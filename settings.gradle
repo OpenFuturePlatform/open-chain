@@ -1,4 +1,3 @@
-rootProject.name = 'kotlin-backend'
+rootProject.name = 'Chain'
 
 include 'backend'
-include 'frontend'

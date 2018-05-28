@@ -1,5 +1,6 @@
-.idea
-build
-out
-.gradle
+.idea/
+build/
+out/
+.gradle/
 kotlin-backend.iml
+Chain.iml
