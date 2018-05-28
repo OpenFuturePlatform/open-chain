@@ -1,0 +1,10 @@
+allprojects {
+    group = 'io.zensoft.inhouse.cd'
+}
+
+// cleaning
+configure(allprojects.findAll { it.name != 'backend' }) {
+    task clean(type: Delete) {
+        delete 'build', 'out'
+    }
+}

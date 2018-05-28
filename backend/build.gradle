@@ -1,0 +1,133 @@
+plugins {
+    id 'jacoco'
+    id 'idea'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.41'
+    id "org.jetbrains.kotlin.kapt" version '1.2.41'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.2.41'
+    id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.41'
+    id 'org.springframework.boot' version '1.5.13.RELEASE'
+}
+
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+group = 'io.zensoft.inhouse.ops'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    kotlinVersion = '1.2.41'
+    queryDslVersion = '4.2.1'
+}
+
+
+dependencies {
+    // Spring
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-freemarker')
+    compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile('org.springframework.boot:spring-boot-starter-security')
+    compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile('org.springframework.boot:spring-boot-starter-amqp')
+
+    //runtime('org.springframework.boot:spring-boot-properties-migrator')
+
+    // DB
+    runtime('org.postgresql:postgresql')
+    compile('org.flywaydb:flyway-core')
+    compile('org.hibernate:hibernate-java8')
+
+    // QueryDSL
+    compile("com.querydsl:querydsl-jpa:${queryDslVersion}")
+    kapt("com.querydsl:querydsl-apt:${queryDslVersion}:jpa") // Magic happens here
+
+    // Utils
+    compile('org.apache.commons:commons-lang3:3.1')
+
+    // Kotlin
+    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
+    compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+    compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.5")
+    compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.5')
+
+    // DevTools
+    runtime('org.springframework.boot:spring-boot-devtools')
+    compileOnly('org.springframework.boot:spring-boot-configuration-processor')
+
+    compile("io.netty:netty-all:4.1.21.Final")
+
+    // Tests
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('org.springframework.security:spring-security-test')
+    // testCompile('com.h2database:h2')                                 // embedded H2
+    // testCompile('com.opentable.components:otj-pg-embedded:0.10.0')   // embedded postgres
+    testCompile('org.postgresql:postgresql')
+}
+
+sourceSets {
+    main.kotlin.srcDirs += 'src/main/kotlin'
+    main.resources.srcDirs += '../frontend/build'
+}
+
+// Jar
+jar {
+    manifest {
+        attributes("Implementation-Version": version)
+    }
+}
+
+// Kotlin
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+noArg {
+    annotations("javax.persistence.MappedSuperclass", "javax.persistence.Entity")
+}
+
+// Jacoco
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+
+    afterEvaluate {
+        classDirectories = files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    'io/zensoft/inhouse/domain/**',
+            ])
+        })
+    }
+}
+check.dependsOn jacocoTestReport
+
+// IDEA
+idea {
+    module {
+        def kaptMain = file('build/generated/source/kapt/main')
+        sourceDirs += kaptMain
+        generatedSourceDirs += kaptMain
+    }
+}
+
+// Tests
+test {
+    if (project.hasProperty('maxParallelForks'))
+        maxParallelForks = project.maxParallelForks as int
+    if (project.hasProperty('forkEvery'))
+        forkEvery = project.forkEvery as int
+}
+
+// TODO: Uncomment the line below when frontend is setted up
+//processResources.dependsOn(':frontend:assemble')

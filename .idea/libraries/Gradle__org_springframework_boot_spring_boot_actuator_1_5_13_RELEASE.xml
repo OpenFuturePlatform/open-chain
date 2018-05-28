@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.springframework.boot:spring-boot-actuator:1.5.13.RELEASE">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-actuator/1.5.13.RELEASE/88c1f8f27c70a6efc5a78e99566bf50e107a0c91/spring-boot-actuator-1.5.13.RELEASE.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-actuator/1.5.13.RELEASE/d6eece8fcb37e63157b10fd935ae73f7a0030699/spring-boot-actuator-1.5.13.RELEASE-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -1,0 +1,4 @@
+rootProject.name = 'kotlin-backend'
+
+include 'backend'
+include 'frontend'
