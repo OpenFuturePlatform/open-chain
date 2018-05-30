@@ -29,4 +29,4 @@ build-jar:
 package-docker:
   stage: package
   script:
-    - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} Dockerfile .
+    - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
