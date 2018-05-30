@@ -22,9 +22,6 @@ build-jar:
     paths:
       - build/libs/*.jar
     expire_in: 1 week
-  only:
-    - master
-    - sprint
 
 ###########################
 # Packaging
@@ -33,6 +30,3 @@ package-docker:
   stage: package
   script:
     - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} Dockerfile .
-  only:
-    - master
-    - sprint
