@@ -2,5 +2,4 @@
 build/
 out/
 .gradle/
-kotlin-backend.iml
-Chain.iml
+*.iml
