@@ -2,5 +2,6 @@
 build/
 out/
 .gradle/
-kotlin-backend.iml
-Chain.iml
+*.iml
+src/main/resources/application-local.properties
+src/test/resources/application-local.properties
