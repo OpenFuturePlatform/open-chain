@@ -91,12 +91,3 @@ jacocoTestReport {
     }
 }
 check.dependsOn jacocoTestReport
-
-// IDEA
-idea {
-    module {
-        def kaptMain = file('build/generated/source/kapt/main')
-        sourceDirs += kaptMain
-        generatedSourceDirs += kaptMain
-    }
-}
