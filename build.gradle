@@ -2,7 +2,6 @@ plugins {
     id 'jacoco'
     id 'idea'
     id 'org.jetbrains.kotlin.jvm' version '1.2.41'
-    // id "org.jetbrains.kotlin.kapt" version '1.2.41'
     id 'org.jetbrains.kotlin.plugin.spring' version '1.2.41'
     id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.41'
     id 'org.springframework.boot' version '2.0.2.RELEASE'
@@ -44,11 +43,6 @@ dependencies {
     // DB
     compile('org.flywaydb:flyway-core')
     runtime('org.postgresql:postgresql')
-//    compile('org.hibernate:hibernate-java8')
-
-    // QueryDSL
-    // compile("com.querydsl:querydsl-jpa:${queryDslVersion}")
-    // kapt("com.querydsl:querydsl-apt:${queryDslVersion}:jpa") // Magic happens here
 
     // Utils
     compile('org.apache.commons:commons-lang3:3.1')
@@ -59,8 +53,6 @@ dependencies {
 
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
-    // testCompile('com.h2database:h2')                                 // embedded H2
-    // testCompile('com.opentable.components:otj-pg-embedded:0.10.0')   // embedded postgres
     testCompile('org.postgresql:postgresql')
 }
 
