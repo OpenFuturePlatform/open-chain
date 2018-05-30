@@ -8,7 +8,7 @@ stages:
   - package
 
 variables:
-    IMAGE_NAME: openchain
+    IMAGE_NAME: open-chain
     IMAGE_TAG: ${CI_COMMIT_REF_NAME}-${CI_PIPELINE_ID}
 
 build-jar:
@@ -29,14 +29,10 @@ build-jar:
 ###########################
 # Packaging
 ###########################
-.registry-auth-script: &registry_auth
-  - docker run --rm | sh
-
 package-docker:
   stage: package
-  before_script: *registry_auth
   script:
-    - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f docker/Dockerfile .
+    - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} Dockerfile .
   only:
     - master
     - sprint
