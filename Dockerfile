@@ -2,12 +2,9 @@ FROM openjdk:8-jre-alpine
 
 WORKDIR root/
 
-ADD backend/build/libs/backend-*.jar ./application.jar
+ADD build/libs/*.jar ./application.jar
 
 EXPOSE 8080
+EXPOSE 9190
 
-CMD java -server \
-    -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled \
-    -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=70 \
-    -XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark \
-    -jar /root/application.jar
+CMD java -client -Xmx1024M -jar /root/application.jar
