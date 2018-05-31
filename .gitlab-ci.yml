@@ -8,7 +8,7 @@ stages:
   - package
 
 variables:
-    IMAGE_NAME: open-chain
+    IMAGE_NAME: chain
     IMAGE_TAG: ${CI_COMMIT_REF_NAME}-${CI_PIPELINE_ID}
 
 build-jar:
