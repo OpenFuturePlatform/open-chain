@@ -1,0 +1,38 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+stages:
+  - build
+  - package
+
+variables:
+    IMAGE_NAME: chain
+    IMAGE_TAG: ${CI_COMMIT_REF_NAME}-${CI_PIPELINE_ID}
+
+build-jar:
+  stage: build
+  image: openjdk:8-jdk
+  before_script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
+  script:
+    - ./gradlew assemble
+  artifacts:
+    paths:
+      - build/libs/*.jar
+    expire_in: 1 week
+  only:
+    - master
+    - sprint
+
+###########################
+# Packaging
+###########################
+package-docker:
+  stage: package
+  script:
+    - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+  only:
+    - master
+    - sprint
