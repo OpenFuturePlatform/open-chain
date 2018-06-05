@@ -18,11 +18,31 @@ data class NodeProperties(
 
         /** Root Nodes List */
         @field:NotEmpty
-        @field:Size(min = 8, max = 8)
+        @field:Size(min = 1, max = 8)
         var rootNodes: List<String> = emptyList(),
 
         /** Node Communication Protocol Version */
         @field:NotNull
-        var version: String? = null
+        var version: String? = null,
+
+        /** Node delay in seconds wait time before server will be started */
+        @field:NotNull
+        var pingTime: Int? = null,
+
+        /** */
+        @field:NotNull
+        var bossCount: Int? = null,
+
+        /** */
+        @field:NotNull
+        var backlog: Int? = null,
+
+        /** */
+        @field:NotNull
+        var keepAlive: Boolean? = null,
+
+        /** */
+        @field:NotNull
+        var connectTimeout: Int? = null
 
 )
