@@ -1,3 +1,3 @@
 package io.openfuture.chain.domain
 
-data class NodeHardwareResponse(val availableProcessors: Int, val freeMemory: Long, val totalMemory: Long)
+data class NodeHardwareResponse(val cpuCoreCount: Int, val cpuTemperature: Double, val ramTotal: Long)

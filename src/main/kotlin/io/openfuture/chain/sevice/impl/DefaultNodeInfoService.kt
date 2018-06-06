@@ -9,13 +9,18 @@ import oshi.SystemInfo
 class DefaultNodeInfoService : NodeInfoService {
 
     override fun getHardwareInfo(): NodeHardwareResponse {
-        val runtime = Runtime.getRuntime()
+        val systemInfo = SystemInfo()
+        val hardwareLayer = systemInfo.hardware
 
-        val availableProcessors = runtime.availableProcessors()
-        val freeMemory = runtime.freeMemory()
-        val maxMemory = runtime.maxMemory()
+        val processor = hardwareLayer.processor
+        val memory = hardwareLayer.memory
+        val sensors = hardwareLayer.sensors
 
-        return NodeHardwareResponse(availableProcessors, freeMemory, maxMemory)
+        val cpuCoreCount = processor.physicalProcessorCount
+        val cpuTemperature = sensors.cpuTemperature
+        val ramTotal = memory.total
+
+        return NodeHardwareResponse(cpuCoreCount, cpuTemperature, ramTotal)
     }
 
 }
