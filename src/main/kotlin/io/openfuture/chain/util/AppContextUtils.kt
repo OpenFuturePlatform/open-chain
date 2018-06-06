@@ -5,14 +5,12 @@ import org.springframework.context.ApplicationContextAware
 import org.springframework.stereotype.Component
 
 @Component
-class AppContextUtils : ApplicationContextAware {
+object AppContextUtils : ApplicationContextAware {
 
-    companion object {
-        lateinit var applicationContext: ApplicationContext
+    private lateinit var applicationContext: ApplicationContext
 
-        fun <T> getBean(type: Class<T>): T {
-            return applicationContext.getBean(type)
-        }
+    fun <T> getBean(type: Class<T>): T {
+        return applicationContext.getBean(type)
     }
 
     override fun setApplicationContext(applicationContext: ApplicationContext) {
