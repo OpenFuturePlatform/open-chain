@@ -3,6 +3,7 @@ package io.openfuture.chain.nio.server.handler
 import io.netty.channel.*
 import io.netty.handler.timeout.IdleStateEvent
 import io.openfuture.chain.nio.server.TcpServer
+import io.openfuture.chain.response.GetTimeResponseProto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -27,8 +28,9 @@ class ServerHandler : SimpleChannelInboundHandler<String>() {
 
     override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any?) {
         if (evt is IdleStateEvent) {
-            ctx.channel().writeAndFlush("Ping")
-            log.info("Server Send: Ping")
+            val message = GetTimeResponseProto.GetTimeResponse.newBuilder().setCurrentTime(12).build()
+            ctx.channel().writeAndFlush(message)
+            log.info("Server Send: 12")
         }
     }
 

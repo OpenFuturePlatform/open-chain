@@ -3,6 +3,8 @@ package io.openfuture.chain.nio.server.handler
 import io.netty.channel.ChannelInboundHandlerAdapter
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
+import io.netty.handler.codec.LengthFieldPrepender
+import io.netty.handler.codec.protobuf.ProtobufEncoder
 import io.netty.handler.codec.string.StringDecoder
 import io.netty.handler.codec.string.StringEncoder
 import io.netty.handler.timeout.IdleStateHandler
@@ -20,7 +22,9 @@ class ServerChannelInitializer(
 
     override fun initChannel(channel: SocketChannel) {
         val idleStateHandler = IdleStateHandler(0, 0, properties.pingTime!!)
-        channel.pipeline().addLast(idleStateHandler, StringDecoder(), StringEncoder(), serverHandler)
+        channel.pipeline().addLast(idleStateHandler,
+                LengthFieldPrepender(4),
+                ProtobufEncoder(), StringEncoder(), serverHandler)
     }
 
 }
