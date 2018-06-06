@@ -6,7 +6,6 @@ import io.openfuture.chain.property.NodeProperties
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.time.Instant
 
 @RestController
 @RequestMapping("${PathConstant.RPC}/info")
@@ -16,6 +15,6 @@ class NodeInfoController(val nodeProperties: NodeProperties) {
     fun getVersion() = NodeVersionResponse(nodeProperties.version!!)
 
     @GetMapping("/getTimestamp")
-    fun getTimestamp() = NodeTimestampResponse(Instant.now().toEpochMilli())
+    fun getTimestamp() = NodeTimestampResponse(System.currentTimeMillis())
 
 }
