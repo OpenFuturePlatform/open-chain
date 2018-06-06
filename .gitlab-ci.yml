@@ -4,12 +4,40 @@ services:
   - docker:dind
 
 stages:
+  - test
   - build
   - package
+  - deploy
 
 variables:
-    IMAGE_NAME: chain
-    IMAGE_TAG: ${CI_COMMIT_REF_NAME}-${CI_PIPELINE_ID}
+    DOCKER_DRIVER: overlay2
+
+
+###########################
+# Building
+###########################
+unit-tests:
+  stage: test
+  image: openjdk:8-jdk
+  before_script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
+  script:
+    - ./gradlew check
+  after_script:
+    - cat build/reports/jacoco/test/html/index.html
+  coverage: '/Total.*?([0-9]{1,3})%/'
+  cache:
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+  artifacts:
+    when: always
+    paths:
+      - build/reports/
+    expire_in: 1 week
+  except:
+    - schedules
+
 
 build-jar:
   stage: build
@@ -18,6 +46,10 @@ build-jar:
     - export GRADLE_USER_HOME=`pwd`/.gradle
   script:
     - ./gradlew assemble
+  cache:
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
   artifacts:
     paths:
       - build/libs/*.jar
@@ -25,14 +57,5 @@ build-jar:
   only:
     - master
     - sprint
-
-###########################
-# Packaging
-###########################
-package-docker:
-  stage: package
-  script:
-    - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-  only:
-    - master
-    - sprint
+  except:
+    - schedules
