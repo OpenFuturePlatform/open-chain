@@ -1,7 +1,6 @@
 package io.openfuture.chain.nio.client.handler
 
 import io.netty.channel.*
-import io.openfuture.chain.nio.server.TcpServer
 import io.openfuture.chain.response.GetTimeResponseProto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -17,7 +16,7 @@ import java.time.ZonedDateTime
 class ClientHandler : SimpleChannelInboundHandler<GetTimeResponseProto.GetTimeResponse>() {
 
     companion object {
-        private val log = LoggerFactory.getLogger(TcpServer::class.java)
+        private val log = LoggerFactory.getLogger(this::class.java)
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: GetTimeResponseProto.GetTimeResponse) {

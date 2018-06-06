@@ -19,7 +19,7 @@ import java.time.ZonedDateTime
 class ServerHandler : SimpleChannelInboundHandler<String>() {
 
     companion object {
-        private val log = LoggerFactory.getLogger(TcpServer::class.java)
+        private val log = LoggerFactory.getLogger(this::class.java)
     }
 
     override fun channelActive(ctx: ChannelHandlerContext) {
