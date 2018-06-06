@@ -19,9 +19,7 @@ class ClientChannelInitializer(
 
     override fun initChannel(ch: SocketChannel) {
         ch.pipeline().addLast(StringEncoder(),
-                LengthFieldBasedFrameDecoder(1048576, 0, 4, 0, 4),
-                ProtobufDecoder(GetTimeResponseProto.GetTimeResponse.getDefaultInstance()),
-                clientHandler)
+                ProtobufDecoder(GetTimeResponseProto.GetTimeResponse.getDefaultInstance()), clientHandler)
     }
 
 }
