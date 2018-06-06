@@ -22,17 +22,15 @@ class ServerHandler : SimpleChannelInboundHandler<TimeMessageProtos.TimeMessage>
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: TimeMessageProtos.TimeMessage) {
-        log.info("Time from server: ${msg.clientTime}, client: ${msg.serverTime}, difference: " +
-                "${msg.clientTime - msg.serverTime}")
+        log.info("Root node time: ${msg.requestTime}")
+
+        val message = msg.toBuilder().setResponseTime(System.currentTimeMillis()).build()
+
+        ctx.channel().writeAndFlush(message)
     }
 
     override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any?) {
         if (evt is IdleStateEvent) {
-            val messageBuilder = TimeMessageProtos.TimeMessage.newBuilder()
-            val message = messageBuilder.setServerTime(System.currentTimeMillis()).build()
-            ctx.channel().writeAndFlush(message)
-
-            log.info("Server Send: ${message.serverTime}")
         }
     }
 

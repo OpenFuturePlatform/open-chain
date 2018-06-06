@@ -17,10 +17,13 @@ class ClientHandler : SimpleChannelInboundHandler<TimeMessageProtos.TimeMessage>
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: TimeMessageProtos.TimeMessage) {
-        log.info("Time from server: ${msg.serverTime}")
+        log.info("Request time: ${msg.requestTime}, response time: ${msg.responseTime}, difference: " +
+                "${msg.responseTime - msg.requestTime}")
+    }
 
-        val message = msg.toBuilder().setClientTime(System.currentTimeMillis()).build()
-
+    override fun channelActive(ctx: ChannelHandlerContext) {
+        val messageBuilder = TimeMessageProtos.TimeMessage.newBuilder()
+        val message = messageBuilder.setRequestTime(System.currentTimeMillis()).build()
         ctx.channel().writeAndFlush(message)
     }
 

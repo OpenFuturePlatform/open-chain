@@ -6,6 +6,6 @@ option java_package = "io.openfuture.chain.message";
 option java_outer_classname = "TimeMessageProtos";
 
 message TimeMessage {
-  int64 serverTime = 1;
-  int64 clientTime = 2;
+  int64 request_time = 1;
+  int64 response_time = 2;
 }
