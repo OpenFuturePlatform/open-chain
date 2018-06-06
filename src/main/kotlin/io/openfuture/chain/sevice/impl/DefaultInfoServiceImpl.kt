@@ -1,12 +1,12 @@
 package io.openfuture.chain.sevice.impl
 
 import io.openfuture.chain.domain.NodeHardwareResponse
-import io.openfuture.chain.sevice.HardwareInfoService
+import io.openfuture.chain.sevice.NodeInfoService
 import org.springframework.stereotype.Service
 import oshi.SystemInfo
 
 @Service
-class HardwareInfoServiceImpl : HardwareInfoService {
+class DefaultInfoServiceImpl : NodeInfoService {
 
     override fun getHardwareInfo(): NodeHardwareResponse {
         val systemInfo = SystemInfo()

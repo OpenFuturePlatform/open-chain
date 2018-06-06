@@ -3,7 +3,7 @@ package io.openfuture.chain.controller
 import io.openfuture.chain.domain.NodeHardwareResponse
 import io.openfuture.chain.domain.NodeVersionResponse
 import io.openfuture.chain.property.NodeProperties
-import io.openfuture.chain.sevice.HardwareInfoService
+import io.openfuture.chain.sevice.NodeInfoService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("${PathConstant.RPC}/info")
 class NodeInfoController(
-        val hardwareInfoService: HardwareInfoService,
+        val nodeInfoService: NodeInfoService,
         val nodeProperties: NodeProperties
 ) {
 
@@ -20,7 +20,7 @@ class NodeInfoController(
 
     @GetMapping("/getHardwareInfo")
     fun getHardwareInfo(): NodeHardwareResponse {
-        return hardwareInfoService.getHardwareInfo()
+        return nodeInfoService.getHardwareInfo()
     }
 
 }
