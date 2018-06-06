@@ -20,9 +20,13 @@ variables:
 unit-tests:
   stage: test
   image: openjdk:8-jdk
+  before_script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
   script:
     - ./gradlew check
-    - cat build/reports/tests/test/index.html
+  after_script:
+    - cat build/reports/jacoco/test/html/index.html
+  coverage: '/Total.*?([0-9]{1,3})%/'
   cache:
     paths:
       - .gradle/wrapper
@@ -30,7 +34,6 @@ unit-tests:
   artifacts:
     when: always
     paths:
-      - build/libs/*.jar
       - build/reports/tests/test/
     expire_in: 1 week
   except:
