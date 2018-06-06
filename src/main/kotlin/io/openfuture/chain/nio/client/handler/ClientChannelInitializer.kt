@@ -18,8 +18,10 @@ class ClientChannelInitializer(
 ) : ChannelInitializer<SocketChannel>() {
 
     override fun initChannel(ch: SocketChannel) {
-        ch.pipeline().addLast(StringEncoder(),
-                ProtobufDecoder(GetTimeResponseProto.GetTimeResponse.getDefaultInstance()), clientHandler)
+        ch.pipeline()
+                .addLast(ProtobufDecoder(GetTimeResponseProto.GetTimeResponse.getDefaultInstance()))
+                .addLast(StringEncoder())
+                .addLast(clientHandler)
     }
 
 }

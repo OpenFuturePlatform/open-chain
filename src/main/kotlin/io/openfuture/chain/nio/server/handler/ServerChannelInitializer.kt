@@ -22,7 +22,11 @@ class ServerChannelInitializer(
 
     override fun initChannel(channel: SocketChannel) {
         val idleStateHandler = IdleStateHandler(0, 0, properties.pingTime!!)
-        channel.pipeline().addLast(idleStateHandler, ProtobufEncoder(), StringEncoder(), serverHandler)
+        channel.pipeline()
+                .addLast(idleStateHandler)
+                .addLast(StringDecoder())
+                .addLast(ProtobufEncoder())
+                .addLast(serverHandler)
     }
 
 }

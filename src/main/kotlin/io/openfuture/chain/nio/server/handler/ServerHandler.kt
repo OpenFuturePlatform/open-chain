@@ -3,7 +3,6 @@ package io.openfuture.chain.nio.server.handler
 import com.google.protobuf.Timestamp
 import io.netty.channel.*
 import io.netty.handler.timeout.IdleStateEvent
-import io.openfuture.chain.nio.server.TcpServer
 import io.openfuture.chain.response.GetTimeResponseProto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
