@@ -1,12 +1,11 @@
 syntax = "proto3";
 
-package tutorial;
+package io.openfuture.chain.message;
 
-option java_package = "io.openfuture.chain.response";
-option java_outer_classname = "GetTimeResponseProto";
+option java_package = "io.openfuture.chain.message";
+option java_outer_classname = "TimeMessageProtos";
 
-import "google/protobuf/timestamp.proto";
-
-message GetTimeResponse {
-  google.protobuf.Timestamp currentTime = 1;
+message TimeMessage {
+  int64 serverTime = 1;
+  int64 clientTime = 2;
 }

@@ -1,29 +1,27 @@
 package io.openfuture.chain.nio.client.handler
 
 import io.netty.channel.*
-import io.openfuture.chain.response.GetTimeResponseProto
+import io.openfuture.chain.message.TimeMessageProtos
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZonedDateTime
 
 /**
  * @author Evgeni Krylov
  */
 @Component
 @ChannelHandler.Sharable
-class ClientHandler : SimpleChannelInboundHandler<GetTimeResponseProto.GetTimeResponse>() {
+class ClientHandler : SimpleChannelInboundHandler<TimeMessageProtos.TimeMessage>() {
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
     }
 
-    override fun channelRead0(ctx: ChannelHandlerContext, msg: GetTimeResponseProto.GetTimeResponse) {
-        val instant = Instant.ofEpochSecond(msg.currentTime.seconds)
-        val time = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
-        log.info("From server: $time")
-        ctx.channel().writeAndFlush("Pong")
+    override fun channelRead0(ctx: ChannelHandlerContext, msg: TimeMessageProtos.TimeMessage) {
+        log.info("Time from server: ${msg.serverTime}")
+
+        val message = msg.toBuilder().setClientTime(System.currentTimeMillis()).build()
+
+        ctx.channel().writeAndFlush(message)
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
