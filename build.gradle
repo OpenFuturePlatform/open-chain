@@ -44,6 +44,9 @@ dependencies {
     compile('org.flywaydb:flyway-core')
     runtime('org.postgresql:postgresql')
 
+    // Native Operating System and Hardware Information
+    compile('com.github.oshi:oshi-core:3.5.0')
+
     // Utils
     compile('org.apache.commons:commons-lang3:3.1')
 
