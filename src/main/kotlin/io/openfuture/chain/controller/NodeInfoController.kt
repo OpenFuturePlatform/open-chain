@@ -18,8 +18,8 @@ class NodeInfoController(
     @GetMapping("/getVersion")
     fun getVersion() = NodeVersionResponse(nodeProperties.version!!)
 
-    @GetMapping("/getHardware")
-    fun getHardware(): NodeHardwareResponse {
+    @GetMapping("/getHardwareInfo")
+    fun getHardwareInfo(): NodeHardwareResponse {
         return hardwareInfoService.getHardwareInfo()
     }
 
