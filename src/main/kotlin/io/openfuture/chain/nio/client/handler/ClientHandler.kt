@@ -1,7 +1,6 @@
 package io.openfuture.chain.nio.client.handler
 
 import io.netty.channel.*
-import io.openfuture.chain.nio.server.TcpServer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Component
 class ClientHandler : SimpleChannelInboundHandler<String>() {
 
     companion object {
-        private val log = LoggerFactory.getLogger(TcpServer::class.java)
+        private val log = LoggerFactory.getLogger(this::class.java)
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: String) {
