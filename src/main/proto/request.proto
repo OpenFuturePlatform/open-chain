@@ -5,6 +5,8 @@ package tutorial;
 option java_package = "io.openfuture.chain.response";
 option java_outer_classname = "GetTimeResponseProto";
 
+import "google/protobuf/timestamp.proto";
+
 message GetTimeResponse {
-  int32 currentTime = 1;
+  google.protobuf.Timestamp currentTime = 1;
 }

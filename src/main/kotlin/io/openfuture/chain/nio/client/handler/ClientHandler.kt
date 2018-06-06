@@ -5,6 +5,9 @@ import io.openfuture.chain.nio.server.TcpServer
 import io.openfuture.chain.response.GetTimeResponseProto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 /**
  * @author Evgeni Krylov
@@ -18,7 +21,9 @@ class ClientHandler : SimpleChannelInboundHandler<GetTimeResponseProto.GetTimeRe
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: GetTimeResponseProto.GetTimeResponse) {
-        log.info("From server: ${msg}")
+        val instant = Instant.ofEpochSecond(msg.currentTime.seconds)
+        val time = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
+        log.info("From server: $time")
         ctx.channel().writeAndFlush("Pong")
     }
 
