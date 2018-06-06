@@ -35,8 +35,6 @@ unit-tests:
     paths:
       - build/reports/
     expire_in: 1 week
-  except:
-    - schedules
 
 
 build-jar:
@@ -57,5 +55,3 @@ build-jar:
   only:
     - master
     - sprint
-  except:
-    - schedules
