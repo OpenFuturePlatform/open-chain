@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 import oshi.SystemInfo
 
 @Service
-class DefaultNodeInfoServiceImpl : NodeInfoService {
+class DefaultNodeInfoService : NodeInfoService {
 
     override fun getHardwareInfo(): NodeHardwareResponse {
         val systemInfo = SystemInfo()
