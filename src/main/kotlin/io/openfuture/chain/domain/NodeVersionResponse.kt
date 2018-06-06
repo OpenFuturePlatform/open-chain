@@ -1,3 +1,3 @@
-package io.openfuture.chain.domain.node.response
+package io.openfuture.chain.domain
 
 data class NodeVersionResponse(val version: String)
