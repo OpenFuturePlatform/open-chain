@@ -15,7 +15,7 @@ class TcpServer(
 ) : Runnable {
 
     companion object {
-        private val log = LoggerFactory.getLogger(TcpServer::class.java)
+        private val log = LoggerFactory.getLogger(this::class.java)
     }
 
     override fun run() {
