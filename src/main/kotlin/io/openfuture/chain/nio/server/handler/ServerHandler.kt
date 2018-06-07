@@ -3,8 +3,8 @@ package io.openfuture.chain.nio.server.handler
 import io.netty.channel.*
 import io.netty.handler.timeout.IdleStateEvent
 import io.openfuture.chain.message.TimeSynchronization
-import io.openfuture.chain.nio.client.handler.ClientHandler
 import io.openfuture.chain.protocol.CommunicationProtocolOuterClass
+import io.openfuture.chain.protocol.CommunicationProtocolOuterClass.CommunicationProtocol.ServiceName.TIME_SYNCHRONIZATION
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -25,7 +25,7 @@ class ServerHandler : SimpleChannelInboundHandler<CommunicationProtocolOuterClas
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: CommunicationProtocolOuterClass.CommunicationProtocol) {
         val serviceName = msg.serviceName
-        if (serviceName == CommunicationProtocolOuterClass.CommunicationProtocol.ServiceName.TIME_SYNCHRONIZATION) {
+        if (serviceName == TIME_SYNCHRONIZATION) {
             val payload = TimeSynchronization.TimeSynchronizationMessage.parseFrom(msg.servicePayload)
             log.info("Request was sent at : ${payload.requestTime} milliseconds")
 
