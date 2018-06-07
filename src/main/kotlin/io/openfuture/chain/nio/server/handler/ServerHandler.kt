@@ -2,9 +2,8 @@ package io.openfuture.chain.nio.server.handler
 
 import io.netty.channel.*
 import io.netty.handler.timeout.IdleStateEvent
-import io.openfuture.chain.message.TimeSynchronization
+import io.openfuture.chain.nio.server.service.TimeSynchronizationService
 import io.openfuture.chain.protocol.CommunicationProtocolOuterClass
-import io.openfuture.chain.protocol.CommunicationProtocolOuterClass.CommunicationProtocol.ServiceName.TIME_SYNCHRONIZATION
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -13,7 +12,9 @@ import org.springframework.stereotype.Component
  */
 @Component
 @ChannelHandler.Sharable
-class ServerHandler : SimpleChannelInboundHandler<CommunicationProtocolOuterClass.CommunicationProtocol>() {
+class ServerHandler(
+        private val timeSynchronizationService: TimeSynchronizationService
+) : SimpleChannelInboundHandler<CommunicationProtocolOuterClass.CommunicationProtocol>() {
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
@@ -25,13 +26,10 @@ class ServerHandler : SimpleChannelInboundHandler<CommunicationProtocolOuterClas
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: CommunicationProtocolOuterClass.CommunicationProtocol) {
         val serviceName = msg.serviceName
-        if (serviceName == TIME_SYNCHRONIZATION) {
-            val payload = TimeSynchronization.TimeSynchronizationMessage.parseFrom(msg.servicePayload)
-            log.info("Request was sent at : ${payload.requestTime} milliseconds")
-
-            val newPayload = payload.toBuilder().setResponseTime(System.currentTimeMillis()).build()
-            val message = msg.toBuilder().setServicePayload(newPayload.toByteString()).build()
-
+        if (timeSynchronizationService.canHandleService(serviceName)) {
+            val payload = timeSynchronizationService.takeMessage(msg)
+            val serviceResponse = timeSynchronizationService.service(payload)
+            val message = timeSynchronizationService.updatePacketByMessage(msg, serviceResponse)
             ctx.channel().writeAndFlush(message)
         }
     }
