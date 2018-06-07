@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 @ChannelHandler.Sharable
 class ServerHandler(
-        private val services: List<ProtobufService<TimeSynchronization.TimeSynchronizationMessage>>
+        private val services: List<ProtobufService<*>>
 ) : SimpleChannelInboundHandler<CommunicationProtocolOuterClass.CommunicationProtocol>() {
 
     companion object {

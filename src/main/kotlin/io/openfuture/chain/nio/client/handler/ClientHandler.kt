@@ -1,10 +1,8 @@
 package io.openfuture.chain.nio.client.handler
 
 import io.netty.channel.*
-import io.openfuture.chain.message.TimeSynchronization
-import io.openfuture.chain.nio.client.service.TimeSynchronizationClient
+import io.openfuture.chain.nio.client.service.ProtobufClient
 import io.openfuture.chain.protocol.CommunicationProtocolOuterClass
-import io.openfuture.chain.protocol.CommunicationProtocolOuterClass.CommunicationProtocol.ServiceName.TIME_SYNCHRONIZATION
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -14,7 +12,7 @@ import org.springframework.stereotype.Component
 @Component
 @ChannelHandler.Sharable
 class ClientHandler(
-        private val timeSynchronizationClient: TimeSynchronizationClient
+        private val clients: List<ProtobufClient<*>>
 ) : SimpleChannelInboundHandler<CommunicationProtocolOuterClass.CommunicationProtocol>() {
 
     companion object {
@@ -23,9 +21,9 @@ class ClientHandler(
 
     override fun channelRead0(ctx: ChannelHandlerContext,
                               msg: CommunicationProtocolOuterClass.CommunicationProtocol) {
-        val serviceName = msg.serviceName
-        if (timeSynchronizationClient.canHandleResponse(serviceName)) {
-            timeSynchronizationClient.handleResponse(msg)
+        val client = clients.find { it.canHandleResponse(msg.serviceName) }
+        if (client != null) {
+            client.handleResponse(msg)
         }
     }
 
