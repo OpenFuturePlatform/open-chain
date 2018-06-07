@@ -2,6 +2,7 @@ package io.openfuture.chain.nio
 
 import io.netty.bootstrap.Bootstrap
 import io.openfuture.chain.nio.client.TcpClient
+import io.openfuture.chain.nio.client.service.TimeSynchronizationClient
 import io.openfuture.chain.nio.server.TcpServer
 import io.openfuture.chain.property.NodeProperties
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -16,7 +17,8 @@ import java.util.concurrent.Executors
 class NioStarter(
     private val tcpServer: TcpServer,
     private val clientBootstrap: Bootstrap,
-    private val nodeProperties: NodeProperties
+    private val nodeProperties: NodeProperties,
+    private val timeSynchronizationClient: TimeSynchronizationClient
 ) : ApplicationListener<ApplicationReadyEvent> {
 
     private val serverExecutor = Executors.newSingleThreadExecutor()
@@ -29,7 +31,7 @@ class NioStarter(
         // start clients
         nodeProperties.rootNodes.forEach {
             val address = it.split(":")
-            clientExecutors.execute(TcpClient(clientBootstrap, address[0], address[1].toInt()))
+            clientExecutors.execute(TcpClient(clientBootstrap, address[0], address[1].toInt(), timeSynchronizationClient))
         }
 
     }
