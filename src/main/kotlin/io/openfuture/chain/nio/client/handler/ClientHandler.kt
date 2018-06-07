@@ -1,6 +1,7 @@
 package io.openfuture.chain.nio.client.handler
 
 import io.netty.channel.*
+import io.openfuture.chain.message.TimeSynchronization
 import io.openfuture.chain.protocol.CommunicationProtocolOuterClass
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -18,13 +19,23 @@ class ClientHandler : SimpleChannelInboundHandler<CommunicationProtocolOuterClas
 
     override fun channelRead0(ctx: ChannelHandlerContext,
                               msg: CommunicationProtocolOuterClass.CommunicationProtocol) {
-        log.info("Request time: ${msg.requestTime}, response time: ${msg.responseTime}, difference: " +
-                "${msg.responseTime - msg.requestTime}")
+        val serviceName = msg.serviceName
+        if (serviceName == CommunicationProtocolOuterClass.CommunicationProtocol.ServiceName.TIME_SYNCHRONIZATION) {
+            val payload = TimeSynchronization.TimeSynchronizationMessage.parseFrom(msg.servicePayload)
+            log.info("Request time: ${payload.requestTime}, response time: ${payload.responseTime}, difference: " +
+                    "${payload.responseTime - payload.requestTime}")
+        }
     }
 
     override fun channelActive(ctx: ChannelHandlerContext) {
+        val servicePayloadBuilder = TimeSynchronization.TimeSynchronizationMessage.newBuilder()
+        val servicePayload = servicePayloadBuilder.setRequestTime(System.currentTimeMillis()).build()
         val messageBuilder = CommunicationProtocolOuterClass.CommunicationProtocol.newBuilder()
-        val message = messageBuilder.setRequestTime(System.currentTimeMillis()).build()
+        val message = messageBuilder
+                .setServiceName(CommunicationProtocolOuterClass.CommunicationProtocol.ServiceName.TIME_SYNCHRONIZATION)
+                .setServicePayload(servicePayload.toByteString())
+                .build()
+
         ctx.channel().writeAndFlush(message)
     }
 

@@ -2,6 +2,8 @@ package io.openfuture.chain.nio.server.handler
 
 import io.netty.channel.*
 import io.netty.handler.timeout.IdleStateEvent
+import io.openfuture.chain.message.TimeSynchronization
+import io.openfuture.chain.nio.client.handler.ClientHandler
 import io.openfuture.chain.protocol.CommunicationProtocolOuterClass
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -22,11 +24,16 @@ class ServerHandler : SimpleChannelInboundHandler<CommunicationProtocolOuterClas
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: CommunicationProtocolOuterClass.CommunicationProtocol) {
-        log.info("Request was sent at : ${msg.requestTime} milliseconds")
+        val serviceName = msg.serviceName
+        if (serviceName == CommunicationProtocolOuterClass.CommunicationProtocol.ServiceName.TIME_SYNCHRONIZATION) {
+            val payload = TimeSynchronization.TimeSynchronizationMessage.parseFrom(msg.servicePayload)
+            log.info("Request was sent at : ${payload.requestTime} milliseconds")
 
-        val message = msg.toBuilder().setResponseTime(System.currentTimeMillis()).build()
+            val newPayload = payload.toBuilder().setResponseTime(System.currentTimeMillis()).build()
+            val message = msg.toBuilder().setServicePayload(newPayload.toByteString()).build()
 
-        ctx.channel().writeAndFlush(message)
+            ctx.channel().writeAndFlush(message)
+        }
     }
 
     override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any?) {
