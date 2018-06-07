@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package io.openfuture.chain.protocol;
+
+message CommunicationProtocol {
+  int64 request_time = 1;
+  int64 response_time = 2;
+}

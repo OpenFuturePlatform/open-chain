@@ -2,7 +2,7 @@ package io.openfuture.chain.nio.server.handler
 
 import io.netty.channel.*
 import io.netty.handler.timeout.IdleStateEvent
-import io.openfuture.chain.message.TimeMessageProtos
+import io.openfuture.chain.protocol.CommunicationProtocolOuterClass
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
  */
 @Component
 @ChannelHandler.Sharable
-class ServerHandler : SimpleChannelInboundHandler<TimeMessageProtos.TimeMessage>() {
+class ServerHandler : SimpleChannelInboundHandler<CommunicationProtocolOuterClass.CommunicationProtocol>() {
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
@@ -21,8 +21,8 @@ class ServerHandler : SimpleChannelInboundHandler<TimeMessageProtos.TimeMessage>
         log.info("Channel ${ctx.channel().remoteAddress()} is active")
     }
 
-    override fun channelRead0(ctx: ChannelHandlerContext, msg: TimeMessageProtos.TimeMessage) {
-        log.info("Root node time: ${msg.requestTime}")
+    override fun channelRead0(ctx: ChannelHandlerContext, msg: CommunicationProtocolOuterClass.CommunicationProtocol) {
+        log.info("Request was sent at : ${msg.requestTime} milliseconds")
 
         val message = msg.toBuilder().setResponseTime(System.currentTimeMillis()).build()
 

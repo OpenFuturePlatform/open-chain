@@ -85,23 +85,9 @@ noArg {
 }
 
 protobuf {
-    // Configure the protoc executable
     protoc {
-        // Download from repositories
+        // Configure the protoc executable
         artifact = "com.google.protobuf:protoc:3.0.0"
-    }
-    generateProtoTasks {
-        // all() returns the collection of all protoc tasks
-        all().each { task ->
-            // Here you can configure the task
-        }
-
-        // In addition to all(), you may get the task collection by various
-        // criteria:
-
-        // (Java only) returns tasks for a sourceSet
-        ofSourceSet('main')
-
     }
 }
 

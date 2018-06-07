@@ -3,14 +3,11 @@ package io.openfuture.chain.nio.server.handler
 import io.netty.channel.ChannelInboundHandlerAdapter
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
-import io.netty.handler.codec.LengthFieldPrepender
 import io.netty.handler.codec.protobuf.ProtobufDecoder
 import io.netty.handler.codec.protobuf.ProtobufEncoder
-import io.netty.handler.codec.string.StringDecoder
-import io.netty.handler.codec.string.StringEncoder
 import io.netty.handler.timeout.IdleStateHandler
-import io.openfuture.chain.message.TimeMessageProtos
 import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.protocol.CommunicationProtocolOuterClass
 import org.springframework.stereotype.Component
 
 /**
@@ -24,9 +21,10 @@ class ServerChannelInitializer(
 
     override fun initChannel(channel: SocketChannel) {
         val idleStateHandler = IdleStateHandler(0, 0, properties.pingTime!!)
+        val protocol = CommunicationProtocolOuterClass.CommunicationProtocol.getDefaultInstance()
         channel.pipeline()
                 .addLast(idleStateHandler)
-                .addLast(ProtobufDecoder(TimeMessageProtos.TimeMessage.getDefaultInstance()))
+                .addLast(ProtobufDecoder(protocol))
                 .addLast(ProtobufEncoder())
                 .addLast(serverHandler)
     }
