@@ -2,7 +2,8 @@ package io.openfuture.chain.nio.server.handler
 
 import io.netty.channel.*
 import io.netty.handler.timeout.IdleStateEvent
-import io.openfuture.chain.nio.server.service.TimeSynchronizationService
+import io.openfuture.chain.message.TimeSynchronization
+import io.openfuture.chain.nio.server.service.ProtobufService
 import io.openfuture.chain.protocol.CommunicationProtocolOuterClass
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 @ChannelHandler.Sharable
 class ServerHandler(
-        private val timeSynchronizationService: TimeSynchronizationService
+        private val services: List<ProtobufService<TimeSynchronization.TimeSynchronizationMessage>>
 ) : SimpleChannelInboundHandler<CommunicationProtocolOuterClass.CommunicationProtocol>() {
 
     companion object {
@@ -25,12 +26,9 @@ class ServerHandler(
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: CommunicationProtocolOuterClass.CommunicationProtocol) {
-        val serviceName = msg.serviceName
-        if (timeSynchronizationService.canHandleService(serviceName)) {
-            val payload = timeSynchronizationService.takeMessage(msg)
-            val serviceResponse = timeSynchronizationService.service(payload)
-            val message = timeSynchronizationService.updatePacketByMessage(msg, serviceResponse)
-            ctx.channel().writeAndFlush(message)
+        val service = services.find { it.canHandlePacket(msg.serviceName) }
+        if (service != null) {
+            ctx.channel().writeAndFlush(service.handleMessage(msg))
         }
     }
 

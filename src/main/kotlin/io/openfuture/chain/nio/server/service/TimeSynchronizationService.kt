@@ -10,28 +10,28 @@ import org.springframework.stereotype.Component
  * @author Vadzim Marchanka
  */
 @Component
-class TimeSynchronizationService {
+class TimeSynchronizationService : ProtobufService<TimeSynchronization.TimeSynchronizationMessage>{
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
     }
 
-    fun service(message: TimeSynchronization.TimeSynchronizationMessage ) :
+    override fun handleMessage(message: TimeSynchronization.TimeSynchronizationMessage ) :
             TimeSynchronization.TimeSynchronizationMessage{
         log.info("Request was sent at : ${message.requestTime} milliseconds")
         return message.toBuilder().setResponseTime(System.currentTimeMillis()).build()
     }
 
-    fun canHandleService(serviceName : CommunicationProtocolOuterClass.CommunicationProtocol.ServiceName) : Boolean{
+    override fun canHandlePacket(serviceName : CommunicationProtocolOuterClass.CommunicationProtocol.ServiceName) : Boolean{
         return serviceName == TIME_SYNCHRONIZATION
     }
 
-    fun takeMessage(packet : CommunicationProtocolOuterClass.CommunicationProtocol)
+    override fun takeMessageFromPacket(packet : CommunicationProtocolOuterClass.CommunicationProtocol)
             : TimeSynchronization.TimeSynchronizationMessage{
         return TimeSynchronization.TimeSynchronizationMessage.parseFrom(packet.servicePayload)
     }
 
-    fun updatePacketByMessage(
+    override fun updatePacketByMessage(
             packet : CommunicationProtocolOuterClass.CommunicationProtocol,
             message : TimeSynchronization.TimeSynchronizationMessage)
             : CommunicationProtocolOuterClass.CommunicationProtocol{
