@@ -55,3 +55,19 @@ build-jar:
   only:
     - master
     - sprint
+
+
+###########################
+# Packaging
+###########################
+package-docker:
+  stage: package
+  variables:
+    IMAGE_NAME: docker.zensoft.io/$CI_PROJECT_PATH
+    IMAGE_VERSION: latest
+  script:
+    - docker build -t $IMAGE_NAME:$IMAGE_VERSION .
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN docker.zensoft.io
+    - docker push $IMAGE_NAME:$IMAGE_VERSION
+  only:
+    - master
