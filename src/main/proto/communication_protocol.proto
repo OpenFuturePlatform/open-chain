@@ -2,12 +2,19 @@ syntax = "proto3";
 
 package io.openfuture.chain.protocol;
 
-message CommunicationProtocol {
+option java_outer_classname = "CommunicationProtocol";
 
-  enum ServiceName {
-    TIME_SYNCHRONIZATION = 0;
-  }
+message TimeRequest {
+    int64 time = 1;
+}
 
-  ServiceName service_name = 1;
-  bytes service_payload = 2;
+message TimeResponse {
+    int64 time = 1;
+}
+
+message VersionRequest {
+}
+
+message VersionResponse {
+    string version = 1;
 }

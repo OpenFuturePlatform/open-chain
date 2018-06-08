@@ -4,7 +4,7 @@ import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
 import io.netty.handler.codec.protobuf.ProtobufDecoder
 import io.netty.handler.codec.protobuf.ProtobufEncoder
-import io.openfuture.chain.protocol.CommunicationProtocolOuterClass
+import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.stereotype.Component
 
 /**
@@ -12,15 +12,15 @@ import org.springframework.stereotype.Component
  */
 @Component
 class ClientChannelInitializer(
-    private val clientHandler: ClientHandler
+    private val timeHandler: TimeResponseHandler
 ) : ChannelInitializer<SocketChannel>() {
 
     override fun initChannel(ch: SocketChannel) {
-        val protocol = CommunicationProtocolOuterClass.CommunicationProtocol.getDefaultInstance()
+        val timeResponse = CommunicationProtocol.TimeResponse.getDefaultInstance()
         ch.pipeline()
-                .addLast(ProtobufDecoder(protocol))
+                .addLast(ProtobufDecoder(timeResponse))
                 .addLast(ProtobufEncoder())
-                .addLast(clientHandler)
+                .addLast(timeHandler)
     }
 
 }
