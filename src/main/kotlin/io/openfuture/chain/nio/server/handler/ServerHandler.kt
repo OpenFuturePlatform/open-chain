@@ -2,7 +2,6 @@ package io.openfuture.chain.nio.server.handler
 
 import io.netty.channel.*
 import io.netty.handler.timeout.IdleStateEvent
-import io.openfuture.chain.nio.server.TcpServer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Component
 class ServerHandler : SimpleChannelInboundHandler<String>() {
 
     companion object {
-        private val log = LoggerFactory.getLogger(TcpServer::class.java)
+        private val log = LoggerFactory.getLogger(this::class.java)
     }
 
     override fun channelActive(ctx: ChannelHandlerContext) {
