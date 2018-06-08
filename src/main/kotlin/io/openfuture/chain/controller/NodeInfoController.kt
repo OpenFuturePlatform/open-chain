@@ -21,8 +21,6 @@ class NodeInfoController(
     fun getTimestamp() = NodeTimestampResponse(System.currentTimeMillis())
 
     @GetMapping("/getHardwareInfo")
-    fun getHardwareInfo(): NodeHardwareInfoResponse {
-        return nodeInfoService.getHardwareInfo()
-    }
+    fun getHardwareInfo(): NodeHardwareInfoResponse = nodeInfoService.getHardwareInfo()
 
 }
