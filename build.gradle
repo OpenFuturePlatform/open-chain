@@ -84,10 +84,20 @@ noArg {
     annotations("javax.persistence.MappedSuperclass", "javax.persistence.Entity")
 }
 
+// Protobuf
 protobuf {
     protoc {
         // Configure the protoc executable
         artifact = "com.google.protobuf:protoc:3.0.0"
+    }
+}
+
+// Support generated Protobuf files in IDEA
+idea {
+    module {
+        def protobuf = file('build/generated/source/proto/main')
+        sourceDirs += protobuf
+        generatedSourceDirs += protobuf
     }
 }
 
