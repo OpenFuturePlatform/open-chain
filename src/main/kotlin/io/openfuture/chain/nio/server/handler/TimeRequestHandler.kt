@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component
 /**
  * @author Evgeni Krylov
  */
-
 @Component
+@ChannelHandler.Sharable
 class TimeRequestHandler : SimpleChannelInboundHandler<CommunicationProtocol.TimeRequest>() {
 
     companion object {

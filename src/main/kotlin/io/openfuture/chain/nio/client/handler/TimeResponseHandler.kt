@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component
  * @author Evgeni Krylov
  */
 @Component
+@ChannelHandler.Sharable
 class TimeResponseHandler : SimpleChannelInboundHandler<CommunicationProtocol.TimeResponse>() {
 
     companion object {
