@@ -3,7 +3,7 @@ package io.openfuture.chain.sevice.impl
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
-import io.openfuture.chain.domain.hardware.StoreInfo
+import io.openfuture.chain.domain.hardware.StorageInfo
 import org.assertj.core.api.Assertions
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,14 +22,14 @@ class DefaultNodeInfoServiceTest {
 
         val cpuInfo = hardwareInfo.cpu
         val ramInfo = hardwareInfo.ram
-        val diskStoresInfo = hardwareInfo.diskStores
+        val totalStorageSize = hardwareInfo.totalStorageSize
         val networksInfo = hardwareInfo.networks
 
         Assertions.assertThat(hardwareInfo).isNotNull
 
         assertCpuInfo(cpuInfo)
         assertRamInfo(ramInfo)
-        assertStoresInfo(diskStoresInfo)
+        Assertions.assertThat(totalStorageSize).isGreaterThan(0L)
         assertNetworksInfo(networksInfo)
     }
 
@@ -49,9 +49,9 @@ class DefaultNodeInfoServiceTest {
 
     @Test
     fun testGetStoresInfo() {
-        val storesInfo = defaultNodeInfoService!!.getDiskStoresInfo()
+        val diskStorageInfo = defaultNodeInfoService!!.getDiskStorageInfo()
 
-        assertStoresInfo(storesInfo)
+        assertStorageInfo(diskStorageInfo)
     }
 
     @Test
@@ -77,9 +77,9 @@ class DefaultNodeInfoServiceTest {
         Assertions.assertThat(ramInfo.total).isGreaterThan(0L)
     }
 
-    private fun assertStoresInfo(diskStoresInfo: List<StoreInfo>) {
-        Assertions.assertThat(diskStoresInfo).isNotEmpty
-        for (diskStoreInfo in diskStoresInfo) {
+    private fun assertStorageInfo(diskStorageInfo: List<StorageInfo>) {
+        Assertions.assertThat(diskStorageInfo).isNotEmpty
+        for (diskStoreInfo in diskStorageInfo) {
             Assertions.assertThat(diskStoreInfo.totalStorage).isGreaterThan(0L)
         }
     }

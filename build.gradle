@@ -47,6 +47,7 @@ dependencies {
     // Utils
     compile('org.apache.commons:commons-lang3:3.1')
     compile('com.github.oshi:oshi-core:3.5.0')
+    compile('org.fusesource:sigar:1.6.4')
 
     // DevTools
     runtime('org.springframework.boot:spring-boot-devtools')

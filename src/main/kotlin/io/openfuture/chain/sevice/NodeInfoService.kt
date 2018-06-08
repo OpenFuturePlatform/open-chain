@@ -4,7 +4,7 @@ import io.openfuture.chain.domain.NodeHardwareInfoResponse
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
-import io.openfuture.chain.domain.hardware.StoreInfo
+import io.openfuture.chain.domain.hardware.StorageInfo
 
 interface NodeInfoService {
 
@@ -14,7 +14,7 @@ interface NodeInfoService {
 
     fun getRamInfo(): RamInfo
 
-    fun getDiskStoresInfo(): List<StoreInfo>
+    fun getDiskStorageInfo(): List<StorageInfo>
 
     fun getNetworksInfo(): List<NetworkInfo>
 }

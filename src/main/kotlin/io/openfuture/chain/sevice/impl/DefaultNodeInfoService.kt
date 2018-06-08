@@ -4,7 +4,7 @@ import io.openfuture.chain.domain.NodeHardwareInfoResponse
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
-import io.openfuture.chain.domain.hardware.StoreInfo
+import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.sevice.NodeInfoService
 import org.springframework.stereotype.Service
 import oshi.SystemInfo
@@ -13,16 +13,20 @@ import java.net.NetworkInterface
 @Service
 class DefaultNodeInfoService : NodeInfoService {
 
-    private val systemInfo = SystemInfo()
-    private val hardwareLayer = systemInfo.hardware
+    private val hardwareLayer = SystemInfo().hardware
 
     override fun getHardwareInfo(): NodeHardwareInfoResponse {
         val cpuInfo = getCpuInfo()
         val ramInfo = getRamInfo()
-        val storesInfo = getDiskStoresInfo()
+        val diskStorageInfo = getDiskStorageInfo()
         val networksInfo = getNetworksInfo()
 
-        return NodeHardwareInfoResponse(cpuInfo, ramInfo, storesInfo, networksInfo)
+        var storageSize = 0L
+        for (storeInfo in diskStorageInfo) {
+            storageSize += storeInfo.totalStorage
+        }
+
+        return NodeHardwareInfoResponse(cpuInfo, ramInfo, storageSize, networksInfo)
     }
 
     override fun getCpuInfo(): CpuInfo {
@@ -41,16 +45,17 @@ class DefaultNodeInfoService : NodeInfoService {
         return RamInfo(freeMemory, usedMemory, totalMemory)
     }
 
-    override fun getDiskStoresInfo(): List<StoreInfo> {
+    override fun getDiskStorageInfo(): List<StorageInfo> {
         val diskStores = hardwareLayer.diskStores
-        val stores = ArrayList<StoreInfo>(diskStores.size)
+        val storage = ArrayList<StorageInfo>(diskStores.size)
         for (diskStore in diskStores) {
+            val deviceName = diskStore.name
             val totalStore = diskStore.size
-            val storageInfoDto = StoreInfo(totalStore)
-            stores.add(storageInfoDto)
+            val storageInfoDto = StorageInfo(deviceName, totalStore)
+            storage.add(storageInfoDto)
         }
 
-        return stores
+        return storage
     }
 
     override fun getNetworksInfo(): List<NetworkInfo> {
