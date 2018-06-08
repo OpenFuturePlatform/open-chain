@@ -1,6 +1,6 @@
 package io.openfuture.chain.controller
 
-import io.openfuture.chain.domain.NodeHardwareResponse
+import io.openfuture.chain.domain.NodeHardwareInfoResponse
 import io.openfuture.chain.domain.NodeVersionResponse
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.sevice.NodeInfoService
@@ -19,7 +19,7 @@ class NodeInfoController(
     fun getVersion() = NodeVersionResponse(nodeProperties.version!!)
 
     @GetMapping("/getHardwareInfo")
-    fun getHardwareInfo(): NodeHardwareResponse {
+    fun getHardwareInfo(): NodeHardwareInfoResponse {
         return nodeInfoService.getHardwareInfo()
     }
 

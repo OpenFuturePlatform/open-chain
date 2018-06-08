@@ -1,9 +1,9 @@
 package io.openfuture.chain.sevice
 
-import io.openfuture.chain.domain.NodeHardwareResponse
+import io.openfuture.chain.domain.NodeHardwareInfoResponse
 
 interface NodeInfoService {
 
-    fun getHardwareInfo(): NodeHardwareResponse
+    fun getHardwareInfo(): NodeHardwareInfoResponse
 
 }
