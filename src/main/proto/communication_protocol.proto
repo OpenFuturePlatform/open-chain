@@ -16,8 +16,8 @@ message Packet {
 
 enum Type {
     HEART_BEAT = 0;
-    TIME_REQUEST = 2;
-    TIME_RESPONSE = 3;
+    TIME_REQUEST = 1;
+    TIME_RESPONSE = 2;
 }
 
 message HeartBeat {
