@@ -42,12 +42,10 @@ class ConnectionServerHandler : ChannelInboundHandlerAdapter() {
     }
 
     override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {
-        log.info("Packet received: {}", packet)
-
         packet as CommunicationProtocol.Packet
-        val type = packet.type
 
-        // check for the packet type
+        // check packet type
+        val type = packet.type
         when (type) {
             HEART_BEAT -> {}
             TIME_REQUEST -> {}
