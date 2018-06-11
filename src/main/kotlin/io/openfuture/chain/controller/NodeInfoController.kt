@@ -1,7 +1,9 @@
 package io.openfuture.chain.controller
 
+import io.openfuture.chain.domain.HealthResponse
 import io.openfuture.chain.domain.NodeTimestampResponse
 import io.openfuture.chain.domain.NodeVersionResponse
+import io.openfuture.chain.util.AppContextUtils
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -15,5 +17,8 @@ class NodeInfoController {
 
     @GetMapping("/getTimestamp")
     fun getTimestamp() = NodeTimestampResponse(System.currentTimeMillis())
+
+    @GetMapping("/getHealthCheck")
+    fun getHealthCheck() = HealthResponse(AppContextUtils.getUpTime())
 
 }

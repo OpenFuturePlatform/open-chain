@@ -13,6 +13,8 @@ object AppContextUtils : ApplicationContextAware {
         return context.getBean(type)
     }
 
+    fun getUpTime(): Long = System.currentTimeMillis() - context.startupDate
+
     override fun setApplicationContext(applicationContext: ApplicationContext) {
         this.context = applicationContext
     }
