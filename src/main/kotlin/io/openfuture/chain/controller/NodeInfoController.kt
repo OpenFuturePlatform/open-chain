@@ -1,9 +1,9 @@
 package io.openfuture.chain.controller
 
-import io.openfuture.chain.domain.NodeHardwareInfoResponse
+import io.openfuture.chain.domain.HardwareInfo
 import io.openfuture.chain.domain.NodeTimestampResponse
 import io.openfuture.chain.domain.NodeVersionResponse
-import io.openfuture.chain.service.NodeInfoService
+import io.openfuture.chain.service.HardwareInfoService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("${PathConstant.RPC}/info")
 class NodeInfoController(
-        val nodeInfoService: NodeInfoService
+        val hardwareInfoService: HardwareInfoService
 ) {
 
     @GetMapping("/getVersion")
@@ -21,6 +21,6 @@ class NodeInfoController(
     fun getTimestamp() = NodeTimestampResponse(System.currentTimeMillis())
 
     @GetMapping("/getHardwareInfo")
-    fun getHardwareInfo(): NodeHardwareInfoResponse = nodeInfoService.getHardwareInfo()
+    fun getHardwareInfo(): HardwareInfo = hardwareInfoService.getHardwareInfo()
 
 }

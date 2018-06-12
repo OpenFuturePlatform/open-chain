@@ -1,6 +1,6 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.domain.NodeHardwareInfoResponse
+import io.openfuture.chain.domain.HardwareInfo
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
@@ -10,11 +10,11 @@ import oshi.SystemInfo
 import java.net.NetworkInterface
 
 @Service
-class DefaultNodeInfoService : NodeInfoService {
+class DefaultHardwareInfoService : HardwareInfoService {
 
     private val hardwareLayer = SystemInfo().hardware
 
-    override fun getHardwareInfo(): NodeHardwareInfoResponse {
+    override fun getHardwareInfo(): HardwareInfo {
         val cpuInfo = getCpuInfo()
         val ramInfo = getRamInfo()
         val diskStorageInfo = getDiskStorageInfo()
@@ -25,7 +25,7 @@ class DefaultNodeInfoService : NodeInfoService {
             storageSize += storeInfo.totalStorage
         }
 
-        return NodeHardwareInfoResponse(cpuInfo, ramInfo, storageSize, networksInfo)
+        return HardwareInfo(cpuInfo, ramInfo, storageSize, networksInfo)
     }
 
     override fun getCpuInfo(): CpuInfo {
