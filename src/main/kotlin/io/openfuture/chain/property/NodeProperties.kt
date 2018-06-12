@@ -10,7 +10,7 @@ import javax.validation.constraints.Size
 @Component
 @Validated
 @ConfigurationProperties(value = "node")
-data class NodeProperties(
+class NodeProperties(
 
         /** Node Server Port */
         @field:NotNull

@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package io.openfuture.chain.protocol;
+
+option java_outer_classname = "CommunicationProtocol";
+
+
+message Packet {
+    Type type = 1;
+
+    oneof body {
+        HeartBeat heart_beat = 2;
+        TimeResponse time_response = 3;
+    }
+}
+
+enum Type {
+    HEART_BEAT = 0;
+    TIME_REQUEST = 1;
+    TIME_RESPONSE = 2;
+}
+
+message HeartBeat {
+    enum Type {
+        PING = 0;
+        PONG = 1;
+    }
+
+    Type type = 1;
+}
+
+message TimeResponse {
+    int64 timestamp = 1;
+}
