@@ -1,4 +1,4 @@
-package io.openfuture.chain.entity
+package io.openfuture.chain.entity.dictionary
 
 import io.openfuture.chain.entity.base.Dictionary
 

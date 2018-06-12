@@ -1,4 +1,4 @@
-package io.openfuture.chain.config
+package io.openfuture.chain.config.nio
 
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelOption

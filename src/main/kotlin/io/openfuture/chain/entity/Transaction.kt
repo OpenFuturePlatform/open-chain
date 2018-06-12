@@ -1,8 +1,8 @@
 package io.openfuture.chain.entity
 
 import io.openfuture.chain.entity.base.BaseModel
+import io.openfuture.chain.entity.dictionary.Currency
 import io.openfuture.chain.util.DictionaryUtils
-import java.security.MessageDigest
 import javax.persistence.*
 
 /**
