@@ -1,4 +1,4 @@
-package io.openfuture.chain.sevice
+package io.openfuture.chain.service
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.domain.hardware.CpuInfo
