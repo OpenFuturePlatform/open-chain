@@ -5,21 +5,22 @@ import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
-import io.openfuture.chain.sevice.DefaultNodeInfoService
 import org.assertj.core.api.Assertions
+import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.InjectMocks
-import org.mockito.junit.MockitoJUnitRunner
 
 class DefaultNodeInfoServiceTest : ServiceTests() {
 
-    @InjectMocks
-    private val defaultNodeInfoService: DefaultNodeInfoService? = null
+    private lateinit var defaultNodeInfoService: DefaultNodeInfoService
+
+    @Before
+    fun setUp() {
+        defaultNodeInfoService = DefaultNodeInfoService()
+    }
 
     @Test
     fun testGetHardwareInfo() {
-        val hardwareInfo = defaultNodeInfoService!!.getHardwareInfo()
+        val hardwareInfo = defaultNodeInfoService.getHardwareInfo()
 
         val cpuInfo = hardwareInfo.cpu
         val ramInfo = hardwareInfo.ram
@@ -36,28 +37,28 @@ class DefaultNodeInfoServiceTest : ServiceTests() {
 
     @Test
     fun testGetCpuInfo() {
-        val cpuInfo = defaultNodeInfoService!!.getCpuInfo()
+        val cpuInfo = defaultNodeInfoService.getCpuInfo()
 
         assertCpuInfo(cpuInfo)
     }
 
     @Test
     fun testGetRamInfo() {
-        val ramInfo = defaultNodeInfoService!!.getRamInfo()
+        val ramInfo = defaultNodeInfoService.getRamInfo()
 
         assertRamInfo(ramInfo)
     }
 
     @Test
     fun testGetStoresInfo() {
-        val diskStorageInfo = defaultNodeInfoService!!.getDiskStorageInfo()
+        val diskStorageInfo = defaultNodeInfoService.getDiskStorageInfo()
 
         assertStorageInfo(diskStorageInfo)
     }
 
     @Test
     fun testGetNetworksInfo() {
-        val networksInfo = defaultNodeInfoService!!.getNetworksInfo()
+        val networksInfo = defaultNodeInfoService.getNetworksInfo()
 
         assertNetworksInfo(networksInfo)
     }
