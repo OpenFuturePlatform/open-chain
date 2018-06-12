@@ -1,5 +1,6 @@
-package io.openfuture.chain.sevice.impl
+package io.openfuture.chain.sevice
 
+import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
@@ -11,8 +12,7 @@ import org.junit.runner.RunWith
 import org.mockito.InjectMocks
 import org.mockito.junit.MockitoJUnitRunner
 
-@RunWith(MockitoJUnitRunner::class)
-class DefaultNodeInfoServiceTest {
+class DefaultNodeInfoServiceTest : ServiceTests() {
 
     @InjectMocks
     private val defaultNodeInfoService: DefaultNodeInfoService? = null
