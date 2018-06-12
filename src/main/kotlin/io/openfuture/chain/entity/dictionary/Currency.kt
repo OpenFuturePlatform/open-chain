@@ -5,7 +5,7 @@ import io.openfuture.chain.entity.base.Dictionary
 /**
  * @author Homza Pavel
  */
-enum class Currency(
+enum class Currency (
         private val id: Int,
         private val value: String
 ) : Dictionary {
