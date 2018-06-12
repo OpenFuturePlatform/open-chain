@@ -14,7 +14,7 @@ class ConnectionListener(
 ) : ChannelFutureListener {
 
     companion object {
-        private val log = LoggerFactory.getLogger(this::class.java)
+        private val log = LoggerFactory.getLogger(ConnectionListener::class.java)
     }
 
     override fun operationComplete(future: ChannelFuture) {
