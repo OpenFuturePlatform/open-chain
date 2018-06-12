@@ -2,7 +2,7 @@ package io.openfuture.chain.controller
 
 import io.openfuture.chain.domain.NodeTimestampResponse
 import io.openfuture.chain.domain.NodeVersionResponse
-import io.openfuture.chain.service.DefaultNodeInfoService
+import org.springframework.context.ApplicationContext
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("${PathConstant.RPC}/info")
 class NodeInfoController(
-        val nodeInfoService: DefaultNodeInfoService
+        private val context: ApplicationContext
 ) {
 
     @GetMapping("/getVersion")
@@ -20,6 +20,6 @@ class NodeInfoController(
     fun getTimestamp() = NodeTimestampResponse(System.currentTimeMillis())
 
     @GetMapping("/getHealthCheck")
-    fun getHealthCheck(): Long = nodeInfoService.getUpTime()
+    fun getHealthCheck(): Long = System.currentTimeMillis() - context.startupDate
 
 }
