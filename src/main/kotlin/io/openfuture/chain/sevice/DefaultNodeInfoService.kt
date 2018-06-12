@@ -1,11 +1,10 @@
-package io.openfuture.chain.sevice.impl
+package io.openfuture.chain.sevice
 
 import io.openfuture.chain.domain.NodeHardwareInfoResponse
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
-import io.openfuture.chain.sevice.NodeInfoService
 import org.springframework.stereotype.Service
 import oshi.SystemInfo
 import java.net.NetworkInterface

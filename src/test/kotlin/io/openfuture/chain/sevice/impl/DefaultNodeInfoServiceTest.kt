@@ -4,6 +4,7 @@ import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
+import io.openfuture.chain.sevice.DefaultNodeInfoService
 import org.assertj.core.api.Assertions
 import org.junit.Test
 import org.junit.runner.RunWith
