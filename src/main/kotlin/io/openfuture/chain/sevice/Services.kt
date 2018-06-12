@@ -17,4 +17,5 @@ interface NodeInfoService {
     fun getDiskStorageInfo(): List<StorageInfo>
 
     fun getNetworksInfo(): List<NetworkInfo>
+
 }
