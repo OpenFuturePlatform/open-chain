@@ -6,17 +6,13 @@ import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
 import org.assertj.core.api.Assertions
-import org.junit.Before
 import org.junit.Test
+import org.mockito.InjectMocks
 
 class DefaultNodeInfoServiceTest : ServiceTests() {
 
+    @InjectMocks
     private lateinit var defaultNodeInfoService: DefaultNodeInfoService
-
-    @Before
-    fun setUp() {
-        defaultNodeInfoService = DefaultNodeInfoService()
-    }
 
     @Test
     fun testGetHardwareInfo() {
