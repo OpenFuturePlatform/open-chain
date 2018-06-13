@@ -24,7 +24,7 @@ class TimeSyncClientHandler(
 
     private val connections: MutableSet<Channel> = ConcurrentHashMap.newKeySet()
 
-    private val peerTimeOffsets: ConcurrentHashMap<String, Long> = ConcurrentHashMap()
+    private val nodeTimeOffsets: ConcurrentHashMap<String, Long> = ConcurrentHashMap()
 
     private val timeSyncThread: Thread = Thread(TimeSyncTask(properties.timeSyncInitialDelay!! * 1000,
             properties.timeSyncInterval!! * 1000, 1*1000))
@@ -63,10 +63,10 @@ class TimeSyncClientHandler(
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: Packet) {
         log.info("Time packet received from ${ctx.channel().remoteAddress()}")
-        val duration = time.now() - message.timeResponse.initialTimestamp
+        val roundTripTime = time.now() - message.timeResponse.initialTimestamp
         val offset = message.timeResponse.timestamp -
-                (message.timeResponse.initialTimestamp + duration/2)
-        peerTimeOffsets[ctx.channel().remoteAddress().toString()] = offset
+                (message.timeResponse.initialTimestamp + roundTripTime/2)
+        nodeTimeOffsets[ctx.channel().remoteAddress().toString()] = offset
     }
 
     private fun check(ctx: ChannelHandlerContext): Boolean {
@@ -87,7 +87,7 @@ class TimeSyncClientHandler(
                 try {
                     Thread.sleep(period)
 
-                    peerTimeOffsets.clear()
+                    nodeTimeOffsets.clear()
 
                     val request = CommunicationProtocol.Packet.newBuilder()
                             .setType(Type.TIME_REQUEST)
@@ -95,9 +95,9 @@ class TimeSyncClientHandler(
                             .build()
                     connections.forEach { it.writeAndFlush(request) }
 
-                    log.info("Time packets were sent to peers $connections")
+                    log.info("Time packets were sent to nodes $connections")
 
-                    Thread(TimeCorrectionTask(timeToWaitPackets)).start()
+                    Thread(TimeAdjustmentTask(timeToWaitPackets)).start()
                 } catch (e: InterruptedException){
                     break
                 }
@@ -107,26 +107,25 @@ class TimeSyncClientHandler(
 
     }
 
-    inner class TimeCorrectionTask(
-            private val timeToWaitPackets: Long
+    inner class TimeAdjustmentTask(
+            private val packetWaitingTime: Long
     ): Runnable {
 
         override fun run() {
-            Thread.sleep(timeToWaitPackets)
+            Thread.sleep(packetWaitingTime)
 
-            log.info("Time correction started. Peers time offsets $peerTimeOffsets")
+            log.info("Time adjustment started. Nodes time offsets $nodeTimeOffsets")
 
-            val offsetsNumber = peerTimeOffsets.size
+            val offsetsNumber = nodeTimeOffsets.size
             if (offsetsNumber != 0 && (offsetsNumber == connections.size)){
-                val offsets = ArrayList(peerTimeOffsets.values)
+                val offsets = ArrayList(nodeTimeOffsets.values)
                 offsets.sort()
-
                 val mediumIndex = if (offsetsNumber % 2 == 0) offsetsNumber/2-1 else offsetsNumber/2
                 time.setAdjustment(offsets[mediumIndex])
 
-                log.info("Time correction was successful. Adjustment is ${offsets[mediumIndex]}")
+                log.info("Time adjustment was successful. Adjustment is ${offsets[mediumIndex]}")
             } else {
-                log.info("Not all packets were received from peers. Can not do sync now.")
+                log.info("Not all packets were received from nodes. Can not do sync now.")
             }
         }
 
