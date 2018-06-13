@@ -16,7 +16,7 @@ import javax.annotation.PreDestroy
 @Component
 @ChannelHandler.Sharable
 class TimeSyncClientHandler(
-        val time : NodeTime
+        private val time : NodeTime
 ) : BaseHandler(Type.TIME_RESPONSE){
 
     @Volatile
@@ -75,7 +75,8 @@ class TimeSyncClientHandler(
 
     inner class TimeSyncTask(
             private val period: Long,
-            private val timeToWaitPackets: Long): Runnable {
+            private val timeToWaitPackets: Long
+    ): Runnable {
 
         override fun run() {
             log.info("Time sync thread is started")
@@ -103,7 +104,9 @@ class TimeSyncClientHandler(
 
     }
 
-    inner class TimeCorrectionTask(private val timeToWaitPackets: Long): Runnable {
+    inner class TimeCorrectionTask(
+            private val timeToWaitPackets: Long
+    ): Runnable {
 
         override fun run() {
             Thread.sleep(timeToWaitPackets)

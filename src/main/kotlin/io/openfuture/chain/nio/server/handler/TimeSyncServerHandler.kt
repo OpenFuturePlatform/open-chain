@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 @Component
 @Scope("prototype")
 class TimeSyncServerHandler(
-        val time : NodeTime
+        private val time : NodeTime
 ) : BaseHandler(Type.TIME_REQUEST) {
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: Packet) {

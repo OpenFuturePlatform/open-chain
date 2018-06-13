@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 @Component
 class NodeTime(
-        private var adjustment : AtomicLong = AtomicLong(0)
+        private val adjustment : AtomicLong = AtomicLong(0)
 ) {
 
     fun now() : Long{
