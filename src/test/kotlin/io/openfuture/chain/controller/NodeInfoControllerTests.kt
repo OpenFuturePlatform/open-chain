@@ -2,6 +2,7 @@ package io.openfuture.chain.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.openfuture.chain.config.ControllerTests
+import io.openfuture.chain.domain.HealthResponse
 import io.openfuture.chain.domain.NodeTimestampResponse
 import io.openfuture.chain.domain.NodeVersionResponse
 import io.openfuture.chain.property.NodeProperties
@@ -37,37 +38,41 @@ class NodeInfoControllerTests : ControllerTests() {
     }
 
     @Test
-    fun testGetVersion() {
+    fun getVersionShouldReturnVersion() {
         val response = NodeVersionResponse()
+        var responseString = objectMapper.writeValueAsString(response)
 
-        val responseJson = mvc.perform(get("${PathConstant.RPC}/info/getVersion"))
+        val responseJsonResult = mvc.perform(get("${PathConstant.RPC}/info/getVersion"))
                 .andExpect(status().isOk)
                 .andReturn().response.contentAsString
 
-        assertThat(responseJson).isEqualTo(objectMapper.writeValueAsString(response))
+        assertThat(responseString).isEqualTo(responseJsonResult)
     }
 
     @Test
-    fun testGetTimestamp() {
+    fun getTimestampShouldReturnTimestampNow() {
         val response = NodeTimestampResponse(System.currentTimeMillis())
 
-        val responseJson = mvc.perform(get("${PathConstant.RPC}/info/getTimestamp"))
+        val responseJsonResult = mvc.perform(get("${PathConstant.RPC}/info/getTimestamp"))
                 .andExpect(status().isOk)
                 .andReturn().response.contentAsString
-        val responseResult = objectMapper.readValue(responseJson, NodeTimestampResponse::class.java)
+        val responseResult = objectMapper.readValue(responseJsonResult, NodeTimestampResponse::class.java)
 
-        assertThat(responseResult.version).isEqualTo(response.version)
-        assertThat(responseResult.timestamp).isGreaterThanOrEqualTo(response.timestamp)
+        assertThat(response.version).isEqualTo(responseResult.version)
+        assertThat(response.timestamp).isLessThanOrEqualTo(responseResult.timestamp)
     }
 
     @Test
-    fun testGetHealthCheck() {
-        val timeUpString = mvc.perform(get("${PathConstant.RPC}/info/getHealthCheck"))
+    fun testGetHealthCheckShoutReturnAppUpTime() {
+        val response = HealthResponse(1L)
+
+        val responseJsonResult = mvc.perform(get("${PathConstant.RPC}/info/getHealthCheck"))
                 .andExpect(status().isOk)
                 .andReturn().response.contentAsString
-        val timeUp = timeUpString.toLong()
+        val responseResult = objectMapper.readValue(responseJsonResult, HealthResponse::class.java)
 
-        assertThat(timeUp).isGreaterThan(0L)
+        assertThat(responseResult).isNotNull
+        assertThat(response.upTime).isGreaterThan(0L)
     }
 
 }
