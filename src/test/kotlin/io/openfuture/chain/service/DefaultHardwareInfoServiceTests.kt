@@ -1,78 +1,95 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.config.ServiceTests
+import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
+import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.Before
+import org.assertj.core.api.Assertions
 import org.junit.Test
+import org.mockito.InjectMocks
 
 class DefaultHardwareInfoServiceTests : ServiceTests() {
 
-    private lateinit var service: DefaultHardwareInfoService
-
-    @Before
-    fun setUp() {
-        service = DefaultHardwareInfoService()
-    }
+    @InjectMocks
+    private lateinit var defaultNodeInfoService: DefaultHardwareInfoService
 
     @Test
     fun testGetHardwareInfo() {
-        val hardwareInfo = service.getHardwareInfo()
+        val hardwareInfo = defaultNodeInfoService.getHardwareInfo()
 
-        var totalStorageSize = 0L
-        val storageInfo = service.getDiskStorageInfo()
-        for (storage in storageInfo) {
-            totalStorageSize += storage.totalStorage
-        }
+        val cpuInfo = hardwareInfo.cpu
+        val ramInfo = hardwareInfo.ram
+        val totalStorageSize = hardwareInfo.totalStorageSize
+        val networksInfo = hardwareInfo.networks
 
-        assertThat(hardwareInfo.cpu).isEqualTo(service.getCpuInfo())
-        assertThat(hardwareInfo.ram).isNotNull
-        assertThat(hardwareInfo.networks).isEqualTo(service.getNetworksInfo())
-        assertThat(hardwareInfo.totalStorageSize).isEqualTo(totalStorageSize)
+        Assertions.assertThat(hardwareInfo).isNotNull
+
+        assertCpuInfo(cpuInfo)
+        assertRamInfo(ramInfo)
+        Assertions.assertThat(totalStorageSize).isGreaterThan(0L)
+        assertNetworksInfo(networksInfo)
     }
 
     @Test
     fun testGetCpuInfo() {
-        val cpuInfo = service.getCpuInfo()
+        val cpuInfo = defaultNodeInfoService.getCpuInfo()
 
-        assertThat(cpuInfo).isNotNull
-        assertThat(cpuInfo.frequency).isGreaterThan(0L)
-        assertThat(cpuInfo.model).isNotBlank()
-        assertThat(cpuInfo.numberOfCores).isGreaterThan(0)
+        assertCpuInfo(cpuInfo)
     }
 
     @Test
     fun testGetRamInfo() {
-        val ramInfo = service.getRamInfo()
+        val ramInfo = defaultNodeInfoService.getRamInfo()
 
-        assertThat(ramInfo).isNotNull
-        assertThat(ramInfo.free).isGreaterThan(0L)
-        assertThat(ramInfo.used).isGreaterThan(0L)
-        assertThat(ramInfo.total).isGreaterThan(0L)
+        assertRamInfo(ramInfo)
     }
 
     @Test
     fun testGetStoresInfo() {
-        val diskStorageInfo: List<StorageInfo> = service.getDiskStorageInfo()
+        val diskStorageInfo = defaultNodeInfoService.getDiskStorageInfo()
 
-        assertThat(diskStorageInfo).isNotEmpty
-        for (diskStoreInfo in diskStorageInfo) {
-            assertThat(diskStoreInfo.totalStorage).isGreaterThan(0L)
-        }
+        assertStorageInfo(diskStorageInfo)
     }
 
     @Test
     fun testGetNetworksInfo() {
-        val networksInfo: List<NetworkInfo> = service.getNetworksInfo()
+        val networksInfo = defaultNodeInfoService.getNetworksInfo()
 
-        assertThat(networksInfo).isNotEmpty
+        assertNetworksInfo(networksInfo)
+    }
+
+    private fun assertCpuInfo(cpuInfo: CpuInfo) {
+        Assertions.assertThat(cpuInfo).isNotNull
+
+        Assertions.assertThat(cpuInfo.frequency).isGreaterThan(0L)
+        Assertions.assertThat(cpuInfo.model).isNotBlank()
+        Assertions.assertThat(cpuInfo.numberOfCores).isGreaterThan(0)
+    }
+
+    private fun assertRamInfo(ramInfo: RamInfo) {
+        Assertions.assertThat(ramInfo).isNotNull
+
+        Assertions.assertThat(ramInfo.free).isGreaterThan(0L)
+        Assertions.assertThat(ramInfo.used).isGreaterThan(0L)
+        Assertions.assertThat(ramInfo.total).isGreaterThan(0L)
+    }
+
+    private fun assertStorageInfo(diskStorageInfo: List<StorageInfo>) {
+        Assertions.assertThat(diskStorageInfo).isNotEmpty
+        for (diskStoreInfo in diskStorageInfo) {
+            Assertions.assertThat(diskStoreInfo.totalStorage).isGreaterThan(0L)
+        }
+    }
+
+    private fun assertNetworksInfo(networksInfo: List<NetworkInfo>) {
+        Assertions.assertThat(networksInfo).isNotEmpty
         for (networkInfo in networksInfo) {
-            assertThat(networkInfo.interfaceName).isNotBlank()
+            Assertions.assertThat(networkInfo.interfaceName).isNotBlank()
 
             val addresses = networkInfo.addresses
             for (address in addresses) {
-                assertThat(address).isNotBlank()
+                Assertions.assertThat(address).isNotBlank()
             }
         }
     }
