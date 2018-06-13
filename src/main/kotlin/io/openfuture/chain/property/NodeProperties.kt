@@ -43,6 +43,14 @@ class NodeProperties(
 
         /** */
         @field:NotNull
-        var connectTimeout: Int? = null
+        var connectTimeout: Int? = null,
+
+        /** */
+        @field:NotNull
+        var timeSyncInterval: Long? = null,
+
+        /** */
+        @field:NotNull
+        var timeSyncInitialDelay: Long? = null
 
 )

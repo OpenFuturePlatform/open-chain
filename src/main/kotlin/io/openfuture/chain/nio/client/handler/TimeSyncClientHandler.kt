@@ -4,6 +4,7 @@ import io.netty.channel.Channel
 import io.netty.channel.ChannelHandler
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.nio.base.BaseHandler
+import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.protocol.CommunicationProtocol.*
 import io.openfuture.chain.util.NodeTime
@@ -17,14 +18,16 @@ import javax.annotation.PreDestroy
 @Component
 @ChannelHandler.Sharable
 class TimeSyncClientHandler(
-        private val time : NodeTime
+        private val time : NodeTime,
+        private val properties: NodeProperties
 ) : BaseHandler(Type.TIME_RESPONSE){
 
     private val connections: MutableSet<Channel> = ConcurrentHashMap.newKeySet()
 
     private val peerTimeOffsets: ConcurrentHashMap<String, Long> = ConcurrentHashMap()
 
-    private val timeSyncThread: Thread = Thread(TimeSyncTask(60*1000, 1*1000))
+    private val timeSyncThread: Thread = Thread(TimeSyncTask(properties.timeSyncInitialDelay!! * 1000,
+            properties.timeSyncInterval!! * 1000, 1*1000))
 
     companion object {
         private val log = LoggerFactory.getLogger(TimeSyncClientHandler::class.java)
@@ -72,12 +75,14 @@ class TimeSyncClientHandler(
     }
 
     inner class TimeSyncTask(
+            private val initialDelay: Long,
             private val period: Long,
             private val timeToWaitPackets: Long
     ): Runnable {
 
         override fun run() {
             log.info("Time sync thread started execution")
+            Thread.sleep(initialDelay)
             while (!Thread.interrupted()) {
                 try {
                     Thread.sleep(period)
