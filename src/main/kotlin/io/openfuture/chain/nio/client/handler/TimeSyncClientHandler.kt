@@ -86,12 +86,13 @@ class TimeSyncClientHandler(
             Thread.sleep(initialDelay)
             while (!Thread.interrupted()) {
                 try {
-                    Thread.sleep(period)
                     nodeTimeOffsets.clear()
                     requestTimeFromNodesToGetOffsets()
 
                     Thread.sleep(offsetsWaitingTime)
                     adjustTimeBasedOnOffsets()
+
+                    Thread.sleep(period - offsetsWaitingTime)
                 } catch (e: InterruptedException){
                     break
                 }
