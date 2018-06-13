@@ -24,7 +24,7 @@ class TimeSyncClientHandler(
 
     private val peerTimeOffsets: ConcurrentHashMap<String, Long> = ConcurrentHashMap()
 
-    private val timeSyncThread: Thread = Thread(TimeSyncTask(60*1000, 10*1000))
+    private val timeSyncThread: Thread = Thread(TimeSyncTask(60*1000, 1*1000))
 
     companion object {
         private val log = LoggerFactory.getLogger(TimeSyncClientHandler::class.java)
@@ -77,8 +77,8 @@ class TimeSyncClientHandler(
     ): Runnable {
 
         override fun run() {
-            log.info("Time sync thread is started")
-            while (!Thread.currentThread().isInterrupted) {
+            log.info("Time sync thread started execution")
+            while (!Thread.interrupted()) {
                 try {
                     Thread.sleep(period)
 
@@ -93,10 +93,11 @@ class TimeSyncClientHandler(
                     log.info("Time packets were sent to peers $connections")
 
                     Thread(TimeCorrectionTask(timeToWaitPackets)).start()
-                } catch (e :InterruptedException){
-                    Thread.currentThread().interrupt()
+                } catch (e: InterruptedException){
+                    break
                 }
             }
+            log.info("Time sync thread finished execution")
         }
 
     }
