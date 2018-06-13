@@ -77,7 +77,7 @@ class TimeSyncClientHandler(
     inner class TimeSyncTask(
             private val initialDelay: Long,
             private val period: Long,
-            private val timeToWaitPackets: Long
+            private val packetWaitingTime: Long
     ): Runnable {
 
         override fun run() {
@@ -97,7 +97,7 @@ class TimeSyncClientHandler(
 
                     log.info("Time packets were sent to nodes $connections")
 
-                    Thread(TimeAdjustmentTask(timeToWaitPackets)).start()
+                    Thread(TimeAdjustmentTask(packetWaitingTime)).start()
                 } catch (e: InterruptedException){
                     break
                 }
