@@ -12,7 +12,7 @@ class NodeTime(
         return System.currentTimeMillis() + adjustment.toLong()
     }
 
-    fun setAdjustment(adjustment: Long){
-        this.adjustment.addAndGet(adjustment)
+    fun addAdjustment(adjustment: Long) : Long{
+        return this.adjustment.addAndGet(adjustment)
     }
 }

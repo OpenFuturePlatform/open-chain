@@ -22,16 +22,16 @@ class TimeSyncClientHandler(
         private val properties: NodeProperties
 ) : BaseHandler(Type.TIME_RESPONSE){
 
+    companion object {
+        private val log = LoggerFactory.getLogger(TimeSyncClientHandler::class.java)
+    }
+
     private val connections: MutableSet<Channel> = ConcurrentHashMap.newKeySet()
 
     private val nodeTimeOffsets: ConcurrentHashMap<String, Long> = ConcurrentHashMap()
 
     private val timeSyncThread: Thread = Thread(TimeSyncTask(properties.timeSyncInitialDelay!! * 1000,
             properties.timeSyncInterval!! * 1000, 1*1000))
-
-    companion object {
-        private val log = LoggerFactory.getLogger(TimeSyncClientHandler::class.java)
-    }
 
     @PostConstruct
     fun init(){
@@ -77,53 +77,50 @@ class TimeSyncClientHandler(
     inner class TimeSyncTask(
             private val initialDelay: Long,
             private val period: Long,
-            private val packetWaitingTime: Long
+            private val offsetsWaitingTime: Long
     ): Runnable {
 
         override fun run() {
             log.info("Time sync thread started execution")
+
             Thread.sleep(initialDelay)
             while (!Thread.interrupted()) {
                 try {
                     Thread.sleep(period)
-
                     nodeTimeOffsets.clear()
+                    requestTimeFromNodesToGetOffsets()
 
-                    val request = CommunicationProtocol.Packet.newBuilder()
-                            .setType(Type.TIME_REQUEST)
-                            .setTimeRequest(TimeRequest.newBuilder().setTimestamp(time.now()).build())
-                            .build()
-                    connections.forEach { it.writeAndFlush(request) }
-
-                    log.info("Time packets were sent to nodes $connections")
-
-                    Thread(TimeAdjustmentTask(packetWaitingTime)).start()
+                    Thread.sleep(offsetsWaitingTime)
+                    adjustTimeBasedOnOffsets()
                 } catch (e: InterruptedException){
                     break
                 }
             }
+
             log.info("Time sync thread finished execution")
         }
 
-    }
+        private fun requestTimeFromNodesToGetOffsets(){
+            val request = CommunicationProtocol.Packet.newBuilder()
+                    .setType(Type.TIME_REQUEST)
+                    .setTimeRequest(TimeRequest.newBuilder().setTimestamp(time.now()).build())
+                    .build()
+            connections.forEach { it.writeAndFlush(request) }
 
-    inner class TimeAdjustmentTask(
-            private val packetWaitingTime: Long
-    ): Runnable {
+            log.info("Time packets were sent to nodes $connections")
+        }
 
-        override fun run() {
-            Thread.sleep(packetWaitingTime)
-
+        private fun adjustTimeBasedOnOffsets(){
             log.info("Time adjustment started. Nodes time offsets $nodeTimeOffsets")
 
             val offsetsNumber = nodeTimeOffsets.size
             if (offsetsNumber != 0 && (offsetsNumber == connections.size)){
                 val offsets = ArrayList(nodeTimeOffsets.values)
                 offsets.sort()
-                val mediumIndex = if (offsetsNumber % 2 == 0) offsetsNumber/2-1 else offsetsNumber/2
-                time.setAdjustment(offsets[mediumIndex])
+                val medianIndex = if (offsetsNumber % 2 == 0) offsetsNumber/2-1 else offsetsNumber/2
+                val adjustment = time.addAdjustment(offsets[medianIndex])
 
-                log.info("Time adjustment was successful. Adjustment is ${offsets[mediumIndex]}")
+                log.info("Time adjustment was successful. Adjustment is $adjustment")
             } else {
                 log.info("Not all packets were received from nodes. Can not do sync now.")
             }
