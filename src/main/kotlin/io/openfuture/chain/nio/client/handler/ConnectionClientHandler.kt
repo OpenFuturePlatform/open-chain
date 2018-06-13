@@ -2,6 +2,7 @@ package io.openfuture.chain.nio.client.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
+import io.openfuture.chain.nio.client.ClientChannels
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.protocol.CommunicationProtocol.Type
 import org.slf4j.LoggerFactory
@@ -10,7 +11,9 @@ import org.springframework.stereotype.Component
 
 @Component
 @Scope("prototype")
-class ConnectionClientHandler : ChannelInboundHandlerAdapter() {
+class ConnectionClientHandler(
+        private val channels: ClientChannels
+) : ChannelInboundHandlerAdapter() {
 
     companion object {
         private val log = LoggerFactory.getLogger(ConnectionClientHandler::class.java)
@@ -18,7 +21,14 @@ class ConnectionClientHandler : ChannelInboundHandlerAdapter() {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         log.info("Connection established")
+        channels.addChannel(ctx.channel())
         ctx.fireChannelActive()
+    }
+
+    override fun channelInactive(ctx: ChannelHandlerContext) {
+        log.info("Connection closed")
+        channels.removeChannel(ctx.channel())
+        ctx.fireChannelInactive()
     }
 
     override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {

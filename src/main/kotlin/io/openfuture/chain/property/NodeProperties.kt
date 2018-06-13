@@ -45,12 +45,9 @@ class NodeProperties(
         @field:NotNull
         var connectTimeout: Int? = null,
 
-        /** */
+        /** Time synchronization interval in milliseconds. Time synchronization will be executed every
+         *  interval value. If it is 1000 than synchronization will be every second. */
         @field:NotNull
-        var timeSyncInterval: Long? = null,
-
-        /** */
-        @field:NotNull
-        var timeSyncInitialDelay: Long? = null
+        var timeSyncInterval: Long? = null
 
 )
