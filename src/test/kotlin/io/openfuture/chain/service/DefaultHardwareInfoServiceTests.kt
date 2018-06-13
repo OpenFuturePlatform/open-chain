@@ -15,7 +15,7 @@ class DefaultHardwareInfoServiceTests : ServiceTests() {
     private lateinit var defaultNodeInfoService: DefaultHardwareInfoService
 
     @Test
-    fun testGetHardwareInfo() {
+    fun getHardwareInfoShouldReturnCpuRamStorageNetworkInformation() {
         val hardwareInfo = defaultNodeInfoService.getHardwareInfo()
 
         val cpuInfo = hardwareInfo.cpu
@@ -32,28 +32,28 @@ class DefaultHardwareInfoServiceTests : ServiceTests() {
     }
 
     @Test
-    fun testGetCpuInfo() {
+    fun getCpuInfoShouldReturnCpuInformation() {
         val cpuInfo = defaultNodeInfoService.getCpuInfo()
 
         assertCpuInfo(cpuInfo)
     }
 
     @Test
-    fun testGetRamInfo() {
+    fun getRamInfoShouldReturnRamInformation() {
         val ramInfo = defaultNodeInfoService.getRamInfo()
 
         assertRamInfo(ramInfo)
     }
 
     @Test
-    fun testGetStoresInfo() {
+    fun getStorageInfoShouldReturnStorageInformation() {
         val diskStorageInfo = defaultNodeInfoService.getDiskStorageInfo()
 
         assertStorageInfo(diskStorageInfo)
     }
 
     @Test
-    fun testGetNetworksInfo() {
+    fun getNetworksInfoShouldNetworkInformation() {
         val networksInfo = defaultNodeInfoService.getNetworksInfo()
 
         assertNetworksInfo(networksInfo)
