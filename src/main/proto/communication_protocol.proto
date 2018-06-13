@@ -10,7 +10,8 @@ message Packet {
 
     oneof body {
         HeartBeat heart_beat = 2;
-        TimeResponse time_response = 3;
+        TimeRequest time_request = 3;
+        TimeResponse time_response = 4;
     }
 }
 
@@ -30,5 +31,10 @@ message HeartBeat {
 }
 
 message TimeResponse {
+    int64 initialTimestamp = 1;
+    int64 timestamp = 2;
+}
+
+message TimeRequest {
     int64 timestamp = 1;
 }
