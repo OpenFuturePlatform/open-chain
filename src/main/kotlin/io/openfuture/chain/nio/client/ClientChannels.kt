@@ -10,15 +10,15 @@ class ClientChannels {
 
     private val channels: MutableSet<Channel> = ConcurrentHashMap.newKeySet()
 
-    fun addChannel(channel: Channel){
+    fun add(channel: Channel){
         channels.add(channel)
     }
 
-    fun removeChannel(channel: Channel){
+    fun remove(channel: Channel){
         channels.remove(channel)
     }
 
-    fun sendPacket(packet : CommunicationProtocol.Packet){
+    fun writeAndFlush(packet : CommunicationProtocol.Packet){
         channels.forEach { it.writeAndFlush(packet) }
     }
 

@@ -61,7 +61,7 @@ class TimeSyncService(
                 .setType(CommunicationProtocol.Type.TIME_REQUEST)
                 .setTimeRequest(CommunicationProtocol.TimeRequest.newBuilder().setTimestamp(time.now()).build())
                 .build()
-        channels.sendPacket(request)
+        channels.writeAndFlush(request)
 
         log.info("Time packets were sent to nodes ${channels.remoteAddresses()}")
     }
