@@ -71,9 +71,60 @@ build-jar:
 package-docker:
   stage: package
   script:
-    - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
     - docker login -u ${DOCKER_LOGIN} -p ${DOCKER_PASS}
+    - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
     - docker push ${IMAGE_NAME}:${IMAGE_TAG}
+  only:
+    - sprint
+    - master
+
+package-linux:
+  services:
+    - docker:dind
+  stage: package
+  script:
+    - |
+      docker run --rm -v "$(pwd):/packages" openplatform/install4j:linux \
+            /JRE/install4j7.0.6/bin/install4jc --license=${INSTALL4J_KEY} \
+            /packages/install4j/linux.install4j
+  artifacts:
+    paths:
+      - linux/*
+    expire_in: 1 day
+  only:
+    - sprint
+    - master
+
+package-windows:
+  services:
+    - docker:dind
+  stage: package
+  script:
+    - |
+      docker run --rm -v "$(pwd):/packages" openplatform/install4j:windows \
+            /JRE/install4j7.0.6/bin/install4jc --license=${INSTALL4J_KEY} \
+            /packages/install4j/windows.install4j
+  artifacts:
+    paths:
+      - windows/*
+    expire_in: 1 day
+  only:
+    - sprint
+    - master
+
+package-macos:
+  services:
+    - docker:dind
+  stage: package
+  script:
+    - |
+      docker run --rm -v "$(pwd):/packages" openplatform/install4j:osx \
+            /JRE/install4j7.0.6/bin/install4jc --license=${INSTALL4J_KEY} \
+            /packages/install4j/macos.install4j
+  artifacts:
+    paths:
+      - macos/*
+    expire_in: 1 day
   only:
     - sprint
     - master
