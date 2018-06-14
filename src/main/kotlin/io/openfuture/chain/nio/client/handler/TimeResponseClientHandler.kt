@@ -19,8 +19,8 @@ class TimeResponseClientHandler(
     }
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: Packet) {
-        log.info("Time packet received from ${ctx.channel().remoteAddress()}")
-        timeSyncService.addTimeOffset(message, ctx.channel().remoteAddress().toString())
+        log.info("Time response received from ${ctx.channel().remoteAddress()}")
+        timeSyncService.calculateAndAddTimeOffset(message, ctx.channel().remoteAddress().toString())
     }
 
 }
