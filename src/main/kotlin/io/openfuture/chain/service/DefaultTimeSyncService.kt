@@ -4,18 +4,19 @@ import io.openfuture.chain.nio.client.ClientChannels
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.util.NodeTime
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Service
 import java.util.ArrayList
 import java.util.concurrent.ConcurrentHashMap
 
-@Component
-class TimeSyncService(
+@Service
+class DefaultTimeSyncService(
         private val time: NodeTime,
-        private val channels: ClientChannels
-) : Runnable {
+        private val channels: ClientChannels)
+    : TimeSyncService{
 
     companion object {
-        private val log = LoggerFactory.getLogger(TimeSyncService::class.java)
+        private val log = LoggerFactory.getLogger(DefaultTimeSyncService::class.java)
 
         /** This constant determine delay when we need to calculate time adjustment.
          *  Time adjustment calculation is based on time offsets that are populated when
@@ -27,7 +28,8 @@ class TimeSyncService(
 
     private val nodeTimeOffsets: ConcurrentHashMap<String, Long> = ConcurrentHashMap()
 
-    override fun run() {
+    @Scheduled(cron = "*/30 * * * * *")
+    override fun sync() {
         log.info("Service started")
 
         nodeTimeOffsets.clear()
@@ -38,17 +40,17 @@ class TimeSyncService(
         log.info("Service finished")
     }
 
-    fun calculateAndAddTimeOffset(packet: CommunicationProtocol.Packet, remoteAddress: String){
-        val roundTripTime = time.now() - packet.timeResponse.initialTimestamp
-        val offset = packet.timeResponse.timestamp -
-                (packet.timeResponse.initialTimestamp + roundTripTime/2)
+    override fun calculateAndAddTimeOffset(packet: CommunicationProtocol.Packet, remoteAddress: String){
+        val roundTripTime = time.now() - packet.timeSyncResponse.initialTimestamp
+        val offset = packet.timeSyncResponse.timestamp -
+                (packet.timeSyncResponse.initialTimestamp + roundTripTime/2)
         nodeTimeOffsets[remoteAddress] = offset
     }
 
     private fun requestTimeFromNodesToGetOffsets(){
         val request = CommunicationProtocol.Packet.newBuilder()
-                .setType(CommunicationProtocol.Type.TIME_REQUEST)
-                .setTimeRequest(CommunicationProtocol.TimeRequest.newBuilder().setTimestamp(time.now()).build())
+                .setType(CommunicationProtocol.Type.TIME_SYNC_REQUEST)
+                .setTimeSyncRequest(CommunicationProtocol.TimeSyncRequest.newBuilder().setTimestamp(time.now()).build())
                 .build()
         channels.writeAndFlush(request)
 
@@ -70,4 +72,5 @@ class TimeSyncService(
             log.info("Not all responses were received from nodes. Can not do sync now.")
         }
     }
+
 }

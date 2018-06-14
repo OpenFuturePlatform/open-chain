@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component
 
 @Component
 @Scope("prototype")
-class TimeResponseClientHandler(
+class TimeSyncClientHandler(
         private val timeSyncService: TimeSyncService
-) : BaseHandler(Type.TIME_RESPONSE){
+) : BaseHandler(Type.TIME_SYNC_RESPONSE){
 
     companion object {
-        private val log = LoggerFactory.getLogger(TimeResponseClientHandler::class.java)
+        private val log = LoggerFactory.getLogger(TimeSyncClientHandler::class.java)
     }
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: Packet) {

@@ -43,11 +43,6 @@ class NodeProperties(
 
         /** */
         @field:NotNull
-        var connectTimeout: Int? = null,
-
-        /** Time synchronization interval in seconds. Time synchronization will be executed every
-         *  interval value. If it is 60 than synchronization will be every minute. */
-        @field:NotNull
-        var timeSyncInterval: Long? = null
+        var connectTimeout: Int? = null
 
 )

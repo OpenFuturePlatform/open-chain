@@ -9,16 +9,16 @@ import org.springframework.stereotype.Component
 
 @Component
 @Scope("prototype")
-class TimeRequestServerHandler(
+class TimeSyncServerHandler(
         private val time : NodeTime
-) : BaseHandler(Type.TIME_REQUEST) {
+) : BaseHandler(Type.TIME_SYNC_REQUEST) {
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: Packet) {
         val response = Packet.newBuilder()
-                .setType(Type.TIME_RESPONSE)
-                .setTimeResponse(TimeResponse.newBuilder()
+                .setType(Type.TIME_SYNC_RESPONSE)
+                .setTimeSyncResponse(TimeSyncResponse.newBuilder()
                         .setTimestamp(time.now())
-                        .setInitialTimestamp(message.timeRequest.timestamp)
+                        .setInitialTimestamp(message.timeSyncRequest.timestamp)
                         .build())
                 .build()
         ctx.channel().writeAndFlush(response)

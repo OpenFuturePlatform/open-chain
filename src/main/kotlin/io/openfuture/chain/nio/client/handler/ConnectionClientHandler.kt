@@ -38,8 +38,8 @@ class ConnectionClientHandler(
         val type = packet.type
         when (type) {
             Type.HEART_BEAT -> {}
-            Type.TIME_REQUEST -> {}
-            Type.TIME_RESPONSE -> {}
+            Type.TIME_SYNC_REQUEST -> {}
+            Type.TIME_SYNC_RESPONSE -> {}
             else -> {
                 log.error("Illegal packet type: {}", packet)
                 ctx.close()
