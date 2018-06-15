@@ -1,4 +1,4 @@
-package io.openfuture.chain.domain
+package io.openfuture.chain.domain.node
 
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.util.AppContextUtils
