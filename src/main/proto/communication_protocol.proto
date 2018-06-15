@@ -31,10 +31,10 @@ message HeartBeat {
 }
 
 message TimeSyncResponse {
-    int64 initialTimestamp = 1;
-    int64 timestamp = 2;
+    int64 nodeTimestamp = 1;
+    int64 networkTimestamp = 2;
 }
 
 message TimeSyncRequest {
-    int64 timestamp = 1;
+    int64 nodeTimestamp = 1;
 }
