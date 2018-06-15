@@ -20,7 +20,6 @@ class TimeSyncClientHandler(
     }
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-
         val request = CommunicationProtocol.Packet.newBuilder()
                 .setType(CommunicationProtocol.Type.TIME_SYNC_REQUEST)
                 .setTimeSyncRequest(CommunicationProtocol.TimeSyncRequest.newBuilder()
