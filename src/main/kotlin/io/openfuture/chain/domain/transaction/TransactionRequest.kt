@@ -6,7 +6,7 @@ import io.openfuture.chain.util.HashUtils
  * @author Homza Pavel
  */
 class TransactionRequest(
-    val blockId: Int = 0,
+    val blockId: Int,
     amount: Int,
     timestamp: Long,
     recipientkey: String,

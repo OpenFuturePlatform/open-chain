@@ -19,7 +19,7 @@ class Transaction(
     val hash: String,
 
     @Column(name = "amount", nullable = false)
-    val amount: Int = 0,
+    val amount: Int,
 
     @Column(name = "timestamp", nullable = false)
     val timestamp: Long,
