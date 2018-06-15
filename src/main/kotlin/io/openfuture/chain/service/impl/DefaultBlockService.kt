@@ -24,7 +24,7 @@ class DefaultBlockService (
     @Transactional(readOnly = true)
     override fun getAll(): MutableList<Block> =  blockRepository.findAll()
 
-    override fun getLast(): Block = blockRepository.findFirstByOrderByVersionDesc()
+    override fun getLast(): Block = blockRepository.findFirstByOrderByOrderNumberDesc()
         ?: throw NotFoundException("Last block not exist!")
 
 

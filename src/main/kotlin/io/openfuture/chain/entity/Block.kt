@@ -11,8 +11,8 @@ import javax.persistence.*
 @Table(name = "blocks")
 class Block(
 
-        @Column(name = "version", nullable = false)
-        val version: Int = 0,
+        @Column(name = "order_number", nullable = false)
+        val orderNumber: Int = 0,
 
         @Column(name = "nonce", nullable = false)
         val nonce: Long = 0,
@@ -40,18 +40,18 @@ class Block(
 
 
 ) : BaseModel() {
-        companion object {
-                fun of(request: BlockRequest): Block = Block(
-                    request.version,
-                    request.nonce,
-                    request.timestamp,
-                    request.previousHash,
-                    request.hash,
-                    request.merkleHash,
-                    request.nodeKey,
-                    request.nodeSignature
-                )
-        }
+    companion object {
+        fun of(request: BlockRequest): Block = Block(
+            request.orderNumber,
+            request.nonce,
+            request.timestamp,
+            request.previousHash,
+            request.hash,
+            request.merkleHash,
+            request.nodeKey,
+            request.nodeSignature
+        )
+    }
 }
 
 
