@@ -1,8 +1,7 @@
 package io.openfuture.chain.entity
 
+import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.base.BaseModel
-import io.openfuture.chain.entity.dictionary.Currency
-import io.openfuture.chain.util.DictionaryUtils
 import javax.persistence.*
 
 /**
@@ -10,35 +9,41 @@ import javax.persistence.*
  */
 @Entity
 @Table(name = "transactions")
-class Transaction (
+class Transaction(
 
-        @ManyToOne
-        @JoinColumn(name = "block_id", nullable = false)
-        val block: Block,
+    @ManyToOne
+    @JoinColumn(name = "block_id", nullable = false)
+    val block: Block,
 
-        @Column(name = "hash", nullable = false)
-        val hash: String,
+    @Column(name = "hash", nullable = false)
+    val hash: String,
 
-        @Column(name = "amount", nullable = false)
-        val amount: Int = 0,
+    @Column(name = "amount", nullable = false)
+    val amount: Int = 0,
 
-        @Column(name = "currency_id", nullable = false)
-        val currencyId: Int,
+    @Column(name = "timestamp", nullable = false)
+    val timestamp: Long,
 
-        @Column(name = "timestamp", nullable = false)
-        val timestamp: Long,
+    @Column(name = "recipient_key", nullable = false)
+    val recipientkey: String,
 
-        @Column(name = "recipient_key", nullable = false)
-        val recipient_key: String,
+    @Column(name = "sender_key", nullable = false)
+    val senderKey: String,
 
-        @Column(name = "sender_key", nullable = false)
-        val senderKey: String,
-
-        @Column(name = "signature", nullable = false)
-        val signature: String
+    @Column(name = "signature", nullable = false)
+    val signature: String
 
 ) : BaseModel() {
 
-    fun getCurrency() = DictionaryUtils.valueOf(Currency::class.java, currencyId)
-
+    companion object {
+        fun of(block: Block, request: TransactionRequest): Transaction = Transaction(
+            block,
+            request.hash,
+            request.amount,
+            request.timestamp,
+            request.recipientkey,
+            request.senderKey,
+            request.signature
+        )
+    }
 }

@@ -1,5 +1,6 @@
 package io.openfuture.chain.entity
 
+import io.openfuture.chain.domain.block.BlockRequest
 import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.*
 
@@ -8,30 +9,49 @@ import javax.persistence.*
  */
 @Entity
 @Table(name = "blocks")
-class Block (
+class Block(
 
         @Column(name = "version", nullable = false)
         val version: Int = 0,
 
-        @Column(name = "size", nullable = false)
-        var size: Int = 0,
+        @Column(name = "nonce", nullable = false)
+        val nonce: Long = 0,
 
         @Column(name = "timestamp", nullable = false)
         val timestamp: Long,
 
-        @Column(name = "merkle_hash", nullable = false)
-        var merkleHash: String,
-
-        @Column(name = "hash", nullable =  false)
-        var hash: String,
-
         @Column(name = "previous_hash", nullable = false)
         val previousHash: String,
 
-        @Column(name = "signature", nullable = false)
-        val signature: String,
+        @Column(name = "hash", nullable = false)
+        val hash: String,
 
-        @OneToMany(mappedBy = "block")
-        val transactions: List<Transaction> = emptyList()
+        @Column(name = "merkle_hash", nullable = false)
+        val merkleHash: String,
 
-) : BaseModel()
+        @Column(name = "node_key", nullable = false)
+        val nodeKey: String,
+
+        @Column(name = "node_signature", nullable = false)
+        val nodeSignature: String,
+
+        @OneToMany(mappedBy = "block", fetch = FetchType.EAGER)
+        val transactions: MutableList<Transaction> = mutableListOf()
+
+
+) : BaseModel() {
+        companion object {
+                fun of(request: BlockRequest): Block = Block(
+                    request.version,
+                    request.nonce,
+                    request.timestamp,
+                    request.previousHash,
+                    request.hash,
+                    request.merkleHash,
+                    request.nodeKey,
+                    request.nodeSignature
+                )
+        }
+}
+
+
