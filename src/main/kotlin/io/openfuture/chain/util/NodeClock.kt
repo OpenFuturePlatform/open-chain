@@ -3,6 +3,7 @@ package io.openfuture.chain.util
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
 @Component
@@ -17,7 +18,7 @@ class NodeClock {
 
     private val networkTimeOffsets: ConcurrentHashMap<String, Long> = ConcurrentHashMap()
 
-    private val lock: ReentrantLock = ReentrantLock()
+    private val lock: Lock = ReentrantLock()
 
     fun nodeTime() : Long = System.currentTimeMillis()
 
@@ -26,25 +27,23 @@ class NodeClock {
     }
 
     fun addTimeOffset(remoteAddress: String, offset: Long) {
-        lock.lock()
         networkTimeOffsets[remoteAddress] = offset
         recalculateAdjustment()
-        lock.unlock()
     }
 
     fun removeTimeOffset(remoteAddress: String) {
-        lock.lock()
         networkTimeOffsets.remove(remoteAddress)
         recalculateAdjustment()
-        lock.unlock()
     }
 
     private fun recalculateAdjustment() {
+        lock.lock()
         if (networkTimeOffsets.size % 2 == 1 && networkTimeOffsets.size > 2) {
             val offsetList = ArrayList(networkTimeOffsets.values)
             offsetList.sort()
             adjustment = offsetList[networkTimeOffsets.size / 2]
             log.info("Time adjustment was changed: $adjustment")
         }
+        lock.unlock()
     }
 }
