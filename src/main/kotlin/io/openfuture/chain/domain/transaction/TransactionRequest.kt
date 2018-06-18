@@ -6,11 +6,11 @@ class TransactionRequest(
     val blockId: Int,
     amount: Int,
     timestamp: Long,
-    recipientkey: String,
+    recipientKey: String,
     senderKey: String,
     signature: String
 
-) : PendingTransactionRequest(amount, timestamp, recipientkey, senderKey, signature) {
+) : PendingTransactionRequest(amount, timestamp, recipientKey, senderKey, signature) {
 
     var hash: String = calculateHash()
 
@@ -18,7 +18,7 @@ class TransactionRequest(
         val builder = StringBuilder()
         builder.append(this.amount)
         builder.append(this.timestamp)
-        builder.append(this.receipientKey)
+        builder.append(this.recipientKey)
         builder.append(this.senderKey)
         builder.append(this.signature)
         return HashUtils.generateHash(builder.toString().toByteArray())

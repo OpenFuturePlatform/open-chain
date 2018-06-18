@@ -10,25 +10,25 @@ class Transaction(
 
     @ManyToOne
     @JoinColumn(name = "block_id", nullable = false)
-    val block: Block,
+    var block: Block,
 
     @Column(name = "hash", nullable = false)
-    val hash: String,
+    var hash: String,
 
     @Column(name = "amount", nullable = false)
-    val amount: Int,
+    var amount: Int,
 
     @Column(name = "timestamp", nullable = false)
-    val timestamp: Long,
+    var timestamp: Long,
 
     @Column(name = "recipient_key", nullable = false)
-    val recipientkey: String,
+    var recipientkey: String,
 
     @Column(name = "sender_key", nullable = false)
-    val senderKey: String,
+    var senderKey: String,
 
     @Column(name = "signature", nullable = false)
-    val signature: String
+    var signature: String
 
 ) : BaseModel() {
 
@@ -38,7 +38,7 @@ class Transaction(
             request.hash,
             request.amount,
             request.timestamp,
-            request.receipientKey,
+            request.recipientKey,
             request.senderKey,
             request.signature
         )

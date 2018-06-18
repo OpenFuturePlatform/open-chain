@@ -9,31 +9,31 @@ import javax.persistence.*
 class Block(
 
         @Column(name = "order_number", nullable = false)
-        val orderNumber: Int = 0,
+        var orderNumber: Int = 0,
 
         @Column(name = "nonce", nullable = false)
-        val nonce: Long = 0,
+        var nonce: Long = 0,
 
         @Column(name = "timestamp", nullable = false)
-        val timestamp: Long,
+        var timestamp: Long,
 
         @Column(name = "previous_hash", nullable = false)
-        val previousHash: String,
+        var previousHash: String,
 
         @Column(name = "hash", nullable = false)
-        val hash: String,
+        var hash: String,
 
         @Column(name = "merkle_hash", nullable = false)
-        val merkleHash: String,
+        var merkleHash: String,
 
         @Column(name = "node_key", nullable = false)
-        val nodeKey: String,
+        var nodeKey: String,
 
         @Column(name = "node_signature", nullable = false)
-        val nodeSignature: String,
+        var nodeSignature: String,
 
         @OneToMany(mappedBy = "block", fetch = FetchType.EAGER)
-        val transactions: MutableList<Transaction> = mutableListOf()
+        var transactions: MutableList<Transaction> = mutableListOf()
 
 
 ) : BaseModel() {

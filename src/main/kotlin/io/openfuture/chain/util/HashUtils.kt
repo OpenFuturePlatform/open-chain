@@ -2,9 +2,6 @@ package io.openfuture.chain.util
 
 import java.security.MessageDigest
 
-/**
- * @author Homza Pavel
- */
 object HashUtils {
 
 	fun generateHash(bytes: ByteArray): String {
