@@ -4,9 +4,6 @@ import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.*
 
-/**
- * @author Homza Pavel
- */
 @Entity
 @Table(name = "transactions")
 class Transaction(
@@ -41,7 +38,7 @@ class Transaction(
             request.hash,
             request.amount,
             request.timestamp,
-            request.recipientkey,
+            request.receipientKey,
             request.senderKey,
             request.signature
         )

@@ -4,9 +4,6 @@ import io.openfuture.chain.domain.block.BlockRequest
 import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.*
 
-/**
- * @author Homza Pavel
- */
 @Entity
 @Table(name = "blocks")
 class Block(

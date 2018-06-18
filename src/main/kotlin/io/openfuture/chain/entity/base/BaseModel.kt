@@ -2,13 +2,10 @@ package io.openfuture.chain.entity.base
 
 import java.io.Serializable
 import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType.*
+import javax.persistence.GenerationType.IDENTITY
 import javax.persistence.Id
 import javax.persistence.MappedSuperclass
 
-/**
- * @author Homza Pavel
- */
 @MappedSuperclass
 abstract class BaseModel(@Id @GeneratedValue(strategy = IDENTITY) var id: Int = 0) : Serializable {
 

@@ -1,14 +1,10 @@
-package io.openfuture.chain.service.impl
+package io.openfuture.chain.service
 
 import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.repository.TransactionRepository
-import io.openfuture.chain.service.TransactionService
 import org.springframework.stereotype.Service
 
-/**
- * @author Homza Pavel
- */
 @Service
 class DefaultTransactionService(
     private val transactionRepository: TransactionRepository,

@@ -1,16 +1,12 @@
-package io.openfuture.chain.service.impl
+package io.openfuture.chain.service
 
 import io.openfuture.chain.domain.block.BlockRequest
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
-import io.openfuture.chain.service.BlockService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
-/**
- * @author Homza Pavel
- */
 @Service
 class DefaultBlockService (
         private val blockRepository: BlockRepository

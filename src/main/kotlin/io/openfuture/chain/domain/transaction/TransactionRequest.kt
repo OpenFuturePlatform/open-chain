@@ -2,9 +2,6 @@ package io.openfuture.chain.domain.transaction
 
 import io.openfuture.chain.util.HashUtils
 
-/**
- * @author Homza Pavel
- */
 class TransactionRequest(
     val blockId: Int,
     amount: Int,
@@ -21,7 +18,7 @@ class TransactionRequest(
         val builder = StringBuilder()
         builder.append(this.amount)
         builder.append(this.timestamp)
-        builder.append(this.recipientkey)
+        builder.append(this.receipientKey)
         builder.append(this.senderKey)
         builder.append(this.signature)
         return HashUtils.generateHash(builder.toString().toByteArray())
