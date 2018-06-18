@@ -8,6 +8,7 @@ import io.openfuture.chain.domain.hardware.StorageInfo
 import org.springframework.stereotype.Service
 import oshi.SystemInfo
 import java.net.NetworkInterface
+import java.util.stream.LongStream
 
 @Service
 class DefaultHardwareInfoService : HardwareInfoService {
@@ -20,10 +21,7 @@ class DefaultHardwareInfoService : HardwareInfoService {
         val diskStorageInfo = getDiskStorageInfo()
         val networksInfo = getNetworksInfo()
 
-        var storageSize = 0L
-        for (storeInfo in diskStorageInfo) {
-            storageSize += storeInfo.totalStorage
-        }
+        var storageSize = diskStorageInfo.stream().flatMapToLong { x -> LongStream.of(x.totalStorage) }.sum()
 
         return HardwareInfo(cpuInfo, ramInfo, storageSize, networksInfo)
     }
