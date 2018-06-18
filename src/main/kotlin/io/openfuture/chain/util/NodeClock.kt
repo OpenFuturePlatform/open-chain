@@ -35,16 +35,22 @@ class NodeClock {
 
     fun addTimeOffset(remoteAddress: String, offset: Long) {
         lock.writeLock().lock()
-        networkTimeOffsets[remoteAddress] = offset
-        recalculateAdjustment()
-        lock.writeLock().unlock()
+        try{
+            networkTimeOffsets[remoteAddress] = offset
+            recalculateAdjustment()
+        } finally {
+            lock.writeLock().unlock()
+        }
     }
 
     fun removeTimeOffset(remoteAddress: String) {
         lock.writeLock().lock()
-        networkTimeOffsets.remove(remoteAddress)
-        recalculateAdjustment()
-        lock.writeLock().unlock()
+        try{
+            networkTimeOffsets.remove(remoteAddress)
+            recalculateAdjustment()
+        } finally {
+            lock.writeLock().unlock()
+        }
     }
 
     private fun recalculateAdjustment() {
