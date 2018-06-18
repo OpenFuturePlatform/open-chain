@@ -10,7 +10,6 @@ import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
-@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class NodeInfoControllerTests : ControllerTests() {
 
@@ -27,7 +26,7 @@ class NodeInfoControllerTests : ControllerTests() {
                 .expectStatus().isOk
                 .expectBody(NodeVersionResponse::class.java)
                 .returnResult().responseBodyContent
-        val responseJsonResult = String(responseBytesResult)
+        val responseJsonResult = String(responseBytesResult!!)
 
         assertThat(responseString).isEqualTo(responseJsonResult)
     }
