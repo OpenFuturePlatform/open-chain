@@ -1,4 +1,4 @@
-package io.openfuture.chain.config
+package io.openfuture.chain.config.nio
 
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelInitializer
@@ -10,9 +10,7 @@ import io.openfuture.chain.property.NodeProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
-/**
- * @author Evgeni Krylov
- */
+
 @Configuration
 class NioServerConfig(
     private val properties: NodeProperties,
@@ -26,7 +24,7 @@ class NioServerConfig(
         .childHandler(serverChannelInitializer)
         .option(ChannelOption.SO_BACKLOG, properties.backlog)
         .childOption(ChannelOption.SO_KEEPALIVE, properties.keepAlive)
-        .childOption(ChannelOption.CONNECT_TIMEOUT_MILLIS, properties.connectTimeout)
+        .childOption(ChannelOption.CONNECT_TIMEOUT_MILLIS, properties.connectionTimeout)
 
     @Bean(destroyMethod = "shutdownGracefully")
     fun bossGroup(): NioEventLoopGroup = NioEventLoopGroup(properties.bossCount!!)
