@@ -10,7 +10,7 @@ plugins {
 }
 
 group = 'io.openfuture.chain'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.0'
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
