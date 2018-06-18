@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Time synchronization
 - End-point chain stability check
 - Heartbeat implementation
-- Application database structure
+- Database structure
 - Database: setup database connection
 - Database: add Base entity
 - Database: add Block entity
