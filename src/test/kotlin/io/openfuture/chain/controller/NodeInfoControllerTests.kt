@@ -18,9 +18,7 @@ class NodeInfoControllerTests : ControllerTests() {
 
     @Test
     fun getVersionShouldReturnVersion() {
-        val response = NodeVersionResponse()
-        val responseString = objectMapper.writeValueAsString(response)
-
+        val responseString = """{"version":"1.0.0"}"""
         val responseBytesResult = webClient.get().uri("${PathConstant.RPC}/info/getVersion")
                 .exchange()
                 .expectStatus().isOk
