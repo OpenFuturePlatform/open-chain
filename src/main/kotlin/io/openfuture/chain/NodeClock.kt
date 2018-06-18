@@ -1,4 +1,4 @@
-package io.openfuture.chain.util
+package io.openfuture.chain
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component

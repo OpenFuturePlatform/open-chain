@@ -3,7 +3,7 @@ package io.openfuture.chain.nio.server.handler
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.nio.base.BaseHandler
 import io.openfuture.chain.protocol.CommunicationProtocol.*
-import io.openfuture.chain.util.NodeClock
+import io.openfuture.chain.NodeClock
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
