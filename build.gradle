@@ -4,7 +4,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.2.41'
     id 'org.jetbrains.kotlin.plugin.spring' version '1.2.41'
     id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.41'
-    id 'org.springframework.boot' version '2.0.2.RELEASE'
+    id 'org.springframework.boot' version '2.0.3.RELEASE'
     id 'io.spring.dependency-management' version '1.0.5.RELEASE'
     id "com.google.protobuf" version "0.8.5"
 }
@@ -19,7 +19,6 @@ repositories {
 
 ext {
     kotlinVersion = '1.2.41'
-    nettyVersion = '4.1.25.Final'
     queryDslVersion = '4.2.1'
     protobufVersion = '3.5.1'
 }
@@ -32,11 +31,8 @@ dependencies {
     compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
 
     // Spring
-    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-webflux')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
-
-    // Netty
-    compile("io.netty:netty-all:$nettyVersion")
 
     // Protobuf
     compile("com.google.protobuf:protobuf-java:$protobufVersion")
@@ -48,6 +44,7 @@ dependencies {
 
     // Utils
     compile('org.apache.commons:commons-lang3:3.1')
+    compile('com.github.oshi:oshi-core:3.5.0')
 
     // DevTools
     runtime('org.springframework.boot:spring-boot-devtools')
