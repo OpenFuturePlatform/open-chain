@@ -6,9 +6,6 @@ import io.netty.handler.codec.string.StringDecoder
 import io.netty.handler.codec.string.StringEncoder
 import org.springframework.stereotype.Component
 
-/**
- * @author Evgeni Krylov
- */
 @Component
 class ClientChannelInitializer(
     private val clientHandler: ClientHandler

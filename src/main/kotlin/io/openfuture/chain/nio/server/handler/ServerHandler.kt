@@ -5,9 +5,6 @@ import io.netty.handler.timeout.IdleStateEvent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
-/**
- * @author Evgeni Krylov
- */
 @Component
 @ChannelHandler.Sharable
 class ServerHandler : SimpleChannelInboundHandler<String>() {

@@ -9,9 +9,6 @@ import io.netty.handler.timeout.IdleStateHandler
 import io.openfuture.chain.property.NodeProperties
 import org.springframework.stereotype.Component
 
-/**
- * @author Evgeni Krylov
- */
 @Component
 class ServerChannelInitializer(
     private val serverHandler : ChannelInboundHandlerAdapter,

@@ -4,9 +4,6 @@ import io.netty.channel.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
-/**
- * @author Evgeni Krylov
- */
 @Component
 @ChannelHandler.Sharable
 class ClientHandler : SimpleChannelInboundHandler<String>() {

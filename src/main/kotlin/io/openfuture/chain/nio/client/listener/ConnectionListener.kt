@@ -6,9 +6,6 @@ import io.openfuture.chain.nio.client.TcpClient
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
-/**
- * @author Evgeni Krylov
- */
 class ConnectionListener(
     private val tcpClient: TcpClient
 ) : ChannelFutureListener {
