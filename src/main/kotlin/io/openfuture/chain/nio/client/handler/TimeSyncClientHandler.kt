@@ -4,7 +4,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.nio.base.BaseHandler
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.protocol.CommunicationProtocol.*
-import io.openfuture.chain.NodeClock
+import io.openfuture.chain.component.NodeClock
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
