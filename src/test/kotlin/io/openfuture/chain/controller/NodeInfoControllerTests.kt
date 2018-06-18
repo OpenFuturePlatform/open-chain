@@ -3,8 +3,8 @@ package io.openfuture.chain.controller
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.domain.HealthResponse
-import io.openfuture.chain.domain.NodeTimestampResponse
-import io.openfuture.chain.domain.NodeVersionResponse
+import io.openfuture.chain.domain.node.NodeTimestampResponse
+import io.openfuture.chain.domain.node.NodeVersionResponse
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.util.AppContextUtils
 import org.assertj.core.api.Assertions.assertThat
