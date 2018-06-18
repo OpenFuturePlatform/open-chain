@@ -12,13 +12,13 @@ class TcpServer(
 ) : Runnable {
 
     companion object {
-        private val log = LoggerFactory.getLogger(this::class.java)
+        private val log = LoggerFactory.getLogger(TcpServer::class.java)
     }
 
     override fun run() {
         try {
             val future = serverBootstrap.bind(properties.port!!)
-            log.info("Netty server is started on port: ${properties.port}")
+            log.info("Netty started on port: ${properties.port}")
 
             future.sync()
             future.channel().closeFuture().sync()

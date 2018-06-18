@@ -10,7 +10,7 @@ import javax.validation.constraints.Size
 @Component
 @Validated
 @ConfigurationProperties(value = "node")
-data class NodeProperties(
+class NodeProperties(
 
         /** Node Server Port */
         @field:NotNull
@@ -24,10 +24,6 @@ data class NodeProperties(
         /** Node Communication Protocol Version */
         @field:NotNull
         var version: String? = null,
-
-        /** Node delay in seconds wait time before server will be started */
-        @field:NotNull
-        var pingTime: Int? = null,
 
         /** */
         @field:NotNull
@@ -43,6 +39,6 @@ data class NodeProperties(
 
         /** */
         @field:NotNull
-        var connectTimeout: Int? = null
+        var connectionTimeout: Int? = null
 
 )
