@@ -5,46 +5,29 @@ import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.domain.HealthResponse
 import io.openfuture.chain.domain.node.NodeTimestampResponse
 import io.openfuture.chain.domain.node.NodeVersionResponse
-import io.openfuture.chain.property.NodeProperties
-import io.openfuture.chain.util.AppContextUtils
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Before
 import org.junit.Test
-import org.mockito.BDDMockito.given
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.context.ApplicationContext
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.boot.test.context.SpringBootTest
 
-@WebMvcTest(NodeInfoController::class)
+@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class NodeInfoControllerTests : ControllerTests() {
-
-    @Autowired
-    private lateinit var context: ApplicationContext
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    @MockBean
-    private lateinit var nodeProperties: NodeProperties
-
-    @Before
-    fun setUp() {
-        val version = "1"
-        AppContextUtils.context = this.context
-        given(nodeProperties.version).willReturn(version)
-    }
-
     @Test
     fun getVersionShouldReturnVersion() {
         val response = NodeVersionResponse()
-        var responseString = objectMapper.writeValueAsString(response)
+        val responseString = objectMapper.writeValueAsString(response)
 
-        val responseJsonResult = mvc.perform(get("${PathConstant.RPC}/info/getVersion"))
-                .andExpect(status().isOk)
-                .andReturn().response.contentAsString
+        val responseBytesResult = webClient.get().uri("${PathConstant.RPC}/info/getVersion")
+                .exchange()
+                .expectStatus().isOk
+                .expectBody(NodeVersionResponse::class.java)
+                .returnResult().responseBodyContent
+        val responseJsonResult = String(responseBytesResult)
 
         assertThat(responseString).isEqualTo(responseJsonResult)
     }
@@ -53,10 +36,12 @@ class NodeInfoControllerTests : ControllerTests() {
     fun getTimestampShouldReturnTimestampNow() {
         val response = NodeTimestampResponse(System.currentTimeMillis())
 
-        val responseJsonResult = mvc.perform(get("${PathConstant.RPC}/info/getTimestamp"))
-                .andExpect(status().isOk)
-                .andReturn().response.contentAsString
-        val responseResult = objectMapper.readValue(responseJsonResult, NodeTimestampResponse::class.java)
+        val responseByteResult = webClient.get().uri("${PathConstant.RPC}/info/getTimestamp")
+                .exchange()
+                .expectStatus().isOk
+                .expectBody(NodeTimestampResponse::class.java)
+                .returnResult().responseBodyContent
+        val responseResult = objectMapper.readValue(responseByteResult, NodeTimestampResponse::class.java)
 
         assertThat(response.version).isEqualTo(responseResult.version)
         assertThat(response.timestamp).isLessThanOrEqualTo(responseResult.timestamp)
@@ -66,10 +51,12 @@ class NodeInfoControllerTests : ControllerTests() {
     fun testGetHealthCheckShoutReturnAppUpTime() {
         val response = HealthResponse(1L)
 
-        val responseJsonResult = mvc.perform(get("${PathConstant.RPC}/info/getHealthCheck"))
-                .andExpect(status().isOk)
-                .andReturn().response.contentAsString
-        val responseResult = objectMapper.readValue(responseJsonResult, HealthResponse::class.java)
+        val responseByteResult = webClient.get().uri("${PathConstant.RPC}/info/getHealthCheck")
+                .exchange()
+                .expectStatus().isOk
+                .expectBody(HealthResponse::class.java)
+                .returnResult().responseBodyContent
+        val responseResult = objectMapper.readValue(responseByteResult, HealthResponse::class.java)
 
         assertThat(responseResult).isNotNull
         assertThat(response.upTime).isGreaterThan(0L)
