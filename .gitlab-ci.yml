@@ -144,7 +144,6 @@ package-macos:
   - chmod 644 ~/.ssh/known_hosts
 
 .deploy-to-host-script: &deploy_to_host
-  - ssh ${DEPLOY_USER}@${DEPLOY_HOST} "docker login -u ${DOCKER_LOGIN} -p ${DOCKER_PASS}"
   - ssh ${DEPLOY_USER}@${DEPLOY_HOST} "docker pull ${IMAGE_NAME}:${IMAGE_TAG}"
   - |
     ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
