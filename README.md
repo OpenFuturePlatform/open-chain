@@ -17,9 +17,9 @@ within a decentralized network.
 We already support the following platforms:
 
 * Docker
-* macOS 10 +
-* Ubuntu 14.04, Ubuntu 14.10, Ubuntu 15.04, Ubuntu 15.10, Ubuntu 16.04, Ubuntu 16.10
-* Windows 7 SP1 +, Windows Server 2008 R2 +
+* macOS 10+
+* *nix
+* Windows
 
 ### Running
 
