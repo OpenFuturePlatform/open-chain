@@ -43,6 +43,7 @@ We use and recommend the following workflow:
     same person.
 2. Create a personal fork of the repository on GitHub (if you don't
 already have one).
+
 3. Create a branch off of master(git checkout -b mybranch).
     * Name the branch so that it clearly communicates your intentions,
     such as issue-88 or peer-to-peer-issue.
