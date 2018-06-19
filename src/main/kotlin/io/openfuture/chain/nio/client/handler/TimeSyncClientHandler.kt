@@ -30,7 +30,7 @@ class TimeSyncClientHandler(
 
         log.info("Time request was sent to ${ctx.channel().remoteAddress()}")
 
-        super.channelActive(ctx)
+        ctx.fireChannelActive()
     }
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: Packet) {
@@ -45,7 +45,7 @@ class TimeSyncClientHandler(
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
         clock.removeTimeOffset(ctx.channel().remoteAddress().toString())
-        super.channelInactive(ctx)
+        ctx.fireChannelInactive()
     }
 
 }

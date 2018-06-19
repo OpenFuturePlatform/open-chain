@@ -35,8 +35,8 @@ class ServerChannelInitializer(
         pipeline.addLast(ReadTimeoutHandler(60))
         pipeline.addLast(connectionServerHandler)
 
-        pipeline.addLast(context.getBean(HeartBeatServerHandler::class.java)) // prototype
         pipeline.addLast(context.getBean(TimeSyncServerHandler::class.java))
+        pipeline.addLast(context.getBean(HeartBeatServerHandler::class.java)) // prototype
     }
 
 }

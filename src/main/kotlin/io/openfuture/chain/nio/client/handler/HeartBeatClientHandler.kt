@@ -44,9 +44,8 @@ class HeartBeatClientHandler : BaseHandler(Type.HEART_BEAT) {
         ctx.writeAndFlush(packet)
     }
 
-    override fun channelInactive(ctx: ChannelHandlerContext) {
+    override fun channelInactive(ctx: ChannelHandlerContext?) {
         heartBeatTask?.cancel(true)
-        ctx.fireChannelInactive()
     }
 
     class HeartBeatTask(private val ctx: ChannelHandlerContext) : Runnable {

@@ -12,7 +12,7 @@ class NodeClock {
     companion object {
         private val log = LoggerFactory.getLogger(NodeClock::class.java)
 
-        private const val MINIMUM_OFFSET_SIZE_TO_DO_SYNC = 5
+        private const val MINIMUM_OFFSETS_SIZE_TO_DO_SYNC = 5
     }
 
     @Volatile
@@ -55,7 +55,7 @@ class NodeClock {
 
     private fun recalculateAdjustment() {
         if (networkTimeOffsets.size % 2 == 1 &&
-                networkTimeOffsets.size >= MINIMUM_OFFSET_SIZE_TO_DO_SYNC) {
+                networkTimeOffsets.size >= MINIMUM_OFFSETS_SIZE_TO_DO_SYNC) {
             val offsetList = ArrayList(networkTimeOffsets.values)
             offsetList.sort()
             adjustment = offsetList[networkTimeOffsets.size / 2]
