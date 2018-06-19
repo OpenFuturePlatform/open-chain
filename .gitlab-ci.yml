@@ -81,7 +81,7 @@ package-artifacts:
   stage: package
   script:
     - |
-      docker run --rm -v "$(pwd):/packages" openplatform/install4j:linux \
+      docker run --rm -v "$(pwd):/packages" openplatform/install4j:full \
             /JRE/install4j7.0.6/bin/install4jc --license=${INSTALL4J_KEY} \
             /packages/install4j/multi.install4j
   artifacts:
