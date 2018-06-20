@@ -34,7 +34,7 @@ class HeartBeatClientHandler : BaseHandler(Type.HEART_BEAT) {
         heartBeatTask?.cancel(true)
         heartBeatTask = ctx.channel()
                 .eventLoop()
-                .scheduleAtFixedRate(HeartBeatTask(ctx), 20, 20, TimeUnit.SECONDS)
+                .scheduleAtFixedRate(HeartBeatTask(ctx), 5, 5, TimeUnit.SECONDS)
 
         // response
         val packet = Packet.newBuilder()

@@ -4,6 +4,7 @@ import io.openfuture.chain.domain.block.BlockRequest
 import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.nio.client.handler.ConnectionClientHandler
 import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.util.GenesisUtils
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.util.CollectionUtils
@@ -16,10 +17,6 @@ class BlockChain(
 ) {
 
     companion object {
-        const val GENESIS_DIFFICULTY = 2
-        const val GENESIS_ORDER_NUMBER = 1
-        const val GENESIS_TIMESTAMP = 0L
-        const val GENESIS_PREVIOUS_HASH = "empty_hash"
         private val log = LoggerFactory.getLogger(ConnectionClientHandler::class.java)
     }
 
@@ -43,22 +40,23 @@ class BlockChain(
 
     fun addTransaction(transactionRequest: TransactionRequest) {
         this.pendingTransactions.add(transactionRequest)
+        if (pendingTransactions.size > 3) { //todo test consensus
+            minePendingTransactions()
+        }
     }
 
     fun minePendingTransactions() {
         val lastBlock = blockService.getLast()
-        val blockRequest = BlockRequest(getDifficulty(), getCurrentTime(), lastBlock.orderNumber++,
-                lastBlock.previousHash, getPrivateKey(), getPublicKey(), pendingTransactions.toList())
-        blockService.save(blockRequest)
-//        sendBlockCreatedNotification(blockRequest)
+        val nextOrderNumber = lastBlock.orderNumber + 1
+        val transactions = pendingTransactions.toList()
+        val blockRequest = BlockRequest(getDifficulty(), getCurrentTime(), nextOrderNumber, lastBlock.hash,
+                getPrivateKey(), getPublicKey(), transactions)
+        pendingTransactions.removeAll(transactions)
+        blockService.save(blockRequest) //todo need change to send and then processing request as new block
     }
 
     private fun initGenesisBlock() {
-        val privateKey = getPrivateKey()
-        val publicKey = getPublicKey()
-        val blockRequest = BlockRequest(GENESIS_DIFFICULTY, GENESIS_TIMESTAMP, GENESIS_ORDER_NUMBER,
-                GENESIS_PREVIOUS_HASH, privateKey, publicKey, listOf())
-        blockService.save(blockRequest)
+        blockService.save(GenesisUtils.genesisBlock)
     }
 
     // todo temp solution; waiting key logic
@@ -78,7 +76,7 @@ class BlockChain(
 
     // todo temp solution; waiting info about consensus
     private fun getDifficulty(): Int {
-        return GENESIS_DIFFICULTY
+        return 2
     }
 
 }

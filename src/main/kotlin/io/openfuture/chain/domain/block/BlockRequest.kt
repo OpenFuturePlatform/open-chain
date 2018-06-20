@@ -3,6 +3,8 @@ package io.openfuture.chain.domain.block
 import io.openfuture.chain.domain.block.nested.BlockHash
 import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.util.HashUtils
+import org.springframework.util.CollectionUtils
+
 
 class BlockRequest {
 
@@ -82,11 +84,27 @@ class BlockRequest {
         return BlockHash(currentNonce, currentHash)
     }
 
-    //todo temp solution, need to implement merkle tree
     private fun generateMerkleHash(transactions: List<TransactionRequest>): String {
-        val builder = StringBuilder()
-        transactions.forEach { it -> builder.append(it.hash) }
-        return HashUtils.generateHash(builder.toString().toByteArray())
+        if (CollectionUtils.isEmpty(transactions)) {
+            throw IllegalArgumentException("Transactions must not be empty!")
+        }
+        return calculateThreeHash(transactions.map { it -> it.hash }.toMutableList())
+    }
+
+    private fun calculateThreeHash(elements: MutableList<String>): String {
+        if (1 == elements.size) {
+            return HashUtils.generateHash(elements.first().toByteArray())
+        }
+
+        if (elements.size % 2 != 0) {
+            elements.add(elements.last())
+        }
+
+        val newHashElements = mutableListOf<String>()
+        for (i in elements.indices step 2) {
+            newHashElements.add(HashUtils.generateHash((elements[i] + elements[i+1]).toByteArray()))
+        }
+        return calculateThreeHash(newHashElements)
     }
 
     //todo need to add logic
