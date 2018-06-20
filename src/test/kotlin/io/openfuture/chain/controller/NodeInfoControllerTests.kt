@@ -45,7 +45,7 @@ class NodeInfoControllerTests : ControllerTests() {
                 .returnResult().responseBody!!
 
         assertThat(responseResult).isNotNull
-        assertThat(response.upTime).isGreaterThan(0L)
+        assertThat(response.uptime).isGreaterThan(0L)
     }
 
 }
