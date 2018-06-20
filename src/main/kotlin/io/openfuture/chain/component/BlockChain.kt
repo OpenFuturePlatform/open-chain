@@ -47,8 +47,8 @@ class BlockChain(
 
     fun minePendingTransactions() {
         val lastBlock = blockService.getLast()
-        val blockRequest = BlockRequest(getDifficulty(), getCurrentTime(), lastBlock.orderNumber++, lastBlock.previousHash,
-                getPrivateKey(), getPublicKey(), pendingTransactions.toList())
+        val blockRequest = BlockRequest(getDifficulty(), getCurrentTime(), lastBlock.orderNumber++,
+                lastBlock.previousHash, getPrivateKey(), getPublicKey(), pendingTransactions.toList())
         blockService.save(blockRequest)
 //        sendBlockCreatedNotification(blockRequest)
     }
@@ -56,8 +56,8 @@ class BlockChain(
     private fun initGenesisBlock() {
         val privateKey = getPrivateKey()
         val publicKey = getPublicKey()
-        val blockRequest = BlockRequest(GENESIS_DIFFICULTY, GENESIS_TIMESTAMP, GENESIS_ORDER_NUMBER, GENESIS_PREVIOUS_HASH,
-                privateKey, publicKey, listOf())
+        val blockRequest = BlockRequest(GENESIS_DIFFICULTY, GENESIS_TIMESTAMP, GENESIS_ORDER_NUMBER,
+                GENESIS_PREVIOUS_HASH, privateKey, publicKey, listOf())
         blockService.save(blockRequest)
     }
 
