@@ -28,8 +28,8 @@ class BlockRequest {
         this.transactions = transactions
     }
 
-    constructor(difficulty: Int, timestamp: Long, orderNumber: Int, previousHash: String, nodePrivateKey: String, nodePublicKey: String,
-                transactions: List<TransactionRequest>) {
+    constructor(difficulty: Int, timestamp: Long, orderNumber: Int, previousHash: String, nodePrivateKey: String,
+                nodePublicKey: String, transactions: List<TransactionRequest>) {
         val merkleHash = generateMerkleHash(transactions)
         val blockHash = generateBlockHash(difficulty, timestamp, orderNumber, previousHash, merkleHash)
         val signature = generateSignature(nodePrivateKey, timestamp, orderNumber, previousHash, merkleHash)
@@ -68,13 +68,16 @@ class BlockRequest {
     }
 
     // -- mining block process
-    private fun generateBlockHash(difficulty: Int, timestamp: Long, orderNumber: Int, previousHash: String, merkleHash: String): BlockHash {
+    private fun generateBlockHash(difficulty: Int, timestamp: Long, orderNumber: Int, previousHash: String,
+                                  merkleHash: String): BlockHash {
         var currentNonce = 0L
-        var currentHash = HashUtils.generateHash(getByteData(currentNonce, timestamp, orderNumber, previousHash, merkleHash))
+        var currentHash = HashUtils.generateHash(getByteData(currentNonce, timestamp, orderNumber, previousHash,
+                merkleHash))
         val target = HashUtils.getDificultyString(difficulty)
         while (currentHash.substring(0, difficulty) != target) {
             currentNonce++
-            currentHash = HashUtils.generateHash(getByteData(currentNonce, timestamp, orderNumber, previousHash, merkleHash))
+            currentHash = HashUtils.generateHash(getByteData(currentNonce, timestamp, orderNumber, previousHash,
+                    merkleHash))
         }
         return BlockHash(currentNonce, currentHash)
     }
@@ -92,7 +95,8 @@ class BlockRequest {
         return HashUtils.generateHash(privateKey.toByteArray())
     }
 
-    private fun getByteData(nonce: Long, timestamp: Long, orderNumber: Int, previousHash: String, merkleHash: String): ByteArray {
+    private fun getByteData(nonce: Long, timestamp: Long, orderNumber: Int, previousHash: String,
+                            merkleHash: String): ByteArray {
         val builder = StringBuilder()
         builder.append(nonce)
         builder.append(timestamp)

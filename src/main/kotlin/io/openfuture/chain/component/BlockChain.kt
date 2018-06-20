@@ -71,7 +71,7 @@ class BlockChain(
         return "node_public_key"
     }
 
-    // todo temp solution; waiting timesinc logic
+    // todo temp solution; waiting timesync logic
     private fun getCurrentTime(): Long {
         return Date().time
     }
