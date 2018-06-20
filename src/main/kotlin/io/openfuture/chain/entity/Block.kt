@@ -39,14 +39,14 @@ class Block(
 ) : BaseModel() {
     companion object {
         fun of(request: BlockRequest): Block = Block(
-            request.orderNumber,
-            request.nonce,
-            request.timestamp,
-            request.previousHash,
-            request.hash,
-            request.merkleHash,
-            request.nodeKey,
-            request.nodeSignature
+            request.orderNumber!!,
+            request.nonce!!,
+            request.timestamp!!,
+            request.previousHash!!,
+            request.hash!!,
+            request.merkleHash!!,
+            request.nodePublicKey!!,
+            request.nodeSignature!!
         )
     }
 }

@@ -8,6 +8,7 @@ import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.Transaction
 
 interface HardwareInfoService {
 
@@ -29,7 +30,7 @@ interface BlockService {
 
     fun getAll(): MutableList<Block>
 
-    fun getLast(): Block?
+    fun getLast(): Block
 
     fun save(request: BlockRequest): Block
 
@@ -37,6 +38,6 @@ interface BlockService {
 
 interface TransactionService {
 
-    fun save(request: TransactionRequest)
+    fun save(block: Block, request: TransactionRequest): Transaction
 
 }

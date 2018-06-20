@@ -1,19 +1,20 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.domain.transaction.TransactionRequest
+import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.repository.TransactionRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultTransactionService(
-    private val transactionRepository: TransactionRepository,
-    private val blockService: DefaultBlockService
+    private val transactionRepository: TransactionRepository
 ): TransactionService {
 
-    override fun save(request: TransactionRequest) {
-        val block = blockService.get(request.blockId)
-        transactionRepository.save(Transaction.of(block, request))
+    @Transactional
+    override fun save(block: Block, request: TransactionRequest): Transaction {
+        return transactionRepository.save(Transaction.of(block, request))
     }
 
 }

@@ -9,7 +9,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultBlockService (
-        private val blockRepository: BlockRepository
+        private val blockRepository: BlockRepository,
+        private val transactionService: TransactionService
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -23,9 +24,11 @@ class DefaultBlockService (
     override fun getLast(): Block = blockRepository.findFirstByOrderByOrderNumberDesc()
         ?: throw NotFoundException("Last block not exist!")
 
-
+    @Transactional
     override fun save(request: BlockRequest): Block {
-        return blockRepository.save(Block.of(request))
+        val block = blockRepository.save(Block.of(request))
+        request.transactions.forEach { transactionService.save(block, it) }
+        return block
     }
 
 }

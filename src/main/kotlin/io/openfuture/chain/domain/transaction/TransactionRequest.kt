@@ -3,14 +3,12 @@ package io.openfuture.chain.domain.transaction
 import io.openfuture.chain.util.HashUtils
 
 class TransactionRequest(
-    val blockId: Int,
-    amount: Int,
-    timestamp: Long,
-    recipientKey: String,
-    senderKey: String,
-    signature: String
-
-) : PendingTransactionRequest(amount, timestamp, recipientKey, senderKey, signature) {
+    val amount: Int,
+    val timestamp: Long,
+    val recipientKey: String,
+    val senderKey: String,
+    val signature: String
+) {
 
     var hash: String = calculateHash()
 
