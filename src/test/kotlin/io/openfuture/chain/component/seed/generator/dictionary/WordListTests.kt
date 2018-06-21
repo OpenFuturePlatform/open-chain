@@ -1,4 +1,4 @@
-package io.openfuture.chain.crypto.seed.generator.dictionary
+package io.openfuture.chain.component.seed.generator.dictionary
 
 import io.openfuture.chain.property.SeedProperties
 import org.assertj.core.api.Assertions.assertThat

@@ -1,6 +1,6 @@
 package io.openfuture.chain.util
 
-import io.openfuture.chain.constant.CryptoConstant
+import io.openfuture.chain.component.seed.SeedGeneratorConstant
 import java.security.MessageDigest
 
 object HashUtils {
@@ -18,19 +18,19 @@ object HashUtils {
 	}
 
 	fun next11Bits(bytes: ByteArray, offset: Int): Int {
-		val skip = offset / CryptoConstant.BYTE_SIZE
-        val lowerBitsToRemove = (MAX_BYTES_TO_READ * CryptoConstant.BYTE_SIZE
-				- CryptoConstant.WORD_INDEX_SIZE) - (offset % CryptoConstant.BYTE_SIZE)
+		val skip = offset / SeedGeneratorConstant.BYTE_SIZE
+        val lowerBitsToRemove = (MAX_BYTES_TO_READ * SeedGeneratorConstant.BYTE_SIZE
+				- SeedGeneratorConstant.WORD_INDEX_SIZE) - (offset % SeedGeneratorConstant.BYTE_SIZE)
 
 		val firstBytePart = bytes[skip].toInt() and (BYTE_MASK shl DOUBLE_BYTE_SIZE)
-		val secondBytePart = bytes[skip + 1].toInt() and (BYTE_MASK shl CryptoConstant.BYTE_SIZE)
+		val secondBytePart = bytes[skip + 1].toInt() and (BYTE_MASK shl SeedGeneratorConstant.BYTE_SIZE)
 		var thirdBytePart = 0
-		if (lowerBitsToRemove < CryptoConstant.BYTE_SIZE) {
+		if (lowerBitsToRemove < SeedGeneratorConstant.BYTE_SIZE) {
 			thirdBytePart = bytes[skip + 2].toInt() and BYTE_MASK
 		}
         return (
 			(((firstBytePart or secondBytePart or thirdBytePart)) shr lowerBitsToRemove)
-					and (1 shl CryptoConstant.WORD_INDEX_SIZE) - 1
+					and (1 shl SeedGeneratorConstant.WORD_INDEX_SIZE) - 1
 		)
 	}
 

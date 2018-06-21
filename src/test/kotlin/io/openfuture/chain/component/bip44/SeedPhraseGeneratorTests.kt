@@ -1,9 +1,9 @@
-package io.openfuture.chain.crypto.bip44
+package io.openfuture.chain.component.bip44
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
-import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
-import io.openfuture.chain.crypto.seed.generator.dictionary.WordList
+import io.openfuture.chain.component.seed.generator.SeedPhraseGenerator
+import io.openfuture.chain.component.seed.generator.dictionary.WordList
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.mockito.BDDMockito.given

@@ -1,6 +1,5 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.crypto.Words
 import io.openfuture.chain.domain.HardwareInfo
 import io.openfuture.chain.domain.block.BlockRequest
 import io.openfuture.chain.domain.hardware.CpuInfo
