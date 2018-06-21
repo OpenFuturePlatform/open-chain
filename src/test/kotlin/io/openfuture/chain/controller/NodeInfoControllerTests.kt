@@ -14,7 +14,6 @@ import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import java.util.*
 
 @WebFluxTest(NodeInfoController::class)
 class NodeInfoControllerTests : ControllerTests() {
@@ -62,25 +61,11 @@ class NodeInfoControllerTests : ControllerTests() {
 
     @Test
     fun getHardwareInfoShoutReturnHardwareInfo() {
-        val cpuModel = "1"
-        val cpuFrequency = 1L
-        val numberOfCores = 1
-        val cpuInfo = CpuInfo(cpuModel, cpuFrequency, numberOfCores)
-
-        val ramFree = 1L
-        val ramUsed = 1L
-        val ramTotal = 2L
-        val ram = RamInfo(ramFree, ramUsed, ramTotal)
-
+        val cpuInfo = CpuInfo("1", 1L, 1)
+        val ramInfo = RamInfo(1L, 1L, 2L)
+        val networksInfo = listOf(NetworkInfo("IN", listOf("192.168.1.1")))
         val totalStorageSize = 1L
-
-        val networkInterfaceName = "IN"
-        val networkAddress = "192.168.1.1"
-        val networkAddresses = Arrays.asList(networkAddress)
-        val network = NetworkInfo(networkInterfaceName, networkAddresses)
-        val networks = Arrays.asList(network)
-
-        val hardwareInfo = HardwareInfo(cpuInfo, ram, totalStorageSize, networks)
+        val hardwareInfo = HardwareInfo(cpuInfo, ramInfo, totalStorageSize, networksInfo)
 
         given(hardwareInfoService.getHardwareInfo()).willReturn(hardwareInfo)
 
