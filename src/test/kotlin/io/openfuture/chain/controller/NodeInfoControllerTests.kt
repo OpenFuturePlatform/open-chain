@@ -3,7 +3,7 @@ package io.openfuture.chain.controller
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.domain.HardwareInfo
-import io.openfuture.chain.domain.HealthResponse
+import io.openfuture.chain.domain.UptimeResponse
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
@@ -48,12 +48,12 @@ class NodeInfoControllerTests : ControllerTests() {
 
     @Test
     fun getHealthCheckShoutReturnAppUpTime() {
-        val response = HealthResponse(1L)
+        val response = UptimeResponse(1L)
 
-        val responseResult = webClient.get().uri("${PathConstant.RPC}/info/getHealthCheck")
+        val responseResult = webClient.get().uri("${PathConstant.RPC}/info/getUptime")
                 .exchange()
                 .expectStatus().isOk
-                .expectBody(HealthResponse::class.java)
+                .expectBody(UptimeResponse::class.java)
                 .returnResult().responseBody!!
 
         assertThat(responseResult).isNotNull

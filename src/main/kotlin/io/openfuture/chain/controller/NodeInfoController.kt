@@ -1,6 +1,6 @@
 package io.openfuture.chain.controller
 
-import io.openfuture.chain.domain.HealthResponse
+import io.openfuture.chain.domain.UptimeResponse
 import org.springframework.context.ApplicationContext
 import io.openfuture.chain.domain.HardwareInfo
 import io.openfuture.chain.domain.node.NodeTimestampResponse
@@ -24,8 +24,8 @@ class NodeInfoController(
     @GetMapping("/getTimestamp")
     fun getTimestamp() = NodeTimestampResponse(System.currentTimeMillis())
 
-    @GetMapping("/getHealthCheck")
-    fun getHealthCheck() = HealthResponse(System.currentTimeMillis() - context.startupDate)
+    @GetMapping("/getUptime")
+    fun getUptime() = UptimeResponse(System.currentTimeMillis() - context.startupDate)
 
     @GetMapping("/getHardwareInfo")
     fun getHardwareInfo(): HardwareInfo = hardwareInfoService.getHardwareInfo()
