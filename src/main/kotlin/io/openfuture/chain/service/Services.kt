@@ -9,6 +9,9 @@ import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.transaction.annotation.Transactional
 
 interface HardwareInfoService {
 
@@ -26,9 +29,11 @@ interface HardwareInfoService {
 
 interface BlockService {
 
-    fun get(id: Int): Block
+    fun count(): Long
 
     fun getAll(): MutableList<Block>
+
+    fun getAll(pageRequest: Pageable): Page<Block>
 
     fun getLast(): Block
 

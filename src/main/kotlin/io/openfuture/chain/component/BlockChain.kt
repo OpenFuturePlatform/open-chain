@@ -1,13 +1,15 @@
 package io.openfuture.chain.component
 
+import io.openfuture.chain.domain.PageRequest
 import io.openfuture.chain.domain.block.BlockRequest
 import io.openfuture.chain.domain.transaction.TransactionRequest
+import io.openfuture.chain.entity.Block
 import io.openfuture.chain.nio.client.handler.ConnectionClientHandler
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.util.GenesisUtils
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import org.springframework.util.CollectionUtils
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
 import javax.annotation.PostConstruct
 
@@ -24,25 +26,33 @@ class BlockChain(
 
     @PostConstruct
     fun initBlockChain() {
-        val blocks = blockService.getAll()
-
-        if (!CollectionUtils.isEmpty(blocks)) {
-            return
+        if (isEmptyBlockChain()) {
+            initGenesisBlock()
         }
-        initGenesisBlock()
+//        updateBlockChainFormNetwork() //todo update blockchain from master nodes
     }
 
+    private fun isEmptyBlockChain(): Boolean {
+        return 0L == blockService.count()
+    }
+
+    @Transactional
     fun addBlock(blockRequest: BlockRequest) {
-        if (blockRequest.isValid()) {
-            blockService.save(blockRequest)
+        val lastBlock = blockService.getLast()
+
+        if (lastBlock.hash != blockRequest.previousHash) {
+            return //todo invalid block
         }
+
+        if (!blockRequest.isValid()) {
+            return // todo invalid block
+        }
+        blockService.save(blockRequest)
+        pendingTransactions.removeAll(blockRequest.transactions)
     }
 
-    fun addTransaction(transactionRequest: TransactionRequest) {
+    fun addPendingTransaction(transactionRequest: TransactionRequest) {
         this.pendingTransactions.add(transactionRequest)
-        if (pendingTransactions.size > 3) { //todo test consensus
-            minePendingTransactions()
-        }
     }
 
     fun minePendingTransactions() {
@@ -51,8 +61,7 @@ class BlockChain(
         val transactions = pendingTransactions.toList()
         val blockRequest = BlockRequest(getDifficulty(), getCurrentTime(), nextOrderNumber, lastBlock.hash,
                 getPrivateKey(), getPublicKey(), transactions)
-        pendingTransactions.removeAll(transactions)
-        blockService.save(blockRequest) //todo need change to send and then processing request as new block
+//        sendCreateBlockNotification(blockRequest) //todo send new block
     }
 
     private fun initGenesisBlock() {
