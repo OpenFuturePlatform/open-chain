@@ -1,14 +1,16 @@
 package io.openfuture.chain.component.seed.generator
 
 import io.openfuture.chain.component.seed.SeedGeneratorConstant
-import io.openfuture.chain.component.seed.generator.dictionary.WordList
+import io.openfuture.chain.repository.SeedWordRepository
 import io.openfuture.chain.util.HashUtils
 import io.openfuture.chain.util.Sha256Utils
 import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class SeedPhraseGenerator(private val wordList: WordList) {
+class SeedPhraseGenerator(
+        private val seedWordRepository: SeedWordRepository
+) {
 
     fun createSeedPhrase(entropy: ByteArray): String {
         val target = StringBuilder()
@@ -22,12 +24,12 @@ class SeedPhraseGenerator(private val wordList: WordList) {
     }
 
     private fun createSeedPhrase(wordIndexes: IntArray, target: StringBuilder) {
-        val separator = wordList.getSeparator().toString()
         for (i in wordIndexes.indices) {
             if (i > 0) {
-                target.append(separator)
+                target.append(SeedGeneratorConstant.SEED_PHRASE_SEPARATOR)
             }
-            target.append(wordList.getWord(wordIndexes[i]))
+            val seedWord = seedWordRepository.findOneByWordIndex(wordIndexes[i])
+            target.append(seedWord.wordValue)
         }
     }
 

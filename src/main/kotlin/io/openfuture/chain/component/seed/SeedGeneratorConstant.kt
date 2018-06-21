@@ -14,4 +14,6 @@ object SeedGeneratorConstant {
 
     const val MAX_ENTROPY_SIZE = 256
 
+    const val SEED_PHRASE_SEPARATOR = ' '
+
 }
