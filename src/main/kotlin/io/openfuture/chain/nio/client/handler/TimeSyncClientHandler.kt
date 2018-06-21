@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.nio.base.BaseHandler
 import io.openfuture.chain.protocol.CommunicationProtocol.*
 import io.openfuture.chain.component.NodeClock
+import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.protocol.CommunicationProtocol.Type.*
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Scope
@@ -36,16 +37,19 @@ class TimeSyncClientHandler(
     override fun packetReceived(ctx: ChannelHandlerContext, message: Packet) {
         log.info("Message $TIME_SYNC_RESPONSE received from ${ctx.channel().remoteAddress()}")
 
-        val roundTripTime = clock.nodeTime() - message.timeSyncResponse.nodeTimestamp
-        val expectedNetworkTimestamp = message.timeSyncResponse.nodeTimestamp + roundTripTime / 2
-        val offset = message.timeSyncResponse.networkTimestamp - expectedNetworkTimestamp
-
+        val offset = calculateTimeOffset(message.timeSyncResponse)
         clock.addTimeOffset(ctx.channel().remoteAddress().toString(), offset)
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
         clock.removeTimeOffset(ctx.channel().remoteAddress().toString())
         ctx.fireChannelInactive()
+    }
+
+    fun calculateTimeOffset(response : CommunicationProtocol.TimeSyncResponse) : Long {
+        val networkLatency = (clock.nodeTime() - response.nodeTimestamp) / 2
+        val expectedNetworkTimestamp = response.nodeTimestamp + networkLatency
+        return response.networkTimestamp - expectedNetworkTimestamp
     }
 
 }
