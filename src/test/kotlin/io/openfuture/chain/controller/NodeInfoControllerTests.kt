@@ -23,7 +23,7 @@ class NodeInfoControllerTests : ControllerTests() {
 
     @Test
     fun getVersionShouldReturnVersion() {
-        val responseString = """{"version":"$version"}"""
+        val responseString = """{"version":"1.0.0"}"""
 
         webClient.get().uri("${PathConstant.RPC}/info/getVersion")
                 .exchange()
