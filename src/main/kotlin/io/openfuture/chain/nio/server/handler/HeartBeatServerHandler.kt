@@ -30,7 +30,7 @@ class HeartBeatServerHandler(
         if (body.type == PING) {
             val recipientKey = ctx.channel().remoteAddress().toString()
             val senderKey = ctx.channel().localAddress().toString()
-            blockChain.addTransaction(TransactionRequest(100, Date().time, recipientKey,
+            blockChain.addPendingTransaction(TransactionRequest(100, Date().time, recipientKey,
                     senderKey, "current_node_signature")) //todo test
 
             val response = Packet.newBuilder()
