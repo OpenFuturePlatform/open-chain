@@ -52,6 +52,7 @@ dependencies {
 
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('io.projectreactor:reactor-test')
     testCompile('org.postgresql:postgresql')
 }
 
