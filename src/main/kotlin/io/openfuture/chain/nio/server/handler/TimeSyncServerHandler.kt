@@ -24,4 +24,5 @@ class TimeSyncServerHandler(
                 .build()
         ctx.channel().writeAndFlush(response)
     }
+
 }
