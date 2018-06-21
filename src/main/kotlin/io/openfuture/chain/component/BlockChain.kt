@@ -1,12 +1,10 @@
 package io.openfuture.chain.component
 
-import io.openfuture.chain.domain.PageRequest
 import io.openfuture.chain.domain.block.BlockRequest
+import io.openfuture.chain.domain.block.GenesisBlock
 import io.openfuture.chain.domain.transaction.TransactionRequest
-import io.openfuture.chain.entity.Block
 import io.openfuture.chain.nio.client.handler.ConnectionClientHandler
 import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.util.GenesisUtils
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -43,7 +41,7 @@ class BlockChain(
         if (lastBlock.hash != blockRequest.previousHash) {
             return //todo invalid block
         }
-
+                
         if (!blockRequest.isValid()) {
             return // todo invalid block
         }
@@ -65,7 +63,7 @@ class BlockChain(
     }
 
     private fun initGenesisBlock() {
-        blockService.save(GenesisUtils.genesisBlock)
+        blockService.save(GenesisBlock.instance)
     }
 
     // todo temp solution; waiting key logic

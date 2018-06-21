@@ -33,8 +33,8 @@ class BlockRequest {
     constructor(difficulty: Int, timestamp: Long, orderNumber: Int, previousHash: String, nodePrivateKey: String,
                 nodePublicKey: String, transactions: List<TransactionRequest>) {
         val merkleHash = generateMerkleHash(transactions)
-        val blockHash = generateBlockHash(difficulty, timestamp, orderNumber, previousHash, merkleHash)
-        val signature = generateSignature(nodePrivateKey, timestamp, orderNumber, previousHash, merkleHash)
+        val blockHash = generateBlockHash(difficulty, timestamp, orderNumber, previousHash, merkleHash, nodePublicKey)
+        val signature = generateSignature(nodePrivateKey, blockHash.nonce, timestamp, orderNumber, previousHash, merkleHash, nodePublicKey)
 
         this.timestamp = timestamp
         this.orderNumber = orderNumber
@@ -59,27 +59,29 @@ class BlockRequest {
         return true
     }
 
-    //todo need to add logic
     private fun isValidSignature(): Boolean {
-        return true
+        val data = getByteData(this.nonce!!, this.timestamp!!, this.orderNumber!!, this.previousHash!!,
+                this.merkleHash!!, this.nodePublicKey!!)
+        return HashUtils.validateSignature(this.nodePublicKey!!, this.nodeSignature!!, data)
     }
 
-    //todo need to add logic
     private fun isValidHash(): Boolean {
-        return true
+        val data = getByteData(this.nonce!!, this.timestamp!!, this.orderNumber!!, this.previousHash!!,
+                this.merkleHash!!, this.nodePublicKey!!)
+        return this.hash == HashUtils.generateHash(data)
     }
 
     // -- mining block process
     private fun generateBlockHash(difficulty: Int, timestamp: Long, orderNumber: Int, previousHash: String,
-                                  merkleHash: String): BlockHash {
+                                  merkleHash: String, nodePublicKey: String): BlockHash {
         var currentNonce = 0L
         var currentHash = HashUtils.generateHash(getByteData(currentNonce, timestamp, orderNumber, previousHash,
-                merkleHash))
+                merkleHash, nodePublicKey))
         val target = HashUtils.getDificultyString(difficulty)
         while (currentHash.substring(0, difficulty) != target) {
             currentNonce++
             currentHash = HashUtils.generateHash(getByteData(currentNonce, timestamp, orderNumber, previousHash,
-                    merkleHash))
+                    merkleHash, nodePublicKey))
         }
         return BlockHash(currentNonce, currentHash)
     }
@@ -107,20 +109,21 @@ class BlockRequest {
         return calculateThreeHash(newHashElements)
     }
 
-    //todo need to add logic
-    fun generateSignature(privateKey: String, timestamp: Long, orderNumber: Int, previousHash: String,
-                          merkleHash: String): String {
-        return HashUtils.generateHash(privateKey.toByteArray())
+    private fun generateSignature(privateKey: String, nonce: Long, timestamp: Long, orderNumber: Int,
+                                  previousHash: String, merkleHash: String, nodePublicKey: String): String {
+        val data = getByteData(nonce, timestamp, orderNumber, previousHash, merkleHash, nodePublicKey)
+        return HashUtils.generateSignature(privateKey, data)
     }
 
     private fun getByteData(nonce: Long, timestamp: Long, orderNumber: Int, previousHash: String,
-                            merkleHash: String): ByteArray {
+                            merkleHash: String, nodePublicKey: String): ByteArray {
         val builder = StringBuilder()
         builder.append(nonce)
         builder.append(timestamp)
         builder.append(orderNumber)
         builder.append(previousHash)
         builder.append(merkleHash)
+        builder.append(nodePublicKey)
         return builder.toString().toByteArray()
     }
 
