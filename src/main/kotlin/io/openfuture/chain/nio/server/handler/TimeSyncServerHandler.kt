@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.nio.base.BaseHandler
 import io.openfuture.chain.protocol.CommunicationProtocol.*
 import io.openfuture.chain.component.NodeClock
+import io.openfuture.chain.protocol.CommunicationProtocol.Type.*
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
@@ -11,11 +12,11 @@ import org.springframework.stereotype.Component
 @Scope("prototype")
 class TimeSyncServerHandler(
         private val clock: NodeClock
-) : BaseHandler(Type.TIME_SYNC_REQUEST) {
+) : BaseHandler(TIME_SYNC_REQUEST) {
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: Packet) {
         val response = Packet.newBuilder()
-                .setType(Type.TIME_SYNC_RESPONSE)
+                .setType(TIME_SYNC_RESPONSE)
                 .setTimeSyncResponse(TimeSyncResponse.newBuilder()
                         .setNetworkTimestamp(clock.networkTime())
                         .setNodeTimestamp(message.timeSyncRequest.nodeTimestamp)
