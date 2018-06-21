@@ -5,9 +5,6 @@ import io.openfuture.chain.property.NodeProperties
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
-/**
- * @author Evgeni Krylov
- */
 @Component
 class TcpServer(
     private val serverBootstrap: ServerBootstrap,
@@ -21,7 +18,7 @@ class TcpServer(
     override fun run() {
         try {
             val future = serverBootstrap.bind(properties.port!!)
-            log.info("Netty server is started on port: ${properties.port}")
+            log.info("Netty started on port: ${properties.port}")
 
             future.sync()
             future.channel().closeFuture().sync()

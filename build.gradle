@@ -1,16 +1,16 @@
 plugins {
     id 'jacoco'
     id 'idea'
-    id 'org.jetbrains.kotlin.jvm' version '1.2.41'
-    id 'org.jetbrains.kotlin.plugin.spring' version '1.2.41'
-    id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.41'
-    id 'org.springframework.boot' version '2.0.2.RELEASE'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.50'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.2.50'
+    id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.50'
+    id 'org.springframework.boot' version '2.0.3.RELEASE'
     id 'io.spring.dependency-management' version '1.0.5.RELEASE'
     id "com.google.protobuf" version "0.8.5"
 }
 
 group = 'io.openfuture.chain'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.0'
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -18,8 +18,7 @@ repositories {
 }
 
 ext {
-    kotlinVersion = '1.2.41'
-    nettyVersion = '4.1.25.Final'
+    kotlinVersion = '1.2.50'
     queryDslVersion = '4.2.1'
     protobufVersion = '3.5.1'
 }
@@ -32,21 +31,20 @@ dependencies {
     compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
 
     // Spring
-    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-webflux')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
-
-    // Netty
-    compile("io.netty:netty-all:$nettyVersion")
 
     // Protobuf
     compile("com.google.protobuf:protobuf-java:$protobufVersion")
 
     // DB
     compile('org.flywaydb:flyway-core')
-    runtime('org.postgresql:postgresql')
+    compile('com.enigmabridge:hibernate4-sqlite-dialect:0.1.2')
+    compile('org.xerial:sqlite-jdbc:3.23.1')
 
     // Utils
     compile('org.apache.commons:commons-lang3:3.1')
+    compile('com.github.oshi:oshi-core:3.5.0')
 
     // DevTools
     runtime('org.springframework.boot:spring-boot-devtools')
@@ -54,6 +52,7 @@ dependencies {
 
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('io.projectreactor:reactor-test')
     testCompile('org.postgresql:postgresql')
 }
 

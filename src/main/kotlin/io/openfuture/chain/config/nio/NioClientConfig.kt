@@ -1,4 +1,4 @@
-package io.openfuture.chain.config
+package io.openfuture.chain.config.nio
 
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelOption
@@ -9,9 +9,6 @@ import io.openfuture.chain.property.NodeProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
-/**
- * @author Evgeni Krylov
- */
 @Configuration
 class NioClientConfig(
     private val clientChannelInitializer: ClientChannelInitializer,

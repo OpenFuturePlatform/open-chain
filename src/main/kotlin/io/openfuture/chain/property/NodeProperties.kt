@@ -25,10 +25,6 @@ class NodeProperties(
         @field:NotNull
         var version: String? = null,
 
-        /** Node delay in seconds wait time before server will be started */
-        @field:NotNull
-        var pingTime: Int? = null,
-
         /** */
         @field:NotNull
         var bossCount: Int? = null,
@@ -43,6 +39,6 @@ class NodeProperties(
 
         /** */
         @field:NotNull
-        var connectTimeout: Int? = null
+        var connectionTimeout: Int? = null
 
 )
