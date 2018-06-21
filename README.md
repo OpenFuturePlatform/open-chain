@@ -8,13 +8,12 @@
 
 ## OPEN Platform: A distributed network for the Smart Contracts
 
-OPEN Platform uses blockchain technology to leverages smart contracts
-for autonomously managed digital assets to create a "smart economy"
-within a decentralized network.
+OPEN Platform uses blockchain technology to leverage **smart contracts** in order to autonomously
+manage digital assets and to create a **smart economy** within a decentralized network.
 
 ### Supported Platforms
 
-We already support the following platforms:
+OPEN Platform currently supports the following platforms:
 
 * Docker
 * macOS 10+
@@ -23,44 +22,46 @@ We already support the following platforms:
 
 ### Running
 
-To run peer applications, you need to download client application
-for a specific operating system and run.
+To run peer applications, you will need to download the client installer for your operating system
+and run it.
 
 ### How to Contribute
 
-You can contribute to OPEN Platform with issues and PRs. Simply filing issues
-for problems you encounter is a great way to contribute. Contributing
-implementations is greatly appreciated.
+OPEN Platform is available under the MIT License. You may contribute to the OPEN Platform project
+by submitting issues and PRs. The simple act of submitting issues regarding problems you encounter
+is a great way to contribute to OPEN Platform. We also appreciate greatly those who are able and willing to
+contribute code and implementations.
 
-We use and recommend the following workflow:
+The OPEN Platform team uses and recommends the following workflow:
 
-1. Create an issue for your work.
+1. Create an issue describing the code you want to submit a pull-request for.
+    **NOTES:**
     * You can skip this step for trivial changes.
-    * Reuse an existing issue on the topic, if there is one.
-    * Clearly state that you are going to take on implementing it,
-    if that's the case. You can request that the issue be assigned to
-    you. Note: The issue filer and the implementer don't have to be the
-    same person.
-2. Create a personal fork of the repository on GitHub (if you don't
-already have one).
-
+    * Please reuse an existing issue, if one exists.
+    * If you intend to fix the issue, please state your intentions to do so clearly within the documentation
+    and request that the issue be assigned to you.  Please note, the person who files an issue and the person
+    who implements a solution for it do not have to be the same person.
+2. Create a personal fork of the repository on GitHub, if you don't
+already have one.
 3. Create a branch off of master(git checkout -b mybranch).
-    * Name the branch so that it clearly communicates your intentions,
-    such as issue-88 or peer-to-peer-issue.
-    * Branches are useful since they isolate your changes from incoming
-    changes from upstream. They also enable you to create multiple PRs
-    from the same fork.
+    **NOTES:**
+    * Please use a meaningful name when naming your branch. Use a name that clearly communicates what you're
+    trying to fix.  For example, **issue-88** or **peer-to-peer-issue** would be meaningful names.
+    * Please use branches and do not submit a pull-request based on your local master branch.
+    Branches isolate your changes from other incoming upstream changes. They also enable you to
+    create multiple pull-requests from the same fork.
 4. Make and commit your changes.
-5. Add new tests corresponding to your change, if applicable.
+5. Add new tests to test your code, if applicable.
 6. Build the repository with your changes.
-    * Make sure that the builds are clean.
-    * Make sure that the tests are all passing, including your new tests.
-7. Create a pull request (PR) against the upstream repository's master branch.
+    **NOTES:**
+    * Make sure the build is clean.
+    * Make sure all tests are passing, including your new tests.
+7. Create a pull-request (PR) against the upstream repository's master branch.
     * Push your changes to your fork on GitHub.
 
-Note: It is OK for your PR to include a large number of commits.
-Once your change is accepted, you will be asked to squash your commits
-into one or some appropriately small number of commits before your PR is merged.
+**NOTE:** It is OK for your pull-request to include a large number of commits. Once your change is
+accepted, you will be asked to squash your commits into one or some appropriately small number
+of commits before your pull-request is merged.
 
 ### License
 
