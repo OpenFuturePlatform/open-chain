@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 @Scope("prototype")
 class TimeSyncClientHandler(
         private val clock: NodeClock
-) : BaseHandler(TIME_SYNC_RESPONSE){
+) : BaseHandler(TIME_SYNC_RESPONSE) {
 
     companion object {
         private val log = LoggerFactory.getLogger(TimeSyncClientHandler::class.java)
@@ -46,7 +46,7 @@ class TimeSyncClientHandler(
         ctx.fireChannelInactive()
     }
 
-    fun calculateTimeOffset(response : CommunicationProtocol.TimeSyncResponse) : Long {
+    fun calculateTimeOffset(response: CommunicationProtocol.TimeSyncResponse): Long {
         val networkLatency = (clock.nodeTime() - response.nodeTimestamp) / 2
         val expectedNetworkTimestamp = response.nodeTimestamp + networkLatency
         return response.networkTimestamp - expectedNetworkTimestamp
