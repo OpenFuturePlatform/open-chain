@@ -17,14 +17,13 @@ import org.springframework.test.web.reactive.server.WebTestClient
  * <a href="https://docs.spring.io/spring-security/site/docs/current/reference/html/test-method.html">documentation</a>
  */
 @RunWith(SpringRunner::class)
+@Import(NodeProperties::class)
 abstract class ControllerTests {
-
-    protected val version = "1"
 
     @MockBean
     private lateinit var context: ApplicationContext
 
-    @MockBean
+    @Autowired
     private lateinit var nodeProperties: NodeProperties
 
     @Autowired
@@ -32,9 +31,7 @@ abstract class ControllerTests {
 
     @Before
     fun setUp() {
-
         AppContextUtils.context = context
         given(AppContextUtils.getBean(NodeProperties::class.java)).willReturn(nodeProperties)
-        given(nodeProperties.version).willReturn(version)
     }
 }
