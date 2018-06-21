@@ -38,7 +38,7 @@ interface BlockService {
 
 interface SeedPhraseGeneratorService {
 
-    fun generateBip44SeedPhrase(): String
+    fun generateSeedPhrase(): String
 
 }
 

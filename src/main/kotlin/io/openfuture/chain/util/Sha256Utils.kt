@@ -8,7 +8,7 @@ object Sha256Utils {
         return sha256(bytes, 0, bytes.size)
     }
 
-    fun sha256(bytes: ByteArray, offset: Int, length: Int): ByteArray {
+    private fun sha256(bytes: ByteArray, offset: Int, length: Int): ByteArray {
         val digest = sha256()
         digest.update(bytes, offset, length)
         return digest.digest()

@@ -1,4 +1,4 @@
-package io.openfuture.chain.crypto.bip39.dictionary
+package io.openfuture.chain.crypto.seed.generator.dictionary
 
 import io.openfuture.chain.property.SeedProperties
 import org.apache.commons.io.FileUtils
