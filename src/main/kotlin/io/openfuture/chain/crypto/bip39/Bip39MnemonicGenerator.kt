@@ -1,4 +1,4 @@
-package io.openfuture.chain.crypto.bip44
+package io.openfuture.chain.crypto.bip39
 
 import io.openfuture.chain.crypto.bip39.dictionary.WordList
 import io.openfuture.chain.util.HashUtils
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class Bip44MnemonicGenerator(private val wordList: WordList) {
+class Bip39MnemonicGenerator(private val wordList: WordList) {
 
     fun createMnemonic(entropy: ByteArray): String {
         var target = StringBuilder()

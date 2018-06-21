@@ -14,13 +14,6 @@ object Sha256Utils {
         return digest.digest()
     }
 
-    fun sha256Twice(bytes: ByteArray, offset: Int, length: Int): ByteArray {
-        val digest = sha256()
-        digest.update(bytes, offset, length)
-        digest.update(digest.digest())
-        return digest.digest()
-    }
-
     private fun sha256(): MessageDigest {
         return MessageDigest.getInstance("SHA-256")
     }
