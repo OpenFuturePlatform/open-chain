@@ -22,8 +22,8 @@ object HashUtils {
         val lowerBitsToRemove = (MAX_BYTES_TO_READ * SeedGeneratorConstant.BYTE_SIZE
 				- SeedGeneratorConstant.WORD_INDEX_SIZE) - (offset % SeedGeneratorConstant.BYTE_SIZE)
 
-		val firstBytePart = bytes[skip].toInt() and (BYTE_MASK shl DOUBLE_BYTE_SIZE)
-		val secondBytePart = bytes[skip + 1].toInt() and (BYTE_MASK shl SeedGeneratorConstant.BYTE_SIZE)
+		val firstBytePart = bytes[skip].toInt() and BYTE_MASK shl DOUBLE_BYTE_SIZE
+		val secondBytePart = bytes[skip + 1].toInt() and BYTE_MASK shl SeedGeneratorConstant.BYTE_SIZE
 		var thirdBytePart = 0
 		if (lowerBitsToRemove < SeedGeneratorConstant.BYTE_SIZE) {
 			thirdBytePart = bytes[skip + 2].toInt() and BYTE_MASK

@@ -5,6 +5,7 @@ import io.openfuture.chain.repository.SeedWordRepository
 import io.openfuture.chain.util.HashUtils
 import io.openfuture.chain.util.Sha256Utils
 import org.springframework.stereotype.Component
+import java.security.SecureRandom
 import java.util.*
 
 @Component
@@ -30,6 +31,11 @@ class SeedPhraseGenerator(
     }
 
     private fun wordIndexes(entropy: ByteArray): IntArray {
+//        val random = SecureRandom()
+//        val wordIndexes = IntArray(12)
+//        for (i in 0 until result.size) {
+//            wordIndexes[i] = random.nextInt(2048)
+//        }
         val ent = entropy.size * SeedGeneratorConstant.BYTE_SIZE
         entropyLengthPreChecks(ent)
 
