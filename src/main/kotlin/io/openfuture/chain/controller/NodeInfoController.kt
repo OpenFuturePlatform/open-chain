@@ -1,5 +1,7 @@
 package io.openfuture.chain.controller
 
+import io.openfuture.chain.domain.UptimeResponse
+import org.springframework.context.ApplicationContext
 import io.openfuture.chain.domain.HardwareInfo
 import io.openfuture.chain.domain.node.NodeTimestampResponse
 import io.openfuture.chain.domain.node.NodeVersionResponse
@@ -13,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("${PathConstant.RPC}/info")
 class NodeInfoController(
-        val hardwareInfoService: HardwareInfoService,
-        val seedPhraseGeneratorService: SeedPhraseGeneratorService
+        private val context: ApplicationContext,
+        val hardwareInfoService: HardwareInfoService
 ) {
 
     @GetMapping("/getVersion")
@@ -23,10 +25,10 @@ class NodeInfoController(
     @GetMapping("/getTimestamp")
     fun getTimestamp() = NodeTimestampResponse(System.currentTimeMillis())
 
+    @GetMapping("/getUptime")
+    fun getUptime() = UptimeResponse(System.currentTimeMillis() - context.startupDate)
+
     @GetMapping("/getHardwareInfo")
     fun getHardwareInfo(): HardwareInfo = hardwareInfoService.getHardwareInfo()
-
-    @GetMapping("/phrase")
-    fun getPhrase(): String = seedPhraseGeneratorService.generateSeedPhrase()
 
 }
