@@ -9,10 +9,10 @@ import javax.persistence.Table
 @Table(name = "seed_words")
 class SeedWord(
 
-    @Column(name = "word_index", nullable = false)
-    var wordIndex: Int,
+    @Column(name = "ind", nullable = false)
+    var index: Int,
 
-    @Column(name = "word_value", nullable = false)
-    var wordValue: String
+    @Column(name = "value", nullable = false)
+    var value: String
 
 ) : BaseModel()

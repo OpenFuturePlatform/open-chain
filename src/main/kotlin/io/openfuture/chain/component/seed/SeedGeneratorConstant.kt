@@ -8,10 +8,4 @@ object SeedGeneratorConstant {
 
     const val MULTIPLICITY_VALUE = 32
 
-    const val ENTROPY_BYTE_SIZE = 16
-
-    const val ENTROPY_SIZE = 128
-
-    const val SEED_PHRASE_SEPARATOR = ' '
-
 }

@@ -34,4 +34,14 @@ object HashUtils {
 		)
 	}
 
+	fun sha256(bytes: ByteArray): ByteArray {
+		return sha256(bytes, 0, bytes.size)
+	}
+
+	private fun sha256(bytes: ByteArray, offset: Int, length: Int): ByteArray {
+		val digest = MessageDigest.getInstance("SHA-256")
+		digest.update(bytes, offset, length)
+		return digest.digest()
+	}
+
 }

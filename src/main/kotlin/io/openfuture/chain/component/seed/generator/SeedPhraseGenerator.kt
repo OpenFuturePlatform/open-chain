@@ -1,10 +1,11 @@
 package io.openfuture.chain.component.seed.generator
 
+import io.openfuture.chain.component.seed.PhraseLength
 import io.openfuture.chain.component.seed.SeedGeneratorConstant
 import io.openfuture.chain.repository.SeedWordRepository
 import io.openfuture.chain.util.HashUtils
-import io.openfuture.chain.util.Sha256Utils
 import org.springframework.stereotype.Component
+import org.springframework.util.StringUtils
 import java.security.SecureRandom
 import java.util.*
 
@@ -13,31 +14,21 @@ class SeedPhraseGenerator(
         private val seedWordRepository: SeedWordRepository
 ) {
 
-    fun createSeedPhrase(entropy: ByteArray): String {
-        val target = StringBuilder()
-        val wordIndexes = wordIndexes(entropy)
-        createSeedPhrase(wordIndexes, target)
-        return target.toString()
+    companion object {
+        const val SEED_PHRASE_SEPARATOR = " "
     }
 
-    private fun createSeedPhrase(wordIndexes: IntArray, target: StringBuilder) {
-        for (i in wordIndexes.indices) {
-            if (i > 0) {
-                target.append(SeedGeneratorConstant.SEED_PHRASE_SEPARATOR)
-            }
-            val seedWord = seedWordRepository.findOneByWordIndex(wordIndexes[i])
-            target.append(seedWord.wordValue)
-        }
+    fun createSeedPhrase(length: PhraseLength): String {
+        val entropy = ByteArray(length.getByteLength())
+        SecureRandom().nextBytes(entropy)
+
+        val wordIndexes = wordIndexes(entropy)
+        val words = Array(wordIndexes.size) { seedWordRepository.findOneByIndex(wordIndexes[it]).value }
+        return StringUtils.arrayToDelimitedString(words, SEED_PHRASE_SEPARATOR)
     }
 
     private fun wordIndexes(entropy: ByteArray): IntArray {
-//        val random = SecureRandom()
-//        val wordIndexes = IntArray(12)
-//        for (i in 0 until result.size) {
-//            wordIndexes[i] = random.nextInt(2048)
-//        }
         val ent = entropy.size * SeedGeneratorConstant.BYTE_SIZE
-        entropyLengthPreChecks(ent)
 
         val entropyWithChecksum = Arrays.copyOf(entropy, entropy.size + 1)
         entropyWithChecksum[entropy.size] = firstByteOfSha256(entropy)
@@ -58,18 +49,8 @@ class SeedPhraseGenerator(
     }
 
     private fun firstByteOfSha256(entropy: ByteArray): Byte {
-        val hash = Sha256Utils.sha256(entropy)
+        val hash = HashUtils.sha256(entropy)
         return hash[0]
-    }
-
-    private fun entropyLengthPreChecks(entSize: Int) {
-        if (entSize != SeedGeneratorConstant.ENTROPY_SIZE) {
-            throw RuntimeException("Entropy size must be ${SeedGeneratorConstant.ENTROPY_SIZE} bits")
-        }
-        if (entSize % SeedGeneratorConstant.MULTIPLICITY_VALUE > 0) {
-            throw RuntimeException("Number of entropy bits must be divisible by " +
-                    "${SeedGeneratorConstant.MULTIPLICITY_VALUE}")
-        }
     }
 
 }

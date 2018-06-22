@@ -18,7 +18,7 @@ class SeedWordRepositoryTests : RepositoryTests() {
 
         entityManager.persist(expectedSeedWord)
 
-        val seedWordResult = repository.findOneByWordIndex(wordIndex)
+        val seedWordResult = repository.findOneByIndex(wordIndex)
 
         assertThat(seedWordResult).isEqualTo(expectedSeedWord)
     }

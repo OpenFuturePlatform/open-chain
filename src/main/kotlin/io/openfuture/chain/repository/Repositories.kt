@@ -23,6 +23,6 @@ interface TransactionRepository : BaseRepository<Transaction>
 @Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {
 
-    fun findOneByWordIndex(wordIndex: Int): SeedWord
+    fun findOneByIndex(index: Int): SeedWord
 
 }

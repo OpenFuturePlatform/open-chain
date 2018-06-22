@@ -1,5 +1,6 @@
 package io.openfuture.chain.component.seed.generator
 
+import io.openfuture.chain.component.seed.PhraseLength
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.entity.SeedWord
@@ -19,14 +20,13 @@ class SeedPhraseGeneratorTests : ServiceTests() {
 
     @Test
     fun createSeedPhraseWhenByteArrayIsTwelveBytesShouldReturnSeedPhrase() {
-        val entropy = ByteArray(16)
         val word = "1"
         val seedWord = SeedWord(0, word)
         val expectedPhrase = "$word $word $word $word $word $word $word $word $word $word $word $word"
 
-        given(seedWordRepository.findOneByWordIndex(any(Int::class.java))).willReturn(seedWord)
+        given(seedWordRepository.findOneByIndex(any(Int::class.java))).willReturn(seedWord)
 
-        val seedPhraseResult = seedPhraseGenerator.createSeedPhrase(entropy)
+        val seedPhraseResult = seedPhraseGenerator.createSeedPhrase(PhraseLength.TWELVE)
 
         assertThat(seedPhraseResult).isEqualTo(expectedPhrase)
     }
