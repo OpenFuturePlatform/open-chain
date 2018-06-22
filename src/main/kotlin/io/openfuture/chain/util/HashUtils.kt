@@ -17,7 +17,7 @@ object HashUtils {
 		return digest.fold("") { str, it -> str + "%02x".format(it) }
 	}
 
-	fun next11Bits(bytes: ByteArray, offset: Int): Int {
+	fun nextWordsIndex(bytes: ByteArray, offset: Int): Int {
 		val skip = offset / SeedGeneratorConstant.BYTE_SIZE
         val lowerBitsToRemove = (MAX_BYTES_TO_READ * SeedGeneratorConstant.BYTE_SIZE
 				- SeedGeneratorConstant.WORD_INDEX_SIZE) - (offset % SeedGeneratorConstant.BYTE_SIZE)

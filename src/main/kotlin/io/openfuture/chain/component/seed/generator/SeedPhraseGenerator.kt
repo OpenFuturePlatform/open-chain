@@ -48,7 +48,7 @@ class SeedPhraseGenerator(
         var bitOffset = 0
         var wordIndex = 0
         while (wordIndex < mnemonicLength) {
-            wordIndexes[wordIndex] = HashUtils.next11Bits(entropyWithChecksum, bitOffset)
+            wordIndexes[wordIndex] = HashUtils.nextWordsIndex(entropyWithChecksum, bitOffset)
             bitOffset += SeedGeneratorConstant.WORD_INDEX_SIZE
             wordIndex++
         }
