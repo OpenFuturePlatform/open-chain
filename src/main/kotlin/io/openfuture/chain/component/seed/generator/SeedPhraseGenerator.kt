@@ -16,9 +16,9 @@ class SeedPhraseGenerator(
 
     companion object {
 
-        const val SEED_PHRASE_SEPARATOR = " "
+        private const val SEED_PHRASE_SEPARATOR = " "
 
-        const val MULTIPLICITY_VALUE = 32
+        private const val MULTIPLICITY_VALUE = 32
 
     }
 
