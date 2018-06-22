@@ -13,7 +13,8 @@ import org.mockito.Mock
 
 class SeedPhraseGeneratorTests : ServiceTests() {
 
-    @Mock private lateinit var seedWordRepository: SeedWordRepository
+    @Mock
+    private lateinit var seedWordRepository: SeedWordRepository
 
     @InjectMocks
     private lateinit var seedPhraseGenerator: SeedPhraseGenerator
@@ -30,4 +31,5 @@ class SeedPhraseGeneratorTests : ServiceTests() {
 
         assertThat(seedPhraseResult).isEqualTo(expectedPhrase)
     }
+
 }

@@ -1,7 +1,6 @@
 package io.openfuture.chain.component.seed.generator
 
 import io.openfuture.chain.component.seed.PhraseLength
-import io.openfuture.chain.component.seed.SeedGeneratorConstant
 import io.openfuture.chain.repository.SeedWordRepository
 import io.openfuture.chain.util.HashUtils
 import org.springframework.stereotype.Component
@@ -15,17 +14,13 @@ class SeedPhraseGenerator(
 ) {
 
     companion object {
-
         private const val SEED_PHRASE_SEPARATOR = " "
-
         private const val MULTIPLICITY_VALUE = 32
-
         private const val DOUBLE_BYTE_SIZE = 16
-
         private const val BYTE_MASK = 0xff
-
         private const val MAX_BYTES_TO_READ = 3
-
+        private const val WORD_INDEX_SIZE = 11
+        private const val BYTE_SIZE = 8
     }
 
     fun createSeedPhrase(length: PhraseLength): String {
@@ -38,40 +33,38 @@ class SeedPhraseGenerator(
     }
 
     private fun wordIndexes(entropy: ByteArray): IntArray {
-        val entropySize = entropy.size * SeedGeneratorConstant.BYTE_SIZE
+        val entropySize = entropy.size * BYTE_SIZE
 
         val entropyWithChecksum = Arrays.copyOf(entropy, entropy.size + 1)
         entropyWithChecksum[entropy.size] = HashUtils.sha256(entropy)[0]
 
         val checksumLength = entropySize / MULTIPLICITY_VALUE
-
-        val mnemonicLength = (entropySize + checksumLength) / SeedGeneratorConstant.WORD_INDEX_SIZE
+        val mnemonicLength = (entropySize + checksumLength) / WORD_INDEX_SIZE
 
         val wordIndexes = IntArray(mnemonicLength)
         var bitOffset = 0
         var wordIndex = 0
         while (wordIndex < mnemonicLength) {
             wordIndexes[wordIndex] = nextWordsIndex(entropyWithChecksum, bitOffset)
-            bitOffset += SeedGeneratorConstant.WORD_INDEX_SIZE
+            bitOffset += WORD_INDEX_SIZE
             wordIndex++
         }
         return wordIndexes
     }
 
     private fun nextWordsIndex(bytes: ByteArray, offset: Int): Int {
-        val skip = offset / SeedGeneratorConstant.BYTE_SIZE
-        val lowerBitsToRemove = (MAX_BYTES_TO_READ * SeedGeneratorConstant.BYTE_SIZE
-                - SeedGeneratorConstant.WORD_INDEX_SIZE) - (offset % SeedGeneratorConstant.BYTE_SIZE)
+        val skip = offset / BYTE_SIZE
+        val lowerBitsToRemove = (MAX_BYTES_TO_READ * BYTE_SIZE - WORD_INDEX_SIZE) - (offset % BYTE_SIZE)
 
         val firstBytePart = bytes[skip].toInt() and BYTE_MASK shl DOUBLE_BYTE_SIZE
-        val secondBytePart = bytes[skip + 1].toInt() and BYTE_MASK shl SeedGeneratorConstant.BYTE_SIZE
-        var thirdBytePart = 0
-        if (lowerBitsToRemove < SeedGeneratorConstant.BYTE_SIZE) {
-            thirdBytePart = bytes[skip + 2].toInt() and BYTE_MASK
+        val secondBytePart = bytes[skip + 1].toInt() and BYTE_MASK shl BYTE_SIZE
+        val thirdBytePart = if (lowerBitsToRemove < BYTE_SIZE) {
+            bytes[skip + 2].toInt() and BYTE_MASK
+        } else {
+            0
         }
-        return (
-                (((firstBytePart or secondBytePart or thirdBytePart)) shr lowerBitsToRemove)
-                        and (1 shl SeedGeneratorConstant.WORD_INDEX_SIZE) - 1
-                )
+
+        return ((firstBytePart or secondBytePart or thirdBytePart) shr lowerBitsToRemove) and (1 shl WORD_INDEX_SIZE) - 1
     }
+
 }
