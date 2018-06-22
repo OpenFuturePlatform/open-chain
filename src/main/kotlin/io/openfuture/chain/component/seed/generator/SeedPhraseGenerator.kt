@@ -15,7 +15,11 @@ class SeedPhraseGenerator(
 ) {
 
     companion object {
+
         const val SEED_PHRASE_SEPARATOR = " "
+
+        const val MULTIPLICITY_VALUE = 32
+
     }
 
     fun createSeedPhrase(length: PhraseLength): String {
@@ -33,7 +37,7 @@ class SeedPhraseGenerator(
         val entropyWithChecksum = Arrays.copyOf(entropy, entropy.size + 1)
         entropyWithChecksum[entropy.size] = firstByteOfSha256(entropy)
 
-        val checksumLength = ent / SeedGeneratorConstant.MULTIPLICITY_VALUE
+        val checksumLength = ent / MULTIPLICITY_VALUE
 
         val mnemonicLength = (ent + checksumLength) / SeedGeneratorConstant.WORD_INDEX_SIZE
 

@@ -6,6 +6,4 @@ object SeedGeneratorConstant {
 
     const val WORD_INDEX_SIZE = 11
 
-    const val MULTIPLICITY_VALUE = 32
-
 }
