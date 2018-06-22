@@ -32,14 +32,14 @@ class SeedPhraseGenerator(
     }
 
     private fun wordIndexes(entropy: ByteArray): IntArray {
-        val ent = entropy.size * SeedGeneratorConstant.BYTE_SIZE
+        val entropySize = entropy.size * SeedGeneratorConstant.BYTE_SIZE
 
         val entropyWithChecksum = Arrays.copyOf(entropy, entropy.size + 1)
-        entropyWithChecksum[entropy.size] = firstByteOfSha256(entropy)
+        entropyWithChecksum[entropy.size] = HashUtils.sha256(entropy)[0]
 
-        val checksumLength = ent / MULTIPLICITY_VALUE
+        val checksumLength = entropySize / MULTIPLICITY_VALUE
 
-        val mnemonicLength = (ent + checksumLength) / SeedGeneratorConstant.WORD_INDEX_SIZE
+        val mnemonicLength = (entropySize + checksumLength) / SeedGeneratorConstant.WORD_INDEX_SIZE
 
         val wordIndexes = IntArray(mnemonicLength)
         var bitOffset = 0
@@ -50,11 +50,6 @@ class SeedPhraseGenerator(
             wordIndex++
         }
         return wordIndexes
-    }
-
-    private fun firstByteOfSha256(entropy: ByteArray): Byte {
-        val hash = HashUtils.sha256(entropy)
-        return hash[0]
     }
 
 }
