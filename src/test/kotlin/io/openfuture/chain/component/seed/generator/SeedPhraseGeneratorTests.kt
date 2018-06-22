@@ -20,7 +20,7 @@ class SeedPhraseGeneratorTests : ServiceTests() {
     @Test
     fun createSeedPhraseWhenByteArrayIsTwelveBytesShouldReturnSeedPhrase() {
         val entropy = ByteArray(16)
-        var word = "1"
+        val word = "1"
         val seedWord = SeedWord(0, word)
         val expectedPhrase = "$word $word $word $word $word $word $word $word $word $word $word $word"
 
