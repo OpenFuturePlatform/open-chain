@@ -4,6 +4,8 @@ CREATE TABLE seed_words (
   word_value    VARCHAR NOT NULL
 );
 
+CREATE INDEX seed_words_word_index ON seed_words (word_index);
+
 INSERT INTO seed_words (word_index, word_value) VALUES (0, 'abandon');
 INSERT INTO seed_words (word_index, word_value) VALUES (1, 'ability');
 INSERT INTO seed_words (word_index, word_value) VALUES (2, 'able');
