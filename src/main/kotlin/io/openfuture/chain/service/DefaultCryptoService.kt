@@ -5,9 +5,9 @@ import io.openfuture.chain.component.seed.generator.SeedPhraseGenerator
 import org.springframework.stereotype.Service
 
 @Service
-class DefaultSeedPhraseGeneratorService(
+class DefaultCryptoService(
         private val seedPhraseGenerator: SeedPhraseGenerator
-) : SeedPhraseGeneratorService {
+) : CryptoService {
 
     override fun generateSeedPhrase(): String = seedPhraseGenerator.createSeedPhrase(TWELVE)
 

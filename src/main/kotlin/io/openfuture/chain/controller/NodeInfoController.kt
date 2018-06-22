@@ -6,7 +6,6 @@ import io.openfuture.chain.domain.HardwareInfo
 import io.openfuture.chain.domain.node.NodeTimestampResponse
 import io.openfuture.chain.domain.node.NodeVersionResponse
 import io.openfuture.chain.service.HardwareInfoService
-import io.openfuture.chain.service.SeedPhraseGeneratorService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController

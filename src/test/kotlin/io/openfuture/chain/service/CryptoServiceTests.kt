@@ -9,13 +9,13 @@ import org.mockito.BDDMockito.given
 import org.mockito.InjectMocks
 import org.mockito.Mock
 
-class SeedPhraseGeneratorServiceTests : ServiceTests() {
+class CryptoServiceTests : ServiceTests() {
 
     @Mock
     private lateinit var seedPhraseGenerator: SeedPhraseGenerator
 
     @InjectMocks
-    private lateinit var seedPhraseGeneratorService: DefaultSeedPhraseGeneratorService
+    private lateinit var cryptoService: DefaultCryptoService
 
     @Test
     fun generateBip44SeedPhraseShouldReturnTwelveSeedPhraseWords() {
@@ -23,7 +23,7 @@ class SeedPhraseGeneratorServiceTests : ServiceTests() {
 
         given(seedPhraseGenerator.createSeedPhrase(PhraseLength.TWELVE)).willReturn(seedPhrase)
 
-        val seedPhraseResult = seedPhraseGeneratorService.generateSeedPhrase()
+        val seedPhraseResult = cryptoService.generateSeedPhrase()
 
         assertThat(seedPhrase).isEqualTo(seedPhraseResult)
     }

@@ -35,7 +35,7 @@ interface BlockService {
 
 }
 
-interface SeedPhraseGeneratorService {
+interface CryptoService {
 
     fun generateSeedPhrase(): String
 
