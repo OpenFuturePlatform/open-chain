@@ -15,11 +15,7 @@ class SeedPhraseGenerator(
     fun createSeedPhrase(entropy: ByteArray): String {
         val target = StringBuilder()
         val wordIndexes = wordIndexes(entropy)
-        try {
-            createSeedPhrase(wordIndexes, target)
-        } finally {
-            Arrays.fill(wordIndexes, 0)
-        }
+        createSeedPhrase(wordIndexes, target)
         return target.toString()
     }
 
@@ -62,17 +58,13 @@ class SeedPhraseGenerator(
         return firstByte
     }
 
-    private fun entropyLengthPreChecks(ent: Int) {
-        if (ent < SeedGeneratorConstant.MIN_ENTROPY_SIZE) {
-            throw RuntimeException("Entropy too low, ${SeedGeneratorConstant.MIN_ENTROPY_SIZE}" +
-                    "-${SeedGeneratorConstant.MAX_ENTROPY_SIZE} bits allowed")
+    private fun entropyLengthPreChecks(entSize: Int) {
+        if (entSize != SeedGeneratorConstant.ENTROPY_SIZE) {
+            throw RuntimeException("Entropy size must be ${SeedGeneratorConstant.ENTROPY_SIZE} bits")
         }
-        if (ent > SeedGeneratorConstant.MAX_ENTROPY_SIZE) {
-            throw RuntimeException("Entropy too low, ${SeedGeneratorConstant.MIN_ENTROPY_SIZE}" +
-                    "-${SeedGeneratorConstant.MAX_ENTROPY_SIZE} bits allowed")
-        }
-        if (ent % SeedGeneratorConstant.MULTIPLICITY_VALUE > 0) {
-            throw RuntimeException("Number of entropy bits must be divisible by ${SeedGeneratorConstant.MULTIPLICITY_VALUE}")
+        if (entSize % SeedGeneratorConstant.MULTIPLICITY_VALUE > 0) {
+            throw RuntimeException("Number of entropy bits must be divisible by " +
+                    "${SeedGeneratorConstant.MULTIPLICITY_VALUE}")
         }
     }
 
