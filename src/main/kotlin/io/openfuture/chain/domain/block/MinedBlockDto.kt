@@ -1,0 +1,41 @@
+package io.openfuture.chain.domain.block
+
+import io.openfuture.chain.domain.block.nested.BlockHash
+import io.openfuture.chain.domain.transaction.TransactionDto
+import io.openfuture.chain.util.HashUtils
+
+class MinedBlockDto(
+        timestamp: Long,
+        orderNumber: Long,
+        previousHash: String,
+        transactions: List<TransactionDto>,
+        var merkleHash: String,
+        var blockHash: BlockHash,
+        val nodePublicKey: String,
+        var nodeSignature: String
+): BaseBlockDto(timestamp, orderNumber, previousHash, transactions) {
+
+    fun isValid(): Boolean {
+
+        if (!isValidHash()) {
+            return false
+        }
+
+        if (!isValidSignature()) {
+            return false
+        }
+
+        return true
+    }
+
+    private fun isValidHash(): Boolean {
+        val data = getHashData(timestamp, orderNumber, previousHash, merkleHash, blockHash.nonce)
+        return this.blockHash.hash == HashUtils.generateHash(data)
+    }
+
+    private fun isValidSignature(): Boolean {
+        val data = getSignatureData(timestamp, orderNumber, previousHash, merkleHash, blockHash.nonce, blockHash.hash)
+        return HashUtils.validateSignature(this.nodePublicKey, this.nodeSignature, data)
+    }
+
+}

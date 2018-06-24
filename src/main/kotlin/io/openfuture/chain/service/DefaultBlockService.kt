@@ -1,6 +1,6 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.domain.block.BlockRequest
+import io.openfuture.chain.domain.block.MinedBlockDto
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
@@ -29,9 +29,9 @@ class DefaultBlockService(
             ?: throw NotFoundException("Last block not exist!")
 
     @Transactional
-    override fun save(request: BlockRequest): Block {
-        val block = repository.save(Block.of(request))
-        request.transactions.forEach { transactionService.save(block, it) }
+    override fun save(dto: MinedBlockDto): Block {
+        val block = repository.save(Block.of(dto))
+        dto.transactions.forEach { transactionService.save(block, it) }
         return block
     }
 

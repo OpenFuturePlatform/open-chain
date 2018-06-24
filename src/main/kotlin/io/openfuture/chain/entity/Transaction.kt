@@ -1,6 +1,6 @@
 package io.openfuture.chain.entity
 
-import io.openfuture.chain.domain.transaction.TransactionRequest
+import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.*
 
@@ -33,14 +33,14 @@ class Transaction(
 ) : BaseModel() {
 
     companion object {
-        fun of(block: Block, request: TransactionRequest): Transaction = Transaction(
+        fun of(block: Block, dto: TransactionDto): Transaction = Transaction(
             block,
-            request.hash,
-            request.amount,
-            request.timestamp,
-            request.recipientKey,
-            request.senderKey,
-            request.signature
+            dto.hash,
+            dto.amount,
+            dto.timestamp,
+            dto.recipientKey,
+            dto.senderKey,
+            dto.signature
         )
     }
 }

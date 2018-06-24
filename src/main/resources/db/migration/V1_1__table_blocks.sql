@@ -1,6 +1,6 @@
 CREATE TABLE blocks (
   id             INTEGER PRIMARY KEY,
-  order_number   INTEGER NOT NULL,
+  order_number   BIGINT NOT NULL,
   nonce          BIGINT  NOT NULL,
   timestamp      BIGINT  NOT NULL,
   merkle_hash    VARCHAR NOT NULL,

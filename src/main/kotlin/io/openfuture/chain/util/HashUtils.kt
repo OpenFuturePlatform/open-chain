@@ -1,10 +1,6 @@
 package io.openfuture.chain.util
 
 import java.security.MessageDigest
-import jdk.nashorn.tools.ShellFunctions.input
-import java.security.PrivateKey
-import java.security.Signature
-
 
 object HashUtils {
 
@@ -13,7 +9,6 @@ object HashUtils {
 		val digest = instance.digest(bytes)
 		return digest.fold("", { str, it -> str + "%02x".format(it) })
 	}
-
 
 	fun generateSignature(privateKey: String, data: ByteArray): String {
 		// todo add logic by genereting signature

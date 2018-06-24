@@ -2,14 +2,13 @@ package io.openfuture.chain.domain.transaction
 
 import io.openfuture.chain.util.HashUtils
 
-class TransactionRequest(
+class TransactionDto(
     val amount: Int,
     val timestamp: Long,
     val recipientKey: String,
     val senderKey: String,
     val signature: String
 ) {
-
     var hash: String = calculateHash()
 
     private fun calculateHash(): String {
@@ -21,4 +20,5 @@ class TransactionRequest(
         builder.append(this.signature)
         return HashUtils.generateHash(builder.toString().toByteArray())
     }
+
 }

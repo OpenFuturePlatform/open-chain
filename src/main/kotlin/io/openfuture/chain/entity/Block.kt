@@ -1,6 +1,6 @@
 package io.openfuture.chain.entity
 
-import io.openfuture.chain.domain.block.BlockRequest
+import io.openfuture.chain.domain.block.MinedBlockDto
 import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.*
 
@@ -9,10 +9,7 @@ import javax.persistence.*
 class Block(
 
         @Column(name = "order_number", nullable = false)
-        var orderNumber: Int = 0,
-
-        @Column(name = "nonce", nullable = false)
-        var nonce: Long = 0,
+        var orderNumber: Long,
 
         @Column(name = "timestamp", nullable = false)
         var timestamp: Long,
@@ -20,11 +17,14 @@ class Block(
         @Column(name = "previous_hash", nullable = false)
         var previousHash: String,
 
-        @Column(name = "hash", nullable = false)
-        var hash: String,
-
         @Column(name = "merkle_hash", nullable = false)
         var merkleHash: String,
+
+        @Column(name = "nonce", nullable = false)
+        var nonce: Long = 0,
+
+        @Column(name = "hash", nullable = false)
+        var hash: String,
 
         @Column(name = "node_key", nullable = false)
         var nodeKey: String,
@@ -38,15 +38,15 @@ class Block(
 
 ) : BaseModel() {
     companion object {
-        fun of(request: BlockRequest): Block = Block(
-            request.orderNumber!!,
-            request.nonce!!,
-            request.timestamp!!,
-            request.previousHash!!,
-            request.hash!!,
-            request.merkleHash!!,
-            request.nodePublicKey!!,
-            request.nodeSignature!!
+        fun of(dto: MinedBlockDto): Block = Block(
+                dto.orderNumber,
+                dto.timestamp,
+                dto.previousHash,
+                dto.merkleHash,
+                dto.blockHash.nonce,
+                dto.blockHash.hash,
+                dto.nodePublicKey,
+                dto.nodeSignature
         )
     }
 }
