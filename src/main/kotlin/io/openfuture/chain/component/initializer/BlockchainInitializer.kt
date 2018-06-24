@@ -48,7 +48,7 @@ class BlockchainInitializer(
     }
 
     private fun generateGenesisSignature(): String {
-        return HashUtils.generateHash("sugnature".toByteArray())
+        return HashUtils.generateHash("signature".toByteArray())
     }
 
     private fun generateGenesisBlockHash(): BlockHash {
