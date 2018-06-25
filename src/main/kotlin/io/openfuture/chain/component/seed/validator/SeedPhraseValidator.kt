@@ -64,12 +64,12 @@ class SeedPhraseValidator(
     }
 
     private fun wordIndexesToEntropyWithCheckSum(wordIndexes: IntArray, entropyWithChecksum: ByteArray) {
-        var i = 0
-        var bi = 0
-        while (i < wordIndexes.size) {
-            writeNextWordIndexToArray(entropyWithChecksum, wordIndexes[i], bi)
-            i++
-            bi += SeedConstant.WORD_INDEX_SIZE
+        var wordIndex = 0
+        var entropyOffset = 0
+        while (wordIndex < wordIndexes.size) {
+            writeNextWordIndexToArray(entropyWithChecksum, wordIndexes[wordIndex], entropyOffset)
+            wordIndex++
+            entropyOffset += SeedConstant.WORD_INDEX_SIZE
         }
     }
 
@@ -77,19 +77,26 @@ class SeedPhraseValidator(
         val byteSkip = offset / SeedConstant.BYTE_SIZE
         val bitSkip = offset % SeedConstant.BYTE_SIZE
 
-        run {
-            val firstValue = bytes[byteSkip]
-            val toWrite = (value shr (OUT_OF_BYTE_SIZE + bitSkip)).toByte()
-            bytes[byteSkip] = (firstValue or toWrite)
-        }
+        writeFirstByteToArray(bytes, byteSkip, bitSkip, value)
+        writeSecondByteToArray(bytes, byteSkip, bitSkip, value)
+        writeThirdByteToArray(bytes, byteSkip, bitSkip, value)
+        writeThirdByteToArray(bytes, byteSkip, bitSkip, value)
+    }
 
-        run {
-            val valueInByte = bytes[byteSkip + 1]
-            val i = 5 - bitSkip
-            val toWrite = (if (i > 0) value shl i else value shr -i).toByte()
-            bytes[byteSkip + 1] = (valueInByte or toWrite)
-        }
+    private fun writeFirstByteToArray(bytes: ByteArray, byteSkip: Int, bitSkip: Int, value: Int) {
+        val firstValue = bytes[byteSkip]
+        val toWrite = (value shr (OUT_OF_BYTE_SIZE + bitSkip)).toByte()
+        bytes[byteSkip] = (firstValue or toWrite)
+    }
 
+    private fun writeSecondByteToArray(bytes: ByteArray, byteSkip: Int, bitSkip: Int, value: Int) {
+        val valueInByte = bytes[byteSkip + 1]
+        val i = 5 - bitSkip
+        val toWrite = (if (i > 0) value shl i else value shr -i).toByte()
+        bytes[byteSkip + 1] = (valueInByte or toWrite)
+    }
+
+    private fun writeThirdByteToArray(bytes: ByteArray, byteSkip: Int, bitSkip: Int, value: Int) {
         if (bitSkip >= 6) {
             val lastByteIndex = byteSkip + 2
             val lastByteValue = bytes[lastByteIndex]
