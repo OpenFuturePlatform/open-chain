@@ -25,4 +25,6 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 
     fun findOneByIndex(index: Int): SeedWord
 
+    fun findOneByValue(value: String): SeedWord
+
 }
