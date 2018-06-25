@@ -56,9 +56,13 @@ class SeedPhraseValidator(
         val seedPhraseWordSize = seedPhraseWords.size
         val result = IntArray(seedPhraseWordSize)
         for ((i, seedPhraseWord) in seedPhraseWords.withIndex()) {
-            val word = seedWordRepository.findOneByValue(seedPhraseWord)
-                    ?: throw SeedValidationException("Word $seedPhraseWord not found")
+            val wordOptional = seedWordRepository.findOneByValue(seedPhraseWord)
 
+            if (!wordOptional.isPresent) {
+                throw SeedValidationException("Word $seedPhraseWord not found")
+            }
+
+            val word = wordOptional.get()
             result[i] = word.index
         }
         return result

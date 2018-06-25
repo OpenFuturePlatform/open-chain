@@ -6,6 +6,7 @@ import io.openfuture.chain.entity.Transaction
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.stereotype.Repository
+import java.util.*
 
 @NoRepositoryBean
 interface BaseRepository<T> : JpaRepository<T, Int>
@@ -25,6 +26,6 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 
     fun findOneByIndex(index: Int): SeedWord
 
-    fun findOneByValue(value: String): SeedWord?
+    fun findOneByValue(value: String): Optional<SeedWord>
 
 }
