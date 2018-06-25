@@ -11,9 +11,6 @@ import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
-/**
- * @author Evgeni Krylov
- */
 @Component
 class ClientChannelInitializer(
         private val context: ApplicationContext
@@ -34,6 +31,7 @@ class ClientChannelInitializer(
         pipeline.addLast(ReadTimeoutHandler(60))
         pipeline.addLast(context.getBean(ConnectionClientHandler::class.java))
 
+        pipeline.addLast(context.getBean(TimeSyncClientHandler::class.java))
         pipeline.addLast(context.getBean(HeartBeatClientHandler::class.java))
     }
 
