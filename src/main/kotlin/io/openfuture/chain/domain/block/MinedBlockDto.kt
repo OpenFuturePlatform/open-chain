@@ -29,12 +29,12 @@ class MinedBlockDto(
     }
 
     private fun isValidHash(): Boolean {
-        val data = getHashData(timestamp, orderNumber, previousHash, merkleHash, blockHash.nonce)
+        val data = getHashData(this.merkleHash, this.blockHash.nonce)
         return this.blockHash.hash == HashUtils.generateHash(data)
     }
 
     private fun isValidSignature(): Boolean {
-        val data = getSignatureData(timestamp, orderNumber, previousHash, merkleHash, blockHash.nonce, blockHash.hash)
+        val data = getSignatureData(this.merkleHash, this.blockHash.nonce, this.blockHash.hash)
         return HashUtils.validateSignature(this.nodePublicKey, this.nodeSignature, data)
     }
 

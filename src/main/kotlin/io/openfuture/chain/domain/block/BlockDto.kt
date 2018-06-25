@@ -14,11 +14,10 @@ class BlockDto(
 
     fun mineBlock(privateKey: String, publicKey: String, difficulty: Int): MinedBlockDto {
         val merkleHash = generateMerkleHash(transactions)
-        val blockHash = generateBlockHash(difficulty, timestamp, orderNumber, previousHash, merkleHash)
-        val signature = generateSignature(privateKey, timestamp, orderNumber, previousHash, merkleHash,
-                blockHash.nonce, blockHash.hash)
-        return MinedBlockDto(timestamp, orderNumber, previousHash, transactions, merkleHash, blockHash,
-                publicKey, signature)
+        val blockHash = generateBlockHash(difficulty, merkleHash)
+        val signature = generateSignature(privateKey, merkleHash, blockHash.nonce, blockHash.hash)
+        return MinedBlockDto(this.timestamp, this.orderNumber, this.previousHash, this.transactions, merkleHash,
+                blockHash, publicKey, signature)
     }
 
     private fun generateMerkleHash(transactions: List<TransactionDto>): String {
@@ -45,23 +44,19 @@ class BlockDto(
     }
 
     // -- mining block process
-    private fun generateBlockHash(difficulty: Int, timestamp: Long, orderNumber: Long, previousHash: String,
-                                  merkleHash: String): BlockHash {
+    private fun generateBlockHash(difficulty: Int, merkleHash: String): BlockHash {
         var currentNonce = 0L
-        var currentHash = HashUtils.generateHash(getHashData(timestamp, orderNumber, previousHash,
-                merkleHash, currentNonce))
+        var currentHash = HashUtils.generateHash(getHashData(merkleHash, currentNonce))
         val target = HashUtils.getDificultyString(difficulty)
         while (currentHash.substring(0, difficulty) != target) {
             currentNonce++
-            currentHash = HashUtils.generateHash(getHashData(timestamp, orderNumber, previousHash,
-                    merkleHash, currentNonce))
+            currentHash = HashUtils.generateHash(getHashData(merkleHash, currentNonce))
         }
         return BlockHash(currentNonce, currentHash)
     }
 
-    private fun generateSignature(privateKey: String, timestamp: Long, orderNumber: Long,
-                                  previousHash: String, merkleHash: String, nonce: Long, hash: String): String {
-        val data = getSignatureData(timestamp, orderNumber, previousHash, merkleHash, nonce, hash)
+    private fun generateSignature(privateKey: String, merkleHash: String, nonce: Long, hash: String): String {
+        val data = getSignatureData(merkleHash, nonce, hash)
         return HashUtils.generateSignature(privateKey, data)
     }
 

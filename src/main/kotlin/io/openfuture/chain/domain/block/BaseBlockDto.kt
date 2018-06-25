@@ -9,28 +9,31 @@ open class BaseBlockDto(
         val transactions: MutableList<TransactionDto>
 ) {
 
-    protected fun getHashData(timestamp: Long, orderNumber: Long, previousHash: String,
-                            merkleHash: String, nonce: Long): ByteArray {
-        val builder = dataBuilder(timestamp, orderNumber, previousHash, merkleHash, nonce)
-        return builder.toString().toByteArray()
+    protected fun getHashData(merkleHash: String, nonce: Long): ByteArray {
+        return dataBuilder(this.timestamp, this.orderNumber, this.previousHash, merkleHash, nonce)
     }
 
-    protected fun getSignatureData(timestamp: Long, orderNumber: Long, previousHash: String,
-                                 merkleHash: String, nonce: Long, hash: String): ByteArray {
-        val builder = dataBuilder(timestamp, orderNumber, previousHash, merkleHash, nonce)
-        builder.append(hash)
-        return builder.toString().toByteArray()
+    protected fun getSignatureData(merkleHash: String, nonce: Long, hash: String): ByteArray {
+        return dataBuilder(this.timestamp, this.orderNumber, this.previousHash, merkleHash, nonce, hash)
     }
 
     private fun dataBuilder(timestamp: Long, orderNumber: Long, previousHash: String, merkleHash: String,
-                            nonce: Long): StringBuilder {
+                            nonce: Long): ByteArray {
+        return dataBuilder(timestamp, orderNumber, previousHash, merkleHash, nonce, null)
+    }
+
+    private fun dataBuilder(timestamp: Long, orderNumber: Long, previousHash: String, merkleHash: String,
+                            nonce: Long, hash: String?): ByteArray {
         val builder = StringBuilder()
         builder.append(timestamp)
         builder.append(orderNumber)
         builder.append(previousHash)
         builder.append(merkleHash)
         builder.append(nonce)
-        return builder
+        if (null != hash) {
+            builder.append(hash)
+        }
+        return builder.toString().toByteArray()
     }
 
 }
