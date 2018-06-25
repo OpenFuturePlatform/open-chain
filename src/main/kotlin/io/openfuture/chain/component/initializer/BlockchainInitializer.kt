@@ -29,6 +29,7 @@ class BlockchainInitializer(
         return 0L == blockService.count()
     }
 
+    // todo temp, need discuss it
     private fun createGenesisBlock(): MinedBlockDto {
         return MinedBlockDto(0, 1, generateGenesisPreviousHash(), generateGenesisTransactions(),
                 generateGenesisMerkleHash(), generateGenesisBlockHash(), generateGenesisPublicKey(),
