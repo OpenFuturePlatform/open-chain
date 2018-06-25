@@ -78,7 +78,6 @@ class SeedPhraseValidator(
         writeFirstByteToArray(bytes, byteSkip, bitSkip, value)
         writeSecondByteToArray(bytes, byteSkip, bitSkip, value)
         writeThirdByteToArray(bytes, byteSkip, bitSkip, value)
-        writeThirdByteToArray(bytes, byteSkip, bitSkip, value)
     }
 
     private fun writeFirstByteToArray(bytes: ByteArray, byteSkip: Int, bitSkip: Int, value: Int) {
