@@ -52,15 +52,13 @@ class SeedPhraseValidator(
         }
     }
 
-    private fun findWordIndexes(split: Collection<String>): IntArray {
-        val ms = split.size
-        val result = IntArray(ms)
-        for ((i, buffer) in split.withIndex()) {
-            if (buffer.isEmpty()) {
-                throw SeedValidationException("Phrase has excess whitespaces")
-            }
+    private fun findWordIndexes(seedPhraseWords: Collection<String>): IntArray {
+        val seedPhraseWordSize = seedPhraseWords.size
+        val result = IntArray(seedPhraseWordSize)
+        for ((i, seedPhraseWord) in seedPhraseWords.withIndex()) {
+            val word = seedWordRepository.findOneByValue(seedPhraseWord)
+                    ?: throw SeedValidationException("Word $seedPhraseWord not found")
 
-            val word = seedWordRepository.findOneByValue(buffer)
             result[i] = word.index
         }
         return result
