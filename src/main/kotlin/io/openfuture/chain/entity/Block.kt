@@ -35,7 +35,6 @@ class Block(
         @OneToMany(mappedBy = "block", fetch = FetchType.EAGER)
         var transactions: MutableList<Transaction> = mutableListOf()
 
-
 ) : BaseModel() {
     companion object {
         fun of(dto: MinedBlockDto): Block = Block(

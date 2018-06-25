@@ -6,7 +6,7 @@ open class BaseBlockDto(
         val timestamp: Long,
         val orderNumber: Long,
         val previousHash: String,
-        val transactions: List<TransactionDto>
+        val transactions: MutableList<TransactionDto>
 ) {
 
     protected fun getHashData(timestamp: Long, orderNumber: Long, previousHash: String,

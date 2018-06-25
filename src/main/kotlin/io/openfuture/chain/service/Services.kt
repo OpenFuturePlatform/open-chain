@@ -30,8 +30,6 @@ interface BlockService {
 
     fun count(): Long
 
-    fun getAll(): MutableList<Block>
-
     fun getAll(pageRequest: Pageable): Page<Block>
 
     fun getLast(): Block

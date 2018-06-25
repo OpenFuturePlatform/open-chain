@@ -8,7 +8,7 @@ class MinedBlockDto(
         timestamp: Long,
         orderNumber: Long,
         previousHash: String,
-        transactions: List<TransactionDto>,
+        transactions: MutableList<TransactionDto>,
         var merkleHash: String,
         var blockHash: BlockHash,
         val nodePublicKey: String,

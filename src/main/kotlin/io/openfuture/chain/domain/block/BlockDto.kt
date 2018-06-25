@@ -9,7 +9,7 @@ class BlockDto(
          tmestamp: Long,
          orderNumber: Long,
          previousHash: String,
-         transactions: List<TransactionDto>
+         transactions: MutableList<TransactionDto>
 ): BaseBlockDto(tmestamp, orderNumber, previousHash, transactions) {
 
     fun mineBlock(privateKey: String, publicKey: String, difficulty: Int): MinedBlockDto {

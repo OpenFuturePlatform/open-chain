@@ -19,9 +19,6 @@ class DefaultBlockService(
     override fun count(): Long = repository.count()
 
     @Transactional(readOnly = true)
-    override fun getAll(): MutableList<Block> = repository.findAll()
-
-    @Transactional(readOnly = true)
     override fun getAll(pageRequest: Pageable): Page<Block> = repository.findAll(pageRequest)
 
     @Transactional(readOnly = true)
@@ -31,7 +28,8 @@ class DefaultBlockService(
     @Transactional
     override fun save(dto: MinedBlockDto): Block {
         val block = repository.save(Block.of(dto))
-        dto.transactions.forEach { transactionService.save(block, it) }
+        val transactions = dto.transactions.map { transactionService.save(block, it) }
+        block.transactions.addAll(transactions)
         return block
     }
 

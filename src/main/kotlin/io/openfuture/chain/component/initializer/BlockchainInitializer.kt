@@ -57,8 +57,8 @@ class BlockchainInitializer(
         return BlockHash(0, hash)
     }
 
-    private fun generateGenesisTransactions(): List<TransactionDto> {
-        return listOf()
+    private fun generateGenesisTransactions(): MutableList<TransactionDto> {
+        return mutableListOf()
     }
 
 }
