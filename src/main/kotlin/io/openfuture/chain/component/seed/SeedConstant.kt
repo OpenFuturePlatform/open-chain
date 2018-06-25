@@ -10,4 +10,8 @@ object SeedConstant {
 
     const val BYTE_SIZE = 8
 
+    const val SECOND_BYTE_OFFSET = 1
+
+    const val THIRD_BYTE_OFFSET = 2
+
 }

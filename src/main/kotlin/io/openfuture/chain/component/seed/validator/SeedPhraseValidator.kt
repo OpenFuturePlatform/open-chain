@@ -6,7 +6,9 @@ import io.openfuture.chain.repository.SeedWordRepository
 import io.openfuture.chain.util.HashUtils
 import org.springframework.stereotype.Component
 import java.util.*
+import kotlin.experimental.and
 import kotlin.experimental.or
+import kotlin.experimental.xor
 
 @Component
 class SeedPhraseValidator(
@@ -17,6 +19,9 @@ class SeedPhraseValidator(
         private const val MULTIPLICITY_WITH_CHECKSUM_VALUE = 33
         private const val MAX_BYTE_SIZE_MOD = 7
         private const val OUT_OF_BYTE_SIZE = SeedConstant.WORD_INDEX_SIZE - SeedConstant.BYTE_SIZE
+        private const val MIN_FIRST_BIT_INDEX_IN_THREE_BYTE = 6
+        private const val SECOND_BYTE_SKIP_BIT_SIZE = 5
+        private const val THIRD_BYTE_SKIP_BIT_SIZE = 13
     }
 
     fun validate(seedPhrase: String) {
@@ -38,11 +43,11 @@ class SeedPhraseValidator(
         val entropyWithChecksum = ByteArray((entropyPlusChecksumSize + MAX_BYTE_SIZE_MOD) / SeedConstant.BYTE_SIZE)
         wordIndexesToEntropyWithCheckSum(seedWordIndexes, entropyWithChecksum)
         val entropy = Arrays.copyOf(entropyWithChecksum, entropyWithChecksum.size - 1)
-        val lastByte = entropyWithChecksum[entropyWithChecksum.size - 1]
         val entropySha = HashUtils.sha256(entropy)[0]
-        val mask = ((1 shl SeedConstant.BYTE_SIZE - checksumSize) - 1).inv().toByte()
+        val mask = ((1 shl (SeedConstant.BYTE_SIZE - checksumSize)) - 1).inv().toByte()
 
-        if (entropySha.toInt() xor lastByte.toInt() and mask.toInt() != 0) {
+        val lastByte = entropyWithChecksum[entropyWithChecksum.size - 1]
+        if (entropySha xor lastByte and mask != 0.toByte()) {
             throw SeedValidationException("Invalid checksum for seed phrase")
         }
     }
@@ -88,16 +93,16 @@ class SeedPhraseValidator(
 
     private fun writeSecondByteToArray(bytes: ByteArray, byteSkip: Int, bitSkip: Int, value: Int) {
         val valueInByte = bytes[byteSkip + 1]
-        val i = 5 - bitSkip
+        val i = SECOND_BYTE_SKIP_BIT_SIZE - bitSkip
         val toWrite = (if (i > 0) value shl i else value shr -i).toByte()
-        bytes[byteSkip + 1] = (valueInByte or toWrite)
+        bytes[byteSkip + SeedConstant.SECOND_BYTE_OFFSET] = (valueInByte or toWrite)
     }
 
     private fun writeThirdByteToArray(bytes: ByteArray, byteSkip: Int, bitSkip: Int, value: Int) {
-        if (bitSkip >= 6) {
-            val lastByteIndex = byteSkip + 2
+        if (bitSkip >= MIN_FIRST_BIT_INDEX_IN_THREE_BYTE) {
+            val lastByteIndex = byteSkip + SeedConstant.THIRD_BYTE_OFFSET
             val lastByteValue = bytes[lastByteIndex]
-            val toWrite = (value shl (13 - bitSkip)).toByte()
+            val toWrite = (value shl (THIRD_BYTE_SKIP_BIT_SIZE - bitSkip)).toByte()
             bytes[lastByteIndex] = (lastByteValue or toWrite)
         }
     }
