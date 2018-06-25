@@ -1,10 +1,8 @@
 CREATE TABLE seed_words (
-  id            INTEGER PRIMARY KEY,
-  ind    INTEGER NOT NULL,
-  value    VARCHAR NOT NULL
+  id    INTEGER PRIMARY KEY,
+  ind   INTEGER NOT NULL UNIQUE,
+  value VARCHAR NOT NULL
 );
-
-CREATE INDEX seed_words_ind ON seed_words (ind);
 
 INSERT INTO seed_words (ind, value) VALUES (0, 'abandon');
 INSERT INTO seed_words (ind, value) VALUES (1, 'ability');
