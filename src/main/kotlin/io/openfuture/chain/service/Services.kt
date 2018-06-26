@@ -6,6 +6,7 @@ import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
+import io.openfuture.chain.domain.key.KeyPair
 import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Block
 
@@ -44,5 +45,13 @@ interface CryptoService {
 interface TransactionService {
 
     fun save(request: TransactionRequest)
+
+}
+
+interface KeyGenerationService {
+
+    fun generateKeyPair(seed: String): KeyPair
+
+    fun generateKeyPair(pair: KeyPair): KeyPair
 
 }
