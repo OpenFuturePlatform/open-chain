@@ -9,15 +9,15 @@ class ECKey {
         val curve = SECNamedCurves.getByName("secp256k1")!!
     }
 
-    private var private: BigInteger? = null
-    private var public: ByteArray? = null
+    var private: BigInteger? = null
+    var public: ByteArray? = null
 
     constructor(bytes: ByteArray) : this(bytes, true)
 
     constructor(left: ByteArray, parent: ECKey) {
         if (parent.hasPrivate()) {
-            this.private = BigInteger(1, left).add(parent.private!!).mod(curve.getN())
-            setPub(true, null)
+            this.private = BigInteger(1, left).add(parent.private!!).mod(curve.n)
+            setPublic(true, null)
         } else {
             throw Error("Support derived ECKey with public key only")
         }
@@ -26,19 +26,19 @@ class ECKey {
     constructor(bytes: ByteArray, isPrivate: Boolean) {
         if (isPrivate) {
             this.private = BigInteger(1, bytes)
-            setPub(true, null)
+            setPublic(true, null)
         } else {
-            setPub(false, bytes)
+            setPublic(false, bytes)
         }
     }
 
     private fun hasPrivate() = null != private
 
-    private fun setPub(fromPrivate: Boolean, bytes: ByteArray?) {
-        if (fromPrivate) {
-            public = curve.getG().multiply(private).encoded
+    private fun setPublic(fromPrivate: Boolean, bytes: ByteArray?) {
+        public = if (fromPrivate) {
+            curve.g.multiply(private).encoded
         } else {
-            public = bytes
+            bytes
         }
     }
 
