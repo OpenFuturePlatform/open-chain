@@ -21,6 +21,8 @@ ext {
     kotlinVersion = '1.2.50'
     queryDslVersion = '4.2.1'
     protobufVersion = '3.5.1'
+    bouncycastleVersion = '1.50'
+
 }
 
 dependencies {
@@ -49,6 +51,9 @@ dependencies {
     // DevTools
     runtime('org.springframework.boot:spring-boot-devtools')
     compileOnly('org.springframework.boot:spring-boot-configuration-processor')
+
+    //Cryptography
+    compile("org.bouncycastle:bcprov-jdk15on:${bouncycastleVersion}")
 
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
