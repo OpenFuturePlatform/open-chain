@@ -1,7 +1,7 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.domain.HardwareInfo
-import io.openfuture.chain.domain.block.MinedBlockDto
+import io.openfuture.chain.domain.block.BlockDto
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
@@ -34,7 +34,14 @@ interface BlockService {
 
     fun getLast(): Block
 
-    fun save(dto: MinedBlockDto): Block
+    fun add(block: BlockDto): Block
+
+    fun createGenesis(): BlockDto
+
+    fun createNext(privateKey: String, publicKey: String, difficulty: Int,
+                   transactions: MutableList<TransactionDto>): BlockDto
+
+    fun isValid(block: BlockDto): Boolean
 
 }
 

@@ -1,6 +1,6 @@
 package io.openfuture.chain.entity
 
-import io.openfuture.chain.domain.block.MinedBlockDto
+import io.openfuture.chain.domain.block.BlockDto
 import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.*
 
@@ -37,11 +37,11 @@ class Block(
 
 ) : BaseModel() {
     companion object {
-        fun of(dto: MinedBlockDto): Block = Block(
-                dto.orderNumber,
-                dto.timestamp,
-                dto.previousHash,
-                dto.merkleHash,
+        fun of(dto: BlockDto): Block = Block(
+                dto.blockData.orderNumber,
+                dto.blockData.timestamp,
+                dto.blockData.previousHash,
+                dto.blockData.merkleHash.hash,
                 dto.blockHash.nonce,
                 dto.blockHash.hash,
                 dto.nodePublicKey,

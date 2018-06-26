@@ -1,8 +1,11 @@
 package io.openfuture.chain.service
 
+import io.openfuture.chain.component.NodeClock
 import io.openfuture.chain.config.ServiceTests
-import io.openfuture.chain.domain.block.MinedBlockDto
+import io.openfuture.chain.domain.block.BlockDto
+import io.openfuture.chain.domain.block.nested.BlockData
 import io.openfuture.chain.domain.block.nested.BlockHash
+import io.openfuture.chain.domain.block.nested.MerkleHash
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
@@ -23,12 +26,14 @@ internal class DefaultBlockServiceTest: ServiceTests() {
     @Mock private lateinit var pageable: Pageable
     @Mock private lateinit var repository: BlockRepository
     @Mock private lateinit var transactionService: TransactionService
+    @Mock private lateinit var nodeClock: NodeClock
 
     private lateinit var service: BlockService
 
+
     @Before
     fun setUp() {
-        service = DefaultBlockService(repository, transactionService)
+        service = DefaultBlockService(repository, transactionService, nodeClock)
     }
 
     @Test
@@ -60,32 +65,32 @@ internal class DefaultBlockServiceTest: ServiceTests() {
     }
 
     @Test
-    fun save() {
-        val transactionDto = createTransactionDto()
-        val minedBlockDto = createMinedBlockDto()
-        minedBlockDto.transactions.add(transactionDto)
-
-        val expectedBlock = Block.of(minedBlockDto)
-        val expectedTransaction = Transaction.of(expectedBlock, transactionDto)
+    fun add() {
+        val transaction = createTransactionDto()
+        val block = createNextBlockDto(mutableListOf(transaction))
+        val expectedBlock = Block.of(block)
+        val expectedTransaction = Transaction.of(expectedBlock, transaction)
         expectedBlock.transactions = mutableListOf(expectedTransaction)
 
         given(repository.save(any(Block::class.java))).willReturn(expectedBlock)
-        given(transactionService.save(expectedBlock, transactionDto)).willReturn(expectedTransaction)
+        given(transactionService.save(expectedBlock, transaction)).willReturn(expectedTransaction)
 
-        val actualBlock = service.save(minedBlockDto)
+        val actualBlock = service.add(block)
         assertThat(actualBlock).isEqualTo(expectedBlock)
     }
 
-    private fun createMinedBlockDto(): MinedBlockDto {
-        return MinedBlockDto(0, 0, "previousHash", mutableListOf(),
-                "merkleHash", BlockHash(0, "hash"), "nodePublicKey",
-                "nodeSignature")
+    private fun createNextBlockDto(transactions: MutableList<TransactionDto>): BlockDto {
+        val previousBlock = createBlockDto(mutableListOf())
+        given(repository.findFirstByOrderByOrderNumberDesc()).willReturn(Block.of(previousBlock))
+        return service.createNext("privateKey", "publicKey", 1, transactions)
     }
 
-    private fun createTransactionDto(): TransactionDto {
-        return TransactionDto(0, 0, "recipientKey", "senderKey",
-                "signature")
-    }
+    private fun createBlockDto(transactions: MutableList<TransactionDto>): BlockDto = BlockDto(BlockData(0,
+            0, "previousHash", MerkleHash("merkleHash", transactions)),
+            BlockHash(0, "hash"), "nodePublicKey", "nodeSignature")
+
+    private fun createTransactionDto(): TransactionDto = TransactionDto(0, 0,
+            "recipientKey", "senderKey", "signature")
 
     private fun createBlock(): Block = Block(1, 0, "previousHash",
             "merkleHash", 0, "hash", "nodeKey", "nodeSignature", mutableListOf())

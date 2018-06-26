@@ -19,6 +19,7 @@ internal class DefaultTransactionServiceTest: ServiceTests() {
 
     private lateinit var service: TransactionService
 
+
     @Before
     fun setUp() {
         service = DefaultTransactionService(repository)
@@ -39,9 +40,8 @@ internal class DefaultTransactionServiceTest: ServiceTests() {
     private fun createBlock(): Block = Block(1, 0, "previousHash",
             "merkleHash", 0, "hash", "nodeKey", "nodeSignature", mutableListOf())
 
-    private fun createTransactionDto(): TransactionDto {
-        return TransactionDto(0, 0, "recipientKey", "senderKey",
-                "signature")
-    }
+    private fun createTransactionDto(): TransactionDto = TransactionDto(0, 0,
+            "recipientKey", "senderKey", "signature")
 
 }
+
