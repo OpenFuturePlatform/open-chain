@@ -4,9 +4,9 @@ import io.openfuture.chain.domain.transaction.TransactionDto
 import org.springframework.stereotype.Component
 
 @Component
-class PendingTransactionStorage {
-
-    private var pendingTransactions: MutableList<TransactionDto> = mutableListOf()
+class PendingTransactionStorage(
+        private var pendingTransactions: MutableList<TransactionDto> = mutableListOf()
+) {
 
     fun getAll(): List<TransactionDto> {
         return this.pendingTransactions.toList()
