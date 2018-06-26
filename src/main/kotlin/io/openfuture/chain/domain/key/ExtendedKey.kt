@@ -46,4 +46,6 @@ class ExtendedKey {
         private val xprv = byteArrayOf(0x04, 0x88.toByte(), 0xAD.toByte(), 0xE4.toByte())
     }
 
+    fun derive(i: Int) = ExtendedKey(ByteArray(0))
+
 }
