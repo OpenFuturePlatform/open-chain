@@ -16,14 +16,10 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.Pageable
-import java.util.*
 
 
 internal class DefaultBlockServiceTest: ServiceTests() {
 
-    @Mock private lateinit var pageable: Pageable
     @Mock private lateinit var repository: BlockRepository
     @Mock private lateinit var transactionService: TransactionService
     @Mock private lateinit var nodeClock: NodeClock
@@ -37,23 +33,11 @@ internal class DefaultBlockServiceTest: ServiceTests() {
     }
 
     @Test
-    fun count() {
+    fun chainSize() {
         val expectedCount = 1L
         given(repository.count()).willReturn(expectedCount)
-        val actualCount = service.count()
+        val actualCount = service.chainSize()
         assertThat(actualCount).isEqualTo(expectedCount)
-    }
-
-    @Test
-    fun getAll() {
-        val block = createBlock()
-        val expectedBlockPages = PageImpl(Collections.singletonList(block), pageable, 1)
-
-        given(repository.findAll(pageable)).willReturn(expectedBlockPages)
-
-        val actualBlockPages = service.getAll(pageable)
-
-        assertThat(actualBlockPages).isEqualTo(expectedBlockPages)
     }
 
     @Test
@@ -82,7 +66,7 @@ internal class DefaultBlockServiceTest: ServiceTests() {
     private fun createNextBlockDto(transactions: MutableList<TransactionDto>): BlockDto {
         val previousBlock = createBlockDto(mutableListOf())
         given(repository.findFirstByOrderByOrderNumberDesc()).willReturn(Block.of(previousBlock))
-        return service.createNext("privateKey", "publicKey", 1, transactions)
+        return service.create("privateKey", "publicKey", 1, transactions)
     }
 
     private fun createBlockDto(transactions: MutableList<TransactionDto>): BlockDto = BlockDto(BlockData(0,

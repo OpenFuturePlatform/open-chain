@@ -9,8 +9,6 @@ import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 
 interface HardwareInfoService {
 
@@ -28,18 +26,14 @@ interface HardwareInfoService {
 
 interface BlockService {
 
-    fun count(): Long
-
-    fun getAll(pageRequest: Pageable): Page<Block>
+    fun chainSize(): Long
 
     fun getLast(): Block
 
     fun add(block: BlockDto): Block
 
-    fun createGenesis(): BlockDto
-
-    fun createNext(privateKey: String, publicKey: String, difficulty: Int,
-                   transactions: MutableList<TransactionDto>): BlockDto
+    fun create(privateKey: String, publicKey: String, difficulty: Int,
+               transactions: MutableList<TransactionDto>): BlockDto
 
     fun isValid(block: BlockDto): Boolean
 
