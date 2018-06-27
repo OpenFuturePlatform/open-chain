@@ -4,6 +4,7 @@ import io.openfuture.chain.component.seed.SeedConstant
 import io.openfuture.chain.exception.SeedValidationException
 import io.openfuture.chain.repository.SeedWordRepository
 import io.openfuture.chain.util.HashUtils
+import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
 import java.util.*
 import kotlin.experimental.and
@@ -25,7 +26,7 @@ class SeedPhraseValidator(
     }
 
     fun validate(seedPhrase: String) {
-        val seedPhraseWords = seedPhrase.split(SeedConstant.SEED_PHRASE_SEPARATOR)
+        val seedPhraseWords = seedPhrase.split(StringUtils.SPACE)
         val seedWordIndexes = findWordIndexes(seedPhraseWords)
         validate(seedWordIndexes)
     }

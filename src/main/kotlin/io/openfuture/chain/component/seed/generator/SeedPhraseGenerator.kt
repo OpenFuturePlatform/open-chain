@@ -21,12 +21,12 @@ class SeedPhraseGenerator(
     }
 
     fun createSeedPhrase(length: PhraseLength): String {
-        val entropy = ByteArray(length.getByteLength())
+        val entropy = ByteArray(length.byteLength)
         SecureRandom().nextBytes(entropy)
 
         val wordIndexes = wordIndexes(entropy)
         val words = Array(wordIndexes.size) { seedWordRepository.findOneByIndex(wordIndexes[it]).value }
-        return StringUtils.arrayToDelimitedString(words, SeedConstant.SEED_PHRASE_SEPARATOR)
+        return StringUtils.arrayToDelimitedString(words, org.apache.commons.lang3.StringUtils.SPACE)
     }
 
     private fun wordIndexes(entropy: ByteArray): IntArray {

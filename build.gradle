@@ -43,7 +43,7 @@ dependencies {
     compile('org.xerial:sqlite-jdbc:3.23.1')
 
     // Utils
-    compile('org.apache.commons:commons-lang3:3.1')
+    compile('org.apache.commons:commons-lang3')
     compile('com.github.oshi:oshi-core:3.5.0')
 
     // DevTools
