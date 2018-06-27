@@ -4,9 +4,11 @@ import io.openfuture.chain.domain.block.BlockDto
 import io.openfuture.chain.domain.block.nested.BlockData
 import io.openfuture.chain.domain.block.nested.BlockHash
 import io.openfuture.chain.domain.block.nested.MerkleHash
+import io.openfuture.chain.nio.client.handler.ConnectionClientHandler
 import io.openfuture.chain.service.DefaultBlockService
 import io.openfuture.chain.util.BlockUtils
 import io.openfuture.chain.util.HashUtils
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
 
@@ -15,11 +17,17 @@ class BlockchainInitializer(
         private val blockService: DefaultBlockService
 ) {
 
+    companion object {
+        private val log = LoggerFactory.getLogger(ConnectionClientHandler::class.java)
+    }
+
     @PostConstruct
     fun initBlockChain() {
         if (0L == blockService.chainSize()) {
             blockService.add(createGenesisBlock())
         }
+
+        log.info("Block chain successfully initialized")
     }
 
     // todo temp solution

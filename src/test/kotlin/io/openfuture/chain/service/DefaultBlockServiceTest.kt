@@ -53,14 +53,14 @@ internal class DefaultBlockServiceTest: ServiceTests() {
         val transaction = createTransactionDto()
         val block = createNextBlockDto(mutableListOf(transaction))
         val expectedBlock = Block.of(block)
-        val expectedTransaction = Transaction.of(expectedBlock, transaction)
-        expectedBlock.transactions = mutableListOf(expectedTransaction)
+        val expectedTransaction = Transaction.of(transaction)
 
         given(repository.save(any(Block::class.java))).willReturn(expectedBlock)
-        given(transactionService.save(expectedBlock, transaction)).willReturn(expectedTransaction)
+        given(transactionService.toBlock(transaction.hash, expectedBlock)).willReturn(expectedTransaction)
 
         val actualBlock = service.add(block)
         assertThat(actualBlock).isEqualTo(expectedBlock)
+        assertThat(actualBlock.transactions).isEqualTo(mutableListOf(expectedTransaction))
     }
 
     private fun createNextBlockDto(transactions: MutableList<TransactionDto>): BlockDto {
@@ -74,7 +74,7 @@ internal class DefaultBlockServiceTest: ServiceTests() {
             BlockHash(0, "hash"), "nodePublicKey", "nodeSignature")
 
     private fun createTransactionDto(): TransactionDto = TransactionDto(0, 0,
-            "recipientKey", "senderKey", "signature")
+            "recipientKey", "senderKey", "signature", "hash")
 
     private fun createBlock(): Block = Block(1, 0, "previousHash",
             "merkleHash", 0, "hash", "nodeKey", "nodeSignature", mutableListOf())

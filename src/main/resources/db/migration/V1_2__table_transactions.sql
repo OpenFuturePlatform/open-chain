@@ -1,7 +1,7 @@
 CREATE TABLE transactions (
   id            INTEGER PRIMARY KEY,
-  block_id      INTEGER NOT NULL REFERENCES blocks,
-  hash          VARCHAR NOT NULL,
+  block_id      INTEGER NULLABLE REFERENCES blocks,
+  hash          VARCHAR NOT NULL UNIQUE,
   amount        INTEGER NOT NULL,
   timestamp     BIGINT  NOT NULL,
   recipient_key VARCHAR NOT NULL,

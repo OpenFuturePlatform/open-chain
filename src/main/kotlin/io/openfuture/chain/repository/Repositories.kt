@@ -17,4 +17,11 @@ interface BlockRepository : BaseRepository<Block> {
 }
 
 @Repository
-interface TransactionRepository : BaseRepository<Transaction>
+interface TransactionRepository : BaseRepository<Transaction> {
+
+    fun findOneByHash(hash: String): Transaction?
+
+    fun findAllByBlockIsNull(): List<Transaction>
+
+}
+

@@ -6,6 +6,7 @@ import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
+import io.openfuture.chain.domain.transaction.TransactionData
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
@@ -33,7 +34,7 @@ interface BlockService {
     fun add(block: BlockDto): Block
 
     fun create(privateKey: String, publicKey: String, difficulty: Int,
-               transactions: MutableList<TransactionDto>): BlockDto
+               transactions: List<TransactionDto>): BlockDto
 
     fun isValid(block: BlockDto): Boolean
 
@@ -41,6 +42,14 @@ interface BlockService {
 
 interface TransactionService {
 
-    fun save(block: Block, dto: TransactionDto): Transaction
+    fun get(hash: String): Transaction
+
+    fun getAllPending(): List<TransactionDto>
+
+    fun add(dto: TransactionDto): Transaction
+
+    fun create(data: TransactionData): TransactionDto
+
+    fun toBlock(hash: String, block: Block): Transaction
 
 }

@@ -1,24 +1,23 @@
 package io.openfuture.chain.domain.transaction
 
-import io.openfuture.chain.util.HashUtils
+import io.openfuture.chain.entity.Transaction
 
 class TransactionDto(
-    val amount: Int,
-    val timestamp: Long,
-    val recipientKey: String,
-    val senderKey: String,
-    val signature: String
+        val amount: Int,
+        val timestamp: Long,
+        val recipientKey: String,
+        val senderKey: String,
+        val signature: String,
+        var hash: String
 ) {
-    var hash: String = calculateHash()
 
-    private fun calculateHash(): String {
-        val builder = StringBuilder()
-        builder.append(this.amount)
-        builder.append(this.timestamp)
-        builder.append(this.recipientKey)
-        builder.append(this.senderKey)
-        builder.append(this.signature)
-        return HashUtils.generateHash(builder.toString().toByteArray())
-    }
+    constructor(transaction: Transaction) : this(
+            transaction.amount,
+            transaction.timestamp,
+            transaction.recipientkey,
+            transaction.senderKey,
+            transaction.signature,
+            transaction.hash
+    )
 
 }

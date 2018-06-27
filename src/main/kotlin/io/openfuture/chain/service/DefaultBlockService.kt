@@ -1,7 +1,6 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.component.NodeClock
-import io.openfuture.chain.component.storage.PendingTransactionStorage
 import io.openfuture.chain.domain.block.BlockDto
 import io.openfuture.chain.domain.block.nested.BlockData
 import io.openfuture.chain.domain.block.nested.BlockHash
@@ -38,13 +37,13 @@ class DefaultBlockService(
         }
 
         val persistBlock = repository.save(Block.of(block))
-        val transactions = block.blockData.merkleHash.transactions.map { transactionService.save(persistBlock, it) }
+        val transactions = block.blockData.merkleHash.transactions.map { transactionService.toBlock(it.hash, persistBlock) }
         persistBlock.transactions.addAll(transactions)
         return persistBlock
     }
 
     override fun create(privateKey: String, publicKey: String, difficulty: Int,
-                        transactions: MutableList<TransactionDto>): BlockDto {
+                        transactions: List<TransactionDto>): BlockDto {
         val previousBlock = this.getLast()
         val nextTimeStamp = nodeClock.networkTime()
         val nextOrderNumber = previousBlock.orderNumber + 1
