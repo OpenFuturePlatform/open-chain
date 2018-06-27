@@ -33,7 +33,7 @@ class ECKey {
         }
     }
 
-    fun getPrivate(): ByteArray? {
+    fun getPrivate(): ByteArray {
         if (isPrivateEmpty()) {
             return ByteArray(0)
         }

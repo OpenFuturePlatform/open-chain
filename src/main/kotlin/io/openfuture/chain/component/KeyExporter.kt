@@ -15,16 +15,18 @@ class KeyExporter {
 
     private fun getWIFBytes(key: ECKey): ByteArray {
         return key.private?.let {
-            val keyBytes = key.private!!.toByteArray()
-            val ek = ByteArray(keyBytes.size + 2)
-            ek[0] = 0x80.toByte()
-            System.arraycopy(keyBytes, 0, ek, 1, keyBytes.size)
-            ek[keyBytes.size + 1] = 0x01
-            val wif = ByteArray(keyBytes.size + 6)
-            val hash = HashUtils.generateHashBytes(ek)
-            System.arraycopy(ek, 0, wif, 0, ek.size)
-            System.arraycopy(hash, 0, wif, ek.size, 4)
-            wif
+            val keyBytes = key.getPrivate()
+
+            val extendedKey = ByteArray(keyBytes.size + 2)
+            extendedKey[0] = 0x80.toByte()
+            System.arraycopy(keyBytes, 0, extendedKey, 1, keyBytes.size)
+            extendedKey[keyBytes.size + 1] = 0x01
+
+            val checkSum = HashUtils.generateHashBytes(extendedKey)
+            val result = ByteArray(extendedKey.size + 4)
+            System.arraycopy(extendedKey, 0, result, 0, extendedKey.size)
+            System.arraycopy(checkSum, 0, result, extendedKey.size, 4)
+            result
         } ?: throw IllegalStateException("Unable to provide WIF if no private key is present")
     }
 
