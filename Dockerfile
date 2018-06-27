@@ -1,5 +1,4 @@
-FROM openjdk:8-jre-alpine
-
+FROM openjdk:8-jre
 WORKDIR root/
 
 ADD build/libs/*.jar ./application.jar
