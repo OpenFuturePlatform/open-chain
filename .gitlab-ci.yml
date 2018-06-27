@@ -134,9 +134,6 @@ deploy-development:
   script: *deploy_to_host
   only:
     - sprint
-  environment:
-    name: development
-    url: http://${DEPLOY_HOST}:8080
 
 deploy-production:
   stage: deploy
@@ -149,6 +146,3 @@ deploy-production:
   script: *deploy_to_host
   only:
     - tags
-  environment:
-    name: production
-    url: http://${DEPLOY_HOST}:8080
