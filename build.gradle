@@ -22,7 +22,6 @@ ext {
     queryDslVersion = '4.2.1'
     protobufVersion = '3.5.1'
     bouncycastleVersion = '1.50'
-
 }
 
 dependencies {
