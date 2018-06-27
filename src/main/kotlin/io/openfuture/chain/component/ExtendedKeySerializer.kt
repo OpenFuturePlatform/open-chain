@@ -5,6 +5,9 @@ import io.openfuture.chain.util.ByteUtils
 import org.springframework.stereotype.Component
 import java.io.ByteArrayOutputStream
 
+/**
+ * Component for serialization public and private keys with correct prefixes.
+ */
 @Component
 class ExtendedKeySerializer {
 

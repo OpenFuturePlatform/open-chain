@@ -3,6 +3,12 @@ package io.openfuture.chain.component
 import io.openfuture.chain.domain.key.ExtendedKey
 import org.springframework.stereotype.Component
 
+/**
+ * Component for hierarchical generating keys depending on the derivation path.
+ * When derivation path is m/i then will be derived account keys.
+ * When derivation path is m/i/k then will be derived external or internal account keys.
+ * When derivation path is m/i/k/n then will be derived wallet keys.
+ */
 @Component
 class DerivationKeysHelper {
 

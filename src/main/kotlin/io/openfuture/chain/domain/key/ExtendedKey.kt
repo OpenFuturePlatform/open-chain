@@ -53,7 +53,7 @@ class ExtendedKey {
     /**
      *  RIPE-MD160(SHA256(public key bytes))
      */
-    fun getFingerprint(): Int {
+    private fun getFingerprint(): Int {
         val keyHash = HashUtils.keyHash(ecKey.public!!)
         var fingerprint = 0
         for (i in 0..3) {
