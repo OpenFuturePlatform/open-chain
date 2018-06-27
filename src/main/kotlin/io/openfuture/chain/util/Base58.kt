@@ -43,10 +43,10 @@ object Base58 {
         }
 
         while (--leadingZerosCount > 0) {
-            encoded[--outputStart] = ENCODED_ZERO;
+            encoded[--outputStart] = ENCODED_ZERO
         }
 
-        return String(encoded, outputStart, encoded.size - outputStart);
+        return String(encoded, outputStart, encoded.size - outputStart)
     }
 
     fun encodeWithChecksum(bytes: ByteArray): String {

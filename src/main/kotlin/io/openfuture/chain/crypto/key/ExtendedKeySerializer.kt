@@ -12,12 +12,12 @@ import java.io.ByteArrayOutputStream
 class ExtendedKeySerializer {
 
     companion object {
-        private val xpub = byteArrayOf(0x04, 0x88.toByte(), 0xB2.toByte(), 0x1E.toByte())
-        private val xprv = byteArrayOf(0x04, 0x88.toByte(), 0xAD.toByte(), 0xE4.toByte())
+        private val xpub = byteArrayOf(0x04.toByte(), 0x88.toByte(), 0xB2.toByte(), 0x1E.toByte())
+        private val xprv = byteArrayOf(0x04.toByte(), 0x88.toByte(), 0xAD.toByte(), 0xE4.toByte())
     }
 
     fun serializePublic(extendedKey: ExtendedKey): String {
-        return serialize(xpub, extendedKey, extendedKey.ecKey.public!!)
+        return serialize(xpub, extendedKey, extendedKey.ecKey.public)
     }
 
     fun serializePrivate(extendedKey: ExtendedKey): String {

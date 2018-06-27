@@ -20,9 +20,9 @@ class ECKey(
         curve.g.multiply(BigInteger(1, bytes)).getEncoded(true)
     )
 
-    constructor(left: ByteArray, parent: ECKey): this(
-        BigInteger(1, left).add(parent.private).mod(curve.n),
-        curve.g.multiply(BigInteger(1, left)).getEncoded(true)
+    constructor(bytes: ByteArray, parent: ECKey): this(
+        BigInteger(1, bytes).add(parent.private).mod(curve.n),
+        curve.g.multiply(BigInteger(1, bytes).add(parent.private).mod(curve.n)).getEncoded(true)
     )
 
     fun getPrivate(): ByteArray {
