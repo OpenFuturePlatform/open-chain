@@ -53,7 +53,7 @@ class ECKey {
     }
 
     fun isPrivateEmpty(): Boolean {
-        return null != private
+        return null == private
     }
 
 }
