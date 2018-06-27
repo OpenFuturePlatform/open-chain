@@ -1,7 +1,9 @@
 package io.openfuture.chain.component
 
 import io.openfuture.chain.domain.key.ExtendedKey
+import org.springframework.stereotype.Component
 
+@Component
 class DerivationKeysHelper {
 
     companion object {
