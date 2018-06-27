@@ -1,8 +1,11 @@
 package io.openfuture.chain.domain.key
 
+import io.openfuture.chain.util.HashUtils
 import org.bouncycastle.asn1.sec.SECNamedCurves
 import org.bouncycastle.asn1.sec.SECObjectIdentifiers
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.math.BigInteger
+import java.util.*
 
 class ECKey {
 
@@ -19,7 +22,7 @@ class ECKey {
     constructor(left: ByteArray, parent: ECKey) {
         if (!parent.isPrivateEmpty()) {
             private = BigInteger(1, left).add(parent.private!!).mod(CURVE.n)
-            public = CURVE.g.multiply(private).encoded
+            public = CURVE.g.multiply(private).getEncoded(true)
         } else {
             throw Error("Support derived ECKey with public key only")
         }
@@ -28,7 +31,7 @@ class ECKey {
     constructor(bytes: ByteArray, isPrivate: Boolean) {
         if (isPrivate) {
             this.private = BigInteger(1, bytes)
-            public = CURVE.g.multiply(private).encoded
+            public = CURVE.g.multiply(private).getEncoded(true)
         } else {
             public = bytes
         }
@@ -47,7 +50,7 @@ class ECKey {
 
         val tmp = ByteArray(PRIVATE_KEY_SIZE)
         System.arraycopy(privateInBytes, Math.max(0, privateInBytes.size - PRIVATE_KEY_SIZE), tmp,
-                Math.max(0, PRIVATE_KEY_SIZE - privateInBytes.size), Math.min(PRIVATE_KEY_SIZE, privateInBytes.size))
+            Math.max(0, PRIVATE_KEY_SIZE - privateInBytes.size), Math.min(PRIVATE_KEY_SIZE, privateInBytes.size))
 
         return tmp
     }
@@ -56,4 +59,9 @@ class ECKey {
         return null == private
     }
 
+    fun getAddress(): String {
+        val hash = HashUtils.keccakKeyHash(public!!)
+        val addressBytes = Arrays.copyOfRange(hash, 0, 20)
+        return "0x${ByteUtils.toHexString(addressBytes)}"
+    }
 }

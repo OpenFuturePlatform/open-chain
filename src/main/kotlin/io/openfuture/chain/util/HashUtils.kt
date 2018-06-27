@@ -2,6 +2,7 @@ package io.openfuture.chain.util
 
 import org.apache.commons.lang3.StringUtils
 import org.bouncycastle.crypto.digests.RIPEMD160Digest
+import org.bouncycastle.jcajce.provider.digest.Keccak
 import java.security.MessageDigest
 
 object HashUtils {
@@ -21,6 +22,12 @@ object HashUtils {
         digest.update(sha256, 0, sha256.size)
         digest.doFinal(result, 0)
         return result
+    }
+
+    fun keccakKeyHash(bytes: ByteArray): ByteArray {
+        val keccak = Keccak.Digest256()
+        keccak.update(bytes)
+        return keccak.digest()
     }
 
 }
