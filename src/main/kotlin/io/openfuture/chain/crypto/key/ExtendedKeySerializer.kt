@@ -1,6 +1,6 @@
-package io.openfuture.chain.component
+package io.openfuture.chain.crypto.key
 
-import io.openfuture.chain.domain.key.ExtendedKey
+import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.util.Base58
 import org.springframework.stereotype.Component
 import java.io.ByteArrayOutputStream
@@ -21,10 +21,6 @@ class ExtendedKeySerializer {
     }
 
     fun serializePrivate(extendedKey: ExtendedKey): String {
-        if (extendedKey.ecKey.isPrivateEmpty()) {
-            throw Exception("This is a public key only. Can't serialize a private key")
-        }
-
         return serialize(xprv, extendedKey, extendedKey.ecKey.getPrivate())
     }
 
