@@ -42,13 +42,12 @@ class DefaultBlockService(
         return persistBlock
     }
 
-    override fun create(privateKey: String, publicKey: String, difficulty: Int,
-                        transactions: List<TransactionDto>): BlockDto {
+    override fun create(privateKey: String, publicKey: String, difficulty: Int): BlockDto {
         val previousBlock = this.getLast()
         val nextTimeStamp = nodeClock.networkTime()
         val nextOrderNumber = previousBlock.orderNumber + 1
         val previousHash = previousBlock.hash
-        val merkleHash = generateMerkleHash(transactions)
+        val merkleHash = generateMerkleHash(transactionService.getAllPending())
         val blockData = BlockData(nextTimeStamp, nextOrderNumber, previousHash, merkleHash)
         val blockHash = generateBlockHash(difficulty, blockData)
         val signature = BlockUtils.generateSignature(privateKey, blockData, blockHash)

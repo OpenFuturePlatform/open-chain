@@ -33,8 +33,7 @@ interface BlockService {
 
     fun add(block: BlockDto): Block
 
-    fun create(privateKey: String, publicKey: String, difficulty: Int,
-               transactions: List<TransactionDto>): BlockDto
+    fun create(privateKey: String, publicKey: String, difficulty: Int): BlockDto
 
     fun isValid(block: BlockDto): Boolean
 

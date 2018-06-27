@@ -65,8 +65,9 @@ internal class DefaultBlockServiceTest: ServiceTests() {
 
     private fun createNextBlockDto(transactions: MutableList<TransactionDto>): BlockDto {
         val previousBlock = createBlockDto(mutableListOf())
+        given(transactionService.getAllPending()).willReturn(transactions)
         given(repository.findFirstByOrderByOrderNumberDesc()).willReturn(Block.of(previousBlock))
-        return service.create("privateKey", "publicKey", 1, transactions)
+        return service.create("privateKey", "publicKey", 1)
     }
 
     private fun createBlockDto(transactions: MutableList<TransactionDto>): BlockDto = BlockDto(BlockData(0,
