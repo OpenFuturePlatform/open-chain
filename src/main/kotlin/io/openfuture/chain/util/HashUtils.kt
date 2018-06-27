@@ -7,10 +7,11 @@ object HashUtils {
 
     private val SHA256 = "SHA-256"
 
-    fun generateHash(bytes: ByteArray): String {
+    fun generateHash(bytes: ByteArray) = generateHashBytes(bytes).fold("", { str, it -> str + "%02x".format(it) })
+
+    fun generateHashBytes(bytes: ByteArray): ByteArray {
         val instance = MessageDigest.getInstance(SHA256)
-        val digest = instance.digest(bytes)
-        return digest.fold("", { str, it -> str + "%02x".format(it) })
+        return instance.digest(bytes)
     }
 
     fun keyHash(bytes: ByteArray): ByteArray {
