@@ -46,11 +46,13 @@ dependencies {
     // Utils
     compile('org.apache.commons:commons-lang3')
     compile('com.github.oshi:oshi-core:3.5.0')
-    compile("org.bouncycastle:bcprov-jdk15on:${bouncycastleVersion}")
 
     // DevTools
     runtime('org.springframework.boot:spring-boot-devtools')
     compileOnly('org.springframework.boot:spring-boot-configuration-processor')
+
+    //Cryptography
+    compile("org.bouncycastle:bcprov-jdk15on:${bouncycastleVersion}")
 
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
