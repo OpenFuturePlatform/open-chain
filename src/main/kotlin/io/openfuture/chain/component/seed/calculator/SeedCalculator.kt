@@ -8,11 +8,11 @@ class SeedCalculator(
         private val hashAlgorithm: PBKDF2WithHmacSHA256 = SpongyCastlePBKDF2WithHmacSHA256.INSTANCE
 ) {
 
-    private val fixedSalt = getUtf8Bytes("mnemonic")
+    private val fixedSalt = getUtf8Bytes("Openfuture")
 
-    fun calculateSeed(mnemonic: String, passphrase: String = ""): ByteArray {
-        val mnemonicChars = Normalizer.normalize(mnemonic, Normalizer.Form.NFKD).toCharArray()
-        val normalizedPassphrase = Normalizer.normalize(passphrase, Normalizer.Form.NFKD)
+    fun calculateSeed(seedPhrase: String, passwordPhrase: String = ""): ByteArray {
+        val mnemonicChars = Normalizer.normalize(seedPhrase, Normalizer.Form.NFKD).toCharArray()
+        val normalizedPassphrase = Normalizer.normalize(passwordPhrase, Normalizer.Form.NFKD)
         val passphraseSalt = getUtf8Bytes(normalizedPassphrase)
         val salt = combine(fixedSalt, passphraseSalt)
         return hashAlgorithm.hash(mnemonicChars, salt)
