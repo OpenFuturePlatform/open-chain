@@ -1,7 +1,6 @@
 package io.openfuture.chain.util
 
 import java.security.MessageDigest
-import kotlin.experimental.or
 
 object HashUtils {
 

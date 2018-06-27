@@ -1,6 +1,7 @@
 package io.openfuture.chain.component.seed.validator
 
 import io.openfuture.chain.component.seed.SeedConstant
+import io.openfuture.chain.entity.SeedWord
 import io.openfuture.chain.exception.SeedValidationException
 import io.openfuture.chain.repository.SeedWordRepository
 import io.openfuture.chain.util.HashUtils
@@ -53,20 +54,13 @@ class SeedPhraseValidator(
         }
     }
 
-    private fun findWordIndexes(seedPhraseWords: Collection<String>): IntArray {
-        val seedPhraseWordSize = seedPhraseWords.size
-        val result = IntArray(seedPhraseWordSize)
-        for ((i, seedPhraseWord) in seedPhraseWords.withIndex()) {
-            val wordOptional = seedWordRepository.findOneByValue(seedPhraseWord)
+    private fun findWordIndexes(seedPhraseWords: Collection<String>): IntArray
+            = seedPhraseWords.map { getWord(it).index }.toIntArray()
 
-            if (!wordOptional.isPresent) {
-                throw SeedValidationException("Word $seedPhraseWord not found")
-            }
-
-            val word = wordOptional.get()
-            result[i] = word.index
+    private fun getWord(wordValue: String): SeedWord {
+        return seedWordRepository.findOneByValue(wordValue).orElseThrow {
+            throw SeedValidationException("Word $wordValue not found")
         }
-        return result
     }
 
     private fun wordIndexesToEntropyWithCheckSum(wordIndexes: IntArray, entropyWithChecksum: ByteArray) {
