@@ -11,11 +11,11 @@ import org.mockito.Mock
 
 class CryptoServiceTests : ServiceTests() {
 
-    @Mock
-    private lateinit var seedPhraseGenerator: SeedPhraseGenerator
+    @Mock private lateinit var seedPhraseGenerator: SeedPhraseGenerator
 
     @InjectMocks
     private lateinit var cryptoService: DefaultCryptoService
+
 
     @Test
     fun generateBip44SeedPhraseShouldReturnTwelveSeedPhraseWords() {
