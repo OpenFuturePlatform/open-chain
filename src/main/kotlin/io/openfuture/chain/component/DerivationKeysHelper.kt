@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 class DerivationKeysHelper {
 
     companion object {
-        private const val PATH_SEPARATOR = "/"
+        private const val PATH_SEPARATOR = '/'
         private const val CORRECT_PATH_PATTERN = "^m/([/]?[0-9]+){1,3}"
 
         private const val ACCOUNT_NUMBER_POSITION = 1
@@ -21,7 +21,7 @@ class DerivationKeysHelper {
             throw Exception("Invalid derivation path")
         }
 
-        val separatedPath = derivationPath.split(PATH_SEPARATOR.toRegex())
+        val separatedPath = derivationPath.split(PATH_SEPARATOR)
         val accountNumber = Integer.parseInt(separatedPath[ACCOUNT_NUMBER_POSITION])
 
         if (ACCOUNT_NUMBER_POSITION == separatedPath.size - 1) {
