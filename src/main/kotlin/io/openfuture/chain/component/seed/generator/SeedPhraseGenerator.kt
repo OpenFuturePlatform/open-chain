@@ -1,7 +1,11 @@
 package io.openfuture.chain.component.seed.generator
 
 import io.openfuture.chain.component.seed.PhraseLength
-import io.openfuture.chain.component.seed.SeedConstant
+import io.openfuture.chain.component.seed.SeedConstant.BYTE_SIZE
+import io.openfuture.chain.component.seed.SeedConstant.MULTIPLICITY_VALUE
+import io.openfuture.chain.component.seed.SeedConstant.SECOND_BYTE_OFFSET
+import io.openfuture.chain.component.seed.SeedConstant.THIRD_BYTE_OFFSET
+import io.openfuture.chain.component.seed.SeedConstant.WORD_INDEX_SIZE
 import io.openfuture.chain.repository.SeedWordRepository
 import io.openfuture.chain.util.HashUtils
 import org.springframework.stereotype.Component
@@ -30,40 +34,40 @@ class SeedPhraseGenerator(
     }
 
     private fun wordIndexes(entropy: ByteArray): IntArray {
-        val entropySize = entropy.size * SeedConstant.BYTE_SIZE
+        val entropySize = entropy.size * BYTE_SIZE
 
         val entropyWithChecksum = Arrays.copyOf(entropy, entropy.size + 1)
         entropyWithChecksum[entropy.size] = HashUtils.sha256(entropy)[0]
 
-        val checksumLength = entropySize / SeedConstant.MULTIPLICITY_VALUE
-        val mnemonicLength = (entropySize + checksumLength) / SeedConstant.WORD_INDEX_SIZE
+        val checksumLength = entropySize / MULTIPLICITY_VALUE
+        val mnemonicLength = (entropySize + checksumLength) / WORD_INDEX_SIZE
 
         val wordIndexes = IntArray(mnemonicLength)
         var bitOffset = 0
         var wordIndex = 0
         while (wordIndex < mnemonicLength) {
             wordIndexes[wordIndex] = nextWordsIndex(entropyWithChecksum, bitOffset)
-            bitOffset += SeedConstant.WORD_INDEX_SIZE
+            bitOffset += WORD_INDEX_SIZE
             wordIndex++
         }
         return wordIndexes
     }
 
     private fun nextWordsIndex(bytes: ByteArray, offset: Int): Int {
-        val skip = offset / SeedConstant.BYTE_SIZE
-        val lowerBitsToRemove = (MAX_BYTES_TO_READ * SeedConstant.BYTE_SIZE - SeedConstant.WORD_INDEX_SIZE) -
-                (offset % SeedConstant.BYTE_SIZE)
+        val skip = offset / BYTE_SIZE
+        val lowerBitsToRemove = (MAX_BYTES_TO_READ * BYTE_SIZE - WORD_INDEX_SIZE) -
+                (offset % BYTE_SIZE)
 
         val firstBytePart = bytes[skip].toInt() and BYTE_MASK shl DOUBLE_BYTE_SIZE
-        val secondBytePart = bytes[skip + SeedConstant.SECOND_BYTE_OFFSET].toInt() and BYTE_MASK shl SeedConstant.BYTE_SIZE
-        val thirdBytePart = if (lowerBitsToRemove < SeedConstant.BYTE_SIZE) {
-            bytes[skip + SeedConstant.THIRD_BYTE_OFFSET].toInt() and BYTE_MASK
+        val secondBytePart = bytes[skip + SECOND_BYTE_OFFSET].toInt() and BYTE_MASK shl BYTE_SIZE
+        val thirdBytePart = if (lowerBitsToRemove < BYTE_SIZE) {
+            bytes[skip + THIRD_BYTE_OFFSET].toInt() and BYTE_MASK
         } else {
             0
         }
 
         return ((firstBytePart or secondBytePart or thirdBytePart) shr lowerBitsToRemove) and (
-                1 shl SeedConstant.WORD_INDEX_SIZE) - 1
+                1 shl WORD_INDEX_SIZE) - 1
     }
 
 }
