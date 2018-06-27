@@ -1,4 +1,4 @@
-package io.openfuture.chain.component
+package io.openfuture.chain.component.key
 
 import io.openfuture.chain.domain.key.ExtendedKey
 import io.openfuture.chain.util.Base58
@@ -17,15 +17,15 @@ class ExtendedKeySerializer {
     }
 
     fun serializePublic(extendedKey: ExtendedKey): String {
-        return serialize(xpub, extendedKey, extendedKey.ecKey.public!!)
+        return serialize(xpub, extendedKey, extendedKey.ecKey!!.public!!)
     }
 
     fun serializePrivate(extendedKey: ExtendedKey): String {
-        if (extendedKey.ecKey.isPrivateEmpty()) {
+        if (extendedKey.ecKey!!.isPrivateEmpty()) {
             throw Exception("This is a public key only. Can't serialize a private key")
         }
 
-        return serialize(xprv, extendedKey, extendedKey.ecKey.getPrivate())
+        return serialize(xprv, extendedKey, extendedKey.ecKey!!.getPrivate())
     }
 
     private fun serialize(prefix: ByteArray, extendedKey: ExtendedKey, keyBytes: ByteArray): String {

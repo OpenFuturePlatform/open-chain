@@ -1,4 +1,4 @@
-package io.openfuture.chain.component
+package io.openfuture.chain.component.key
 
 import io.openfuture.chain.domain.key.ECKey
 import io.openfuture.chain.util.Base58

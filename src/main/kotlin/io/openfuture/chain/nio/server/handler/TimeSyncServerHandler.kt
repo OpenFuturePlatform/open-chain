@@ -1,10 +1,12 @@
 package io.openfuture.chain.nio.server.handler
 
 import io.netty.channel.ChannelHandlerContext
+import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.nio.base.BaseHandler
-import io.openfuture.chain.protocol.CommunicationProtocol.*
-import io.openfuture.chain.component.NodeClock
-import io.openfuture.chain.protocol.CommunicationProtocol.Type.*
+import io.openfuture.chain.protocol.CommunicationProtocol.Packet
+import io.openfuture.chain.protocol.CommunicationProtocol.TimeSyncResponse
+import io.openfuture.chain.protocol.CommunicationProtocol.Type.TIME_SYNC_REQUEST
+import io.openfuture.chain.protocol.CommunicationProtocol.Type.TIME_SYNC_RESPONSE
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 

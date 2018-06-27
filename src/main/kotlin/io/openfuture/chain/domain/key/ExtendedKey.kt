@@ -5,29 +5,13 @@ import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
-class ExtendedKey {
-
-    var chainCode: ByteArray
-    var ecKey: ECKey
-    var sequence: Int = 0
-    var depth: Int = 0
-    var parentFingerprint: Int = 0
-
-    constructor(
-        keyHash: ByteArray,
-        sequence: Int = 0,
-        depth: Int = 0,
-        parentFingerprint: Int = 0,
-        ecKey: ECKey? = null
-    ) {
-        val leftBytes = Arrays.copyOfRange(keyHash, 0, 32)
-        val rightBytes = Arrays.copyOfRange(keyHash, 32, 64)
-        this.chainCode = rightBytes
-        this.sequence = sequence
-        this.depth = depth
-        this.parentFingerprint = parentFingerprint
-        this.ecKey = ecKey?.let { ECKey(leftBytes, it) } ?: ECKey(leftBytes)
-    }
+class ExtendedKey(
+        var ecKey: ECKey?,
+        var chainCode: ByteArray,
+        var sequence: Int = 0,
+        var depth: Int = 0,
+        var parentFingerprint: Int = 0
+) {
 
     /**
      * Currently supports only simple derivation m/i
@@ -39,22 +23,26 @@ class ExtendedKey {
         val mac = Mac.getInstance("HmacSHA512", "BC")
         val key = SecretKeySpec(chainCode, "HmacSHA512")
         mac.init(key)
-        val public = this.ecKey.public!!
+        val public = this.ecKey!!.public!!
         val child = ByteArray(public.size + 4)
         System.arraycopy(public, 0, child, 0, public.size)
         child[public.size] = (i.ushr(24) and 0xff).toByte()
         child[public.size + 1] = (i.ushr(16) and 0xff).toByte()
         child[public.size + 2] = (i.ushr(8) and 0xff).toByte()
         child[public.size + 3] = (i and 0xff).toByte()
+
         val keyHash = mac.doFinal(child)
-        return ExtendedKey(keyHash, i, this.depth + 1, getFingerprint(), this.ecKey)
+        val leftBytes = Arrays.copyOfRange(keyHash, 0, 32)
+        val rightBytes = Arrays.copyOfRange(keyHash, 32, 64)
+        val ecKey = this.ecKey?.let { ECKey(leftBytes, it) } ?: ECKey(leftBytes)
+        return ExtendedKey(ecKey, rightBytes, i, this.depth + 1, getFingerprint())
     }
 
     /**
      *  RIPE-MD160(SHA256(public key bytes))
      */
     private fun getFingerprint(): Int {
-        val keyHash = HashUtils.keyHash(ecKey.public!!)
+        val keyHash = HashUtils.keyHash(ecKey!!.public!!)
         var fingerprint = 0
         for (i in 0..3) {
             fingerprint = fingerprint shl 8

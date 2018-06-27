@@ -1,4 +1,4 @@
-package io.openfuture.chain.component
+package io.openfuture.chain.component.key
 
 import io.openfuture.chain.domain.key.ExtendedKey
 import org.springframework.stereotype.Component
