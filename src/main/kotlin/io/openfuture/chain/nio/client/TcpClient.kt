@@ -3,9 +3,6 @@ package io.openfuture.chain.nio.client
 import io.netty.bootstrap.Bootstrap
 import io.openfuture.chain.nio.client.listener.ConnectionListener
 
-/**
- * @author Evgeni Krylov
- */
 class TcpClient(
     private val bootstrap: Bootstrap,
     private val host: String,
