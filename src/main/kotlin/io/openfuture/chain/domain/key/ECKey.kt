@@ -1,12 +1,13 @@
 package io.openfuture.chain.domain.key
 
 import org.bouncycastle.asn1.sec.SECNamedCurves
+import org.bouncycastle.asn1.sec.SECObjectIdentifiers
 import java.math.BigInteger
 
 class ECKey {
 
     companion object {
-        val curve = SECNamedCurves.getByName("secp256k1")!!
+        val CURVE = SECNamedCurves.getByOID(SECObjectIdentifiers.secp256k1)!!
         const val PRIVATE_KEY_SIZE = 32
     }
 
@@ -17,8 +18,8 @@ class ECKey {
 
     constructor(left: ByteArray, parent: ECKey) {
         if (!parent.isPrivateEmpty()) {
-            private = BigInteger(1, left).add(parent.private!!).mod(curve.n)
-            public = curve.g.multiply(private).encoded
+            private = BigInteger(1, left).add(parent.private!!).mod(CURVE.n)
+            public = CURVE.g.multiply(private).encoded
         } else {
             throw Error("Support derived ECKey with public key only")
         }
@@ -27,7 +28,7 @@ class ECKey {
     constructor(bytes: ByteArray, isPrivate: Boolean) {
         if (isPrivate) {
             this.private = BigInteger(1, bytes)
-            public = curve.g.multiply(private).encoded
+            public = CURVE.g.multiply(private).encoded
         } else {
             public = bytes
         }
