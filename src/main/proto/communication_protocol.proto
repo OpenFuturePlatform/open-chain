@@ -10,14 +10,15 @@ message Packet {
 
     oneof body {
         HeartBeat heart_beat = 2;
-        TimeResponse time_response = 3;
+        TimeSyncRequest time_sync_request = 3;
+        TimeSyncResponse time_sync_response = 4;
     }
 }
 
 enum Type {
     HEART_BEAT = 0;
-    TIME_REQUEST = 1;
-    TIME_RESPONSE = 2;
+    TIME_SYNC_REQUEST = 1;
+    TIME_SYNC_RESPONSE = 2;
 }
 
 message HeartBeat {
@@ -29,6 +30,11 @@ message HeartBeat {
     Type type = 1;
 }
 
-message TimeResponse {
-    int64 timestamp = 1;
+message TimeSyncResponse {
+    int64 nodeTimestamp = 1;
+    int64 networkTimestamp = 2;
+}
+
+message TimeSyncRequest {
+    int64 nodeTimestamp = 1;
 }

@@ -9,9 +9,6 @@ import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Component
 import java.util.concurrent.Executors
 
-/**
- * @author Evgeni Krylov
- */
 @Component
 class NioStarter(
     private val tcpServer: TcpServer,
