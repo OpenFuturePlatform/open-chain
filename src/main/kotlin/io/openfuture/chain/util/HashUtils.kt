@@ -1,13 +1,14 @@
 package io.openfuture.chain.util
 
+import org.apache.commons.lang3.StringUtils
 import org.bouncycastle.crypto.digests.RIPEMD160Digest
 import java.security.MessageDigest
 
 object HashUtils {
 
-    private val SHA256 = "SHA-256"
+    private const val SHA256 = "SHA-256"
 
-    fun generateHash(bytes: ByteArray) = generateHashBytes(bytes).fold("", { str, it -> str + "%02x".format(it) })
+    fun generateHash(bytes: ByteArray) = generateHashBytes(bytes).fold(StringUtils.EMPTY) { str, it -> str + "%02x".format(it) }
 
     fun generateHashBytes(bytes: ByteArray): ByteArray {
         val instance = MessageDigest.getInstance(SHA256)

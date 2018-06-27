@@ -16,17 +16,16 @@ class ExtendedKeySerializer {
         private val xprv = byteArrayOf(0x04, 0x88.toByte(), 0xAD.toByte(), 0xE4.toByte())
     }
 
-
     fun serializePublic(extendedKey: ExtendedKey): String {
         return serialize(xpub, extendedKey, extendedKey.ecKey.public!!)
     }
 
     fun serializePrivate(extendedKey: ExtendedKey): String {
-        if (!extendedKey.ecKey.isPrivateEmpty()) {
-            return serialize(xprv, extendedKey, extendedKey.ecKey.getPrivate()!!)
+        if (extendedKey.ecKey.isPrivateEmpty()) {
+            throw Exception("This is a public key only. Can't serialize a private key")
         }
 
-        throw Exception("This is a public key only. Can't serialize a private key")
+        return serialize(xprv, extendedKey, extendedKey.ecKey.getPrivate())
     }
 
     private fun serialize(prefix: ByteArray, extendedKey: ExtendedKey, keyBytes: ByteArray): String {
