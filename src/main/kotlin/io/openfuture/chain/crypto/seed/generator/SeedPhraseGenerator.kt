@@ -1,11 +1,11 @@
-package io.openfuture.chain.component.seed.generator
+package io.openfuture.chain.crypto.seed.generator
 
-import io.openfuture.chain.component.seed.PhraseLength
-import io.openfuture.chain.component.seed.SeedConstant.BYTE_SIZE
-import io.openfuture.chain.component.seed.SeedConstant.MULTIPLICITY_VALUE
-import io.openfuture.chain.component.seed.SeedConstant.SECOND_BYTE_OFFSET
-import io.openfuture.chain.component.seed.SeedConstant.THIRD_BYTE_OFFSET
-import io.openfuture.chain.component.seed.SeedConstant.WORD_INDEX_SIZE
+import io.openfuture.chain.crypto.seed.PhraseLength
+import io.openfuture.chain.crypto.seed.SeedConstant.BYTE_SIZE
+import io.openfuture.chain.crypto.seed.SeedConstant.MULTIPLICITY_VALUE
+import io.openfuture.chain.crypto.seed.SeedConstant.SECOND_BYTE_OFFSET
+import io.openfuture.chain.crypto.seed.SeedConstant.THIRD_BYTE_OFFSET
+import io.openfuture.chain.crypto.seed.SeedConstant.WORD_INDEX_SIZE
 import io.openfuture.chain.repository.SeedWordRepository
 import io.openfuture.chain.util.HashUtils
 import org.springframework.stereotype.Component

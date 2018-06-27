@@ -1,4 +1,4 @@
-package io.openfuture.chain.component.seed
+package io.openfuture.chain.crypto.seed
 
 object SeedConstant {
 

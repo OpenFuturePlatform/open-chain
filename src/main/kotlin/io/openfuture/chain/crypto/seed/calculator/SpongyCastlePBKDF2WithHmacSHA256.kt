@@ -1,4 +1,4 @@
-package io.openfuture.chain.component.seed.calculator
+package io.openfuture.chain.crypto.seed.calculator
 
 import org.bouncycastle.crypto.PBEParametersGenerator
 import org.bouncycastle.crypto.digests.SHA512Digest

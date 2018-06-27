@@ -1,4 +1,4 @@
-package io.openfuture.chain.component.seed.calculator
+package io.openfuture.chain.crypto.seed.calculator
 
 interface PBKDF2WithHmacSHA256 {
 

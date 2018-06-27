@@ -1,4 +1,4 @@
-package io.openfuture.chain.component.seed.calculator
+package io.openfuture.chain.crypto.seed.calculator
 
 import org.springframework.stereotype.Component
 import java.text.Normalizer

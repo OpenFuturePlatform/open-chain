@@ -1,6 +1,6 @@
-package io.openfuture.chain.component.seed.validator
+package io.openfuture.chain.crypto.seed.validator
 
-import io.openfuture.chain.component.seed.SeedConstant
+import io.openfuture.chain.crypto.seed.SeedConstant
 import io.openfuture.chain.entity.SeedWord
 import io.openfuture.chain.exception.SeedValidationException
 import io.openfuture.chain.repository.SeedWordRepository

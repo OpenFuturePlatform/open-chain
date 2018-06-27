@@ -1,8 +1,8 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.component.seed.PhraseLength
-import io.openfuture.chain.component.seed.generator.SeedPhraseGenerator
 import io.openfuture.chain.config.ServiceTests
+import io.openfuture.chain.crypto.seed.PhraseLength
+import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.mockito.BDDMockito.given
