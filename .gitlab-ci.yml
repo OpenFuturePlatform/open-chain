@@ -75,7 +75,7 @@ package-docker:
     - sprint
     - master
 
-package-artifacts:
+package-native:
   services:
     - docker:dind
   stage: package
