@@ -1,7 +1,7 @@
 package io.openfuture.chain.component
 
 import io.openfuture.chain.domain.key.ECKey
-import io.openfuture.chain.util.ByteUtils
+import io.openfuture.chain.util.Base58
 import io.openfuture.chain.util.HashUtils
 import org.springframework.stereotype.Component
 
@@ -11,7 +11,7 @@ class KeyExporter {
     /**
      * Exporting in a Wallet Import Format - a Base58 String representation of private key
      */
-    fun exportPrivateKey(key: ECKey): String = ByteUtils.toBase58(getWIFBytes(key))
+    fun exportPrivateKey(key: ECKey): String = Base58.encode(getWIFBytes(key))
 
     private fun getWIFBytes(key: ECKey): ByteArray {
         return key.private?.let {

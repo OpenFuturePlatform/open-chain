@@ -2,8 +2,6 @@ package io.openfuture.chain.domain.key
 
 import io.openfuture.chain.util.HashUtils
 import java.util.*
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
 
 class ExtendedKey {
 
@@ -42,21 +40,18 @@ class ExtendedKey {
      * Currently supports only simple derivation m/i
      * Accounts with internal/external key chains need to be implemented
      */
-    fun derive(i: Int) = getChild(i)
+    fun derive(sequence: Int) = getChild(sequence)
 
-    private fun getChild(i: Int): ExtendedKey {
-        val mac = Mac.getInstance("HmacSHA512", "BC")
-        val key = SecretKeySpec(chainCode, "HmacSHA512")
-        mac.init(key)
+    private fun getChild(sequence: Int): ExtendedKey {
         val public = this.ecKey.public!!
         val child = ByteArray(public.size + 4)
         System.arraycopy(public, 0, child, 0, public.size)
-        child[public.size] = (i.ushr(24) and 0xff).toByte()
-        child[public.size + 1] = (i.ushr(16) and 0xff).toByte()
-        child[public.size + 2] = (i.ushr(8) and 0xff).toByte()
-        child[public.size + 3] = (i and 0xff).toByte()
-        val keyHash = mac.doFinal(child)
-        return ExtendedKey(keyHash, i, this.depth + 1, getFingerprint(), this.ecKey)
+        child[public.size] = (sequence.ushr(24) and 0xff).toByte()
+        child[public.size + 1] = (sequence.ushr(16) and 0xff).toByte()
+        child[public.size + 2] = (sequence.ushr(8) and 0xff).toByte()
+        child[public.size + 3] = (sequence and 0xff).toByte()
+        val keyHash = HashUtils.hmacSha512(chainCode, child)
+        return ExtendedKey(keyHash, sequence, this.depth + 1, getFingerprint(), this.ecKey)
     }
 
     /**
