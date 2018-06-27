@@ -50,6 +50,6 @@ interface TransactionService {
 
     fun create(data: TransactionData): TransactionDto
 
-    fun toBlock(hash: String, block: Block): Transaction
+    fun addToBlock(hash: String, block: Block): Transaction
 
 }

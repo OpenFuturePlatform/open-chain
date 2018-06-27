@@ -56,7 +56,7 @@ internal class DefaultBlockServiceTest: ServiceTests() {
         val expectedTransaction = Transaction.of(transaction)
 
         given(repository.save(any(Block::class.java))).willReturn(expectedBlock)
-        given(transactionService.toBlock(transaction.hash, expectedBlock)).willReturn(expectedTransaction)
+        given(transactionService.addToBlock(transaction.hash, expectedBlock)).willReturn(expectedTransaction)
 
         val actualBlock = service.add(block)
         assertThat(actualBlock).isEqualTo(expectedBlock)

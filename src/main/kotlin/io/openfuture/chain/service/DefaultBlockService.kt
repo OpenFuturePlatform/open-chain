@@ -37,7 +37,7 @@ class DefaultBlockService(
         }
 
         val persistBlock = repository.save(Block.of(block))
-        val transactions = block.blockData.merkleHash.transactions.map { transactionService.toBlock(it.hash, persistBlock) }
+        val transactions = block.blockData.merkleHash.transactions.map { transactionService.addToBlock(it.hash, persistBlock) }
         persistBlock.transactions.addAll(transactions)
         return persistBlock
     }

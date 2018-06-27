@@ -34,7 +34,7 @@ class DefaultTransactionService(
     }
 
     @Transactional
-    override fun toBlock(hash: String, block: Block): Transaction {
+    override fun addToBlock(hash: String, block: Block): Transaction {
         val persisBlock = this.get(hash)
         if (null != persisBlock.block) {
             throw LogicException("Transaction with hash: $hash already belong to block!")
