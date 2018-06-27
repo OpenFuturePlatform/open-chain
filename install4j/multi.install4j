@@ -22,7 +22,7 @@
       <mountPoint id="58" root="" location="" mode="755" />
     </mountPoints>
     <entries>
-      <fileEntry mountPoint="58" file="/packages/build/lib/open-chain.jar" overwriteMode="4" shared="false" fileMode="644" uninstallMode="0" overrideFileMode="false" overrideOverwriteMode="false" overrideUninstallMode="false" />
+      <fileEntry mountPoint="58" file="/packages/build/libs/open-chain.jar" overwriteMode="4" shared="false" fileMode="644" uninstallMode="0" overrideFileMode="false" overrideOverwriteMode="false" overrideUninstallMode="false" />
     </entries>
     <components />
   </files>
