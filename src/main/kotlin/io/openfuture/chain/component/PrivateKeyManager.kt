@@ -26,7 +26,7 @@ class PrivateKeyManager {
             System.arraycopy(keyBytes, 0, extendedKey, 1, keyBytes.size)
             extendedKey[keyBytes.size + 1] = 0x01
 
-            val checkSum = HashUtils.generateHashBytes(extendedKey)
+            val checkSum = HashUtils.genarateDoubleHashBytes(extendedKey)
             val result = ByteArray(extendedKey.size + 4)
             System.arraycopy(extendedKey, 0, result, 0, extendedKey.size)
             System.arraycopy(checkSum, 0, result, extendedKey.size, 4)
@@ -46,7 +46,7 @@ class PrivateKeyManager {
     private fun checkChecksum(bytes: ByteArray) {
         val keyBytes = Arrays.copyOfRange(bytes, 0, bytes.size - 4)
         val checksum = Arrays.copyOfRange(bytes, bytes.size - 4, bytes.size)
-        val actualChecksum = Arrays.copyOfRange(HashUtils.generateHashBytes(keyBytes), 0, 4)
+        val actualChecksum = Arrays.copyOfRange(HashUtils.genarateDoubleHashBytes(keyBytes), 0, 4)
         if (!Arrays.equals(checksum, actualChecksum))
             throw IllegalArgumentException("Invalid checksum")
     }

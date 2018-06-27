@@ -50,7 +50,7 @@ object Base58 {
     }
 
     fun encodeWithChecksum(bytes: ByteArray): String {
-        val checkSum = HashUtils.generateHashBytes(HashUtils.generateHashBytes(bytes))
+        val checkSum = HashUtils.genarateDoubleHashBytes(bytes)
         val extended = ByteArray(bytes.size + 4)
         System.arraycopy(bytes, 0, extended, 0, bytes.size)
         System.arraycopy(checkSum, 0, extended, bytes.size, 4)
@@ -102,7 +102,7 @@ object Base58 {
             throw IllegalArgumentException("Input too short. Size: ${decoded.size}")
         val data = Arrays.copyOfRange(decoded, 0, decoded.size - 4)
         val checksum = Arrays.copyOfRange(decoded, decoded.size - 4, decoded.size)
-        val actualChecksum = Arrays.copyOfRange(HashUtils.generateHashBytes(HashUtils.generateHashBytes(data)), 0, 4)
+        val actualChecksum = Arrays.copyOfRange(HashUtils.genarateDoubleHashBytes(data), 0, 4)
         if (!Arrays.equals(checksum, actualChecksum))
             throw IllegalArgumentException("Invalid checksum")
         return data

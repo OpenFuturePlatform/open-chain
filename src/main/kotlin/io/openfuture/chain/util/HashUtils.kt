@@ -10,7 +10,9 @@ object HashUtils {
 
     fun generateHash(bytes: ByteArray) = generateHashBytes(bytes).fold(StringUtils.EMPTY) { str, it -> str + "%02x".format(it) }
 
-    fun generateHashBytes(bytes: ByteArray): ByteArray = MessageDigest.getInstance(SHA256).digest(bytes)
+    fun generateHashBytes(bytes: ByteArray) = MessageDigest.getInstance(SHA256).digest(bytes)
+
+    fun genarateDoubleHashBytes(bytes: ByteArray) = generateHashBytes(generateHashBytes(bytes))
 
     fun keyHash(bytes: ByteArray): ByteArray {
         val result = ByteArray(20)
