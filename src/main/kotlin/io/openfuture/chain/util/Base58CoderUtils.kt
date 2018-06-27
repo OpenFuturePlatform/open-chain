@@ -1,9 +1,10 @@
 package io.openfuture.chain.util
 
+import org.apache.commons.lang3.StringUtils
 import java.util.*
 
 
-object Base58 {
+object Base58CoderUtils {
 
     private val ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray()
     private val ENCODED_ZERO = ALPHABET[0]
@@ -18,7 +19,7 @@ object Base58 {
 
     fun encode(bytes: ByteArray): String {
         if (bytes.isEmpty()) {
-            return ""
+            return StringUtils.EMPTY
         }
 
         var leadingZerosCount = 0
@@ -43,10 +44,10 @@ object Base58 {
         }
 
         while (--leadingZerosCount > 0) {
-            encoded[--outputStart] = ENCODED_ZERO;
+            encoded[--outputStart] = ENCODED_ZERO
         }
 
-        return String(encoded, outputStart, encoded.size - outputStart);
+        return String(encoded, outputStart, encoded.size - outputStart)
     }
 
     fun encodeWithChecksum(bytes: ByteArray): String {

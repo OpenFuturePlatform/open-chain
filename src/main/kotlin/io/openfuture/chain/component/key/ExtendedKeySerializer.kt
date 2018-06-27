@@ -1,7 +1,7 @@
 package io.openfuture.chain.component.key
 
 import io.openfuture.chain.domain.key.ExtendedKey
-import io.openfuture.chain.util.Base58
+import io.openfuture.chain.util.Base58CoderUtils
 import org.springframework.stereotype.Component
 import java.io.ByteArrayOutputStream
 
@@ -12,8 +12,8 @@ import java.io.ByteArrayOutputStream
 class ExtendedKeySerializer {
 
     companion object {
-        private val xpub = byteArrayOf(0x04, 0x88.toByte(), 0xB2.toByte(), 0x1E.toByte())
-        private val xprv = byteArrayOf(0x04, 0x88.toByte(), 0xAD.toByte(), 0xE4.toByte())
+        val xpub = byteArrayOf(0x04, 0x88.toByte(), 0xB2.toByte(), 0x1E.toByte())
+        val xprv = byteArrayOf(0x04, 0x88.toByte(), 0xAD.toByte(), 0xE4.toByte())
     }
 
     fun serializePublic(extendedKey: ExtendedKey): String {
@@ -27,6 +27,7 @@ class ExtendedKeySerializer {
 
         return serialize(xprv, extendedKey, extendedKey.ecKey!!.getPrivate())
     }
+
 
     private fun serialize(prefix: ByteArray, extendedKey: ExtendedKey, keyBytes: ByteArray): String {
         val out = ByteArrayOutputStream()
@@ -47,7 +48,7 @@ class ExtendedKeySerializer {
         }
 
         out.write(keyBytes)
-        return Base58.encodeWithChecksum(out.toByteArray())
+        return Base58CoderUtils.encodeWithChecksum(out.toByteArray())
     }
 
 }
