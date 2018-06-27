@@ -21,7 +21,6 @@ class DerivationKeysHelper {
         private const val ADDRESS_NUMBER_POSITION = 3
     }
 
-
     fun derive(rootKey: ExtendedKey, derivationPath: String): ExtendedKey {
         if (!CORRECT_PATH_PATTERN.toRegex().matches(derivationPath)) {
             throw Exception("Invalid derivation path")
