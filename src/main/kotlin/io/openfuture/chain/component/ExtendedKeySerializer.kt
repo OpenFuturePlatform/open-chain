@@ -5,9 +5,6 @@ import io.openfuture.chain.util.ByteUtil
 import org.springframework.stereotype.Component
 import java.io.ByteArrayOutputStream
 
-/**
- * @author Alexey Skadorva
- */
 @Component
 class ExtendedKeySerializer {
 
