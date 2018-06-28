@@ -29,9 +29,6 @@ class DerivationKeysHelperTest {
         val serializedPrivateKey = serializer.serializePrivate(derivedKey)
         val serializedPublicKey = serializer.serializePublic(derivedKey)
 
-        println("02fc9e5af0ac8d9b3cecfe2a888e2117ba3d089d8585886c9c826b6b22a98d12ea")
-        println(ByteUtils.toHexString(derivedKey.ecKey.public))
-
         Assertions.assertThat(serializedPrivateKey)
             .isEqualTo("xprv9vHkqa6EV4sPZHYqZznhT2NPtPCjKuDKGY38FBWLvgaDx45zo9WQRUT3dKYnjwih2yJD9mkrocEZXo1ex8G81dwSM1fwqWpWkeS3v86pgKt")
         Assertions.assertThat(serializedPublicKey)
