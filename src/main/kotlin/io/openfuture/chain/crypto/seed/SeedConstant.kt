@@ -12,4 +12,8 @@ object SeedConstant {
 
     const val THIRD_BYTE_OFFSET = 2
 
+    const val DOUBLE_BYTE_SIZE = 16
+
+    const val SECOND_BYTE_SKIP_BIT_SIZE = DOUBLE_BYTE_SIZE - WORD_INDEX_SIZE
+
 }

@@ -2,6 +2,7 @@ package io.openfuture.chain.crypto.seed.generator
 
 import io.openfuture.chain.crypto.seed.PhraseLength
 import io.openfuture.chain.crypto.seed.SeedConstant.BYTE_SIZE
+import io.openfuture.chain.crypto.seed.SeedConstant.DOUBLE_BYTE_SIZE
 import io.openfuture.chain.crypto.seed.SeedConstant.MULTIPLICITY_VALUE
 import io.openfuture.chain.crypto.seed.SeedConstant.SECOND_BYTE_OFFSET
 import io.openfuture.chain.crypto.seed.SeedConstant.THIRD_BYTE_OFFSET
@@ -19,7 +20,6 @@ class SeedPhraseGenerator(
 ) {
 
     companion object {
-        private const val DOUBLE_BYTE_SIZE = 16
         private const val BYTE_MASK = 0xff
         private const val MAX_BYTES_TO_READ = 3
         private const val WORD_INDEX_MASK = (1 shl WORD_INDEX_SIZE) - 1
