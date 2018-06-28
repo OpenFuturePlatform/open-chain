@@ -35,11 +35,11 @@ class Transaction(
     companion object {
         fun of(dto: TransactionDto): Transaction = Transaction(
                 dto.hash,
-                dto.amount,
-                dto.timestamp,
-                dto.recipientKey,
-                dto.senderKey,
-                dto.signature
+                dto.data.amount,
+                dto.data.timestamp,
+                dto.data.recipientKey,
+                dto.data.senderKey,
+                dto.data.signature
         )
     }
 

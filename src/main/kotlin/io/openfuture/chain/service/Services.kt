@@ -51,4 +51,6 @@ interface TransactionService {
 
     fun addToBlock(hash: String, block: Block): Transaction
 
+    fun isValid(dto: TransactionDto): Boolean
+
 }

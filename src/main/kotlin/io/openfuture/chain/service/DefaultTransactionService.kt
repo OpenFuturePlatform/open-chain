@@ -6,6 +6,7 @@ import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.exception.NotFoundException
+import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.repository.TransactionRepository
 import io.openfuture.chain.util.HashUtils
 import io.openfuture.chain.util.TransactionUtils
@@ -23,14 +24,21 @@ class DefaultTransactionService(
     }
 
     @Transactional(readOnly = true)
-    override fun get(hash: String): Transaction = repository.findOneByHash(hash) ?: throw NotFoundException("Transaction with hash: $hash not exist!")
+    override fun get(hash: String): Transaction = repository.findOneByHash(hash)
+            ?: throw NotFoundException("Transaction with hash: $hash not exist!")
 
     @Transactional
-    override fun add(dto: TransactionDto): Transaction = repository.save(Transaction.of(dto))
+    override fun add(dto: TransactionDto): Transaction {
+        if (!this.isValid(dto)) {
+            throw ValidationException("Block is not valid!")
+        }
+
+        return repository.save(Transaction.of(dto))
+    }
 
     override fun create(data: TransactionData): TransactionDto {
         val hash = TransactionUtils.generateHash(data)
-        return TransactionDto(data.amount, data.timestamp, data.recipientKey, data.senderKey, data.signature, hash)
+        return TransactionDto(data, hash)
     }
 
     @Transactional
@@ -42,6 +50,13 @@ class DefaultTransactionService(
 
         persisBlock.block = block
         return repository.save(persisBlock)
+    }
+
+    override fun isValid(dto: TransactionDto): Boolean {
+        if (TransactionUtils.isValidHash(dto.hash, dto.data)) {
+            return false
+        }
+        return true
     }
 
 }

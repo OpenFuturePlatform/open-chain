@@ -1,6 +1,7 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.config.ServiceTests
+import io.openfuture.chain.domain.transaction.TransactionData
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.repository.TransactionRepository
@@ -34,8 +35,8 @@ internal class DefaultTransactionServiceTest: ServiceTests() {
         Assertions.assertThat(actualTransaction).isEqualTo(expectedTransaction)
     }
 
-    private fun createTransactionDto(): TransactionDto = TransactionDto(0, 0,
-            "recipientKey", "senderKey", "signature", "hash")
+    private fun createTransactionDto(): TransactionDto = TransactionDto(TransactionData(0, 0,
+            "recipientKey", "senderKey", "signature"), "hash")
 
 }
 

@@ -6,6 +6,7 @@ import io.openfuture.chain.domain.block.BlockDto
 import io.openfuture.chain.domain.block.nested.BlockData
 import io.openfuture.chain.domain.block.nested.BlockHash
 import io.openfuture.chain.domain.block.nested.MerkleHash
+import io.openfuture.chain.domain.transaction.TransactionData
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
@@ -74,8 +75,8 @@ internal class DefaultBlockServiceTest: ServiceTests() {
             0, "previousHash", MerkleHash("merkleHash", transactions)),
             BlockHash(0, "hash"), "nodePublicKey", "nodeSignature")
 
-    private fun createTransactionDto(): TransactionDto = TransactionDto(0, 0,
-            "recipientKey", "senderKey", "signature", "hash")
+    private fun createTransactionDto(): TransactionDto = TransactionDto(TransactionData(0, 0,
+            "recipientKey", "senderKey", "signature"), "hash")
 
     private fun createBlock(): Block = Block(1, 0, "previousHash",
             "merkleHash", 0, "hash", "nodeKey", "nodeSignature", mutableListOf())
