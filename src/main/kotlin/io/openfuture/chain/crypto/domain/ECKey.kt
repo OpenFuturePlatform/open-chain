@@ -1,4 +1,4 @@
-package io.openfuture.chain.domain.key
+package io.openfuture.chain.crypto.domain
 
 import io.openfuture.chain.util.HashUtils
 import org.bouncycastle.asn1.sec.SECNamedCurves

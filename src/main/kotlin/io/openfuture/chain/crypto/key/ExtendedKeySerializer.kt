@@ -1,6 +1,6 @@
-package io.openfuture.chain.component.key
+package io.openfuture.chain.crypto.key
 
-import io.openfuture.chain.domain.key.ExtendedKey
+import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.util.Base58CoderUtils
 import org.springframework.stereotype.Component
 import java.io.ByteArrayOutputStream

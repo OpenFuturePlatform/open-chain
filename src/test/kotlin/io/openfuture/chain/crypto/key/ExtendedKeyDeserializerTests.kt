@@ -1,4 +1,4 @@
-package io.openfuture.chain.component.key
+package io.openfuture.chain.crypto.key
 
 import io.openfuture.chain.config.ServiceTests
 import org.assertj.core.api.Assertions.assertThat

@@ -1,4 +1,4 @@
-package io.openfuture.chain.domain.key
+package io.openfuture.chain.crypto.domain
 
 import io.openfuture.chain.util.HashUtils
 import java.util.*
@@ -6,11 +6,11 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 class ExtendedKey(
-        var ecKey: ECKey?,
-        var chainCode: ByteArray,
-        var sequence: Int = 0,
-        var depth: Int = 0,
-        var parentFingerprint: Int = 0
+    var ecKey: ECKey?,
+    var chainCode: ByteArray,
+    var sequence: Int = 0,
+    var depth: Int = 0,
+    var parentFingerprint: Int = 0
 ) {
 
     /**

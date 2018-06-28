@@ -1,12 +1,12 @@
-package io.openfuture.chain.component.key
+package io.openfuture.chain.crypto.key
 
 import io.openfuture.chain.config.ServiceTests
-import io.openfuture.chain.domain.key.ECKey
-import io.openfuture.chain.domain.key.ExtendedKey
+import io.openfuture.chain.crypto.domain.ECKey
+import io.openfuture.chain.crypto.domain.ExtendedKey
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
-class ExtendedKeySerializerTests: ServiceTests() {
+class ExtendedKeySerializerTests : ServiceTests() {
 
     private val serializer = ExtendedKeySerializer()
 
