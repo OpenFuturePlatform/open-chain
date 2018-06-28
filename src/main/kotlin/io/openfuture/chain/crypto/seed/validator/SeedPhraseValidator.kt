@@ -29,7 +29,7 @@ class SeedPhraseValidator(
         private const val MAX_BYTE_SIZE_MOD = 7
         private const val OUT_OF_BYTE_SIZE = WORD_INDEX_SIZE - BYTE_SIZE
         private const val MAX_FIRST_BIT_INDEX_IN_TWO_BYTE = DOUBLE_BYTE_SIZE - WORD_INDEX_SIZE + 1
-        private const val THIRD_BYTE_SKIP_BIT_SIZE = 13
+        private const val THIRD_BYTE_SKIP_BIT_SIZE = BYTE_SIZE + MAX_FIRST_BIT_INDEX_IN_TWO_BYTE
     }
 
     fun validate(seedPhrase: String) {
@@ -138,6 +138,9 @@ class SeedPhraseValidator(
 
     /**
      * Writes to [byteSkip] + 2 byte of [bytes] first part of value if value wasn't written fully in previous bytes
+     *
+     * first check is when value fits in previous two bytes the method will do nothing
+     * valueInByte is byte value to fill it from 0 bit to [WORD_INDEX_SIZE] - bites written to previous two bytes
      *
      * @param bytes byte array to fill [byteSkip] + 2 byte from [value] if [value] wasn't written fully in previous
      * bytes
