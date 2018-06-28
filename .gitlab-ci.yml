@@ -10,11 +10,13 @@ stages:
   - deploy
 
 variables:
-    DOCKER_DRIVER: overlay2
+  DOCKER_DRIVER: overlay2
+  IMAGE_NAME: openplatform/chain
+  IMAGE_TAG: latest
 
 
 ###########################
-# Building
+# Tests
 ###########################
 unit-tests:
   stage: test
@@ -34,9 +36,12 @@ unit-tests:
     when: always
     paths:
       - build/reports/
-    expire_in: 1 week
+    expire_in: 1 day
 
 
+###########################
+# Building
+###########################
 build-jar:
   stage: build
   image: openjdk:8-jdk
@@ -51,10 +56,10 @@ build-jar:
   artifacts:
     paths:
       - build/libs/*.jar
-    expire_in: 1 week
+    expire_in: 1 day
   only:
-    - master
     - sprint
+    - master
 
 
 ###########################
@@ -62,12 +67,83 @@ build-jar:
 ###########################
 package-docker:
   stage: package
-  variables:
-    IMAGE_NAME: docker.zensoft.io/$CI_PROJECT_PATH
-    IMAGE_VERSION: latest
   script:
-    - docker build -t $IMAGE_NAME:$IMAGE_VERSION .
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN docker.zensoft.io
-    - docker push $IMAGE_NAME:$IMAGE_VERSION
+    - docker login -u ${DOCKER_LOGIN} -p ${DOCKER_PASS}
+    - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+    - docker push ${IMAGE_NAME}:${IMAGE_TAG}
   only:
+    - sprint
     - master
+
+package-native:
+  services:
+    - docker:dind
+  stage: package
+  script:
+    - mv build/libs/open-chain-*.jar build/libs/open-chain.jar
+    - |
+      docker run --rm -v "$(pwd):/packages" openplatform/install4j:full \
+            /JRE/install4j7.0.6/bin/install4jc --license=${INSTALL4J_KEY} \
+            /packages/install4j/multi.install4j
+  artifacts:
+    paths:
+      - artifacts/*
+    expire_in: 1 day
+  only:
+    - sprint
+    - master
+
+
+###########################
+# Deployment
+###########################
+.prepare-key-script: &prepare_key
+  - apk add --no-cache openssh-client
+  - eval $(ssh-agent -s)
+  - echo "$DEPLOY_KEY" | tr -d '\r' | ssh-add - > /dev/null
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
+  - chmod 644 ~/.ssh/known_hosts
+
+.deploy-to-host-script: &deploy_to_host
+  - ssh ${DEPLOY_USER}@${DEPLOY_HOST} "docker pull ${IMAGE_NAME}:${IMAGE_TAG}"
+  - |
+    ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
+      docker stop ${CONTAINER_NAME} && \
+      IMG=\$(docker ps -a --filter='name=^/${CONTAINER_NAME}$' --format='{{.Image}}') &&  \
+      docker rm -f ${CONTAINER_NAME} && \
+      docker rmi \$IMG; \
+      exit 0
+    "
+  - |
+    ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
+      docker run -d --name '${CONTAINER_NAME}' --restart=always \
+                 -p 8080:8080 \
+                 -p 9190:9190 \
+                 ${IMAGE_NAME}:${IMAGE_TAG}
+    "
+
+deploy-development:
+  stage: deploy
+  variables:
+    DEPLOY_USER: $DEPLOY_USER_DEV
+    DEPLOY_HOST: $DEPLOY_HOST_DEV
+    DEPLOY_KEY: $DEPLOY_KEY_DEV
+    CONTAINER_NAME: openchain
+  before_script: *prepare_key
+  script: *deploy_to_host
+  only:
+    - sprint
+
+deploy-production:
+  stage: deploy
+  variables:
+    DEPLOY_USER: $DEPLOY_USER_PROD
+    DEPLOY_HOST: $DEPLOY_HOST_PROD
+    DEPLOY_KEY: $DEPLOY_KEY_PROD
+    CONTAINER_NAME: openchain
+  before_script: *prepare_key
+  script: *deploy_to_host
+  only:
+    - tags
