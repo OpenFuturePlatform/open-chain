@@ -8,8 +8,8 @@ import io.openfuture.chain.crypto.seed.SeedConstant.THIRD_BYTE_OFFSET
 import io.openfuture.chain.crypto.seed.SeedConstant.WORD_INDEX_SIZE
 import io.openfuture.chain.repository.SeedWordRepository
 import io.openfuture.chain.util.HashUtils
+import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
-import org.springframework.util.StringUtils
 import java.security.SecureRandom
 import java.util.*
 
@@ -30,7 +30,7 @@ class SeedPhraseGenerator(
 
         val wordIndexes = wordIndexes(entropy)
         val words = Array(wordIndexes.size) { seedWordRepository.findOneByIndex(wordIndexes[it]).value }
-        return StringUtils.arrayToDelimitedString(words, org.apache.commons.lang3.StringUtils.SPACE)
+        return words.joinToString(StringUtils.SPACE)
     }
 
     private fun wordIndexes(entropy: ByteArray): IntArray {

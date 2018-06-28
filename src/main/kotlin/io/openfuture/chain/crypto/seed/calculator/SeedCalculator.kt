@@ -5,7 +5,7 @@ import java.text.Normalizer
 
 @Component
 class SeedCalculator(
-        private val hashAlgorithm: PBKDF2WithHmacSHA256 = SpongyCastlePBKDF2WithHmacSHA256.INSTANCE
+        private val hashAlgorithm: BouncyCastlePBKDF2WithHmacSHA256
 ) {
 
     private val fixedSalt = getUtf8Bytes("Openfuture")
