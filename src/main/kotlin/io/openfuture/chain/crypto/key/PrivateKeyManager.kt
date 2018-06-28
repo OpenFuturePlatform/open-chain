@@ -42,12 +42,18 @@ class PrivateKeyManager {
     }
 
     private fun parseWIFBytes(keyBytes: ByteArray): ECKey {
-        checkChecksum(keyBytes)
-        if (keyBytes.size == WIF_KEY_LENGTH) {
-            val key = Arrays.copyOfRange(keyBytes, 1, keyBytes.size - CHECKSUM_SIZE - 1)
-            return ECKey(key, true)
+        validate(keyBytes)
+        return ECKey(Arrays.copyOfRange(keyBytes, 1, keyBytes.size - CHECKSUM_SIZE - 1), true)
+    }
+
+    private fun validate(bytes: ByteArray) {
+        if (bytes.size != WIF_KEY_LENGTH || bytes.size < 4) {
+            throw IllegalArgumentException("Invalid key length")
         }
-        throw IllegalArgumentException("Invalid key length")
+        if (bytes[0] != WIF_PREFIX.toByte()) {
+            throw IllegalArgumentException("Invalid key format")
+        }
+        checkChecksum(bytes)
     }
 
     private fun checkChecksum(bytes: ByteArray) {
