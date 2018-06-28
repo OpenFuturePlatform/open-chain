@@ -28,7 +28,6 @@ class ExtendedKeySerializer {
         return serialize(xprv, extendedKey, extendedKey.ecKey!!.getPrivate())
     }
 
-
     private fun serialize(prefix: ByteArray, extendedKey: ExtendedKey, keyBytes: ByteArray): String {
         val out = ByteArrayOutputStream()
         out.write(prefix)
