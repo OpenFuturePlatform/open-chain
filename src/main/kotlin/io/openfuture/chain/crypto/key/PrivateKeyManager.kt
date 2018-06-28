@@ -13,6 +13,13 @@ import java.util.*
 @Component
 class PrivateKeyManager {
 
+    companion object {
+        private const val WIF_PREFIX = 0x80
+        private const val WIF_POSTFIX = 0x01
+        private const val WIF_KEY_LENGTH = 38
+        private const val CHECKSUM_SIZE = 4
+    }
+
     fun exportPrivateKey(key: ECKey): String = Base58CoderUtils.encode(getWIFBytes(key))
 
     fun importPrivateKey(serializedKey: String): ECKey = parseWIFBytes(Base58CoderUtils.decode(serializedKey))
@@ -22,31 +29,31 @@ class PrivateKeyManager {
             val keyBytes = key.getPrivate()
 
             val extendedKey = ByteArray(keyBytes.size + 2)
-            extendedKey[0] = 0x80.toByte()
+            extendedKey[0] = WIF_PREFIX.toByte()
             System.arraycopy(keyBytes, 0, extendedKey, 1, keyBytes.size)
-            extendedKey[keyBytes.size + 1] = 0x01
+            extendedKey[keyBytes.size + 1] = WIF_POSTFIX.toByte()
 
             val checkSum = HashUtils.genarateDoubleHashBytes(extendedKey)
-            val result = ByteArray(extendedKey.size + 4)
+            val result = ByteArray(extendedKey.size + CHECKSUM_SIZE)
             System.arraycopy(extendedKey, 0, result, 0, extendedKey.size)
-            System.arraycopy(checkSum, 0, result, extendedKey.size, 4)
+            System.arraycopy(checkSum, 0, result, extendedKey.size, CHECKSUM_SIZE)
             result
         } ?: throw IllegalStateException("Unable to provide WIF if no private key is present")
     }
 
     private fun parseWIFBytes(keyBytes: ByteArray): ECKey {
         checkChecksum(keyBytes)
-        if (keyBytes.size == 38) {
-            val key = Arrays.copyOfRange(keyBytes, 1, keyBytes.size - 5)
+        if (keyBytes.size == WIF_KEY_LENGTH) {
+            val key = Arrays.copyOfRange(keyBytes, 1, keyBytes.size - CHECKSUM_SIZE - 1)
             return ECKey(key, true)
         }
         throw IllegalArgumentException("Invalid key length")
     }
 
     private fun checkChecksum(bytes: ByteArray) {
-        val keyBytes = Arrays.copyOfRange(bytes, 0, bytes.size - 4)
-        val checksum = Arrays.copyOfRange(bytes, bytes.size - 4, bytes.size)
-        val actualChecksum = Arrays.copyOfRange(HashUtils.genarateDoubleHashBytes(keyBytes), 0, 4)
+        val keyBytes = Arrays.copyOfRange(bytes, 0, bytes.size - CHECKSUM_SIZE)
+        val checksum = Arrays.copyOfRange(bytes, bytes.size - CHECKSUM_SIZE, bytes.size)
+        val actualChecksum = Arrays.copyOfRange(HashUtils.genarateDoubleHashBytes(keyBytes), 0, CHECKSUM_SIZE)
         if (!Arrays.equals(checksum, actualChecksum))
             throw IllegalArgumentException("Invalid checksum")
     }
