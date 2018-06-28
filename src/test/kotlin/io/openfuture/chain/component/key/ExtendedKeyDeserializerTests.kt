@@ -7,32 +7,33 @@ import org.junit.Test
 class ExtendedKeyDeserializerTests : ServiceTests() {
 
     private val deserializer = ExtendedKeyDeserializer()
+    private val serializer = ExtendedKeySerializer()
 
 
     @Test
     fun deserializePrivateKeyTest() {
-        val deserialzedKey = "xprv9uGwJ6JNoNk95aGW2AUfYinfLFL8p2GKdMZpC6tyNPou9Rbmn1XdbgK8XZgf44sECrD4vBDKPArGRrTeAWj9ThZWVb4qtFCMZEp4qF8tNfE"
-
+        val deserialzedKey = "xprv9s21ZrQH143K4QKw9Cq9BUSUJGMSNMBt5mQVU8QD32NZpw4i6bnmiACNkqunc6P6B5tHXGw4oJMo2wXVwDgj2WDQFpTFufd4TdtKpZvpgEb"
+        val expectedPublicKey = "xpub661MyMwAqRbcGtQQFEN9YcPCrJBvmoujSzL6GWopbMuYhjPre972FxWrc6NHZiH87hAz3vg3o95GDTwncHF6dMkoJLQ897p4VssRDA4kJ7V"
         val extendedKey = deserializer.deserialize(deserialzedKey)
 
-        assertThat(extendedKey.depth).isEqualTo(1)
-        assertThat(extendedKey.ecKey!!.public).isNotNull()
-        assertThat(extendedKey.ecKey!!.private).isNotNull()
+        assertThat(extendedKey.depth).isEqualTo(0)
+        assertThat(serializer.serializePrivate(extendedKey)).isEqualTo(deserialzedKey)
+        assertThat(serializer.serializePublic(extendedKey)).isEqualTo(expectedPublicKey)
     }
 
     @Test
     fun deserializePublicKeyTest() {
-        val deserialzedKey = "xpub68GHhbqGdkJSJ4Ly8C1furjPtHAdDUzAzaVQzVJavjLt2DvvKYqt9UdcNrmk6JKU8h1rK2nWAV6yqPV6Hpvuf33dezACzKmFEbK3fWN4Za6"
+        val deserialzedKey = "xpub661MyMwAqRbcGtQQFEN9YcPCrJBvmoujSzL6GWopbMuYhjPre972FxWrc6NHZiH87hAz3vg3o95GDTwncHF6dMkoJLQ897p4VssRDA4kJ7V"
 
         val extendedKey = deserializer.deserialize(deserialzedKey)
 
-        assertThat(extendedKey.depth).isEqualTo(1)
-        assertThat(extendedKey.ecKey!!.public).isNotNull()
+        assertThat(extendedKey.depth).isEqualTo(0)
         assertThat(extendedKey.ecKey!!.private).isNull()
+        assertThat(serializer.serializePublic(extendedKey)).isEqualTo(deserialzedKey)
     }
 
     @Test(expected = Exception::class)
-    fun deserializeWhenIncorrectKeyShoulThrowExceptionTest() {
+    fun deserializeWhenIncorrectKeyShouldThrowExceptionTest() {
         val deserializedKey = "xpub68GHhbqGdkJSJ4Ly8"
 
         deserializer.deserialize(deserializedKey)
