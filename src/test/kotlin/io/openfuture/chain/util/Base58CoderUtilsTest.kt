@@ -7,7 +7,7 @@ import java.util.*
 class Base58CoderUtilsTest {
 
     @Test
-    fun encodeShouldCorrectlyEncodeBytes() {
+    fun encodeShouldReturnCorrectlyEncodedBytes() {
         val value = "Hello, world!"
         val expectedValue = "72k1xXWG59wUsYv7h2"
 
@@ -17,14 +17,14 @@ class Base58CoderUtilsTest {
     }
 
     @Test
-    fun encodeShouldReturnEmptyStringWhenEmptyBytes() {
+    fun encodeShouldReturnEmptyStringWhenBytesToEncodeAreEmpty() {
         val encoded = Base58CoderUtils.encode(ByteArray(0))
 
         Assert.assertTrue(encoded.isEmpty())
     }
 
     @Test
-    fun encodeWithChecksumShouldCorrectlyEncodeBytes() {
+    fun encodeWithChecksumShouldReturnCorrectlyEncodedBytes() {
         val value = "Hello, world!"
         val expectedValue = "gTazoqFvngVDSCkJGJQuokb"
 
@@ -34,7 +34,7 @@ class Base58CoderUtilsTest {
     }
 
     @Test
-    fun decodeShouldCorrectlyDecodeBytes() {
+    fun decodeShouldReturnCorrectlyDecodedBytes() {
         val value = "72k1xXWG59wUsYv7h2"
         val expectedValue = "Hello, world!".toByteArray()
 
@@ -44,7 +44,7 @@ class Base58CoderUtilsTest {
     }
 
     @Test
-    fun decodeWithChecksumShouldCorrectlyDecodeBytes() {
+    fun decodeWithChecksumShouldReturnCorrectlyDecodedBytes() {
         val value = "gTazoqFvngVDSCkJGJQuokb"
         val expectedValue = "Hello, world!".toByteArray()
 
