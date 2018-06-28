@@ -5,9 +5,6 @@ import io.openfuture.chain.property.NodeProperties
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
-/**
- * @author Evgeni Krylov
- */
 @Component
 class TcpServer(
     private val serverBootstrap: ServerBootstrap,
