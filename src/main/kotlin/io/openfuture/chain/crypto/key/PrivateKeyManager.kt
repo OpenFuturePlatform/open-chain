@@ -33,7 +33,7 @@ class PrivateKeyManager {
             System.arraycopy(keyBytes, 0, extendedKey, 1, keyBytes.size)
             extendedKey[keyBytes.size + 1] = WIF_POSTFIX.toByte()
 
-            val checkSum = HashUtils.genarateDoubleHashBytes(extendedKey)
+            val checkSum = HashUtils.doubleSha256(extendedKey)
             val result = ByteArray(extendedKey.size + CHECKSUM_SIZE)
             System.arraycopy(extendedKey, 0, result, 0, extendedKey.size)
             System.arraycopy(checkSum, 0, result, extendedKey.size, CHECKSUM_SIZE)
@@ -59,7 +59,7 @@ class PrivateKeyManager {
     private fun checkChecksum(bytes: ByteArray) {
         val keyBytes = Arrays.copyOfRange(bytes, 0, bytes.size - CHECKSUM_SIZE)
         val checksum = Arrays.copyOfRange(bytes, bytes.size - CHECKSUM_SIZE, bytes.size)
-        val actualChecksum = Arrays.copyOfRange(HashUtils.genarateDoubleHashBytes(keyBytes), 0, CHECKSUM_SIZE)
+        val actualChecksum = Arrays.copyOfRange(HashUtils.doubleSha256(keyBytes), 0, CHECKSUM_SIZE)
         if (!Arrays.equals(checksum, actualChecksum))
             throw IllegalArgumentException("Invalid checksum")
     }

@@ -9,11 +9,9 @@ object HashUtils {
 
     private const val SHA256 = "SHA-256"
 
-    fun generateHash(bytes: ByteArray) = generateHashBytes(bytes).fold(StringUtils.EMPTY) { str, it -> str + "%02x".format(it) }
+    fun generateHash(bytes: ByteArray) = sha256(bytes).fold(StringUtils.EMPTY) { str, it -> str + "%02x".format(it) }
 
-    fun generateHashBytes(bytes: ByteArray) = MessageDigest.getInstance(SHA256).digest(bytes)
-
-    fun genarateDoubleHashBytes(bytes: ByteArray) = generateHashBytes(generateHashBytes(bytes))
+    fun doubleSha256(bytes: ByteArray) = sha256(sha256(bytes))
 
     fun keyHash(bytes: ByteArray): ByteArray {
         val result = ByteArray(20)
@@ -31,7 +29,7 @@ object HashUtils {
     }
 
     fun sha256(bytes: ByteArray): ByteArray {
-        val digest = MessageDigest.getInstance("SHA-256")
+        val digest = MessageDigest.getInstance(SHA256)
         digest.update(bytes, 0, bytes.size)
         return digest.digest()
     }
