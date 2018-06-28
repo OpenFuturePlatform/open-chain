@@ -2,6 +2,7 @@ package io.openfuture.chain.crypto.seed.validator
 
 import io.openfuture.chain.crypto.seed.SeedConstant
 import io.openfuture.chain.crypto.seed.SeedConstant.BYTE_SIZE
+import io.openfuture.chain.crypto.seed.SeedConstant.DOUBLE_BYTE_SIZE
 import io.openfuture.chain.crypto.seed.SeedConstant.MULTIPLICITY_VALUE
 import io.openfuture.chain.crypto.seed.SeedConstant.SECOND_BYTE_OFFSET
 import io.openfuture.chain.crypto.seed.SeedConstant.SECOND_BYTE_SKIP_BIT_SIZE
@@ -27,7 +28,7 @@ class SeedPhraseValidator(
         private const val MULTIPLICITY_WITH_CHECKSUM_VALUE = 33
         private const val MAX_BYTE_SIZE_MOD = 7
         private const val OUT_OF_BYTE_SIZE = WORD_INDEX_SIZE - BYTE_SIZE
-        private const val MIN_FIRST_BIT_INDEX_IN_THREE_BYTE = 6
+        private const val MAX_FIRST_BIT_INDEX_IN_TWO_BYTE = DOUBLE_BYTE_SIZE - WORD_INDEX_SIZE + 1
         private const val THIRD_BYTE_SKIP_BIT_SIZE = 13
     }
 
@@ -98,8 +99,8 @@ class SeedPhraseValidator(
      *
      * firstValue is byte value to fill it from byteSkip bit to byte edge bit with first part of [value]
      * toWrite the value where it shift right by bytes [OUT_OF_BYTE_SIZE] with [bitSkip] to get the byte value of first
-     * byte
-     * Next the computed value is added to firstValue and assigned to byte in array
+     * byte.
+     * Next the computed value toWrite is added to firstValue and assigned to byte in array
      *
      * @param bytes byte array to fill [byteSkip] byte with [SeedConstant.BYTE_SIZE] - bitSkip bits of [value]
      * @param byteSkip byte index in [bytes] array from which value will be written to [bytes]
@@ -117,9 +118,10 @@ class SeedPhraseValidator(
      * from 0 bit to [WORD_INDEX_SIZE] - bits size written in previous byte, but no more than [SeedConstant.BYTE_SIZE]
      * bits
      *
-     * firstValue is byte value to fill it from 0 bit to WORD_INDEX_SIZE - [SeedConstant.BYTE_SIZE] + bitSkip bit with
-     * value from [value] parameter
-     *
+     * valueInByte is byte value to fill it from 0 bit to WORD_INDEX_SIZE - [SeedConstant.BYTE_SIZE] + bitSkip bit with
+     * value from [value] parameter.
+     * shitBitCount shift bit count to get second part of value
+     * Next the computed toWrite value is added to firstValue and assigned to byte in array
      *
      * @param bytes byte array to fill [byteSkip] + 1 byte from [value]
      * @param byteSkip previous byte index in [bytes] array from which value will be written to [bytes]
@@ -129,8 +131,8 @@ class SeedPhraseValidator(
     private fun writeSecondByteToArray(bytes: ByteArray, byteSkip: Int, bitSkip: Int, value: Int) {
         val byteIndex = byteSkip + SECOND_BYTE_OFFSET
         val valueInByte = bytes[byteSkip + SECOND_BYTE_OFFSET]
-        val i = SECOND_BYTE_SKIP_BIT_SIZE - bitSkip
-        val toWrite = (if (i > 0) value shl i else value shr -i).toByte()
+        val shitBitCount = SECOND_BYTE_SKIP_BIT_SIZE - bitSkip
+        val toWrite = (if (shitBitCount > 0) value shl shitBitCount else value shr -shitBitCount).toByte()
         bytes[byteIndex] = (valueInByte or toWrite)
     }
 
@@ -144,7 +146,7 @@ class SeedPhraseValidator(
      * @param value value to write part of it to [bytes] array
      */
     private fun writeThirdByteToArray(bytes: ByteArray, byteSkip: Int, bitSkip: Int, value: Int) {
-        if (bitSkip >= MIN_FIRST_BIT_INDEX_IN_THREE_BYTE) {
+        if (bitSkip > MAX_FIRST_BIT_INDEX_IN_TWO_BYTE) {
             val byteIndex = byteSkip + THIRD_BYTE_OFFSET
             val lastByteValue = bytes[byteIndex]
             val toWrite = (value shl (THIRD_BYTE_SKIP_BIT_SIZE - bitSkip)).toByte()
