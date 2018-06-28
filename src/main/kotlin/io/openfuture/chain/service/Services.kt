@@ -39,6 +39,12 @@ interface BlockService {
 
 }
 
+interface CryptoService {
+
+    fun generateSeedPhrase(): String
+
+}
+
 interface TransactionService {
 
     fun get(hash: String): Transaction

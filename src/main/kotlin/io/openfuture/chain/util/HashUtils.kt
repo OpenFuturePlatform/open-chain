@@ -4,24 +4,29 @@ import java.security.MessageDigest
 
 object HashUtils {
 
-	fun generateHash(bytes: ByteArray): String {
-		val instance = MessageDigest.getInstance("SHA-256")
-		val digest = instance.digest(bytes)
-		return digest.fold("", { str, it -> str + "%02x".format(it) })
-	}
+    fun generateHash(bytes: ByteArray): String {
+        val array = sha256(bytes)
+        return array.fold("") { str, it -> str + "%02x".format(it) }
+    }
 
-	fun generateSignature(privateKey: String, data: ByteArray): String {
-		// todo add logic by genereting signature
-		return generateHash(privateKey.toByteArray()) // todo temp solution
-	}
+    fun sha256(bytes: ByteArray): ByteArray {
+        val digest = MessageDigest.getInstance("SHA-256")
+        digest.update(bytes, 0, bytes.size)
+        return digest.digest()
+    }
 
-	fun validateSignature(publicKey: String, signature: String, data: ByteArray): Boolean {
-		// todo add logic by validation signature
-		return true
-	}
+    fun generateSignature(privateKey: String, data: ByteArray): String {
+        // todo add logic by genereting signature
+        return generateHash(privateKey.toByteArray()) // todo temp solution
+    }
 
-	fun getDificultyString(difficulty: Int): String {
-		return String(CharArray(difficulty)).replace('\u0000', '0')
-	}
+    fun validateSignature(publicKey: String, signature: String, data: ByteArray): Boolean {
+        // todo add logic by validation signature
+        return true
+    }
+
+    fun getDificultyString(difficulty: Int): String {
+        return String(CharArray(difficulty)).replace('\u0000', '0')
+    }
 
 }

@@ -8,6 +8,7 @@ class DefaultHardwareInfoServiceTests : ServiceTests() {
 
     private val service = DefaultHardwareInfoService()
 
+
     @Test
     fun getHardwareInfoShouldReturnCpuRamStorageNetworkInformation() {
         val hardwareInfo = service.getHardwareInfo()
