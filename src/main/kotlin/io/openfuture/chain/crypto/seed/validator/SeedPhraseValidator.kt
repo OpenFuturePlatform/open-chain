@@ -127,10 +127,11 @@ class SeedPhraseValidator(
      * @param value value to write part of it to [bytes] array
      */
     private fun writeSecondByteToArray(bytes: ByteArray, byteSkip: Int, bitSkip: Int, value: Int) {
-        val valueInByte = bytes[byteSkip + 1]
+        val byteIndex = byteSkip + SECOND_BYTE_OFFSET
+        val valueInByte = bytes[byteSkip + SECOND_BYTE_OFFSET]
         val i = SECOND_BYTE_SKIP_BIT_SIZE - bitSkip
         val toWrite = (if (i > 0) value shl i else value shr -i).toByte()
-        bytes[byteSkip + SECOND_BYTE_OFFSET] = (valueInByte or toWrite)
+        bytes[byteIndex] = (valueInByte or toWrite)
     }
 
     /**
@@ -144,10 +145,10 @@ class SeedPhraseValidator(
      */
     private fun writeThirdByteToArray(bytes: ByteArray, byteSkip: Int, bitSkip: Int, value: Int) {
         if (bitSkip >= MIN_FIRST_BIT_INDEX_IN_THREE_BYTE) {
-            val lastByteIndex = byteSkip + THIRD_BYTE_OFFSET
-            val lastByteValue = bytes[lastByteIndex]
+            val byteIndex = byteSkip + THIRD_BYTE_OFFSET
+            val lastByteValue = bytes[byteIndex]
             val toWrite = (value shl (THIRD_BYTE_SKIP_BIT_SIZE - bitSkip)).toByte()
-            bytes[lastByteIndex] = (lastByteValue or toWrite)
+            bytes[byteIndex] = (lastByteValue or toWrite)
         }
     }
 
