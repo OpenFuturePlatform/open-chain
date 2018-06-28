@@ -13,7 +13,7 @@ class Base58CoderUtilsTest {
 
         val encoded = Base58CoderUtils.encode(value.toByteArray())
 
-        Assert.assertTrue(encoded == expectedValue)
+        Assert.assertEquals(encoded, expectedValue)
     }
 
     @Test
@@ -30,7 +30,7 @@ class Base58CoderUtilsTest {
 
         val encoded = Base58CoderUtils.encodeWithChecksum(value.toByteArray())
 
-        Assert.assertTrue(encoded == expectedValue)
+        Assert.assertEquals(encoded, expectedValue)
     }
 
     @Test
