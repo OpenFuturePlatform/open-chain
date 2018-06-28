@@ -5,7 +5,7 @@ import org.bouncycastle.asn1.sec.SECObjectIdentifiers
 import java.math.BigInteger
 
 class ECKey(
-    val private: BigInteger,
+    val private: BigInteger?,
     val public: ByteArray
 ) {
 
@@ -25,7 +25,15 @@ class ECKey(
         curve.g.multiply(BigInteger(1, bytes).add(parent.private).mod(curve.n)).getEncoded(true)
     )
 
+    constructor(bytes: ByteArray, isPrivate: Boolean): this(
+        if (isPrivate) BigInteger(1, bytes) else null,
+        if (isPrivate) curve.g.multiply(BigInteger(1, bytes)).getEncoded(true) else bytes
+    )
+
     fun getPrivate(): ByteArray {
+        if (null == private) {
+            return ByteArray(0)
+        }
         val privateInBytes = private.toByteArray()
 
         return if (privateInBytes.size == PRIVATE_KEY_SIZE) {

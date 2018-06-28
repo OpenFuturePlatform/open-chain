@@ -1,7 +1,7 @@
 CREATE TABLE seed_words (
   id    INTEGER PRIMARY KEY,
   ind   INTEGER NOT NULL UNIQUE,
-  value VARCHAR NOT NULL
+  value VARCHAR NOT NULL UNIQUE
 );
 
 INSERT INTO seed_words (ind, value) VALUES (0, 'abandon');

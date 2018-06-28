@@ -11,6 +11,7 @@ class SeedWordRepositoryTests : RepositoryTests() {
     @Autowired
     private lateinit var repository: SeedWordRepository
 
+
     @Test
     fun findOneByWordIndexTest() {
         val wordIndex = 2048
