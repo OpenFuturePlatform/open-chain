@@ -25,6 +25,7 @@ class NodeInfoControllerTests : ControllerTests() {
     @Autowired
     private lateinit var nodeProperties: NodeProperties
 
+
     @Test
     fun getVersionShouldReturnVersionFromProperties() {
         webClient.get().uri("${PathConstant.RPC}/info/getVersion")
