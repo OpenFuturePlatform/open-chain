@@ -28,7 +28,7 @@ class SeedPhraseValidator(
 
     fun validate(seedPhrase: String) {
         val seedPhraseWords = seedPhrase.split(StringUtils.SPACE)
-        val seedWordIndexes = findWordIndexes(seedPhraseWords)
+        val seedWordIndexes = seedPhraseWords.map { getWord(it).index }.toIntArray()
         validate(seedWordIndexes)
     }
 
@@ -53,9 +53,6 @@ class SeedPhraseValidator(
             throw SeedValidationException("Invalid checksum for seed phrase")
         }
     }
-
-    private fun findWordIndexes(seedPhraseWords: Collection<String>): IntArray
-            = seedPhraseWords.map { getWord(it).index }.toIntArray()
 
     private fun getWord(wordValue: String): SeedWord {
         return seedWordRepository.findOneByValue(wordValue).orElseThrow {

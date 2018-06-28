@@ -22,6 +22,7 @@ class SeedPhraseGenerator(
         private const val DOUBLE_BYTE_SIZE = 16
         private const val BYTE_MASK = 0xff
         private const val MAX_BYTES_TO_READ = 3
+        private const val WORD_INDEX_MASK = (1 shl WORD_INDEX_SIZE) - 1
     }
 
     fun createSeedPhrase(length: PhraseLength): String {
@@ -53,6 +54,16 @@ class SeedPhraseGenerator(
         return wordIndexes
     }
 
+    /**
+     * Method returns [WORD_INDEX_SIZE] bits of [bytes] from [offset] bits.
+     *
+     * firstBytePart contains second byte filled not zero exactly
+     * secondBytePart contains third byte filled not zero exactly
+     * thirdBytePart contains fourth byte filled not zero exactly
+     *
+     * After getting these variables they are summarized and shift right for lacking bits of right edge of byte.
+     * Then it gets mask with eleven the one digits
+     */
     private fun nextWordsIndex(bytes: ByteArray, offset: Int): Int {
         val skip = offset / BYTE_SIZE
         val lowerBitsToRemove = (MAX_BYTES_TO_READ * BYTE_SIZE - WORD_INDEX_SIZE) -
@@ -66,8 +77,7 @@ class SeedPhraseGenerator(
             0
         }
 
-        return ((firstBytePart or secondBytePart or thirdBytePart) shr lowerBitsToRemove) and (
-                1 shl WORD_INDEX_SIZE) - 1
+        return ((firstBytePart or secondBytePart or thirdBytePart) shr lowerBitsToRemove) and WORD_INDEX_MASK
     }
 
 }
