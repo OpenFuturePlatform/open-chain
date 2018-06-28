@@ -70,6 +70,9 @@ class SeedPhraseValidator(
         }
     }
 
+    /**
+     * Method adds [WORD_INDEX_SIZE] last bits to [bytes] from [offset]
+     */
     private fun writeNextWordIndexToArray(bytes: ByteArray, value: Int, offset: Int) {
         val byteSkip = offset / SeedConstant.BYTE_SIZE
         val bitSkip = offset % SeedConstant.BYTE_SIZE
@@ -79,6 +82,9 @@ class SeedPhraseValidator(
         writeThirdByteToArray(bytes, byteSkip, bitSkip, value)
     }
 
+    /**
+     * Writes to [bytes] the part of value to byteSkip byte
+     */
     private fun writeFirstByteToArray(bytes: ByteArray, byteSkip: Int, bitSkip: Int, value: Int) {
         val firstValue = bytes[byteSkip]
         val toWrite = (value shr (OUT_OF_BYTE_SIZE + bitSkip)).toByte()
