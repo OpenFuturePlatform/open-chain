@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Seed phrase generator
 - Seed phrase validator
 - Service: generate seed phrase
+- Service: obtaining master key by seed phrase
+- Service: obtaining derivation key of master key by seed phrase and derivation path
+- Service: producing serialized public key value in base58 format from extended key
+- Service: producing serialized private key value in base58 format from extended key
+- End-point: obtaining master key by seed phrase
+- End-point: obtaining derivation key with address of master key by seed phrase and derivation path
 - Extended private key serialization
 - Extended public key serialization
 - Private key exportation
