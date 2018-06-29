@@ -3,6 +3,7 @@ package io.openfuture.chain.service
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
 import io.openfuture.chain.domain.block.BlockRequest
+import io.openfuture.chain.domain.crypto.key.WalletDto
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
@@ -47,6 +48,8 @@ interface CryptoService {
     fun serializedPublicKey(key: ExtendedKey): String
 
     fun serializedPrivateKey(key: ExtendedKey): String
+
+    fun generateKey(): WalletDto
 
 }
 

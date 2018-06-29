@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Private key exportation
 - Private key importation
 - Key derivation algorithm implementation
+- RPC requests: generate keys
 
 ## [0.1.0] - 2018-06-18
 ### Added
