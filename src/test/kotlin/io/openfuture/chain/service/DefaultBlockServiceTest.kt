@@ -1,6 +1,6 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.component.NodeClock
+import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.domain.block.BlockDto
 import io.openfuture.chain.domain.block.nested.BlockData
