@@ -22,7 +22,7 @@ class ExtendedKeySerializer {
 
     fun serializePrivate(extendedKey: ExtendedKey): String {
         if (extendedKey.ecKey.isPrivateEmpty()) {
-            throw Exception("This is a public key only. Can't serialize a private key")
+            throw IllegalArgumentException("This is a public key only. Can't serialize a private key")
         }
 
         return serialize(xprv, extendedKey, extendedKey.ecKey.getPrivate())
