@@ -2,6 +2,7 @@ package io.openfuture.chain.service
 
 import io.openfuture.chain.domain.HardwareInfo
 import io.openfuture.chain.domain.block.BlockRequest
+import io.openfuture.chain.domain.crypto.key.KeyDto
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
@@ -39,7 +40,7 @@ interface CryptoService {
 
     fun generateSeedPhrase(): String
 
-    fun generateKey(): String
+    fun generateKey(): KeyDto
 
 }
 
