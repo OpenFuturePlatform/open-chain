@@ -14,7 +14,8 @@ class DerivationKeysHelper {
 
     companion object {
         private const val PATH_SEPARATOR = '/'
-        private const val CORRECT_PATH_PATTERN = "^m/([/]?[0-9]+){1,3}"
+        private const val HARDENED_DERIVATION_FLAG = 'h'
+        private const val CORRECT_PATH_PATTERN = "^m/([/]?([0-9]h?)+){1,3}"
 
         private const val ACCOUNT_NUMBER_POSITION = 1
         private const val WALLET_NUMBER_POSITION = 2
@@ -27,19 +28,19 @@ class DerivationKeysHelper {
         }
 
         val separatedPath = derivationPath.split(PATH_SEPARATOR)
-        val accountNumber = Integer.parseInt(separatedPath[ACCOUNT_NUMBER_POSITION])
+        val accountNumber = translatePathNumber(separatedPath[ACCOUNT_NUMBER_POSITION])
 
         if (ACCOUNT_NUMBER_POSITION == separatedPath.size - 1) {
             return rootKey.derive(accountNumber)
         }
 
-        val walletNumber = Integer.parseInt(separatedPath[WALLET_NUMBER_POSITION])
+        val walletNumber = translatePathNumber(separatedPath[WALLET_NUMBER_POSITION])
 
         if (WALLET_NUMBER_POSITION == separatedPath.size - 1) {
             return deriveWalletChainKeys(rootKey, accountNumber, walletNumber)
         }
 
-        val addressNumber = Integer.parseInt(separatedPath[ADDRESS_NUMBER_POSITION])
+        val addressNumber = translatePathNumber(separatedPath[ADDRESS_NUMBER_POSITION])
         val base = deriveWalletChainKeys(rootKey, accountNumber, walletNumber)
 
         return base.derive(addressNumber)
@@ -48,6 +49,18 @@ class DerivationKeysHelper {
     private fun deriveWalletChainKeys(rootKey: ExtendedKey, accountNumber: Int, walletNumber: Int): ExtendedKey {
         val base = rootKey.derive(accountNumber)
         return base.derive(walletNumber)
+    }
+
+    /**
+     * Non hardened indexes in [0, 2^31)
+     * Hardened indexes in [2^31 2^32)
+     */
+    private fun translatePathNumber(value: String): Int {
+        return if (value.toLowerCase().contains(HARDENED_DERIVATION_FLAG)) {
+            Integer.parseInt(value.dropLast(1)) or -0x80000000
+        } else {
+            Integer.parseInt(value)
+        }
     }
 
 }
