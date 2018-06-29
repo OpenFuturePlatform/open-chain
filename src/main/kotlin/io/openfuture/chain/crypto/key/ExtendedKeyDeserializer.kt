@@ -24,7 +24,7 @@ class ExtendedKeyDeserializer {
         val decodedSerializedKey = Base58CoderUtils.decodeWithChecksum(serializedKey)
 
         if (DECODED_SERIALIZED_KEY_LENGTH != decodedSerializedKey.size) {
-            throw Exception("Invalid serialized key value")
+            throw IllegalArgumentException("Invalid serialized key value")
         }
 
         val depth = toIntFromByte(decodedSerializedKey[4])
