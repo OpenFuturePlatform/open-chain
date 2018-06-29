@@ -4,6 +4,8 @@ import org.apache.commons.lang3.StringUtils
 import org.bouncycastle.crypto.digests.RIPEMD160Digest
 import org.bouncycastle.jcajce.provider.digest.Keccak
 import java.security.MessageDigest
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 
 object HashUtils {
 
@@ -28,10 +30,17 @@ object HashUtils {
         return keccak.digest()
     }
 
-    fun sha256(bytes: ByteArray): ByteArray {
-        val digest = MessageDigest.getInstance(SHA256)
-        digest.update(bytes, 0, bytes.size)
-        return digest.digest()
-    }
+	fun sha256(bytes: ByteArray): ByteArray {
+		val digest = MessageDigest.getInstance(SHA256)
+		digest.update(bytes, 0, bytes.size)
+		return digest.digest()
+	}
+
+	fun hmacSha512(key: ByteArray, message: ByteArray): ByteArray {
+		val keySpec = SecretKeySpec(key, "HmacSHA512")
+		val mac = Mac.getInstance("HmacSHA512")
+		mac.init(keySpec)
+		return mac.doFinal(message)
+	}
 
 }
