@@ -49,7 +49,14 @@ class ExtendedKeyDeserializer {
         val keyBytes = Arrays.copyOfRange(decodedSerializedKey, 13 + 32, decodedSerializedKey.size)
         val ecKey = ECKey(keyBytes, isSerializedKeyPrivate(decodedSerializedKey))
 
-        return ExtendedKey(ecKey, chainCode, sequence, depth, parentFingerprint)
+        return ExtendedKey(
+            keyHash = ByteArray(64),
+            ecKey = ecKey,
+            chainCode = chainCode,
+            sequence = sequence,
+            depth = depth,
+            parentFingerprint = parentFingerprint
+        )
     }
 
     private fun isSerializedKeyPrivate(decodedSerializedKey: ByteArray): Boolean {

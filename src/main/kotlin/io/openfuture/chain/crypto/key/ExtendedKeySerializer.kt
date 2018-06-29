@@ -12,8 +12,8 @@ import java.io.ByteArrayOutputStream
 class ExtendedKeySerializer {
 
     companion object {
-        private val xpub = byteArrayOf(0x04.toByte(), 0x88.toByte(), 0xB2.toByte(), 0x1E.toByte())
-        private val xprv = byteArrayOf(0x04.toByte(), 0x88.toByte(), 0xAD.toByte(), 0xE4.toByte())
+        val xpub = byteArrayOf(0x04.toByte(), 0x88.toByte(), 0xB2.toByte(), 0x1E.toByte())
+        val xprv = byteArrayOf(0x04.toByte(), 0x88.toByte(), 0xAD.toByte(), 0xE4.toByte())
     }
 
     fun serializePublic(extendedKey: ExtendedKey): String {
@@ -21,7 +21,7 @@ class ExtendedKeySerializer {
     }
 
     fun serializePrivate(extendedKey: ExtendedKey): String {
-        if (extendedKey.ecKey!!.isPrivateEmpty()) {
+        if (extendedKey.ecKey.isPrivateEmpty()) {
             throw Exception("This is a public key only. Can't serialize a private key")
         }
 

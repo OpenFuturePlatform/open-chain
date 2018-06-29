@@ -10,6 +10,7 @@ import javax.crypto.spec.SecretKeySpec
 object HashUtils {
 
     private const val SHA256 = "SHA-256"
+    private const val HMACSHA512 = "HmacSHA512"
 
     fun generateHash(bytes: ByteArray) = sha256(bytes).fold(StringUtils.EMPTY) { str, it -> str + "%02x".format(it) }
 
@@ -37,8 +38,8 @@ object HashUtils {
 	}
 
 	fun hmacSha512(key: ByteArray, message: ByteArray): ByteArray {
-		val keySpec = SecretKeySpec(key, "HmacSHA512")
-		val mac = Mac.getInstance("HmacSHA512")
+		val keySpec = SecretKeySpec(key, HMACSHA512)
+		val mac = Mac.getInstance(HMACSHA512)
 		mac.init(keySpec)
 		return mac.doFinal(message)
 	}

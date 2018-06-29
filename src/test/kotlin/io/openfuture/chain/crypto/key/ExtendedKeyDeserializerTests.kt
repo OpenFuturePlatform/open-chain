@@ -28,7 +28,7 @@ class ExtendedKeyDeserializerTests : ServiceTests() {
         val extendedKey = deserializer.deserialize(deserialzedKey)
 
         assertThat(extendedKey.depth).isEqualTo(0)
-        assertThat(extendedKey.ecKey!!.private).isNull()
+        assertThat(extendedKey.ecKey.private).isNull()
         assertThat(serializer.serializePublic(extendedKey)).isEqualTo(deserialzedKey)
     }
 
