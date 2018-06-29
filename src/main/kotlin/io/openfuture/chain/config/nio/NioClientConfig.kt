@@ -9,7 +9,6 @@ import io.openfuture.chain.property.NodeProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
-
 @Configuration
 class NioClientConfig(
     private val clientChannelInitializer: ClientChannelInitializer,

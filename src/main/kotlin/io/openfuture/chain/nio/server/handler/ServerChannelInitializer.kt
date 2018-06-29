@@ -11,9 +11,6 @@ import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
-/**
- * @author Evgeni Krylov
- */
 @Component
 class ServerChannelInitializer(
     private val connectionServerHandler: ConnectionServerHandler,
@@ -35,6 +32,7 @@ class ServerChannelInitializer(
         pipeline.addLast(ReadTimeoutHandler(60))
         pipeline.addLast(connectionServerHandler)
 
+        pipeline.addLast(context.getBean(TimeSyncServerHandler::class.java))
         pipeline.addLast(context.getBean(HeartBeatServerHandler::class.java)) // prototype
     }
 

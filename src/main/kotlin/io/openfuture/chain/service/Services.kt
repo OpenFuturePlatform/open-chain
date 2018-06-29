@@ -35,6 +35,12 @@ interface BlockService {
 
 }
 
+interface CryptoService {
+
+    fun generateSeedPhrase(): String
+
+}
+
 interface TransactionService {
 
     fun save(request: TransactionRequest)
