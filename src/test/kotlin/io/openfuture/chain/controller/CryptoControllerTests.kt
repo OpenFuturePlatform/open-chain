@@ -41,7 +41,7 @@ class CryptoControllerTests : ControllerTests() {
     }
 
     @Test
-    fun getDerivationKeyReturnMasterKeyWhenSeedPhraseDerivationPathAndSent() {
+    fun getDerivationKeyReturnDerivationKeyWhenSeedPhraseDerivationPathAndSent() {
         val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
         val derivationPath = "m/0"
         val seed = ByteArray(32)
