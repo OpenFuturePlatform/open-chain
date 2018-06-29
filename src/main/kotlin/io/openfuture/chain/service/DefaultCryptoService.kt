@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class DefaultCryptoService(
-        private val seedPhraseGenerator: SeedPhraseGenerator
+    private val seedPhraseGenerator: SeedPhraseGenerator
 ) : CryptoService {
 
     override fun generateSeedPhrase(): String = seedPhraseGenerator.createSeedPhrase(TWELVE)
