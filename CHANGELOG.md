@@ -14,8 +14,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Private key exportation
 - Private key importation
 - Key derivation algorithm implementation
-- RPC requests: importKey
-- RPC requests: importWifKey
+- RPC requests: import key
+- RPC requests: import key in WIF (Wallet Import Format)
 
 ## [0.1.0] - 2018-06-18
 ### Added
