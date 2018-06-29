@@ -50,8 +50,6 @@ interface CryptoService {
 
     fun serializedPrivateKey(key: ExtendedKey): String
 
-    fun generateKey(): WalletDto
-
     fun importKey(key: String): ExtendedKey
 
     fun importWifKey(wifKey: String): ECKey
@@ -59,6 +57,8 @@ interface CryptoService {
     fun serializePublicKey(key: ExtendedKey): String
 
     fun serializePrivateKey(key: ExtendedKey): String
+
+    fun generateKey(): WalletDto
 
 }
 

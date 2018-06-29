@@ -2,9 +2,7 @@ package io.openfuture.chain.controller
 
 import io.openfuture.chain.domain.crypto.DerivationKeyRequest
 import io.openfuture.chain.domain.crypto.MasterKeyRequest
-import io.openfuture.chain.domain.crypto.key.AddressKeyDto
-import io.openfuture.chain.domain.crypto.key.ImportKeyRequest
-import io.openfuture.chain.domain.crypto.key.KeyDto
+import io.openfuture.chain.domain.crypto.key.*
 import io.openfuture.chain.service.CryptoService
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -12,7 +10,7 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("${PathConstant.RPC}/crypto")
 class CryptoController(
-    val cryptoService: CryptoService
+    private val cryptoService: CryptoService
 ) {
 
     @PostMapping("/doGenerateMaster")
