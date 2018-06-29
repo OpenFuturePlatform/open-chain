@@ -1,6 +1,7 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.config.ServiceTests
+import io.openfuture.chain.crypto.key.ExtendedKeySerializer
 import io.openfuture.chain.crypto.seed.PhraseLength
 import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
 import org.assertj.core.api.Assertions.assertThat
@@ -12,6 +13,7 @@ import org.mockito.Mock
 class CryptoServiceTests : ServiceTests() {
 
     @Mock private lateinit var seedPhraseGenerator: SeedPhraseGenerator
+    @Mock private lateinit var extendedKeySerializer: ExtendedKeySerializer
 
     @InjectMocks
     private lateinit var cryptoService: DefaultCryptoService
