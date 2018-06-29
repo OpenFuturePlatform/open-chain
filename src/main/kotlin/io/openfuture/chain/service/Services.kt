@@ -1,9 +1,8 @@
 package io.openfuture.chain.service
 
+import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
 import io.openfuture.chain.domain.block.BlockRequest
-import io.openfuture.chain.domain.crypto.key.AddressKeyDto
-import io.openfuture.chain.domain.crypto.key.KeyDto
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
@@ -41,9 +40,13 @@ interface CryptoService {
 
     fun generateSeedPhrase(): String
 
-    fun getMasterKey(seedPhrase: String): KeyDto
+    fun getMasterKey(seedPhrase: String): ExtendedKey
 
-    fun getDerivationKey(seedPhrase: String, derivationPath: String): AddressKeyDto
+    fun getDerivationKey(seedPhrase: String, derivationPath: String): ExtendedKey
+
+    fun getPublicKey(key: ExtendedKey): String
+
+    fun getPrivateKey(key: ExtendedKey): String
 
 }
 

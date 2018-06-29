@@ -6,8 +6,7 @@ import io.openfuture.chain.crypto.key.ExtendedKeySerializer
 import io.openfuture.chain.crypto.seed.PhraseLength.TWELVE
 import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
 import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
-import io.openfuture.chain.domain.crypto.key.AddressKeyDto
-import io.openfuture.chain.domain.crypto.key.KeyDto
+import io.openfuture.chain.crypto.seed.validator.SeedPhraseValidator
 import org.springframework.stereotype.Service
 
 @Service
@@ -15,31 +14,28 @@ class DefaultCryptoService(
     private val seedPhraseGenerator: SeedPhraseGenerator,
     private val seedCalculator: SeedCalculator,
     private val derivationKeyHelper: DerivationKeysHelper,
-    private val extendedKeySerializer: ExtendedKeySerializer
+    private val extendedKeySerializer: ExtendedKeySerializer,
+    private val seedPhraseValidator: SeedPhraseValidator
 ) : CryptoService {
 
     override fun generateSeedPhrase(): String = seedPhraseGenerator.createSeedPhrase(TWELVE)
 
-    override fun getMasterKey(seedPhrase: String): KeyDto {
-        val seed = seedCalculator.calculateSeed(seedPhrase)
-        val masterKey = ExtendedKey.root(seed)
+    override fun getMasterKey(seedPhrase: String): ExtendedKey {
+        seedPhraseValidator.validate(seedPhrase)
 
-        return KeyDto(
-                extendedKeySerializer.serializePublic(masterKey),
-                extendedKeySerializer.serializePrivate(masterKey)
-        )
+        val seed = seedCalculator.calculateSeed(seedPhrase)
+        return ExtendedKey.root(seed)
     }
 
-    override fun getDerivationKey(seedPhrase: String, derivationPath: String): AddressKeyDto {
-        val seed = seedCalculator.calculateSeed(seedPhrase)
-        val masterKey = ExtendedKey.root(seed)
-        val derivationKey = derivationKeyHelper.derive(masterKey, derivationPath)
+    override fun getDerivationKey(seedPhrase: String, derivationPath: String): ExtendedKey {
+        seedPhraseValidator.validate(seedPhrase)
 
-        return AddressKeyDto(
-                extendedKeySerializer.serializePublic(derivationKey),
-                extendedKeySerializer.serializePrivate(derivationKey),
-                derivationKey.ecKey.getAddress()
-        )
+        val masterKey = getMasterKey(seedPhrase)
+        return derivationKeyHelper.derive(masterKey, derivationPath)
     }
+
+    override fun getPublicKey(key: ExtendedKey) = extendedKeySerializer.serializePublic(key)
+
+    override fun getPrivateKey(key: ExtendedKey) = extendedKeySerializer.serializePrivate(key)
 
 }
