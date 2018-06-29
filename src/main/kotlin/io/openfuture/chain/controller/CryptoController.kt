@@ -15,7 +15,7 @@ class CryptoController(
     private val cryptoService: CryptoService
 ) {
 
-    @PostMapping("importKey")
+    @PostMapping("/importKey")
     fun importKey(@RequestBody @Valid request: ImportKeyRequest): AddressKeyDto {
         val importedKey = cryptoService.importKey(request.decodedKey!!)
         return AddressKeyDto(
@@ -25,7 +25,7 @@ class CryptoController(
         )
     }
 
-    @PostMapping("importWifKey")
+    @PostMapping("/importWifKey")
     fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): AddressKeyDto = AddressKeyDto(
         cryptoService.importWifKey(request.decodedKey!!)
     )
