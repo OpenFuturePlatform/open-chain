@@ -15,7 +15,7 @@ class DerivationKeysHelper {
     companion object {
         private const val PATH_SEPARATOR = '/'
         private const val HARDENED_DERIVATION_FLAG = 'h'
-        private const val CORRECT_PATH_PATTERN = "^m/([/]?([0-9]h?)+){1,3}"
+        private const val CORRECT_PATH_PATTERN = "^m([/]+[0-9]+[h]?){1,3}"
 
         private const val ACCOUNT_NUMBER_POSITION = 1
         private const val WALLET_NUMBER_POSITION = 2
