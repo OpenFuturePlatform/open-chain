@@ -1,5 +1,6 @@
 package io.openfuture.chain.util
 
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.transaction.TransactionData
 
 object TransactionUtils {

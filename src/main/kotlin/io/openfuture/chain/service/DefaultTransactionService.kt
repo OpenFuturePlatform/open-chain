@@ -8,7 +8,7 @@ import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.repository.TransactionRepository
-import io.openfuture.chain.util.HashUtils
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.util.TransactionUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

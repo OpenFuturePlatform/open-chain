@@ -11,7 +11,7 @@ import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.util.BlockUtils
-import io.openfuture.chain.util.HashUtils
+import io.openfuture.chain.crypto.util.HashUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.CollectionUtils

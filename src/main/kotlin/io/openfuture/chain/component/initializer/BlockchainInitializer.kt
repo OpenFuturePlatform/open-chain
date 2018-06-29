@@ -7,7 +7,7 @@ import io.openfuture.chain.domain.block.nested.MerkleHash
 import io.openfuture.chain.nio.client.handler.ConnectionClientHandler
 import io.openfuture.chain.service.DefaultBlockService
 import io.openfuture.chain.util.BlockUtils
-import io.openfuture.chain.util.HashUtils
+import io.openfuture.chain.crypto.util.HashUtils
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
