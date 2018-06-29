@@ -22,7 +22,7 @@ class CryptoControllerTests : ControllerTests() {
 
 
     @Test
-    fun getMasterKeyReturnMasterKeyWhenSeedPhraseSent() {
+    fun doGenerateMasterReturnMasterKeyWhenSeedPhraseSent() {
         val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
         val seed = ByteArray(32)
         val masterKey = ExtendedKey.root(seed)
@@ -33,7 +33,7 @@ class CryptoControllerTests : ControllerTests() {
         given(cryptoService.serializedPrivateKey(any(ExtendedKey::class.java))).willReturn("2")
         given(cryptoService.getMasterKey(seedPhrase)).willReturn(masterKey)
 
-        webClient.post().uri("${PathConstant.RPC}/keys/getMasterKey")
+        webClient.post().uri("${PathConstant.RPC}/crypto/doGenerateMaster")
                 .body(Mono.just(masterKeyRequest), MasterKeyRequest::class.java)
                 .exchange()
                 .expectStatus().isOk
@@ -41,7 +41,7 @@ class CryptoControllerTests : ControllerTests() {
     }
 
     @Test
-    fun getDerivationKeyReturnDerivationKeyWhenSeedPhraseDerivationPathAndSent() {
+    fun doDeriveReturnDerivationKeyWhenSeedPhraseDerivationPathAndSent() {
         val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
         val derivationPath = "m/0"
         val seed = ByteArray(32)
@@ -53,7 +53,7 @@ class CryptoControllerTests : ControllerTests() {
         given(cryptoService.serializedPrivateKey(any(ExtendedKey::class.java))).willReturn("2")
         given(cryptoService.getDerivationKey(seedPhrase, derivationPath)).willReturn(masterKey)
 
-        webClient.post().uri("${PathConstant.RPC}/keys/getDerivationKey")
+        webClient.post().uri("${PathConstant.RPC}/crypto/doDerive")
                 .body(Mono.just(derivationKeyRequest), DerivationKeyRequest::class.java)
                 .exchange()
                 .expectStatus().isOk

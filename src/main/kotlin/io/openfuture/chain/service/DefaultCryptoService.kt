@@ -1,8 +1,11 @@
 package io.openfuture.chain.service
 
+import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.crypto.key.DerivationKeysHelper
+import io.openfuture.chain.crypto.key.ExtendedKeyDeserializer
 import io.openfuture.chain.crypto.key.ExtendedKeySerializer
+import io.openfuture.chain.crypto.key.PrivateKeyManager
 import io.openfuture.chain.crypto.seed.PhraseLength.TWELVE
 import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
 import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
@@ -15,10 +18,11 @@ import org.springframework.stereotype.Service
 class DefaultCryptoService(
     private val seedPhraseGenerator: SeedPhraseGenerator,
     private val seedCalculator: SeedCalculator,
-    private val derivationKeyHelper: DerivationKeysHelper,
     private val extendedKeySerializer: ExtendedKeySerializer,
     private val seedPhraseValidator: SeedPhraseValidator,
-    private val derivationKeysHelper: DerivationKeysHelper
+    private val derivationKeysHelper: DerivationKeysHelper,
+    private val keyManager: PrivateKeyManager,
+    private val deserializer: ExtendedKeyDeserializer
 ) : CryptoService {
 
     override fun generateSeedPhrase(): String = seedPhraseGenerator.createSeedPhrase(TWELVE)
@@ -34,7 +38,7 @@ class DefaultCryptoService(
         seedPhraseValidator.validate(seedPhrase)
 
         val masterKey = getMasterKey(seedPhrase)
-        return derivationKeyHelper.derive(masterKey, derivationPath)
+        return derivationKeysHelper.derive(masterKey, derivationPath)
     }
 
     override fun serializedPublicKey(key: ExtendedKey): String = extendedKeySerializer.serializePublic(key)
@@ -52,5 +56,13 @@ class DefaultCryptoService(
         return WalletDto(seedPhrase, extendedKeySerializer.serializePublic(rootExtendedKey),
                 extendedKeySerializer.serializePrivate(rootExtendedKey), addressKeyDto)
     }
+
+    override fun importKey(key: String): ExtendedKey = deserializer.deserialize(key)
+
+    override fun importWifKey(wifKey: String): ECKey = keyManager.importPrivateKey(wifKey)
+
+    override fun serializePublicKey(key: ExtendedKey) = extendedKeySerializer.serializePublic(key)
+
+    override fun serializePrivateKey(key: ExtendedKey) = extendedKeySerializer.serializePrivate(key)
 
 }

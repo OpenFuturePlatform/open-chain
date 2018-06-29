@@ -2,9 +2,12 @@ package io.openfuture.chain.service
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
+import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.crypto.key.DerivationKeysHelper
+import io.openfuture.chain.crypto.key.ExtendedKeyDeserializer
 import io.openfuture.chain.crypto.key.ExtendedKeySerializer
+import io.openfuture.chain.crypto.key.PrivateKeyManager
 import io.openfuture.chain.crypto.seed.PhraseLength.TWELVE
 import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
 import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
@@ -19,15 +22,16 @@ class CryptoServiceTests : ServiceTests() {
 
     @Mock private lateinit var seedPhraseGenerator: SeedPhraseGenerator
 
-    @Mock private lateinit var derivationKeysHelper: DerivationKeysHelper
-
     @Mock private lateinit var seedCalculator: SeedCalculator
 
-    @Mock private lateinit var derivationKeyHelper: DerivationKeysHelper
+    @Mock private lateinit var derivationKeysHelper: DerivationKeysHelper
 
     @Mock private lateinit var extendedKeySerializer: ExtendedKeySerializer
 
     @Mock private lateinit var seedPhraseValidator: SeedPhraseValidator
+
+    @Mock private lateinit var keyManager: PrivateKeyManager
+    @Mock private lateinit var deserializer: ExtendedKeyDeserializer
 
     private lateinit var cryptoService: DefaultCryptoService
 
@@ -37,10 +41,11 @@ class CryptoServiceTests : ServiceTests() {
         cryptoService = DefaultCryptoService(
                 seedPhraseGenerator,
                 seedCalculator,
-                derivationKeyHelper,
                 extendedKeySerializer,
                 seedPhraseValidator,
-                derivationKeysHelper
+                derivationKeysHelper,
+                keyManager,
+                deserializer
         )
     }
 
@@ -75,7 +80,7 @@ class CryptoServiceTests : ServiceTests() {
         val extendedKey = ExtendedKey.root(seed)
 
         given(seedCalculator.calculateSeed(seedPhrase)).willReturn(seed)
-        given(derivationKeyHelper.derive(any(ExtendedKey::class.java), any(String::class.java))).willReturn(extendedKey)
+        given(derivationKeysHelper.derive(any(ExtendedKey::class.java), any(String::class.java))).willReturn(extendedKey)
 
         val key = cryptoService.getDerivationKey(seedPhrase, derivationPath)
 
@@ -124,6 +129,48 @@ class CryptoServiceTests : ServiceTests() {
         assertThat(actualWalletDto.addressKeyDto.publicKey).isEqualTo(publicKey)
         assertThat(actualWalletDto.addressKeyDto.privateKey).isEqualTo(privateKey)
         assertThat(actualWalletDto.addressKeyDto.address).isNotNull()
+    }
+
+    fun importKeyShouldReturnKeysValuesAndAddressWhenPrivateKeyImporting() {
+        val decodedKey = "xpub661MyMwAqRbcF1xAwgn4pRrb25d3iSwvBC4DaTsNSUcoLZ6y4jgG2gtTGNjSVSvLzLMEawq1ghm1XkJ2QEzU3"
+        val extendedKey = ExtendedKey(ByteArray(64))
+
+        given(deserializer.deserialize(decodedKey)).willReturn(extendedKey)
+
+        val importedKey = cryptoService.importKey(decodedKey)
+
+        assertThat(importedKey.ecKey.public).isNotNull()
+        assertThat(importedKey.ecKey.private).isNotNull()
+        assertThat(importedKey.ecKey.getAddress()).isNotBlank()
+    }
+
+    @Test
+    fun importKeyShouldReturnPublicKeyValueAndAddressWhenPublicKeyImporting() {
+        val decodedKey = "xpub661MyMwAqRbcF1xAwgn4pRrb25d3iSwvBC4DaTsNSUcoLZ6y4jgG2gtTGNjSVSvLzLMEawq1ghm1XkJ2QEzU3"
+        val extendedKey = ExtendedKey(ByteArray(64), ecKey = ECKey(ByteArray(0), false))
+
+        given(deserializer.deserialize(decodedKey)).willReturn(extendedKey)
+
+        val importedKey = cryptoService.importKey(decodedKey)
+
+        assertThat(importedKey.ecKey.public).isNotNull()
+        assertThat(importedKey.ecKey.getAddress()).isNotNull()
+        assertThat(importedKey.ecKey.private).isNull()
+
+    }
+
+    @Test
+    fun importWifKeyShouldReturnKeysValuesAndAddress() {
+        val wifKey = "Kz5FUmSQf37sncxHS9LRGaUGokh9syGhwdZEFdYNX5y9uVZH8myo"
+        val ecKey = ECKey(ByteArray(0))
+
+        given(keyManager.importPrivateKey(wifKey)).willReturn(ecKey)
+
+        val importedKey = cryptoService.importWifKey(wifKey)
+
+        assertThat(importedKey.public).isNotNull()
+        assertThat(importedKey.private).isNotNull()
+        assertThat(importedKey.getAddress()).isNotBlank()
     }
 
     private fun assertExtendedKey(key: ExtendedKey) {
