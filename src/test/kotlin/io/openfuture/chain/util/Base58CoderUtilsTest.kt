@@ -1,5 +1,6 @@
 package io.openfuture.chain.util
 
+import io.openfuture.chain.crypto.util.Base58CoderUtils
 import org.junit.Assert
 import org.junit.Test
 import java.util.*

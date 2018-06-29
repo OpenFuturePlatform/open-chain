@@ -1,8 +1,8 @@
 package io.openfuture.chain.crypto.key
 
 import io.openfuture.chain.crypto.domain.ECKey
-import io.openfuture.chain.util.Base58CoderUtils
-import io.openfuture.chain.util.HashUtils
+import io.openfuture.chain.crypto.util.Base58CoderUtils
+import io.openfuture.chain.crypto.util.HashUtils
 import org.springframework.stereotype.Component
 import java.util.*
 
