@@ -8,6 +8,7 @@ class PrivateKeyManagerTest {
 
     private val privateKeyManager = PrivateKeyManager()
 
+
     @Test
     fun exportPrivateKeyShouldReturnPrivateKeyInWIFFormat() {
         val deserializer = ExtendedKeyDeserializer()

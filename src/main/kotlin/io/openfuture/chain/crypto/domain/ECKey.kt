@@ -57,5 +57,4 @@ class ECKey(
         return "0x${ByteUtils.toHexString(addressBytes)}"
     }
 
-
 }
