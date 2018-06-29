@@ -1,6 +1,6 @@
 package io.openfuture.chain.controller
 
-import io.openfuture.chain.domain.crypto.KeyRequest
+import io.openfuture.chain.domain.crypto.DerivationKeyRequest
 import io.openfuture.chain.domain.crypto.MasterKeyRequest
 import io.openfuture.chain.service.CryptoService
 import org.springframework.web.bind.annotation.PostMapping
@@ -18,7 +18,7 @@ class CryptoController(
     fun getMasterKey(@RequestBody keyRequest: MasterKeyRequest) = cryptoService.getMasterKey(keyRequest.seedPhrase)
 
     @PostMapping("/getDerivationKey")
-    fun getDerivationKey(@RequestBody keyRequest: KeyRequest)
+    fun getDerivationKey(@RequestBody keyRequest: DerivationKeyRequest)
             = cryptoService.getDerivationKey(keyRequest.seedPhrase, keyRequest.derivationPath)
 
 }
