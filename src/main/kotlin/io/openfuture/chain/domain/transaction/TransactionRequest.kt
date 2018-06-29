@@ -1,6 +1,6 @@
 package io.openfuture.chain.domain.transaction
 
-import io.openfuture.chain.util.HashUtils
+import io.openfuture.chain.crypto.util.HashUtils
 
 class TransactionRequest(
     val blockId: Int,

@@ -1,16 +1,16 @@
 plugins {
     id 'jacoco'
     id 'idea'
-    id 'org.jetbrains.kotlin.jvm' version '1.2.41'
-    id 'org.jetbrains.kotlin.plugin.spring' version '1.2.41'
-    id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.41'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.50'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.2.50'
+    id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.50'
     id 'org.springframework.boot' version '2.0.3.RELEASE'
     id 'io.spring.dependency-management' version '1.0.5.RELEASE'
     id "com.google.protobuf" version "0.8.5"
 }
 
 group = 'io.openfuture.chain'
-version = '0.1.0'
+version = '0.2.0'
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -18,15 +18,16 @@ repositories {
 }
 
 ext {
-    kotlinVersion = '1.2.41'
+    kotlinVersion = '1.2.50'
     queryDslVersion = '4.2.1'
     protobufVersion = '3.5.1'
+    bouncycastleVersion = '1.59'
 }
 
 dependencies {
     // Kotlin
-    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
-    compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
+    compile("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     compile("com.fasterxml.jackson.module:jackson-module-kotlin")
     compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
 
@@ -43,15 +44,19 @@ dependencies {
     compile('org.xerial:sqlite-jdbc:3.23.1')
 
     // Utils
-    compile('org.apache.commons:commons-lang3:3.1')
+    compile('org.apache.commons:commons-lang3:3.7')
     compile('com.github.oshi:oshi-core:3.5.0')
 
     // DevTools
     runtime('org.springframework.boot:spring-boot-devtools')
     compileOnly('org.springframework.boot:spring-boot-configuration-processor')
 
+    //Cryptography
+    compile("org.bouncycastle:bcprov-jdk15on:$bouncycastleVersion")
+
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('io.projectreactor:reactor-test')
     testCompile('org.postgresql:postgresql')
 }
 

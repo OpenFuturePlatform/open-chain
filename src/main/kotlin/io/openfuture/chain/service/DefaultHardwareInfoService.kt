@@ -21,7 +21,7 @@ class DefaultHardwareInfoService : HardwareInfoService {
         val diskStorageInfo = getDiskStorageInfo()
         val networksInfo = getNetworksInfo()
 
-        var storageSize = diskStorageInfo.stream().flatMapToLong { x -> LongStream.of(x.totalStorage) }.sum()
+        val storageSize = diskStorageInfo.stream().flatMapToLong { LongStream.of(it.totalStorage) }.sum()
 
         return HardwareInfo(cpuInfo, ramInfo, storageSize, networksInfo)
     }
