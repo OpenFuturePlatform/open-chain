@@ -1,6 +1,6 @@
 package io.openfuture.chain.crypto.domain
 
-import io.openfuture.chain.util.HashUtils
+import io.openfuture.chain.crypto.util.HashUtils
 import java.util.*
 
 class ExtendedKey(

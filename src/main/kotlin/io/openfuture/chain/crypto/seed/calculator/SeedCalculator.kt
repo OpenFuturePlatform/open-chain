@@ -1,12 +1,11 @@
 package io.openfuture.chain.crypto.seed.calculator
 
+import io.openfuture.chain.crypto.util.HashUtils
 import org.springframework.stereotype.Component
 import java.text.Normalizer
 
 @Component
-class SeedCalculator(
-        private val hashAlgorithm: BouncyCastlePBKDF2WithHmacSHA256
-) {
+class SeedCalculator {
 
     private val fixedSalt = getUtf8Bytes("Openfuture")
 
@@ -15,7 +14,7 @@ class SeedCalculator(
         val normalizedPassphrase = Normalizer.normalize(passwordPhrase, Normalizer.Form.NFKD)
         val passphraseSalt = getUtf8Bytes(normalizedPassphrase)
         val salt = combine(fixedSalt, passphraseSalt)
-        return hashAlgorithm.hash(mnemonicChars, salt)
+        return HashUtils.hashPBKDF2(mnemonicChars, salt)
     }
 
     private fun combine(array1: ByteArray, array2: ByteArray): ByteArray {

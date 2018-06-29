@@ -2,7 +2,7 @@ package io.openfuture.chain.crypto.key
 
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
-import io.openfuture.chain.util.Base58CoderUtils
+import io.openfuture.chain.crypto.util.Base58CoderUtils
 import org.bouncycastle.util.Arrays
 import org.bouncycastle.util.Arrays.areEqual
 import org.springframework.stereotype.Component
@@ -24,7 +24,7 @@ class ExtendedKeyDeserializer {
         val decodedSerializedKey = Base58CoderUtils.decodeWithChecksum(serializedKey)
 
         if (DECODED_SERIALIZED_KEY_LENGTH != decodedSerializedKey.size) {
-            throw Exception("Invalid serialized key value")
+            throw IllegalArgumentException("Invalid serialized key value")
         }
 
         val depth = toIntFromByte(decodedSerializedKey[4])
