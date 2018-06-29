@@ -2,16 +2,13 @@ package io.openfuture.chain.service
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
-import io.openfuture.chain.crypto.domain.ExtendedKey
-import io.openfuture.chain.crypto.key.DerivationKeysHelper
-import io.openfuture.chain.crypto.key.ExtendedKeySerializer
-import io.openfuture.chain.crypto.seed.PhraseLength.TWELVE
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
+import io.openfuture.chain.crypto.key.DerivationKeysHelper
 import io.openfuture.chain.crypto.key.ExtendedKeyDeserializer
 import io.openfuture.chain.crypto.key.ExtendedKeySerializer
 import io.openfuture.chain.crypto.key.PrivateKeyManager
-import io.openfuture.chain.crypto.seed.PhraseLength
+import io.openfuture.chain.crypto.seed.PhraseLength.TWELVE
 import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -25,7 +22,6 @@ class CryptoServiceTests : ServiceTests() {
     @Mock private lateinit var extendedKeySerializer: ExtendedKeySerializer
     @Mock private lateinit var derivationKeysHelper: DerivationKeysHelper
     @Mock private lateinit var keyManager: PrivateKeyManager
-    @Mock private lateinit var serializer: ExtendedKeySerializer
     @Mock private lateinit var deserializer: ExtendedKeyDeserializer
 
     @InjectMocks
