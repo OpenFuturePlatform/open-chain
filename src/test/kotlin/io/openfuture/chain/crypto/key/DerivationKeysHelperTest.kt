@@ -1,7 +1,6 @@
-package io.openfuture.chain.crypto.domain
+package io.openfuture.chain.crypto.key
 
-import io.openfuture.chain.crypto.key.DerivationKeysHelper
-import io.openfuture.chain.crypto.key.ExtendedKeySerializer
+import io.openfuture.chain.crypto.domain.ExtendedKey
 import org.assertj.core.api.Assertions
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.junit.Test

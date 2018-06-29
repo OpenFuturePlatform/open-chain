@@ -1,9 +1,10 @@
 package io.openfuture.chain.util
 
+import org.apache.commons.lang3.StringUtils
 import java.util.*
 
 
-object Base58 {
+object Base58CoderUtils {
 
     private val ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray()
     private val ENCODED_ZERO = ALPHABET[0]
@@ -18,7 +19,7 @@ object Base58 {
 
     fun encode(bytes: ByteArray): String {
         if (bytes.isEmpty()) {
-            return ""
+            return StringUtils.EMPTY
         }
 
         var leadingZerosCount = 0
@@ -50,7 +51,7 @@ object Base58 {
     }
 
     fun encodeWithChecksum(bytes: ByteArray): String {
-        val checkSum = HashUtils.generateHashBytes(HashUtils.generateHashBytes(bytes))
+        val checkSum = HashUtils.doubleSha256(bytes)
         val extended = ByteArray(bytes.size + 4)
         System.arraycopy(bytes, 0, extended, 0, bytes.size)
         System.arraycopy(checkSum, 0, extended, bytes.size, 4)
@@ -64,7 +65,7 @@ object Base58 {
 
         val input58 = ByteArray(input.length)
         for (i in 0 until input.length) {
-            var digit58 = if (input[i].toInt() in 0..127) {
+            val digit58 = if (input[i].toInt() in 0..127) {
                 INDEXES[input[i].toInt()]
             } else {
                 throw IllegalArgumentException("Invalid character ${input[i]} at $i")
@@ -102,7 +103,7 @@ object Base58 {
             throw IllegalArgumentException("Input too short. Size: ${decoded.size}")
         val data = Arrays.copyOfRange(decoded, 0, decoded.size - 4)
         val checksum = Arrays.copyOfRange(decoded, decoded.size - 4, decoded.size)
-        val actualChecksum = Arrays.copyOfRange(HashUtils.generateHashBytes(data), 0, 4)
+        val actualChecksum = Arrays.copyOfRange(HashUtils.doubleSha256(data), 0, 4)
         if (!Arrays.equals(checksum, actualChecksum))
             throw IllegalArgumentException("Invalid checksum")
         return data

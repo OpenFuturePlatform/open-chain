@@ -1,7 +1,7 @@
 package io.openfuture.chain.crypto.key
 
 import io.openfuture.chain.crypto.domain.ExtendedKey
-import io.openfuture.chain.util.Base58
+import io.openfuture.chain.util.Base58CoderUtils
 import org.springframework.stereotype.Component
 import java.io.ByteArrayOutputStream
 
@@ -12,8 +12,8 @@ import java.io.ByteArrayOutputStream
 class ExtendedKeySerializer {
 
     companion object {
-        private val xpub = byteArrayOf(0x04.toByte(), 0x88.toByte(), 0xB2.toByte(), 0x1E.toByte())
-        private val xprv = byteArrayOf(0x04.toByte(), 0x88.toByte(), 0xAD.toByte(), 0xE4.toByte())
+        val xpub = byteArrayOf(0x04.toByte(), 0x88.toByte(), 0xB2.toByte(), 0x1E.toByte())
+        val xprv = byteArrayOf(0x04.toByte(), 0x88.toByte(), 0xAD.toByte(), 0xE4.toByte())
     }
 
     fun serializePublic(extendedKey: ExtendedKey): String {
@@ -21,6 +21,10 @@ class ExtendedKeySerializer {
     }
 
     fun serializePrivate(extendedKey: ExtendedKey): String {
+        if (extendedKey.ecKey.isPrivateEmpty()) {
+            throw Exception("This is a public key only. Can't serialize a private key")
+        }
+
         return serialize(xprv, extendedKey, extendedKey.ecKey.getPrivate())
     }
 
@@ -43,7 +47,7 @@ class ExtendedKeySerializer {
         }
 
         out.write(keyBytes)
-        return Base58.encodeWithChecksum(out.toByteArray())
+        return Base58CoderUtils.encodeWithChecksum(out.toByteArray())
     }
 
 }
