@@ -1,4 +1,4 @@
-package io.openfuture.chain.util
+package io.openfuture.chain.crypto.util
 
 import org.apache.commons.lang3.StringUtils
 import java.util.*
