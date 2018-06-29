@@ -1,6 +1,11 @@
 package io.openfuture.chain.util
 
+import org.apache.commons.lang3.StringUtils
+import org.bouncycastle.crypto.digests.RIPEMD160Digest
+import org.bouncycastle.jcajce.provider.digest.Keccak
 import java.security.MessageDigest
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 
 object HashUtils {
 
