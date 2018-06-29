@@ -16,7 +16,14 @@ class CryptoController(
 ) {
 
     @PostMapping("importKey")
-    fun importKey(@RequestBody @Valid request: ImportKeyRequest) = cryptoService.importKey(request.decodedKey!!)
+    fun importKey(@RequestBody @Valid request: ImportKeyRequest): AddressKeyDto {
+        val importedKey = cryptoService.importKey(request.decodedKey!!)
+        return AddressKeyDto(
+            cryptoService.serializePublicKey(importedKey),
+            if (!importedKey.ecKey.isPrivateEmpty()) cryptoService.serializePrivateKey(importedKey) else null,
+            importedKey.ecKey.getAddress()
+        )
+    }
 
     @PostMapping("importWifKey")
     fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): AddressKeyDto = AddressKeyDto(

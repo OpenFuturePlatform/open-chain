@@ -44,17 +44,14 @@ class CryptoServiceTests : ServiceTests() {
     fun importKeyShouldReturnKeysValuesAndAddressWhenPrivateKeyImporting() {
         val decodedKey = "xpub661MyMwAqRbcF1xAwgn4pRrb25d3iSwvBC4DaTsNSUcoLZ6y4jgG2gtTGNjSVSvLzLMEawq1ghm1XkJ2QEzU3"
         val extendedKey = ExtendedKey(ByteArray(64))
-        val privateKey = "xprv9s21ZrQH143K2XshqfF4THurU3nZJzE4oy8cn5Tkt95pTkmpXCN1UtZyR85ERwhvYuRzDuDkzqTVAPys4SRJ"
 
         given(deserializer.deserialize(decodedKey)).willReturn(extendedKey)
-        given(serializer.serializePublic(extendedKey)).willReturn(decodedKey)
-        given(serializer.serializePrivate(extendedKey)).willReturn(privateKey)
 
         val importedKey = cryptoService.importKey(decodedKey)
 
-        assertThat(importedKey.publicKey).isEqualTo(decodedKey)
-        assertThat(importedKey.privateKey).isEqualTo(privateKey)
-        assertThat(importedKey.address).isNotBlank()
+        assertThat(importedKey.ecKey.public).isNotNull()
+        assertThat(importedKey.ecKey.private).isNotNull()
+        assertThat(importedKey.ecKey.getAddress()).isNotBlank()
     }
 
     @Test
@@ -63,13 +60,12 @@ class CryptoServiceTests : ServiceTests() {
         val extendedKey = ExtendedKey(ByteArray(64), ecKey = ECKey(ByteArray(0), false))
 
         given(deserializer.deserialize(decodedKey)).willReturn(extendedKey)
-        given(serializer.serializePublic(extendedKey)).willReturn(decodedKey)
 
         val importedKey = cryptoService.importKey(decodedKey)
 
-        assertThat(importedKey.publicKey).isEqualTo(decodedKey)
-        assertThat(importedKey.address).isNotBlank()
-        assertThat(importedKey.privateKey).isNull()
+        assertThat(importedKey.ecKey.public).isNotNull()
+        assertThat(importedKey.ecKey.getAddress()).isNotNull()
+        assertThat(importedKey.ecKey.private).isNull()
 
     }
 
@@ -82,9 +78,9 @@ class CryptoServiceTests : ServiceTests() {
 
         val importedKey = cryptoService.importWifKey(wifKey)
 
-        assertThat(importedKey.publicKey).isNotBlank()
-        assertThat(importedKey.privateKey).isNotBlank()
-        assertThat(importedKey.address).isNotBlank()
+        assertThat(importedKey.public).isNotNull()
+        assertThat(importedKey.private).isNotNull()
+        assertThat(importedKey.getAddress()).isNotBlank()
 
     }
 
