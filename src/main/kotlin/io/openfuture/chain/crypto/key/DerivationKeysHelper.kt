@@ -46,6 +46,12 @@ class DerivationKeysHelper {
         return base.derive(addressNumber)
     }
 
+    fun deriveDefaultAddress(rootKey: ExtendedKey): ExtendedKey {
+        val base = deriveWalletChainKeys(rootKey, 0, 0)
+
+        return base.derive(0)
+    }
+
     private fun deriveWalletChainKeys(rootKey: ExtendedKey, accountNumber: Int, walletNumber: Int): ExtendedKey {
         val base = rootKey.derive(accountNumber)
         return base.derive(walletNumber)

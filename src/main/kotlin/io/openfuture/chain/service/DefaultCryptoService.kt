@@ -16,22 +16,18 @@ class DefaultCryptoService(
         private val derivationKeysHelper: DerivationKeysHelper
 ) : CryptoService {
 
-    companion object {
-        private const val DEFAULT_DERIVATION_PATH = "m/0/0/0"
-    }
-
     override fun generateSeedPhrase(): String = seedPhraseGenerator.createSeedPhrase(TWELVE)
 
     override fun generateKey(): WalletDto {
         val seedPhrase = seedPhraseGenerator.createSeedPhrase(TWELVE)
         val rootExtendedKey = ExtendedKey.root(seedPhrase.toByteArray())
 
-        val extendedKey = derivationKeysHelper.derive(rootExtendedKey, DEFAULT_DERIVATION_PATH)
+        val extendedKey = derivationKeysHelper.deriveDefaultAddress(rootExtendedKey)
         val addressKeyDto = AddressKeyDto(extendedKeySerializer.serializePublic(extendedKey),
                 extendedKeySerializer.serializePrivate(extendedKey), extendedKey.ecKey.getAddress())
 
-        return WalletDto(extendedKeySerializer.serializePublic(rootExtendedKey),
-                extendedKeySerializer.serializePrivate(rootExtendedKey), seedPhrase, addressKeyDto)
+        return WalletDto(seedPhrase, extendedKeySerializer.serializePublic(rootExtendedKey),
+                extendedKeySerializer.serializePrivate(rootExtendedKey), addressKeyDto)
     }
 
 }

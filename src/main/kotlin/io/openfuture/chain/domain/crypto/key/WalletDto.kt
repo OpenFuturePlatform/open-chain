@@ -2,7 +2,7 @@ package io.openfuture.chain.domain.crypto.key
 
 data class WalletDto(
         val seedPhrase: String,
-        val publicKey: String,
-        val privateKey: String? = null,
+        val masterPublicKey: String,
+        val masterPrivateKey: String? = null,
         val addressKeyDto: AddressKeyDto
 )
