@@ -30,7 +30,7 @@ class DefaultTransactionService(
     @Transactional
     override fun add(dto: TransactionDto): Transaction {
         if (!this.isValid(dto)) {
-            throw ValidationException("Block is not valid!")
+            throw ValidationException("Transaction is not valid!")
         }
 
         return repository.save(Transaction.of(dto))
@@ -53,10 +53,14 @@ class DefaultTransactionService(
     }
 
     override fun isValid(dto: TransactionDto): Boolean {
-        if (TransactionUtils.isValidHash(dto.hash, dto.data)) {
+        if (!TransactionUtils.isValidHash(dto.hash, dto.data)) {
             return false
         }
         return true
+    }
+
+    override fun isExists(hash: String): Boolean {
+        return null != repository.findOneByHash(hash)
     }
 
 }

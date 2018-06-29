@@ -59,4 +59,6 @@ interface TransactionService {
 
     fun isValid(dto: TransactionDto): Boolean
 
+    fun isExists(hash: String): Boolean
+
 }
