@@ -1,6 +1,8 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.config.ServiceTests
+import io.openfuture.chain.crypto.domain.ECKey
+import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.crypto.key.ExtendedKeyDeserializer
 import io.openfuture.chain.crypto.key.ExtendedKeySerializer
 import io.openfuture.chain.crypto.key.PrivateKeyManager
@@ -36,6 +38,54 @@ class CryptoServiceTests : ServiceTests() {
         val seedPhraseResult = cryptoService.generateSeedPhrase()
 
         assertThat(seedPhrase).isEqualTo(seedPhraseResult)
+    }
+
+    @Test
+    fun importKeyShouldReturnKeysValuesAndAddressWhenPrivateKeyImporting() {
+        val decodedKey = "xpub661MyMwAqRbcF1xAwgn4pRrb25d3iSwvBC4DaTsNSUcoLZ6y4jgG2gtTGNjSVSvLzLMEawq1ghm1XkJ2QEzU3"
+        val extendedKey = ExtendedKey(ByteArray(64))
+        val privateKey = "xprv9s21ZrQH143K2XshqfF4THurU3nZJzE4oy8cn5Tkt95pTkmpXCN1UtZyR85ERwhvYuRzDuDkzqTVAPys4SRJ"
+
+        given(deserializer.deserialize(decodedKey)).willReturn(extendedKey)
+        given(serializer.serializePublic(extendedKey)).willReturn(decodedKey)
+        given(serializer.serializePrivate(extendedKey)).willReturn(privateKey)
+
+        val importedKey = cryptoService.importKey(decodedKey)
+
+        assertThat(importedKey.publicKey).isEqualTo(decodedKey)
+        assertThat(importedKey.privateKey).isEqualTo(privateKey)
+        assertThat(importedKey.address).isNotBlank()
+    }
+
+    @Test
+    fun importKeyShouldReturnPublicKeyValueAndAddressWhenPublicKeyImporting() {
+        val decodedKey = "xpub661MyMwAqRbcF1xAwgn4pRrb25d3iSwvBC4DaTsNSUcoLZ6y4jgG2gtTGNjSVSvLzLMEawq1ghm1XkJ2QEzU3"
+        val extendedKey = ExtendedKey(ByteArray(64), ecKey = ECKey(ByteArray(0), false))
+
+        given(deserializer.deserialize(decodedKey)).willReturn(extendedKey)
+        given(serializer.serializePublic(extendedKey)).willReturn(decodedKey)
+
+        val importedKey = cryptoService.importKey(decodedKey)
+
+        assertThat(importedKey.publicKey).isEqualTo(decodedKey)
+        assertThat(importedKey.address).isNotBlank()
+        assertThat(importedKey.privateKey).isNull()
+
+    }
+
+    @Test
+    fun importWifKeyShouldReturnKeysValuesAndAddress() {
+        val wifKey = "Kz5FUmSQf37sncxHS9LRGaUGokh9syGhwdZEFdYNX5y9uVZH8myo"
+        val ecKey = ECKey(ByteArray(0))
+
+        given(keyManager.importPrivateKey(wifKey)).willReturn(ecKey)
+
+        val importedKey = cryptoService.importWifKey(wifKey)
+
+        assertThat(importedKey.publicKey).isNotBlank()
+        assertThat(importedKey.privateKey).isNotBlank()
+        assertThat(importedKey.address).isNotBlank()
+
     }
 
 }
