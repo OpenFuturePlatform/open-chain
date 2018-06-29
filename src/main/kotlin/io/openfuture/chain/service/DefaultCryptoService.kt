@@ -17,7 +17,6 @@ class DefaultCryptoService(
     private val keyManager: PrivateKeyManager,
     private val serializer: ExtendedKeySerializer,
     private val deserializer: ExtendedKeyDeserializer,
-    private val extendedKeySerializer: ExtendedKeySerializer,
     private val derivationKeysHelper: DerivationKeysHelper,
     private val seedPhraseValidator: SeedPhraseValidator,
     private val seedCalculator: SeedCalculator
@@ -29,20 +28,20 @@ class DefaultCryptoService(
 
     override fun importWifKey(wifKey: String): ECKey = keyManager.importPrivateKey(wifKey)
 
-    override fun serializePublicKey(key: ExtendedKey) = serializer.serializePublic(key)
+    override fun serializePublicKey(key: ExtendedKey): String = serializer.serializePublic(key)
 
-    override fun serializePrivateKey(key: ExtendedKey) = serializer.serializePrivate(key)
+    override fun serializePrivateKey(key: ExtendedKey): String = serializer.serializePrivate(key)
 
     override fun generateKey(): WalletDto {
         val seedPhrase = seedPhraseGenerator.createSeedPhrase(PhraseLength.TWELVE)
         val rootExtendedKey = ExtendedKey.root(seedPhrase.toByteArray())
 
         val extendedKey = derivationKeysHelper.deriveDefaultAddress(rootExtendedKey)
-        val addressKeyDto = AddressKeyDto(extendedKeySerializer.serializePublic(extendedKey),
-                extendedKeySerializer.serializePrivate(extendedKey), extendedKey.ecKey.getAddress())
+        val addressKeyDto = AddressKeyDto(serializer.serializePublic(extendedKey),
+                serializer.serializePrivate(extendedKey), extendedKey.ecKey.getAddress())
 
-        return WalletDto(seedPhrase, extendedKeySerializer.serializePublic(rootExtendedKey),
-                extendedKeySerializer.serializePrivate(rootExtendedKey), addressKeyDto)
+        return WalletDto(seedPhrase, serializer.serializePublic(rootExtendedKey),
+            serializer.serializePrivate(rootExtendedKey), addressKeyDto)
     }
 
     override fun getMasterKey(seedPhrase: String): ExtendedKey {

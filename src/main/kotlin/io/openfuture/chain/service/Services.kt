@@ -46,10 +46,6 @@ interface CryptoService {
 
     fun getDerivationKey(seedPhrase: String, derivationPath: String): ExtendedKey
 
-    fun serializedPublicKey(key: ExtendedKey): String
-
-    fun serializedPrivateKey(key: ExtendedKey): String
-
     fun importKey(key: String): ExtendedKey
 
     fun importWifKey(wifKey: String): ECKey

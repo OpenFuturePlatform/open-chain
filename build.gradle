@@ -26,8 +26,8 @@ ext {
 
 dependencies {
     // Kotlin
-    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
-    compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
+    compile("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     compile("com.fasterxml.jackson.module:jackson-module-kotlin")
     compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
 
@@ -52,7 +52,7 @@ dependencies {
     compileOnly('org.springframework.boot:spring-boot-configuration-processor')
 
     //Cryptography
-    compile("org.bouncycastle:bcprov-jdk15on:${bouncycastleVersion}")
+    compile("org.bouncycastle:bcprov-jdk15on:$bouncycastleVersion")
 
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')

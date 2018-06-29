@@ -21,15 +21,10 @@ import org.mockito.Mock
 class CryptoServiceTests : ServiceTests() {
 
     @Mock private lateinit var seedPhraseGenerator: SeedPhraseGenerator
-
     @Mock private lateinit var seedCalculator: SeedCalculator
-
     @Mock private lateinit var derivationKeysHelper: DerivationKeysHelper
-
-    @Mock private lateinit var extendedKeySerializer: ExtendedKeySerializer
-
+    @Mock private lateinit var serializer: ExtendedKeySerializer
     @Mock private lateinit var seedPhraseValidator: SeedPhraseValidator
-
     @Mock private lateinit var keyManager: PrivateKeyManager
     @Mock private lateinit var deserializer: ExtendedKeyDeserializer
 
@@ -39,13 +34,13 @@ class CryptoServiceTests : ServiceTests() {
     @Before
     fun setUp() {
         cryptoService = DefaultCryptoService(
-                seedPhraseGenerator,
-                seedCalculator,
-                extendedKeySerializer,
-                seedPhraseValidator,
-                derivationKeysHelper,
-                keyManager,
-                deserializer
+            seedPhraseGenerator,
+            keyManager,
+            serializer,
+            deserializer,
+            derivationKeysHelper,
+            seedPhraseValidator,
+            seedCalculator
         )
     }
 
@@ -93,9 +88,9 @@ class CryptoServiceTests : ServiceTests() {
         val extendedKey = ExtendedKey.root(seed)
         val expectedPublicKey = "123456678890"
 
-        given(extendedKeySerializer.serializePublic(extendedKey)).willReturn(expectedPublicKey)
+        given(serializer.serializePublic(extendedKey)).willReturn(expectedPublicKey)
 
-        val publicKey = cryptoService.serializedPublicKey(extendedKey)
+        val publicKey = cryptoService.serializePublicKey(extendedKey)
         assertThat(expectedPublicKey).isEqualTo(publicKey)
     }
 
@@ -105,9 +100,9 @@ class CryptoServiceTests : ServiceTests() {
         val extendedKey = ExtendedKey.root(seed)
         val expectedPrivateKey = "123456678890"
 
-        given(extendedKeySerializer.serializePrivate(extendedKey)).willReturn(expectedPrivateKey)
+        given(serializer.serializePrivate(extendedKey)).willReturn(expectedPrivateKey)
 
-        val privateKey = cryptoService.serializedPrivateKey(extendedKey)
+        val privateKey = cryptoService.serializePrivateKey(extendedKey)
         assertThat(expectedPrivateKey).isEqualTo(privateKey)
     }
 
@@ -118,8 +113,8 @@ class CryptoServiceTests : ServiceTests() {
 
         given(seedPhraseGenerator.createSeedPhrase(TWELVE)).willReturn(seedPhrase)
         given(derivationKeysHelper.deriveDefaultAddress(any(ExtendedKey::class.java))).will { invocation -> invocation.arguments[0]  }
-        given(extendedKeySerializer.serializePublic(any(ExtendedKey::class.java))).willReturn(publicKey)
-        given(extendedKeySerializer.serializePrivate(any(ExtendedKey::class.java))).willReturn(privateKey)
+        given(serializer.serializePublic(any(ExtendedKey::class.java))).willReturn(publicKey)
+        given(serializer.serializePrivate(any(ExtendedKey::class.java))).willReturn(privateKey)
 
         val actualWalletDto = cryptoService.generateKey()
 

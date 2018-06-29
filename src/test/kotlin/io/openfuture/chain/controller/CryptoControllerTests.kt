@@ -29,8 +29,8 @@ class CryptoControllerTests : ControllerTests() {
         val masterKeyRequest = MasterKeyRequest(seedPhrase)
         val expectedAddress = AddressKeyDto("1", "2")
 
-        given(cryptoService.serializedPublicKey(any(ExtendedKey::class.java))).willReturn("1")
-        given(cryptoService.serializedPrivateKey(any(ExtendedKey::class.java))).willReturn("2")
+        given(cryptoService.serializePublicKey(any(ExtendedKey::class.java))).willReturn("1")
+        given(cryptoService.serializePrivateKey(any(ExtendedKey::class.java))).willReturn("2")
         given(cryptoService.getMasterKey(seedPhrase)).willReturn(masterKey)
 
         webClient.post().uri("${PathConstant.RPC}/crypto/doGenerateMaster")
@@ -49,8 +49,8 @@ class CryptoControllerTests : ControllerTests() {
         val derivationKeyRequest = DerivationKeyRequest(seedPhrase, derivationPath)
         val expectedKey = KeyDto("1", "2")
 
-        given(cryptoService.serializedPublicKey(any(ExtendedKey::class.java))).willReturn("1")
-        given(cryptoService.serializedPrivateKey(any(ExtendedKey::class.java))).willReturn("2")
+        given(cryptoService.serializePublicKey(any(ExtendedKey::class.java))).willReturn("1")
+        given(cryptoService.serializePrivateKey(any(ExtendedKey::class.java))).willReturn("2")
         given(cryptoService.getDerivationKey(seedPhrase, derivationPath)).willReturn(masterKey)
 
         webClient.post().uri("${PathConstant.RPC}/crypto/doDerive")
