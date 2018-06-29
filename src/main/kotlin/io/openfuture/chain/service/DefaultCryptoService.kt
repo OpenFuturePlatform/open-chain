@@ -34,8 +34,8 @@ class DefaultCryptoService(
         return derivationKeyHelper.derive(masterKey, derivationPath)
     }
 
-    override fun getPublicKey(key: ExtendedKey) = extendedKeySerializer.serializePublic(key)
+    override fun getSerializedPublicKey(key: ExtendedKey) = extendedKeySerializer.serializePublic(key)
 
-    override fun getPrivateKey(key: ExtendedKey) = extendedKeySerializer.serializePrivate(key)
+    override fun getSerializedPrivateKey(key: ExtendedKey) = extendedKeySerializer.serializePrivate(key)
 
 }

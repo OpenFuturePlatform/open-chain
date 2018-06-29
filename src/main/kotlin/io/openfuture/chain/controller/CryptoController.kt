@@ -21,8 +21,8 @@ class CryptoController(
         val key = cryptoService.getMasterKey(keyRequest.seedPhrase)
 
         return KeyDto(
-                cryptoService.getPublicKey(key),
-                cryptoService.getPrivateKey(key)
+                cryptoService.getSerializedPublicKey(key),
+                cryptoService.getSerializedPrivateKey(key)
         )
     }
 
@@ -31,8 +31,8 @@ class CryptoController(
         val key = cryptoService.getDerivationKey(keyRequest.seedPhrase, keyRequest.derivationPath)
 
         return AddressKeyDto(
-                cryptoService.getPublicKey(key),
-                cryptoService.getPrivateKey(key),
+                cryptoService.getSerializedPublicKey(key),
+                cryptoService.getSerializedPrivateKey(key),
                 key.ecKey.getAddress()
         )
     }
