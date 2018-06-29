@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.RestController
 import javax.validation.Valid
 
 @RestController
-@RequestMapping("${PathConstant.RPC}/keys")
+@RequestMapping("${PathConstant.RPC}/crypto")
 class CryptoController(
     private val cryptoService: CryptoService
 ) {
 
-    @PostMapping("/import")
+    @PostMapping("/keys/doImport")
     fun importKey(@RequestBody @Valid request: ImportKeyRequest): AddressKeyDto {
         val importedKey = cryptoService.importKey(request.decodedKey!!)
         return AddressKeyDto(
@@ -25,7 +25,7 @@ class CryptoController(
         )
     }
 
-    @PostMapping("/importWif")
+    @PostMapping("/keys/doImportWif")
     fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): AddressKeyDto = AddressKeyDto(
         cryptoService.importWifKey(request.decodedKey!!)
     )

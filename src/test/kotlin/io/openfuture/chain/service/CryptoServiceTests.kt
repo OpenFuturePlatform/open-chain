@@ -16,14 +16,13 @@ import org.mockito.Mock
 
 class CryptoServiceTests : ServiceTests() {
 
-    @Mock
-    private lateinit var seedPhraseGenerator: SeedPhraseGenerator
-    @Mock
-    private lateinit var keyManager: PrivateKeyManager
-    @Mock
-    private lateinit var serializer: ExtendedKeySerializer
-    @Mock
-    private lateinit var deserializer: ExtendedKeyDeserializer
+    @Mock private lateinit var seedPhraseGenerator: SeedPhraseGenerator
+
+    @Mock private lateinit var keyManager: PrivateKeyManager
+
+    @Mock private lateinit var serializer: ExtendedKeySerializer
+
+    @Mock private lateinit var deserializer: ExtendedKeyDeserializer
 
     @InjectMocks
     private lateinit var cryptoService: DefaultCryptoService
