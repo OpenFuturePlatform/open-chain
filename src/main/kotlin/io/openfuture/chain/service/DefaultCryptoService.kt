@@ -1,12 +1,12 @@
 package io.openfuture.chain.service
 
+import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.key.ExtendedKeyDeserializer
 import io.openfuture.chain.crypto.key.ExtendedKeySerializer
 import io.openfuture.chain.crypto.key.PrivateKeyManager
 import io.openfuture.chain.crypto.seed.PhraseLength.TWELVE
 import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
 import io.openfuture.chain.domain.crypto.key.AddressKeyDto
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 
 @Service
@@ -26,14 +26,7 @@ class DefaultCryptoService(
         )
     }
 
-    override fun importWifKey(wifKey: String): AddressKeyDto {
-        val ecKey = keyManager.importPrivateKey(wifKey)
-        return AddressKeyDto(
-            ByteUtils.toHexString(ecKey.public),
-            ByteUtils.toHexString(ecKey.getPrivate()),
-            ecKey.getAddress()
-        )
-    }
+    override fun importWifKey(wifKey: String): ECKey = keyManager.importPrivateKey(wifKey)
 
     override fun generateSeedPhrase(): String = seedPhraseGenerator.createSeedPhrase(TWELVE)
 

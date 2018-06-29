@@ -1,5 +1,6 @@
 package io.openfuture.chain.controller
 
+import io.openfuture.chain.domain.crypto.key.AddressKeyDto
 import io.openfuture.chain.domain.crypto.key.ImportKeyRequest
 import io.openfuture.chain.service.CryptoService
 import org.springframework.web.bind.annotation.PostMapping
@@ -18,6 +19,8 @@ class CryptoController(
     fun importKey(@RequestBody @Valid request: ImportKeyRequest) = cryptoService.importKey(request.decodedKey!!)
 
     @PostMapping("importWifKey")
-    fun importWifKey(@RequestBody @Valid request: ImportKeyRequest) = cryptoService.importWifKey(request.decodedKey!!)
+    fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): AddressKeyDto = AddressKeyDto(
+        cryptoService.importWifKey(request.decodedKey!!)
+    )
 
 }
