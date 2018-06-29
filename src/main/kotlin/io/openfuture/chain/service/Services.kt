@@ -39,6 +39,8 @@ interface CryptoService {
 
     fun generateSeedPhrase(): String
 
+    fun generateKey(): String
+
 }
 
 interface TransactionService {
