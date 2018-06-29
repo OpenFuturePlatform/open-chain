@@ -1,42 +1,24 @@
 package io.openfuture.chain.controller
 
-import io.openfuture.chain.crypto.key.ExtendedKeySerializer
 import io.openfuture.chain.domain.crypto.KeyRequest
-import io.openfuture.chain.domain.crypto.KeyResponse
+import io.openfuture.chain.domain.crypto.MasterKeyRequest
 import io.openfuture.chain.service.CryptoService
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("${PathConstant.RPC}/keys")
 class CryptoController(
-    val cryptoService: CryptoService,
-    val extendedKeySerializer: ExtendedKeySerializer
+    val cryptoService: CryptoService
 ) {
 
-    @GetMapping("/getMasterKey")
-    fun getMasterKey(
-            @RequestParam seedPhrase: String
-    ): KeyResponse {
-        val extendedKey = cryptoService.getMasterKey(seedPhrase)
+    @PostMapping("/getMasterKey")
+    fun getMasterKey(@RequestBody keyRequest: MasterKeyRequest) = cryptoService.getMasterKey(keyRequest.seedPhrase)
 
-        return KeyResponse(
-                extendedKeySerializer.serializePublic(extendedKey),
-                extendedKeySerializer.serializePrivate(extendedKey),
-                extendedKey.ecKey.getAddress()
-        )
-    }
-
-    @PostMapping("/getKey")
-    fun getKey(
-            @RequestBody keyRequest: KeyRequest
-    ): KeyResponse {
-        val extendedKey = cryptoService.getDerivationKey(keyRequest.seedPhrase, keyRequest.derivationPath)
-
-        return KeyResponse(
-                extendedKeySerializer.serializePublic(extendedKey),
-                extendedKeySerializer.serializePrivate(extendedKey),
-                extendedKey.ecKey.getAddress()
-        )
-    }
+    @PostMapping("/getDerivationKey")
+    fun getDerivationKey(@RequestBody keyRequest: KeyRequest)
+            = cryptoService.getDerivationKey(keyRequest.seedPhrase, keyRequest.derivationPath)
 
 }
