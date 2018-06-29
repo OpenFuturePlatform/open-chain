@@ -8,21 +8,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Seed phrase generator
 - Seed phrase validator
-- Service: generate seed phrase
-- Service: obtaining master key by seed phrase
-- Service: obtaining derivation key of master key by seed phrase and derivation path
-- Service: producing serialized public key value in base58 format from extended key
-- Service: producing serialized private key value in base58 format from extended key
-- End-point: obtaining master key by seed phrase
-- End-point: obtaining derivation key with address of master key by seed phrase and derivation path
+- Generate a master key with seed phrase
+- Key derivation algorithm
+- Get derivation key of master key by seed phrase and derivation path
+- Get a serialized public key value in base58 format from extended key
+- Get serialized private key value in base58 format from extended key
+- End-point: get a master key by seed phrase
+- End-point: get derivation key with an address of master key by seed phrase and derivation path
 - Extended private key serialization
 - Extended public key serialization
-- Private key exportation
-- Private key importation
-- Key derivation algorithm implementation
-- RPC requests: import key
-- RPC requests: import key in WIF (Wallet Import Format)
-- RPC requests: generate keys
+- Export private key
+- Import private key
+- RPC requests: importKey
+- RPC requests: importKey in WIF (Wallet Import Format)
+- RPC requests: generateKeys
 
 ## [0.1.0] - 2018-06-18
 ### Added
