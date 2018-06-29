@@ -13,7 +13,7 @@ class CryptoController(
     val cryptoService: CryptoService
 ) {
 
-    @PostMapping("/getMasterKey")
+    @PostMapping("/doGenerateMaster")
     fun getMasterKey(@RequestBody keyRequest: MasterKeyRequest): KeyDto {
         val key = cryptoService.getMasterKey(keyRequest.seedPhrase)
 
@@ -23,7 +23,7 @@ class CryptoController(
         )
     }
 
-    @PostMapping("/getDerivationKey")
+    @PostMapping("/doDerive")
     fun getDerivationKey(@RequestBody keyRequest: DerivationKeyRequest): AddressKeyDto {
         val key = cryptoService.getDerivationKey(keyRequest.seedPhrase, keyRequest.derivationPath)
 
