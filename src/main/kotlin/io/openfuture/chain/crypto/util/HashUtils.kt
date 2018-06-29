@@ -1,7 +1,11 @@
-package io.openfuture.chain.util
+package io.openfuture.chain.crypto.util
 
 import org.apache.commons.lang3.StringUtils
+import org.bouncycastle.crypto.PBEParametersGenerator
 import org.bouncycastle.crypto.digests.RIPEMD160Digest
+import org.bouncycastle.crypto.digests.SHA512Digest
+import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
+import org.bouncycastle.crypto.params.KeyParameter
 import org.bouncycastle.jcajce.provider.digest.Keccak
 import java.security.MessageDigest
 import javax.crypto.Mac
@@ -11,6 +15,8 @@ object HashUtils {
 
     private const val SHA256 = "SHA-256"
     private const val HMACSHA512 = "HmacSHA512"
+    private const val KEY_SIZE = 512
+    private const val ITERATION_COUNT = 2048
 
     fun generateHash(bytes: ByteArray) = sha256(bytes).fold(StringUtils.EMPTY) { str, it -> str + "%02x".format(it) }
 
@@ -56,6 +62,13 @@ object HashUtils {
 
     fun getDificultyString(difficulty: Int): String {
         return String(CharArray(difficulty)).replace('\u0000', '0')
+    }
+
+    fun hashPBKDF2(chars: CharArray, salt: ByteArray): ByteArray {
+        val generator = PKCS5S2ParametersGenerator(SHA512Digest())
+        generator.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(chars), salt, ITERATION_COUNT)
+        val key = generator.generateDerivedMacParameters(KEY_SIZE) as KeyParameter
+        return key.key
     }
 
 }
