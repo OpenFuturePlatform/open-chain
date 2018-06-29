@@ -29,5 +29,4 @@ class CryptoController(
     fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): AddressKeyDto = AddressKeyDto(
         cryptoService.importWifKey(request.decodedKey!!)
     )
-;
 }
