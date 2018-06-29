@@ -44,9 +44,9 @@ interface CryptoService {
 
     fun getDerivationKey(seedPhrase: String, derivationPath: String): ExtendedKey
 
-    fun getSerializedPublicKey(key: ExtendedKey): String
+    fun serializedPublicKey(key: ExtendedKey): String
 
-    fun getSerializedPrivateKey(key: ExtendedKey): String
+    fun serializedPrivateKey(key: ExtendedKey): String
 
 }
 
