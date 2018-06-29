@@ -20,11 +20,11 @@ class PrivateKeyManager {
         private const val CHECKSUM_SIZE = 4
     }
 
-    fun exportPrivateKey(key: ECKey): String = Base58CoderUtils.encode(getWIFBytes(key))
+    fun exportPrivateKey(key: ECKey): String = Base58CoderUtils.encode(getWifBytes(key))
 
-    fun importPrivateKey(serializedKey: String): ECKey = parseWIFBytes(Base58CoderUtils.decode(serializedKey))
+    fun importPrivateKey(serializedKey: String): ECKey = parseWifBytes(Base58CoderUtils.decode(serializedKey))
 
-    private fun getWIFBytes(key: ECKey): ByteArray {
+    private fun getWifBytes(key: ECKey): ByteArray {
         return key.private?.let {
             val keyBytes = key.getPrivate()
 
@@ -41,7 +41,7 @@ class PrivateKeyManager {
         } ?: throw IllegalStateException("Unable to provide WIF if no private key is present")
     }
 
-    private fun parseWIFBytes(keyBytes: ByteArray): ECKey {
+    private fun parseWifBytes(keyBytes: ByteArray): ECKey {
         validate(keyBytes)
         return ECKey(Arrays.copyOfRange(keyBytes, 1, keyBytes.size - CHECKSUM_SIZE - 1), true)
     }
