@@ -5,9 +5,8 @@ import io.openfuture.chain.config.any
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.crypto.key.DerivationKeysHelper
 import io.openfuture.chain.crypto.key.ExtendedKeySerializer
-import io.openfuture.chain.crypto.seed.PhraseLength
-import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
 import io.openfuture.chain.crypto.seed.PhraseLength.TWELVE
+import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
 import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
 import io.openfuture.chain.crypto.seed.validator.SeedPhraseValidator
 import org.assertj.core.api.Assertions.assertThat
@@ -40,7 +39,8 @@ class CryptoServiceTests : ServiceTests() {
                 seedCalculator,
                 derivationKeyHelper,
                 extendedKeySerializer,
-                seedPhraseValidator
+                seedPhraseValidator,
+                derivationKeysHelper
         )
     }
 
@@ -106,15 +106,6 @@ class CryptoServiceTests : ServiceTests() {
         assertThat(expectedPrivateKey).isEqualTo(privateKey)
     }
 
-    private fun assertExtendedKey(key: ExtendedKey) {
-        assertThat(key).isNotNull
-        assertThat(key.chainCode).isNotNull()
-        assertThat(key.depth).isNotNull()
-        assertThat(key.ecKey).isNotNull
-        assertThat(key.ecKey.public).isNotNull()
-        assertThat(key.ecKey.private).isNotNull()
-        assertThat(key.parentFingerprint).isNotNull()
-        assertThat(key.sequence).isNotNull()
     fun generateKeyShouldReturnWalletDtoTest() {
         val seedPhrase = "ability able about above absent absorb abstract absurd abuse accident access act"
         val privateKey  = "xprv9s21ZrQH143K4QKw9Cq9BUSUJGMSNMBt5mQVU8QD32NZpw4i6bnmiACNkqunc6P6B5tHXGw4oJMo2wXVwDgj2WDQFpTFufd4TdtKpZvpgEb"
@@ -133,6 +124,17 @@ class CryptoServiceTests : ServiceTests() {
         assertThat(actualWalletDto.addressKeyDto.publicKey).isEqualTo(publicKey)
         assertThat(actualWalletDto.addressKeyDto.privateKey).isEqualTo(privateKey)
         assertThat(actualWalletDto.addressKeyDto.address).isNotNull()
+    }
+
+    private fun assertExtendedKey(key: ExtendedKey) {
+        assertThat(key).isNotNull
+        assertThat(key.chainCode).isNotNull()
+        assertThat(key.depth).isNotNull()
+        assertThat(key.ecKey).isNotNull
+        assertThat(key.ecKey.public).isNotNull()
+        assertThat(key.ecKey.private).isNotNull()
+        assertThat(key.parentFingerprint).isNotNull()
+        assertThat(key.sequence).isNotNull()
     }
 
 }
