@@ -22,7 +22,7 @@ class Transaction(
     var timestamp: Long,
 
     @Column(name = "recipient_key", nullable = false)
-    var recipientkey: String,
+    var recipientKey: String,
 
     @Column(name = "sender_key", nullable = false)
     var senderKey: String,

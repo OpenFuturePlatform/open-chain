@@ -11,6 +11,7 @@ import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.Transaction
 
 interface HardwareInfoService {
 
@@ -61,5 +62,15 @@ interface CryptoService {
 interface TransactionService {
 
     fun save(request: TransactionRequest)
+
+    fun getByRecipientKey(recipientKey: String): List<Transaction>
+
+    fun getBySenderKey(senderKey: String): List<Transaction>
+
+}
+
+interface WalletService {
+
+    fun getTotalBalance(key: String): Int
 
 }
