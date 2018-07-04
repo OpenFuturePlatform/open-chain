@@ -10,7 +10,6 @@ import io.openfuture.chain.util.BlockUtils
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.transaction.TransactionData
 import io.openfuture.chain.domain.transaction.TransactionDto
-import io.openfuture.chain.entity.Block
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.TransactionService
 import org.slf4j.LoggerFactory
@@ -66,8 +65,8 @@ class BlockchainInitializer(
     private fun createRandomTransaction(): TransactionDto {
         val amount = Random().nextLong()
         val timestamp = Date().time
-        return transactionService.create(TransactionData(amount, timestamp, "recipientKey", "senderKey",
-                "signature"))
+        val data = TransactionData(amount, timestamp, "recipientKey", "senderKey", "signature")
+        return transactionService.create(data)
     }
 
     @Deprecated("generate block")
