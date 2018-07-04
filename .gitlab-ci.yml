@@ -7,12 +7,10 @@ stages:
   - test
   - build
   - package
-  - deploy
 
 variables:
   DOCKER_DRIVER: overlay2
   IMAGE_NAME: openplatform/chain
-  IMAGE_TAG: latest
 
 
 ###########################
@@ -60,7 +58,7 @@ build-jar:
   only:
     - sprint
     - master
-
+    - tags
 
 ###########################
 # Packaging
@@ -68,16 +66,16 @@ build-jar:
 package-docker:
   stage: package
   script:
+    - if [[ ${CI_COMMIT_REF_NAME} == master ]]; then export IMAGE_TAG=latest; else export IMAGE_TAG=${CI_COMMIT_REF_NAME}; fi;
     - docker login -u ${DOCKER_LOGIN} -p ${DOCKER_PASS}
     - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
     - docker push ${IMAGE_NAME}:${IMAGE_TAG}
   only:
     - sprint
     - master
+    - tags
 
 package-native:
-  services:
-    - docker:dind
   stage: package
   script:
     - mv build/libs/open-chain-*.jar build/libs/open-chain.jar
@@ -90,61 +88,5 @@ package-native:
       - artifacts/*
     expire_in: 1 day
   only:
-    - sprint
-    - master
-
-
-###########################
-# Deployment
-###########################
-.prepare-key-script: &prepare_key
-  - apk add --no-cache openssh-client
-  - eval $(ssh-agent -s)
-  - echo "$DEPLOY_KEY" | tr -d '\r' | ssh-add - > /dev/null
-  - mkdir -p ~/.ssh
-  - chmod 700 ~/.ssh
-  - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
-  - chmod 644 ~/.ssh/known_hosts
-
-.deploy-to-host-script: &deploy_to_host
-  - ssh ${DEPLOY_USER}@${DEPLOY_HOST} "docker pull ${IMAGE_NAME}:${IMAGE_TAG}"
-  - |
-    ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
-      docker stop ${CONTAINER_NAME} && \
-      IMG=\$(docker ps -a --filter='name=^/${CONTAINER_NAME}$' --format='{{.Image}}') &&  \
-      docker rm -f ${CONTAINER_NAME} && \
-      docker rmi \$IMG; \
-      exit 0
-    "
-  - |
-    ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
-      docker run -d --name '${CONTAINER_NAME}' --restart=always \
-                 -p 8080:8080 \
-                 -p 9190:9190 \
-                 ${IMAGE_NAME}:${IMAGE_TAG}
-    "
-
-deploy-development:
-  stage: deploy
-  variables:
-    DEPLOY_USER: $DEPLOY_USER_DEV
-    DEPLOY_HOST: $DEPLOY_HOST_DEV
-    DEPLOY_KEY: $DEPLOY_KEY_DEV
-    CONTAINER_NAME: openchain
-  before_script: *prepare_key
-  script: *deploy_to_host
-  only:
-    - sprint
-
-deploy-production:
-  stage: deploy
-  image: openplatform/gcloud:latest
-  script:
-    - echo ${GCLOUD_SERVICE_KEY} > gcloud-sk.json
-    - gcloud auth activate-service-account --key-file gcloud-sk.json
-    - gcloud container clusters get-credentials openchain --zone ${GСLOUD_ZONE} --project ${GCLOUD_PROJECT_ID}
-    - sed -i "s/IMAGE_TAG/${IMAGE_TAG}/" kubernetes.yml
-    - sed -i "s/LB_IP/${GCLOUD_LB_IP}/g" kubernetes.yml
-    - kubectl apply -f kubernetes.yml
-  only:
     - tags
+
