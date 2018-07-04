@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class DefaultWalletService(
-        private val transactionService: DefaultTransactionService
+        private val transactionService: TransactionService
 ): WalletService {
 
     companion object {

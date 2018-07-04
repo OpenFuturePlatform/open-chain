@@ -10,13 +10,14 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultTransactionService(
     private val transactionRepository: TransactionRepository,
-    private val blockService: DefaultBlockService
+    private val blockService: BlockService
 ): TransactionService {
 
     @Transactional
-    override fun save(request: TransactionRequest) {
+    override fun save(request: TransactionRequest): Transaction {
         val block = blockService.get(request.blockId)
-        transactionRepository.save(Transaction.of(block, request))
+
+        return transactionRepository.save(Transaction.of(block, request))
     }
 
     override fun getByRecipientKey(recipientKey: String): List<Transaction> = transactionRepository.findByRecipientKey(recipientKey)

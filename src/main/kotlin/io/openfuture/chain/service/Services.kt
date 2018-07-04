@@ -61,7 +61,7 @@ interface CryptoService {
 
 interface TransactionService {
 
-    fun save(request: TransactionRequest)
+    fun save(request: TransactionRequest): Transaction
 
     fun getByRecipientKey(recipientKey: String): List<Transaction>
 
