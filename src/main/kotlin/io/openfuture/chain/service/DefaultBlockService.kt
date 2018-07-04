@@ -7,17 +7,19 @@ import io.openfuture.chain.repository.BlockRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
-@Transactional(readOnly = true)
 @Service
 class DefaultBlockService (
         private val blockRepository: BlockRepository
 ) : BlockService {
 
+    @Transactional(readOnly = true)
     override fun get(id: Int): Block = blockRepository.getOne(id)
         ?: throw NotFoundException("Not found id $id")
 
+    @Transactional(readOnly = true)
     override fun getAll(): MutableList<Block> =  blockRepository.findAll()
 
+    @Transactional(readOnly = true)
     override fun getLast(): Block = blockRepository.findFirstByOrderByOrderNumberDesc()
         ?: throw NotFoundException("Last block not exist!")
 

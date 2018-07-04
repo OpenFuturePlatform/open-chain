@@ -6,7 +6,6 @@ import io.openfuture.chain.repository.TransactionRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
-@Transactional(readOnly = true)
 @Service
 class DefaultTransactionService(
     private val transactionRepository: TransactionRepository,
@@ -20,8 +19,10 @@ class DefaultTransactionService(
         return transactionRepository.save(Transaction.of(block, request))
     }
 
+    @Transactional(readOnly = true)
     override fun getByRecipientKey(recipientKey: String): List<Transaction> = transactionRepository.findByRecipientKey(recipientKey)
 
+    @Transactional(readOnly = true)
     override fun getBySenderKey(senderKey: String): List<Transaction> = transactionRepository.findBySenderKey(senderKey)
 
 }
