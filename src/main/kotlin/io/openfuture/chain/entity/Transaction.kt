@@ -12,7 +12,7 @@ class Transaction(
         var hash: String,
 
         @Column(name = "amount", nullable = false)
-        var amount: Int,
+        var amount: Long,
 
         @Column(name = "timestamp", nullable = false)
         var timestamp: Long,

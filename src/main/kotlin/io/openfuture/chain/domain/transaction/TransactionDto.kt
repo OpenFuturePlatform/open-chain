@@ -2,7 +2,7 @@ package io.openfuture.chain.domain.transaction
 
 import io.openfuture.chain.entity.Transaction
 
-class TransactionDto(
+data class TransactionDto(
         val data: TransactionData,
         var hash: String
 ) {
