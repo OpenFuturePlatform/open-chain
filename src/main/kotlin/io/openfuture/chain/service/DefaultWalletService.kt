@@ -9,13 +9,17 @@ class DefaultWalletService(
         private val transactionService: DefaultTransactionService
 ): WalletService {
 
+    companion object {
+        private const val MINIMAL_AVAILABLE_BALANCE = 0
+    }
+
     override fun getTotalBalance(key: String): Int {
         val sentTransactions = transactionService.getBySenderKey(key)
-        val receiveTransactions = transactionService.getByRecipientKey(key)
+        val receivedTransactions = transactionService.getByRecipientKey(key)
 
-        val balance = receiveTransactions.sumBy(Transaction::amount) - sentTransactions.sumBy(Transaction::amount)
+        val balance = receivedTransactions.sumBy(Transaction::amount) - sentTransactions.sumBy(Transaction::amount)
 
-        if(0 > balance) {
+        if(MINIMAL_AVAILABLE_BALANCE > balance) {
             throw BalanceException("Incorrect negative balance by address: $key")
         }
 
