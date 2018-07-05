@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Address mixed-case checksum
 - Address validation
-- RPC requests: validate address
+- RPC requests: validateAddress
 
 ## [0.2.0] - 2018-06-29
 ### Added
