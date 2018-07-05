@@ -9,7 +9,6 @@ import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
-import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Block
 
 interface HardwareInfoService {
@@ -58,7 +57,7 @@ interface CryptoService {
 
 }
 
-interface TransactionService {
+interface VoteTransactionService {
 
     fun save(request: TransactionRequest)
 

@@ -1,7 +1,5 @@
 package io.openfuture.chain.domain.block
 
-import io.openfuture.chain.domain.transaction.TransactionRequest
-
 data class BlockRequest(
     val orderNumber: Int,
     val nonce: Long,

@@ -5,7 +5,7 @@ import io.openfuture.chain.repository.TransactionRepository
 import org.springframework.stereotype.Service
 
 @Service
-class DefaultTransactionService(
+class DefaultVoteTransactionService(
     private val transactionRepository: TransactionRepository,
     private val blockService: DefaultBlockService
 ): TransactionService {
