@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class BlockValidator(
-        private val blockService: BlockService
+    private val blockService: BlockService
 ) {
 
     fun isValid(block: Block): Boolean {
@@ -38,7 +38,7 @@ class BlockValidator(
                 return false
             }
 
-            if (block.timestamp > lastChainBlock.timestamp) {
+            if (block.timestamp <= lastChainBlock.timestamp) {
                 return false
             }
         }
