@@ -6,7 +6,7 @@ object AddressUtils {
 
     private const val PREFIX = "0x"
 
-    fun removePrefix(address: String): String = address.replace(PREFIX, "")
+    fun removePrefix(address: String): String = address.removePrefix(PREFIX)
 
     fun addPrefix(address: String): String = PREFIX + address
 
