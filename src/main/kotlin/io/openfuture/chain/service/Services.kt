@@ -9,10 +9,12 @@ import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
-import io.openfuture.chain.domain.transaction.TransactionData
-import io.openfuture.chain.domain.transaction.TransactionDto
+import io.openfuture.chain.domain.transaction.VoteTransactionDto
+import io.openfuture.chain.domain.transaction.vote.VoteTransactionData
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
+import io.openfuture.chain.entity.VoteTransaction
+import org.springframework.transaction.annotation.Transactional
 
 interface HardwareInfoService {
 
@@ -62,26 +64,20 @@ interface CryptoService {
 
 }
 
-interface TransactionService {
+interface TransactionService<Entity : Transaction> {
 
-    fun get(hash: String): Transaction
+    fun getAllPending(): List<Entity>
 
-    fun getAllPending(): List<TransactionDto>
+    fun get(hash: String): Entity
 
-    fun add(dto: TransactionDto): Transaction
-
-    fun create(data: TransactionData): TransactionDto
-
-    fun addToBlock(hash: String, block: Block): Transaction
-
-    fun isValid(dto: TransactionDto): Boolean
-
-    fun isExists(hash: String): Boolean
+    fun addToBlock(hash: String, block: Block): Entity
 
 }
 
-interface VoteTransactionService {
+interface VoteTransactionService : TransactionService<VoteTransaction> {
 
-    fun save(request: TransactionRequest)
+    fun add(dto: VoteTransactionDto): VoteTransaction
+
+    fun create(data: VoteTransactionData): VoteTransactionDto
 
 }

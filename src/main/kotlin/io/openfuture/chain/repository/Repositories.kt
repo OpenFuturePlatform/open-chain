@@ -1,8 +1,6 @@
 package io.openfuture.chain.repository
 
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.SeedWord
-import io.openfuture.chain.entity.Transaction
+import io.openfuture.chain.entity.*
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.stereotype.Repository
@@ -19,13 +17,22 @@ interface BlockRepository : BaseRepository<Block> {
 }
 
 @Repository
-interface TransactionRepository : BaseRepository<Transaction> {
+interface BaseTransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 
-    fun findOneByHash(hash: String): Transaction?
+    fun findOneByHash(hash: String): Entity?
 
-    fun findAllByBlockIsNull(): List<Transaction>
+    fun findAllByBlockIsNull(): List<Entity>
 
 }
+
+@Repository
+interface TransactionRepository: BaseTransactionRepository<Transaction>
+
+@Repository
+interface VoteTransactionRepository : BaseTransactionRepository<VoteTransaction>
+
+@Repository
+interface VoteRepository : BaseRepository<Vote>
 
 @Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {

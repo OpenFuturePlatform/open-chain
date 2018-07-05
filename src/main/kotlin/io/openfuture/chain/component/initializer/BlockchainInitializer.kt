@@ -8,10 +8,13 @@ import io.openfuture.chain.domain.block.nested.MerkleHash
 import io.openfuture.chain.nio.client.handler.ConnectionClientHandler
 import io.openfuture.chain.util.BlockUtils
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.domain.transaction.TransactionData
 import io.openfuture.chain.domain.transaction.TransactionDto
+import io.openfuture.chain.domain.transaction.VoteTransactionDto
+import io.openfuture.chain.domain.transaction.vote.VoteDto
+import io.openfuture.chain.domain.transaction.vote.VoteTransactionData
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.TransactionService
+import io.openfuture.chain.service.VoteTransactionService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
@@ -22,7 +25,7 @@ import java.util.*
 @Component
 class BlockchainInitializer(
         private val blockService: BlockService,
-        private val transactionService: TransactionService,
+        private val voteTransactionService: VoteTransactionService,
         private val objectMapper: ObjectMapper
 ) {
 
@@ -41,7 +44,7 @@ class BlockchainInitializer(
 
     @Scheduled(fixedDelayString = "10000")
     fun createTransactionSchedule() {
-        val trx = TransactionDto(transactionService.add(createRandomTransaction()))
+        val trx = TransactionDto(voteTransactionService.add(createRandomTransaction()))
         log.info("Created new transaction {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(trx))
     }
 
@@ -62,11 +65,9 @@ class BlockchainInitializer(
     }
 
     @Deprecated("generate random transaction")
-    private fun createRandomTransaction(): TransactionDto {
-        val amount = Random().nextLong()
-        val timestamp = Date().time
-        val data = TransactionData(amount, timestamp, "recipientKey", "senderKey", "signature")
-        return transactionService.create(data)
+    private fun createRandomTransaction(): VoteTransactionDto {
+        val data = VoteTransactionData(mutableListOf(VoteDto("publicKey", 100)))
+        return voteTransactionService.create(data)
     }
 
     @Deprecated("generate block")

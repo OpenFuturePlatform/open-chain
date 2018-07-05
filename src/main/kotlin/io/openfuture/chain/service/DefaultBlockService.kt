@@ -12,6 +12,7 @@ import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.util.BlockUtils
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.entity.Transaction
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.CollectionUtils
@@ -19,7 +20,7 @@ import org.springframework.util.CollectionUtils
 @Service
 class DefaultBlockService(
         private val repository: BlockRepository,
-        private val transactionService: TransactionService,
+        private val transactionService: TransactionService<Transaction>,
         private val nodeClock: NodeClock
 ) : BlockService {
 
@@ -47,7 +48,8 @@ class DefaultBlockService(
         val nextTimeStamp = nodeClock.networkTime()
         val nextOrderNumber = previousBlock.orderNumber + 1
         val previousHash = previousBlock.hash
-        val merkleHash = generateMerkleHash(transactionService.getAllPending())
+        val transactions = transactionService.getAllPending().map { TransactionDto(it) }
+        val merkleHash = generateMerkleHash(transactions)
         val blockData = BlockData(nextTimeStamp, nextOrderNumber, previousHash, merkleHash)
         val blockHash = generateBlockHash(difficulty, blockData)
         val signature = BlockUtils.generateSignature(privateKey, blockData, blockHash)

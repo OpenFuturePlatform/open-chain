@@ -6,10 +6,14 @@ import io.openfuture.chain.domain.block.BlockDto
 import io.openfuture.chain.domain.block.nested.BlockData
 import io.openfuture.chain.domain.block.nested.BlockHash
 import io.openfuture.chain.domain.block.nested.MerkleHash
-import io.openfuture.chain.domain.transaction.TransactionData
 import io.openfuture.chain.domain.transaction.TransactionDto
+import io.openfuture.chain.domain.transaction.VoteTransactionDto
+import io.openfuture.chain.domain.transaction.vote.VoteDto
+import io.openfuture.chain.domain.transaction.vote.VoteTransactionData
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
+import io.openfuture.chain.entity.VoteTransaction
+import io.openfuture.chain.entity.dictionary.TransactionType
 import io.openfuture.chain.repository.BlockRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -17,12 +21,13 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
+import java.util.*
 
 
 internal class DefaultBlockServiceTest: ServiceTests() {
 
     @Mock private lateinit var repository: BlockRepository
-    @Mock private lateinit var transactionService: TransactionService
+    @Mock private lateinit var transactionService: TransactionService<Transaction>
     @Mock private lateinit var nodeClock: NodeClock
 
     private lateinit var service: BlockService
@@ -51,20 +56,19 @@ internal class DefaultBlockServiceTest: ServiceTests() {
 
     @Test
     fun add() {
-        val transaction = createTransactionDto()
-        val block = createNextBlockDto(mutableListOf(transaction))
+        val expectedTransaction = VoteTransaction.of(createTransactionDto())
+        val block = createNextBlockDto(listOf(expectedTransaction))
         val expectedBlock = Block.of(block)
-        val expectedTransaction = Transaction.of(transaction)
 
         given(repository.save(any(Block::class.java))).willReturn(expectedBlock)
-        given(transactionService.addToBlock(transaction.hash, expectedBlock)).willReturn(expectedTransaction)
+        given(transactionService.addToBlock(expectedTransaction.hash, expectedBlock)).willReturn(expectedTransaction)
 
         val actualBlock = service.add(block)
         assertThat(actualBlock).isEqualTo(expectedBlock)
         assertThat(actualBlock.transactions).isEqualTo(mutableListOf(expectedTransaction))
     }
 
-    private fun createNextBlockDto(transactions: MutableList<TransactionDto>): BlockDto {
+    private fun createNextBlockDto(transactions: List<Transaction>): BlockDto {
         val previousBlock = createBlockDto(mutableListOf())
         given(transactionService.getAllPending()).willReturn(transactions)
         given(repository.findFirstByOrderByOrderNumberDesc()).willReturn(Block.of(previousBlock))
@@ -75,8 +79,8 @@ internal class DefaultBlockServiceTest: ServiceTests() {
             0, "previousHash", MerkleHash("merkleHash", transactions)),
             BlockHash(0, "hash"), "nodePublicKey", "nodeSignature")
 
-    private fun createTransactionDto(): TransactionDto = TransactionDto(TransactionData(0, 0,
-            "recipientKey", "senderKey", "signature"), "hash")
+    private fun createTransactionDto(): VoteTransactionDto = VoteTransactionDto(Date().time, "hash",
+            VoteTransactionData(mutableListOf(VoteDto("pubKey", 10))))
 
     private fun createBlock(): Block = Block(1, 0, "previousHash",
             "merkleHash", 0, "hash", "nodeKey", "nodeSignature", mutableListOf())

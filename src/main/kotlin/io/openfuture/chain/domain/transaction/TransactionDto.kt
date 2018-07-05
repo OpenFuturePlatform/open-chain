@@ -1,16 +1,18 @@
 package io.openfuture.chain.domain.transaction
 
 import io.openfuture.chain.entity.Transaction
+import io.openfuture.chain.entity.dictionary.TransactionType
 
-data class TransactionDto(
-        val data: TransactionData,
-        var hash: String
+open class TransactionDto(
+        var timestamp: Long,
+        var hash: String,
+        var type: TransactionType
 ) {
 
     constructor(transaction: Transaction) : this(
-            TransactionData(transaction.amount, transaction.timestamp, transaction.recipientkey,
-                    transaction.senderKey, transaction.signature),
-            transaction.hash
+            transaction.timestamp,
+            transaction.hash,
+            transaction.getType()
     )
 
 }
