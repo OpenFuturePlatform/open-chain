@@ -8,10 +8,10 @@ import io.openfuture.chain.crypto.seed.SeedConstant.SECOND_BYTE_OFFSET
 import io.openfuture.chain.crypto.seed.SeedConstant.SECOND_BYTE_SKIP_BIT_SIZE
 import io.openfuture.chain.crypto.seed.SeedConstant.THIRD_BYTE_OFFSET
 import io.openfuture.chain.crypto.seed.SeedConstant.WORD_INDEX_SIZE
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.SeedWord
 import io.openfuture.chain.exception.SeedValidationException
 import io.openfuture.chain.repository.SeedWordRepository
-import io.openfuture.chain.crypto.util.HashUtils
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
 import java.util.*
@@ -60,9 +60,9 @@ class SeedPhraseValidator(
         }
     }
 
-    private fun getWord(wordValue: String): SeedWord {
-        return seedWordRepository.findOneByValue(wordValue).orElseThrow {
-            throw SeedValidationException("Word $wordValue not found")
+    private fun getWord(value: String): SeedWord {
+        return seedWordRepository.findOneByValue(value).orElseThrow {
+            throw SeedValidationException("Word $value not found")
         }
     }
 
