@@ -3,6 +3,7 @@ package io.openfuture.chain.crypto.block
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.util.BlockUtils
 import org.springframework.stereotype.Component
 
 @Component
@@ -21,7 +22,7 @@ class BlockValidator(
             return false
         }
 
-        val transactionsMerkleHash = merkleTreeHashThatWillBeImplementedByGeorge(transactions)
+        val transactionsMerkleHash = BlockUtils.calculateMerkleRoot(transactions)
         if (block.merkleHash != transactionsMerkleHash) {
             return false
         }
@@ -58,10 +59,6 @@ class BlockValidator(
         }
 
         return true
-    }
-
-    private fun merkleTreeHashThatWillBeImplementedByGeorge(transactions: Set<Transaction>): String {
-        return ""
     }
 
 }
