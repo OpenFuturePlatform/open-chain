@@ -1,6 +1,8 @@
 package io.openfuture.chain.domain.crypto.key
 
+import javax.validation.constraints.NotBlank
+
 data class DerivationKeyRequest(
-    val seedPhrase: String,
-    val derivationPath: String
+    @field:NotBlank var seedPhrase: String? = null,
+    @field:NotBlank var derivationPath: String? = null
 )

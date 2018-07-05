@@ -1,5 +1,7 @@
 package io.openfuture.chain.domain.crypto.key
 
+import javax.validation.constraints.NotBlank
+
 data class MasterKeyRequest(
-    val seedPhrase: String
+    @field:NotBlank var seedPhrase: String? = null
 )
