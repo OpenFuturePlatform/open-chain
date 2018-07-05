@@ -26,6 +26,22 @@ class BlockValidator(
             return false
         }
 
+        val lastChainBlock = blockService.getLast()
+        if (lastChainBlock != null) {
+            val lastBlockHeight = lastChainBlock.height
+            if (block.height != lastBlockHeight + 1) {
+                return false
+            }
+
+            if (block.previousHash != lastChainBlock.hash) {
+                return false
+            }
+
+            if (block.timestamp > lastChainBlock.timestamp) {
+                return false
+            }
+        }
+
         return true
     }
 

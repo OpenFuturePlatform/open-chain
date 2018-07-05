@@ -7,26 +7,26 @@ import javax.persistence.*
 @Table(name = "blocks")
 class Block(
     @Column(name = "hash", nullable = false)
-    private val hash: String,
+    var hash: String,
 
     @Column(name = "height", nullable = false)
-    private val height: Long,
+    var height: Long,
 
     @Column(name = "signature", nullable = false)
-    private val signature: String,
+    var signature: String,
 
     @Column(name = "previous_hash", nullable = false)
-    private val previousHash: String,
+    var previousHash: String,
 
     @Column(name = "merkle_hash", nullable = false)
-    val merkleHash: String,
+    var merkleHash: String,
 
     @Column(name = "timestamp", nullable = false)
-    private val timestamp: Long,
+    var timestamp: Long,
 
     @OneToMany
     @JoinColumn(name = "block_id", nullable = true)
-    val transactions: Set<Transaction>
+    var transactions: Set<Transaction>
 ) : BaseModel()
 
 
