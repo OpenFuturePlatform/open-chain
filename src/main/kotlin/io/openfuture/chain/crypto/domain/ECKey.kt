@@ -14,6 +14,8 @@ class ECKey(
 
     companion object {
         private const val PRIVATE_KEY_SIZE = 32
+        private const val ADDRESS_KEY_PART_SIZE = 20
+        private const val ADDRESS_PREFIX = "0x"
 
         private val curve = SECNamedCurves.getByOID(SECObjectIdentifiers.secp256k1)
     }
@@ -52,9 +54,13 @@ class ECKey(
     fun isPrivateEmpty() = null == private
 
     fun getAddress(): String {
-        val hash = HashUtils.keccakKeyHash(public)
-        val addressBytes = Arrays.copyOfRange(hash, 0, 20)
-        return "0x${ByteUtils.toHexString(addressBytes)}"
+        val address = ByteUtils.toHexString(Arrays.copyOfRange(HashUtils.keccak256(public), 0, ADDRESS_KEY_PART_SIZE))
+        val addressHash = ByteUtils.toHexString(HashUtils.keccak256(address.toByteArray()))
+        var result = ADDRESS_PREFIX
+        for (i in 0 until address.length) {
+            result += if (Integer.parseInt(addressHash[i].toString(), 16) >= 8) address[i].toUpperCase() else address[i]
+        }
+        return result
     }
 
 }
