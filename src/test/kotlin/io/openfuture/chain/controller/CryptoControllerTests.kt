@@ -3,8 +3,8 @@ package io.openfuture.chain.controller
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.crypto.domain.ExtendedKey
-import io.openfuture.chain.domain.crypto.DerivationKeyRequest
-import io.openfuture.chain.domain.crypto.MasterKeyRequest
+import io.openfuture.chain.domain.crypto.key.DerivationKeyRequest
+import io.openfuture.chain.domain.crypto.key.MasterKeyRequest
 import io.openfuture.chain.domain.crypto.key.AddressKeyDto
 import io.openfuture.chain.domain.crypto.key.KeyDto
 import io.openfuture.chain.service.CryptoService

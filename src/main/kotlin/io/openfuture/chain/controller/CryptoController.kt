@@ -1,7 +1,6 @@
 package io.openfuture.chain.controller
 
-import io.openfuture.chain.domain.crypto.DerivationKeyRequest
-import io.openfuture.chain.domain.crypto.MasterKeyRequest
+import io.openfuture.chain.domain.crypto.AccountDto
 import io.openfuture.chain.domain.crypto.key.*
 import io.openfuture.chain.service.CryptoService
 import org.springframework.web.bind.annotation.*
@@ -18,8 +17,8 @@ class CryptoController(
         val key = cryptoService.getMasterKey(keyRequest.seedPhrase)
 
         return KeyDto(
-                cryptoService.serializePublicKey(key),
-                cryptoService.serializePrivateKey(key)
+            cryptoService.serializePublicKey(key),
+            cryptoService.serializePrivateKey(key)
         )
     }
 
@@ -28,14 +27,14 @@ class CryptoController(
         val key = cryptoService.getDerivationKey(keyRequest.seedPhrase, keyRequest.derivationPath)
 
         return AddressKeyDto(
-                cryptoService.serializePublicKey(key),
-                cryptoService.serializePrivateKey(key),
-                key.ecKey.getAddress()
+            cryptoService.serializePublicKey(key),
+            cryptoService.serializePrivateKey(key),
+            key.ecKey.getAddress()
         )
     }
 
     @GetMapping("/generate")
-    fun generateKey() = cryptoService.generateKey()
+    fun generateKey(): AccountDto = cryptoService.generateKey()
 
     @PostMapping("/keys/doImport")
     fun importKey(@RequestBody @Valid request: ImportKeyRequest): AddressKeyDto {
