@@ -121,9 +121,9 @@ class CryptoServiceTests : ServiceTests() {
         assertThat(actualWalletDto.seedPhrase).isEqualTo(seedPhrase)
         assertThat(actualWalletDto.masterPublicKey).isEqualTo(publicKey)
         assertThat(actualWalletDto.masterPrivateKey).isEqualTo(privateKey)
-        assertThat(actualWalletDto.addressKeyDto.publicKey).isEqualTo(publicKey)
-        assertThat(actualWalletDto.addressKeyDto.privateKey).isEqualTo(privateKey)
-        assertThat(actualWalletDto.addressKeyDto.address).isNotNull()
+        assertThat(actualWalletDto.defaultAccount.publicKey).isEqualTo(publicKey)
+        assertThat(actualWalletDto.defaultAccount.privateKey).isEqualTo(privateKey)
+        assertThat(actualWalletDto.defaultAccount.address).isNotNull()
     }
 
     fun importKeyShouldReturnKeysValuesAndAddressWhenPrivateKeyImporting() {

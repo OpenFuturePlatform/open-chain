@@ -10,8 +10,8 @@ import io.openfuture.chain.crypto.seed.PhraseLength
 import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
 import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
 import io.openfuture.chain.crypto.seed.validator.SeedPhraseValidator
+import io.openfuture.chain.domain.crypto.RootAccountDto
 import io.openfuture.chain.domain.crypto.AccountDto
-import io.openfuture.chain.domain.crypto.key.AddressKeyDto
 import org.springframework.stereotype.Service
 
 @Service
@@ -35,15 +35,15 @@ class DefaultCryptoService(
 
     override fun serializePrivateKey(key: ExtendedKey): String = serializer.serializePrivate(key)
 
-    override fun generateKey(): AccountDto {
+    override fun generateKey(): RootAccountDto {
         val seedPhrase = seedPhraseGenerator.createSeedPhrase(PhraseLength.TWELVE)
         val rootExtendedKey = ExtendedKey.root(seedCalculator.calculateSeed(seedPhrase))
 
         val extendedKey = derivationKeysHelper.deriveDefaultAddress(rootExtendedKey)
-        val addressKeyDto = AddressKeyDto(serializer.serializePublic(extendedKey),
+        val addressKeyDto = AccountDto(serializer.serializePublic(extendedKey),
             serializer.serializePrivate(extendedKey), extendedKey.ecKey.getAddress())
 
-        return AccountDto(seedPhrase, serializer.serializePublic(rootExtendedKey),
+        return RootAccountDto(seedPhrase, serializer.serializePublic(rootExtendedKey),
             serializer.serializePrivate(rootExtendedKey), addressKeyDto)
     }
 

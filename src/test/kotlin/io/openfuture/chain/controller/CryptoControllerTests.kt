@@ -5,7 +5,7 @@ import io.openfuture.chain.config.any
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.crypto.key.DerivationKeyRequest
 import io.openfuture.chain.domain.crypto.key.MasterKeyRequest
-import io.openfuture.chain.domain.crypto.key.AddressKeyDto
+import io.openfuture.chain.domain.crypto.AccountDto
 import io.openfuture.chain.domain.crypto.key.KeyDto
 import io.openfuture.chain.service.CryptoService
 import org.junit.Test
@@ -27,7 +27,7 @@ class CryptoControllerTests : ControllerTests() {
         val seed = ByteArray(32)
         val masterKey = ExtendedKey.root(seed)
         val masterKeyRequest = MasterKeyRequest(seedPhrase)
-        val expectedAddress = AddressKeyDto("1", "2")
+        val expectedAddress = AccountDto("1", "2")
 
         given(cryptoService.serializePublicKey(any(ExtendedKey::class.java))).willReturn("1")
         given(cryptoService.serializePrivateKey(any(ExtendedKey::class.java))).willReturn("2")
@@ -37,7 +37,7 @@ class CryptoControllerTests : ControllerTests() {
                 .body(Mono.just(masterKeyRequest), MasterKeyRequest::class.java)
                 .exchange()
                 .expectStatus().isOk
-                .expectBody(AddressKeyDto::class.java).isEqualTo<Nothing>(expectedAddress)
+                .expectBody(AccountDto::class.java).isEqualTo<Nothing>(expectedAddress)
     }
 
     @Test

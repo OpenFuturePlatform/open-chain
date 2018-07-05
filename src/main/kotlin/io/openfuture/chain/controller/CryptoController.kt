@@ -1,6 +1,7 @@
 package io.openfuture.chain.controller
 
 import io.openfuture.chain.domain.crypto.AccountDto
+import io.openfuture.chain.domain.crypto.RootAccountDto
 import io.openfuture.chain.domain.crypto.key.*
 import io.openfuture.chain.service.CryptoService
 import org.springframework.web.bind.annotation.*
@@ -23,10 +24,10 @@ class CryptoController(
     }
 
     @PostMapping("/doDerive")
-    fun getDerivationKey(@RequestBody @Valid keyRequest: DerivationKeyRequest): AddressKeyDto {
+    fun getDerivationKey(@RequestBody @Valid keyRequest: DerivationKeyRequest): AccountDto {
         val key = cryptoService.getDerivationKey(keyRequest.seedPhrase!!, keyRequest.derivationPath!!)
 
-        return AddressKeyDto(
+        return AccountDto(
             cryptoService.serializePublicKey(key),
             cryptoService.serializePrivateKey(key),
             key.ecKey.getAddress()
@@ -34,12 +35,13 @@ class CryptoController(
     }
 
     @GetMapping("/generate")
-    fun generateKey(): AccountDto = cryptoService.generateKey()
+    fun generateKey(): RootAccountDto = cryptoService.generateKey()
 
     @PostMapping("/keys/doImport")
-    fun importKey(@RequestBody @Valid request: ImportKeyRequest): AddressKeyDto {
+    fun importKey(@RequestBody @Valid request: ImportKeyRequest): AccountDto {
         val importedKey = cryptoService.importKey(request.decodedKey!!)
-        return AddressKeyDto(
+
+        return AccountDto(
             cryptoService.serializePublicKey(importedKey),
             if (!importedKey.ecKey.isPrivateEmpty()) cryptoService.serializePrivateKey(importedKey) else null,
             importedKey.ecKey.getAddress()
@@ -47,7 +49,7 @@ class CryptoController(
     }
 
     @PostMapping("/keys/doImportWif")
-    fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): AddressKeyDto = AddressKeyDto(
+    fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): AccountDto = AccountDto(
         cryptoService.importWifKey(request.decodedKey!!)
     )
 
