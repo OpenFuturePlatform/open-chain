@@ -37,18 +37,32 @@ object HashUtils {
         return keccak.digest()
     }
 
-	fun sha256(bytes: ByteArray): ByteArray {
-		val digest = MessageDigest.getInstance(SHA256)
-		digest.update(bytes, 0, bytes.size)
-		return digest.digest()
-	}
+    fun sha256(bytes: ByteArray): ByteArray {
+        val digest = MessageDigest.getInstance(SHA256)
+        digest.update(bytes, 0, bytes.size)
+        return digest.digest()
+    }
 
-	fun hmacSha512(key: ByteArray, message: ByteArray): ByteArray {
-		val keySpec = SecretKeySpec(key, HMACSHA512)
-		val mac = Mac.getInstance(HMACSHA512)
-		mac.init(keySpec)
-		return mac.doFinal(message)
-	}
+    fun hmacSha512(key: ByteArray, message: ByteArray): ByteArray {
+        val keySpec = SecretKeySpec(key, HMACSHA512)
+        val mac = Mac.getInstance(HMACSHA512)
+        mac.init(keySpec)
+        return mac.doFinal(message)
+    }
+
+    fun generateSignature(privateKey: String, data: ByteArray): String {
+        // todo add logic by genereting signature
+        return generateHash(privateKey.toByteArray()) // todo temp solution
+    }
+
+    fun validateSignature(publicKey: String, signature: String, data: ByteArray): Boolean {
+        // todo add logic by validation signature
+        return true
+    }
+
+    fun getDificultyString(difficulty: Int): String {
+        return String(CharArray(difficulty)).replace('\u0000', '0')
+    }
 
     fun hashPBKDF2(chars: CharArray, salt: ByteArray): ByteArray {
         val generator = PKCS5S2ParametersGenerator(SHA512Digest())

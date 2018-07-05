@@ -19,7 +19,13 @@ interface BlockRepository : BaseRepository<Block> {
 }
 
 @Repository
-interface TransactionRepository : BaseRepository<Transaction>
+interface TransactionRepository : BaseRepository<Transaction> {
+
+    fun findOneByHash(hash: String): Transaction?
+
+    fun findAllByBlockIsNull(): List<Transaction>
+
+}
 
 @Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {
@@ -29,3 +35,4 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
     fun findOneByValue(value: String): Optional<SeedWord>
 
 }
+
