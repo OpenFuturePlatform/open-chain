@@ -1,5 +1,6 @@
-package io.openfuture.chain.crypto.key
+package io.openfuture.chain.validation
 
+import io.openfuture.chain.validation.AddressValidator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -12,7 +13,7 @@ class AddressValidatorTest {
     fun validateShouldReturnTrueForValidAddress() {
         val address = "0x5aF3B0FFB89C09D7A38Fd01E42E0A5e32011e36e"
 
-        val result = validator.validate(address)
+        val result = validator.isValid(address, null)
 
         assertThat(result).isTrue()
     }
@@ -21,7 +22,7 @@ class AddressValidatorTest {
     fun validateShouldReturnFalseForInvalidAddress() {
         val address = "0x5aF3B0FFB89C09D7A38Fd01E42E0A5e32011e36E"
 
-        val result = validator.validate(address)
+        val result = validator.isValid(address, null)
 
         assertThat(result).isFalse()
     }
