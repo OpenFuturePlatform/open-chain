@@ -34,7 +34,7 @@ class CryptoController(
         )
     }
 
-    @GetMapping("/generate")
+    @GetMapping("/doGenerate")
     fun generateKey(): RootAccountDto = cryptoService.generateKey()
 
     @PostMapping("/keys/doImport")
