@@ -23,7 +23,7 @@ class BlockValidatorTests : ServiceTests() {
     }
 
     @Test
-    fun isValidTest() {
+    fun isValidShouldReturnTrue() {
         val previouseBlock = Block(
             "prev_block_hash",
             122,
