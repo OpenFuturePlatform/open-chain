@@ -8,7 +8,7 @@ import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
 import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
 import io.openfuture.chain.crypto.seed.validator.SeedPhraseValidator
 import io.openfuture.chain.domain.crypto.key.AddressKeyDto
-import io.openfuture.chain.domain.crypto.key.WalletDto
+import io.openfuture.chain.domain.crypto.AccountDto
 import org.springframework.stereotype.Service
 
 @Service
@@ -32,7 +32,7 @@ class DefaultCryptoService(
 
     override fun serializePrivateKey(key: ExtendedKey): String = serializer.serializePrivate(key)
 
-    override fun generateKey(): WalletDto {
+    override fun generateKey(): AccountDto {
         val seedPhrase = seedPhraseGenerator.createSeedPhrase(PhraseLength.TWELVE)
         val rootExtendedKey = ExtendedKey.root(seedPhrase.toByteArray())
 
@@ -40,7 +40,7 @@ class DefaultCryptoService(
         val addressKeyDto = AddressKeyDto(serializer.serializePublic(extendedKey),
                 serializer.serializePrivate(extendedKey), extendedKey.ecKey.getAddress())
 
-        return WalletDto(seedPhrase, serializer.serializePublic(rootExtendedKey),
+        return AccountDto(seedPhrase, serializer.serializePublic(rootExtendedKey),
             serializer.serializePrivate(rootExtendedKey), addressKeyDto)
     }
 
