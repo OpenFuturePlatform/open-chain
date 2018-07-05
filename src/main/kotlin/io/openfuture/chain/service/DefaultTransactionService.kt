@@ -11,9 +11,4 @@ class DefaultTransactionService(
     private val blockService: DefaultBlockService
 ): TransactionService {
 
-    override fun save(request: TransactionRequest) {
-        val block = blockService.get(request.blockId)
-        transactionRepository.save(Transaction.of(block, request))
-    }
-
 }

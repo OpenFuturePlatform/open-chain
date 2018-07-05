@@ -34,8 +34,6 @@ interface BlockService {
 
     fun getLast(): Block?
 
-    fun save(request: BlockRequest): Block
-
 }
 
 interface CryptoService {
@@ -59,7 +57,5 @@ interface CryptoService {
 }
 
 interface TransactionService {
-
-    fun save(request: TransactionRequest)
 
 }

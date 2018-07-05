@@ -8,10 +8,6 @@ import javax.persistence.*
 @Table(name = "transactions")
 class Transaction(
 
-    @ManyToOne
-    @JoinColumn(name = "block_id", nullable = false)
-    var block: Block,
-
     @Column(name = "hash", nullable = false)
     var hash: String,
 
@@ -30,17 +26,4 @@ class Transaction(
     @Column(name = "signature", nullable = false)
     var signature: String
 
-) : BaseModel() {
-
-    companion object {
-        fun of(block: Block, request: TransactionRequest): Transaction = Transaction(
-            block,
-            request.hash,
-            request.amount,
-            request.timestamp,
-            request.recipientKey,
-            request.senderKey,
-            request.signature
-        )
-    }
-}
+) : BaseModel()

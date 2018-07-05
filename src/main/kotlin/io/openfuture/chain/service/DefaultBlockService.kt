@@ -23,9 +23,4 @@ class DefaultBlockService (
     override fun getLast(): Block = blockRepository.findFirstByOrderByOrderNumberDesc()
         ?: throw NotFoundException("Last block not exist!")
 
-
-    override fun save(request: BlockRequest): Block {
-        return blockRepository.save(Block.of(request))
-    }
-
 }
