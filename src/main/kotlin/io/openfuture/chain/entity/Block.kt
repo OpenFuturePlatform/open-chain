@@ -27,6 +27,7 @@ class Block(
     @OneToMany
     @JoinColumn(name = "block_id", nullable = true)
     var transactions: Set<Transaction>
+
 ) : BaseModel()
 
 
