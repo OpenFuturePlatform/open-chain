@@ -42,7 +42,9 @@ interface CryptoService {
 
     fun generateSeedPhrase(): String
 
-    fun getMasterKey(seedPhrase: String): ExtendedKey
+    fun generateNewAccount(): RootAccountDto
+
+    fun getRootAccount(seedPhrase: String): RootAccountDto
 
     fun getDerivationKey(seedPhrase: String, derivationPath: String): ExtendedKey
 
@@ -53,8 +55,6 @@ interface CryptoService {
     fun serializePublicKey(key: ExtendedKey): String
 
     fun serializePrivateKey(key: ExtendedKey): String
-
-    fun generateKey(): RootAccountDto
 
 }
 

@@ -20,13 +20,20 @@ import org.mockito.Mock
 
 class CryptoServiceTests : ServiceTests() {
 
-    @Mock private lateinit var seedPhraseGenerator: SeedPhraseGenerator
-    @Mock private lateinit var seedCalculator: SeedCalculator
-    @Mock private lateinit var derivationKeysHelper: DerivationKeysHelper
-    @Mock private lateinit var serializer: ExtendedKeySerializer
-    @Mock private lateinit var seedPhraseValidator: SeedPhraseValidator
-    @Mock private lateinit var keyManager: PrivateKeyManager
-    @Mock private lateinit var deserializer: ExtendedKeyDeserializer
+    @Mock
+    private lateinit var seedPhraseGenerator: SeedPhraseGenerator
+    @Mock
+    private lateinit var seedCalculator: SeedCalculator
+    @Mock
+    private lateinit var derivationKeysHelper: DerivationKeysHelper
+    @Mock
+    private lateinit var serializer: ExtendedKeySerializer
+    @Mock
+    private lateinit var seedPhraseValidator: SeedPhraseValidator
+    @Mock
+    private lateinit var keyManager: PrivateKeyManager
+    @Mock
+    private lateinit var deserializer: ExtendedKeyDeserializer
 
     private lateinit var cryptoService: DefaultCryptoService
 
@@ -56,15 +63,23 @@ class CryptoServiceTests : ServiceTests() {
     }
 
     @Test
-    fun getMasterKeyShouldReturnMasterKeyWhenSeedPhraseSent() {
+    fun getRootAccountKeyShouldReturnRootInfoBySeedPhrase() {
         val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
         val seed = ByteArray(32)
 
         given(seedCalculator.calculateSeed(seedPhrase)).willReturn(seed)
+        given(derivationKeysHelper.deriveDefaultAddress(any(ExtendedKey::class.java))).will { invocation -> invocation.arguments[0] }
+        given(serializer.serializePublic(any(ExtendedKey::class.java))).willReturn("1")
+        given(serializer.serializePrivate(any(ExtendedKey::class.java))).willReturn("2")
 
-        val key = cryptoService.getMasterKey(seedPhrase)
+        val actualRootAccount = cryptoService.getRootAccount(seedPhrase)
 
-        assertThat(key).isNotNull
+        assertThat(actualRootAccount.seedPhrase).isEqualTo(seedPhrase)
+        assertThat(actualRootAccount.masterPublicKey).isEqualTo("1")
+        assertThat(actualRootAccount.masterPrivateKey).isEqualTo("2")
+        assertThat(actualRootAccount.defaultAccount.publicKey).isEqualTo("1")
+        assertThat(actualRootAccount.defaultAccount.privateKey).isEqualTo("2")
+        assertThat(actualRootAccount.defaultAccount.address).isNotNull()
     }
 
     @Test
@@ -83,7 +98,7 @@ class CryptoServiceTests : ServiceTests() {
     }
 
     @Test
-    fun serializedPublicKeyShouldReturnSerializedPublicKey()  {
+    fun serializedPublicKeyShouldReturnSerializedPublicKey() {
         val seed = ByteArray(32)
         val extendedKey = ExtendedKey.root(seed)
         val expectedPublicKey = "123456678890"
@@ -95,7 +110,7 @@ class CryptoServiceTests : ServiceTests() {
     }
 
     @Test
-    fun serializedPrivateKeyShouldReturnSerializedPublicKey()  {
+    fun serializedPrivateKeyShouldReturnSerializedPublicKey() {
         val seed = ByteArray(32)
         val extendedKey = ExtendedKey.root(seed)
         val expectedPrivateKey = "123456678890"
@@ -106,24 +121,24 @@ class CryptoServiceTests : ServiceTests() {
         assertThat(expectedPrivateKey).isEqualTo(privateKey)
     }
 
-    fun generateKeyShouldReturnWalletDtoTest() {
+    fun generateNewAccountShouldReturnRootAccountInfo() {
         val seedPhrase = "ability able about above absent absorb abstract absurd abuse accident access act"
-        val privateKey  = "xprv9s21ZrQH143K4QKw9Cq9BUSUJGMSNMBt5mQVU8QD32NZpw4i6bnmiACNkqunc6P6B5tHXGw4oJMo2wXVwDgj2WDQFpTFufd4TdtKpZvpgEb"
+        val privateKey = "xprv9s21ZrQH143K4QKw9Cq9BUSUJGMSNMBt5mQVU8QD32NZpw4i6bnmiACNkqunc6P6B5tHXGw4oJMo2wXVwDgj2WDQFpTFufd4TdtKpZvpgEb"
         val publicKey = "xpub661MyMwAqRbcGtQQFEN9YcPCrJBvmoujSzL6GWopbMuYhjPre972FxWrc6NHZiH87hAz3vg3o95GDTwncHF6dMkoJLQ897p4VssRDA4kJ7V"
 
         given(seedPhraseGenerator.createSeedPhrase(TWELVE)).willReturn(seedPhrase)
-        given(derivationKeysHelper.deriveDefaultAddress(any(ExtendedKey::class.java))).will { invocation -> invocation.arguments[0]  }
+        given(derivationKeysHelper.deriveDefaultAddress(any(ExtendedKey::class.java))).will { invocation -> invocation.arguments[0] }
         given(serializer.serializePublic(any(ExtendedKey::class.java))).willReturn(publicKey)
         given(serializer.serializePrivate(any(ExtendedKey::class.java))).willReturn(privateKey)
 
-        val actualWalletDto = cryptoService.generateKey()
+        val actualRootAccount = cryptoService.generateNewAccount()
 
-        assertThat(actualWalletDto.seedPhrase).isEqualTo(seedPhrase)
-        assertThat(actualWalletDto.masterPublicKey).isEqualTo(publicKey)
-        assertThat(actualWalletDto.masterPrivateKey).isEqualTo(privateKey)
-        assertThat(actualWalletDto.defaultAccount.publicKey).isEqualTo(publicKey)
-        assertThat(actualWalletDto.defaultAccount.privateKey).isEqualTo(privateKey)
-        assertThat(actualWalletDto.defaultAccount.address).isNotNull()
+        assertThat(actualRootAccount.seedPhrase).isEqualTo(seedPhrase)
+        assertThat(actualRootAccount.masterPublicKey).isEqualTo(publicKey)
+        assertThat(actualRootAccount.masterPrivateKey).isEqualTo(privateKey)
+        assertThat(actualRootAccount.defaultAccount.publicKey).isEqualTo(publicKey)
+        assertThat(actualRootAccount.defaultAccount.privateKey).isEqualTo(privateKey)
+        assertThat(actualRootAccount.defaultAccount.address).isNotNull()
     }
 
     fun importKeyShouldReturnKeysValuesAndAddressWhenPrivateKeyImporting() {

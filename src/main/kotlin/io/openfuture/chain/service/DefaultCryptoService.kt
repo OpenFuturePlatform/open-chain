@@ -10,8 +10,8 @@ import io.openfuture.chain.crypto.seed.PhraseLength
 import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
 import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
 import io.openfuture.chain.crypto.seed.validator.SeedPhraseValidator
-import io.openfuture.chain.domain.crypto.RootAccountDto
 import io.openfuture.chain.domain.crypto.AccountDto
+import io.openfuture.chain.domain.crypto.RootAccountDto
 import org.springframework.stereotype.Service
 
 @Service
@@ -27,6 +27,33 @@ class DefaultCryptoService(
 
     override fun generateSeedPhrase(): String = seedPhraseGenerator.createSeedPhrase(PhraseLength.TWELVE)
 
+    override fun generateNewAccount(): RootAccountDto = getRootAccount(generateSeedPhrase())
+
+    override fun getRootAccount(seedPhrase: String): RootAccountDto {
+        seedPhraseValidator.validate(seedPhrase)
+
+        val rootExtendedKey = ExtendedKey.root(seedCalculator.calculateSeed(seedPhrase))
+        val extendedKey = derivationKeysHelper.deriveDefaultAddress(rootExtendedKey)
+
+        return RootAccountDto(
+            seedPhrase,
+            serializer.serializePublic(rootExtendedKey),
+            serializer.serializePrivate(rootExtendedKey),
+            AccountDto(
+                serializer.serializePublic(extendedKey),
+                serializer.serializePrivate(extendedKey),
+                extendedKey.ecKey.getAddress()
+            )
+        )
+    }
+
+    override fun getDerivationKey(seedPhrase: String, derivationPath: String): ExtendedKey {
+        seedPhraseValidator.validate(seedPhrase)
+
+        val masterKey = ExtendedKey.root(seedCalculator.calculateSeed(seedPhrase))
+        return derivationKeysHelper.derive(masterKey, derivationPath)
+    }
+
     override fun importKey(key: String): ExtendedKey = deserializer.deserialize(key)
 
     override fun importWifKey(wifKey: String): ECKey = keyManager.importPrivateKey(wifKey)
@@ -34,31 +61,5 @@ class DefaultCryptoService(
     override fun serializePublicKey(key: ExtendedKey): String = serializer.serializePublic(key)
 
     override fun serializePrivateKey(key: ExtendedKey): String = serializer.serializePrivate(key)
-
-    override fun generateKey(): RootAccountDto {
-        val seedPhrase = seedPhraseGenerator.createSeedPhrase(PhraseLength.TWELVE)
-        val rootExtendedKey = ExtendedKey.root(seedCalculator.calculateSeed(seedPhrase))
-
-        val extendedKey = derivationKeysHelper.deriveDefaultAddress(rootExtendedKey)
-        val addressKeyDto = AccountDto(serializer.serializePublic(extendedKey),
-            serializer.serializePrivate(extendedKey), extendedKey.ecKey.getAddress())
-
-        return RootAccountDto(seedPhrase, serializer.serializePublic(rootExtendedKey),
-            serializer.serializePrivate(rootExtendedKey), addressKeyDto)
-    }
-
-    override fun getMasterKey(seedPhrase: String): ExtendedKey {
-        seedPhraseValidator.validate(seedPhrase)
-
-        val seed = seedCalculator.calculateSeed(seedPhrase)
-        return ExtendedKey.root(seed)
-    }
-
-    override fun getDerivationKey(seedPhrase: String, derivationPath: String): ExtendedKey {
-        seedPhraseValidator.validate(seedPhrase)
-
-        val masterKey = getMasterKey(seedPhrase)
-        return derivationKeysHelper.derive(masterKey, derivationPath)
-    }
 
 }

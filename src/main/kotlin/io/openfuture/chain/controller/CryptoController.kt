@@ -2,7 +2,9 @@ package io.openfuture.chain.controller
 
 import io.openfuture.chain.domain.crypto.AccountDto
 import io.openfuture.chain.domain.crypto.RootAccountDto
-import io.openfuture.chain.domain.crypto.key.*
+import io.openfuture.chain.domain.crypto.key.DerivationKeyRequest
+import io.openfuture.chain.domain.crypto.key.ImportKeyRequest
+import io.openfuture.chain.domain.crypto.key.RestoreRequest
 import io.openfuture.chain.service.CryptoService
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -13,18 +15,12 @@ class CryptoController(
     private val cryptoService: CryptoService
 ) {
 
-    @PostMapping("/doGenerateMaster")
-    fun getMasterKey(@RequestBody @Valid keyRequest: MasterKeyRequest): KeyDto {
-        val key = cryptoService.getMasterKey(keyRequest.seedPhrase!!)
-
-        return KeyDto(
-            cryptoService.serializePublicKey(key),
-            cryptoService.serializePrivateKey(key)
-        )
-    }
+    @PostMapping("/doRestore")
+    fun restore(@RequestBody @Valid keyRequest: RestoreRequest): RootAccountDto =
+        cryptoService.getRootAccount(keyRequest.seedPhrase!!)
 
     @PostMapping("/doDerive")
-    fun getDerivationKey(@RequestBody @Valid keyRequest: DerivationKeyRequest): AccountDto {
+    fun getDerivationAccount(@RequestBody @Valid keyRequest: DerivationKeyRequest): AccountDto {
         val key = cryptoService.getDerivationKey(keyRequest.seedPhrase!!, keyRequest.derivationPath!!)
 
         return AccountDto(
@@ -35,7 +31,7 @@ class CryptoController(
     }
 
     @GetMapping("/doGenerate")
-    fun generateKey(): RootAccountDto = cryptoService.generateKey()
+    fun generateNewAccount(): RootAccountDto = cryptoService.generateNewAccount()
 
     @PostMapping("/keys/doImport")
     fun importKey(@RequestBody @Valid request: ImportKeyRequest): AccountDto {
@@ -49,8 +45,7 @@ class CryptoController(
     }
 
     @PostMapping("/keys/doImportWif")
-    fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): AccountDto = AccountDto(
-        cryptoService.importWifKey(request.decodedKey!!)
-    )
+    fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): AccountDto =
+        AccountDto(cryptoService.importWifKey(request.decodedKey!!))
 
 }

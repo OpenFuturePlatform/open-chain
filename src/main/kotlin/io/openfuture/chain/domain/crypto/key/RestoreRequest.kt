@@ -2,6 +2,6 @@ package io.openfuture.chain.domain.crypto.key
 
 import javax.validation.constraints.NotBlank
 
-data class MasterKeyRequest(
+data class RestoreRequest(
     @field:NotBlank var seedPhrase: String? = null
 )
