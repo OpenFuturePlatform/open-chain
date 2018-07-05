@@ -1,6 +1,5 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.domain.block.BlockRequest
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
@@ -20,7 +19,7 @@ class DefaultBlockService (
     @Transactional(readOnly = true)
     override fun getAll(): MutableList<Block> =  blockRepository.findAll()
 
-    override fun getLast(): Block = blockRepository.findFirstByOrderByOrderNumberDesc()
+    override fun getLast(): Block = blockRepository.findFirstByOrderByHeightDesc()
         ?: throw NotFoundException("Last block not exist!")
 
 }

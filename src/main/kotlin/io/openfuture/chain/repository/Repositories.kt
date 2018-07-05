@@ -14,7 +14,7 @@ interface BaseRepository<T> : JpaRepository<T, Int>
 @Repository
 interface BlockRepository : BaseRepository<Block> {
 
-    fun findFirstByOrderByOrderNumberDesc(): Block?
+    fun findFirstByOrderByHeightDesc(): Block?
 
 }
 
