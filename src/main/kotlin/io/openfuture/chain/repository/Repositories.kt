@@ -17,22 +17,13 @@ interface BlockRepository : BaseRepository<Block> {
 }
 
 @Repository
-interface BaseTransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
+interface TransactionRepository: BaseRepository<Transaction> {
 
-    fun findOneByHash(hash: String): Entity?
+    fun findOneByHash(hash: String): Transaction?
 
-    fun findAllByBlockIsNull(): List<Entity>
+    fun findAllByBlockIsNull(): List<Transaction>
 
 }
-
-@Repository
-interface TransactionRepository: BaseTransactionRepository<Transaction>
-
-@Repository
-interface VoteTransactionRepository : BaseTransactionRepository<VoteTransaction>
-
-@Repository
-interface VoteRepository : BaseRepository<Vote>
 
 @Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {

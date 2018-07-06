@@ -2,15 +2,13 @@ package io.openfuture.chain.entity.dictionary
 
 import io.openfuture.chain.entity.base.Dictionary
 
-enum class TransactionType(
-        private val id: Int,
-        private val value: String
+enum class TransactionPayloadType(
+        private val id: Int
 ) : Dictionary {
 
-    VOTE(1, "vote");
+    VOTE(1),
+    DELEGATE_REGISTRATION(2);
 
     override fun getId(): Int = id
-
-    fun getValue(): String = value
 
 }

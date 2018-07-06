@@ -3,16 +3,12 @@ package io.openfuture.chain.service
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.block.BlockDto
 import io.openfuture.chain.domain.block.nested.BlockData
-import io.openfuture.chain.domain.block.nested.BlockHash
 import io.openfuture.chain.domain.block.nested.MerkleHash
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.exception.NotFoundException
-import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.repository.BlockRepository
-import io.openfuture.chain.util.BlockUtils
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.entity.Transaction
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.CollectionUtils
@@ -20,7 +16,7 @@ import org.springframework.util.CollectionUtils
 @Service
 class DefaultBlockService(
         private val repository: BlockRepository,
-        private val transactionService: TransactionService<Transaction>,
+        private val transactionService: TransactionService,
         private val nodeClock: NodeClock
 ) : BlockService {
 
@@ -33,40 +29,24 @@ class DefaultBlockService(
 
     @Transactional
     override fun add(block: BlockDto): Block {
-        if (!this.isValid(block)) {
-            throw ValidationException("Block is not valid!")
-        }
-
+        // todo need to add validation
         val persistBlock = repository.save(Block.of(block))
         val transactions = block.blockData.merkleHash.transactions.map { transactionService.addToBlock(it.hash, persistBlock) }
         persistBlock.transactions.addAll(transactions)
         return persistBlock
     }
 
+    @Deprecated("temp solution")
     override fun create(privateKey: String, publicKey: String, difficulty: Int): BlockDto {
         val previousBlock = this.getLast()
-        val nextTimeStamp = nodeClock.networkTime()
+        val networkTime = nodeClock.networkTime()
         val nextOrderNumber = previousBlock.orderNumber + 1
         val previousHash = previousBlock.hash
         val transactions = transactionService.getAllPending().map { TransactionDto(it) }
         val merkleHash = generateMerkleHash(transactions)
-        val blockData = BlockData(nextTimeStamp, nextOrderNumber, previousHash, merkleHash)
-        val blockHash = generateBlockHash(difficulty, blockData)
-        val signature = BlockUtils.generateSignature(privateKey, blockData, blockHash)
-
-        return BlockDto(blockData, blockHash, publicKey, signature)
-    }
-
-    override fun isValid(block: BlockDto): Boolean {
-        if (!BlockUtils.isValidHash(block.blockData, block.blockHash)) {
-            return false
-        }
-
-        if (!BlockUtils.isValidSignature(block.nodePublicKey, block.nodeSignature, block.blockData, block.blockHash)) {
-            return false
-        }
-
-        return true
+        val blockData = BlockData(nextOrderNumber, previousHash, merkleHash)
+        val signature = HashUtils.generateHash(privateKey.toByteArray() + blockData.getByteData())
+        return BlockDto.of(networkTime, blockData, publicKey, signature)
     }
 
     private fun generateMerkleHash(transactions: List<TransactionDto>): MerkleHash {
@@ -90,18 +70,6 @@ class DefaultBlockService(
             newHashElements.add(HashUtils.generateHash((elements[i] + elements[i + 1]).toByteArray()))
         }
         return calculateThreeHash(newHashElements)
-    }
-
-    // -- mining block process
-    private fun generateBlockHash(difficulty: Int, blockData: BlockData): BlockHash {
-        var currentNonce = 0L
-        var currentHash = BlockUtils.generateHash(blockData, currentNonce)
-        val target = HashUtils.getDificultyString(difficulty)
-        while (currentHash.substring(0, difficulty) != target) {
-            currentNonce++
-            currentHash = BlockUtils.generateHash(blockData, currentNonce)
-        }
-        return BlockHash(currentNonce, currentHash)
     }
 
 }

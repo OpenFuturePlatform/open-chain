@@ -50,20 +50,6 @@ object HashUtils {
         return mac.doFinal(message)
     }
 
-    fun generateSignature(privateKey: String, data: ByteArray): String {
-        // todo add logic by genereting signature
-        return generateHash(privateKey.toByteArray()) // todo temp solution
-    }
-
-    fun validateSignature(publicKey: String, signature: String, data: ByteArray): Boolean {
-        // todo add logic by validation signature
-        return true
-    }
-
-    fun getDificultyString(difficulty: Int): String {
-        return String(CharArray(difficulty)).replace('\u0000', '0')
-    }
-
     fun hashPBKDF2(chars: CharArray, salt: ByteArray): ByteArray {
         val generator = PKCS5S2ParametersGenerator(SHA512Digest())
         generator.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(chars), salt, ITERATION_COUNT)
