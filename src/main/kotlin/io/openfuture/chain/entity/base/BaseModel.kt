@@ -7,7 +7,7 @@ import javax.persistence.Id
 import javax.persistence.MappedSuperclass
 
 @MappedSuperclass
-abstract class BaseModel(@Id @GeneratedValue(strategy = IDENTITY) var id: Long = 0) : Serializable {
+abstract class BaseModel(@Id @GeneratedValue(strategy = IDENTITY) var id: Int = 0) : Serializable {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -15,7 +15,7 @@ abstract class BaseModel(@Id @GeneratedValue(strategy = IDENTITY) var id: Long =
 
         other as BaseModel
 
-        if (id == 0L) return false
+        if (id == 0) return false
         if (id != other.id) return false
 
         return true

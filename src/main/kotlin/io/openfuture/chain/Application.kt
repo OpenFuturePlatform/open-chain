@@ -4,11 +4,12 @@ import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Profile
 
 @SpringBootApplication
 class Application {
 
-    //@Profile("local")
+    @Profile("local")
     @Bean
     fun flywayMigrationStrategy(): FlywayMigrationStrategy {
         return FlywayMigrationStrategy { flyway ->

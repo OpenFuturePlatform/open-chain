@@ -1,4 +1,4 @@
 CREATE TABLE main_blocks (
-  id        BIGINT PRIMARY KEY,
+  id        INTEGER PRIMARY KEY,
   signature VARCHAR NOT NULL
 );

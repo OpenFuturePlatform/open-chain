@@ -1,5 +1,5 @@
 CREATE TABLE blocks (
-  id            BIGINT PRIMARY KEY,
+  id            INTEGER PRIMARY KEY,
   hash          VARCHAR NOT NULL,
   height        BIGINT NOT NULL,
   previous_hash VARCHAR NOT NULL,

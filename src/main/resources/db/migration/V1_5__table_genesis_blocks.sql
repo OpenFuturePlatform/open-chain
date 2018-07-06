@@ -1,4 +1,4 @@
 CREATE TABLE genesis_blocks (
-  id          BIGINT PRIMARY KEY,
+  id          INTEGER PRIMARY KEY,
   epoch_index BIGINT NOT NULL
 );
