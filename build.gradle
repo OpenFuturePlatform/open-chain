@@ -45,6 +45,7 @@ dependencies {
 
     // Utils
     compile('org.apache.commons:commons-lang3:3.7')
+    compile('org.apache.commons:commons-collections4:4.1')
     compile('com.github.oshi:oshi-core:3.5.0')
 
     // DevTools

@@ -5,6 +5,7 @@ import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
 import io.openfuture.chain.domain.block.BlockDto
 import io.openfuture.chain.domain.crypto.key.WalletDto
+import io.openfuture.chain.domain.delegate.DelegateDto
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
@@ -12,9 +13,9 @@ import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.vote.VoteTransactionData
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.entity.VoteTransaction
-import org.springframework.transaction.annotation.Transactional
 
 interface HardwareInfoService {
 
@@ -79,5 +80,19 @@ interface VoteTransactionService : TransactionService<VoteTransaction> {
     fun add(dto: VoteTransactionDto): VoteTransaction
 
     fun create(data: VoteTransactionData): VoteTransactionDto
+
+}
+
+interface DelegateService {
+
+    fun getAll(): List<Delegate>
+
+    fun getByPublicKey(publicKey: String): Delegate
+
+    fun getActiveDelegates(): List<Delegate>
+
+    fun isValidActiveDelegates(publicKeysDelegates: List<String>): Boolean
+
+    fun add(dto: DelegateDto): Delegate
 
 }

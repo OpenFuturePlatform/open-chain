@@ -26,7 +26,7 @@ interface BaseTransactionRepository<Entity : Transaction> : BaseRepository<Entit
 }
 
 @Repository
-interface TransactionRepository: BaseTransactionRepository<Transaction>
+interface TransactionRepository : BaseTransactionRepository<Transaction>
 
 @Repository
 interface VoteTransactionRepository : BaseTransactionRepository<VoteTransaction>
@@ -43,3 +43,9 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 
 }
 
+@Repository
+interface DelegateRepository : BaseRepository<Delegate> {
+
+    fun findOneByPublicKey(publicKey: String): Delegate?
+
+}
