@@ -20,13 +20,7 @@ interface BlockRepository : BaseRepository<Block> {
 }
 
 @Repository
-interface TransactionRepository : BaseRepository<Transaction> {
-
-    fun findByRecipientKey(recipientKey: String): List<Transaction>
-
-    fun findBySenderKey(senderKey: String): List<Transaction>
-
-}
+interface TransactionRepository : BaseRepository<Transaction>
 
 @Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {
