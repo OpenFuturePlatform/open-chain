@@ -20,20 +20,13 @@ import org.mockito.Mock
 
 class CryptoServiceTests : ServiceTests() {
 
-    @Mock
-    private lateinit var seedPhraseGenerator: SeedPhraseGenerator
-    @Mock
-    private lateinit var seedCalculator: SeedCalculator
-    @Mock
-    private lateinit var derivationKeysHelper: DerivationKeysHelper
-    @Mock
-    private lateinit var serializer: ExtendedKeySerializer
-    @Mock
-    private lateinit var seedPhraseValidator: SeedPhraseValidator
-    @Mock
-    private lateinit var keyManager: PrivateKeyManager
-    @Mock
-    private lateinit var deserializer: ExtendedKeyDeserializer
+    @Mock private lateinit var seedPhraseGenerator: SeedPhraseGenerator
+    @Mock private lateinit var seedCalculator: SeedCalculator
+    @Mock private lateinit var derivationKeysHelper: DerivationKeysHelper
+    @Mock private lateinit var serializer: ExtendedKeySerializer
+    @Mock private lateinit var seedPhraseValidator: SeedPhraseValidator
+    @Mock private lateinit var keyManager: PrivateKeyManager
+    @Mock private lateinit var deserializer: ExtendedKeyDeserializer
 
     private lateinit var cryptoService: DefaultCryptoService
 
