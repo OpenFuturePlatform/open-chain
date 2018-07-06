@@ -8,10 +8,10 @@ import io.openfuture.chain.crypto.seed.SeedConstant.SECOND_BYTE_OFFSET
 import io.openfuture.chain.crypto.seed.SeedConstant.SECOND_BYTE_SKIP_BIT_SIZE
 import io.openfuture.chain.crypto.seed.SeedConstant.THIRD_BYTE_OFFSET
 import io.openfuture.chain.crypto.seed.SeedConstant.WORD_INDEX_SIZE
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.SeedWord
 import io.openfuture.chain.exception.SeedValidationException
 import io.openfuture.chain.repository.SeedWordRepository
-import io.openfuture.chain.crypto.util.HashUtils
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
 import java.util.*
@@ -21,14 +21,14 @@ import kotlin.experimental.xor
 
 @Component
 class SeedPhraseValidator(
-        private val seedWordRepository: SeedWordRepository
+    private val seedWordRepository: SeedWordRepository
 ) {
 
     companion object {
         private const val MULTIPLICITY_WITH_CHECKSUM_VALUE = 33
         private const val MAX_BYTE_SIZE_MOD = 7
         private const val OUT_OF_BYTE_SIZE = WORD_INDEX_SIZE - BYTE_SIZE
-        private const val MAX_FIRST_BIT_INDEX_IN_TWO_BYTE = DOUBLE_BYTE_SIZE - WORD_INDEX_SIZE + 1
+        private const val MAX_FIRST_BIT_INDEX_IN_TWO_BYTE = DOUBLE_BYTE_SIZE - WORD_INDEX_SIZE
         private const val THIRD_BYTE_SKIP_BIT_SIZE = BYTE_SIZE + MAX_FIRST_BIT_INDEX_IN_TWO_BYTE
     }
 
@@ -55,7 +55,7 @@ class SeedPhraseValidator(
         val mask = ((1 shl (BYTE_SIZE - checksumSize)) - 1).inv().toByte()
 
         val lastByte = entropyWithChecksum[entropyWithChecksum.size - 1]
-        if (entropySha xor lastByte and mask != 0.toByte()) {
+        if (((entropySha xor lastByte) and mask) != 0.toByte()) {
             throw SeedValidationException("Invalid checksum for seed phrase")
         }
     }
