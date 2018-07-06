@@ -1,5 +1,6 @@
 package io.openfuture.chain.service
 
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Transaction
