@@ -7,8 +7,8 @@ import io.openfuture.chain.crypto.seed.SeedConstant.MULTIPLICITY_VALUE
 import io.openfuture.chain.crypto.seed.SeedConstant.SECOND_BYTE_OFFSET
 import io.openfuture.chain.crypto.seed.SeedConstant.THIRD_BYTE_OFFSET
 import io.openfuture.chain.crypto.seed.SeedConstant.WORD_INDEX_SIZE
-import io.openfuture.chain.repository.SeedWordRepository
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.repository.SeedWordRepository
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
 import java.security.SecureRandom
@@ -16,7 +16,7 @@ import java.util.*
 
 @Component
 class SeedPhraseGenerator(
-        private val seedWordRepository: SeedWordRepository
+    private val seedWordRepository: SeedWordRepository
 ) {
 
     companion object {
@@ -70,11 +70,10 @@ class SeedPhraseGenerator(
      */
     private fun nextWordsIndex(bytes: ByteArray, offset: Int): Int {
         val skip = offset / BYTE_SIZE
-        val lowerBitsToRemove = (MAX_BYTES_TO_READ * BYTE_SIZE - WORD_INDEX_SIZE) -
-                (offset % BYTE_SIZE)
+        val lowerBitsToRemove = (MAX_BYTES_TO_READ * BYTE_SIZE - WORD_INDEX_SIZE) - (offset % BYTE_SIZE)
 
-        val firstBytePart = bytes[skip].toInt() and (BYTE_MASK shl DOUBLE_BYTE_SIZE)
-        val secondBytePart = bytes[skip + SECOND_BYTE_OFFSET].toInt() and (BYTE_MASK shl BYTE_SIZE)
+        val firstBytePart = bytes[skip].toInt() and BYTE_MASK shl DOUBLE_BYTE_SIZE
+        val secondBytePart = bytes[skip + SECOND_BYTE_OFFSET].toInt() and BYTE_MASK shl BYTE_SIZE
         val thirdBytePart = if (lowerBitsToRemove < BYTE_SIZE) {
             bytes[skip + THIRD_BYTE_OFFSET].toInt() and BYTE_MASK
         } else {
