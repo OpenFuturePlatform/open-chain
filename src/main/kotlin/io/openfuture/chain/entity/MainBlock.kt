@@ -4,7 +4,8 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "main_blocks")
-class MainBlock(hash: String, height: Long, previousHash: String, merkleHash: String, timestamp: Long,
+class MainBlock(hash: String, height: Long, previousHash: String,
+        merkleHash: String, timestamp: Long,
 
     @Column(name = "signature", nullable = false)
     var signature: String,
@@ -13,4 +14,4 @@ class MainBlock(hash: String, height: Long, previousHash: String, merkleHash: St
     @JoinColumn(name = "block_id", nullable = true)
     var transactions: Set<Transaction>
 
-) : Block(hash, height, previousHash, merkleHash, timestamp)
+) : Block(hash, height, previousHash, merkleHash, timestamp, BlockVersion.MAIN.version)

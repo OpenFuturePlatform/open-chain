@@ -21,7 +21,10 @@ abstract class Block(
     var merkleHash: String,
 
     @Column(name = "timestamp", nullable = false)
-    var timestamp: Long
+    var timestamp: Long,
+
+    @Column(name = "version", nullable = false)
+    var version: Int
 
 ) : BaseModel()
 
