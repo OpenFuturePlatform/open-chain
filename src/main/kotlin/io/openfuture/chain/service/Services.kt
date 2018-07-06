@@ -71,6 +71,8 @@ interface TransactionService {
 
 interface WalletService {
 
-    fun getTotalBalance(key: String): Int
+    fun getBalance(address: String): Double
+
+    fun updateByTransaction(transaction: Transaction)
 
 }

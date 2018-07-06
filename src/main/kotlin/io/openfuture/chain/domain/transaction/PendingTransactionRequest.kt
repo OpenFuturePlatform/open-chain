@@ -5,5 +5,7 @@ open class PendingTransactionRequest(
     val timestamp: Long,
     val recipientKey: String,
     val senderKey: String,
-    val signature: String
+    val signature: String,
+    val from: String,
+    val to: String
 )

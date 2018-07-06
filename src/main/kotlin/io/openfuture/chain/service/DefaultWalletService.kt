@@ -1,29 +1,36 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.entity.Transaction
-import io.openfuture.chain.exception.BalanceException
+import io.openfuture.chain.entity.Wallet
+import io.openfuture.chain.repository.WalletRepository
 import org.springframework.stereotype.Service
 
 @Service
 class DefaultWalletService(
-        private val transactionService: TransactionService
-): WalletService {
+        private val repository: WalletRepository
+) : WalletService {
 
     companion object {
-        private const val MINIMAL_AVAILABLE_BALANCE = 0
+        private const val DEFAULT_WALLET_BALANCE = 0.0
     }
 
-    override fun getTotalBalance(key: String): Int {
-        val sentTransactions = transactionService.getBySenderKey(key)
-        val receivedTransactions = transactionService.getByRecipientKey(key)
+    override fun updateByTransaction(transaction: Transaction) {
+        update(transaction.from, transaction.amount * -1)
 
-        val balance = receivedTransactions.sumBy(Transaction::amount) - sentTransactions.sumBy(Transaction::amount)
+        update(transaction.to, transaction.amount)
+    }
 
-        if(MINIMAL_AVAILABLE_BALANCE > balance) {
-            throw BalanceException("Incorrect negative balance by address: $key")
-        }
+    override fun getBalance(address: String): Double =
+            repository.findOneByAddress(address)?.let(Wallet::balance) ?: DEFAULT_WALLET_BALANCE
 
-        return balance
+    private fun update(address: String, amount: Int) {
+        var wallet = repository.findOneByAddress(address)
+
+        wallet = wallet?: Wallet(address)
+
+        wallet.balance += amount
+
+        repository.save(wallet)
     }
 
 }

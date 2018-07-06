@@ -34,7 +34,7 @@ class DefaultWalletServiceTest : ServiceTests() {
         given(transactionService.getByRecipientKey(key)).willReturn(receivedTransactions)
         given(transactionService.getBySenderKey(key)).willReturn(sentTransactions)
 
-        val actualBalance = service.getTotalBalance(key)
+        val actualBalance = service.getBalance(key)
 
         assertThat(actualBalance).isEqualTo(expectedBalance)
     }
@@ -50,7 +50,7 @@ class DefaultWalletServiceTest : ServiceTests() {
         given(transactionService.getByRecipientKey(key)).willReturn(receivedTransactions)
         given(transactionService.getBySenderKey(key)).willReturn(sentTransactions)
 
-        service.getTotalBalance(key)
+        service.getBalance(key)
     }
 
     private fun createTransactions(amount: Int, senderKey: String, recipientKey: String): List<Transaction> {
