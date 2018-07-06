@@ -44,7 +44,7 @@ class BlockValidatorTests : ServiceTests() {
         )
 
         val block = Block(
-            "block_hash",
+            "454ebbef16f93d174ab0e5e020f8ab80f2cf117e1b6beeeae3151bc87e99f081",
             123,
             "signature",
             "prev_block_hash",

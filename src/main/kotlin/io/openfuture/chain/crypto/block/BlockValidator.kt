@@ -1,5 +1,6 @@
 package io.openfuture.chain.crypto.block
 
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.service.BlockService
@@ -12,10 +13,6 @@ class BlockValidator(
 ) {
 
     fun isValid(block: Block): Boolean {
-        if (BlockUtils.calculateHash() != block.hash) {
-            return false
-        }
-
         val transactions = block.transactions
 
         if (transactions.isEmpty()) {
@@ -28,6 +25,15 @@ class BlockValidator(
 
         val transactionsMerkleHash = BlockUtils.calculateMerkleRoot(transactions)
         if (block.merkleHash != transactionsMerkleHash) {
+            return false
+        }
+
+        val calculatedHashBytes = BlockUtils.calculateHash(
+            block.previousHash,
+            block.merkleHash,
+            block.timestamp,
+            block.height)
+        if (HashUtils.bytesToHexString(calculatedHashBytes) != block.hash) {
             return false
         }
 
