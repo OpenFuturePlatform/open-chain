@@ -12,6 +12,10 @@ import javax.validation.constraints.Size
 @ConfigurationProperties(value = "node")
 class NodeProperties(
 
+        /** Node Server Host */
+        @field:NotNull
+        var host: String? = null,
+
         /** Node Server Port */
         @field:NotNull
         var port: Int? = null,
@@ -39,6 +43,11 @@ class NodeProperties(
 
         /** */
         @field:NotNull
-        var connectionTimeout: Int? = null
+        var connectionTimeout: Int? = null,
 
+        /** Node Public Key */
+        var publicKey: ByteArray? = null,
+
+        /** Node Private Key */
+        var privateKey: ByteArray? = null
 )
