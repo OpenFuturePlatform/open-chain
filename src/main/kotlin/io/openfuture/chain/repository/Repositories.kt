@@ -32,3 +32,5 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 }
 
 interface GenesisBlockRepository : BaseRepository<GenesisBlock>
+
+interface MainBlockRepository : BaseRepository<MainBlockRepository>
