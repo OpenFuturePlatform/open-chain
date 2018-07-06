@@ -30,7 +30,7 @@ class DefaultBlockService (
         val time = System.currentTimeMillis()
         val hash = BlockUtils.calculateHash(previousBlock.hash, merkleRootHash, time, (previousBlock.height + 1))
         return blockRepository
-            .save(Block(String(hash), previousBlock.height + 1, "", previousBlock.hash, merkleRootHash, time, transactions))
+            .save(Block(HashUtils.bytesToHexString(hash), previousBlock.height + 1, "", previousBlock.hash, merkleRootHash, time, transactions))
     }
 
 }
