@@ -26,7 +26,7 @@ class SeedPhraseGenerator(
     }
 
     fun createSeedPhrase(length: PhraseLength): String {
-        val entropy = ByteArray(length.byteLength)
+        val entropy = ByteArray(length.entropyLength / BYTE_SIZE)
         SecureRandom().nextBytes(entropy)
 
         val wordIndexes = wordIndexes(entropy)

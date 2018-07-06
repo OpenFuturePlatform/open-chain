@@ -30,7 +30,8 @@ class DefaultCryptoService(
     override fun generateNewAccount(): RootAccountDto = getRootAccount(generateSeedPhrase())
 
     override fun getRootAccount(seedPhrase: String): RootAccountDto {
-        seedPhraseValidator.validate(seedPhrase)
+        if (!seedPhraseValidator.validate(seedPhrase))
+            throw IllegalArgumentException("Invalid seed phrase")
 
         val rootExtendedKey = ExtendedKey.root(seedCalculator.calculateSeed(seedPhrase))
         val extendedKey = derivationKeysHelper.deriveDefaultAddress(rootExtendedKey)
@@ -48,7 +49,8 @@ class DefaultCryptoService(
     }
 
     override fun getDerivationKey(seedPhrase: String, derivationPath: String): ExtendedKey {
-        seedPhraseValidator.validate(seedPhrase)
+        if (!seedPhraseValidator.validate(seedPhrase))
+            throw IllegalArgumentException("Invalid seed phrase")
 
         val masterKey = ExtendedKey.root(seedCalculator.calculateSeed(seedPhrase))
         return derivationKeysHelper.derive(masterKey, derivationPath)
