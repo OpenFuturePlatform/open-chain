@@ -6,7 +6,7 @@ import javax.persistence.Entity
 import javax.persistence.Table
 
 @Entity
-@Table(name = "transactions")
+@Table(name = "wallets")
 class Wallet(
 
         @Column(name = "address", nullable = false)

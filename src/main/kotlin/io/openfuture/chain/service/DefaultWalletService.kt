@@ -14,20 +14,19 @@ class DefaultWalletService(
         private const val DEFAULT_WALLET_BALANCE = 0.0
     }
 
-    override fun updateByTransaction(transaction: Transaction) {
-        update(transaction.from, transaction.amount * -1)
-
-        update(transaction.to, transaction.amount)
-    }
-
     override fun getBalance(address: String): Double =
             repository.findOneByAddress(address)?.let(Wallet::balance) ?: DEFAULT_WALLET_BALANCE
 
-    private fun update(address: String, amount: Int) {
+    override fun updateByTransaction(transaction: Transaction) {
+        updateByAddress(transaction.senderAddress, -transaction.amount)
+
+        updateByAddress(transaction.recipientAddress, transaction.amount)
+    }
+
+    private fun updateByAddress(address: String, amount: Int) {
         var wallet = repository.findOneByAddress(address)
 
-        wallet = wallet?: Wallet(address)
-
+        wallet = wallet ?: Wallet(address)
         wallet.balance += amount
 
         repository.save(wallet)

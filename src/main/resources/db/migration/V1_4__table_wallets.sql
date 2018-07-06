@@ -4,5 +4,5 @@ CREATE TABLE wallets (
   balance       DOUBLE
 );
 
-ALTER TABLE transactions ADD COLUMN 'from' VARCHAR;
-ALTER TABLE transactions ADD COLUMN 'to' VARCHAR;
+ALTER TABLE transactions ADD COLUMN sender_address VARCHAR;
+ALTER TABLE transactions ADD COLUMN recipient_address VARCHAR;

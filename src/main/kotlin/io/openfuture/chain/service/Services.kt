@@ -63,10 +63,6 @@ interface TransactionService {
 
     fun save(request: TransactionRequest): Transaction
 
-    fun getByRecipientKey(recipientKey: String): List<Transaction>
-
-    fun getBySenderKey(senderKey: String): List<Transaction>
-
 }
 
 interface WalletService {

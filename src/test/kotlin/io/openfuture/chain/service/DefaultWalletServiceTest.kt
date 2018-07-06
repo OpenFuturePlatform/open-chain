@@ -3,60 +3,76 @@ package io.openfuture.chain.service
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
-import io.openfuture.chain.exception.BalanceException
+import io.openfuture.chain.entity.Wallet
+import io.openfuture.chain.repository.WalletRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
+import org.mockito.Mockito.verify
 
 class DefaultWalletServiceTest : ServiceTests() {
 
-    @Mock private lateinit var transactionService: TransactionService
+    @Mock
+    private lateinit var repository: WalletRepository
 
     private lateinit var service: WalletService
 
 
     @Before
     fun setUp() {
-        service = DefaultWalletService(transactionService)
+        service = DefaultWalletService(repository)
     }
 
     @Test
-    fun getTotalBalanceShouldReturnBalanceFromAllTransactionsByKeyTest() {
-        val key = "key"
-        val sentAmount = 5
-        val receivedAmount = 10
-        val expectedBalance = receivedAmount - sentAmount
-        val sentTransactions = createTransactions(sentAmount, "recipientKey", key)
-        val receivedTransactions = createTransactions(receivedAmount, "key", "senderKey")
+    fun getBalanceShouldReturnBalanceFromAllTransactionsByAddressTest() {
+        val address = "address"
+        val expectedBalance = 10.0
+        val wallet = Wallet(address, expectedBalance)
 
-        given(transactionService.getByRecipientKey(key)).willReturn(receivedTransactions)
-        given(transactionService.getBySenderKey(key)).willReturn(sentTransactions)
+        given(repository.findOneByAddress(address)).willReturn(wallet)
 
-        val actualBalance = service.getBalance(key)
+        val actualBalance = service.getBalance(address)
 
         assertThat(actualBalance).isEqualTo(expectedBalance)
     }
 
-    @Test(expected = BalanceException::class)
-    fun getTotalBalanceWhenNegativeBalanceShouldThrowExceptionTest() {
-        val key = "key"
-        val sentAmount = 10
-        val receivedAmount = 5
-        val sentTransactions = createTransactions(sentAmount, "recipientKey", key)
-        val receivedTransactions = createTransactions(receivedAmount, "key", "senderKey")
+    @Test
+    fun getBalanceWhenNotExistsWalletByAddressShouldReturnDefaultBalanceValueTest() {
+        val address = "address"
+        val expectedBalance = 0.0
 
-        given(transactionService.getByRecipientKey(key)).willReturn(receivedTransactions)
-        given(transactionService.getBySenderKey(key)).willReturn(sentTransactions)
+        given(repository.findOneByAddress(address)).willReturn(null)
 
-        service.getBalance(key)
+        val actualBalance = service.getBalance(address)
+
+        assertThat(actualBalance).isEqualTo(expectedBalance)
     }
 
-    private fun createTransactions(amount: Int, senderKey: String, recipientKey: String): List<Transaction> {
+    @Test
+    fun updateByTransactionShouldChangeWalletsBalanceValueTest() {
+        val amount = 1.0
+        val senderAddress = "senderAddress"
+        val recipientAddress = "recipientAddress"
+
+        val transaction = createTransaction(amount, senderAddress, recipientAddress)
+        val senderWallet = Wallet(senderAddress, 1.0)
+        val recipientWallet = Wallet(recipientAddress, 5.0)
+
+        given(repository.findOneByAddress(senderAddress)).willReturn(senderWallet)
+        given(repository.findOneByAddress(recipientAddress)).willReturn(recipientWallet)
+
+        service.updateByTransaction(transaction)
+
+        verify(repository).save(senderWallet.apply { balance += amount })
+        verify(repository).save(recipientWallet.apply { balance -= amount })
+    }
+
+    private fun createTransaction(amount: Double, senderAddress: String, recipientAddress: String): Transaction {
         val block = Block(1, 1L, 1L, "previousHash", "hash", "merkleHash", "nodeKey", "nodeSignature")
 
-        return listOf(Transaction(block, "hash", amount, 1L, recipientKey, senderKey, "signature"))
+        return Transaction(block, "hash", amount.toInt(), 1L, "recipientKey", "senderKey", "signature", senderAddress, recipientAddress)
     }
 
 }

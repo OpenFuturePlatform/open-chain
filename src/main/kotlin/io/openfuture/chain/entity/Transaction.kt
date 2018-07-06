@@ -30,11 +30,11 @@ class Transaction(
     @Column(name = "signature", nullable = false)
     var signature: String,
 
-    @Column(name = "from", nullable = false)
-    var from: String,
+    @Column(name = "sender_address", nullable = false)
+    var senderAddress: String,
 
-    @Column(name = "to", nullable = false)
-    var to: String
+    @Column(name = "recipient_address", nullable = false)
+    var recipientAddress: String
 
 ) : BaseModel() {
 
@@ -47,8 +47,8 @@ class Transaction(
             request.recipientKey,
             request.senderKey,
             request.signature,
-            request.from,
-            request.to
+            request.senderAddress,
+            request.recipientAddress
         )
     }
 }

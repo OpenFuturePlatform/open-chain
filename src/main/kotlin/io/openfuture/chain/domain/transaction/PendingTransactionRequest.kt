@@ -6,6 +6,6 @@ open class PendingTransactionRequest(
     val recipientKey: String,
     val senderKey: String,
     val signature: String,
-    val from: String,
-    val to: String
+    val senderAddress: String,
+    val recipientAddress: String
 )

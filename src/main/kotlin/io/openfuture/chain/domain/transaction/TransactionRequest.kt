@@ -9,10 +9,10 @@ class TransactionRequest(
     recipientKey: String,
     senderKey: String,
     signature: String,
-    from: String,
-    to: String
+    senderAddress: String,
+    recipientAddress: String
 
-) : PendingTransactionRequest(amount, timestamp, recipientKey, senderKey, signature, from , to) {
+) : PendingTransactionRequest(amount, timestamp, recipientKey, senderKey, signature, senderAddress , recipientAddress) {
 
     var hash: String = calculateHash()
 
@@ -23,8 +23,8 @@ class TransactionRequest(
         builder.append(this.recipientKey)
         builder.append(this.senderKey)
         builder.append(this.signature)
-        builder.append(this.from)
-        builder.append(this.to)
+        builder.append(this.senderAddress)
+        builder.append(this.recipientAddress)
         return HashUtils.generateHash(builder.toString().toByteArray())
     }
 }
