@@ -1,4 +1,4 @@
-package io.openfuture.chain.crypto.block
+package io.openfuture.chain.block
 
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.BlockVersion
@@ -8,7 +8,7 @@ import io.openfuture.chain.util.BlockUtils
 import org.springframework.stereotype.Component
 
 @Component
-class MainValidator : Validator {
+class MainBlockValidator : BlockValidator {
 
     override fun isValid(block: Block): Boolean {
         val mainBlock = block as MainBlock

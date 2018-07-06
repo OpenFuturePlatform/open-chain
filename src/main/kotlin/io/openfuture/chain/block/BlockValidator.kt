@@ -1,8 +1,8 @@
-package io.openfuture.chain.crypto.block
+package io.openfuture.chain.block
 
 import io.openfuture.chain.entity.Block
 
-interface Validator {
+interface BlockValidator {
 
     fun isValid(block: Block): Boolean
 

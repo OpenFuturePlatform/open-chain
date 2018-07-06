@@ -1,26 +1,27 @@
-package io.openfuture.chain.crypto.block
+package io.openfuture.chain.block
 
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.context.ApplicationContext
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct
 
-@Component
-class BlockValidator(
+@Service
+class BlockValidationService(
     private val blockService: BlockService,
     private val applicationContext: ApplicationContext
 ) {
 
-    private val validators = HashMap<Int, Validator>()
+    private val validators = HashMap<Int, BlockValidator>()
+
 
     @PostConstruct
-    private fun init() {
-        val vs = applicationContext.getBeansOfType(Validator::class.java).values
-        vs.forEach {
-            validators.put(it.getVersion(), it)
+    fun init() {
+        val blockValidators = applicationContext.getBeansOfType(BlockValidator::class.java).values
+        blockValidators.forEach {
+            validators[it.getVersion()] = it
         }
     }
 
