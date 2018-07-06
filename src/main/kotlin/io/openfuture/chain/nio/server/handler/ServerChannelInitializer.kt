@@ -31,6 +31,7 @@ class ServerChannelInitializer(
 
         // Handlers
         pipeline.addLast(ReadTimeoutHandler(60))
+        pipeline.addLast(context.getBean(HandshakeServerHandler::class.java))
         pipeline.addLast(connectionServerHandler)
 
         pipeline.addLast(context.getBean(TimeSyncServerHandler::class.java))
