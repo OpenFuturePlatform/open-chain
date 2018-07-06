@@ -1,6 +1,7 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
@@ -29,7 +30,7 @@ class DefaultBlockService (
         val time = System.currentTimeMillis()
         val hash = BlockUtils.calculateHash(previousBlock.hash, merkleRootHash, time, (previousBlock.height + 1))
         return blockRepository
-            .save(Block(String(hash), previousBlock.height + 1, "", previousBlock.hash, merkleRootHash, time, transactions))
+            .save(MainBlock(HashUtils.bytesToHexString(hash), previousBlock.height + 1, previousBlock.hash, merkleRootHash, time, "", transactions))
     }
 
 }

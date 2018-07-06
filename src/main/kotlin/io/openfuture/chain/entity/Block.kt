@@ -5,16 +5,14 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "blocks")
-class Block(
+@Inheritance(strategy = InheritanceType.JOINED)
+abstract class Block(
 
     @Column(name = "hash", nullable = false)
     var hash: String,
 
     @Column(name = "height", nullable = false)
     var height: Long,
-
-    @Column(name = "signature", nullable = false)
-    var signature: String,
 
     @Column(name = "previous_hash", nullable = false)
     var previousHash: String,
@@ -25,9 +23,8 @@ class Block(
     @Column(name = "timestamp", nullable = false)
     var timestamp: Long,
 
-    @OneToMany
-    @JoinColumn(name = "block_id", nullable = true)
-    var transactions: Set<Transaction>
+    @Column(name = "version", nullable = false)
+    var version: Int
 
 ) : BaseModel()
 
