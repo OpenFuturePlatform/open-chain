@@ -13,6 +13,6 @@ class WalletController(
 ) {
 
     @GetMapping("/{address}/balance")
-    fun getBalance(@PathVariable address: String) = walletService.getTotalBalance(address)
+    fun getBalance(@PathVariable address: String) = walletService.getBalance(address)
 
 }
