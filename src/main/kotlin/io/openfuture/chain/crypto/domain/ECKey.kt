@@ -1,8 +1,17 @@
 package io.openfuture.chain.crypto.domain
 
 import io.openfuture.chain.crypto.util.HashUtils
+import org.bouncycastle.asn1.ASN1InputStream
+import org.bouncycastle.asn1.ASN1Integer
+import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.sec.SECNamedCurves
 import org.bouncycastle.asn1.sec.SECObjectIdentifiers
+import org.bouncycastle.crypto.digests.SHA256Digest
+import org.bouncycastle.crypto.params.ECDomainParameters
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters
+import org.bouncycastle.crypto.params.ECPublicKeyParameters
+import org.bouncycastle.crypto.signers.ECDSASigner
+import org.bouncycastle.crypto.signers.HMacDSAKCalculator
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.math.BigInteger
 import java.util.*
@@ -16,6 +25,7 @@ class ECKey(
         private const val PRIVATE_KEY_SIZE = 32
 
         private val curve = SECNamedCurves.getByOID(SECObjectIdentifiers.secp256k1)
+        private val params = ECDomainParameters(curve.curve, curve.g, curve.n, curve.h)
     }
 
     constructor(bytes: ByteArray) : this(
@@ -55,6 +65,30 @@ class ECKey(
         val hash = HashUtils.keccakKeyHash(public)
         val addressBytes = Arrays.copyOfRange(hash, 0, 20)
         return "0x${ByteUtils.toHexString(addressBytes)}"
+    }
+
+    fun sign(hashedMessage: ByteArray): ByteArray {
+        if (hashedMessage.size != 32 || isPrivateEmpty()) {
+            throw Exception("Invalid params for sign")
+        }
+
+        val signer = ECDSASigner(HMacDSAKCalculator(SHA256Digest()))
+        signer.init(true, ECPrivateKeyParameters(private, params))
+        val signature = signer.generateSignature(hashedMessage)
+
+        return ECDSASignature(signature[0], signature[1]).toDER()
+    }
+
+    fun verify(hashedMessage: ByteArray, signature: ByteArray): Boolean {
+        val signer = ECDSASigner()
+        signer.init(false, ECPublicKeyParameters(curve.curve.decodePoint(public), params))
+
+        val seq = ASN1InputStream(signature).use { it.readObject() as DLSequence }
+        val r = (seq.getObjectAt(0) as ASN1Integer).positiveValue
+        val s = (seq.getObjectAt(1) as ASN1Integer).positiveValue
+
+        return signer.verifySignature(hashedMessage, r, s)
+
     }
 
 }
