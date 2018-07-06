@@ -1,9 +1,6 @@
 package io.openfuture.chain.repository
 
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.GenesisBlock
-import io.openfuture.chain.entity.SeedWord
-import io.openfuture.chain.entity.Transaction
+import io.openfuture.chain.entity.*
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.stereotype.Repository
@@ -33,4 +30,4 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 
 interface GenesisBlockRepository : BaseRepository<GenesisBlock>
 
-interface MainBlockRepository : BaseRepository<MainBlockRepository>
+interface MainBlockRepository : BaseRepository<MainBlock>
