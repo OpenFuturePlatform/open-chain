@@ -15,6 +15,9 @@ class CryptoController(
     private val cryptoService: CryptoService
 ) {
 
+    @GetMapping("/doGenerate")
+    fun generateNewAccount(): RootAccountDto = cryptoService.generateNewAccount()
+
     @PostMapping("/doRestore")
     fun restore(@RequestBody @Valid keyRequest: RestoreRequest): RootAccountDto =
         cryptoService.getRootAccount(keyRequest.seedPhrase!!)
@@ -29,9 +32,6 @@ class CryptoController(
             key.ecKey.getAddress()
         )
     }
-
-    @GetMapping("/doGenerate")
-    fun generateNewAccount(): RootAccountDto = cryptoService.generateNewAccount()
 
     @PostMapping("/keys/doImport")
     fun importKey(@RequestBody @Valid request: ImportKeyRequest): AccountDto {
