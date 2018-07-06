@@ -13,7 +13,7 @@ import org.mockito.BDDMockito.given
 import org.mockito.Mock
 import org.springframework.context.ApplicationContext
 
-class BlockValidatorTests : ServiceTests() {
+class BlockValidationServiceTests : ServiceTests() {
 
     @Mock private lateinit var blockService: BlockService
 
