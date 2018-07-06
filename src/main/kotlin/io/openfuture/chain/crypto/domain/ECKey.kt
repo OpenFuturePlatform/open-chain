@@ -2,7 +2,6 @@ package io.openfuture.chain.crypto.domain
 
 import io.openfuture.chain.crypto.util.HashUtils
 import org.bouncycastle.asn1.ASN1InputStream
-import org.bouncycastle.asn1.ASN1Integer
 import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.sec.SECNamedCurves
 import org.bouncycastle.asn1.sec.SECObjectIdentifiers
@@ -83,12 +82,9 @@ class ECKey(
         val signer = ECDSASigner()
         signer.init(false, ECPublicKeyParameters(curve.curve.decodePoint(public), params))
 
-        val seq = ASN1InputStream(signature).use { it.readObject() as DLSequence }
-        val r = (seq.getObjectAt(0) as ASN1Integer).positiveValue
-        val s = (seq.getObjectAt(1) as ASN1Integer).positiveValue
+        val sign = ECDSASignature(ASN1InputStream(signature).use { it.readObject() as DLSequence })
 
-        return signer.verifySignature(hashedMessage, r, s)
-
+        return signer.verifySignature(hashedMessage, sign.r, sign.s)
     }
 
 }
