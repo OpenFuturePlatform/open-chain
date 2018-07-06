@@ -6,6 +6,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "blocks")
 class Block(
+
     @Column(name = "hash", nullable = false)
     var hash: String,
 
@@ -15,7 +16,7 @@ class Block(
     @Column(name = "signature", nullable = false)
     var signature: String,
 
-    @Column(name = "previous_рash", nullable = false)
+    @Column(name = "previous_hash", nullable = false)
     var previousHash: String,
 
     @Column(name = "merkle_hash", nullable = false)

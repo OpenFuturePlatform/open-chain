@@ -6,6 +6,9 @@ import io.openfuture.chain.entity.Transaction
 object BlockUtils {
 
     fun calculateMerkleRoot(transactions: Set<Transaction>): String {
+        if (transactions.size == 1) {
+            return transactions.single().hash
+        }
         var previousTreeLayout = transactions.map { it.hash.toByteArray() }
         var treeLayout = mutableListOf<ByteArray>()
         while(previousTreeLayout.size != 2) {
@@ -22,6 +25,11 @@ object BlockUtils {
             treeLayout = mutableListOf()
         }
         return HashUtils.generateHash(previousTreeLayout[0] + previousTreeLayout[1])
+    }
+
+    fun calculateHash(previousHash: String, merkleRoot: String, timestamp: Long, height: Long): ByteArray {
+        val headers = previousHash + merkleRoot + timestamp + height
+        return HashUtils.doubleSha256(headers.toByteArray())
     }
 
 }
