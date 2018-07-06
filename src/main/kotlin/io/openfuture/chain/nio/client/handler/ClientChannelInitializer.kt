@@ -7,6 +7,7 @@ import io.netty.handler.codec.protobuf.ProtobufEncoder
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender
 import io.netty.handler.timeout.ReadTimeoutHandler
+import io.openfuture.chain.nio.base.NodeSyncHandler
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
@@ -32,6 +33,7 @@ class ClientChannelInitializer(
         pipeline.addLast(context.getBean(ConnectionClientHandler::class.java))
 
         pipeline.addLast(context.getBean(TimeSyncClientHandler::class.java))
+        pipeline.addLast(context.getBean(NodeSyncHandler::class.java))
         pipeline.addLast(context.getBean(HeartBeatClientHandler::class.java))
     }
 

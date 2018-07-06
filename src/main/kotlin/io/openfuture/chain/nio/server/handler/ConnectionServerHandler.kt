@@ -35,6 +35,8 @@ class ConnectionServerHandler : ChannelInboundHandlerAdapter() {
                     .setHeartBeat(HeartBeat.newBuilder().setType(HeartBeat.Type.PING).build())
                     .build()
             ctx.writeAndFlush(packet)
+
+            ctx.fireChannelActive()
         } else {
             log.error("Connection with {} rejected", address)
             ctx.close()
@@ -50,6 +52,7 @@ class ConnectionServerHandler : ChannelInboundHandlerAdapter() {
             HEART_BEAT -> {}
             TIME_SYNC_REQUEST -> {}
             TIME_SYNC_RESPONSE -> {}
+            NODE_SYNC -> {}
             else -> {
                 log.error("Illegal packet type: {}", packet)
                 ctx.close()
