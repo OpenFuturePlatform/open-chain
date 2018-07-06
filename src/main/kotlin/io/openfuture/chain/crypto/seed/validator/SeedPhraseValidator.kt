@@ -28,7 +28,7 @@ class SeedPhraseValidator(
         private const val MULTIPLICITY_WITH_CHECKSUM_VALUE = 33
         private const val MAX_BYTE_SIZE_MOD = 7
         private const val OUT_OF_BYTE_SIZE = WORD_INDEX_SIZE - BYTE_SIZE
-        private const val MAX_FIRST_BIT_INDEX_IN_TWO_BYTE = DOUBLE_BYTE_SIZE - WORD_INDEX_SIZE + 1
+        private const val MAX_FIRST_BIT_INDEX_IN_TWO_BYTE = DOUBLE_BYTE_SIZE - WORD_INDEX_SIZE
         private const val THIRD_BYTE_SKIP_BIT_SIZE = BYTE_SIZE + MAX_FIRST_BIT_INDEX_IN_TWO_BYTE
     }
 
@@ -51,11 +51,11 @@ class SeedPhraseValidator(
         val entropyWithChecksum = ByteArray((entropyPlusChecksumSize + MAX_BYTE_SIZE_MOD) / BYTE_SIZE)
         wordIndexesToEntropyWithCheckSum(seedWordIndexes, entropyWithChecksum)
         val entropy = Arrays.copyOf(entropyWithChecksum, entropyWithChecksum.size - 1)
+        val lastByte = entropyWithChecksum[entropyWithChecksum.size - 1]
         val entropySha = HashUtils.sha256(entropy)[0]
         val mask = ((1 shl (BYTE_SIZE - checksumSize)) - 1).inv().toByte()
 
-        val lastByte = entropyWithChecksum[entropyWithChecksum.size - 1]
-        if (entropySha xor lastByte and mask != 0.toByte()) {
+        if (((entropySha xor lastByte) and mask) != 0.toByte()) {
             throw SeedValidationException("Invalid checksum for seed phrase")
         }
     }
@@ -70,9 +70,34 @@ class SeedPhraseValidator(
         var wordIndex = 0
         var entropyOffset = 0
         while (wordIndex < wordIndexes.size) {
-            writeNextWordIndexToArray(entropyWithChecksum, wordIndexes[wordIndex], entropyOffset)
+            writeNext11(entropyWithChecksum, wordIndexes[wordIndex], entropyOffset)
             wordIndex++
             entropyOffset += WORD_INDEX_SIZE
+        }
+    }
+
+    fun writeNext11(bytes: ByteArray, value: Int, offset: Int) {
+        val skip = offset / 8
+        val bitSkip = offset % 8
+        run {
+            //byte 0
+            val firstValue = bytes[skip]
+            val toWrite = (value shr 3 + bitSkip).toByte()
+            bytes[skip] = firstValue or toWrite
+        }
+
+        run {
+            //byte 1
+            val valueInByte = bytes[skip + 1]
+            val i = 5 - bitSkip
+            val toWrite = (if (i > 0) value shl i else value shr -i).toByte()
+            bytes[skip + 1] = valueInByte or toWrite
+        }
+
+        if (bitSkip >= 6) {//byte 2
+            val valueInByte = bytes[skip + 2]
+            val toWrite = (value shl 13 - bitSkip).toByte()
+            bytes[skip + 2] = valueInByte or toWrite
         }
     }
 

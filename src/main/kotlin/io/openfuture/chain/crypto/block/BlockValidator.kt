@@ -12,6 +12,10 @@ class BlockValidator(
 ) {
 
     fun isValid(block: Block): Boolean {
+        if (BlockUtils.calculateHash() != block.hash) {
+            return false
+        }
+
         val transactions = block.transactions
 
         if (transactions.isEmpty()) {
