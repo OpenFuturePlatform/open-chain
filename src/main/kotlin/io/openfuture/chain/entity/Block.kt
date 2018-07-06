@@ -6,6 +6,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "blocks")
 class Block(
+
     @Column(name = "hash", nullable = false)
     var hash: String,
 
