@@ -13,10 +13,7 @@ import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Transaction
-import io.openfuture.chain.entity.Vote
-import org.springframework.transaction.annotation.Transactional
 
 interface HardwareInfoService {
 
@@ -74,14 +71,8 @@ interface TransactionService {
 
     fun addToBlock(hash: String, block: Block): Transaction
 
-    fun add(dto: TransactionDto): Transaction
+    fun add(dto: VoteTransactionDto): Transaction
 
     fun createVote(data: VoteTransactionData): VoteTransactionDto
-
-}
-
-interface VoteService {
-
-    fun getVotesByPublicKey(publicKey: String): List<Vote>
 
 }

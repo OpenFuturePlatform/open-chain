@@ -8,14 +8,13 @@ INSERT INTO transaction_types (id, key) VALUES (2, 'DELEGATE_REGISTRATION');
 --
 CREATE TABLE transactions (
   id               INTEGER PRIMARY KEY,
-  type_id          INTEGER NOT NULL REFERENCES transaction_payload_types,
+  type_id          INTEGER NOT NULL REFERENCES transaction_types,
   timestamp        BIGINT  NOT NULL,
   amount           BIGINT  NOT NULL,
   recipient_key    VARCHAR NOT NULL,
   sender_key       VARCHAR NOT NULL,
   sender_signature VARCHAR NOT NULL,
   hash             VARCHAR NOT NULL,
-  payload          VARCHAR NULLABLE,
   block_id         INTEGER NULLABLE REFERENCES blocks
 );
 

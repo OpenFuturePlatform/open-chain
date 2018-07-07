@@ -4,8 +4,6 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.MainBlockDto
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.MainBlock
-import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.util.BlockUtils
@@ -14,22 +12,27 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultBlockService (
-        private val blockRepository: BlockRepository
+        private val repository: BlockRepository,
+        private val transactionService: TransactionService
 ) : BlockService {
 
     @Transactional(readOnly = true)
-    override fun get(id: Int): Block = blockRepository.getOne(id)
+    override fun get(id: Int): Block = repository.getOne(id)
         ?: throw NotFoundException("Not found id $id")
 
     @Transactional(readOnly = true)
-    override fun getAll(): MutableList<Block> =  blockRepository.findAll()
+    override fun getAll(): MutableList<Block> =  repository.findAll()
 
-    override fun getLast(): Block = blockRepository.findFirstByOrderByHeightDesc()
+    @Transactional(readOnly = true)
+    override fun getLast(): Block = repository.findFirstByOrderByHeightDesc()
         ?: throw NotFoundException("Last block not exist!")
 
     @Transactional
     override fun add(dto: MainBlockDto): Block {
-        return blockRepository.save(MainBlock.of(dto))
+        val persistBlock = repository.save(dto.toEntity())
+        val transactions = dto.transactions.map { transactionService.addToBlock(it.hash, persistBlock) }
+        persistBlock.transactions.addAll(transactions)
+        return persistBlock
     }
 
     @Transactional

@@ -17,6 +17,12 @@ interface BlockRepository : BaseRepository<Block> {
 }
 
 @Repository
+interface GenesisBlockRepository : BaseRepository<GenesisBlock>
+
+@Repository
+interface MainBlockRepository : BaseRepository<MainBlock>
+
+@Repository
 interface TransactionRepository: BaseRepository<Transaction> {
 
     fun findOneByHash(hash: String): Transaction?
@@ -43,7 +49,3 @@ interface VoteRepository: BaseRepository<Vote> {
     fun findAllByPublicKey(publicKey: String): List<Vote>
 
 }
-
-@Repository
-interface GenesisBlockRepository : BaseRepository<GenesisBlock>
-

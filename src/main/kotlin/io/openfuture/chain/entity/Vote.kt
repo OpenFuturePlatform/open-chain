@@ -1,5 +1,6 @@
 package io.openfuture.chain.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import io.openfuture.chain.domain.transaction.vote.VoteDto
 import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.*
@@ -8,6 +9,7 @@ import javax.persistence.*
 @Table(name = "votes")
 class Vote(
 
+        @JsonIgnore
         @ManyToOne
         @JoinColumn(name = "transaction_id", nullable = false)
         var transaction: VoteTransaction,

@@ -5,8 +5,8 @@ import io.openfuture.chain.domain.transaction.data.TransactionData
 
 object TransactionUtils {
 
-    fun calculateHash(data: TransactionData): String {
-        val bytes = data.getByteData()
+    fun calculateHash(networkTime: Long, data: TransactionData): String {
+        val bytes = data.getByteData() + networkTime.toString().toByteArray()
         return HashUtils.generateHash(bytes)
     }
 

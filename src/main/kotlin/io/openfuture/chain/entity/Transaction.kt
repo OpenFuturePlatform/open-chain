@@ -1,5 +1,6 @@
 package io.openfuture.chain.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.base.BaseModel
 import io.openfuture.chain.entity.dictionary.TransactionType
@@ -32,6 +33,7 @@ abstract class Transaction(
         @Column(name = "hash", nullable = false)
         var hash: String,
 
+        @JsonIgnore
         @ManyToOne
         @JoinColumn(name = "block_id", nullable = true)
         var block: Block? = null
