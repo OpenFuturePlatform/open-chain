@@ -34,13 +34,11 @@ interface HardwareInfoService {
 
 interface BlockService {
 
-    fun chainSize(): Long
+    fun get(id: Int): Block
 
-    fun getLast(): Block
+    fun getAll(): MutableList<Block>
 
-    fun add(block: BlockDto): Block
-
-    fun create(privateKey: String, publicKey: String, difficulty: Int): BlockDto
+    fun getLast(): Block?
 
 }
 
@@ -83,4 +81,3 @@ interface VoteService {
     fun getVotesByPublicKey(publicKey: String): List<Vote>
 
 }
-
