@@ -42,10 +42,3 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
     fun findOneByValue(value: String): Optional<SeedWord>
 
 }
-
-@Repository
-interface VoteRepository: BaseRepository<Vote> {
-
-    fun findAllByPublicKey(publicKey: String): List<Vote>
-
-}

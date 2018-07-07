@@ -7,7 +7,7 @@ import io.openfuture.chain.domain.block.MainBlockDto
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
-import io.openfuture.chain.domain.transaction.vote.VoteDto
+import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.TransactionService
 import io.openfuture.chain.util.BlockUtils
@@ -70,7 +70,7 @@ class BlockchainInitializer(
     private fun createRandomTransaction(): VoteTransactionDto {
         val amount = Math.round(Math.random())
         val data = VoteTransactionData(amount, "recipientKey", "senderKey", "senderSignature",
-                mutableListOf(VoteDto("publicKey_X", 100)))
+                VoteType.FOR, "publicKey_X", 100)
         return transactionService.createVote(data)
     }
 

@@ -1,8 +1,9 @@
 package io.openfuture.chain.entity
 
-import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.entity.dictionary.TransactionType
+import io.openfuture.chain.entity.dictionary.VoteType
+import io.openfuture.chain.util.DictionaryUtils
 import javax.persistence.*
 
 @Entity
@@ -14,10 +15,17 @@ class VoteTransaction(
         senderKey: String,
         senderSignature: String,
         hash: String,
-        block: Block? = null,
 
-        @OneToMany(mappedBy = "transaction", fetch = FetchType.EAGER)
-        val votes: MutableList<Vote> = mutableListOf()
+        @Column(name = "vote_type_id")
+        var voteTypeId: Int,
+
+        @Column(name = "delegate_key", nullable = false)
+        var delegateKey: String,
+
+        @Column(name = "weight", nullable = false)
+        var weight: Int,
+
+        block: Block? = null
 
 ) : Transaction(TransactionType.VOTE.getId(), timestamp, amount, recipientKey, senderKey, senderSignature, hash,
         block) {
@@ -29,7 +37,9 @@ class VoteTransaction(
             this.senderKey,
             this.senderSignature,
             this.hash,
-            this.votes.map { it.toDto() }.toMutableList()
+            DictionaryUtils.valueOf(VoteType::class.java, this.voteTypeId),
+            this.delegateKey,
+            this.weight
     )
 
 }

@@ -1,10 +1,7 @@
 package io.openfuture.chain.domain.transaction
 
-import io.openfuture.chain.domain.transaction.vote.VoteDto
-import io.openfuture.chain.entity.Transaction
-import io.openfuture.chain.entity.Vote
 import io.openfuture.chain.entity.VoteTransaction
-import io.openfuture.chain.entity.dictionary.TransactionType
+import io.openfuture.chain.entity.dictionary.VoteType
 
 class VoteTransactionDto(
         timestamp: Long,
@@ -13,7 +10,9 @@ class VoteTransactionDto(
         senderKey: String,
         senderSignature: String,
         hash: String,
-        val votes: MutableList<VoteDto>
+        val voteType: VoteType,
+        val delegateKey: String,
+        val weight: Int
 
 ) : TransactionDto(timestamp, amount, recipientKey, senderKey, senderSignature, hash) {
 
@@ -23,7 +22,10 @@ class VoteTransactionDto(
             this.recipientKey,
             this.senderKey,
             this.senderSignature,
-            this.hash
+            this.hash,
+            this.voteType.getId(),
+            this.delegateKey,
+            this.weight
     )
 
 }

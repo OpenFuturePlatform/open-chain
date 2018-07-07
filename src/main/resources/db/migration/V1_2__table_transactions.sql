@@ -18,14 +18,16 @@ CREATE TABLE transactions (
   block_id         INTEGER NULLABLE REFERENCES blocks
 );
 
-CREATE TABLE vote_transactions (
-  id INTEGER PRIMARY KEY REFERENCES transactions
+CREATE TABLE vote_types (
+  id  INT PRIMARY KEY,
+  key VARCHAR NOT NULL UNIQUE
 );
+INSERT INTO vote_types (id, key) VALUES (1, 'FOR');
+INSERT INTO vote_types (id, key) VALUES (2, 'AGAINST');
 
---
-CREATE TABLE votes (
-  id             INTEGER PRIMARY KEY,
-  transaction_id INTEGER NOT NULL REFERENCES vote_transactions,
-  public_key     VARCHAR NOT NULL,
-  weight         INTEGER NOT NULL
-)
+CREATE TABLE vote_transactions (
+  id           INTEGER PRIMARY KEY REFERENCES transactions,
+  vote_type_id INTEGER NOT NULL REFERENCES vote_types,
+  delegate_key VARCHAR NOT NULL,
+  weight       INTEGER NOT NULL
+);
