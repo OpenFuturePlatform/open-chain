@@ -15,7 +15,7 @@ class BlockCollector(
     private var signedBlocks = mutableListOf<SignedBlock>()
 
     // variable to collect the blocks from the same round only
-    private var blockCollectionHash: String? = null
+    private lateinit var blockCollectionHash: String
 
 
     fun setBlockCollectionHash(blockCollectionHash: String) {

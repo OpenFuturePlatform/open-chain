@@ -24,13 +24,14 @@ class DefaultBlockApplyingService(
         return SignedBlock(block, signature)
     }
 
-    override fun sendSignedBlock(signedBlock: SignedBlock) {
+    override fun sendSignedBlockOrBroadcast(signedBlock: SignedBlock) {
         // TODO we will send signed block back if it's active delegate or broadcast from handler else
     }
 
     override fun sendFullSignedBlock(fullSignedBlock: FullSignedBlock) {
+        // TODO after signed blocks will be collected
         // TODO we will send signed with all delegates block to each active delegates after mergeBlockSigns method from
-        // handler if it's signed by more than 50%
+        // TODO handler if it's signed by more than 50%
     }
 
     override fun applyBlock(fullSignedBlock: FullSignedBlock) {
@@ -43,7 +44,7 @@ class DefaultBlockApplyingService(
 
         for (signature in signatures) {
             // TODO here we will check delegates signatures, if signature is wrong we'll throw an exception that
-            // signature is wrong
+            // TODO signature is wrong
         }
 
         blockRepository.save(block)

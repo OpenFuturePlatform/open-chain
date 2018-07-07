@@ -66,7 +66,7 @@ interface BlockApplyingService {
 
     fun signBlock(block: Block): SignedBlock
 
-    fun sendSignedBlock(signedBlock: SignedBlock)
+    fun sendSignedBlockOrBroadcast(signedBlock: SignedBlock)
 
     fun sendFullSignedBlock(fullSignedBlock: FullSignedBlock)
 
