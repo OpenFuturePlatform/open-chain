@@ -15,10 +15,12 @@ class AddressValidator : ConstraintValidator<Address, String> {
     }
 
     override fun isValid(value: String, context: ConstraintValidatorContext?): Boolean {
-        return if (ADDRESS_PATTERN.toRegex().matches(value)) {
+        if (ADDRESS_PATTERN.toRegex().matches(value)) {
             val noPrefixAddress = AddressUtils.removePrefix(value)
-            noPrefixAddress == AddressUtils.addChecksum(noPrefixAddress.toLowerCase())
-        } else false
+            return noPrefixAddress == AddressUtils.addChecksum(noPrefixAddress.toLowerCase())
+        }
+
+        return false
     }
 
 }
