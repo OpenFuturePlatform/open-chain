@@ -13,6 +13,7 @@ class DefaultBlockApplyingService(
     val blockValidationService: BlockValidationService,
     val blockRepository: BlockRepository
     // TODO here will be broadcast service
+    // TODO signature checking service will be here
 ) : BlockApplyingService {
 
     override fun sendBlockToSign(block: Block) {
@@ -25,7 +26,7 @@ class DefaultBlockApplyingService(
     }
 
     override fun sendSignedBlock(signedBlock: SignedBlock) {
-        // TODO we will send signed block back if it's active delegate or broadcast else from handler
+        // TODO we will send signed block back if it's active delegate or broadcast from handler else
     }
 
     override fun mergeBlockSigns(signedBlocks: List<SignedBlock>): FullSignedBlock {
@@ -38,6 +39,8 @@ class DefaultBlockApplyingService(
                 throw IllegalArgumentException("$signedBlocks has wrong block = $signedBlock")
             }
 
+            val signature = signedBlock.signature
+            // TODO we'll check signature by some service
         }
 
         val signatures = signedBlocks.stream().map { it.signature }.collect(Collectors.toSet())
@@ -64,6 +67,5 @@ class DefaultBlockApplyingService(
 
         blockRepository.save(block)
     }
-
 
 }
