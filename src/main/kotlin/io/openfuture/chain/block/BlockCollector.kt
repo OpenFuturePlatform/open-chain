@@ -12,8 +12,20 @@ class BlockCollector(
 
     private val lock = ReentrantReadWriteLock()
 
-    private var signedBlocks = mutableListOf<SignedBlock>()
+    @Volatile private var signedBlocks = mutableListOf<SignedBlock>()
 
+    // variable to collect the blocks from the same round only
+    @Volatile private var blockCollectionHash: String? = null
+
+
+    fun setBlockCollectionHash(blockCollectionHash: String) {
+        try {
+            lock.writeLock().lock()
+            this.blockCollectionHash = blockCollectionHash
+        } finally {
+            lock.writeLock().unlock()
+        }
+    }
 
     fun clear() {
         try {
@@ -24,31 +36,40 @@ class BlockCollector(
         }
     }
 
-    fun addBlock(block: SignedBlock) {
+    fun addBlock(signedBlock: SignedBlock) {
         try {
             lock.writeLock().lock()
-            signedBlocks.add(block)
+
+            if (signedBlock.block.hash == blockCollectionHash) {
+                signedBlocks.add(signedBlock)
+            }
         } finally {
             lock.writeLock().unlock()
         }
     }
 
     fun mergeBlockSigns(): FullSignedBlock {
-        val firstBlock = signedBlocks.first()
-        for (signedBlock in signedBlocks) {
-            val block = signedBlock.block
+        try {
+            lock.readLock().lock()
 
-            val blockIsValid = blockValidationService.isValid(block)
-            if (!blockIsValid || signedBlock.block.hash != firstBlock.block.hash) {
-                throw IllegalArgumentException("$signedBlocks has wrong block = $signedBlock")
+            val firstBlock = signedBlocks.first()
+            for (signedBlock in signedBlocks) {
+                val block = signedBlock.block
+
+                val blockIsValid = blockValidationService.isValid(block)
+                if (!blockIsValid || signedBlock.block.hash != firstBlock.block.hash) {
+                    throw IllegalArgumentException("$signedBlocks has wrong block = $signedBlock")
+                }
+
+                val signature = signedBlock.signature
+                // TODO we'll check signature by some service
             }
 
-            val signature = signedBlock.signature
-            // TODO we'll check signature by some service
+            val signatures = signedBlocks.map { it.signature }.toSet()
+            return FullSignedBlock(firstBlock.block, signatures)
+        } finally {
+            lock.readLock().unlock()
         }
-
-        val signatures = signedBlocks.map { it.signature }.toSet()
-        return FullSignedBlock(firstBlock.block, signatures)
     }
 
 }
