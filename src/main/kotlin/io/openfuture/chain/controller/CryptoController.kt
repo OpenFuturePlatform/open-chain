@@ -25,23 +25,17 @@ class CryptoController(
     @PostMapping("/doDerive")
     fun getDerivationAccount(@RequestBody @Valid keyRequest: DerivationKeyRequest): AccountDto {
         val key = cryptoService.getDerivationKey(keyRequest.seedPhrase!!, keyRequest.derivationPath!!)
-
-        return AccountDto(
-            cryptoService.serializePublicKey(key),
-            cryptoService.serializePrivateKey(key),
-            key.ecKey.getAddress()
-        )
+        val publicKey = cryptoService.serializePublicKey(key)
+        val privateKey = cryptoService.serializePrivateKey(key)
+        return AccountDto(publicKey, privateKey, key.ecKey.getAddress())
     }
 
     @PostMapping("/keys/doImport")
     fun importKey(@RequestBody @Valid request: ImportKeyRequest): AccountDto {
-        val importedKey = cryptoService.importKey(request.decodedKey!!)
-
-        return AccountDto(
-            cryptoService.serializePublicKey(importedKey),
-            if (!importedKey.ecKey.isPrivateEmpty()) cryptoService.serializePrivateKey(importedKey) else null,
-            importedKey.ecKey.getAddress()
-        )
+        val key = cryptoService.importKey(request.decodedKey!!)
+        val publicKey = cryptoService.serializePublicKey(key)
+        val privateKey = if (!key.ecKey.isPrivateEmpty()) cryptoService.serializePrivateKey(key) else null
+        return AccountDto(publicKey, privateKey, key.ecKey.getAddress())
     }
 
     @PostMapping("/keys/doImportWif")
