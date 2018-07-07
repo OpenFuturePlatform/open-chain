@@ -75,7 +75,7 @@ class ECKey(
         signer.init(true, ECPrivateKeyParameters(private, params))
         val signature = signer.generateSignature(hashedMessage)
 
-        return ECDSASignature(signature[0], signature[1]).toDER()
+        return ECDSASignature(signature[0], signature[1]).encode()
     }
 
     fun verify(hashedMessage: ByteArray, signature: ByteArray): Boolean {

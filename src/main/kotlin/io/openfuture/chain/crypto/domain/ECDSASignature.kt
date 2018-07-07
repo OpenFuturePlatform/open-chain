@@ -11,13 +11,20 @@ data class ECDSASignature(
     val s: BigInteger
 ) {
 
+    companion object {
+        private const val DER_ENCODED_SIGN_LENGTH = 72
+    }
+
     constructor(sequence: DLSequence) : this(
         (sequence.getObjectAt(0) as ASN1Integer).positiveValue,
         (sequence.getObjectAt(1) as ASN1Integer).positiveValue
     )
 
-    fun toDER(): ByteArray {
-        val bos = ByteArrayOutputStream(72)
+    /**
+     * DER encoding
+     */
+    fun encode(): ByteArray {
+        val bos = ByteArrayOutputStream(DER_ENCODED_SIGN_LENGTH)
         val seq = DERSequenceGenerator(bos)
         seq.addObject(ASN1Integer(r))
         seq.addObject(ASN1Integer(s))
