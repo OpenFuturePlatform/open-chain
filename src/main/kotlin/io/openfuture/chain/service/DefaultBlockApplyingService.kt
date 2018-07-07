@@ -12,6 +12,7 @@ import java.util.stream.Collectors
 class DefaultBlockApplyingService(
     val blockValidationService: BlockValidationService,
     val blockRepository: BlockRepository
+    // TODO here will be broadcast service
 ) : BlockApplyingService {
 
     override fun sendBlockToSign(block: Block) {
