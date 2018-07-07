@@ -1,27 +1,12 @@
 package io.openfuture.chain.domain.transaction
 
-import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.entity.Transaction
+import io.openfuture.chain.entity.dictionary.TransactionType
 
-data class TransactionDto(
-        var data: TransactionData,
+abstract class TransactionDto(
         var timestamp: Long,
+        var amount: Long,
+        var recipientKey: String,
+        var senderKey: String,
+        var senderSignature: String,
         var hash: String
-) {
-
-    companion object {
-        fun of(networkTime: Long, data: TransactionData): TransactionDto = TransactionDto(
-                data,
-                networkTime,
-                HashUtils.generateHash(data.getByteData() + networkTime.toByte())
-        )
-    }
-
-    constructor(transaction: Transaction) : this(
-            TransactionData(transaction.amount, transaction.recipientKey, transaction.senderKey,
-                    transaction.senderSignature, transaction.getPayload()),
-            transaction.timestamp,
-            transaction.hash
-    )
-
-}
+)

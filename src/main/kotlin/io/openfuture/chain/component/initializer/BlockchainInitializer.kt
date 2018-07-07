@@ -3,13 +3,13 @@ package io.openfuture.chain.component.initializer
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.openfuture.chain.domain.block.BlockDto
 import io.openfuture.chain.domain.block.nested.BlockData
-import io.openfuture.chain.domain.block.nested.BlockHash
 import io.openfuture.chain.domain.block.nested.MerkleHash
 import io.openfuture.chain.nio.client.handler.ConnectionClientHandler
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.domain.transaction.TransactionData
+import io.openfuture.chain.domain.transaction.data.TransactionData
 import io.openfuture.chain.domain.transaction.TransactionDto
-import io.openfuture.chain.domain.transaction.payload.VotePayload
+import io.openfuture.chain.domain.transaction.VoteTransactionDto
+import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.domain.transaction.vote.VoteDto
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.TransactionService
@@ -42,7 +42,7 @@ class BlockchainInitializer(
 
     @Scheduled(fixedDelayString = "10000")
     fun createTransactionSchedule() {
-        val trx = TransactionDto(transactionService.add(createRandomTransaction()))
+        val trx = transactionService.add(createVoteTransaction())
         log.info("Created new transaction {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(trx))
     }
 
@@ -61,11 +61,11 @@ class BlockchainInitializer(
     }
 
     @Deprecated("generate random transaction")
-    private fun createRandomTransaction(): TransactionDto {
+    private fun createVoteTransaction(): VoteTransactionDto {
         val amount = Math.round(Math.random())
-        val data = TransactionData(amount, "recipientKey", "senderKey", "senderSignature",
-                VotePayload(mutableListOf(VoteDto("publicKey_X", 100))))
-        return transactionService.create(data)
+        val data = VoteTransactionData(amount, "recipientKey", "senderKey", "senderSignature",
+                mutableListOf(VoteDto("publicKey", 100)))
+        return transactionService.createVote(data)
     }
 
     @Deprecated("generate block")

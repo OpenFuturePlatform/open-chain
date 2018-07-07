@@ -9,10 +9,14 @@ import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
-import io.openfuture.chain.domain.transaction.TransactionData
+import io.openfuture.chain.domain.transaction.data.TransactionData
 import io.openfuture.chain.domain.transaction.TransactionDto
+import io.openfuture.chain.domain.transaction.VoteTransactionDto
+import io.openfuture.chain.domain.transaction.data.VoteTransactionData
+import io.openfuture.chain.domain.transaction.vote.VoteDto
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
+import io.openfuture.chain.entity.Vote
 
 interface HardwareInfoService {
 
@@ -68,8 +72,15 @@ interface TransactionService {
 
     fun addToBlock(hash: String, block: Block): Transaction
 
-    fun add(dto: TransactionDto): Transaction
+    fun add(dto: VoteTransactionDto): Transaction
 
-    fun create(data: TransactionData): TransactionDto
+    fun createVote(data: VoteTransactionData): VoteTransactionDto
 
 }
+
+interface VoteService {
+
+    fun getVotesByPublicKey(publicKey: String): List<Vote>
+
+}
+

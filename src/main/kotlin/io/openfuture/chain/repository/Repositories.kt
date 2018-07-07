@@ -26,11 +26,21 @@ interface TransactionRepository: BaseRepository<Transaction> {
 }
 
 @Repository
+interface VoteTransactionRepository: BaseRepository<VoteTransaction>
+
+@Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {
 
     fun findOneByIndex(index: Int): SeedWord
 
     fun findOneByValue(value: String): Optional<SeedWord>
+
+}
+
+@Repository
+interface VoteRepository: BaseRepository<Vote> {
+
+    fun findAllByPublicKey(publicKey: String): List<Vote>
 
 }
 

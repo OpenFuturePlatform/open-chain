@@ -1,13 +1,17 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.component.node.NodeClock
-import io.openfuture.chain.domain.transaction.TransactionDto
-import io.openfuture.chain.domain.transaction.TransactionData
+import io.openfuture.chain.domain.transaction.VoteTransactionDto
+import io.openfuture.chain.domain.transaction.data.VoteTransactionData
+import io.openfuture.chain.domain.transaction.vote.VoteDto
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
+import io.openfuture.chain.entity.VoteTransaction
 import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.TransactionRepository
+import io.openfuture.chain.repository.VoteTransactionRepository
+import io.openfuture.chain.util.TransactionUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -36,15 +40,17 @@ class DefaultTransactionService(
         persistTransaction.block = block
         return repository.save(persistTransaction)
     }
+
     @Transactional
-    override fun add(dto: TransactionDto): Transaction {
-        //todo need to add validation
-        return repository.save(Transaction.of(dto))
+    override fun add(dto: VoteTransactionDto): Transaction {
+        return repository.save(VoteTransaction.of(dto))
     }
 
-    override fun create(data: TransactionData): TransactionDto {
+    override fun createVote(data: VoteTransactionData): VoteTransactionDto {
         val networkTime = nodeClock.networkTime()
-        return TransactionDto.of(networkTime, data)
+        val hash = TransactionUtils.calculateHash(data)
+        return VoteTransactionDto(networkTime, data.amount, data.recipientKey, data.senderKey, data.senderSignature,
+                hash, data.votes)
     }
 
 }
