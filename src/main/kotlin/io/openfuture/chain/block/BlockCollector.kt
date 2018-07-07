@@ -12,10 +12,10 @@ class BlockCollector(
 
     private val lock = ReentrantReadWriteLock()
 
-    @Volatile private var signedBlocks = mutableListOf<SignedBlock>()
+    private var signedBlocks = mutableListOf<SignedBlock>()
 
     // variable to collect the blocks from the same round only
-    @Volatile private var blockCollectionHash: String? = null
+    private var blockCollectionHash: String? = null
 
 
     fun setBlockCollectionHash(blockCollectionHash: String) {
