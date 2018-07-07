@@ -120,7 +120,8 @@ class CryptoServiceTests : ServiceTests() {
         given(serializer.serializePublic(extendedKey)).willReturn(expectedPublicKey)
 
         val publicKey = cryptoService.serializePublicKey(extendedKey)
-        assertThat(expectedPublicKey).isEqualTo(publicKey)
+
+        assertThat(publicKey).isEqualTo(expectedPublicKey)
     }
 
     @Test
@@ -132,7 +133,8 @@ class CryptoServiceTests : ServiceTests() {
         given(serializer.serializePrivate(extendedKey)).willReturn(expectedPrivateKey)
 
         val privateKey = cryptoService.serializePrivateKey(extendedKey)
-        assertThat(expectedPrivateKey).isEqualTo(privateKey)
+
+        assertThat(privateKey).isEqualTo(expectedPrivateKey)
     }
 
     fun generateNewAccountShouldReturnRootAccountInfo() {
