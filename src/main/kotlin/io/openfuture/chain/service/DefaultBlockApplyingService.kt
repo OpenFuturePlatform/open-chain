@@ -46,7 +46,7 @@ class DefaultBlockApplyingService(
 
     override fun sendFullSignedBlock(fullSignedBlock: FullSignedBlock) {
         // TODO we will send signed with all delegates block to each active delegates after mergeBlockSigns method from
-        // handler
+        // handler if it's signed by more than 50%
     }
 
     override fun applyBlock(fullSignedBlock: FullSignedBlock) {
