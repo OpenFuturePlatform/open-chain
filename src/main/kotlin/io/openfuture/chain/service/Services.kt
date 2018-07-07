@@ -68,8 +68,6 @@ interface BlockApplyingService {
 
     fun sendSignedBlock(signedBlock: SignedBlock)
 
-    fun mergeBlockSigns(signedBlocks: List<SignedBlock>): FullSignedBlock
-
     fun sendFullSignedBlock(fullSignedBlock: FullSignedBlock)
 
     fun applyBlock(fullSignedBlock: FullSignedBlock)

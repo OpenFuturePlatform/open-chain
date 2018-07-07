@@ -6,7 +6,6 @@ import io.openfuture.chain.block.message.SignedBlock
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.repository.BlockRepository
 import org.springframework.stereotype.Service
-import java.util.stream.Collectors
 
 @Service
 class DefaultBlockApplyingService(
@@ -27,24 +26,6 @@ class DefaultBlockApplyingService(
 
     override fun sendSignedBlock(signedBlock: SignedBlock) {
         // TODO we will send signed block back if it's active delegate or broadcast from handler else
-    }
-
-    override fun mergeBlockSigns(signedBlocks: List<SignedBlock>): FullSignedBlock {
-        val firstBlock = signedBlocks.first()
-        for (signedBlock in signedBlocks) {
-            val block = signedBlock.block
-
-            val blockIsValid = blockValidationService.isValid(block)
-            if (!blockIsValid || signedBlock.block.hash != firstBlock.block.hash) {
-                throw IllegalArgumentException("$signedBlocks has wrong block = $signedBlock")
-            }
-
-            val signature = signedBlock.signature
-            // TODO we'll check signature by some service
-        }
-
-        val signatures = signedBlocks.stream().map { it.signature }.collect(Collectors.toSet())
-        return FullSignedBlock(firstBlock.block, signatures)
     }
 
     override fun sendFullSignedBlock(fullSignedBlock: FullSignedBlock) {
