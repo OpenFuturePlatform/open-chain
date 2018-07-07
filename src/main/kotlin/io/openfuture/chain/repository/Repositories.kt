@@ -27,7 +27,3 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
     fun findOneByValue(value: String): Optional<SeedWord>
 
 }
-
-interface GenesisBlockRepository : BaseRepository<GenesisBlock>
-
-interface MainBlockRepository : BaseRepository<MainBlock>
