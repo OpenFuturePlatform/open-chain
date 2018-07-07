@@ -1,6 +1,5 @@
 package io.openfuture.chain.validation
 
-import io.openfuture.chain.validation.AddressValidator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -8,6 +7,7 @@ import org.junit.Test
 class AddressValidatorTest {
 
     private val validator = AddressValidator()
+
 
     @Test
     fun validateShouldReturnTrueForValidAddress() {
@@ -26,4 +26,5 @@ class AddressValidatorTest {
 
         assertThat(result).isFalse()
     }
+
 }
