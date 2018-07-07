@@ -51,8 +51,7 @@ class ConnectionServerHandler : ChannelInboundHandlerAdapter() {
         when (type) {
             HEART_BEAT -> {}
             TIME_SYNC_REQUEST -> {}
-            TIME_SYNC_RESPONSE -> {}
-            NODE_SYNC -> {}
+            JOIN_NETWORK_REQUEST -> {}
             else -> {
                 log.error("Illegal packet type: {}", packet)
                 ctx.close()

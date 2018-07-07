@@ -1,17 +1,16 @@
 package io.openfuture.chain.entity
 
+import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.Column
 import javax.persistence.Entity
-import javax.persistence.Id
 import javax.persistence.Table
 
 @Entity
 @Table(name = "nodes")
-class Node(
+class Node (
 
-    @Id
-    @Column(name = "public_key")
-    var publicKey : ByteArray,
+    @Column(name = "network_id", nullable = false)
+    var networkId : String,
 
     @Column(name = "host", nullable = false)
     var host: String,
@@ -19,4 +18,4 @@ class Node(
     @Column(name = "port", nullable = false)
     var port: Int
 
-)
+) : BaseModel()

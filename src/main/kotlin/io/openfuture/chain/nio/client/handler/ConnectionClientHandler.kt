@@ -33,9 +33,8 @@ class ConnectionClientHandler : ChannelInboundHandlerAdapter() {
         val type = packet.type
         when (type) {
             Type.HEART_BEAT -> {}
-            Type.TIME_SYNC_REQUEST -> {}
             Type.TIME_SYNC_RESPONSE -> {}
-            Type.NODE_SYNC -> {}
+            Type.JOIN_NETWORK_RESPONSE -> {}
             else -> {
                 log.error("Illegal packet type: {}", packet)
                 ctx.close()

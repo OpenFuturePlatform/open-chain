@@ -1,5 +1,6 @@
 CREATE TABLE nodes (
-  public_key BLOB PRIMARY KEY,
-  host VARCHAR NOT NULL,
-  port INTEGER NOT NULL
+  id         INTEGER PRIMARY KEY,
+  network_id VARCHAR NOT NULL UNIQUE,
+  host       VARCHAR NOT NULL,
+  port       INTEGER NOT NULL
 );
