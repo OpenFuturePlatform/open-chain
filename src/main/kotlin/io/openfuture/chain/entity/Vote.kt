@@ -1,6 +1,7 @@
 package io.openfuture.chain.entity
 
 import io.openfuture.chain.domain.transaction.vote.VoteDto
+import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.*
 
 @Entity
@@ -17,15 +18,12 @@ class Vote(
         @Column(name = "weight", nullable = false)
         var weight: Int
 
-) {
+) : BaseModel() {
 
-    companion object {
-        fun of(transaction: VoteTransaction, dto: VoteDto): Vote = Vote(
-                transaction,
-                dto.pubicKey,
-                dto.weight
-        )
-    }
+    fun toDto(): VoteDto = VoteDto(
+            this.publicKey,
+            this.weight
+    )
 
 }
 

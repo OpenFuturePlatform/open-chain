@@ -1,11 +1,12 @@
 package io.openfuture.chain.entity
 
+import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.entity.dictionary.TransactionType
 import javax.persistence.*
 
 @Entity
-@Table(name = "vote_transaction")
+@Table(name = "vote_transactions")
 class VoteTransaction(
         timestamp: Long,
         amount: Long,
@@ -21,14 +22,14 @@ class VoteTransaction(
 ) : Transaction(TransactionType.VOTE.getId(), timestamp, amount, recipientKey, senderKey, senderSignature, hash,
         block) {
 
-    companion object {
-        fun of(dto: VoteTransactionDto): VoteTransaction = VoteTransaction(
-                dto.timestamp,
-                dto.amount,
-                dto.recipientKey,
-                dto.senderKey,
-                dto.senderSignature,
-                dto.hash
-        )
-    }
+    override fun toDto(): VoteTransactionDto = VoteTransactionDto(
+            this.timestamp,
+            this.amount,
+            this.recipientKey,
+            this.senderKey,
+            this.senderSignature,
+            this.hash,
+            this.votes.map { it.toDto() }.toMutableList()
+    )
+
 }

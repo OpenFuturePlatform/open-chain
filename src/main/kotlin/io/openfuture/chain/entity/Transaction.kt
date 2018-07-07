@@ -1,5 +1,6 @@
 package io.openfuture.chain.entity
 
+import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.base.BaseModel
 import io.openfuture.chain.entity.dictionary.TransactionType
 import io.openfuture.chain.util.DictionaryUtils
@@ -38,4 +39,7 @@ abstract class Transaction(
 ) : BaseModel() {
 
         fun getType() = DictionaryUtils.valueOf(TransactionType::class.java, typeId)
+
+        abstract fun toDto(): TransactionDto
+
 }

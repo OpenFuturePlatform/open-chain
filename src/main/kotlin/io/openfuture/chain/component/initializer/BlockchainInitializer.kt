@@ -1,23 +1,20 @@
 package io.openfuture.chain.component.initializer
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.openfuture.chain.domain.block.BlockDto
-import io.openfuture.chain.domain.block.nested.BlockData
-import io.openfuture.chain.domain.block.nested.MerkleHash
 import io.openfuture.chain.nio.client.handler.ConnectionClientHandler
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.domain.transaction.data.TransactionData
+import io.openfuture.chain.domain.block.MainBlockDto
 import io.openfuture.chain.domain.transaction.TransactionDto
-import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.domain.transaction.vote.VoteDto
+import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.TransactionService
+import io.openfuture.chain.util.BlockUtils
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
 import org.springframework.scheduling.annotation.Scheduled
-import java.util.*
 
 
 @Component
@@ -33,7 +30,7 @@ class BlockchainInitializer(
 
     @PostConstruct
     fun initBlockChain() {
-        if (0L == blockService.chainSize()) {
+        if (0 == blockService.getAll().size) {
             blockService.add(createGenesisBlock())
         }
 
@@ -42,35 +39,39 @@ class BlockchainInitializer(
 
     @Scheduled(fixedDelayString = "10000")
     fun createTransactionSchedule() {
-        val trx = transactionService.add(createVoteTransaction())
+        val trx = transactionService.add(createRandomTransaction())
         log.info("Created new transaction {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(trx))
     }
 
     @Scheduled(fixedDelayString = "60000")
     fun createBlockSchedule() {
-        val block = BlockDto(blockService.add(createBlock()))
+        val transactions = transactionService.getAllPending()
+        val block = blockService.add(createBlock(transactions))
         log.info("Created new block {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(block))
     }
 
     // todo temp solution
-    private fun createGenesisBlock(): BlockDto {
-        val merkleHash = MerkleHash(HashUtils.generateHash("merkleHash".toByteArray()), listOf())
+    private fun createGenesisBlock(): MainBlockDto {
         val previousHash = HashUtils.generateHash("previousHash".toByteArray())
-        val blockData = BlockData(0, previousHash, merkleHash)
-        return BlockDto.of(Date().time, blockData, "nodePublicKey", "nodeSignature")
+        val transactions = mutableSetOf(createRandomTransaction())
+        val merkleRoot = BlockUtils.calculateMerkleRoot(transactions)
+        val hash = HashUtils.bytesToHexString(BlockUtils.calculateHash(previousHash, merkleRoot, 0, 0))
+
+        return MainBlockDto(hash, 0, previousHash, merkleRoot, 0,
+                "genesis_signature", transactions)
     }
 
     @Deprecated("generate random transaction")
-    private fun createVoteTransaction(): VoteTransactionDto {
+    private fun createRandomTransaction(): TransactionDto {
         val amount = Math.round(Math.random())
         val data = VoteTransactionData(amount, "recipientKey", "senderKey", "senderSignature",
-                mutableListOf(VoteDto("publicKey", 100)))
+                mutableListOf(VoteDto("publicKey_X", 100)))
         return transactionService.createVote(data)
     }
 
     @Deprecated("generate block")
-    private fun createBlock(): BlockDto {
-        return blockService.create("privateKey", "publicKey", 2)
+    private fun createBlock(transactions: MutableSet<TransactionDto>): MainBlockDto {
+        return blockService.create(transactions)
     }
 
 }

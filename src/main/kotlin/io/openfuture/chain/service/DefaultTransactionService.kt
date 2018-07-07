@@ -1,16 +1,14 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.component.node.NodeClock
+import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
-import io.openfuture.chain.domain.transaction.vote.VoteDto
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
-import io.openfuture.chain.entity.VoteTransaction
 import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.TransactionRepository
-import io.openfuture.chain.repository.VoteTransactionRepository
 import io.openfuture.chain.util.TransactionUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -22,7 +20,7 @@ class DefaultTransactionService(
 ) : TransactionService {
 
     @Transactional(readOnly = true)
-    override fun getAllPending(): List<Transaction> {
+    override fun getAllPending(): MutableSet<Transaction> {
         return repository.findAllByBlockIsNull()
     }
 
@@ -42,8 +40,8 @@ class DefaultTransactionService(
     }
 
     @Transactional
-    override fun add(dto: VoteTransactionDto): Transaction {
-        return repository.save(VoteTransaction.of(dto))
+    override fun add(dto: TransactionDto): Transaction {
+        return repository.save(dto.toEntity())
     }
 
     override fun createVote(data: VoteTransactionData): VoteTransactionDto {

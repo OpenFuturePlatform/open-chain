@@ -1,6 +1,8 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.domain.block.MainBlockDto
+import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Transaction
@@ -25,13 +27,19 @@ class DefaultBlockService (
     override fun getLast(): Block = blockRepository.findFirstByOrderByHeightDesc()
         ?: throw NotFoundException("Last block not exist!")
 
-    fun create(transactions: Set<Transaction>): Block {
+    @Transactional
+    override fun add(dto: MainBlockDto): Block {
+        return blockRepository.save(MainBlock.of(dto))
+    }
+
+    @Transactional
+    override fun create(transactions: MutableSet<TransactionDto>): MainBlockDto {
         val previousBlock = getLast()
         val merkleRootHash = BlockUtils.calculateMerkleRoot(transactions)
         val time = System.currentTimeMillis()
         val hash = BlockUtils.calculateHash(previousBlock.hash, merkleRootHash, time, (previousBlock.height + 1))
-        return blockRepository
-            .save(MainBlock(HashUtils.bytesToHexString(hash), previousBlock.height + 1, previousBlock.hash, merkleRootHash, time, "", transactions))
+        return MainBlockDto(HashUtils.bytesToHexString(hash), previousBlock.height + 1,
+                previousBlock.hash, merkleRootHash, time, "", transactions)
     }
 
 }
