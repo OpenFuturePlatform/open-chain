@@ -1,15 +1,15 @@
 package io.openfuture.chain.service
 
+import io.openfuture.chain.block.message.FullSignedBlock
+import io.openfuture.chain.block.message.SignedBlock
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
-import io.openfuture.chain.domain.block.BlockRequest
 import io.openfuture.chain.domain.crypto.key.WalletDto
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
-import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Block
 
 interface HardwareInfoService {
@@ -57,5 +57,21 @@ interface CryptoService {
 }
 
 interface TransactionService {
+
+}
+
+interface BlockApplyingService {
+
+    fun sendBlockToSign(block: Block)
+
+    fun signBlock(block: Block): SignedBlock
+
+    fun sendSignedBlock(signedBlock: SignedBlock)
+
+    fun mergeBlockSigns(signedBlocks: List<SignedBlock>): FullSignedBlock
+
+    fun sendFullSignedBlock(fullSignedBlock: FullSignedBlock)
+
+    fun applyBlock(fullSignedBlock: FullSignedBlock)
 
 }
