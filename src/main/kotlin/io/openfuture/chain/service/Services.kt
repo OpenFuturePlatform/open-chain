@@ -56,6 +56,8 @@ interface CryptoService {
 
     fun generateKey(): WalletDto
 
+    fun generateMultisigAccount(): WalletDto
+
 }
 
 interface TransactionService {

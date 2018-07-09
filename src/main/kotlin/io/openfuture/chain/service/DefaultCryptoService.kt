@@ -2,14 +2,20 @@ package io.openfuture.chain.service
 
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
-import io.openfuture.chain.crypto.key.*
+import io.openfuture.chain.crypto.key.DerivationKeysHelper
+import io.openfuture.chain.crypto.key.ExtendedKeyDeserializer
+import io.openfuture.chain.crypto.key.ExtendedKeySerializer
+import io.openfuture.chain.crypto.key.PrivateKeyManager
 import io.openfuture.chain.crypto.seed.PhraseLength
 import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
 import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
 import io.openfuture.chain.crypto.seed.validator.SeedPhraseValidator
 import io.openfuture.chain.domain.crypto.key.AddressKeyDto
 import io.openfuture.chain.domain.crypto.key.WalletDto
+import org.apache.commons.lang3.StringUtils
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
+
 
 @Service
 class DefaultCryptoService(
@@ -20,7 +26,7 @@ class DefaultCryptoService(
     private val derivationKeysHelper: DerivationKeysHelper,
     private val seedPhraseValidator: SeedPhraseValidator,
     private val seedCalculator: SeedCalculator
-    ) : CryptoService {
+) : CryptoService {
 
     override fun generateSeedPhrase(): String = seedPhraseGenerator.createSeedPhrase(PhraseLength.TWELVE)
 
@@ -38,7 +44,7 @@ class DefaultCryptoService(
 
         val extendedKey = derivationKeysHelper.deriveDefaultAddress(rootExtendedKey)
         val addressKeyDto = AddressKeyDto(serializer.serializePublic(extendedKey),
-                serializer.serializePrivate(extendedKey), extendedKey.ecKey.getAddress())
+            serializer.serializePrivate(extendedKey), extendedKey.ecKey.getAddress())
 
         return WalletDto(seedPhrase, serializer.serializePublic(rootExtendedKey),
             serializer.serializePrivate(rootExtendedKey), addressKeyDto)
@@ -56,6 +62,35 @@ class DefaultCryptoService(
 
         val masterKey = getMasterKey(seedPhrase)
         return derivationKeysHelper.derive(masterKey, derivationPath)
+    }
+
+    //TODO
+    override fun generateMultisigAccount(): WalletDto {
+        val seedPhrase = seedPhraseGenerator.createSeedPhrase(PhraseLength.TWELVE)
+        val rootExtendedKey = ExtendedKey.root(seedPhrase.toByteArray())
+
+        val extendedKey = derivationKeysHelper.deriveDefaultMultisigAddress(rootExtendedKey)
+
+        val addressKeyDto = AddressKeyDto(serializer.serializePublic(extendedKey),
+            serializer.serializePrivate(extendedKey), extendedKey.ecKey.getAddress())
+
+        return WalletDto(seedPhrase, serializer.serializePublic(rootExtendedKey),
+            serializer.serializePrivate(rootExtendedKey), addressKeyDto)
+    }
+
+    private fun createMultisigRedeemScript(threshold: Int, keys: List<ECKey>): String {
+        if (threshold < 0 || threshold > keys.size) {
+            throw IllegalArgumentException("Invalid threshold: $threshold")
+        }
+
+        val publicKeys = keys.map { ByteUtils.toHexString(it.public) }.sorted()
+        return with(StringBuilder()) {
+            append(threshold).append(StringUtils.EMPTY)
+            append(publicKeys.joinToString(StringUtils.EMPTY)).append(StringUtils.EMPTY)
+            append(keys.size).append(StringUtils.EMPTY)
+            toString()
+        }
+
     }
 
 }
