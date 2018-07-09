@@ -67,8 +67,8 @@ class ECKey(
     }
 
     fun sign(hashedMessage: ByteArray): ByteArray {
-        if (hashedMessage.size != 32 || isPrivateEmpty()) {
-            throw Exception("Invalid params for sign")
+        if (isPrivateEmpty()) {
+            throw IllegalArgumentException("Unable to sign the data. Private key is not provided")
         }
 
         val signer = ECDSASigner(HMacDSAKCalculator(SHA256Digest()))
