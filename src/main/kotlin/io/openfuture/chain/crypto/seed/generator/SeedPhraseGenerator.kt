@@ -73,8 +73,8 @@ class SeedPhraseGenerator(
         val lowerBitsToRemove = (MAX_BYTES_TO_READ * BYTE_SIZE - WORD_INDEX_SIZE) -
                 (offset % BYTE_SIZE)
 
-        val firstBytePart = bytes[skip].toInt() and (BYTE_MASK shl DOUBLE_BYTE_SIZE)
-        val secondBytePart = bytes[skip + SECOND_BYTE_OFFSET].toInt() and (BYTE_MASK shl BYTE_SIZE)
+        val firstBytePart = bytes[skip].toInt() and BYTE_MASK shl DOUBLE_BYTE_SIZE
+        val secondBytePart = bytes[skip + SECOND_BYTE_OFFSET].toInt() and BYTE_MASK shl BYTE_SIZE
         val thirdBytePart = if (lowerBitsToRemove < BYTE_SIZE) {
             bytes[skip + THIRD_BYTE_OFFSET].toInt() and BYTE_MASK
         } else {

@@ -39,6 +39,14 @@ class NodeProperties(
 
         /** */
         @field:NotNull
-        var connectionTimeout: Int? = null
+        var connectionTimeout: Int? = null,
+
+        /** Private key path */
+        @field:NotNull
+        var privateKeyPath: String? = null,
+
+        /** Public key path */
+        @field:NotNull
+        var publicKeyPath: String? = null
 
 )

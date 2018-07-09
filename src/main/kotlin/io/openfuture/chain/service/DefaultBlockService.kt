@@ -1,5 +1,7 @@
 package io.openfuture.chain.service
 
+import io.openfuture.chain.crypto.key.KeyHolder
+import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.MainBlock
@@ -12,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultBlockService (
-        private val blockRepository: BlockRepository
+        private val blockRepository: BlockRepository,
+        private val signatureManager: SignatureManager,
+        private val keyHolder: KeyHolder
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -30,8 +34,22 @@ class DefaultBlockService (
         val merkleRootHash = BlockUtils.calculateMerkleRoot(transactions)
         val time = System.currentTimeMillis()
         val hash = BlockUtils.calculateHash(previousBlock.hash, merkleRootHash, time, (previousBlock.height + 1))
+
+        val privateKey = keyHolder.getPrivateKey()
+        signatureManager.sign(hash, privateKey)
+
         return blockRepository
-            .save(MainBlock(HashUtils.bytesToHexString(hash), previousBlock.height + 1, previousBlock.hash, merkleRootHash, time, "", transactions))
+            .save(
+                MainBlock(
+                    HashUtils.bytesToHexString(hash),
+                    previousBlock.height + 1,
+                    previousBlock.hash,
+                    merkleRootHash,
+                    time,
+                    "",
+                    transactions
+                )
+            )
     }
 
 }
