@@ -1,5 +1,7 @@
 package io.openfuture.chain.block
 
+import io.openfuture.chain.crypto.signature.SignatureManager
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.*
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.stereotype.Component
@@ -7,7 +9,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 
 @Component
 class BlockCollector(
-    private val blockValidationService: BlockValidationService
+    private val blockValidationService: BlockValidationService,
+    private val signatureManager: SignatureManager
 ) {
 
     private val lock = ReentrantReadWriteLock()
@@ -54,8 +57,9 @@ class BlockCollector(
                     throw IllegalArgumentException("$signedBlocks has wrong block = $signedBlock")
                 }
 
-                val signature = signedBlock.signature
-                // TODO we'll check signature by some service
+                val hash = HashUtils.hexStringToBytes(block.hash)
+                val publicKey = HashUtils.hexStringToBytes(signedBlock.publicKey)
+                signatureManager.verify(hash, signedBlock.signature, publicKey)
             }
 
             val signatures = signedBlocks.map { it.signature }.toSet()
