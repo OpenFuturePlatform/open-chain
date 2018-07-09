@@ -27,7 +27,7 @@ class DefaultEpochService(
         val heightBlocksCurrentEpoch = 100 // TODO("genesisBlockService.getLastBlock().heightBlocks")
         val actualHeightBlocksCurrentEpoch = getActualHeightBlocksCurrentEpoch()
 
-        return (heightBlocksCurrentEpoch - actualHeightBlocksCurrentEpoch) == 0
+        return heightBlocksCurrentEpoch == actualHeightBlocksCurrentEpoch
     }
 
 }
