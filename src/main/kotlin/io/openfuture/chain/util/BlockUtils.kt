@@ -2,7 +2,6 @@ package io.openfuture.chain.util
 
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.transaction.TransactionDto
-import io.openfuture.chain.entity.Transaction
 
 object BlockUtils {
 

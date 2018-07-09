@@ -1,8 +1,9 @@
-package io.openfuture.chain.entity
+package io.openfuture.chain.entity.transaction
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.base.BaseModel
+import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.dictionary.TransactionType
 import io.openfuture.chain.util.DictionaryUtils
 import javax.persistence.*

@@ -1,6 +1,7 @@
-package io.openfuture.chain.entity
+package io.openfuture.chain.entity.transaction
 
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
+import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.dictionary.TransactionType
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.util.DictionaryUtils

@@ -3,9 +3,9 @@ package io.openfuture.chain.service
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.Transaction
-import io.openfuture.chain.entity.VoteTransaction
+import io.openfuture.chain.entity.block.Block
+import io.openfuture.chain.entity.transaction.Transaction
+import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.TransactionRepository
@@ -13,7 +13,6 @@ import io.openfuture.chain.repository.VoteTransactionRepository
 import io.openfuture.chain.util.TransactionUtils
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

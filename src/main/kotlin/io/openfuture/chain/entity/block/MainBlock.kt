@@ -1,6 +1,8 @@
-package io.openfuture.chain.entity
+package io.openfuture.chain.entity.block
 
 import io.openfuture.chain.domain.block.MainBlockDto
+import io.openfuture.chain.entity.transaction.Transaction
+import io.openfuture.chain.entity.dictionary.BlockVersion
 import javax.persistence.*
 
 @Entity

@@ -13,13 +13,12 @@ import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
-import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.Delegate
-import io.openfuture.chain.entity.Transaction
-import io.openfuture.chain.entity.VoteTransaction
+import io.openfuture.chain.entity.transaction.Transaction
+import io.openfuture.chain.entity.transaction.VoteTransaction
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
-import org.springframework.transaction.annotation.Transactional
 
 interface HardwareInfoService {
 

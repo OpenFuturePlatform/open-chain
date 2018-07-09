@@ -3,7 +3,7 @@ package io.openfuture.chain.service
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.MainBlockDto
 import io.openfuture.chain.domain.transaction.TransactionDto
-import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.util.BlockUtils
