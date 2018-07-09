@@ -36,7 +36,7 @@ class DefaultBlockService (
         val hash = BlockUtils.calculateHash(previousBlock.hash, merkleRootHash, time, (previousBlock.height + 1))
 
         val privateKey = keyHolder.getPrivateKey()
-        signatureManager.sign(hash, privateKey)
+        val signature = signatureManager.sign(hash, privateKey)
 
         return blockRepository
             .save(
@@ -46,7 +46,7 @@ class DefaultBlockService (
                     previousBlock.hash,
                     merkleRootHash,
                     time,
-                    "",
+                    signature,
                     transactions
                 )
             )
