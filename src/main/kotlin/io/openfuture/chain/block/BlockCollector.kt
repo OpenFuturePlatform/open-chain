@@ -73,9 +73,7 @@ class BlockCollector(
             block = toMainBlock(signedBlock)
         } else if (signedBlock.genesisBlock != null) {
             block = toGenesisBlock(signedBlock)
-        }
-
-        if (block == null) {
+        } else {
             throw IllegalArgumentException("signedBlock has wrong block")
         }
 
