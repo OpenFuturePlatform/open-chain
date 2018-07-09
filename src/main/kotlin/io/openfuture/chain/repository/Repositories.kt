@@ -49,8 +49,10 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 }
 
 @Repository
-interface DelegateRepository : BaseRepository<Delegate> {
+interface AccountRepository : BaseRepository<Account> {
 
-    fun findOneByPublicKey(publicKey: String): Delegate?
+    fun findOneByPublicKey(publicKey: String): Account?
+
+    fun findOneByPublicKeyAndIsDelegateIsTrue(publicKey: String): Account?
 
 }

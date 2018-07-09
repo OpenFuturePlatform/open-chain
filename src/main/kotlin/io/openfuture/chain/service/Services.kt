@@ -5,7 +5,7 @@ import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
 import io.openfuture.chain.domain.block.MainBlockDto
 import io.openfuture.chain.domain.crypto.key.WalletDto
-import io.openfuture.chain.domain.delegate.DelegateDto
+import io.openfuture.chain.domain.delegate.AccountDto
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
@@ -15,7 +15,7 @@ import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.block.Block
-import io.openfuture.chain.entity.Delegate
+import io.openfuture.chain.entity.Account
 import io.openfuture.chain.entity.transaction.Transaction
 
 interface HardwareInfoService {
@@ -81,17 +81,19 @@ interface TransactionService {
 
 }
 
-interface DelegateService {
+interface AccountService {
 
-    fun getAll(): List<Delegate>
+    fun getAll(): List<Account>
 
-    fun getByPublicKey(publicKey: String): Delegate
+    fun getAccountByPublicKey(publicKey: String): Account
 
-    fun getActiveDelegates(): List<Delegate>
+    fun getDelegateByPublicKey(publicKey: String): Account
+
+    fun getActiveDelegates(): List<Account>
 
     fun isValidActiveDelegates(publicKeysDelegates: List<String>): Boolean
 
-    fun add(dto: DelegateDto): Delegate
+    fun add(dto: AccountDto): Account
 
     fun updateRatingByVote(dto: VoteDto)
 

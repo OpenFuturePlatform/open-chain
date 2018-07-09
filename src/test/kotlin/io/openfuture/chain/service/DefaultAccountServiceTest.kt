@@ -2,10 +2,10 @@ package io.openfuture.chain.service
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
-import io.openfuture.chain.domain.delegate.DelegateDto
-import io.openfuture.chain.entity.Delegate
+import io.openfuture.chain.domain.delegate.AccountDto
+import io.openfuture.chain.entity.Account
 import io.openfuture.chain.property.DelegateProperties
-import io.openfuture.chain.repository.DelegateRepository
+import io.openfuture.chain.repository.AccountRepository
 import org.assertj.core.api.Java6Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -13,17 +13,17 @@ import org.mockito.BDDMockito.given
 import org.mockito.Mock
 
 
-class DefaultDelegateServiceTest : ServiceTests() {
+class DefaultAccountServiceTest : ServiceTests() {
 
-    private lateinit var service: DelegateService
+    private lateinit var service: AccountService
 
-    @Mock private lateinit var repository: DelegateRepository
+    @Mock private lateinit var repository: AccountRepository
     @Mock private lateinit var delegateProperties: DelegateProperties
 
 
     @Before
     fun setUp() {
-        service = DefaultDelegateService(repository, delegateProperties)
+        service = DefaultAccountService(repository, delegateProperties)
     }
 
     @Test
@@ -43,17 +43,17 @@ class DefaultDelegateServiceTest : ServiceTests() {
 
         given(repository.findOneByPublicKey(delegate.publicKey)).willReturn(delegate)
 
-        val actualDelegate = service.getByPublicKey(delegate.publicKey)
+        val actualDelegate = service.getAccountByPublicKey(delegate.publicKey)
 
         assertThat(actualDelegate).isEqualTo(delegate)
     }
 
     @Test
     fun add() {
-        val delegateDto = DelegateDto("username", "address", "publicKey")
-        val delegate = Delegate.of(delegateDto)
+        val delegateDto = AccountDto("username", "address", "publicKey")
+        val delegate = Account.of(delegateDto)
 
-        given(repository.save(any(Delegate::class.java))).will { invocation -> invocation.arguments[0] }
+        given(repository.save(any(Account::class.java))).will { invocation -> invocation.arguments[0] }
 
         val actualDelegate = service.add(delegateDto)
 
@@ -62,6 +62,6 @@ class DefaultDelegateServiceTest : ServiceTests() {
         assertThat(actualDelegate.publicKey).isEqualTo(delegate.publicKey)
     }
 
-    private fun createDelegate(publicKey: String): Delegate = Delegate("username", "address", publicKey)
+    private fun createDelegate(publicKey: String): Account = Account("username", "address", publicKey)
 
 }

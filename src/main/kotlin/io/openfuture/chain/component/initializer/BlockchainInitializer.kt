@@ -9,7 +9,7 @@ import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.service.DelegateService
+import io.openfuture.chain.service.AccountService
 import io.openfuture.chain.service.TransactionService
 import io.openfuture.chain.util.BlockUtils
 import org.slf4j.LoggerFactory
@@ -23,7 +23,7 @@ import java.util.*
 @Component
 class BlockchainInitializer(
         private val blockService: BlockService,
-        private val delegateService: DelegateService,
+        private val delegateService: AccountService,
         private val transactionService: TransactionService,
         private val objectMapper: ObjectMapper
 ) {

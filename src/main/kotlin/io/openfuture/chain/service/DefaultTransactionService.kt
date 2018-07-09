@@ -19,7 +19,7 @@ class DefaultTransactionService(
         private val repository: TransactionRepository,
         private val voteTransactionRepository: VoteTransactionRepository,
         private val nodeClock: NodeClock,
-        private val delegateService: DelegateService
+        private val delegateService: AccountService
 ) : TransactionService {
 
     @Transactional(readOnly = true)

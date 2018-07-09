@@ -1,12 +1,12 @@
 package io.openfuture.chain.entity
 
-import io.openfuture.chain.domain.delegate.DelegateDto
+import io.openfuture.chain.domain.delegate.AccountDto
 import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.*
 
 @Entity
-@Table(name = "delegates")
-class Delegate(
+@Table(name = "accounts")
+class Account(
 
         @Column(name = "username", nullable = false)
         val username: String,
@@ -17,22 +17,24 @@ class Delegate(
         @Column(name = "public_key", nullable = false, unique = true)
         val publicKey: String,
 
+        @Column(name = "is_delegate", nullable = false)
+        val isDelegate: Boolean = false,
+
         @Column(name = "rating", nullable = false)
         var rating: Int = 0,
 
         @ManyToMany(fetch = FetchType.EAGER)
         @JoinTable(
-                name = "delegates_votes",
-                joinColumns = [(JoinColumn(name = "vote_sender_id", nullable = false))],
-                inverseJoinColumns = [(JoinColumn(name = "vote_recipient_id", nullable = false))]
+                name = "accounts_2_delegates",
+                joinColumns = [(JoinColumn(name = "account_id", nullable = false))],
+                inverseJoinColumns = [(JoinColumn(name = "delegate_id", nullable = false))]
         )
-        val votes: MutableSet<Delegate> = mutableSetOf<Delegate>()
-
+        val votes: MutableSet<Account> = mutableSetOf()
 
 ) : BaseModel() {
 
     companion object {
-        fun of(delegateDto: DelegateDto): Delegate = Delegate(
+        fun of(delegateDto: AccountDto): Account = Account(
                 delegateDto.username,
                 delegateDto.address,
                 delegateDto.publicKey

@@ -1,13 +1,13 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.domain.delegate.DelegateDto
+import io.openfuture.chain.domain.delegate.AccountDto
 import io.openfuture.chain.domain.transaction.data.VoteDto
-import io.openfuture.chain.entity.Delegate
+import io.openfuture.chain.entity.Account
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.property.DelegateProperties
-import io.openfuture.chain.repository.DelegateRepository
+import io.openfuture.chain.repository.AccountRepository
 import org.apache.commons.collections4.CollectionUtils
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -17,10 +17,10 @@ import javax.annotation.PostConstruct
 
 @Service
 @Transactional(readOnly = true)
-class DefaultDelegateService(
-        private val repository: DelegateRepository,
+class DefaultAccountService(
+        private val repository: AccountRepository,
         private val delegateProperties: DelegateProperties
-) : DelegateService {
+) : AccountService {
 
     companion object {
         const val VOTES_LIMIT = 20
@@ -29,18 +29,21 @@ class DefaultDelegateService(
     @PostConstruct
     fun initGenesisDelegate() {
         for ((index, publicKey) in delegateProperties.publicKeys!!.withIndex()) {
-            val genesisDelegate = Delegate("genesisDelegate$index", delegateProperties.address!!, publicKey)
+            val genesisDelegate = Account("genesisDelegate$index", delegateProperties.address!!, publicKey, true)
             repository.save(genesisDelegate)
         }
     }
 
-    override fun getAll(): List<Delegate> = repository.findAll()
+    override fun getAll(): List<Account> = repository.findAll()
 
-    override fun getByPublicKey(publicKey: String): Delegate = repository.findOneByPublicKey(publicKey)
-            ?: throw NotFoundException("Delegate with such publicKey: $publicKey not exist!")
+    override fun getAccountByPublicKey(publicKey: String): Account = repository.findOneByPublicKey(publicKey)
+            ?: throw NotFoundException("Account with publicKey: $publicKey not exist!")
 
-    override fun getActiveDelegates(): List<Delegate> {
-        val result = mutableListOf<Delegate>()
+    override fun getDelegateByPublicKey(publicKey: String): Account = repository.findOneByPublicKeyAndIsDelegateIsTrue(publicKey)
+            ?: throw NotFoundException("Delegate with publicKey: $publicKey not exist!")
+
+    override fun getActiveDelegates(): List<Account> {
+        val result = mutableListOf<Account>()
         val request = PageRequest.of(0, 21, Sort(Sort.Direction.DESC, "rating"))
         result.addAll(repository.findAll(request).content)
         return result
@@ -52,37 +55,37 @@ class DefaultDelegateService(
     }
 
     @Transactional
-    override fun add(dto: DelegateDto): Delegate = repository.save(Delegate.of(dto))
+    override fun add(dto: AccountDto): Account = repository.save(Account.of(dto))
 
     @Transactional
     override fun updateRatingByVote(dto: VoteDto) {
-        val sender = this.getByPublicKey(dto.senderKey)
-        val delegate = this.getByPublicKey(dto.delegateKey)
+        val account = this.getAccountByPublicKey(dto.accountKey)
+        val delegate = this.getDelegateByPublicKey(dto.delegateKey)
 
         if (VOTES_LIMIT <= delegate.votes.size && dto.voteType == VoteType.FOR) {
-            throw ValidationException("Delegate with key ${delegate.publicKey} already spent all votes!")
+            throw ValidationException("Account with publicKey ${account.publicKey} already spent all votes!")
         }
 
-        if (sender.votes.contains(delegate) && dto.voteType == VoteType.FOR) {
-            throw ValidationException("Sender with key ${sender.publicKey} already voted for delegate with publicKey " +
+        if (account.votes.contains(delegate) && dto.voteType == VoteType.FOR) {
+            throw ValidationException("Account with publicKey ${account.publicKey} already voted for delegate with publicKey " +
                     "${delegate.publicKey}!")
         }
 
-        if (!sender.votes.contains(delegate) && dto.voteType == VoteType.AGAINST) {
-            throw ValidationException("Sender with key ${sender.publicKey} can't remove vote for delegate with " +
+        if (!account.votes.contains(delegate) && dto.voteType == VoteType.AGAINST) {
+            throw ValidationException("Account with publicKey ${account.publicKey} can't remove vote from delegate with " +
                     "publicKey ${delegate.publicKey}!")
         }
 
         if (dto.voteType == VoteType.FOR) {
             delegate.rating+= dto.value
-            sender.votes.add(delegate)
+            account.votes.add(delegate)
         } else {
             delegate.rating-= dto.value
-            sender.votes.remove(delegate)
+            account.votes.remove(delegate)
         }
 
         repository.save(delegate)
-        repository.save(sender)
+        repository.save(account)
     }
 
 }
