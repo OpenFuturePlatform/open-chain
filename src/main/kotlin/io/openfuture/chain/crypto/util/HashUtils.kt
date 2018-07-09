@@ -10,6 +10,7 @@ import org.bouncycastle.jcajce.provider.digest.Keccak
 import java.security.MessageDigest
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
+import javax.xml.bind.DatatypeConverter
 
 object HashUtils {
 
@@ -23,6 +24,8 @@ object HashUtils {
     fun doubleSha256(bytes: ByteArray) = sha256(sha256(bytes))
 
     fun bytesToHexString(bytes: ByteArray) = bytes.fold(StringUtils.EMPTY) { str, it -> str + "%02x".format(it) }
+
+    fun hexStringToBytes(hex: String): ByteArray = DatatypeConverter.parseHexBinary(hex)
 
     fun keyHash(bytes: ByteArray): ByteArray {
         val result = ByteArray(20)

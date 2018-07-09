@@ -2,7 +2,10 @@ package io.openfuture.chain.service
 
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
-import io.openfuture.chain.crypto.key.*
+import io.openfuture.chain.crypto.key.DerivationKeysHelper
+import io.openfuture.chain.crypto.key.ExtendedKeyDeserializer
+import io.openfuture.chain.crypto.key.ExtendedKeySerializer
+import io.openfuture.chain.crypto.key.PrivateKeyManager
 import io.openfuture.chain.crypto.seed.PhraseLength
 import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
 import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
@@ -33,8 +36,8 @@ class DefaultCryptoService(
     override fun serializePrivateKey(key: ExtendedKey): String = serializer.serializePrivate(key)
 
     override fun generateKey(): WalletDto {
-        val seedPhrase = seedPhraseGenerator.createSeedPhrase(PhraseLength.TWELVE)
-        val rootExtendedKey = ExtendedKey.root(seedPhrase.toByteArray())
+        val seedPhrase = generateSeedPhrase()
+        val rootExtendedKey = getMasterKey(seedPhrase)
 
         val extendedKey = derivationKeysHelper.deriveDefaultAddress(rootExtendedKey)
         val addressKeyDto = AddressKeyDto(serializer.serializePublic(extendedKey),

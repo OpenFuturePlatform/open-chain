@@ -11,6 +11,8 @@ import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.protocol.CommunicationProtocol
+import java.nio.channels.Channel
 
 interface HardwareInfoService {
 
@@ -71,5 +73,18 @@ interface BlockApplyingService {
     fun sendFullSignedBlock(fullSignedBlock: FullSignedBlock)
 
     fun applyBlock(fullSignedBlock: FullSignedBlock)
+
+}
+
+interface NetworkService {
+
+    fun joinNetwork(host : String, port: Int)
+
+    fun handleJoinResponse(message: CommunicationProtocol.Packet,
+                           channel: Channel)
+
+    fun connect(host : String, port: Int)
+
+    fun broadcast(packet: CommunicationProtocol.Packet)
 
 }
