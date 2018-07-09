@@ -5,16 +5,22 @@ import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
+import io.openfuture.chain.entity.VoteTransaction
 import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.TransactionRepository
+import io.openfuture.chain.repository.VoteTransactionRepository
 import io.openfuture.chain.util.TransactionUtils
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultTransactionService(
         private val repository: TransactionRepository,
+        private val voteTransactionRepository: VoteTransactionRepository,
         private val nodeClock: NodeClock
 ) : TransactionService {
 
@@ -42,6 +48,11 @@ class DefaultTransactionService(
     override fun add(dto: VoteTransactionDto): Transaction {
         //todo need to add validation
         return repository.save(dto.toEntity())
+    }
+
+    @Transactional(readOnly = true)
+    override fun getAllVotes(request: PageRequest): Page<VoteTransaction>? {
+        return voteTransactionRepository.findAll(request)
     }
 
     override fun createVote(data: VoteTransactionData): VoteTransactionDto {
