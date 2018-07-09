@@ -6,6 +6,8 @@ import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.property.DelegateProperties
 import io.openfuture.chain.repository.DelegateRepository
 import org.apache.commons.collections4.CollectionUtils
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.annotation.PostConstruct
@@ -14,6 +16,7 @@ import javax.annotation.PostConstruct
 @Transactional(readOnly = true)
 class DefaultDelegateService(
         private val repository: DelegateRepository,
+        private val transactionService: TransactionService,
         private val delegateProperties: DelegateProperties
 ) : DelegateService {
 
@@ -32,7 +35,6 @@ class DefaultDelegateService(
 
     override fun getActiveDelegates(): List<Delegate> {
         val publicKeysActiveDelegates = listOf<String>() // TODO("getting of public keys top 21 delegates from any vote service")
-
         val activeDelegates = mutableListOf<Delegate>()
         publicKeysActiveDelegates.forEach { activeDelegates.add(getByPublicKey(it)) }
 
