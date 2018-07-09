@@ -75,13 +75,22 @@ interface NodeService {
 
     fun findAll() : List<CommunicationProtocol.Node>
 
+    fun deleteAll()
+
+    fun deleteByNetworkId(networkId: String)
+
+    fun findByNetworkId(networkId: String) : Node?
+
 }
 
 interface NetworkService {
 
-    fun join(host : String, port: Int)
+    fun joinNetwork(host : String, port: Int)
 
     fun handleJoinResponse(message: CommunicationProtocol.Packet,
                            channel: Channel)
 
+    fun connect(host : String, port: Int)
+
+    fun broadcast(packet: CommunicationProtocol.Packet)
 }

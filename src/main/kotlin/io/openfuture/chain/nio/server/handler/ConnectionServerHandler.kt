@@ -1,9 +1,9 @@
 package io.openfuture.chain.nio.server.handler
 
-import io.netty.channel.Channel
 import io.netty.channel.ChannelHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
+import io.openfuture.chain.nio.ChannelStorage
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.protocol.CommunicationProtocol.HeartBeat
 import io.openfuture.chain.protocol.CommunicationProtocol.Packet
@@ -13,20 +13,20 @@ import org.springframework.stereotype.Component
 
 @Component
 @ChannelHandler.Sharable
-class ConnectionServerHandler : ChannelInboundHandlerAdapter() {
+class ConnectionServerHandler(
+    private val channels : ChannelStorage
+) : ChannelInboundHandlerAdapter() {
 
     companion object {
         private val log = LoggerFactory.getLogger(ConnectionServerHandler::class.java)
     }
 
-    private val connections: Set<Channel> = mutableSetOf()
-
-
     override fun channelActive(ctx: ChannelHandlerContext) {
         val address = ctx.channel().remoteAddress()
 
         if (check(ctx)) {
-            connections.plus(ctx.channel())
+            channels.add(ctx.channel())
+
             log.info("Connection with {} established", address)
 
             // start heart beat
@@ -52,6 +52,7 @@ class ConnectionServerHandler : ChannelInboundHandlerAdapter() {
             HEART_BEAT -> {}
             TIME_SYNC_REQUEST -> {}
             JOIN_NETWORK_REQUEST -> {}
+            UPDATE_ROUTING_TABLE -> {}
             else -> {
                 log.error("Illegal packet type: {}", packet)
                 ctx.close()
@@ -63,7 +64,7 @@ class ConnectionServerHandler : ChannelInboundHandlerAdapter() {
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        connections.minus(ctx.channel())
+        channels.remove(ctx.channel())
     }
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {

@@ -32,4 +32,10 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 }
 
 @Repository
-interface NodeRepository : BaseRepository<Node>
+interface NodeRepository : BaseRepository<Node> {
+
+    fun deleteOneByNetworkId(networkId: String)
+
+    fun findOneByNetworkId(networkId: String): Optional<Node>
+
+}

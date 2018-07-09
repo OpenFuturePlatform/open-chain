@@ -4,12 +4,12 @@ import io.openfuture.chain.entity.Node
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.repository.NodeRepository
 import org.springframework.stereotype.Component
+import javax.transaction.Transactional
 
 @Component
 class DefaultNodeService(
     private val repository: NodeRepository
 ) : NodeService {
-
     override fun saveAll(nodes: List<CommunicationProtocol.Node>) {
         val nodeEntities = ArrayList<Node>(nodes.size)
         nodes.forEach {
@@ -33,5 +33,22 @@ class DefaultNodeService(
                 .build())
         }
         return result
+    }
+
+    @Transactional
+    override fun deleteByNetworkId(networkId: String) {
+        repository.deleteOneByNetworkId(networkId)
+    }
+
+    override fun deleteAll() {
+        repository.deleteAll()
+    }
+
+    override fun findByNetworkId(networkId: String) : Node?{
+        val node = repository.findOneByNetworkId(networkId)
+        if (node.isPresent) {
+            return node.get()
+        }
+        return null
     }
 }
