@@ -11,6 +11,7 @@ import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.Transaction
 
 interface HardwareInfoService {
 
@@ -57,5 +58,9 @@ interface CryptoService {
 }
 
 interface TransactionService {
+
+    fun save(transaction: Transaction): Transaction
+
+    fun getPendingTransactions(): List<Transaction>
 
 }

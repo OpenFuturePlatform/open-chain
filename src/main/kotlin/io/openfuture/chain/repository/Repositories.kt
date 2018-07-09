@@ -20,7 +20,11 @@ interface BlockRepository : BaseRepository<Block> {
 }
 
 @Repository
-interface TransactionRepository : BaseRepository<Transaction>
+interface TransactionRepository : BaseRepository<Transaction> {
+
+    fun findAllByBlockIdIsNull(): List<Transaction>
+
+}
 
 @Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {
