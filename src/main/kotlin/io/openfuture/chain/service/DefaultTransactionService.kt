@@ -46,7 +46,7 @@ class DefaultTransactionService(
     @Transactional
     override fun addVote(dto: VoteTransactionDto): Transaction {
         //todo need to add validation
-        val vote = VoteDto(dto.delegateKey, dto.voteType, dto.weight) //todo need to think about calculate the vote weight
+        val vote = VoteDto(dto.senderKey, dto.delegateKey, dto.voteType, dto.weight) //todo need to think about calculate the vote weight
         delegateService.updateRatingByVote(vote)
         return repository.save(dto.toEntity())
     }

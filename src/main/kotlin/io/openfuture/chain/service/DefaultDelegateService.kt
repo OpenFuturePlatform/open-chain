@@ -5,6 +5,7 @@ import io.openfuture.chain.domain.transaction.data.VoteDto
 import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.exception.NotFoundException
+import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.property.DelegateProperties
 import io.openfuture.chain.repository.DelegateRepository
 import org.apache.commons.collections4.CollectionUtils
@@ -21,6 +22,10 @@ class DefaultDelegateService(
         private val delegateProperties: DelegateProperties
 ) : DelegateService {
 
+    companion object {
+        const val VOTES_LIMIT = 20
+    }
+
     @PostConstruct
     fun initGenesisDelegate() {
         for ((index, publicKey) in delegateProperties.publicKeys!!.withIndex()) {
@@ -36,7 +41,7 @@ class DefaultDelegateService(
 
     override fun getActiveDelegates(): List<Delegate> {
         val result = mutableListOf<Delegate>()
-        val request = PageRequest.of(0, 10, Sort(Sort.Direction.DESC, "rating"))
+        val request = PageRequest.of(0, 21, Sort(Sort.Direction.DESC, "rating"))
         result.addAll(repository.findAll(request).content)
         return result
     }
@@ -51,9 +56,33 @@ class DefaultDelegateService(
 
     @Transactional
     override fun updateRatingByVote(dto: VoteDto) {
-        val persisDelegate = this.getByPublicKey(dto.delegateKey)
-        if (dto.voteType == VoteType.FOR) persisDelegate.rating+= dto.value else persisDelegate.rating-= dto.value
-        repository.save(persisDelegate)
+        val sender = this.getByPublicKey(dto.senderKey)
+        val delegate = this.getByPublicKey(dto.delegateKey)
+
+        if (VOTES_LIMIT <= delegate.votes.size && dto.voteType == VoteType.FOR) {
+            throw ValidationException("Delegate with key ${delegate.publicKey} already spent all votes!")
+        }
+
+        if (sender.votes.contains(delegate) && dto.voteType == VoteType.FOR) {
+            throw ValidationException("Sender with key ${sender.publicKey} already voted for delegate with publicKey " +
+                    "${delegate.publicKey}!")
+        }
+
+        if (!sender.votes.contains(delegate) && dto.voteType == VoteType.AGAINST) {
+            throw ValidationException("Sender with key ${sender.publicKey} can't remove vote for delegate with " +
+                    "publicKey ${delegate.publicKey}!")
+        }
+
+        if (dto.voteType == VoteType.FOR) {
+            delegate.rating+= dto.value
+            sender.votes.add(delegate)
+        } else {
+            delegate.rating-= dto.value
+            sender.votes.remove(delegate)
+        }
+
+        repository.save(delegate)
+        repository.save(sender)
     }
 
 }

@@ -18,7 +18,16 @@ class Delegate(
         val publicKey: String,
 
         @Column(name = "rating", nullable = false)
-        var rating: Int = 0
+        var rating: Int = 0,
+
+        @ManyToMany(fetch = FetchType.EAGER)
+        @JoinTable(
+                name = "delegates_votes",
+                joinColumns = [(JoinColumn(name = "vote_sender_id", nullable = false))],
+                inverseJoinColumns = [(JoinColumn(name = "vote_recipient_id", nullable = false))]
+        )
+        val votes: MutableSet<Delegate> = mutableSetOf<Delegate>()
+
 
 ) : BaseModel() {
 

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.util.CollectionUtils
+import java.util.*
 
 
 @Component
@@ -70,17 +71,15 @@ class BlockchainInitializer(
 
     @Deprecated("generate random transaction")
     private fun createRandomTransaction(): VoteTransactionDto {
-        val amount = Math.round(Math.random())
-        var delegeteKey = ""
+        val amount = Random().nextLong()
+        val activeDelegates = delegateService.getAll()
 
-        if (amount == 0L) {
-            delegeteKey = delegateService.getActiveDelegates()[0].publicKey
-        } else {
-            delegeteKey = delegateService.getActiveDelegates()[1].publicKey
-        }
+        val recipientKey = activeDelegates[Random().nextInt(2)].publicKey
+        val delegateKey = activeDelegates[Random().nextInt(21)].publicKey
+        val type = if (amount % 2 == 0L) VoteType.FOR else VoteType.AGAINST
 
-        val data = VoteTransactionData(amount, "recipientKey", "senderKey", "senderSignature",
-                VoteType.FOR, delegeteKey, 1)
+        val data = VoteTransactionData(amount, recipientKey, recipientKey, "senderSignature",
+                type, delegateKey, 1)
         return transactionService.createVote(data)
     }
 
