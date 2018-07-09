@@ -33,8 +33,8 @@ class DefaultCryptoService(
     override fun serializePrivateKey(key: ExtendedKey): String = serializer.serializePrivate(key)
 
     override fun generateKey(): WalletDto {
-        val seedPhrase = seedPhraseGenerator.createSeedPhrase(PhraseLength.TWELVE)
-        val rootExtendedKey = ExtendedKey.root(seedPhrase.toByteArray())
+        val seedPhrase = generateSeedPhrase()
+        val rootExtendedKey = getMasterKey(seedPhrase)
 
         val extendedKey = derivationKeysHelper.deriveDefaultAddress(rootExtendedKey)
         val addressKeyDto = AddressKeyDto(serializer.serializePublic(extendedKey),
