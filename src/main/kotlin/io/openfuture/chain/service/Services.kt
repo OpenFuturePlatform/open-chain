@@ -3,14 +3,14 @@ package io.openfuture.chain.service
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
-import io.openfuture.chain.domain.block.BlockRequest
 import io.openfuture.chain.domain.crypto.key.WalletDto
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
-import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.protocol.CommunicationProtocol
+import java.nio.channels.Channel
 
 interface HardwareInfoService {
 
@@ -57,5 +57,18 @@ interface CryptoService {
 }
 
 interface TransactionService {
+
+}
+
+interface NetworkService {
+
+    fun joinNetwork(host : String, port: Int)
+
+    fun handleJoinResponse(message: CommunicationProtocol.Packet,
+                           channel: Channel)
+
+    fun connect(host : String, port: Int)
+
+    fun broadcast(packet: CommunicationProtocol.Packet)
 
 }
