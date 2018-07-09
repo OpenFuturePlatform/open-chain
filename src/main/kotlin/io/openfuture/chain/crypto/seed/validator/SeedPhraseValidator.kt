@@ -46,11 +46,7 @@ class SeedPhraseValidator(
         val entropySha = HashUtils.sha256(entropy)[0]
         val mask = ((1 shl (BYTE_SIZE - phaseLength.checkSumLength)) - 1).inv().toByte()
         val lastByte = entropyWithChecksum[entropyWithChecksum.size - 1]
-        if (((entropySha xor lastByte) and mask) != 0.toByte()) {
-            return false
-        }
-
-        return true
+        return (entropySha xor lastByte) and mask == 0.toByte()
     }
 
     private fun getWord(word: String): SeedWord? = seedWordRepository.findOneByValue(word)
