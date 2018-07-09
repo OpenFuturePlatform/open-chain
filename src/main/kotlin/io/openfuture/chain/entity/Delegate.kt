@@ -15,7 +15,10 @@ class Delegate(
         val address: String,
 
         @Column(name = "public_key", nullable = false, unique = true)
-        val publicKey: String
+        val publicKey: String,
+
+        @Column(name = "rating", nullable = false)
+        var rating: Int = 0
 
 ) : BaseModel() {
 

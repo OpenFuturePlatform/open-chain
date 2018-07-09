@@ -2,17 +2,15 @@ package io.openfuture.chain.service
 
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
+import io.openfuture.chain.domain.transaction.data.VoteDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.transaction.Transaction
-import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.TransactionRepository
 import io.openfuture.chain.repository.VoteTransactionRepository
 import io.openfuture.chain.util.TransactionUtils
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,7 +18,8 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultTransactionService(
         private val repository: TransactionRepository,
         private val voteTransactionRepository: VoteTransactionRepository,
-        private val nodeClock: NodeClock
+        private val nodeClock: NodeClock,
+        private val delegateService: DelegateService
 ) : TransactionService {
 
     @Transactional(readOnly = true)
@@ -43,15 +42,13 @@ class DefaultTransactionService(
         return repository.save(persistTransaction)
     }
 
+    // --  votes logic // todo need to create TransactionVoteService with extends this
     @Transactional
-    override fun add(dto: VoteTransactionDto): Transaction {
+    override fun addVote(dto: VoteTransactionDto): Transaction {
         //todo need to add validation
+        val vote = VoteDto(dto.delegateKey, dto.voteType, dto.weight) //todo need to think about calculate the vote weight
+        delegateService.updateRatingByVote(vote)
         return repository.save(dto.toEntity())
-    }
-
-    @Transactional(readOnly = true)
-    override fun getAllVotes(request: PageRequest): Page<VoteTransaction>? {
-        return voteTransactionRepository.findAll(request)
     }
 
     override fun createVote(data: VoteTransactionData): VoteTransactionDto {

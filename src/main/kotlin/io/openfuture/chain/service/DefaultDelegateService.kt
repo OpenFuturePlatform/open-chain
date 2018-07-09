@@ -1,7 +1,9 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.domain.delegate.DelegateDto
+import io.openfuture.chain.domain.transaction.data.VoteDto
 import io.openfuture.chain.entity.Delegate
+import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.property.DelegateProperties
 import io.openfuture.chain.repository.DelegateRepository
@@ -16,7 +18,6 @@ import javax.annotation.PostConstruct
 @Transactional(readOnly = true)
 class DefaultDelegateService(
         private val repository: DelegateRepository,
-        private val transactionService: TransactionService,
         private val delegateProperties: DelegateProperties
 ) : DelegateService {
 
@@ -34,20 +35,25 @@ class DefaultDelegateService(
             ?: throw NotFoundException("Delegate with such publicKey: $publicKey not exist!")
 
     override fun getActiveDelegates(): List<Delegate> {
-        val publicKeysActiveDelegates = listOf<String>() // TODO("getting of public keys top 21 delegates from any vote service")
-        val activeDelegates = mutableListOf<Delegate>()
-        publicKeysActiveDelegates.forEach { activeDelegates.add(getByPublicKey(it)) }
-
-        return activeDelegates
+        val result = mutableListOf<Delegate>()
+        val request = PageRequest.of(0, 10, Sort(Sort.Direction.DESC, "rating"))
+        result.addAll(repository.findAll(request).content)
+        return result
     }
 
     override fun isValidActiveDelegates(publicKeysDelegates: List<String>): Boolean {
-        val publicKeysActiveDelegates = listOf<String>() // TODO("getting of public keys top 21 delegates from any vote service")
-
+        val publicKeysActiveDelegates = this.getActiveDelegates()
         return CollectionUtils.containsAny(publicKeysActiveDelegates, publicKeysDelegates)
     }
 
     @Transactional
     override fun add(dto: DelegateDto): Delegate = repository.save(Delegate.of(dto))
+
+    @Transactional
+    override fun updateRatingByVote(dto: VoteDto) {
+        val persisDelegate = this.getByPublicKey(dto.delegateKey)
+        if (dto.voteType == VoteType.FOR) persisDelegate.rating+= dto.value else persisDelegate.rating-= dto.value
+        repository.save(persisDelegate)
+    }
 
 }

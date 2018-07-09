@@ -9,6 +9,7 @@ import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.service.TransactionService
 import io.openfuture.chain.util.BlockUtils
 import org.slf4j.LoggerFactory
@@ -21,6 +22,7 @@ import org.springframework.util.CollectionUtils
 @Component
 class BlockchainInitializer(
         private val blockService: BlockService,
+        private val delegateService: DelegateService,
         private val transactionService: TransactionService,
         private val objectMapper: ObjectMapper
 ) {
@@ -41,7 +43,7 @@ class BlockchainInitializer(
     @Scheduled(fixedDelayString = "2000")
     fun createTransactionSchedule() {
         val dto = createRandomTransaction()
-        val trx = transactionService.add(dto)
+        val trx = transactionService.addVote(dto)
         log.info("Created new transaction {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(trx))
     }
 
@@ -69,8 +71,16 @@ class BlockchainInitializer(
     @Deprecated("generate random transaction")
     private fun createRandomTransaction(): VoteTransactionDto {
         val amount = Math.round(Math.random())
+        var delegeteKey = ""
+
+        if (amount == 0L) {
+            delegeteKey = delegateService.getActiveDelegates()[0].publicKey
+        } else {
+            delegeteKey = delegateService.getActiveDelegates()[1].publicKey
+        }
+
         val data = VoteTransactionData(amount, "recipientKey", "senderKey", "senderSignature",
-                VoteType.FOR, "publicKey_X", 100)
+                VoteType.FOR, delegeteKey, 1)
         return transactionService.createVote(data)
     }
 

@@ -12,13 +12,11 @@ import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
+import io.openfuture.chain.domain.transaction.data.VoteDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.transaction.Transaction
-import io.openfuture.chain.entity.transaction.VoteTransaction
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
 
 interface HardwareInfoService {
 
@@ -76,10 +74,8 @@ interface TransactionService {
 
     fun addToBlock(hash: String, block: Block): Transaction
 
-    fun add(dto: VoteTransactionDto): Transaction
-
     // -- votes
-    fun getAllVotes(request: PageRequest): Page<VoteTransaction>?
+    fun addVote(dto: VoteTransactionDto): Transaction
 
     fun createVote(data: VoteTransactionData): VoteTransactionDto
 
@@ -96,5 +92,7 @@ interface DelegateService {
     fun isValidActiveDelegates(publicKeysDelegates: List<String>): Boolean
 
     fun add(dto: DelegateDto): Delegate
+
+    fun updateRatingByVote(dto: VoteDto)
 
 }
