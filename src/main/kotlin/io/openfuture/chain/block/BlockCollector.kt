@@ -44,9 +44,9 @@ class BlockCollector(
             lock.readLock().lock()
 
             val firstSignedBlock = signedBlocks.first()
-            val firstBlock = getBlock(firstSignedBlock)
+            val firstBlock = toBlock(firstSignedBlock)
             for (signedBlock in signedBlocks) {
-                val block = getBlock(signedBlock)
+                val block = toBlock(signedBlock)
 
                 val blockIsValid = blockValidationService.isValid(block)
                 if (!blockIsValid || block.hash != firstBlock.hash) {
@@ -67,7 +67,18 @@ class BlockCollector(
         }
     }
 
-    private fun getBlock(signedBlock: CommunicationProtocol.SignedBlock): Block {
+    private fun setBlockProto(
+            builder: CommunicationProtocol.FullSignedBlock.Builder,
+            block: Block): CommunicationProtocol.FullSignedBlock.Builder {
+        if (block.version == BlockVersion.MAIN.version) {
+            builder.mainBlock = toMainBlockProto(block)
+        } else if (block.version == BlockVersion.GENESIS.version) {
+            builder.genesisBlock = toGenesisBlockProto(block)
+        }
+        return builder
+    }
+
+    private fun toBlock(signedBlock: CommunicationProtocol.SignedBlock): Block {
         var block: Block? = null
         if (signedBlock.mainBlock != null) {
             block = toMainBlock(signedBlock)
@@ -78,17 +89,6 @@ class BlockCollector(
         }
 
         return block
-    }
-
-    private fun setBlockProto(
-            builder: CommunicationProtocol.FullSignedBlock.Builder,
-            block: Block): CommunicationProtocol.FullSignedBlock.Builder {
-        if (block.version == BlockVersion.MAIN.version) {
-            builder.mainBlock = toMainBlockProto(block)
-        } else if (block.version == BlockVersion.GENESIS.version) {
-            builder.genesisBlock = toGenesisBlockProto(block)
-        }
-        return builder
     }
 
     private fun toMainBlock(signedBlock: CommunicationProtocol.SignedBlock): MainBlock {
