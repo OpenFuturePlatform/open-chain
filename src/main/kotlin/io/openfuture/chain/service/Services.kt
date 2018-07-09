@@ -63,3 +63,13 @@ interface TransactionService {
     fun save(request: TransactionRequest)
 
 }
+
+interface EpochService {
+
+    fun calculateHeightBlocksNextEpoch(): Int
+
+    fun getActualHeightBlocksCurrentEpoch(): Int
+
+    fun isNewEpoch(): Boolean
+
+}
