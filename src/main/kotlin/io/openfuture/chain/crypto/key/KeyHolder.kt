@@ -16,17 +16,26 @@ class KeyHolder(
 
     private var privateKey: ByteArray? = null
 
+    private var publicKey: ByteArray? = null
+
 
     @PostConstruct
     private fun init() {
         generatePrivatePublicKeysIfNotExist()
 
-        val keyValue = File(properties.privateKeyPath).readText(Charset.forName("UTF-8"))
-        privateKey = HashUtils.hexStringToBytes(keyValue)
+        val privateKeyValue = File(properties.privateKeyPath).readText(Charset.forName("UTF-8"))
+        val publicKeyValue = File(properties.publicKeyPath).readText(Charset.forName("UTF-8"))
+
+        privateKey = HashUtils.hexStringToBytes(privateKeyValue)
+        publicKey = HashUtils.hexStringToBytes(publicKeyValue)
     }
 
     fun getPrivateKey(): ByteArray {
         return privateKey!!
+    }
+
+    fun getPublicKey(): ByteArray {
+        return publicKey!!
     }
 
     private fun generatePrivatePublicKeysIfNotExist() {
