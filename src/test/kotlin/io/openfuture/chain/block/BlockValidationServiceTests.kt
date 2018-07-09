@@ -3,6 +3,7 @@ package io.openfuture.chain.block
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.BlockVersion
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.service.BlockService
@@ -28,7 +29,7 @@ class BlockValidationServiceTests : ServiceTests() {
     fun setUp() {
         val validators = HashMap<String, BlockValidator>()
         validators.put("", blockValidator)
-        given(blockValidator.getVersion()).willReturn(2)
+        given(blockValidator.getVersion()).willReturn(BlockVersion.MAIN.version)
         given(applicationContext.getBeansOfType(BlockValidator::class.java)).willReturn(validators)
         blockValidationService = BlockValidationService(blockService, applicationContext)
         blockValidationService.init()
