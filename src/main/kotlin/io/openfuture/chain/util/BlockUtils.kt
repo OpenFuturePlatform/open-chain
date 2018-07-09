@@ -1,9 +1,13 @@
 package io.openfuture.chain.util
 
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
+import java.util.*
 
 object BlockUtils {
+
+    private var blockProductionOrder: List<String> = emptyList()
 
     fun calculateMerkleRoot(transactions: Set<Transaction>): String {
         if (transactions.size == 1) {
@@ -31,5 +35,15 @@ object BlockUtils {
         val headers = previousHash + merkleRoot + timestamp + height
         return HashUtils.doubleSha256(headers.toByteArray())
     }
+
+    fun refreshBlockProductionOrder(delegates: List<String>, block: Block): List<String> {
+        val random = Random(block.timestamp)
+        blockProductionOrder = delegates.shuffled(random)
+        return blockProductionOrder
+    }
+
+    fun getBlockProductionOrder(): List<String> = blockProductionOrder
+
+
 
 }
