@@ -19,6 +19,7 @@ class BlockCollector(
 
 
     fun setBlockCollectionHash(blockCollectionHash: String) {
+        CommunicationProtocol.Packet.BodyCase.TIME_SYNC_REQUEST
         try {
             lock.writeLock().lock()
             this.blockCollectionHash = blockCollectionHash

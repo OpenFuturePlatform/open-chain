@@ -12,6 +12,11 @@ message Packet {
         HeartBeat heart_beat = 2;
         TimeSyncRequest time_sync_request = 3;
         TimeSyncResponse time_sync_response = 4;
+        Transaction transaction = 5;
+        MainBlock main_block = 6;
+        GenesisBlock genesis_block = 7;
+        SignedBlock signed_block = 8;
+        FullSignedBlock full_signed_block = 9;
     }
 }
 
