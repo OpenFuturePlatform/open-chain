@@ -9,7 +9,7 @@ import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender
 import io.netty.handler.timeout.ReadTimeoutHandler
 import io.openfuture.chain.nio.base.ConnectHandler
 import io.openfuture.chain.nio.base.DisconnectHandler
-import io.openfuture.chain.nio.base.UpdateRoutingTableHandler
+import io.openfuture.chain.nio.base.UpdateNetworkAddressesHandler
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
@@ -37,7 +37,7 @@ class ClientChannelInitializer(
         pipeline.addLast(context.getBean(ConnectionClientHandler::class.java))
 
         pipeline.addLast(context.getBean(JoinNetworkClientHandler::class.java))
-        pipeline.addLast(context.getBean(UpdateRoutingTableHandler::class.java))
+        pipeline.addLast(context.getBean(UpdateNetworkAddressesHandler::class.java))
         pipeline.addLast(context.getBean(TimeSyncClientHandler::class.java))
         pipeline.addLast(context.getBean(HeartBeatClientHandler::class.java))
     }

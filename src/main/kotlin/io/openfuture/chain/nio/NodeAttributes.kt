@@ -9,7 +9,7 @@ class NodeAttributes(
 ) {
 
     @Volatile
-    var networkId : String? = null
+    var id : String? = null
 
     @Volatile
     var host: String? = null

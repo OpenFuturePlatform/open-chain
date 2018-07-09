@@ -16,7 +16,7 @@ message Packet {
         JoinNetworkResponse join_network_response = 6;
         Connect connect = 7;
         Disconnect disconnect = 8;
-        UpdateRoutingTable update_routing_table = 9;
+        UpdateNetworkAddresses update_network_addresses = 9;
     }
 }
 
@@ -28,7 +28,7 @@ enum Type {
     JOIN_NETWORK_RESPONSE = 5;
     CONNECT = 6;
     DISCONNECT = 7;
-    UPDATE_ROUTING_TABLE = 8;
+    UPDATE_NETWORK_ADDRESSES = 8;
 }
 
 message HeartBeat {
@@ -41,16 +41,16 @@ message HeartBeat {
 }
 
 message TimeSyncResponse {
-    int64 nodeTimestamp = 1;
-    int64 networkTimestamp = 2;
+    int64 node_timestamp = 1;
+    int64 network_timestamp = 2;
 }
 
 message TimeSyncRequest {
-    int64 nodeTimestamp = 1;
+    int64 node_timestamp = 1;
 }
 
-message Node {
-    string network_id = 1;
+message NetworkAddress {
+    string node_id = 1;
     string host = 2;
     int32 port = 3;
 }
@@ -60,36 +60,36 @@ message JoinNetworkRequest {
 }
 
 message JoinNetworkResponse {
-    string network_id = 1;
+    string node_id = 1;
     string host = 2;
-    repeated Node nodes = 3;
+    repeated NetworkAddress network_addresses = 3;
 }
 
 message Connect {
-    string network_id = 1;
+    string node_id = 1;
 }
 
 message Disconnect {
     bool leave_network = 1;
 }
 
-message UpdateRoutingTable {
+message UpdateNetworkAddresses {
     enum Type {
         ADD = 0;
         REMOVE = 1;
     }
 
-    message AddRow {
-        Node node = 1;
+    message AddAddress {
+        NetworkAddress address = 1;
     }
 
-    message RemoveRow {
-        string network_id = 1;
+    message RemoveAddress {
+        string node_id = 1;
     }
 
     Type type = 1;
     oneof operation {
-        AddRow add_row = 2;
-        RemoveRow remove_row = 3;
+        AddAddress add_address = 2;
+        RemoveAddress remove_address = 3;
     }
 }

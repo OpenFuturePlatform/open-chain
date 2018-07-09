@@ -1,6 +1,5 @@
 package io.openfuture.chain.service
 
-import io.netty.channel.Channel
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
@@ -12,7 +11,7 @@ import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.Node
+import io.openfuture.chain.entity.NetworkAddress
 import io.openfuture.chain.protocol.CommunicationProtocol
 
 interface HardwareInfoService {
@@ -67,30 +66,28 @@ interface TransactionService {
 
 }
 
-interface NodeService {
+interface NetworkAddressService {
 
-    fun saveAll(nodes: List<CommunicationProtocol.Node>)
+    fun findAll() : List<CommunicationProtocol.NetworkAddress>
 
-    fun save(node: Node)
+    fun save(address: NetworkAddress)
 
-    fun findAll() : List<CommunicationProtocol.Node>
+    fun saveAll(addresses: List<CommunicationProtocol.NetworkAddress>)
 
     fun deleteAll()
 
-    fun deleteByNetworkId(networkId: String)
+    fun deleteByNodeId(nodeId: String)
 
-    fun findByNetworkId(networkId: String) : Node?
+    fun findByNodeId(nodeId: String) : NetworkAddress?
 
 }
 
 interface NetworkService {
 
-    fun joinNetwork(host : String, port: Int)
-
-    fun handleJoinResponse(message: CommunicationProtocol.Packet,
-                           channel: Channel)
+    fun join(host : String, port: Int)
 
     fun connect(host : String, port: Int)
 
     fun broadcast(packet: CommunicationProtocol.Packet)
+
 }

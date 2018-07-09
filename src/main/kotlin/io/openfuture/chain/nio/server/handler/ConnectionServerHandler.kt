@@ -52,7 +52,7 @@ class ConnectionServerHandler(
             HEART_BEAT -> {}
             TIME_SYNC_REQUEST -> {}
             JOIN_NETWORK_REQUEST -> {}
-            UPDATE_ROUTING_TABLE -> {}
+            UPDATE_NETWORK_ADDRESSES -> {}
             else -> {
                 log.error("Illegal packet type: {}", packet)
                 ctx.close()

@@ -23,7 +23,7 @@ class NioStarter(
 
         // start clients
         val address = nodeProperties.rootNodes[0].split(":")
-        networkService.joinNetwork(address[0], address[1].toInt())
+        networkService.join(address[0], address[1].toInt())
 
         //TODO: remove sleep and replace it by callback
         Thread.sleep(1000)

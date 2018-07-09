@@ -6,11 +6,11 @@ import javax.persistence.Entity
 import javax.persistence.Table
 
 @Entity
-@Table(name = "nodes")
-class Node (
+@Table(name = "network_addresses")
+class NetworkAddress (
 
-    @Column(name = "network_id", nullable = false)
-    var networkId : String,
+    @Column(name = "node_id", nullable = false)
+    var nodeId : String,
 
     @Column(name = "host", nullable = false)
     var host: String,

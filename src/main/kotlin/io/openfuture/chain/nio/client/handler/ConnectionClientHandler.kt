@@ -40,7 +40,7 @@ class ConnectionClientHandler(
             Type.HEART_BEAT -> {}
             Type.TIME_SYNC_RESPONSE -> {}
             Type.JOIN_NETWORK_RESPONSE -> {}
-            Type.UPDATE_ROUTING_TABLE -> {}
+            Type.UPDATE_NETWORK_ADDRESSES -> {}
             else -> {
                 log.error("Illegal packet type: {}", packet)
                 ctx.close()

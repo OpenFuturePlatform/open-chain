@@ -14,20 +14,18 @@ class ConnectHandler(
 ) : BaseHandler(CommunicationProtocol.Type.CONNECT) {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        if (attributes.networkId != null) {
-            val message = CommunicationProtocol.Packet.newBuilder()
-                .setType(CommunicationProtocol.Type.CONNECT)
-                .setConnect(CommunicationProtocol.Connect.newBuilder()
-                    .setNetworkId(attributes.networkId)
-                    .build())
-                .build()
-            ctx.writeAndFlush(message)
-        }
+        val message = CommunicationProtocol.Packet.newBuilder()
+            .setType(CommunicationProtocol.Type.CONNECT)
+            .setConnect(CommunicationProtocol.Connect.newBuilder()
+                .setNodeId(attributes.id)
+                .build())
+            .build()
+        ctx.writeAndFlush(message)
+
         ctx.fireChannelActive()
     }
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: CommunicationProtocol.Packet) {
-        val payload = message.connect
-        ctx.channel().attr(ChannelAttributes.REMOTE_NODE_ID).set(payload.networkId)
+        ctx.channel().attr(ChannelAttributes.REMOTE_NODE_ID).set(message.connect.nodeId)
     }
 }
