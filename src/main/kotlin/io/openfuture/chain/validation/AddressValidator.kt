@@ -14,10 +14,11 @@ class AddressValidator : ConstraintValidator<Address, String> {
         private const val ADDRESS_PATTERN = "^0x[0-9a-fA-F]{40}$"
     }
 
+
     override fun isValid(value: String, context: ConstraintValidatorContext?): Boolean {
         if (ADDRESS_PATTERN.toRegex().matches(value)) {
-            val noPrefixAddress = AddressUtils.removePrefix(value)
-            return noPrefixAddress == AddressUtils.addChecksum(noPrefixAddress.toLowerCase())
+            val addressWithoutPrefix = AddressUtils.removePrefix(value)
+            return addressWithoutPrefix == AddressUtils.addChecksum(addressWithoutPrefix.toLowerCase())
         }
 
         return false

@@ -54,7 +54,8 @@ class ECKey(
     fun isPrivateEmpty() = null == private
 
     fun getAddress(): String {
-        val address = ByteUtils.toHexString(Arrays.copyOfRange(HashUtils.keccak256(public), 0, ADDRESS_KEY_PART_SIZE))
+        val pubKeyHash = HashUtils.keccak256(public)
+        val address = ByteUtils.toHexString(Arrays.copyOfRange(pubKeyHash, 0, ADDRESS_KEY_PART_SIZE))
         return AddressUtils.addPrefix(AddressUtils.addChecksum(address))
     }
 
