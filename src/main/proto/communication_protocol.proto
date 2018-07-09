@@ -69,18 +69,22 @@ message GenesisBlock {
     string merkleHash = 4;
     int64 timestamp = 5;
     int32 version = 6;
-    string signature = 7;
-    repeated Transaction transactions = 8;
+    int64 epochIndex = 7;
+    repeated string activeDelegateIps = 8;
 }
 
 message SignedBlock {
     oneof body {
-        MainBlock block = 1;
+        GenesisBlock genesisBlock = 1;
+        MainBlock mainBlock = 2;
     }
-    string signature = 2;
+    string signature = 3;
 }
 
 message FullSignedBlock {
-    MainBlock block = 1;
-    repeated string signatures = 2;
+    oneof body {
+        GenesisBlock genesisBlock = 1;
+        MainBlock mainBlock = 2;
+    }
+    repeated string signatures = 3;
 }

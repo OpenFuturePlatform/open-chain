@@ -1,5 +1,6 @@
 package io.openfuture.chain.block
 
+import io.openfuture.chain.entity.*
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.stereotype.Component
 import java.util.concurrent.locks.ReentrantReadWriteLock
@@ -30,8 +31,7 @@ class BlockCollector(
     fun addBlock(signedBlock: CommunicationProtocol.SignedBlock) {
         try {
             lock.writeLock().lock()
-
-            if (signedBlock.block.hash == blockCollectionHash) {
+            if (signedBlock.mainBlock.hash == blockCollectionHash) {
                 signedBlocks.add(signedBlock)
             }
         } finally {
@@ -43,12 +43,13 @@ class BlockCollector(
         try {
             lock.readLock().lock()
 
-            val firstBlock = signedBlocks.first()
+            val firstSignedBlock = signedBlocks.first()
+            val firstBlock = getBlock(firstSignedBlock)
             for (signedBlock in signedBlocks) {
-                val block = signedBlock.block
+                val block = getBlock(signedBlock)
 
                 val blockIsValid = blockValidationService.isValid(block)
-                if (!blockIsValid || signedBlock.block.hash != firstBlock.block.hash) {
+                if (!blockIsValid || block.hash != firstBlock.hash) {
                     throw IllegalArgumentException("$signedBlocks has wrong block = $signedBlock")
                 }
 
@@ -58,13 +59,110 @@ class BlockCollector(
 
             val signatures = signedBlocks.map { it.signature }.toSet()
 
-            return CommunicationProtocol.FullSignedBlock.newBuilder()
-                .setBlock(firstBlock.block)
+            return setBlockProto(CommunicationProtocol.FullSignedBlock.newBuilder(), firstBlock)
                 .addAllSignatures(signatures)
                 .build()
         } finally {
             lock.readLock().unlock()
         }
+    }
+
+    private fun getBlock(signedBlock: CommunicationProtocol.SignedBlock): Block {
+        var block: Block? = null
+        if (signedBlock.mainBlock != null) {
+            block = toMainBlock(signedBlock)
+        } else if (signedBlock.genesisBlock != null) {
+            block = toGenesisBlock(signedBlock)
+        }
+
+        if (block == null) {
+            throw IllegalArgumentException("signedBlock has wrong block")
+        }
+
+        return block
+    }
+
+    private fun setBlockProto(
+            builder: CommunicationProtocol.FullSignedBlock.Builder,
+            block: Block): CommunicationProtocol.FullSignedBlock.Builder {
+        if (block.version == BlockVersion.MAIN.version) {
+            builder.mainBlock = toMainBlockProto(block)
+        } else if (block.version == BlockVersion.GENESIS.version) {
+            builder.genesisBlock = toGenesisBlockProto(block)
+        }
+        return builder
+    }
+
+    private fun toMainBlock(signedBlock: CommunicationProtocol.SignedBlock): MainBlock {
+        val mainBlock = signedBlock.mainBlock
+        return MainBlock(
+            mainBlock.hash,
+            mainBlock.height,
+            mainBlock.previousHash,
+            mainBlock.merkleHash,
+            mainBlock.timestamp,
+            mainBlock.signature,
+            mainBlock.transactionsList.map { toTransaction(it) }.toSet())
+    }
+
+    private fun toGenesisBlock(signedBlock: CommunicationProtocol.SignedBlock): GenesisBlock {
+        val genesisBlock = signedBlock.genesisBlock
+        return GenesisBlock(
+            genesisBlock.hash,
+            genesisBlock.height,
+            genesisBlock.previousHash,
+            genesisBlock.merkleHash,
+            genesisBlock.timestamp,
+            genesisBlock.epochIndex,
+            genesisBlock.activeDelegateIpsList.toSet())
+    }
+
+    private fun toTransaction(transaction: CommunicationProtocol.Transaction): Transaction {
+        return Transaction(
+            transaction.hash,
+            transaction.amount,
+            transaction.timestamp,
+            transaction.recipientkey,
+            transaction.senderKey,
+            transaction.signature
+        )
+    }
+
+    private fun toMainBlockProto(block: Block): CommunicationProtocol.MainBlock {
+        val mainBlock = block as MainBlock
+        return CommunicationProtocol.MainBlock.newBuilder()
+            .setHash(mainBlock.hash)
+            .setHeight(mainBlock.height)
+            .setPreviousHash(mainBlock.previousHash)
+            .setMerkleHash(mainBlock.merkleHash)
+            .setTimestamp(mainBlock.timestamp)
+            .setSignature(mainBlock.signature)
+            .addAllTransactions(mainBlock.transactions.map { toTransactionProto(it) }.toList())
+            .build()
+    }
+
+    private fun toGenesisBlockProto(block: Block): CommunicationProtocol.GenesisBlock {
+        val genesisBlock = block as GenesisBlock
+        return CommunicationProtocol.GenesisBlock.newBuilder()
+            .setHash(genesisBlock.hash)
+            .setHeight(genesisBlock.height)
+            .setPreviousHash(genesisBlock.previousHash)
+            .setMerkleHash(genesisBlock.merkleHash)
+            .setTimestamp(genesisBlock.timestamp)
+            .setEpochIndex(genesisBlock.epochIndex)
+            .addAllActiveDelegateIps(genesisBlock.activeDelegateIps.toList())
+            .build()
+    }
+
+    private fun toTransactionProto(transaction: Transaction): CommunicationProtocol.Transaction {
+        return CommunicationProtocol.Transaction.newBuilder()
+            .setHash(transaction.hash)
+            .setAmount(transaction.amount)
+            .setTimestamp(transaction.timestamp)
+            .setRecipientkey(transaction.recipientkey)
+            .setSenderKey(transaction.senderKey)
+            .setSignature(transaction.signature)
+            .build()
     }
 
 }
