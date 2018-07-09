@@ -64,7 +64,7 @@ class DerivationKeysHelper {
         return base.derive(hardenedIndex(DEFAULT_ACCOUNT_INDEX))
     }
 
-    fun deriveDefaultMultisigAdress(rootKey: ExtendedKey): ExtendedKey =
+    fun deriveDefaultMultisigAddress(rootKey: ExtendedKey): ExtendedKey =
         rootKey.derive(hardenedIndex(DEFAULT_MULTISIG_ACCOUNT_INDEX))
 
     private fun deriveWalletChainKeys(rootKey: ExtendedKey, accountNumber: Int, walletNumber: Int): ExtendedKey {
