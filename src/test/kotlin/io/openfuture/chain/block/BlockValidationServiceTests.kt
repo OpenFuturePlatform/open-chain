@@ -36,7 +36,7 @@ class BlockValidationServiceTests : ServiceTests() {
 
     @Test
     fun isValidShouldReturnTrue() {
-        val previouseBlock = MainBlock(
+        val previousBlock = MainBlock(
             "prev_block_hash",
             122,
             "previous_hash",
@@ -83,7 +83,7 @@ class BlockValidationServiceTests : ServiceTests() {
         )
 
         given(blockValidator.isValid(any(Block::class.java))).willReturn(true)
-        given(blockService.getLast()).willReturn(previouseBlock)
+        given(blockService.getLast()).willReturn(previousBlock)
 
         val isValid = blockValidationService.isValid(block)
 
