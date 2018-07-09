@@ -64,8 +64,7 @@ interface NetworkService {
 
     fun joinNetwork(host : String, port: Int)
 
-    fun handleJoinResponse(message: CommunicationProtocol.Packet,
-                           channel: Channel)
+    fun handleJoinResponse(message: CommunicationProtocol.Packet, channel: Channel)
 
     fun connect(host : String, port: Int)
 
