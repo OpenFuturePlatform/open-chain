@@ -22,14 +22,6 @@ class BlockCollector(
         try {
             lock.writeLock().lock()
             this.blockCollectionHash = blockCollectionHash
-        } finally {
-            lock.writeLock().unlock()
-        }
-    }
-
-    fun clear() {
-        try {
-            lock.writeLock().lock()
             signedBlocks = mutableListOf()
         } finally {
             lock.writeLock().unlock()
