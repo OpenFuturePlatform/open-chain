@@ -15,6 +15,7 @@ message Packet {
         Transaction transaction = 5;
         MainBlock main_block = 6;
         GenesisBlock genesis_block = 7;
+        BlockSignatures block_signatures = 8;
     }
 }
 

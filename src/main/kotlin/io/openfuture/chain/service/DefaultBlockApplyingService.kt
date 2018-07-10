@@ -6,7 +6,7 @@ import io.openfuture.chain.crypto.key.KeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.nio.converter.FullSignedBlockConverter
+import io.openfuture.chain.nio.converter.BlockSignaturesConverter
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.repository.BlockRepository
 import org.springframework.stereotype.Service
@@ -17,7 +17,7 @@ class DefaultBlockApplyingService(
     private val blockRepository: BlockRepository,
     private val signatureManager: SignatureManager,
     private val keyHolder: KeyHolder,
-    private val fullSignedBlockConverter: FullSignedBlockConverter,
+    private val blockSignaturesConverter: BlockSignaturesConverter,
     private val signatureCollector: SignatureCollector
     // TODO here will be broadcast service
     // TODO signature checking service will be here
@@ -55,7 +55,7 @@ class DefaultBlockApplyingService(
     }
 
     override fun applyBlock(fullSignedBlock: CommunicationProtocol.FullSignedBlock) {
-        val block = fullSignedBlockConverter.toBlock(fullSignedBlock)
+        val block = blockSignaturesConverter.toBlock(fullSignedBlock)
         val signatures = fullSignedBlock.signaturesList
 
         if (!blockValidationService.isValid(block)) {
