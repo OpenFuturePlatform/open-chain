@@ -16,7 +16,7 @@ class GenesisBlockConverter {
             genesisBlock.merkleHash,
             genesisBlock.timestamp,
             genesisBlock.epochIndex,
-            genesisBlock.activeDelegateIpsList.toSet())
+            genesisBlock.activeDelegateKeysList.toSet())
     }
 
     fun toGenesisBlockProto(block: Block): CommunicationProtocol.GenesisBlock {
@@ -28,7 +28,7 @@ class GenesisBlockConverter {
             .setMerkleHash(genesisBlock.merkleHash)
             .setTimestamp(genesisBlock.timestamp)
             .setEpochIndex(genesisBlock.epochIndex)
-            .addAllActiveDelegateIps(genesisBlock.activeDelegateIps.toList())
+            .addAllActiveDelegateKeys(genesisBlock.activeDelegateKeys.toList())
             .build()
     }
 
