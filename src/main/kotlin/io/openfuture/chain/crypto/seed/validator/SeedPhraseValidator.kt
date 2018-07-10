@@ -8,10 +8,10 @@ import io.openfuture.chain.crypto.seed.SeedConstant.SECOND_BYTE_OFFSET
 import io.openfuture.chain.crypto.seed.SeedConstant.SECOND_BYTE_SKIP_BIT_SIZE
 import io.openfuture.chain.crypto.seed.SeedConstant.THIRD_BYTE_OFFSET
 import io.openfuture.chain.crypto.seed.SeedConstant.WORD_INDEX_SIZE
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.SeedWord
 import io.openfuture.chain.exception.SeedValidationException
 import io.openfuture.chain.repository.SeedWordRepository
-import io.openfuture.chain.crypto.util.HashUtils
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
 import java.util.*
@@ -51,18 +51,18 @@ class SeedPhraseValidator(
         val entropyWithChecksum = ByteArray((entropyPlusChecksumSize + MAX_BYTE_SIZE_MOD) / BYTE_SIZE)
         wordIndexesToEntropyWithCheckSum(seedWordIndexes, entropyWithChecksum)
         val entropy = Arrays.copyOf(entropyWithChecksum, entropyWithChecksum.size - 1)
+        val lastByte = entropyWithChecksum[entropyWithChecksum.size - 1]
         val entropySha = HashUtils.sha256(entropy)[0]
         val mask = ((1 shl (BYTE_SIZE - checksumSize)) - 1).inv().toByte()
 
-        val lastByte = entropyWithChecksum[entropyWithChecksum.size - 1]
-        if (entropySha xor lastByte and mask != 0.toByte()) {
+        if (((entropySha xor lastByte) and mask) != 0.toByte()) {
             throw SeedValidationException("Invalid checksum for seed phrase")
         }
     }
 
-    private fun getWord(wordValue: String): SeedWord {
-        return seedWordRepository.findOneByValue(wordValue).orElseThrow {
-            throw SeedValidationException("Word $wordValue not found")
+    private fun getWord(value: String): SeedWord {
+        return seedWordRepository.findOneByValue(value).orElseThrow {
+            throw SeedValidationException("Word $value not found")
         }
     }
 
@@ -70,9 +70,34 @@ class SeedPhraseValidator(
         var wordIndex = 0
         var entropyOffset = 0
         while (wordIndex < wordIndexes.size) {
-            writeNextWordIndexToArray(entropyWithChecksum, wordIndexes[wordIndex], entropyOffset)
+            writeNext11(entropyWithChecksum, wordIndexes[wordIndex], entropyOffset)
             wordIndex++
             entropyOffset += WORD_INDEX_SIZE
+        }
+    }
+
+    fun writeNext11(bytes: ByteArray, value: Int, offset: Int) {
+        val skip = offset / 8
+        val bitSkip = offset % 8
+        run {
+            //byte 0
+            val firstValue = bytes[skip]
+            val toWrite = (value shr 3 + bitSkip).toByte()
+            bytes[skip] = firstValue or toWrite
+        }
+
+        run {
+            //byte 1
+            val valueInByte = bytes[skip + 1]
+            val i = 5 - bitSkip
+            val toWrite = (if (i > 0) value shl i else value shr -i).toByte()
+            bytes[skip + 1] = valueInByte or toWrite
+        }
+
+        if (bitSkip >= 6) {//byte 2
+            val valueInByte = bytes[skip + 2]
+            val toWrite = (value shl 13 - bitSkip).toByte()
+            bytes[skip + 2] = valueInByte or toWrite
         }
     }
 

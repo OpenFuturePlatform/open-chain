@@ -2,7 +2,10 @@ package io.openfuture.chain.service
 
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
-import io.openfuture.chain.crypto.key.*
+import io.openfuture.chain.crypto.key.DerivationKeysHelper
+import io.openfuture.chain.crypto.key.ExtendedKeyDeserializer
+import io.openfuture.chain.crypto.key.ExtendedKeySerializer
+import io.openfuture.chain.crypto.key.PrivateKeyManager
 import io.openfuture.chain.crypto.seed.PhraseLength
 import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
 import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
