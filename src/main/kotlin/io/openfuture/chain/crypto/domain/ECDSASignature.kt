@@ -15,6 +15,7 @@ data class ECDSASignature(
         private const val DER_ENCODED_SIGN_LENGTH = 72
     }
 
+
     constructor(sequence: DLSequence) : this(
         (sequence.getObjectAt(0) as ASN1Integer).positiveValue,
         (sequence.getObjectAt(1) as ASN1Integer).positiveValue

@@ -24,6 +24,7 @@ class ExtendedKey(
         }
     }
 
+
     /**
      * Accounts with internal/external key chains need to be implemented
      */

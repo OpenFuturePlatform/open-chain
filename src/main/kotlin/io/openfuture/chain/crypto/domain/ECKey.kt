@@ -27,6 +27,7 @@ class ECKey(
         private val params = ECDomainParameters(curve.curve, curve.g, curve.n, curve.h)
     }
 
+
     constructor(bytes: ByteArray) : this(
         BigInteger(1, bytes),
         curve.g.multiply(BigInteger(1, bytes)).getEncoded(true)
