@@ -2,7 +2,10 @@ package io.openfuture.chain.controller
 
 import io.openfuture.chain.domain.crypto.DerivationKeyRequest
 import io.openfuture.chain.domain.crypto.MasterKeyRequest
-import io.openfuture.chain.domain.crypto.key.*
+import io.openfuture.chain.domain.crypto.key.AddressKeyDto
+import io.openfuture.chain.domain.crypto.key.ImportKeyRequest
+import io.openfuture.chain.domain.crypto.key.KeyDto
+import io.openfuture.chain.domain.crypto.ValidateAddressRequest
 import io.openfuture.chain.service.CryptoService
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -18,8 +21,8 @@ class CryptoController(
         val key = cryptoService.getMasterKey(keyRequest.seedPhrase)
 
         return KeyDto(
-                cryptoService.serializePublicKey(key),
-                cryptoService.serializePrivateKey(key)
+            cryptoService.serializePublicKey(key),
+            cryptoService.serializePrivateKey(key)
         )
     }
 
@@ -28,9 +31,9 @@ class CryptoController(
         val key = cryptoService.getDerivationKey(keyRequest.seedPhrase, keyRequest.derivationPath)
 
         return AddressKeyDto(
-                cryptoService.serializePublicKey(key),
-                cryptoService.serializePrivateKey(key),
-                key.ecKey.getAddress()
+            cryptoService.serializePublicKey(key),
+            cryptoService.serializePrivateKey(key),
+            key.ecKey.getAddress()
         )
     }
 
@@ -51,5 +54,8 @@ class CryptoController(
     fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): AddressKeyDto = AddressKeyDto(
         cryptoService.importWifKey(request.decodedKey!!)
     )
+
+    @PostMapping("/validateAddress")
+    fun validateAddress(@RequestBody @Valid request: ValidateAddressRequest): ValidateAddressRequest = request
 
 }
