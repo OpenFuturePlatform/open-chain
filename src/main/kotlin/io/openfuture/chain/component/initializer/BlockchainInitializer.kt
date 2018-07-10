@@ -73,9 +73,9 @@ class BlockchainInitializer(
     private fun createRandomTransaction(): VoteTransactionDto {
         val amount = Random().nextLong()
         val delegates = stakeholderService.getAllDelegates()
-        val accounts = stakeholderService.getAllStakeholders()
+        val stakeholders = stakeholderService.getAllStakeholders()
 
-        val recipientKey = accounts[Random().nextInt(2)].publicKey
+        val recipientKey = stakeholders[Random().nextInt(2)].publicKey
         val delegateKey = delegates[Random().nextInt(21)].publicKey
         val type = if (amount % 2 == 0L) VoteType.FOR else VoteType.AGAINST
 
