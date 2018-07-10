@@ -14,7 +14,7 @@ class DefaultBlockService (
 
     @Transactional(readOnly = true)
     override fun get(id: Int): Block = blockRepository.getOne(id)
-        ?: throw NotFoundException("Not found networkId $id")
+        ?: throw NotFoundException("Not found id $id")
 
 
     @Transactional(readOnly = true)
