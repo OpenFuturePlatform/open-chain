@@ -22,14 +22,14 @@ class SignatureCollector(
     private var blockSignatures = mutableListOf<CommunicationProtocol.BlockSignature>()
 
     // variable to collect the blocks from the same round only
-    private lateinit var generatedBlock: Block
+    private lateinit var pendingBlock: Block
 
 
-    fun setBlockTemplate(generatedBlock: Block) {
+    fun setPendingBlock(generatedBlock: Block) {
         CommunicationProtocol.Packet.BodyCase.TIME_SYNC_REQUEST
         try {
             lock.writeLock().lock()
-            this.generatedBlock = generatedBlock
+            this.pendingBlock = generatedBlock
             blockSignatures = mutableListOf()
         } finally {
             lock.writeLock().unlock()
@@ -39,7 +39,7 @@ class SignatureCollector(
     fun addBlockSignature(blockSign: CommunicationProtocol.BlockSignature) {
         try {
             lock.writeLock().lock()
-            if (blockSign.blockHash == generatedBlock.hash) {
+            if (blockSign.blockHash == pendingBlock.hash) {
                 blockSignatures.add(blockSign)
             }
         } finally {
@@ -53,7 +53,7 @@ class SignatureCollector(
 
             val firstSign = blockSignatures.first()
             for (blockSign in blockSignatures) {
-                if (blockSign.blockHash != generatedBlock.hash || blockSign.blockHash != firstSign.blockHash) {
+                if (blockSign.blockHash != pendingBlock.hash || blockSign.blockHash != firstSign.blockHash) {
                     throw IllegalArgumentException("$blockSignatures has wrong sign = $blockSign")
                 }
 
@@ -66,7 +66,7 @@ class SignatureCollector(
 
             val signatures = blockSignatures.map { it.signature }.toSet()
 
-            return setBlockProto(CommunicationProtocol.FullSignedBlock.newBuilder(), generatedBlock)
+            return setBlockProto(CommunicationProtocol.FullSignedBlock.newBuilder(), pendingBlock)
                 .addAllSignatures(signatures)
                 .build()
         } finally {
