@@ -56,6 +56,6 @@ class CryptoControllerTests : ControllerTests() {
     }
 
     private fun createAccountDto(): AccountDto =
-        AccountDto(KeyDto("1", "2"), "0x83a1e77bd25daadd7a889bc36ac207a7d39cfd02")
+        AccountDto(KeyDto("1", "2"), "0x83a1e77Bd25daADd7A889BC36AC207A7D39CFD02")
 
 }
