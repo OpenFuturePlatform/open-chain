@@ -6,8 +6,7 @@ enum class TransactionType(
         private val id: Int
 ) : Dictionary {
 
-    VOTE(1),
-    DELEGATE_REGISTRATION(2);
+    VOTE(1);
 
     override fun getId(): Int = id
 
