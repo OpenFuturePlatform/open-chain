@@ -1,5 +1,6 @@
 package io.openfuture.chain.service
 
+import io.openfuture.chain.block.SignatureCollector
 import io.openfuture.chain.crypto.key.KeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultBlockService(
     private val blockRepository: BlockRepository,
     private val transactionService: TransactionService,
+    private val signatureCollector: SignatureCollector,
     private val keyHolder: KeyHolder,
     private val signatureManager: SignatureManager,
     @Value("\${block.capacity}")private val transactionCapacity: Int
@@ -61,7 +63,8 @@ class DefaultBlockService(
     fun fireBlockCreation(event: BlockCreationEvent) {
         val pendingTransactions = transactionService.getPendingTransactions()
         if (transactionCapacity == pendingTransactions.size) {
-            this.create(pendingTransactions.toList())
+            val block = this.create(pendingTransactions.toList())
+            signatureCollector.setBlockTemplate(block)
         }
     }
 
