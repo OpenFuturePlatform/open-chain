@@ -25,7 +25,7 @@ class MainBlockValidatorTests : ServiceTests() {
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             1512345678L,
             "signature",
-            setOf(
+            listOf(
                 Transaction(
                     "transaction_hash1",
                     1000,
@@ -59,7 +59,7 @@ class MainBlockValidatorTests : ServiceTests() {
             "0000000000000000000000000000000000000000000000000000000000000000",
             1512345678L,
             "signature",
-            setOf(
+            listOf(
                 Transaction(
                     "transaction_hash1",
                     1000,

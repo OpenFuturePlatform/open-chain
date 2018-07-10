@@ -70,34 +70,9 @@ class SeedPhraseValidator(
         var wordIndex = 0
         var entropyOffset = 0
         while (wordIndex < wordIndexes.size) {
-            writeNext11(entropyWithChecksum, wordIndexes[wordIndex], entropyOffset)
+            writeNextWordIndexToArray(entropyWithChecksum, wordIndexes[wordIndex], entropyOffset)
             wordIndex++
             entropyOffset += WORD_INDEX_SIZE
-        }
-    }
-
-    fun writeNext11(bytes: ByteArray, value: Int, offset: Int) {
-        val skip = offset / 8
-        val bitSkip = offset % 8
-        run {
-            //byte 0
-            val firstValue = bytes[skip]
-            val toWrite = (value shr 3 + bitSkip).toByte()
-            bytes[skip] = firstValue or toWrite
-        }
-
-        run {
-            //byte 1
-            val valueInByte = bytes[skip + 1]
-            val i = 5 - bitSkip
-            val toWrite = (if (i > 0) value shl i else value shr -i).toByte()
-            bytes[skip + 1] = valueInByte or toWrite
-        }
-
-        if (bitSkip >= 6) {//byte 2
-            val valueInByte = bytes[skip + 2]
-            val toWrite = (value shl 13 - bitSkip).toByte()
-            bytes[skip + 2] = valueInByte or toWrite
         }
     }
 

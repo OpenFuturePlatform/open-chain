@@ -44,7 +44,7 @@ class BlockValidationServiceTests : ServiceTests() {
             "merkle_hash",
             1510000000L,
             "prev_signature",
-            setOf(
+            listOf(
                 Transaction(
                     "prev_transaction_hash1",
                     2000,
@@ -63,7 +63,7 @@ class BlockValidationServiceTests : ServiceTests() {
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             1512345678L,
             "signature",
-            setOf(
+            listOf(
                 Transaction(
                     "transaction_hash1",
                     1000,
@@ -100,7 +100,7 @@ class BlockValidationServiceTests : ServiceTests() {
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             1512345678L,
             "signature",
-            setOf(
+            listOf(
                 Transaction(
                     "transaction_hash1",
                     1000,
