@@ -8,6 +8,17 @@ import org.springframework.stereotype.Component
 @Component
 class GenesisBlockConverter {
 
+    fun toGenesisBlock(genesisBlock: CommunicationProtocol.GenesisBlock): GenesisBlock {
+        return GenesisBlock(
+            genesisBlock.hash,
+            genesisBlock.height,
+            genesisBlock.previousHash,
+            genesisBlock.merkleHash,
+            genesisBlock.timestamp,
+            genesisBlock.epochIndex,
+            genesisBlock.activeDelegateIpsList.toSet())
+    }
+
     fun toGenesisBlockProto(block: Block): CommunicationProtocol.GenesisBlock {
         val genesisBlock = block as GenesisBlock
         return CommunicationProtocol.GenesisBlock.newBuilder()
