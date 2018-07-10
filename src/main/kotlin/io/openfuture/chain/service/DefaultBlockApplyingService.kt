@@ -45,7 +45,7 @@ class DefaultBlockApplyingService(
     }
 
     override fun addSignature(blockSignature: CommunicationProtocol.BlockSignature) {
-        signatureCollector.addBlockSignature(blockSignature)
+        signatureCollector.addBlockSignatures(blockSignature)
     }
 
     override fun broadcastFullSignedBlock(fullSignedBlock: CommunicationProtocol.FullSignedBlock) {

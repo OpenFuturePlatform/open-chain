@@ -19,7 +19,7 @@ class SignatureCollector(
 
     private val lock = ReentrantReadWriteLock()
 
-    private var blockSignatures = mutableListOf<CommunicationProtocol.BlockSignature>()
+    private var signaturePublicKeyPairs = setOf<CommunicationProtocol.SignaturePublicKeyPair>()
 
     // variable to collect the blocks from the same round only
     private lateinit var pendingBlock: Block
@@ -30,13 +30,13 @@ class SignatureCollector(
         try {
             lock.writeLock().lock()
             this.pendingBlock = generatedBlock
-            blockSignatures = mutableListOf()
+            signaturePublicKeyPairs = mutableSetOf()
         } finally {
             lock.writeLock().unlock()
         }
     }
 
-    fun addBlockSignature(blockSign: CommunicationProtocol.BlockSignature) {
+    fun addBlockSignatures(blockSign: CommunicationProtocol.BlockSignature) {
         try {
             lock.writeLock().lock()
             if (blockSign.blockHash == pendingBlock.hash) {
