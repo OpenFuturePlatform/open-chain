@@ -33,7 +33,7 @@ object HashUtils {
         return result
     }
 
-    fun keccakKeyHash(bytes: ByteArray): ByteArray {
+    fun keccak256(bytes: ByteArray): ByteArray {
         val keccak = Keccak.Digest256()
         keccak.update(bytes)
         return keccak.digest()

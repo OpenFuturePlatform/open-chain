@@ -1,5 +1,6 @@
 package io.openfuture.chain.crypto.domain
 
+import io.openfuture.chain.crypto.util.AddressUtils
 import io.openfuture.chain.crypto.util.HashUtils
 import org.bouncycastle.asn1.sec.SECNamedCurves
 import org.bouncycastle.asn1.sec.SECObjectIdentifiers
@@ -14,6 +15,7 @@ class ECKey(
 
     companion object {
         private const val PRIVATE_KEY_SIZE = 32
+        private const val ADDRESS_KEY_PART_SIZE = 20
 
         private val curve = SECNamedCurves.getByOID(SECObjectIdentifiers.secp256k1)
     }
@@ -52,9 +54,9 @@ class ECKey(
     fun isPrivateEmpty() = null == private
 
     fun getAddress(): String {
-        val hash = HashUtils.keccakKeyHash(public)
-        val addressBytes = Arrays.copyOfRange(hash, 0, 20)
-        return "0x${ByteUtils.toHexString(addressBytes)}"
+        val pubKeyHash = HashUtils.keccak256(public)
+        val address = ByteUtils.toHexString(Arrays.copyOfRange(pubKeyHash, 0, ADDRESS_KEY_PART_SIZE))
+        return AddressUtils.addPrefix(AddressUtils.addChecksum(address))
     }
 
 }
