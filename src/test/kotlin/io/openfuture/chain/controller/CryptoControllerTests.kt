@@ -5,6 +5,7 @@ import io.openfuture.chain.config.any
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.crypto.DerivationKeyRequest
 import io.openfuture.chain.domain.crypto.MasterKeyRequest
+import io.openfuture.chain.domain.crypto.ValidateAddressRequest
 import io.openfuture.chain.domain.crypto.key.AddressKeyDto
 import io.openfuture.chain.domain.crypto.key.KeyDto
 import io.openfuture.chain.service.CryptoService
@@ -34,10 +35,10 @@ class CryptoControllerTests : ControllerTests() {
         given(cryptoService.getMasterKey(seedPhrase)).willReturn(masterKey)
 
         webClient.post().uri("${PathConstant.RPC}/crypto/doGenerateMaster")
-                .body(Mono.just(masterKeyRequest), MasterKeyRequest::class.java)
-                .exchange()
-                .expectStatus().isOk
-                .expectBody(AddressKeyDto::class.java).isEqualTo<Nothing>(expectedAddress)
+            .body(Mono.just(masterKeyRequest), MasterKeyRequest::class.java)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(AddressKeyDto::class.java).isEqualTo<Nothing>(expectedAddress)
     }
 
     @Test
@@ -54,10 +55,33 @@ class CryptoControllerTests : ControllerTests() {
         given(cryptoService.getDerivationKey(seedPhrase, derivationPath)).willReturn(masterKey)
 
         webClient.post().uri("${PathConstant.RPC}/crypto/doDerive")
-                .body(Mono.just(derivationKeyRequest), DerivationKeyRequest::class.java)
-                .exchange()
-                .expectStatus().isOk
-                .expectBody(KeyDto::class.java).isEqualTo<Nothing>(expectedKey)
+            .body(Mono.just(derivationKeyRequest), DerivationKeyRequest::class.java)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(KeyDto::class.java).isEqualTo<Nothing>(expectedKey)
+    }
+
+    @Test
+    fun validateAddressShouldReturnAddressAndStatusOk() {
+        val address = "0x5aF3B0FFB89C09D7A38Fd01E42E0A5e32011e36e"
+        val request = ValidateAddressRequest(address)
+        
+        webClient.post().uri("${PathConstant.RPC}/crypto/validateAddress")
+            .body(Mono.just(request), ValidateAddressRequest::class.java)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(ValidateAddressRequest::class.java).isEqualTo<Nothing>(request)
+    }
+
+    @Test
+    fun validateAddressShouldReturnStatusBadRequest() {
+        val address = "0x5aF3B0FFB89C09D7A38Fd01E42E0A5e32011e36eaaaa"
+        val request = ValidateAddressRequest(address)
+
+        webClient.post().uri("${PathConstant.RPC}/crypto/validateAddress")
+            .body(Mono.just(request), ValidateAddressRequest::class.java)
+            .exchange()
+            .expectStatus().isBadRequest
     }
 
 }
