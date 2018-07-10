@@ -36,7 +36,7 @@ class SignatureCollector(
         }
     }
 
-    fun addBlockSign(blockSign: CommunicationProtocol.BlockSignature) {
+    fun addBlockSignature(blockSign: CommunicationProtocol.BlockSignature) {
         try {
             lock.writeLock().lock()
             if (blockSign.blockHash == generatedBlock.hash) {
@@ -47,7 +47,7 @@ class SignatureCollector(
         }
     }
 
-    fun mergeBlockSigns(): CommunicationProtocol.FullSignedBlock {
+    fun mergeBlockSignatures(): CommunicationProtocol.FullSignedBlock {
         try {
             lock.readLock().lock()
 
