@@ -3,7 +3,7 @@ package io.openfuture.chain.domain.transaction
 import io.openfuture.chain.crypto.util.HashUtils
 
 class TransactionRequest(
-    val blockId: Int,
+    var blockId: Int,
     amount: Int,
     timestamp: Long,
     recipientKey: String,

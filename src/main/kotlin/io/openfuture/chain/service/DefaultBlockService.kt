@@ -1,6 +1,7 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.domain.block.BlockRequest
+import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
@@ -9,7 +10,9 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultBlockService (
-        private val blockRepository: BlockRepository
+    private val blockRepository: BlockRepository,
+    private val wallerService: WalletService,
+    private val transactionService: TransactionService
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -25,7 +28,19 @@ class DefaultBlockService (
 
     @Transactional
     override fun save(request: BlockRequest): Block {
-        return blockRepository.save(Block.of(request))
+        val savedBlock = blockRepository.save(Block.of(request))
+
+        request.transactions.forEach { saveTransactionRequest(savedBlock, it)}
+
+        return savedBlock
+    }
+
+    private fun saveTransactionRequest(block: Block, transactionRequest: TransactionRequest) {
+        val savedTransaction = transactionService.save(transactionRequest.apply { blockId = block.id })
+
+        wallerService.updateByTransaction(savedTransaction)
+
+        block.transactions.add(savedTransaction)
     }
 
 }
