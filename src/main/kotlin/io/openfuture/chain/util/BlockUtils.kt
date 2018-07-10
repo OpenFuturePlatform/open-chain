@@ -5,7 +5,7 @@ import io.openfuture.chain.domain.transaction.TransactionDto
 
 object BlockUtils {
 
-    fun calculateMerkleRoot(transactions: MutableSet<TransactionDto>): String {
+    fun calculateMerkleRoot(transactions: MutableSet<out TransactionDto>): String {
         if (transactions.size == 1) {
             return transactions.single().hash
         }

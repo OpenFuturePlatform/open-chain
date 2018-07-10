@@ -18,6 +18,7 @@ import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.account.Stakeholder
 import io.openfuture.chain.entity.account.Delegate
 import io.openfuture.chain.entity.transaction.Transaction
+import io.openfuture.chain.entity.transaction.VoteTransaction
 
 interface HardwareInfoService {
 
@@ -43,7 +44,7 @@ interface BlockService {
 
     fun add(dto: MainBlockDto): Block
 
-    fun create(transactions: MutableSet<TransactionDto>): MainBlockDto
+    fun create(transactions: MutableSet<out TransactionDto>): MainBlockDto
 
 }
 
@@ -67,16 +68,19 @@ interface CryptoService {
 
 }
 
-interface TransactionService {
+interface TransactionService<Entity : Transaction> {
 
-    fun getAllPending(): MutableSet<Transaction>
+    fun getAllPending(): MutableSet<Entity>
 
-    fun get(hash: String): Transaction
+    fun get(hash: String): Entity
 
-    fun addToBlock(hash: String, block: Block): Transaction
+    fun addToBlock(hash: String, block: Block): Entity
 
-    // -- votes
-    fun addVote(dto: VoteTransactionDto): Transaction
+}
+
+interface VoteTransactionService : TransactionService<VoteTransaction> {
+
+    fun addVote(dto: VoteTransactionDto): VoteTransaction
 
     fun createVote(data: VoteTransactionData): VoteTransactionDto
 

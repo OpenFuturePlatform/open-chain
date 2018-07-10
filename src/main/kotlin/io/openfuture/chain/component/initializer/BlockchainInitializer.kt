@@ -10,7 +10,7 @@ import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.StakeholderService
-import io.openfuture.chain.service.TransactionService
+import io.openfuture.chain.service.VoteTransactionService
 import io.openfuture.chain.util.BlockUtils
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -24,7 +24,7 @@ import java.util.*
 class BlockchainInitializer(
         private val blockService: BlockService,
         private val stakeholderService: StakeholderService,
-        private val transactionService: TransactionService,
+        private val transactionService: VoteTransactionService,
         private val objectMapper: ObjectMapper
 ) {
 
@@ -85,7 +85,7 @@ class BlockchainInitializer(
     }
 
     @Deprecated("generate block")
-    private fun createBlock(transactions: MutableSet<TransactionDto>): MainBlockDto {
+    private fun createBlock(transactions: MutableSet<out TransactionDto>): MainBlockDto {
         return blockService.create(transactions)
     }
 
