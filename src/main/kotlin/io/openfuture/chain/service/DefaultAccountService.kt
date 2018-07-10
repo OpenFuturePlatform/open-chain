@@ -77,18 +77,21 @@ class DefaultAccountService(
         if (VOTES_LIMIT <= delegate.votes.size && dto.voteType == VoteType.FOR) {
             //todo need to throw exception ?
             log.error("Account with publicKey ${account.publicKey} already spent all votes!")
+            return
         }
 
         if (account.votes.contains(delegate) && dto.voteType == VoteType.FOR) {
             //todo need to throw exception ?
             log.error("Account with publicKey ${account.publicKey} already voted for delegate with publicKey " +
                     "${delegate.publicKey}!")
+            return
         }
 
         if (!account.votes.contains(delegate) && dto.voteType == VoteType.AGAINST) {
             //todo need to throw exception ?
             log.error("Account with publicKey ${account.publicKey} can't remove vote from delegate with " +
                     "publicKey ${delegate.publicKey}!")
+            return
         }
 
         if (dto.voteType == VoteType.FOR) {
