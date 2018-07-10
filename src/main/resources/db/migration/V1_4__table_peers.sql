@@ -1,6 +1,6 @@
-CREATE TABLE network_addresses (
+CREATE TABLE peers (
   id         INTEGER PRIMARY KEY,
-  node_id VARCHAR NOT NULL UNIQUE,
+  network_id VARCHAR NOT NULL UNIQUE,
   host       VARCHAR NOT NULL,
   port       INTEGER NOT NULL
 );

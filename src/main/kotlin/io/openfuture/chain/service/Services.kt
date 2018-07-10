@@ -12,7 +12,7 @@ import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.NetworkAddress
+import io.openfuture.chain.entity.Peer
 import io.openfuture.chain.protocol.CommunicationProtocol
 
 interface HardwareInfoService {
@@ -67,19 +67,19 @@ interface TransactionService {
 
 }
 
-interface NetworkAddressService {
+interface PeerService {
 
-    fun findAll() : List<CommunicationProtocol.NetworkAddress>
+    fun findAll() : List<CommunicationProtocol.Peer>
 
-    fun save(address: NetworkAddress)
+    fun save(address: Peer)
 
-    fun saveAll(addresses: List<CommunicationProtocol.NetworkAddress>)
+    fun saveAll(addresses: List<CommunicationProtocol.Peer>)
 
     fun deleteAll()
 
-    fun deleteByNodeId(nodeId: String)
+    fun deleteByNetworkId(networkId: String)
 
-    fun findByNodeId(nodeId: String) : NetworkAddress?
+    fun findByNetworkId(networkId: String) : Peer?
 
 }
 
@@ -92,4 +92,7 @@ interface NetworkService {
     fun broadcast(packet: CommunicationProtocol.Packet)
 
     fun disconnect(channel: Channel)
+
+    fun activeChannels(): MutableSet<Channel>
+
 }

@@ -16,7 +16,7 @@ message Packet {
         JoinNetworkResponse join_network_response = 6;
         Connect connect = 7;
         Disconnect disconnect = 8;
-        UpdateNetworkAddresses update_network_addresses = 9;
+        PeerEvent peer_event = 9;
     }
 }
 
@@ -28,7 +28,7 @@ enum Type {
     JOIN_NETWORK_RESPONSE = 5;
     CONNECT = 6;
     DISCONNECT = 7;
-    UPDATE_NETWORK_ADDRESSES = 8;
+    PEER_EVENT = 8;
 }
 
 message HeartBeat {
@@ -49,8 +49,8 @@ message TimeSyncRequest {
     int64 node_timestamp = 1;
 }
 
-message NetworkAddress {
-    string node_id = 1;
+message Peer {
+    string network_id = 1;
     string host = 2;
     int32 port = 3;
 }
@@ -60,36 +60,25 @@ message JoinNetworkRequest {
 }
 
 message JoinNetworkResponse {
-    string node_id = 1;
+    string network_id = 1;
     string host = 2;
-    repeated NetworkAddress network_addresses = 3;
+    repeated Peer peers = 3;
 }
 
 message Connect {
-    string node_id = 1;
+    string network_id = 1;
 }
 
 message Disconnect {
     bool leave_network = 1;
 }
 
-message UpdateNetworkAddresses {
+message PeerEvent {
     enum Type {
-        ADD = 0;
-        REMOVE = 1;
-    }
-
-    message AddAddress {
-        NetworkAddress address = 1;
-    }
-
-    message RemoveAddress {
-        string node_id = 1;
+        JOIN_NETWORK = 0;
+        LEAVE_NETWORK = 1;
     }
 
     Type type = 1;
-    oneof operation {
-        AddAddress add_address = 2;
-        RemoveAddress remove_address = 3;
-    }
+    Peer peer = 2;
 }

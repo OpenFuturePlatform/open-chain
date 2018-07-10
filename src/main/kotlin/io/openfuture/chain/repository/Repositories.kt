@@ -1,7 +1,7 @@
 package io.openfuture.chain.repository
 
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.NetworkAddress
+import io.openfuture.chain.entity.Peer
 import io.openfuture.chain.entity.SeedWord
 import io.openfuture.chain.entity.Transaction
 import org.springframework.data.jpa.repository.JpaRepository
@@ -32,10 +32,10 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 }
 
 @Repository
-interface NetworkAddressRepository : BaseRepository<NetworkAddress> {
+interface PeerRepository : BaseRepository<Peer> {
 
-    fun deleteOneByNodeId(nodeId: String)
+    fun deleteOneByNetworkId(networkId: String)
 
-    fun findOneByNodeId(nodeId: String): Optional<NetworkAddress>
+    fun findOneByNetworkId(networkId: String): Optional<Peer>
 
 }

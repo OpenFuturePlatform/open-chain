@@ -3,18 +3,19 @@ package io.openfuture.chain.service
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
-import io.openfuture.chain.nio.ChannelStorage
 import io.openfuture.chain.nio.NodeAttributes
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class DefaultNetworkService(
     private val clientBootstrap: Bootstrap,
-    private val nodeAttributes: NodeAttributes,
-    private val channels: ChannelStorage
+    private val nodeAttributes: NodeAttributes
 ) : NetworkService {
+
+    private val channels : MutableSet<Channel> = ConcurrentHashMap.newKeySet()
 
     companion object {
         private val logger = LoggerFactory.getLogger(DefaultNetworkService::class.java)
@@ -51,7 +52,13 @@ class DefaultNetworkService(
     }
 
     override fun broadcast(packet: CommunicationProtocol.Packet) {
-        channels.writeAndFlush(packet)
+        channels.forEach {
+            it.writeAndFlush(packet)
+        }
+    }
+
+    override fun activeChannels() : MutableSet<Channel> {
+        return channels
     }
 
     private fun createJoinNetworkMessage() : CommunicationProtocol.Packet{
