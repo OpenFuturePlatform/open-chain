@@ -1,14 +1,14 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.domain.delegate.AccountDto
+import io.openfuture.chain.domain.delegate.StakeholderDto
 import io.openfuture.chain.domain.transaction.data.VoteDto
-import io.openfuture.chain.entity.account.Account
+import io.openfuture.chain.entity.account.Stakeholder
 import io.openfuture.chain.entity.account.Delegate
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.nio.client.handler.ConnectionClientHandler
 import io.openfuture.chain.property.DelegateProperties
-import io.openfuture.chain.repository.AccountRepository
+import io.openfuture.chain.repository.StakeholderRepository
 import io.openfuture.chain.repository.DelegateRepository
 import org.apache.commons.collections4.CollectionUtils
 import org.slf4j.LoggerFactory
@@ -19,11 +19,11 @@ import org.springframework.transaction.annotation.Transactional
 import javax.annotation.PostConstruct
 
 @Service
-class DefaultAccountService(
-        private val repository: AccountRepository<Account>,
+class DefaultStakeholderService(
+        private val repository: StakeholderRepository<Stakeholder>,
         private val delegateRepository: DelegateRepository,
         private val delegateProperties: DelegateProperties
-) : AccountService {
+) : StakeholderService {
 
     companion object {
         private val log = LoggerFactory.getLogger(ConnectionClientHandler::class.java)
@@ -39,14 +39,14 @@ class DefaultAccountService(
     }
 
     @Transactional(readOnly = true)
-    override fun getAllAccounts(): List<Account> = repository.findAll()
+    override fun getAllStakeholders(): List<Stakeholder> = repository.findAll()
 
     @Transactional(readOnly = true)
-    override fun getAccountByPublicKey(publicKey: String): Account = repository.findOneByPublicKey(publicKey)
-            ?: throw NotFoundException("Account with publicKey: $publicKey not exist!")
+    override fun getStakeholderByPublicKey(publicKey: String): Stakeholder = repository.findOneByPublicKey(publicKey)
+            ?: throw NotFoundException("Stakeholder with publicKey: $publicKey not exist!")
 
     @Transactional
-    override fun addAccount(dto: AccountDto): Account = repository.save(Account.of(dto))
+    override fun addStakeholder(dto: StakeholderDto): Stakeholder = repository.save(Stakeholder.of(dto))
 
     @Transactional(readOnly = true)
     override fun getAllDelegates(): List<Delegate> = delegateRepository.findAll()
@@ -71,25 +71,25 @@ class DefaultAccountService(
 
     @Transactional
     override fun updateDelegateRatingByVote(dto: VoteDto) {
-        val account = this.getAccountByPublicKey(dto.accountKey)
+        val account = this.getStakeholderByPublicKey(dto.accountKey)
         val delegate = this.getDelegateByPublicKey(dto.delegateKey)
 
         if (VOTES_LIMIT <= delegate.votes.size && dto.voteType == VoteType.FOR) {
             //todo need to throw exception ?
-            log.error("Account with publicKey ${account.publicKey} already spent all votes!")
+            log.error("Stakeholder with publicKey ${account.publicKey} already spent all votes!")
             return
         }
 
         if (account.votes.contains(delegate) && dto.voteType == VoteType.FOR) {
             //todo need to throw exception ?
-            log.error("Account with publicKey ${account.publicKey} already voted for delegate with publicKey " +
+            log.error("Stakeholder with publicKey ${account.publicKey} already voted for delegate with publicKey " +
                     "${delegate.publicKey}!")
             return
         }
 
         if (!account.votes.contains(delegate) && dto.voteType == VoteType.AGAINST) {
             //todo need to throw exception ?
-            log.error("Account with publicKey ${account.publicKey} can't remove vote from delegate with " +
+            log.error("Stakeholder with publicKey ${account.publicKey} can't remove vote from delegate with " +
                     "publicKey ${delegate.publicKey}!")
             return
         }

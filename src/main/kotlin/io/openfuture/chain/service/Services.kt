@@ -5,7 +5,7 @@ import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
 import io.openfuture.chain.domain.block.MainBlockDto
 import io.openfuture.chain.domain.crypto.key.WalletDto
-import io.openfuture.chain.domain.delegate.AccountDto
+import io.openfuture.chain.domain.delegate.StakeholderDto
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
@@ -15,7 +15,7 @@ import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.block.Block
-import io.openfuture.chain.entity.account.Account
+import io.openfuture.chain.entity.account.Stakeholder
 import io.openfuture.chain.entity.account.Delegate
 import io.openfuture.chain.entity.transaction.Transaction
 
@@ -82,14 +82,14 @@ interface TransactionService {
 
 }
 
-interface AccountService {
+interface StakeholderService {
 
     // -- accounts
-    fun getAllAccounts(): List<Account>
+    fun getAllStakeholders(): List<Stakeholder>
 
-    fun getAccountByPublicKey(publicKey: String): Account
+    fun getStakeholderByPublicKey(publicKey: String): Stakeholder
 
-    fun addAccount(dto: AccountDto): Account
+    fun addStakeholder(dto: StakeholderDto): Stakeholder
 
     // -- delegates
     fun getAllDelegates(): List<Delegate>

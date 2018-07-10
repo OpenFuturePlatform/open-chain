@@ -9,7 +9,7 @@ import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.service.AccountService
+import io.openfuture.chain.service.StakeholderService
 import io.openfuture.chain.service.TransactionService
 import io.openfuture.chain.util.BlockUtils
 import org.slf4j.LoggerFactory
@@ -23,7 +23,7 @@ import java.util.*
 @Component
 class BlockchainInitializer(
         private val blockService: BlockService,
-        private val accountService: AccountService,
+        private val stakeholderService: StakeholderService,
         private val transactionService: TransactionService,
         private val objectMapper: ObjectMapper
 ) {
@@ -72,8 +72,8 @@ class BlockchainInitializer(
     @Deprecated("generate random transaction")
     private fun createRandomTransaction(): VoteTransactionDto {
         val amount = Random().nextLong()
-        val delegates = accountService.getAllDelegates()
-        val accounts = accountService.getAllAccounts()
+        val delegates = stakeholderService.getAllDelegates()
+        val accounts = stakeholderService.getAllStakeholders()
 
         val recipientKey = accounts[Random().nextInt(2)].publicKey
         val delegateKey = delegates[Random().nextInt(21)].publicKey

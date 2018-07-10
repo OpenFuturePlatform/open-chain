@@ -19,7 +19,7 @@ class DefaultTransactionService(
         private val repository: TransactionRepository<Transaction>,
         private val voteRepository: VoteTransactionRepository,
         private val nodeClock: NodeClock,
-        private val accountService: AccountService
+        private val stakeholderService: StakeholderService
 ) : TransactionService {
 
     @Transactional(readOnly = true)
@@ -45,9 +45,9 @@ class DefaultTransactionService(
     // --  votes logic // todo need to create TransactionVoteService with extends this
     @Transactional
     override fun addVote(dto: VoteTransactionDto): Transaction {
-        //todo need to addAccount validation
+        //todo need to add validation
         val vote = VoteDto(dto.senderKey, dto.delegateKey, dto.voteType, dto.weight) //todo need to think about calculate the vote weight
-        accountService.updateDelegateRatingByVote(vote)
+        stakeholderService.updateDelegateRatingByVote(vote)
         return voteRepository.save(dto.toEntity())
     }
 

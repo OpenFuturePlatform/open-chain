@@ -1,7 +1,7 @@
 package io.openfuture.chain.repository
 
 import io.openfuture.chain.entity.*
-import io.openfuture.chain.entity.account.Account
+import io.openfuture.chain.entity.account.Stakeholder
 import io.openfuture.chain.entity.account.Delegate
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
@@ -51,11 +51,11 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 }
 
 @Repository
-interface AccountRepository<Entity : Account> : BaseRepository<Entity> {
+interface StakeholderRepository<Entity : Stakeholder> : BaseRepository<Entity> {
 
     fun findOneByPublicKey(publicKey: String): Entity?
 
 }
 
 @Repository
-interface DelegateRepository : AccountRepository<Delegate>
+interface DelegateRepository : StakeholderRepository<Delegate>

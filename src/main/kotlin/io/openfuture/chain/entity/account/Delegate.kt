@@ -12,4 +12,4 @@ class Delegate(
         @Column(name = "rating", nullable = false)
         var rating: Int = 0
 
-) : Account(username, address, publicKey)
+) : Stakeholder(username, address, publicKey)

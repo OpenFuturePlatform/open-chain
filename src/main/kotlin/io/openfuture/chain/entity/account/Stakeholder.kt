@@ -1,13 +1,13 @@
 package io.openfuture.chain.entity.account
 
-import io.openfuture.chain.domain.delegate.AccountDto
+import io.openfuture.chain.domain.delegate.StakeholderDto
 import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.*
 
 @Entity
-@Table(name = "accounts")
+@Table(name = "stakeholders")
 @Inheritance(strategy = InheritanceType.JOINED)
-open class Account(
+open class Stakeholder(
 
         @Column(name = "username", nullable = false)
         val username: String,
@@ -20,8 +20,8 @@ open class Account(
 
         @ManyToMany(fetch = FetchType.EAGER)
         @JoinTable(
-                name = "accounts_2_delegates",
-                joinColumns = [(JoinColumn(name = "account_id", nullable = false))],
+                name = "stakeholders_2_delegates",
+                joinColumns = [(JoinColumn(name = "stakeholder_id", nullable = false))],
                 inverseJoinColumns = [(JoinColumn(name = "delegate_id", nullable = false))]
         )
         val votes: MutableSet<Delegate> = mutableSetOf()
@@ -29,7 +29,7 @@ open class Account(
 ) : BaseModel() {
 
     companion object {
-        fun of(delegateDto: AccountDto): Account = Account(
+        fun of(delegateDto: StakeholderDto): Stakeholder = Stakeholder(
                 delegateDto.username,
                 delegateDto.address,
                 delegateDto.publicKey
