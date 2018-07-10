@@ -34,7 +34,7 @@ class DefaultBlockService(
     override fun getLast(): Block = blockRepository.findFirstByOrderByHeightDesc()
         ?: throw NotFoundException("Last block not exist!")
 
-    fun create(transactions: Set<Transaction>): Block {
+    fun create(transactions: List<Transaction>): Block {
         val previousBlock = getLast()
         val merkleRootHash = BlockUtils.calculateMerkleRoot(transactions)
         val time = System.currentTimeMillis()
@@ -61,7 +61,7 @@ class DefaultBlockService(
     fun fireBlockCreation(event: BlockCreationEvent) {
         val pendingTransactions = transactionService.getPendingTransactions()
         if (transactionCapacity == pendingTransactions.size) {
-            this.create(pendingTransactions.toSet())
+            this.create(pendingTransactions.toList())
         }
     }
 

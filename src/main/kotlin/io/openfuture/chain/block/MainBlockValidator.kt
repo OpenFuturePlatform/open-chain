@@ -33,7 +33,7 @@ class MainBlockValidator : BlockValidator {
         return BlockVersion.MAIN.version
     }
 
-    private fun transactionsIsWellFormed(transactions: Set<Transaction>): Boolean {
+    private fun transactionsIsWellFormed(transactions: List<Transaction>): Boolean {
         val transactionHashes = HashSet<String>()
         for (transaction in transactions) {
 

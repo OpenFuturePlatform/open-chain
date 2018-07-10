@@ -105,7 +105,7 @@ class BlockCollector(
             mainBlock.merkleHash,
             mainBlock.timestamp,
             mainBlock.signature,
-            mainBlock.transactionsList.map { toTransaction(it) }.toSet())
+            mainBlock.transactionsList.map { toTransaction(it) }.toList())
     }
 
     private fun toGenesisBlock(signedBlock: CommunicationProtocol.SignedBlock): GenesisBlock {
