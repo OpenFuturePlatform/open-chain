@@ -2,6 +2,7 @@ package io.openfuture.chain.block
 
 import io.openfuture.chain.domain.block.SignaturePublicKeyPair
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.nio.converter.BlockSignaturesConverter
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.protocol.CommunicationProtocol.BlockSignatures
 import org.springframework.stereotype.Component
