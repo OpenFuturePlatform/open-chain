@@ -10,13 +10,11 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
-import org.mockito.BDDMockito.verify
 import org.mockito.Mock
 
 class DefaultTransactionServiceTests : ServiceTests() {
 
     @Mock private lateinit var repository: TransactionRepository
-    @Mock private lateinit var walletService: DefaultWalletService
     @Mock private lateinit var blockService: DefaultBlockService
 
     private lateinit var service: TransactionService
@@ -24,7 +22,7 @@ class DefaultTransactionServiceTests : ServiceTests() {
 
     @Before
     fun setUp() {
-        service = DefaultTransactionService(repository, walletService, blockService)
+        service = DefaultTransactionService(repository, blockService)
     }
 
     @Test
@@ -36,8 +34,6 @@ class DefaultTransactionServiceTests : ServiceTests() {
         given(repository.save(any(Transaction::class.java))).will { invocation -> invocation.arguments[0] }
 
         val actualTransaction = service.save(request)
-
-        verify(walletService).updateByTransaction(actualTransaction)
 
         assertThat(actualTransaction.block).isEqualTo(block)
         assertThat(actualTransaction.hash).isEqualTo(request.hash)

@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultTransactionService(
     private val transactionRepository: TransactionRepository,
-    private val wallerService: WalletService,
     private val blockService: BlockService
 ) : TransactionService {
 
@@ -17,11 +16,7 @@ class DefaultTransactionService(
     override fun save(request: TransactionRequest): Transaction {
         val block = blockService.get(request.blockId)
 
-        val savedTransaction = transactionRepository.save(Transaction.of(block, request))
-
-        wallerService.updateByTransaction(savedTransaction)
-
-        return savedTransaction
+        return transactionRepository.save(Transaction.of(block, request))
     }
 
 }
