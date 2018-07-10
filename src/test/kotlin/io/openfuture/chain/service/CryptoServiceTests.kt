@@ -67,7 +67,7 @@ class CryptoServiceTests : ServiceTests() {
         val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
         val seed = ByteArray(32)
 
-        given(seedPhraseValidator.validate(seedPhrase)).willReturn(true)
+        given(seedPhraseValidator.isValid(seedPhrase)).willReturn(true)
         given(seedCalculator.calculateSeed(seedPhrase)).willReturn(seed)
         given(derivationKeysHelper.deriveDefaultAddress(any(ExtendedKey::class.java))).will { invocation -> invocation.arguments[0] }
         given(serializer.serializePublic(any(ExtendedKey::class.java))).willReturn("1")
@@ -87,7 +87,7 @@ class CryptoServiceTests : ServiceTests() {
     fun getRootAccountKeyShouldThrowIllegalArgumentExceptionWhenInvalidSeedPhrase() {
         val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
 
-        given(seedPhraseValidator.validate(seedPhrase)).willReturn(false)
+        given(seedPhraseValidator.isValid(seedPhrase)).willReturn(false)
 
         cryptoService.getRootAccount(seedPhrase)
     }
@@ -99,7 +99,7 @@ class CryptoServiceTests : ServiceTests() {
         val seed = ByteArray(32)
         val extendedKey = ExtendedKey.root(seed)
 
-        given(seedPhraseValidator.validate(seedPhrase)).willReturn(true)
+        given(seedPhraseValidator.isValid(seedPhrase)).willReturn(true)
         given(seedCalculator.calculateSeed(seedPhrase)).willReturn(seed)
         given(derivationKeysHelper.derive(any(ExtendedKey::class.java), any(String::class.java))).willReturn(extendedKey)
 
@@ -113,7 +113,7 @@ class CryptoServiceTests : ServiceTests() {
         val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
         val derivationPath = "m/0"
 
-        given(seedPhraseValidator.validate(seedPhrase)).willReturn(false)
+        given(seedPhraseValidator.isValid(seedPhrase)).willReturn(false)
 
         cryptoService.getDerivationKey(seedPhrase, derivationPath)
     }
