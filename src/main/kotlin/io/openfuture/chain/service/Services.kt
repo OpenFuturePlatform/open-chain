@@ -66,10 +66,8 @@ interface TransactionService {
 
 interface EpochService {
 
-    fun calculateHeightBlocksNextEpoch(): Int
+    fun getActualSizeCurrentEpoch(): Int
 
-    fun getActualHeightBlocksCurrentEpoch(): Int
-
-    fun isNewEpoch(): Boolean
+    fun isCreateGenesisBlock(): Boolean
 
 }

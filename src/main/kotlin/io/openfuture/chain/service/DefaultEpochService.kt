@@ -10,24 +10,15 @@ class DefaultEpochService(
         private val epochProperties: EpochProperties
 ) : EpochService {
 
-    override fun calculateHeightBlocksNextEpoch(): Int {
-        val countActiveDelegates = 21 // TODO("delegateProperties.count")
-
-        return epochProperties.securityParameter!! * countActiveDelegates
-    }
-
-    override fun getActualHeightBlocksCurrentEpoch(): Int {
+    override fun getActualSizeCurrentEpoch(): Int {
         val orderNumberLastBlock = 130 // TODO("blockService.getLastBlock().orderNumber")
         val orderNumberLastGenesisBlock = 100 // TODO("genesisBlockService.getLastBlock().orderNumber")
 
-        return (orderNumberLastBlock + 1) - orderNumberLastGenesisBlock
+        return orderNumberLastBlock - orderNumberLastGenesisBlock
     }
 
-    override fun isNewEpoch(): Boolean {
-        val heightBlocksCurrentEpoch = 100 // TODO("genesisBlockService.getLastBlock().heightBlocks")
-        val actualHeightBlocksCurrentEpoch = getActualHeightBlocksCurrentEpoch()
-
-        return heightBlocksCurrentEpoch == actualHeightBlocksCurrentEpoch
+    override fun isCreateGenesisBlock(): Boolean {
+        return (epochProperties.size!! - 1) == getActualSizeCurrentEpoch()
     }
 
 }
