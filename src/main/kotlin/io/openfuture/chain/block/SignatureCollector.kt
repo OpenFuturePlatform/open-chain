@@ -1,10 +1,8 @@
 package io.openfuture.chain.block
 
-import io.openfuture.chain.crypto.signature.SignatureManager
+import io.openfuture.chain.domain.block.SignaturePublicKeyPair
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.nio.converter.BlockSignaturesConverter
-import io.openfuture.chain.nio.converter.GenesisBlockConverter
-import io.openfuture.chain.nio.converter.MainBlockConverter
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.protocol.CommunicationProtocol.BlockSignatures
 import org.springframework.stereotype.Component
@@ -12,29 +10,26 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 
 @Component
 class SignatureCollector(
-    private val signatureManager: SignatureManager,
-    private val genesisBlockConverter: GenesisBlockConverter,
-    private val blockSignaturesConverter: BlockSignaturesConverter,
-    private val mainBlockConverter: MainBlockConverter
+    private val blockSignaturesConverter: BlockSignaturesConverter
 ) {
 
     private val lock = ReentrantReadWriteLock()
 
-    private var signaturePublicKeyPairs = HashSet<SignaturePublicKeyPair>()
+    private val signaturePublicKeyPairs = mutableSetOf<SignaturePublicKeyPair>()
 
-    // variable to collect the blocks from the same round only
+    // variable to collect the signatures from the same round only
     private lateinit var pendingBlock: Block
 
 
     fun getBlockSignatures(): BlockSignatures {
         val blockSignaturesBuilder = BlockSignatures.newBuilder()
-        val communicationProtocolBuiler = CommunicationProtocol.SignaturePublicKeyPair.newBuilder()
+        val communicationProtocolBuilder = CommunicationProtocol.SignaturePublicKeyPair.newBuilder()
 
         blockSignaturesConverter.setBlockProto(blockSignaturesBuilder, pendingBlock)
 
         val signatures = signaturePublicKeyPairs
             .map {
-                communicationProtocolBuiler
+                communicationProtocolBuilder
                     .setSignature(it.signature)
                     .setPublicKey(it.publicKey)
                     .build()
@@ -50,7 +45,7 @@ class SignatureCollector(
         try {
             lock.writeLock().lock()
             this.pendingBlock = generatedBlock
-            signaturePublicKeyPairs = HashSet()
+            signaturePublicKeyPairs.clear()
         } finally {
             lock.writeLock().unlock()
         }

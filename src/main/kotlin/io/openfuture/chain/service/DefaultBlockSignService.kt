@@ -2,10 +2,10 @@ package io.openfuture.chain.service
 
 import io.openfuture.chain.block.BlockValidationService
 import io.openfuture.chain.block.SignatureCollector
-import io.openfuture.chain.block.SignaturePublicKeyPair
 import io.openfuture.chain.crypto.key.KeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.domain.block.SignaturePublicKeyPair
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.nio.converter.BlockSignaturesConverter
 import io.openfuture.chain.protocol.CommunicationProtocol
