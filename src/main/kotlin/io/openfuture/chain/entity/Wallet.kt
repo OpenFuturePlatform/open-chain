@@ -9,10 +9,10 @@ import javax.persistence.Table
 @Table(name = "wallets")
 class Wallet(
 
-        @Column(name = "address", nullable = false)
-        var address: String,
+    @Column(name = "address", nullable = false)
+    var address: String,
 
-        @Column(name = "balance", nullable = false)
-        var balance: Double = 0.0
+    @Column(name = "balance", nullable = false)
+    var balance: Double = 0.0
 
 ) : BaseModel()

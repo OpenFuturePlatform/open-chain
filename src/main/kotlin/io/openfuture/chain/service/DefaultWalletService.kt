@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class DefaultWalletService(
-        private val repository: WalletRepository
+    private val repository: WalletRepository
 ) : WalletService {
 
     companion object {
@@ -16,7 +16,7 @@ class DefaultWalletService(
 
 
     override fun getBalance(address: String): Double =
-            repository.findOneByAddress(address)?.balance ?: DEFAULT_WALLET_BALANCE
+        repository.findOneByAddress(address)?.balance ?: DEFAULT_WALLET_BALANCE
 
     override fun updateByTransaction(transaction: Transaction) {
         updateByAddress(transaction.senderAddress, -transaction.amount)
