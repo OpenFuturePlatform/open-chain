@@ -12,6 +12,9 @@ message Packet {
         HeartBeat heart_beat = 2;
         TimeSyncRequest time_sync_request = 3;
         TimeSyncResponse time_sync_response = 4;
+        Transaction transaction = 5;
+        MainBlock main_block = 6;
+        GenesisBlock genesis_block = 7;
     }
 }
 
@@ -19,6 +22,9 @@ enum Type {
     HEART_BEAT = 0;
     TIME_SYNC_REQUEST = 1;
     TIME_SYNC_RESPONSE = 2;
+    MAIN_BLOCK = 3;
+    SIGNED_BLOCK = 4;
+    FULL_SIGNED_BLOCK = 5;
 }
 
 message HeartBeat {
@@ -37,4 +43,49 @@ message TimeSyncResponse {
 
 message TimeSyncRequest {
     int64 nodeTimestamp = 1;
+}
+
+message Transaction {
+    string hash = 1;
+    int32 amount = 2;
+    int64 timestamp = 3;
+    string recipientkey = 4;
+    string senderKey = 5;
+    string signature = 6;
+}
+
+message MainBlock {
+    string hash = 1;
+    int64 height = 2;
+    string previousHash = 3;
+    string merkleHash = 4;
+    int64 timestamp = 5;
+    int32 version = 6;
+    string signature = 7;
+    repeated Transaction transactions = 8;
+}
+
+message GenesisBlock {
+    string hash = 1;
+    int64 height = 2;
+    string previousHash = 3;
+    string merkleHash = 4;
+    int64 timestamp = 5;
+    int32 version = 6;
+    int64 epochIndex = 7;
+    repeated string activeDelegateIps = 8;
+}
+
+message SignaturePublicKeyPair {
+    string signature = 1;
+    string publicKey = 2;
+}
+
+message BlockSignatures {
+    oneof body {
+        GenesisBlock genesisBlock = 1;
+        MainBlock mainBlock = 2;
+    }
+
+    repeated SignaturePublicKeyPair signatures = 3;
 }
