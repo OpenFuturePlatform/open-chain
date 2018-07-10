@@ -3,6 +3,7 @@ package io.openfuture.chain.block
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.BlockVersion
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.service.BlockService
@@ -28,7 +29,7 @@ class BlockValidationServiceTests : ServiceTests() {
     fun setUp() {
         val validators = HashMap<String, BlockValidator>()
         validators.put("", blockValidator)
-        given(blockValidator.getVersion()).willReturn(2)
+        given(blockValidator.getVersion()).willReturn(BlockVersion.MAIN.version)
         given(applicationContext.getBeansOfType(BlockValidator::class.java)).willReturn(validators)
         blockValidationService = BlockValidationService(blockService, applicationContext)
         blockValidationService.init()
@@ -36,14 +37,14 @@ class BlockValidationServiceTests : ServiceTests() {
 
     @Test
     fun isValidShouldReturnTrue() {
-        val previouseBlock = MainBlock(
+        val previousBlock = MainBlock(
             "prev_block_hash",
             122,
             "previous_hash",
             "merkle_hash",
             1510000000L,
             "prev_signature",
-            setOf(
+            listOf(
                 Transaction(
                     "prev_transaction_hash1",
                     2000,
@@ -62,7 +63,7 @@ class BlockValidationServiceTests : ServiceTests() {
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             1512345678L,
             "signature",
-            setOf(
+            listOf(
                 Transaction(
                     "transaction_hash1",
                     1000,
@@ -83,7 +84,7 @@ class BlockValidationServiceTests : ServiceTests() {
         )
 
         given(blockValidator.isValid(any(Block::class.java))).willReturn(true)
-        given(blockService.getLast()).willReturn(previouseBlock)
+        given(blockService.getLast()).willReturn(previousBlock)
 
         val isValid = blockValidationService.isValid(block)
 
@@ -99,7 +100,7 @@ class BlockValidationServiceTests : ServiceTests() {
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             1512345678L,
             "signature",
-            setOf(
+            listOf(
                 Transaction(
                     "transaction_hash1",
                     1000,

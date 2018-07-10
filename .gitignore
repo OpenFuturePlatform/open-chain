@@ -4,3 +4,4 @@ out/
 .gradle/
 *.iml
 *.db
+*.txt
