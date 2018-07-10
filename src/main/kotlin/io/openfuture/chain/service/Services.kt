@@ -59,6 +59,10 @@ interface CryptoService {
 
 interface TransactionService {
 
+    fun save(transaction: Transaction): Transaction
+
+    fun getPendingTransactions(): List<Transaction>
+
 }
 
 interface NetworkService {
@@ -70,9 +74,5 @@ interface NetworkService {
     fun connect(host : String, port: Int)
 
     fun broadcast(packet: CommunicationProtocol.Packet)
-
-    fun save(transaction: Transaction): Transaction
-
-    fun getPendingTransactions(): List<Transaction>
 
 }
