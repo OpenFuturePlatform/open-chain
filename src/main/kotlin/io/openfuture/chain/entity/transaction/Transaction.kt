@@ -4,17 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.base.BaseModel
 import io.openfuture.chain.entity.block.Block
-import io.openfuture.chain.entity.dictionary.TransactionType
-import io.openfuture.chain.util.DictionaryUtils
 import javax.persistence.*
 
 @Entity
 @Table(name = "transactions")
 @Inheritance(strategy = InheritanceType.JOINED)
-abstract class Transaction(
-
-        @Column(name = "type_id", nullable = false, updatable = false)
-        var typeId: Int,
+open class Transaction(
 
         @Column(name = "timestamp", nullable = false)
         var timestamp: Long,
@@ -41,8 +36,15 @@ abstract class Transaction(
 
 ) : BaseModel() {
 
-        fun getType() = DictionaryUtils.valueOf(TransactionType::class.java, typeId)
-
-        abstract fun toDto(): TransactionDto
+    companion object {
+        fun of(dto: TransactionDto): Transaction = Transaction(
+                dto.timestamp,
+                dto.amount,
+                dto.recipientKey,
+                dto.senderKey,
+                dto.senderSignature,
+                dto.hash
+        )
+    }
 
 }

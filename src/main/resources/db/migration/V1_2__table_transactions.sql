@@ -1,12 +1,5 @@
-CREATE TABLE transaction_types (
-  id  INT PRIMARY KEY,
-  key VARCHAR NOT NULL UNIQUE
-);
-INSERT INTO transaction_types (id, key) VALUES (1, 'VOTE');
---
 CREATE TABLE transactions (
   id               INTEGER PRIMARY KEY,
-  type_id          INTEGER NOT NULL REFERENCES transaction_types,
   timestamp        BIGINT  NOT NULL,
   amount           BIGINT  NOT NULL,
   recipient_key    VARCHAR NOT NULL,

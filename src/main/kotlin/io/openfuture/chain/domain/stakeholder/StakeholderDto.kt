@@ -1,13 +1,11 @@
-package io.openfuture.chain.domain.delegate
+package io.openfuture.chain.domain.stakeholder
 
 import io.openfuture.chain.entity.account.Stakeholder
 
-data class StakeholderDto(
+open class StakeholderDto(
         val username: String,
         val address: String,
-        val publicKey: String,
-        val rating: Int = 0,
-        val isDelegate: Boolean = false
+        val publicKey: String
 ) {
 
     constructor(stakeholder: Stakeholder) : this(

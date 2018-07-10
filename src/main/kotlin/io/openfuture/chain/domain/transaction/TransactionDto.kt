@@ -2,7 +2,7 @@ package io.openfuture.chain.domain.transaction
 
 import io.openfuture.chain.entity.transaction.Transaction
 
-abstract class TransactionDto(
+open class TransactionDto(
         var timestamp: Long,
         var amount: Long,
         var recipientKey: String,
@@ -11,6 +11,13 @@ abstract class TransactionDto(
         var hash: String
 ) {
 
-    abstract fun toEntity(): Transaction
+    constructor(transaction: Transaction) : this(
+            transaction.timestamp,
+            transaction.amount,
+            transaction.recipientKey,
+            transaction.senderKey,
+            transaction.senderSignature,
+            transaction.hash
+    )
 
 }

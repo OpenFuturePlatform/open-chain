@@ -1,6 +1,7 @@
 package io.openfuture.chain.entity.block
 
 import io.openfuture.chain.domain.block.MainBlockDto
+import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.transaction.Transaction
 import io.openfuture.chain.entity.dictionary.BlockVersion
 import javax.persistence.*
@@ -19,16 +20,6 @@ class MainBlock(hash: String, height: Long, previousHash: String,
 
 ) : Block(hash, height, previousHash, merkleHash, timestamp, BlockVersion.MAIN.version) {
 
-    fun toDto(): MainBlockDto = MainBlockDto(
-            this.hash,
-            this.height,
-            this.previousHash,
-            this.merkleHash,
-            this.timestamp,
-            this.signature,
-            this.transactions.map { it.toDto() }.toSet()
-    )
-
     companion object {
         fun of(dto: MainBlockDto): MainBlock = MainBlock(
                 dto.hash,
@@ -38,4 +29,5 @@ class MainBlock(hash: String, height: Long, previousHash: String,
                 dto.timestamp,
                 dto.signature)
     }
+
 }

@@ -2,11 +2,10 @@ package io.openfuture.chain.service
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
-import io.openfuture.chain.domain.delegate.StakeholderDto
+import io.openfuture.chain.domain.stakeholder.StakeholderDto
 import io.openfuture.chain.entity.account.Stakeholder
-import io.openfuture.chain.property.DelegateProperties
 import io.openfuture.chain.repository.StakeholderRepository
-import io.openfuture.chain.repository.DelegateRepository
+import io.openfuture.chain.service.stakeholder.DefaultStakeholderService
 import org.assertj.core.api.Java6Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -16,16 +15,14 @@ import org.mockito.Mock
 
 class DefaultStakeholderServiceTest : ServiceTests() {
 
-    private lateinit var service: StakeholderService
+    private lateinit var serviceBase: StakeholderService
 
     @Mock private lateinit var repository: StakeholderRepository<Stakeholder>
-    @Mock private lateinit var delegateRepository: DelegateRepository
-    @Mock private lateinit var delegateProperties: DelegateProperties
 
 
     @Before
     fun setUp() {
-        service = DefaultStakeholderService(repository, delegateRepository, delegateProperties)
+        serviceBase = DefaultStakeholderService(repository)
     }
 
     @Test
@@ -34,7 +31,7 @@ class DefaultStakeholderServiceTest : ServiceTests() {
 
         given(repository.findAll()).willReturn(stakeholders)
 
-        val actualStakeholders = service.getAllStakeholders()
+        val actualStakeholders = serviceBase.getAll()
 
         assertThat(actualStakeholders).isEqualTo(stakeholders)
     }
@@ -45,7 +42,7 @@ class DefaultStakeholderServiceTest : ServiceTests() {
 
         given(repository.findOneByPublicKey(delegate.publicKey)).willReturn(delegate)
 
-        val actualDelegate = service.getStakeholderByPublicKey(delegate.publicKey)
+        val actualDelegate = serviceBase.getByPublicKey(delegate.publicKey)
 
         assertThat(actualDelegate).isEqualTo(delegate)
     }
@@ -57,7 +54,7 @@ class DefaultStakeholderServiceTest : ServiceTests() {
 
         given(repository.save(any(Stakeholder::class.java))).will { invocation -> invocation.arguments[0] }
 
-        val actualDelegate = service.addStakeholder(stakeholderDto)
+        val actualDelegate = serviceBase.add(stakeholderDto)
 
         assertThat(actualDelegate.username).isEqualTo(stakeholder.username)
         assertThat(actualDelegate.address).isEqualTo(stakeholder.address)

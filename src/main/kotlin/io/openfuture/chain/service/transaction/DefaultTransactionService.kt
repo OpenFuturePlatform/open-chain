@@ -1,10 +1,11 @@
-package io.openfuture.chain.service
+package io.openfuture.chain.service.transaction
 
 import io.openfuture.chain.entity.transaction.Transaction
 import io.openfuture.chain.repository.TransactionRepository
+import io.openfuture.chain.service.TransactionService
 import org.springframework.stereotype.Service
 
 @Service
 class DefaultTransactionService(
         repository: TransactionRepository<Transaction>
-) : BaseTransactionService<Transaction>(repository), TransactionService<Transaction>
+) : DefaultBaseTransactionService<Transaction>(repository), TransactionService

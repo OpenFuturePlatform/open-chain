@@ -8,9 +8,7 @@ import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.dictionary.VoteType
-import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.service.StakeholderService
-import io.openfuture.chain.service.VoteTransactionService
+import io.openfuture.chain.service.*
 import io.openfuture.chain.util.BlockUtils
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -24,6 +22,7 @@ import java.util.*
 class BlockchainInitializer(
         private val blockService: BlockService,
         private val stakeholderService: StakeholderService,
+        private val delegateService: DelegateService,
         private val transactionService: VoteTransactionService,
         private val objectMapper: ObjectMapper
 ) {
@@ -50,7 +49,7 @@ class BlockchainInitializer(
 
     @Scheduled(fixedDelayString = "15000")
     fun createBlockSchedule() {
-        val transactions = transactionService.getAllPending().map { it.toDto() }.toMutableSet()
+        val transactions = transactionService.getAllPending().map { TransactionDto(it) }.toMutableSet()
         if (CollectionUtils.isEmpty(transactions)) {
             return
         }
@@ -72,8 +71,8 @@ class BlockchainInitializer(
     @Deprecated("generate random transaction")
     private fun createRandomTransaction(): VoteTransactionDto {
         val amount = Random().nextLong()
-        val delegates = stakeholderService.getAllDelegates()
-        val stakeholders = stakeholderService.getAllStakeholders()
+        val delegates = delegateService.getActiveDelegates()
+        val stakeholders = stakeholderService.getAll()
 
         val recipientKey = stakeholders[Random().nextInt(2)].publicKey
         val delegateKey = delegates[Random().nextInt(21)].publicKey

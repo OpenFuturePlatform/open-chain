@@ -1,6 +1,6 @@
 package io.openfuture.chain.entity.account
 
-import io.openfuture.chain.domain.delegate.StakeholderDto
+import io.openfuture.chain.domain.stakeholder.StakeholderDto
 import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.*
 

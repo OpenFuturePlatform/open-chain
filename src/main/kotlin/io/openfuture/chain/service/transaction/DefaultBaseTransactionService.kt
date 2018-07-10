@@ -1,15 +1,16 @@
-package io.openfuture.chain.service
+package io.openfuture.chain.service.transaction
 
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.transaction.Transaction
 import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.TransactionRepository
+import io.openfuture.chain.service.BaseTransactionService
 import org.springframework.transaction.annotation.Transactional
 
-open class BaseTransactionService<Entity : Transaction>(
+abstract class DefaultBaseTransactionService<Entity : Transaction>(
         protected val repository: TransactionRepository<Entity>
-) : TransactionService<Entity> {
+) : BaseTransactionService<Entity> {
 
     @Transactional(readOnly = true)
     override fun getAllPending(): MutableSet<Entity> {
