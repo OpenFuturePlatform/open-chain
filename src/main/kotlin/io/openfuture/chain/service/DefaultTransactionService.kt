@@ -9,7 +9,6 @@ import io.openfuture.chain.entity.transaction.Transaction
 import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.TransactionRepository
-import io.openfuture.chain.repository.VoteTransactionRepository
 import io.openfuture.chain.util.TransactionUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,9 +16,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultTransactionService(
         private val repository: TransactionRepository,
-        private val voteTransactionRepository: VoteTransactionRepository,
         private val nodeClock: NodeClock,
-        private val delegateService: AccountService
+        private val accountService: AccountService
 ) : TransactionService {
 
     @Transactional(readOnly = true)
@@ -45,9 +43,9 @@ class DefaultTransactionService(
     // --  votes logic // todo need to create TransactionVoteService with extends this
     @Transactional
     override fun addVote(dto: VoteTransactionDto): Transaction {
-        //todo need to add validation
+        //todo need to addAccount validation
         val vote = VoteDto(dto.senderKey, dto.delegateKey, dto.voteType, dto.weight) //todo need to think about calculate the vote weight
-        delegateService.updateRatingByVote(vote)
+        accountService.updateDelegateRatingByVote(vote)
         return repository.save(dto.toEntity())
     }
 

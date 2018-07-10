@@ -1,6 +1,6 @@
 package io.openfuture.chain.domain.delegate
 
-import io.openfuture.chain.entity.Account
+import io.openfuture.chain.entity.account.Account
 
 data class AccountDto(
         val username: String,
@@ -13,9 +13,7 @@ data class AccountDto(
     constructor(account: Account) : this(
             account.username,
             account.address,
-            account.publicKey,
-            account.rating,
-            account.isDelegate
+            account.publicKey
     )
 
 }

@@ -23,7 +23,7 @@ import java.util.*
 @Component
 class BlockchainInitializer(
         private val blockService: BlockService,
-        private val delegateService: AccountService,
+        private val accountService: AccountService,
         private val transactionService: TransactionService,
         private val objectMapper: ObjectMapper
 ) {
@@ -72,10 +72,11 @@ class BlockchainInitializer(
     @Deprecated("generate random transaction")
     private fun createRandomTransaction(): VoteTransactionDto {
         val amount = Random().nextLong()
-        val activeDelegates = delegateService.getAll()
+        val delegates = accountService.getAllDelegates()
+        val accounts = accountService.getAllAccounts()
 
-        val recipientKey = activeDelegates[Random().nextInt(2)].publicKey
-        val delegateKey = activeDelegates[Random().nextInt(21)].publicKey
+        val recipientKey = accounts[Random().nextInt(2)].publicKey
+        val delegateKey = delegates[Random().nextInt(21)].publicKey
         val type = if (amount % 2 == 0L) VoteType.FOR else VoteType.AGAINST
 
         val data = VoteTransactionData(amount, recipientKey, recipientKey, "senderSignature",

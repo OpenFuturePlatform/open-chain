@@ -15,7 +15,8 @@ import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.block.Block
-import io.openfuture.chain.entity.Account
+import io.openfuture.chain.entity.account.Account
+import io.openfuture.chain.entity.account.Delegate
 import io.openfuture.chain.entity.transaction.Transaction
 
 interface HardwareInfoService {
@@ -83,18 +84,22 @@ interface TransactionService {
 
 interface AccountService {
 
-    fun getAll(): List<Account>
+    // -- accounts
+    fun getAllAccounts(): List<Account>
 
     fun getAccountByPublicKey(publicKey: String): Account
 
-    fun getDelegateByPublicKey(publicKey: String): Account
+    fun addAccount(dto: AccountDto): Account
 
-    fun getActiveDelegates(): List<Account>
+    // -- delegates
+    fun getAllDelegates(): List<Delegate>
+
+    fun getDelegateByPublicKey(publicKey: String): Delegate
+
+    fun getActiveDelegates(): List<Delegate>
 
     fun isValidActiveDelegates(publicKeysDelegates: List<String>): Boolean
 
-    fun add(dto: AccountDto): Account
-
-    fun updateRatingByVote(dto: VoteDto)
+    fun updateDelegateRatingByVote(dto: VoteDto)
 
 }

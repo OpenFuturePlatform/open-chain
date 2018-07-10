@@ -3,9 +3,10 @@ package io.openfuture.chain.service
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.domain.delegate.AccountDto
-import io.openfuture.chain.entity.Account
+import io.openfuture.chain.entity.account.Account
 import io.openfuture.chain.property.DelegateProperties
 import io.openfuture.chain.repository.AccountRepository
+import io.openfuture.chain.repository.DelegateRepository
 import org.assertj.core.api.Java6Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -17,13 +18,14 @@ class DefaultAccountServiceTest : ServiceTests() {
 
     private lateinit var service: AccountService
 
-    @Mock private lateinit var repository: AccountRepository
+    @Mock private lateinit var repository: AccountRepository<Account>
+    @Mock private lateinit var delegateRepository: DelegateRepository
     @Mock private lateinit var delegateProperties: DelegateProperties
 
 
     @Before
     fun setUp() {
-        service = DefaultAccountService(repository, delegateProperties)
+        service = DefaultAccountService(repository, delegateRepository, delegateProperties)
     }
 
     @Test
@@ -32,7 +34,7 @@ class DefaultAccountServiceTest : ServiceTests() {
 
         given(repository.findAll()).willReturn(delegates)
 
-        val actualDelegates = service.getAll()
+        val actualDelegates = service.getAllAccounts()
 
         assertThat(actualDelegates).isEqualTo(delegates)
     }
@@ -55,7 +57,7 @@ class DefaultAccountServiceTest : ServiceTests() {
 
         given(repository.save(any(Account::class.java))).will { invocation -> invocation.arguments[0] }
 
-        val actualDelegate = service.add(delegateDto)
+        val actualDelegate = service.addAccount(delegateDto)
 
         assertThat(actualDelegate.username).isEqualTo(delegate.username)
         assertThat(actualDelegate.address).isEqualTo(delegate.address)
