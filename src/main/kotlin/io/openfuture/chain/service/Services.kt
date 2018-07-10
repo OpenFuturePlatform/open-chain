@@ -1,7 +1,5 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.block.message.FullSignedBlock
-import io.openfuture.chain.block.message.SignedBlock
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
@@ -71,13 +69,13 @@ interface BlockApplyingService {
 
     fun sendBlockToSign(block: Block)
 
-    fun signBlock(block: Block): SignedBlock
+    fun signBlock(block: Block): CommunicationProtocol.BlockSignature
 
-    fun sendSignedBlockOrBroadcast(signedBlock: SignedBlock)
+    fun sendSignedBlockOrBroadcast(blockSignature: CommunicationProtocol.BlockSignature)
 
-    fun sendFullSignedBlock(fullSignedBlock: FullSignedBlock)
+    fun sendFullSignedBlock(fullSignedBlock: CommunicationProtocol.FullSignedBlock)
 
-    fun applyBlock(fullSignedBlock: FullSignedBlock)
+    fun applyBlock(fullSignedBlock: CommunicationProtocol.FullSignedBlock)
 
 }
 
