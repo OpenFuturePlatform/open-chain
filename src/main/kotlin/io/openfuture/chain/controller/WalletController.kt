@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("${PathConstant.RPC}/wallets")
 class WalletController(
-        private val walletService: WalletService
+    private val walletService: WalletService
 ) {
 
     @GetMapping("/{address}/balance")
