@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Address mixed-case checksum
+- Address validation
+- RPC requests: validateAddress
+
 ### Changed
 - Improve end-point of getting a master key by seed phrase by adding a default account info to the response
 
