@@ -5,9 +5,7 @@ enum class PhraseLength(val phraseLength: Int, val entropyLength: Int, val check
     TWELVE(12, 128, 4);
 
     companion object {
-        val phraseLengthMap = PhraseLength.values().associateBy(PhraseLength::phraseLength)
-
-        fun fromPhaseLength(phraseLength: Int) = phraseLengthMap[phraseLength]
+        fun fromPhraseLength(phraseLength: Int): PhraseLength? = values().singleOrNull { it.phraseLength == phraseLength }
     }
 
 }

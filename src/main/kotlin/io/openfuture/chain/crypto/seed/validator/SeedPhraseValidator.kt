@@ -32,11 +32,8 @@ class SeedPhraseValidator(
 
     fun isValid(seedPhrase: String): Boolean {
         val seedPhraseWords = seedPhrase.split(StringUtils.SPACE)
-        if (!PhraseLength.phraseLengthMap.containsKey(seedPhraseWords.size)) {
-            return false
-        }
+        val phaseLength = PhraseLength.fromPhraseLength(seedPhraseWords.size) ?: return false
 
-        val phaseLength = PhraseLength.fromPhaseLength(seedPhraseWords.size)!!
         val byteArraySize = (phaseLength.entropyLength + phaseLength.checkSumLength + MAX_BYTE_SIZE_MOD) / BYTE_SIZE
         val entropyWithChecksum = ByteArray(byteArraySize)
         val seedWordIndexes = seedPhraseWords.map { getWord(it)?.index ?: return false }.toIntArray()
