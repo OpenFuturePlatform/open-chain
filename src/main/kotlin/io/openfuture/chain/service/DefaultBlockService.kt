@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultBlockService(
     private val blockRepository: BlockRepository,
     private val transactionService: TransactionService,
+    private val blockApplyingService: BlockApplyingService,
     private val signatureCollector: SignatureCollector,
     private val keyHolder: KeyHolder,
     private val signatureManager: SignatureManager,
@@ -45,26 +46,25 @@ class DefaultBlockService(
         val privateKey = keyHolder.getPrivateKey()
         val signature = signatureManager.sign(hash, privateKey)
 
-        return blockRepository
-            .save(
-                MainBlock(
-                    HashUtils.bytesToHexString(hash),
-                    previousBlock.height + 1,
-                    previousBlock.hash,
-                    merkleRootHash,
-                    time,
-                    signature,
-                    transactions
-                )
-            )
+        val block = MainBlock(
+            HashUtils.bytesToHexString(hash),
+            previousBlock.height + 1,
+            previousBlock.hash,
+            merkleRootHash,
+            time,
+            signature,
+            transactions
+        )
+        signatureCollector.setPendingBlock(block)
+        blockApplyingService.broadcastBlockToSign(block)
+        return block
     }
 
     @EventListener
     fun fireBlockCreation(event: BlockCreationEvent) {
         val pendingTransactions = transactionService.getPendingTransactions()
         if (transactionCapacity == pendingTransactions.size) {
-            val block = this.create(pendingTransactions.toList())
-            signatureCollector.setBlockTemplate(block)
+            this.create(pendingTransactions.toList())
         }
     }
 
