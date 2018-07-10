@@ -15,7 +15,7 @@ message Packet {
         Transaction transaction = 5;
         MainBlock main_block = 6;
         GenesisBlock genesis_block = 7;
-        BlockSignature block_signature = 8;
+        BlockSignatures block_signatures = 8;
         FullSignedBlock full_signed_block = 9;
     }
 }
@@ -78,10 +78,18 @@ message GenesisBlock {
     repeated string activeDelegateIps = 8;
 }
 
-message BlockSignature {
-    string blockHash = 1;
-    string signature = 2;
-    string publicKey = 3;
+message SignaturePublicKeyPair {
+    string signature = 1;
+    string publicKey = 2;
+}
+
+message BlockSignatures {
+    oneof body {
+        GenesisBlock genesisBlock = 1;
+        MainBlock mainBlock = 2;
+    }
+
+    repeated SignaturePublicKeyPair signatures = 3;
 }
 
 message FullSignedBlock {
