@@ -11,6 +11,7 @@ import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.protocol.CommunicationProtocol
 import java.nio.channels.Channel
+import io.openfuture.chain.entity.Transaction
 
 interface HardwareInfoService {
 
@@ -69,5 +70,9 @@ interface NetworkService {
     fun connect(host : String, port: Int)
 
     fun broadcast(packet: CommunicationProtocol.Packet)
+
+    fun save(transaction: Transaction): Transaction
+
+    fun getPendingTransactions(): List<Transaction>
 
 }
