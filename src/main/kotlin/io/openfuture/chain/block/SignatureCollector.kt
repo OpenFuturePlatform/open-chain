@@ -15,7 +15,7 @@ class SignatureCollector(
 
     private val lock = ReentrantReadWriteLock()
 
-    private val signaturePublicKeyPairs = mutableSetOf<SignaturePublicKeyPair>()
+    private val signaturePublicKeyPairs: HashSet<SignaturePublicKeyPair> = HashSet()
 
     // variable to collect the signatures from the same round only
     private lateinit var pendingBlock: Block
