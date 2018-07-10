@@ -6,6 +6,7 @@ import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.crypto.AccountDto
 import io.openfuture.chain.domain.crypto.RootAccountDto
 import io.openfuture.chain.domain.crypto.key.DerivationKeyRequest
+import io.openfuture.chain.domain.crypto.key.KeyDto
 import io.openfuture.chain.domain.crypto.key.RestoreRequest
 import io.openfuture.chain.service.CryptoService
 import org.junit.Test
@@ -27,9 +28,8 @@ class CryptoControllerTests : ControllerTests() {
         val restoreRequest = RestoreRequest(seedPhrase)
         val expectedAccount = RootAccountDto(
             seedPhrase,
-            "1",
-            "2",
-            AccountDto("1", "2", "0x83a1e77bd25daadd7a889bc36ac207a7d39cfd02")
+            KeyDto("1", "2"),
+            AccountDto(KeyDto("1", "2"), "0x83a1e77bd25daadd7a889bc36ac207a7d39cfd02")
         )
 
         given(cryptoService.getRootAccount(seedPhrase)).willReturn(expectedAccount)
@@ -48,7 +48,7 @@ class CryptoControllerTests : ControllerTests() {
         val seed = ByteArray(32)
         val masterKey = ExtendedKey.root(seed)
         val derivationKeyRequest = DerivationKeyRequest(seedPhrase, derivationPath)
-        val expectedAccount = AccountDto("1", "2", "0x83a1e77bd25daadd7a889bc36ac207a7d39cfd02")
+        val expectedAccount = AccountDto(KeyDto("1", "2"), "0x83a1e77bd25daadd7a889bc36ac207a7d39cfd02")
 
         given(cryptoService.serializePublicKey(any(ExtendedKey::class.java))).willReturn("1")
         given(cryptoService.serializePrivateKey(any(ExtendedKey::class.java))).willReturn("2")

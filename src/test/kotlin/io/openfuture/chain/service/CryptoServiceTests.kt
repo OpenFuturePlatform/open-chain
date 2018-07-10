@@ -20,13 +20,20 @@ import org.mockito.Mock
 
 class CryptoServiceTests : ServiceTests() {
 
-    @Mock private lateinit var seedPhraseGenerator: SeedPhraseGenerator
-    @Mock private lateinit var seedCalculator: SeedCalculator
-    @Mock private lateinit var derivationKeysHelper: DerivationKeysHelper
-    @Mock private lateinit var serializer: ExtendedKeySerializer
-    @Mock private lateinit var seedPhraseValidator: SeedPhraseValidator
-    @Mock private lateinit var keyManager: PrivateKeyManager
-    @Mock private lateinit var deserializer: ExtendedKeyDeserializer
+    @Mock
+    private lateinit var seedPhraseGenerator: SeedPhraseGenerator
+    @Mock
+    private lateinit var seedCalculator: SeedCalculator
+    @Mock
+    private lateinit var derivationKeysHelper: DerivationKeysHelper
+    @Mock
+    private lateinit var serializer: ExtendedKeySerializer
+    @Mock
+    private lateinit var seedPhraseValidator: SeedPhraseValidator
+    @Mock
+    private lateinit var keyManager: PrivateKeyManager
+    @Mock
+    private lateinit var deserializer: ExtendedKeyDeserializer
 
     private lateinit var cryptoService: DefaultCryptoService
 
@@ -69,10 +76,10 @@ class CryptoServiceTests : ServiceTests() {
         val actualRootAccount = cryptoService.getRootAccount(seedPhrase)
 
         assertThat(actualRootAccount.seedPhrase).isEqualTo(seedPhrase)
-        assertThat(actualRootAccount.masterPublicKey).isEqualTo("1")
-        assertThat(actualRootAccount.masterPrivateKey).isEqualTo("2")
-        assertThat(actualRootAccount.defaultAccount.publicKey).isEqualTo("1")
-        assertThat(actualRootAccount.defaultAccount.privateKey).isEqualTo("2")
+        assertThat(actualRootAccount.masterKeys.publicKey).isEqualTo("1")
+        assertThat(actualRootAccount.masterKeys.privateKey).isEqualTo("2")
+        assertThat(actualRootAccount.defaultAccount.keys.publicKey).isEqualTo("1")
+        assertThat(actualRootAccount.defaultAccount.keys.privateKey).isEqualTo("2")
         assertThat(actualRootAccount.defaultAccount.address).isNotNull()
     }
 
@@ -150,10 +157,10 @@ class CryptoServiceTests : ServiceTests() {
         val actualRootAccount = cryptoService.generateNewAccount()
 
         assertThat(actualRootAccount.seedPhrase).isEqualTo(seedPhrase)
-        assertThat(actualRootAccount.masterPublicKey).isEqualTo(publicKey)
-        assertThat(actualRootAccount.masterPrivateKey).isEqualTo(privateKey)
-        assertThat(actualRootAccount.defaultAccount.publicKey).isEqualTo(publicKey)
-        assertThat(actualRootAccount.defaultAccount.privateKey).isEqualTo(privateKey)
+        assertThat(actualRootAccount.masterKeys.publicKey).isEqualTo(publicKey)
+        assertThat(actualRootAccount.masterKeys.privateKey).isEqualTo(privateKey)
+        assertThat(actualRootAccount.defaultAccount.keys.publicKey).isEqualTo(publicKey)
+        assertThat(actualRootAccount.defaultAccount.keys.privateKey).isEqualTo(privateKey)
         assertThat(actualRootAccount.defaultAccount.address).isNotNull()
     }
 
