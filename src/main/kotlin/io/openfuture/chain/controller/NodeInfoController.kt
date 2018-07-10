@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("${PathConstant.RPC}/info")
 class NodeInfoController(
-        private val context: ApplicationContext,
-        private val hardwareInfoService: HardwareInfoService
+    private val context: ApplicationContext,
+    private val hardwareInfoService: HardwareInfoService
 ) {
 
     @GetMapping("/getVersion")
