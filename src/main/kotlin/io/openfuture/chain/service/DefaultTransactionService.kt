@@ -11,7 +11,7 @@ class DefaultTransactionService(
     private val transactionRepository: TransactionRepository,
     private val wallerService: WalletService,
     private val blockService: BlockService
-): TransactionService {
+) : TransactionService {
 
     @Transactional
     override fun save(request: TransactionRequest): Transaction {
