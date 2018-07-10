@@ -1,13 +1,12 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.crypto.signature.SignatureManager
-import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.BlockVersion
 import io.openfuture.chain.nio.converter.BlockSignaturesConverter
 import io.openfuture.chain.nio.converter.GenesisBlockConverter
 import io.openfuture.chain.nio.converter.MainBlockConverter
 import io.openfuture.chain.protocol.CommunicationProtocol
+import io.openfuture.chain.protocol.CommunicationProtocol.BlockSignatures
 import org.springframework.stereotype.Component
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
@@ -27,13 +26,23 @@ class SignatureCollector(
     private lateinit var pendingBlock: Block
 
 
-    fun getBlockSignatures() {
-        val blockSignaturesBuilder = CommunicationProtocol.BlockSignatures.newBuilder()
+    fun getBlockSignatures(): BlockSignatures {
+        val blockSignaturesBuilder = BlockSignatures.newBuilder()
+        val communicationProtocolBuiler = CommunicationProtocol.SignaturePublicKeyPair.newBuilder()
 
-        setBlockProto(blockSignaturesBuilder, pendingBlock)
+        blockSignaturesConverter.setBlockProto(blockSignaturesBuilder, pendingBlock)
+
+        val signatures = signaturePublicKeyPairs
+            .map {
+                communicationProtocolBuiler
+                    .setSignature(it.signature)
+                    .setPublicKey(it.publicKey)
+                    .build()
+            }.toList()
 
         return blockSignaturesBuilder
-            .addAllSignatures()
+            .addAllSignatures(signatures)
+            .build()
     }
 
     fun setPendingBlock(generatedBlock: Block) {
@@ -47,7 +56,7 @@ class SignatureCollector(
         }
     }
 
-    fun addBlockSignatures(blockSignatures: CommunicationProtocol.BlockSignatures): Boolean {
+    fun addBlockSignatures(blockSignatures: BlockSignatures): Boolean {
         try {
             lock.writeLock().lock()
 
@@ -64,44 +73,6 @@ class SignatureCollector(
             lock.writeLock().unlock()
         }
         return true
-    }
-
-    fun mergeBlockSignatures(): CommunicationProtocol.FullSignedBlock {
-        try {
-            lock.readLock().lock()
-
-            val firstSign = blockSignatures.first()
-            for (blockSign in blockSignatures) {
-                if (blockSign.blockHash != pendingBlock.hash || blockSign.blockHash != firstSign.blockHash) {
-                    throw IllegalArgumentException("$blockSignatures has wrong sign = $blockSign")
-                }
-
-                val hash = HashUtils.hexStringToBytes(blockSign.blockHash)
-                val publicKey = HashUtils.hexStringToBytes(blockSign.publicKey)
-                if (!signatureManager.verify(hash, blockSign.signature, publicKey)) {
-                    throw IllegalArgumentException("$blockSign has wrong sign")
-                }
-            }
-
-            val signatures = blockSignatures.map { it.signature }.toSet()
-
-            return setBlockProto(CommunicationProtocol.FullSignedBlock.newBuilder(), pendingBlock)
-                .addAllSignatures(signatures)
-                .build()
-        } finally {
-            lock.readLock().unlock()
-        }
-    }
-
-    private fun setBlockProto(
-            builder: CommunicationProtocol.FullSignedBlock.Builder,
-            block: Block): CommunicationProtocol.FullSignedBlock.Builder {
-        if (block.version == BlockVersion.MAIN.version) {
-            builder.mainBlock = mainBlockConverter.toMainBlockProto(block)
-        } else if (block.version == BlockVersion.GENESIS.version) {
-            builder.genesisBlock = genesisBlockConverter.toGenesisBlockProto(block)
-        }
-        return builder
     }
 
 }

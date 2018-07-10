@@ -1,6 +1,7 @@
 package io.openfuture.chain.nio.converter
 
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.BlockVersion
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.stereotype.Component
 
@@ -18,6 +19,17 @@ class BlockSignaturesConverter(
         }
 
         throw IllegalArgumentException("$blockSignatures has no block")
+    }
+
+    fun setBlockProto(
+            blockSignaturesBuilder: CommunicationProtocol.BlockSignatures.Builder,
+            block: Block): CommunicationProtocol.BlockSignatures.Builder {
+        if (block.version == BlockVersion.MAIN.version) {
+            blockSignaturesBuilder.mainBlock = mainBlockConverter.toMainBlockProto(block)
+        } else if (block.version == BlockVersion.GENESIS.version) {
+            blockSignaturesBuilder.genesisBlock = genesisBlockConverter.toGenesisBlockProto(block)
+        }
+        return blockSignaturesBuilder
     }
 
 }

@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultBlockService(
     private val blockRepository: BlockRepository,
     private val transactionService: TransactionService,
-    private val blockApplyingService: BlockApplyingService,
+    private val blockSignService: BlockSignService,
     private val signatureCollector: SignatureCollector,
     private val keyHolder: KeyHolder,
     private val signatureManager: SignatureManager,
@@ -56,7 +56,7 @@ class DefaultBlockService(
             transactions
         )
         signatureCollector.setPendingBlock(block)
-        blockApplyingService.broadcastBlockToSign(block)
+        // broadcast will be here like this broadcastService.broadcastBlockToSign(block)
         return block
     }
 
