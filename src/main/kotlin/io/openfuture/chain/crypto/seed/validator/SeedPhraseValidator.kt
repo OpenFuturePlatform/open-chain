@@ -32,7 +32,7 @@ class SeedPhraseValidator(
 
     fun isValid(seedPhrase: String): Boolean {
         val seedPhraseWords = seedPhrase.split(StringUtils.SPACE)
-        val phaseLength = PhraseLength.fromPhraseLength(seedPhraseWords.size) ?: return false
+        val phaseLength = PhraseLength.fromValue(seedPhraseWords.size) ?: return false
 
         val byteArraySize = (phaseLength.entropyLength + phaseLength.checkSumLength + MAX_BYTE_SIZE_MOD) / BYTE_SIZE
         val entropyWithChecksum = ByteArray(byteArraySize)
