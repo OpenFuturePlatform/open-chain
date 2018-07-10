@@ -16,6 +16,8 @@ interface BlockRepository : BaseRepository<Block> {
 
     fun findFirstByOrderByHeightDesc(): Block?
 
+    fun findFirstByVersion(version: Int): Block?
+
 }
 
 @Repository
