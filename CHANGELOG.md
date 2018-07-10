@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Vote transaction type
+- Voting algorithm mechanism
+- Voting store
+- Delegate rating calculation
+- Active delegates store
 
 ## [0.2.0] - 2018-06-29
 ### Added
