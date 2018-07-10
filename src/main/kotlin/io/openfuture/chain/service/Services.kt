@@ -9,9 +9,9 @@ import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.protocol.CommunicationProtocol
 import java.nio.channels.Channel
-import io.openfuture.chain.entity.Transaction
 
 interface HardwareInfoService {
 
