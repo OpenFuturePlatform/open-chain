@@ -7,8 +7,6 @@ import java.util.*
 
 object BlockUtils {
 
-    private var blockProductionOrder: List<String> = emptyList()
-
     fun calculateMerkleRoot(transactions: Set<Transaction>): String {
         if (transactions.size == 1) {
             return transactions.single().hash
@@ -36,14 +34,9 @@ object BlockUtils {
         return HashUtils.doubleSha256(headers.toByteArray())
     }
 
-    fun refreshBlockProductionOrder(delegates: List<String>, block: Block): List<String> {
+    fun getBlockProducer(delegates: List<String>, block: Block): String {
         val random = Random(block.timestamp)
-        blockProductionOrder = delegates.shuffled(random)
-        return blockProductionOrder
+        return delegates.shuffled(random).first()
     }
-
-    fun getBlockProductionOrder(): List<String> = blockProductionOrder
-
-
 
 }
