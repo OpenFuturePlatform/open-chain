@@ -67,13 +67,15 @@ interface TransactionService {
 
 interface BlockApplyingService {
 
-    fun sendBlockToSign(block: Block)
+    fun broadcastBlockToSign(block: Block)
 
     fun signBlock(block: Block): CommunicationProtocol.BlockSignature
 
-    fun sendSignedBlockOrBroadcast(blockSignature: CommunicationProtocol.BlockSignature)
+    fun broadcastSignature(blockSignature: CommunicationProtocol.BlockSignature)
 
-    fun sendFullSignedBlock(fullSignedBlock: CommunicationProtocol.FullSignedBlock)
+    fun addSignature(blockSignature: CommunicationProtocol.BlockSignature)
+
+    fun broadcastFullSignedBlock(fullSignedBlock: CommunicationProtocol.FullSignedBlock)
 
     fun applyBlock(fullSignedBlock: CommunicationProtocol.FullSignedBlock)
 
