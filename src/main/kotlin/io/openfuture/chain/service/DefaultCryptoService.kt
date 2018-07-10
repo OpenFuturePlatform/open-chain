@@ -12,8 +12,6 @@ import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
 import io.openfuture.chain.crypto.seed.validator.SeedPhraseValidator
 import io.openfuture.chain.domain.crypto.key.AddressKeyDto
 import io.openfuture.chain.domain.crypto.key.WalletDto
-import org.apache.commons.lang3.StringUtils
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 
 
@@ -62,35 +60,6 @@ class DefaultCryptoService(
 
         val masterKey = getMasterKey(seedPhrase)
         return derivationKeysHelper.derive(masterKey, derivationPath)
-    }
-
-    //TODO
-    override fun generateMultisigAccount(): WalletDto {
-        val seedPhrase = seedPhraseGenerator.createSeedPhrase(PhraseLength.TWELVE)
-        val rootExtendedKey = ExtendedKey.root(seedPhrase.toByteArray())
-
-        val extendedKey = derivationKeysHelper.deriveDefaultMultisigAddress(rootExtendedKey)
-
-        val addressKeyDto = AddressKeyDto(serializer.serializePublic(extendedKey),
-            serializer.serializePrivate(extendedKey), extendedKey.ecKey.getAddress())
-
-        return WalletDto(seedPhrase, serializer.serializePublic(rootExtendedKey),
-            serializer.serializePrivate(rootExtendedKey), addressKeyDto)
-    }
-
-    private fun createMultisigRedeemScript(threshold: Int, keys: List<ECKey>): String {
-        if (threshold < 0 || threshold > keys.size) {
-            throw IllegalArgumentException("Invalid threshold: $threshold")
-        }
-
-        val publicKeys = keys.map { ByteUtils.toHexString(it.public) }.sorted()
-        return with(StringBuilder()) {
-            append(threshold).append(StringUtils.EMPTY)
-            append(publicKeys.joinToString(StringUtils.EMPTY)).append(StringUtils.EMPTY)
-            append(keys.size).append(StringUtils.EMPTY)
-            toString()
-        }
-
     }
 
 }

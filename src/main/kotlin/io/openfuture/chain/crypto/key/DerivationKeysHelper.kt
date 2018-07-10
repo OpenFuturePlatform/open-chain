@@ -23,7 +23,6 @@ class DerivationKeysHelper {
         private const val ADDRESS_NUMBER_POSITION = 4
 
         private const val DEFAULT_ACCOUNT_INDEX = 0
-        private const val DEFAULT_MULTISIG_ACCOUNT_INDEX = 45
     }
 
 
@@ -63,9 +62,6 @@ class DerivationKeysHelper {
 
         return base.derive(hardenedIndex(DEFAULT_ACCOUNT_INDEX))
     }
-
-    fun deriveDefaultMultisigAddress(rootKey: ExtendedKey): ExtendedKey =
-        rootKey.derive(hardenedIndex(DEFAULT_MULTISIG_ACCOUNT_INDEX))
 
     private fun deriveWalletChainKeys(rootKey: ExtendedKey, accountNumber: Int, walletNumber: Int): ExtendedKey {
         val base = rootKey.derive(accountNumber)
