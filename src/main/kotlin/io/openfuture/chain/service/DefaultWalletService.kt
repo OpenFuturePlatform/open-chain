@@ -14,6 +14,7 @@ class DefaultWalletService(
         private const val DEFAULT_WALLET_BALANCE = 0.0
     }
 
+
     override fun getBalance(address: String): Double =
             repository.findOneByAddress(address)?.balance ?: DEFAULT_WALLET_BALANCE
 
