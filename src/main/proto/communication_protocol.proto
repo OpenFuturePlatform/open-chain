@@ -91,11 +91,3 @@ message BlockSignatures {
 
     repeated SignaturePublicKeyPair signatures = 3;
 }
-
-message FullSignedBlock {
-    oneof body {
-        GenesisBlock genesisBlock = 1;
-        MainBlock mainBlock = 2;
-    }
-    repeated string signatures = 3;
-}
