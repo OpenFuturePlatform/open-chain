@@ -14,14 +14,15 @@ class ConnectHandler(
 ) : BaseHandler(CommunicationProtocol.Type.CONNECT) {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        val message = CommunicationProtocol.Packet.newBuilder()
-            .setType(CommunicationProtocol.Type.CONNECT)
-            .setConnect(CommunicationProtocol.Connect.newBuilder()
-                .setNodeId(attributes.id)
-                .build())
-            .build()
-        ctx.writeAndFlush(message)
-
+        if (attributes.id != null) {
+            val message = CommunicationProtocol.Packet.newBuilder()
+                .setType(CommunicationProtocol.Type.CONNECT)
+                .setConnect(CommunicationProtocol.Connect.newBuilder()
+                    .setNodeId(attributes.id)
+                    .build())
+                .build()
+            ctx.writeAndFlush(message)
+        }
         ctx.fireChannelActive()
     }
 

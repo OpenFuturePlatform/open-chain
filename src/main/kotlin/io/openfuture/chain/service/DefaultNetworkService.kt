@@ -40,6 +40,16 @@ class DefaultNetworkService(
         }
     }
 
+    override fun disconnect(channel: Channel) {
+        channel.writeAndFlush(CommunicationProtocol.Packet.newBuilder()
+            .setType(CommunicationProtocol.Type.DISCONNECT)
+            .setDisconnect(CommunicationProtocol.Disconnect.newBuilder()
+                .setLeaveNetwork(false)
+                .build())
+            .build())
+        channel.close()
+    }
+
     override fun broadcast(packet: CommunicationProtocol.Packet) {
         channels.writeAndFlush(packet)
     }

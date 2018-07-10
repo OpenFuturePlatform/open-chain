@@ -1,5 +1,6 @@
 package io.openfuture.chain.service
 
+import io.netty.channel.Channel
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
@@ -90,4 +91,5 @@ interface NetworkService {
 
     fun broadcast(packet: CommunicationProtocol.Packet)
 
+    fun disconnect(channel: Channel)
 }

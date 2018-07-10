@@ -5,6 +5,7 @@ import io.openfuture.chain.nio.NodeAttributes
 import io.openfuture.chain.nio.base.BaseHandler
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.service.NetworkAddressService
+import io.openfuture.chain.service.NetworkService
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component
 @Scope("prototype")
 class JoinNetworkClientHandler(
     private val addressService: NetworkAddressService,
+    private val networkService: NetworkService,
     private val nodeAttributes: NodeAttributes
 ) : BaseHandler(CommunicationProtocol.Type.JOIN_NETWORK_RESPONSE) {
 
@@ -22,7 +24,7 @@ class JoinNetworkClientHandler(
         nodeAttributes.host = message.joinNetworkResponse.host
         nodeAttributes.id = message.joinNetworkResponse.nodeId
 
-        ctx.channel().close()
+        networkService.disconnect(ctx.channel())
     }
 
 }
