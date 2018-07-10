@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional(readOnly = true)
 class DefaultEpochService(
-        private val epochProperties: EpochProperties
+    private val epochProperties: EpochProperties
 ) : EpochService {
 
     override fun getActualSizeCurrentEpoch(): Int {
