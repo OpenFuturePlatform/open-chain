@@ -2,11 +2,13 @@ package io.openfuture.chain.block
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.BlockVersion
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.util.BlockUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -24,6 +26,8 @@ class BlockValidationServiceTests : ServiceTests() {
 
     private lateinit var blockValidationService: BlockValidationService
 
+    private val currentTime = System.currentTimeMillis()
+
 
     @Before
     fun setUp() {
@@ -31,8 +35,9 @@ class BlockValidationServiceTests : ServiceTests() {
         validators[""] = blockValidator
         given(blockValidator.getVersion()).willReturn(BlockVersion.MAIN.version)
         given(applicationContext.getBeansOfType(BlockValidator::class.java)).willReturn(validators)
-        blockValidationService = BlockValidationService(blockService, applicationContext, 1000)
+        blockValidationService = BlockValidationService(blockService, applicationContext, 3000)
         blockValidationService.init()
+        blockValidationService.setEpochTime(currentTime)
     }
 
     @Test
@@ -56,12 +61,17 @@ class BlockValidationServiceTests : ServiceTests() {
             )
         )
 
+        val height = 123L
+        val prevHash = "prev_block_hash"
+        val merkleHash = "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"
+        val hash = BlockUtils.calculateHash(prevHash, merkleHash, currentTime, height)
+
         val block = MainBlock(
-            "454ebbef16f93d174ab0e5e020f8ab80f2cf117e1b6beeeae3151bc87e99f081",
-            123,
-            "prev_block_hash",
-            "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
-            1512345678L,
+            HashUtils.bytesToHexString(hash),
+            height,
+            prevHash,
+            merkleHash,
+            currentTime,
             "signature",
             listOf(
                 Transaction(
@@ -84,7 +94,6 @@ class BlockValidationServiceTests : ServiceTests() {
         )
 
         given(blockValidator.isValid(any(Block::class.java))).willReturn(true)
-        given(blockService.getLast()).willReturn(previousBlock)
 
         val isValid = blockValidationService.isValid(block)
 
@@ -119,8 +128,6 @@ class BlockValidationServiceTests : ServiceTests() {
                 )
             )
         )
-
-        given(blockValidator.isValid(any(Block::class.java))).willReturn(false)
 
         val isValid = blockValidationService.isValid(block)
 
