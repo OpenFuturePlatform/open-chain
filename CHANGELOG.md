@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Address mixed-case checksum
 - Address validation
 - RPC requests: validateAddress
+- Calculation wallet balance
+- Database: add Wallet entity
 - Sign data
 - Verify signed data
 - Define epoch duration in properties

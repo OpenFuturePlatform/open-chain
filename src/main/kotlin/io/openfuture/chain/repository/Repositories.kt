@@ -28,3 +28,10 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
     fun findOneByValue(value: String): SeedWord?
 
 }
+
+@Repository
+interface WalletRepository : BaseRepository<Wallet> {
+
+    fun findOneByAddress(address: String): Wallet?
+
+}

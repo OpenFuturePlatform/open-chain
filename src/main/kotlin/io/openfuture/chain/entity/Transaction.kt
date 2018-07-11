@@ -22,25 +22,33 @@ class Transaction(
     var timestamp: Long,
 
     @Column(name = "recipient_key", nullable = false)
-    var recipientkey: String,
+    var recipientKey: String,
 
     @Column(name = "sender_key", nullable = false)
     var senderKey: String,
 
     @Column(name = "signature", nullable = false)
-    var signature: String
+    var signature: String,
+
+    @Column(name = "sender_address", nullable = false)
+    var senderAddress: String,
+
+    @Column(name = "recipient_address", nullable = false)
+    var recipientAddress: String
 
 ) : BaseModel() {
 
     companion object {
-        fun of(block: Block, request: TransactionRequest): Transaction = Transaction(
-            block,
+        fun of(request: TransactionRequest): Transaction = Transaction(
+            null,
             request.hash,
-            request.amount,
-            request.timestamp,
-            request.recipientKey,
-            request.senderKey,
-            request.signature
+            request.amount!!,
+            request.timestamp!!,
+            request.recipientKey!!,
+            request.senderKey!!,
+            request.signature!!,
+            request.senderAddress!!,
+            request.recipientAddress!!
         )
     }
 

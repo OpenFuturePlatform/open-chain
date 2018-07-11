@@ -4,9 +4,12 @@ import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
 import io.openfuture.chain.domain.crypto.RootAccountDto
-import io.openfuture.chain.domain.hardware.*
-import io.openfuture.chain.domain.transaction.TransactionRequest
+import io.openfuture.chain.domain.hardware.CpuInfo
+import io.openfuture.chain.domain.hardware.NetworkInfo
+import io.openfuture.chain.domain.hardware.RamInfo
+import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.Transaction
 
 interface HardwareInfoService {
 
@@ -29,6 +32,8 @@ interface BlockService {
     fun getLast(): Block
 
     fun getLastGenesis(): Block
+
+    fun save(block: Block): Block
 
 }
 
@@ -57,5 +62,19 @@ interface ConsensusService {
     fun getCurrentEpochHeight(): Int
 
     fun isGenesisBlockNeeded(): Boolean
+
+}
+
+interface TransactionService {
+
+    fun save(transaction: Transaction): Transaction
+
+}
+
+interface WalletService {
+
+    fun getBalance(address: String): Double
+
+    fun updateByTransaction(transaction: Transaction)
 
 }
