@@ -25,9 +25,8 @@ class DefaultWalletService(
     }
 
     private fun updateByAddress(address: String, amount: Int) {
-        var wallet = repository.findOneByAddress(address)
+        val wallet = repository.findOneByAddress(address) ?: Wallet(address)
 
-        wallet = wallet ?: Wallet(address)
         wallet.balance += amount
 
         repository.save(wallet)
