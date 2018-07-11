@@ -21,11 +21,14 @@ import io.openfuture.chain.domain.vote.VoteDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.Stakeholder
+import io.openfuture.chain.entity.block.GenesisBlock
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.peer.Delegate
 import io.openfuture.chain.entity.peer.Peer
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
+import org.springframework.transaction.annotation.Transactional
 
 interface HardwareInfoService {
 
@@ -45,9 +48,9 @@ interface BlockService {
 
     fun get(hash: String): Block
 
-    fun getLast(): Block
+    fun getLast(): MainBlock
 
-    fun getLastGenesis(): Block
+    fun getLastGenesis(): GenesisBlock
 
 }
 
@@ -140,7 +143,7 @@ interface StakeholderService {
 
 interface ConsensusService {
 
-    fun getCurrentEpochHeight(): Int
+    fun getCurrentEpochHeight(): Long
 
     fun isGenesisBlockNeeded(): Boolean
 

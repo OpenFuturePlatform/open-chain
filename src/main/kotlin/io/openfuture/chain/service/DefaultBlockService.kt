@@ -1,20 +1,20 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.domain.block.MainBlockDto
-import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.entity.block.Block
+import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
-import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
-import io.openfuture.chain.util.BlockUtils
+import io.openfuture.chain.repository.GenesisBlockRepository
+import io.openfuture.chain.repository.MainBlockRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultBlockService(
-    private val blockRepository: BlockRepository
+    private val blockRepository: BlockRepository<Block>,
+    private val genesisBlockRepository: GenesisBlockRepository,
+    private val mainBlockRepository: MainBlockRepository
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -22,12 +22,11 @@ class DefaultBlockService(
         ?: throw NotFoundException("Block with hash:$hash not found")
 
     @Transactional(readOnly = true)
-    override fun getLast(): Block = blockRepository.findFirstByOrderByHeightDesc()
+    override fun getLast(): MainBlock = mainBlockRepository.findFirstByOrderByHeightDesc()
         ?: throw NotFoundException("Last block not found!")
 
     @Transactional(readOnly = true)
-    override fun getLastGenesis(): Block {
-        TODO("not implemented")
-    }
+    override fun getLastGenesis(): GenesisBlock = genesisBlockRepository.findFirstByOrderByHeightDesc()
+        ?: throw NotFoundException("Last block not found!")
 
 }

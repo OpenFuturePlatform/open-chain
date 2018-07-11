@@ -5,7 +5,7 @@ import io.openfuture.chain.domain.vote.VoteDto
 import io.openfuture.chain.entity.peer.Delegate
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.nio.client.handler.ConnectionClientHandler
-import io.openfuture.chain.property.DelegateProperties
+import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.DelegateRepository
 import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.service.StakeholderService
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultDelegateService(
     repository: DelegateRepository,
-    private val delegateProperties: DelegateProperties,
+    private val consensusProperties: ConsensusProperties,
     private val stakeholderService: StakeholderService
 ) : DefaultBasePeerService<Delegate, DelegateDto>(repository), DelegateService {
 
@@ -34,7 +34,7 @@ class DefaultDelegateService(
 
     @Transactional(readOnly = true)
     override fun getActiveDelegates(): List<Delegate> {
-        val request = PageRequest.of(0, delegateProperties.count!!, Sort(Sort.Direction.DESC, RATING))
+        val request = PageRequest.of(0, consensusProperties.delegatesCount!!, Sort(Sort.Direction.DESC, RATING))
         return repository.findAll(request).content
     }
 

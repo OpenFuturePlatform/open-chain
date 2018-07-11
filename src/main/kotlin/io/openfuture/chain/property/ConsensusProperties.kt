@@ -12,6 +12,10 @@ class ConsensusProperties(
 
     /** The count of blocks in epoch */
     @field:NotNull
-    var epochHeight: Int? = null
+    var epochHeight: Int? = null,
+
+    /** The count of active delegates */
+    @field:NotNull
+    var delegatesCount: Int? = null
 
 )
