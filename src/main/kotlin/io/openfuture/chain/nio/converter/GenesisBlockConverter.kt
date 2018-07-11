@@ -6,21 +6,21 @@ import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.stereotype.Component
 
 @Component
-class GenesisBlockConverter {
+class GenesisBlockConverter: MessageConverter<Block,  CommunicationProtocol.GenesisBlock> {
 
-    fun toGenesisBlock(genesisBlock: CommunicationProtocol.GenesisBlock): GenesisBlock {
+    override fun fromMessage(message: CommunicationProtocol.GenesisBlock): GenesisBlock {
         return GenesisBlock(
-            genesisBlock.hash,
-            genesisBlock.height,
-            genesisBlock.previousHash,
-            genesisBlock.merkleHash,
-            genesisBlock.timestamp,
-            genesisBlock.epochIndex,
-            genesisBlock.activeDelegateKeysList.toSet())
+            message.hash,
+            message.height,
+            message.previousHash,
+            message.merkleHash,
+            message.timestamp,
+            message.epochIndex,
+            message.activeDelegateKeysList.toSet())
     }
 
-    fun toGenesisBlockProto(block: Block): CommunicationProtocol.GenesisBlock {
-        val genesisBlock = block as GenesisBlock
+    override fun fromEntity(entity: Block): CommunicationProtocol.GenesisBlock {
+        val genesisBlock = entity as GenesisBlock
         return CommunicationProtocol.GenesisBlock.newBuilder()
             .setHash(genesisBlock.hash)
             .setHeight(genesisBlock.height)

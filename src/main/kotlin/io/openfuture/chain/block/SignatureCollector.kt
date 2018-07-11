@@ -40,7 +40,7 @@ class SignatureCollector(
         try {
             lock.writeLock().lock()
 
-            val block = blockSignaturesConverter.toBlock(blockSignatures)
+            val block = blockSignaturesConverter.fromMessage(blockSignatures)
             if (block.hash != pendingBlock.hash) {
                 return false
             }
