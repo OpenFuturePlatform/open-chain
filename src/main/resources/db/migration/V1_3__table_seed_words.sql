@@ -1538,7 +1538,7 @@ INSERT INTO seed_words (ind, value) VALUES (1530, 'satisfy');
 INSERT INTO seed_words (ind, value) VALUES (1531, 'satoshi');
 INSERT INTO seed_words (ind, value) VALUES (1532, 'sauce');
 INSERT INTO seed_words (ind, value) VALUES (1533, 'sausage');
-INSERT INTO seed_words (ind, value) VALUES (1534, 'saveAll');
+INSERT INTO seed_words (ind, value) VALUES (1534, 'save');
 INSERT INTO seed_words (ind, value) VALUES (1535, 'say');
 INSERT INTO seed_words (ind, value) VALUES (1536, 'scale');
 INSERT INTO seed_words (ind, value) VALUES (1537, 'scan');
