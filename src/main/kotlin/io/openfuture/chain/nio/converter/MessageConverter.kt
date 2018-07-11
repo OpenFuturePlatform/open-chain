@@ -2,10 +2,10 @@ package io.openfuture.chain.nio.converter
 
 import io.openfuture.chain.entity.base.BaseModel
 
-interface MessageConverter<E: BaseModel, M> {
+interface MessageConverter<T: BaseModel, K> {
 
-    fun fromEntity(entity: E): M
+    fun fromEntity(entity: T): K
 
-    fun fromMessage(message: M): E
+    fun fromMessage(message: K): T
 
 }
