@@ -10,8 +10,8 @@ import javax.validation.constraints.NotNull
 @ConfigurationProperties(prefix = "epoch")
 class EpochProperties(
 
-        /** The count of blocks in epoch */
-        @field:NotNull
-        var size: Int? = null
+    /** The count of blocks in epoch */
+    @field:NotNull
+    var size: Int? = null
 
 )
