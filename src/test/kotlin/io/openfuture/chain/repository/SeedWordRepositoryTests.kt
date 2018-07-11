@@ -13,7 +13,7 @@ class SeedWordRepositoryTests : RepositoryTests() {
 
 
     @Test
-    fun findOneByWordIndexTest() {
+    fun findOneByWordIndexShouldReturnWord() {
         val wordIndex = 2048
         val expectedSeedWord = SeedWord(2048, "zop")
 

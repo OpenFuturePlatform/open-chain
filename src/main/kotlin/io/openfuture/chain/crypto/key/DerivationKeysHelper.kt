@@ -28,7 +28,7 @@ class DerivationKeysHelper {
 
     fun derive(rootKey: ExtendedKey, derivationPath: String): ExtendedKey {
         if (!CORRECT_PATH_PATTERN.toRegex().matches(derivationPath)) {
-            throw Exception("Invalid derivation path")
+            throw IllegalArgumentException("Invalid derivation path")
         }
 
         val separatedPath = derivationPath.split(PATH_SEPARATOR)
