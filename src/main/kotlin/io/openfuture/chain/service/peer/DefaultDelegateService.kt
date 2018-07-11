@@ -29,6 +29,7 @@ class DefaultDelegateService(
         private const val RATING = "rating"
     }
 
+
     @Transactional
     override fun add(dto: DelegateDto): Delegate = repository.save(Delegate.of(dto))
 
