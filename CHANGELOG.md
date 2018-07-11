@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Voting store
 - Delegate rating calculation
 - Active delegates store
+- Sign data
+- Verify signed data
 
 ### Changed
 - Default account info is added to the doGenerateMaster end-point response

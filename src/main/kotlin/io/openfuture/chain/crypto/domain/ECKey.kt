@@ -2,8 +2,16 @@ package io.openfuture.chain.crypto.domain
 
 import io.openfuture.chain.crypto.util.AddressUtils
 import io.openfuture.chain.crypto.util.HashUtils
+import org.bouncycastle.asn1.ASN1InputStream
+import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.sec.SECNamedCurves
 import org.bouncycastle.asn1.sec.SECObjectIdentifiers
+import org.bouncycastle.crypto.digests.SHA256Digest
+import org.bouncycastle.crypto.params.ECDomainParameters
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters
+import org.bouncycastle.crypto.params.ECPublicKeyParameters
+import org.bouncycastle.crypto.signers.ECDSASigner
+import org.bouncycastle.crypto.signers.HMacDSAKCalculator
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.math.BigInteger
 import java.util.*
@@ -18,7 +26,9 @@ class ECKey(
         private const val ADDRESS_KEY_PART_SIZE = 20
 
         private val curve = SECNamedCurves.getByOID(SECObjectIdentifiers.secp256k1)
+        private val params = ECDomainParameters(curve.curve, curve.g, curve.n, curve.h)
     }
+
 
     constructor(bytes: ByteArray) : this(
         BigInteger(1, bytes),
@@ -57,6 +67,27 @@ class ECKey(
         val pubKeyHash = HashUtils.keccak256(public)
         val address = ByteUtils.toHexString(Arrays.copyOfRange(pubKeyHash, 0, ADDRESS_KEY_PART_SIZE))
         return AddressUtils.addPrefix(AddressUtils.addChecksum(address))
+    }
+
+    fun sign(hashedMessage: ByteArray): ByteArray {
+        if (isPrivateEmpty()) {
+            throw IllegalArgumentException("Unable to sign the data. Private key is not provided")
+        }
+
+        val signer = ECDSASigner(HMacDSAKCalculator(SHA256Digest()))
+        signer.init(true, ECPrivateKeyParameters(private, params))
+        val signature = signer.generateSignature(hashedMessage)
+
+        return ECDSASignature(signature[0], signature[1]).encode()
+    }
+
+    fun verify(hashedMessage: ByteArray, signature: ByteArray): Boolean {
+        val signer = ECDSASigner()
+        signer.init(false, ECPublicKeyParameters(curve.curve.decodePoint(public), params))
+
+        val sign = ECDSASignature(ASN1InputStream(signature).use { it.readObject() as DLSequence })
+
+        return signer.verifySignature(hashedMessage, sign.r, sign.s)
     }
 
 }
