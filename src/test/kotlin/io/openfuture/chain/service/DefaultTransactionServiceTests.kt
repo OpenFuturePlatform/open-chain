@@ -2,7 +2,6 @@ package io.openfuture.chain.service
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
-import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.repository.TransactionRepository
@@ -15,30 +14,28 @@ import org.mockito.Mock
 class DefaultTransactionServiceTests : ServiceTests() {
 
     @Mock private lateinit var repository: TransactionRepository
-    @Mock private lateinit var blockService: DefaultBlockService
 
     private lateinit var service: TransactionService
 
 
     @Before
     fun setUp() {
-        service = DefaultTransactionService(repository, blockService)
+        service = DefaultTransactionService(repository)
     }
 
     @Test
     fun saveShouldReturnSavedTransactionTest() {
-        val request = TransactionRequest(1, 1, 1L, "recipientKey", "senderKey", "signature", "from", "to")
         val block = Block(1, 1L, 1L, "previousHash", "hash", "merkleHash", "nodeKey", "nodeSignature")
+        val transaction = Transaction(block, "hash", 1, 1L, "recipientKey", "senderKey", "signature", "from", "to")
 
-        given(blockService.get(request.blockId)).willReturn(block)
         given(repository.save(any(Transaction::class.java))).will { invocation -> invocation.arguments[0] }
 
-        val actualTransaction = service.save(request)
+        val actualTransaction = service.save(transaction)
 
         assertThat(actualTransaction.block).isEqualTo(block)
-        assertThat(actualTransaction.hash).isEqualTo(request.hash)
-        assertThat(actualTransaction.senderKey).isEqualTo(request.senderKey)
-        assertThat(actualTransaction.recipientKey).isEqualTo(request.recipientKey)
+        assertThat(actualTransaction.hash).isEqualTo(transaction.hash)
+        assertThat(actualTransaction.senderKey).isEqualTo(transaction.senderKey)
+        assertThat(actualTransaction.recipientKey).isEqualTo(transaction.recipientKey)
     }
 
 }

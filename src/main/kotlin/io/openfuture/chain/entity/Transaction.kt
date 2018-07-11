@@ -39,16 +39,16 @@ class Transaction(
 ) : BaseModel() {
 
     companion object {
-        fun of(block: Block, request: TransactionRequest): Transaction = Transaction(
-            block,
+        fun of(request: TransactionRequest): Transaction = Transaction(
+            null,
             request.hash,
-            request.amount,
-            request.timestamp,
-            request.recipientKey,
-            request.senderKey,
-            request.signature,
-            request.senderAddress,
-            request.recipientAddress
+            request.amount!!,
+            request.timestamp!!,
+            request.recipientKey!!,
+            request.senderKey!!,
+            request.signature!!,
+            request.senderAddress!!,
+            request.recipientAddress!!
         )
     }
 

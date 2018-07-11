@@ -1,18 +1,19 @@
 package io.openfuture.chain.domain.transaction
 
 import io.openfuture.chain.crypto.util.HashUtils
+import org.jetbrains.annotations.NotNull
+import javax.validation.constraints.NotBlank
 
 class TransactionRequest(
-    var blockId: Int,
-    amount: Int,
-    timestamp: Long,
-    recipientKey: String,
-    senderKey: String,
-    signature: String,
-    senderAddress: String,
-    recipientAddress: String
+    @NotNull val amount: Int?,
+    @NotNull val timestamp: Long?,
+    @NotBlank val recipientKey: String?,
+    @NotBlank val senderKey: String?,
+    @NotBlank val signature: String?,
+    @NotBlank val senderAddress: String?,
+    @NotBlank val recipientAddress: String?
 
-) : PendingTransactionRequest(amount, timestamp, recipientKey, senderKey, signature, senderAddress , recipientAddress) {
+) {
 
     var hash: String = calculateHash()
 

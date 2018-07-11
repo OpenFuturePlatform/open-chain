@@ -1,8 +1,7 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.domain.block.BlockRequest
-import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
 import org.springframework.stereotype.Service
@@ -16,32 +15,33 @@ class DefaultBlockService (
 ) : BlockService {
 
     @Transactional(readOnly = true)
-    override fun get(hash: String): Block = blockRepository.findByHash(hash)
+    override fun get(hash: String): Block = repository.findByHash(hash)
         ?: throw NotFoundException("Block with hash:$hash not found")
 
     @Transactional(readOnly = true)
-    override fun getLast(): Block = blockRepository.findFirstByOrderByHeightDesc()
+    override fun getLast(): Block = repository.findFirstByOrderByHeightDesc()
         ?: throw NotFoundException("Last block not found!")
 
     @Transactional(readOnly = true)
     override fun getLastGenesis(): Block {
         TODO("not implemented")
+    }
 
     @Transactional
-    override fun save(request: BlockRequest): Block {
-        val savedBlock = repository.save(Block.of(request))
+    override fun save(block: Block): Block {
+        val savedBlock = repository.save(block)
 
-        request.transactions.forEach { saveTransactionRequest(savedBlock, it)}
+        block.transactions.forEach { savedBlock.transactions.add(saveTransaction(it))}
 
         return savedBlock
     }
 
-    private fun saveTransactionRequest(block: Block, transactionRequest: TransactionRequest) {
-        val savedTransaction = transactionService.save(transactionRequest.apply { blockId = block.id })
+    private fun saveTransaction(transaction: Transaction) : Transaction {
+        val savedTransaction = transactionService.save(transaction)
 
         wallerService.updateByTransaction(savedTransaction)
 
-        block.transactions.add(savedTransaction)
+        return savedTransaction
     }
 
 }
