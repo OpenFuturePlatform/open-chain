@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Delegate rating calculation
 - Active delegates store
 
+### Changed
+- Default account info is added to the doGenerateMaster end-point response
+- doGenerateMaster end-point renamed to doRestore
+
 ## [0.2.0] - 2018-06-29
 ### Added
 - Seed phrase generator

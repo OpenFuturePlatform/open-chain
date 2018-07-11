@@ -1,7 +1,7 @@
 package io.openfuture.chain.util
 
 import io.openfuture.chain.crypto.util.Base58CoderUtils
-import org.junit.Assert
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.util.*
 
@@ -14,14 +14,14 @@ class Base58CoderUtilsTest {
 
         val encoded = Base58CoderUtils.encode(value.toByteArray())
 
-        Assert.assertEquals(encoded, expectedValue)
+        assertThat(encoded).isEqualTo(expectedValue)
     }
 
     @Test
     fun encodeShouldReturnEmptyStringWhenBytesToEncodeAreEmpty() {
         val encoded = Base58CoderUtils.encode(ByteArray(0))
 
-        Assert.assertTrue(encoded.isEmpty())
+        assertThat(encoded).isEmpty()
     }
 
     @Test
@@ -31,7 +31,7 @@ class Base58CoderUtilsTest {
 
         val encoded = Base58CoderUtils.encodeWithChecksum(value.toByteArray())
 
-        Assert.assertEquals(encoded, expectedValue)
+        assertThat(encoded).isEqualTo(expectedValue)
     }
 
     @Test
@@ -41,7 +41,7 @@ class Base58CoderUtilsTest {
 
         val decoded = Base58CoderUtils.decode(value)
 
-        Assert.assertTrue(Arrays.equals(decoded, expectedValue))
+        assertThat(Arrays.equals(decoded, expectedValue)).isTrue()
     }
 
     @Test
@@ -51,7 +51,7 @@ class Base58CoderUtilsTest {
 
         val decoded = Base58CoderUtils.decodeWithChecksum(value)
 
-        Assert.assertTrue(Arrays.equals(decoded, expectedValue))
+        assertThat(Arrays.equals(decoded, expectedValue)).isTrue()
     }
 
     @Test(expected = IllegalArgumentException::class)
