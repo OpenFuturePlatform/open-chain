@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultBlockService(
-    private val blockRepository: BlockRepository,
+    private val blockRepository: BlockRepository<Block>,
     private val transactionService: TransactionService,
     private val signatureCollector: SignatureCollector,
     private val keyHolder: KeyHolder,
@@ -35,19 +35,22 @@ class DefaultBlockService(
     private var activeDelegates = emptyList<String>()
 
     @Transactional(readOnly = true)
-    override fun get(id: Int): Block = blockRepository.getOne(id)
-        ?: throw NotFoundException("Not found id $id")
+    override fun get(id: Int): Block =
+        blockRepository.getOne(id)
+            ?: throw NotFoundException("Not found id $id")
 
     @Transactional(readOnly = true)
     override fun getAll(): MutableList<Block> = blockRepository.findAll()
 
     @Transactional(readOnly = true)
-    override fun getLast(): Block = blockRepository.findFirstByOrderByHeightDesc()
-        ?: throw NotFoundException("Last block not exist!")
+    override fun getLast(): Block =
+        blockRepository.findFirstByOrderByHeightDesc()
+            ?: throw NotFoundException("Last block not exist!")
 
     @Transactional(readOnly = true)
-    override fun getLastGenesisBlock(): GenesisBlock = blockRepository.findFirstByVersion(BlockVersion.GENESIS.version) as? GenesisBlock
-        ?: throw NotFoundException("Last Genesis block not exist!")
+    override fun getLastGenesisBlock(): GenesisBlock =
+        blockRepository.findFirstByVersionOrderByHeight(BlockVersion.GENESIS.version) as? GenesisBlock
+            ?: throw NotFoundException("Last Genesis block not exist!")
 
     @Transactional
     override fun save(block: Block): Block {
