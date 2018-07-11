@@ -43,7 +43,7 @@ class DefaultNetworkService(
         val connectionNeeded = properties.peersNumber!! - connectedPeers.size
         val peers = knownPeers.shuffled(SecureRandom())
         for (peer in peers) {
-            if (peer.networkId != networkId && !isConnected(networkId)) {
+            if (peer.networkId != networkId && !isConnected(peer.networkId)) {
                 clientBootstrap.connect(peer.host, peer.port).addListener {
                     future -> future as ChannelFuture
                         if (!future.isSuccess) {
