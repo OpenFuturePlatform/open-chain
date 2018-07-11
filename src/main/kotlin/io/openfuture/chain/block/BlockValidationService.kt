@@ -4,6 +4,7 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.util.BlockUtils
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct
@@ -11,11 +12,13 @@ import javax.annotation.PostConstruct
 @Service
 class BlockValidationService(
     private val blockService: BlockService,
-    private val applicationContext: ApplicationContext
+    private val applicationContext: ApplicationContext,
+    @Value("\${block.time.slot}") private val interval: Long
 ) {
 
     private val validators = HashMap<Int, BlockValidator>()
 
+    private var epochTime: Long = 0L
 
     @PostConstruct
     fun init() {
@@ -26,6 +29,11 @@ class BlockValidationService(
     }
 
     fun isValid(block: Block): Boolean {
+        val currentTime = System.currentTimeMillis()
+        if (getSlotNumber(currentTime) != getSlotNumber(block.timestamp)) {
+            return false
+        }
+
         val blockVersion = block.version
 
         val blockValidator = validators[blockVersion]
@@ -60,6 +68,14 @@ class BlockValidationService(
         }
 
         return true
+    }
+
+    fun getSlotNumber(time: Long): Long {
+        return (time - epochTime) / interval
+    }
+
+    fun setEpochTime(value: Long) {
+        this.epochTime = value
     }
 
 }
