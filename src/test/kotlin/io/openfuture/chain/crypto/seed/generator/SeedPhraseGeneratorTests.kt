@@ -6,18 +6,22 @@ import io.openfuture.chain.crypto.seed.PhraseLength
 import io.openfuture.chain.entity.SeedWord
 import io.openfuture.chain.repository.SeedWordRepository
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
-import org.mockito.InjectMocks
 import org.mockito.Mock
 
 class SeedPhraseGeneratorTests : ServiceTests() {
 
-    @Mock
-    private lateinit var seedWordRepository: SeedWordRepository
+    @Mock private lateinit var seedWordRepository: SeedWordRepository
 
-    @InjectMocks
     private lateinit var seedPhraseGenerator: SeedPhraseGenerator
+
+
+    @Before
+    fun setUp() {
+        seedPhraseGenerator = SeedPhraseGenerator(seedWordRepository)
+    }
 
     @Test
     fun createSeedPhraseWhenByteArrayIsTwelveBytesShouldReturnSeedPhrase() {
