@@ -13,7 +13,7 @@ class WalletRepositoryTests : RepositoryTests() {
 
 
     @Test
-    fun findOneByWordIndexTest() {
+    fun findOneByAddress() {
         val address = "address"
         val wallet = Wallet(address, 1.0)
 

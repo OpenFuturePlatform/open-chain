@@ -9,8 +9,8 @@ import javax.persistence.*
 class Transaction(
 
     @ManyToOne
-    @JoinColumn(name = "block_id", nullable = false)
-    var block: Block,
+    @JoinColumn(name = "block_hash", referencedColumnName = "hash", nullable = true)
+    var block: Block?,
 
     @Column(name = "hash", nullable = false)
     var hash: String,
@@ -39,16 +39,17 @@ class Transaction(
 ) : BaseModel() {
 
     companion object {
-        fun of(block: Block, request: TransactionRequest): Transaction = Transaction(
-            block,
+        fun of(request: TransactionRequest): Transaction = Transaction(
+            null,
             request.hash,
-            request.amount,
-            request.timestamp,
-            request.recipientKey,
-            request.senderKey,
-            request.signature,
-            request.senderAddress,
-            request.recipientAddress
+            request.amount!!,
+            request.timestamp!!,
+            request.recipientKey!!,
+            request.senderKey!!,
+            request.signature!!,
+            request.senderAddress!!,
+            request.recipientAddress!!
         )
     }
+
 }
