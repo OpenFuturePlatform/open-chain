@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Address mixed-case checksum
 - Address validation
 - RPC requests: validateAddress
+- Sign data
+- Verify signed data
 
 ### Changed
 - Default account info is added to the doGenerateMaster end-point response
