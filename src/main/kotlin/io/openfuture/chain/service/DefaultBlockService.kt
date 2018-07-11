@@ -9,8 +9,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultBlockService(
     private val repository: BlockRepository,
-    private val wallerService: WalletService,
-    private val transactionService: TransactionService
+    private val wallerService: WalletService
 ) : BlockService {
 
     @Transactional(readOnly = true)
