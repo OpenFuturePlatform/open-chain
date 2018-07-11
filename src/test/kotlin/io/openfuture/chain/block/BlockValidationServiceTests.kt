@@ -35,7 +35,7 @@ class BlockValidationServiceTests : ServiceTests() {
         validators[""] = blockValidator
         given(blockValidator.getVersion()).willReturn(BlockVersion.MAIN.version)
         given(applicationContext.getBeansOfType(BlockValidator::class.java)).willReturn(validators)
-        blockValidationService = BlockValidationService(blockService, applicationContext, 3000)
+        blockValidationService = BlockValidationService(applicationContext, 3000)
         blockValidationService.init()
         blockValidationService.setEpochTime(currentTime)
     }
@@ -95,13 +95,32 @@ class BlockValidationServiceTests : ServiceTests() {
 
         given(blockValidator.isValid(any(Block::class.java))).willReturn(true)
 
-        val isValid = blockValidationService.isValid(block)
+        val isValid = blockValidationService.isValid(block, previousBlock)
 
         assertThat(isValid).isTrue()
     }
 
     @Test
     fun isValidShouldReturnFalse() {
+        val previousBlock = MainBlock(
+            "prev_block_hash",
+            122,
+            "previous_hash",
+            "merkle_hash",
+            1510000000L,
+            "prev_signature",
+            listOf(
+                Transaction(
+                    "prev_transaction_hash1",
+                    2000,
+                    1500000000L,
+                    "prev_recipient_key1",
+                    "prev_sender_key1",
+                    "prev_signature1"
+                )
+            )
+        )
+
         val block = MainBlock(
             "454ebbef16f93d174ab0e5e020f8ab80f2cf117e1b6beeeae3151bc87e99f081",
             123,
@@ -129,7 +148,7 @@ class BlockValidationServiceTests : ServiceTests() {
             )
         )
 
-        val isValid = blockValidationService.isValid(block)
+        val isValid = blockValidationService.isValid(block, previousBlock)
 
         assertThat(isValid).isFalse()
     }

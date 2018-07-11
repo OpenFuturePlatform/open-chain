@@ -2,7 +2,6 @@ package io.openfuture.chain.block
 
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationContext

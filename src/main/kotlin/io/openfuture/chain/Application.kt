@@ -1,7 +1,5 @@
 package io.openfuture.chain
 
-import io.openfuture.chain.service.BlockService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy
@@ -10,9 +8,6 @@ import org.springframework.context.annotation.Profile
 
 @SpringBootApplication
 class Application {
-
-    @Autowired
-    private lateinit var blockService: BlockService
 
     @Profile("local")
     @Bean
