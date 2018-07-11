@@ -11,8 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: validateAddress
 - Sign data
 - Verify signed data
-- Definition of epoch: get current epoch height
-- Definition of epoch: is genesis block needed
+- Get current epoch height
+- Check is genesis block needed
 
 ### Changed
 - Default account info is added to the doGenerateMaster end-point response
