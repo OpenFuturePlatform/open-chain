@@ -4,14 +4,13 @@ import io.netty.channel.Channel
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
-import io.openfuture.chain.domain.block.BlockRequest
 import io.openfuture.chain.domain.crypto.RootAccountDto
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
-import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.network.domain.Peer
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -33,13 +32,13 @@ interface HardwareInfoService {
 
 interface BlockService {
 
-    fun get(id: Int): Block
+    fun get(hash: String): Block
 
-    fun getAll(): MutableList<Block>
+    fun getLast(): Block
 
-    fun getLast(): Block?
+    fun getLastGenesis(): Block
 
-    fun save(request: BlockRequest): Block
+    fun save(block: Block): Block
 
 }
 
@@ -63,9 +62,25 @@ interface CryptoService {
 
 }
 
+interface ConsensusService {
+
+    fun getCurrentEpochHeight(): Int
+
+    fun isGenesisBlockNeeded(): Boolean
+
+}
+
 interface TransactionService {
 
-    fun save(request: TransactionRequest)
+    fun save(transaction: Transaction): Transaction
+
+}
+
+interface WalletService {
+
+    fun getBalance(address: String): Double
+
+    fun updateByTransaction(transaction: Transaction)
 
 }
 
