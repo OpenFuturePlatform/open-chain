@@ -30,11 +30,11 @@ interface GenesisBlockRepository : BaseRepository<GenesisBlock>
 interface MainBlockRepository : BaseRepository<MainBlock>
 
 @Repository
-interface TransactionRepository<Entity : Transaction>: BaseRepository<Entity> {
+interface TransactionRepository<E : Transaction>: BaseRepository<E> {
 
-    fun findOneByHash(hash: String): Entity?
+    fun findOneByHash(hash: String): E?
 
-    fun findAllByBlockIsNull(): MutableSet<Entity>
+    fun findAllByBlockIsNull(): MutableSet<E>
 
 }
 
@@ -51,9 +51,9 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 }
 
 @Repository
-interface StakeholderRepository<Entity : Stakeholder> : BaseRepository<Entity> {
+interface StakeholderRepository<E : Stakeholder> : BaseRepository<E> {
 
-    fun findOneByPublicKey(publicKey: String): Entity?
+    fun findOneByPublicKey(publicKey: String): E?
 
 }
 
