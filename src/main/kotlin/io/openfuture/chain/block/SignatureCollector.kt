@@ -19,10 +19,22 @@ class SignatureCollector(
     private lateinit var pendingBlock: PendingBlock
 
 
-    fun getBlock(): Block = pendingBlock.block
+    fun getBlock(): Block {
+        try {
+            lock.readLock().lock()
+            return pendingBlock.block
+        } finally {
+            lock.readLock().unlock()
+        }
+    }
 
     fun getBlockSignatures(): BlockSignatures {
-        return blockSignaturesConverter.fromEntity(pendingBlock)
+        try {
+            lock.readLock().lock()
+            return blockSignaturesConverter.fromEntity(pendingBlock)
+        } finally {
+            lock.readLock().unlock()
+        }
     }
 
     fun setPendingBlock(generatedBlock: Block) {
