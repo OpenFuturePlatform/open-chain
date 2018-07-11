@@ -1,11 +1,11 @@
 package io.openfuture.chain.controller
 
-import io.openfuture.chain.domain.crypto.DerivationKeyRequest
-import io.openfuture.chain.domain.crypto.MasterKeyRequest
-import io.openfuture.chain.domain.crypto.key.AddressKeyDto
+import io.openfuture.chain.domain.crypto.AccountDto
+import io.openfuture.chain.domain.crypto.RootAccountDto
+import io.openfuture.chain.domain.crypto.key.DerivationKeyRequest
 import io.openfuture.chain.domain.crypto.key.ImportKeyRequest
 import io.openfuture.chain.domain.crypto.key.KeyDto
-import io.openfuture.chain.domain.crypto.ValidateAddressRequest
+import io.openfuture.chain.domain.crypto.key.RestoreRequest
 import io.openfuture.chain.service.CryptoService
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -16,46 +16,31 @@ class CryptoController(
     private val cryptoService: CryptoService
 ) {
 
-    @PostMapping("/doGenerateMaster")
-    fun getMasterKey(@RequestBody keyRequest: MasterKeyRequest): KeyDto {
-        val key = cryptoService.getMasterKey(keyRequest.seedPhrase)
+    @GetMapping("/doGenerate")
+    fun generateNewAccount(): RootAccountDto = cryptoService.generateNewAccount()
 
-        return KeyDto(
-            cryptoService.serializePublicKey(key),
-            cryptoService.serializePrivateKey(key)
-        )
-    }
+    @PostMapping("/doRestore")
+    fun restore(@RequestBody @Valid keyRequest: RestoreRequest): RootAccountDto =
+        cryptoService.getRootAccount(keyRequest.seedPhrase!!)
 
     @PostMapping("/doDerive")
-    fun getDerivationKey(@RequestBody keyRequest: DerivationKeyRequest): AddressKeyDto {
-        val key = cryptoService.getDerivationKey(keyRequest.seedPhrase, keyRequest.derivationPath)
-
-        return AddressKeyDto(
-            cryptoService.serializePublicKey(key),
-            cryptoService.serializePrivateKey(key),
-            key.ecKey.getAddress()
-        )
+    fun getDerivationAccount(@RequestBody @Valid keyRequest: DerivationKeyRequest): AccountDto {
+        val key = cryptoService.getDerivationKey(keyRequest.seedPhrase!!, keyRequest.derivationPath!!)
+        val publicKey = cryptoService.serializePublicKey(key)
+        val privateKey = cryptoService.serializePrivateKey(key)
+        return AccountDto(KeyDto(publicKey, privateKey), key.ecKey.getAddress())
     }
 
-    @GetMapping("/generate")
-    fun generateKey() = cryptoService.generateKey()
-
     @PostMapping("/keys/doImport")
-    fun importKey(@RequestBody @Valid request: ImportKeyRequest): AddressKeyDto {
-        val importedKey = cryptoService.importKey(request.decodedKey!!)
-        return AddressKeyDto(
-            cryptoService.serializePublicKey(importedKey),
-            if (!importedKey.ecKey.isPrivateEmpty()) cryptoService.serializePrivateKey(importedKey) else null,
-            importedKey.ecKey.getAddress()
-        )
+    fun importKey(@RequestBody @Valid request: ImportKeyRequest): AccountDto {
+        val key = cryptoService.importKey(request.decodedKey!!)
+        val publicKey = cryptoService.serializePublicKey(key)
+        val privateKey = if (!key.ecKey.isPrivateEmpty()) cryptoService.serializePrivateKey(key) else null
+        return AccountDto(KeyDto(publicKey, privateKey), key.ecKey.getAddress())
     }
 
     @PostMapping("/keys/doImportWif")
-    fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): AddressKeyDto = AddressKeyDto(
-        cryptoService.importWifKey(request.decodedKey!!)
-    )
-
-    @PostMapping("/validateAddress")
-    fun validateAddress(@RequestBody @Valid request: ValidateAddressRequest): ValidateAddressRequest = request
+    fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): AccountDto =
+        AccountDto(cryptoService.importWifKey(request.decodedKey!!))
 
 }
