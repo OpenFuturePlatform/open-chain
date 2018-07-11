@@ -30,7 +30,7 @@ class DefaultBlockSignService(
         val signature = signatureManager.sign(HashUtils.hexStringToBytes(block.hash), keyHolder.getPrivateKey())
 
         val builder = CommunicationProtocol.BlockSignatures.newBuilder()
-        blockSignaturesConverter.setBlockProto(builder, block)
+        blockSignaturesConverter.setBlockMessage(builder, block)
         val signatures = listOf<CommunicationProtocol.SignaturePublicKeyPair>(
             CommunicationProtocol.SignaturePublicKeyPair.newBuilder()
                 .setSignature(signature)
@@ -46,7 +46,7 @@ class DefaultBlockSignService(
         val signatures = blockSignatures.signaturesList
             .map { SignaturePublicKeyPair(it.signature, it.publicKey) }.toHashSet()
 
-        val block = blockSignaturesConverter.toBlock(blockSignatures)
+        val block = blockSignaturesConverter.fromMessage(blockSignatures)
 
         val signature = signatureManager.sign(HashUtils.hexStringToBytes(block.hash), keyHolder.getPrivateKey())
         val signaturePublicKeyPair = SignaturePublicKeyPair(
@@ -57,8 +57,8 @@ class DefaultBlockSignService(
         signatures.add(signaturePublicKeyPair)
     }
 
-    override fun addSignatures(blockSignatures: CommunicationProtocol.BlockSignatures): Boolean {
-        return signatureCollector.addBlockSignatures(blockSignatures)
+    override fun addSignatures(blockSignature: CommunicationProtocol.BlockSignatures): Boolean {
+        return signatureCollector.addBlockSignatures(blockSignature)
     }
 
 }

@@ -8,21 +8,21 @@ import org.springframework.stereotype.Component
 @Component
 class MainBlockConverter(
     private val transactionConverter: TransactionConverter
-) {
+): MessageConverter<Block,  CommunicationProtocol.MainBlock> {
 
-    fun toMainBlock(mainBlock: CommunicationProtocol.MainBlock): MainBlock {
+    override fun fromMessage(message: CommunicationProtocol.MainBlock): MainBlock {
         return MainBlock(
-            mainBlock.hash,
-            mainBlock.height,
-            mainBlock.previousHash,
-            mainBlock.merkleHash,
-            mainBlock.timestamp,
-            mainBlock.signature,
-            mainBlock.transactionsList.map { transactionConverter.toTransaction(it) }.toList())
+            message.hash,
+            message.height,
+            message.previousHash,
+            message.merkleHash,
+            message.timestamp,
+            message.signature,
+            message.transactionsList.map { transactionConverter.fromMessage(it) }.toList())
     }
 
-    fun toMainBlockProto(block: Block): CommunicationProtocol.MainBlock {
-        val mainBlock = block as MainBlock
+    override fun fromEntity(entity: Block): CommunicationProtocol.MainBlock {
+        val mainBlock = entity as MainBlock
         return CommunicationProtocol.MainBlock.newBuilder()
             .setHash(mainBlock.hash)
             .setHeight(mainBlock.height)
@@ -30,7 +30,7 @@ class MainBlockConverter(
             .setMerkleHash(mainBlock.merkleHash)
             .setTimestamp(mainBlock.timestamp)
             .setSignature(mainBlock.signature)
-            .addAllTransactions(mainBlock.transactions.map { transactionConverter.toTransactionProto(it) }.toList())
+            .addAllTransactions(mainBlock.transactions.map { transactionConverter.fromEntity(it) }.toList())
             .build()
     }
 

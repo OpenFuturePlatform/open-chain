@@ -23,9 +23,7 @@ enum Type {
     HEART_BEAT = 0;
     TIME_SYNC_REQUEST = 1;
     TIME_SYNC_RESPONSE = 2;
-    MAIN_BLOCK = 3;
-    SIGNED_BLOCK = 4;
-    FULL_SIGNED_BLOCK = 5;
+    SIGNED_BLOCK = 3;
 }
 
 message HeartBeat {
@@ -74,7 +72,7 @@ message GenesisBlock {
     int64 timestamp = 5;
     int32 version = 6;
     int64 epochIndex = 7;
-    repeated string activeDelegateIps = 8;
+    repeated string activeDelegateKeys = 8;
 }
 
 message SignaturePublicKeyPair {

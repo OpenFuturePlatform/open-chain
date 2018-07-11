@@ -1,13 +1,14 @@
 package io.openfuture.chain.crypto.key
 
 import io.openfuture.chain.crypto.domain.ExtendedKey
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.junit.Test
 
 class DerivationKeysHelperTest {
 
     private val helper = DerivationKeysHelper()
+
 
     @Test
     fun deriveShouldGenerateKeyPairAccordingToBip32Specification() {
@@ -19,18 +20,18 @@ class DerivationKeysHelperTest {
         val serializedPrivateKeyRoot = serializer.serializePrivate(rootKey)
         val serializedPublicKeyRoot = serializer.serializePublic(rootKey)
 
-        Assertions.assertThat(serializedPrivateKeyRoot)
+        assertThat(serializedPrivateKeyRoot)
             .isEqualTo("xprv9s21ZrQH143K31xYSDQpPDxsXRTUcvj2iNHm5NUtrGiGG5e2DtALGdso3pGz6ssrdK4PFmM8NSpSBHNqPqm55Qn3LqFtT2emdEXVYsCzC2U")
-        Assertions.assertThat(serializedPublicKeyRoot)
+        assertThat(serializedPublicKeyRoot)
             .isEqualTo("xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB")
 
         val derivedKey = helper.derive(rootKey, "m/0")
         val serializedPrivateKey = serializer.serializePrivate(derivedKey)
         val serializedPublicKey = serializer.serializePublic(derivedKey)
 
-        Assertions.assertThat(serializedPrivateKey)
+        assertThat(serializedPrivateKey)
             .isEqualTo("xprv9vHkqa6EV4sPZHYqZznhT2NPtPCjKuDKGY38FBWLvgaDx45zo9WQRUT3dKYnjwih2yJD9mkrocEZXo1ex8G81dwSM1fwqWpWkeS3v86pgKt")
-        Assertions.assertThat(serializedPublicKey)
+        assertThat(serializedPublicKey)
             .isEqualTo("xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH")
     }
 
