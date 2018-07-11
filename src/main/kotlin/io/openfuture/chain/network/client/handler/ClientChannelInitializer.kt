@@ -1,4 +1,4 @@
-package io.openfuture.chain.nio.server.handler
+package io.openfuture.chain.network.client.handler
 
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
@@ -7,17 +7,15 @@ import io.netty.handler.codec.protobuf.ProtobufEncoder
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender
 import io.netty.handler.timeout.ReadTimeoutHandler
-import io.openfuture.chain.nio.base.ConnectHandler
-import io.openfuture.chain.nio.base.DisconnectHandler
-import io.openfuture.chain.nio.base.PeerEventHandler
+import io.openfuture.chain.network.base.ConnectHandler
+import io.openfuture.chain.network.server.handler.GetPeerServerHandler
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
 @Component
-class ServerChannelInitializer(
-    private val connectionServerHandler: ConnectionServerHandler,
-    private val context: ApplicationContext
+class ClientChannelInitializer(
+        private val context: ApplicationContext
 ) : ChannelInitializer<SocketChannel>() {
 
     override fun initChannel(channel: SocketChannel) {
@@ -34,13 +32,12 @@ class ServerChannelInitializer(
         // Handlers
         pipeline.addLast(ReadTimeoutHandler(60))
         pipeline.addLast(context.getBean(ConnectHandler::class.java))
-        pipeline.addLast(context.getBean(DisconnectHandler::class.java))
-        pipeline.addLast(connectionServerHandler)
+        pipeline.addLast(context.getBean(ConnectionClientHandler::class.java))
 
-        pipeline.addLast(context.getBean(TimeSyncServerHandler::class.java))
-        pipeline.addLast(context.getBean(PeerEventHandler::class.java))
-        pipeline.addLast(context.getBean(JoinNetworkServerHandler::class.java))
-        pipeline.addLast(context.getBean(HeartBeatServerHandler::class.java)) // prototype
+        pipeline.addLast(context.getBean(GetPeerClientHandler::class.java))
+        pipeline.addLast(context.getBean(GetPeerServerHandler::class.java))
+        pipeline.addLast(context.getBean(TimeSyncClientHandler::class.java))
+        pipeline.addLast(context.getBean(HeartBeatClientHandler::class.java))
     }
 
 }

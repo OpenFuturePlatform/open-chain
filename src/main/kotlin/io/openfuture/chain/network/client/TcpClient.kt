@@ -1,7 +1,7 @@
-package io.openfuture.chain.nio.client
+package io.openfuture.chain.network.client
 
 import io.netty.bootstrap.Bootstrap
-import io.openfuture.chain.nio.client.listener.ConnectionListener
+import io.openfuture.chain.network.client.listener.ConnectionListener
 
 class TcpClient(
     private val bootstrap: Bootstrap,

@@ -12,11 +12,9 @@ message Packet {
         HeartBeat heart_beat = 2;
         TimeSyncRequest time_sync_request = 3;
         TimeSyncResponse time_sync_response = 4;
-        JoinNetworkRequest join_network_request = 5;
-        JoinNetworkResponse join_network_response = 6;
+        GetPeerRequest get_peer_request = 5;
+        GetPeerResponse get_peer_response = 6;
         Connect connect = 7;
-        Disconnect disconnect = 8;
-        PeerEvent peer_event = 9;
     }
 }
 
@@ -24,11 +22,9 @@ enum Type {
     HEART_BEAT = 0;
     TIME_SYNC_REQUEST = 1;
     TIME_SYNC_RESPONSE = 2;
-    JOIN_NETWORK_REQUEST = 4;
-    JOIN_NETWORK_RESPONSE = 5;
+    GET_PEER_REQUEST = 4;
+    GET_PEER_RESPONSE = 5;
     CONNECT = 6;
-    DISCONNECT = 7;
-    PEER_EVENT = 8;
 }
 
 message HeartBeat {
@@ -55,29 +51,14 @@ message Peer {
     int32 port = 3;
 }
 
-message JoinNetworkRequest {
-    int32 port = 1;
+message GetPeerRequest {
+    string id = 1;
 }
 
-message JoinNetworkResponse {
-    string network_id = 1;
+message GetPeerResponse {
     repeated Peer peers = 3;
 }
 
 message Connect {
-    string network_id = 1;
-}
-
-message Disconnect {
-    bool leave_network = 1;
-}
-
-message PeerEvent {
-    enum Type {
-        JOIN_NETWORK = 0;
-        LEAVE_NETWORK = 1;
-    }
-
-    Type type = 1;
-    Peer peer = 2;
+    Peer peer = 1;
 }

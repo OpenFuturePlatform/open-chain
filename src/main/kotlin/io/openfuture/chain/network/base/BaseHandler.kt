@@ -1,4 +1,4 @@
-package io.openfuture.chain.nio.base
+package io.openfuture.chain.network.base
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter

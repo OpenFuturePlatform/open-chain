@@ -1,8 +1,9 @@
-package io.openfuture.chain.nio.server.handler
+package io.openfuture.chain.network.server.handler
 
 import io.netty.channel.ChannelHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
+import io.openfuture.chain.network.ChannelAttributes.REMOTE_PEER
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.protocol.CommunicationProtocol.HeartBeat
 import io.openfuture.chain.protocol.CommunicationProtocol.Packet
@@ -25,23 +26,18 @@ class ConnectionServerHandler(
     override fun channelActive(ctx: ChannelHandlerContext) {
         val address = ctx.channel().remoteAddress()
 
-        if (check(ctx)) {
-            networkService.activeOutboundChannels().add(ctx.channel())
+        networkService.addConnectedPeer(ctx.channel(), ctx.channel().attr(REMOTE_PEER).get())
 
-            log.info("Connection with {} established", address)
+        log.info("Connection with {} established", address)
 
-            // start heart beat
-            val packet = Packet.newBuilder()
-                    .setType(HEART_BEAT)
-                    .setHeartBeat(HeartBeat.newBuilder().setType(HeartBeat.Type.PING).build())
-                    .build()
-            ctx.writeAndFlush(packet)
+        // start heart beat
+        val packet = Packet.newBuilder()
+            .setType(HEART_BEAT)
+            .setHeartBeat(HeartBeat.newBuilder().setType(HeartBeat.Type.PING).build())
+            .build()
+        ctx.writeAndFlush(packet)
 
-            ctx.fireChannelActive()
-        } else {
-            log.error("Connection with {} rejected", address)
-            ctx.close()
-        }
+        ctx.fireChannelActive()
     }
 
     override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {
@@ -52,8 +48,8 @@ class ConnectionServerHandler(
         when (type) {
             HEART_BEAT -> {}
             TIME_SYNC_REQUEST -> {}
-            JOIN_NETWORK_REQUEST -> {}
-            PEER_EVENT -> {}
+            GET_PEER_REQUEST -> {}
+            GET_PEER_RESPONSE -> {}
             else -> {
                 log.error("Illegal packet type: {}", packet)
                 ctx.close()
@@ -65,17 +61,12 @@ class ConnectionServerHandler(
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        networkService.activeOutboundChannels().remove(ctx.channel())
+        networkService.removeConnectedPeer(ctx.channel())
     }
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         log.error("Connection error", cause)
         ctx.close()
-    }
-
-    private fun check(ctx: ChannelHandlerContext): Boolean {
-        log.trace("Check {}", ctx.channel().remoteAddress())
-        return true
     }
 
 }

@@ -1,7 +1,7 @@
 package io.openfuture.chain.repository
 
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.Peer
+import io.openfuture.chain.network.domain.Peer
 import io.openfuture.chain.entity.SeedWord
 import io.openfuture.chain.entity.Transaction
 import org.springframework.data.jpa.repository.JpaRepository
@@ -28,14 +28,5 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
     fun findOneByIndex(index: Int): SeedWord
 
     fun findOneByValue(value: String): SeedWord?
-
-}
-
-@Repository
-interface PeerRepository : BaseRepository<Peer> {
-
-    fun deleteOneByNetworkId(networkId: String)
-
-    fun findOneByNetworkId(networkId: String): Optional<Peer>
 
 }

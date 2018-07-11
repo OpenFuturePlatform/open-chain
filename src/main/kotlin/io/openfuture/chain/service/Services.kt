@@ -12,7 +12,7 @@ import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.Peer
+import io.openfuture.chain.network.domain.Peer
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
@@ -69,42 +69,25 @@ interface TransactionService {
 
 }
 
-interface PeerService {
-
-    fun findAll() : List<CommunicationProtocol.Peer>
-
-    fun save(address: Peer)
-
-    fun saveAll(addresses: List<CommunicationProtocol.Peer>)
-
-    fun deleteAll()
-
-    fun deleteByNetworkId(networkId: String)
-
-    fun findByNetworkId(networkId: String) : Peer?
-
-}
-
 interface NetworkService {
 
-    @EventListener
-    fun start(event: ApplicationReadyEvent)
-
-    fun connect(host: String, port: Int)
+    fun start()
 
     fun broadcast(packet: CommunicationProtocol.Packet)
 
-    fun disconnect(channel: Channel)
-
-    fun activeInboundChannels(): MutableSet<Channel>
-
-    fun activeOutboundChannels(): MutableSet<Channel>
-
     fun isConnected(networkId: String): Boolean
 
-    fun getNetworkId(): String?
-
-    fun setNetworkId(networkId: String)
+    fun getNetworkId(): String
 
     fun maintainInboundConnections()
+
+    fun addConnectedPeer(channel: Channel, peer: Peer)
+
+    fun removeConnectedPeer(channel: Channel)
+
+    fun addKnownPeers(peers: List<CommunicationProtocol.Peer>)
+
+    fun getPeerInfo() : Peer
+
+    fun connectedPeers(): Set<Peer>
 }

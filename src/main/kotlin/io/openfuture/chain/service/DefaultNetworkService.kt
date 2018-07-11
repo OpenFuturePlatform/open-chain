@@ -3,12 +3,10 @@ package io.openfuture.chain.service
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
-import io.openfuture.chain.nio.ChannelAttributes
+import io.openfuture.chain.network.domain.Peer
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.slf4j.LoggerFactory
-import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.security.SecureRandom
@@ -17,112 +15,102 @@ import java.util.concurrent.ConcurrentHashMap
 @Component
 class DefaultNetworkService(
     private val clientBootstrap: Bootstrap,
-    private val properties: NodeProperties,
-    private val peerService: PeerService
+    private val properties: NodeProperties
 ) : NetworkService {
-
-    private val inboundChannels : MutableSet<Channel> = ConcurrentHashMap.newKeySet()
-
-    private val outboundChannels : MutableSet<Channel> = ConcurrentHashMap.newKeySet()
-
-    @Volatile
-    private var networkId : String? = null
+    private val connectedPeers : MutableMap<Channel, Peer> = ConcurrentHashMap()
+    private val knownPeers : MutableSet<Peer> = ConcurrentHashMap.newKeySet()
+    private val networkId = properties.host!! + properties.port
 
     companion object {
         private val logger = LoggerFactory.getLogger(DefaultNetworkService::class.java)
-        private const val INBOUND_CONNECTION_NUMBER = 8
     }
 
-    @EventListener
-    override fun start(event: ApplicationReadyEvent) {
-        peerService.deleteAll()
-
-        val address = properties.rootNodes[0].split(":")
-        clientBootstrap.connect(address[0], address[1].toInt()).addListener { future ->
-            future as ChannelFuture
-            if (future.isSuccess) {
-                future.channel().writeAndFlush(createJoinNetworkMessage())
+    override fun start() {
+        val shuffledNodes = properties.rootNodes.shuffled(SecureRandom())
+        val address = shuffledNodes[0].split(":")
+        clientBootstrap.connect(address[0], address[1].toInt()).addListener {
+            future -> future as ChannelFuture
+            if (!future.isSuccess) {
+                logger.warn("Can not connect to ${address[0]}:${address[1]}")
             } else {
-                logger.warn("Can not join to network: ${address[0]} : ${address[1]}.")
+                future.channel().writeAndFlush(createGetPeersMessage())
             }
         }
     }
 
     @Scheduled(cron="*/30 * * * * *")
     override fun maintainInboundConnections() {
-        if (networkId == null) {
-            return
-        }
-        val connectionNeeded = INBOUND_CONNECTION_NUMBER - inboundChannels.size
-        val peers = peerService.findAll().shuffled(SecureRandom())
+        val connectionNeeded = properties.peersNumber!! - connectedPeers.size
+        val peers = knownPeers.shuffled(SecureRandom())
         for (peer in peers) {
-            if (peer.networkId != networkId && !isConnected(networkId!!)) {
-                connect(peer.host, peer.port)
-            }
-            connectionNeeded.dec()
-            if (connectionNeeded == 0) {
-                return
-            }
-        }
-    }
-
-    override fun connect(host: String, port: Int) {
-        clientBootstrap.connect(host, port).addListener { future ->
-            future as ChannelFuture
-            if (!future.isSuccess) {
-                logger.warn("Can not connect to: $host : $port.")
+            if (peer.networkId != networkId && !isConnected(networkId)) {
+                clientBootstrap.connect(peer.host, peer.port).addListener {
+                    future -> future as ChannelFuture
+                        if (!future.isSuccess) {
+                            logger.warn("Can not connect to ${peer.host}:${peer.port}")
+                        }
+                }
+                connectionNeeded.dec()
+                if (connectionNeeded == 0) {
+                    return
+                }
             }
         }
-    }
-
-    override fun disconnect(channel: Channel) {
-        channel.writeAndFlush(CommunicationProtocol.Packet.newBuilder()
-            .setType(CommunicationProtocol.Type.DISCONNECT)
-            .setDisconnect(CommunicationProtocol.Disconnect.newBuilder()
-                .setLeaveNetwork(false)
-                .build())
-            .build())
-        channel.close()
+        if (connectionNeeded > 0 && connectedPeers.isNotEmpty()) {
+            knownPeers.clear()
+            connectedPeers.keys.shuffled(SecureRandom())[0].writeAndFlush(createGetPeersMessage())
+        }
     }
 
     override fun broadcast(packet: CommunicationProtocol.Packet) {
-        inboundChannels.plus(outboundChannels).forEach {
+        connectedPeers.keys.forEach {
             it.writeAndFlush(packet)
         }
     }
 
-    override fun activeInboundChannels() : MutableSet<Channel> {
-        return inboundChannels
+    override fun addConnectedPeer(channel : Channel, peer: Peer) {
+        connectedPeers[channel] = peer
     }
 
-    override fun activeOutboundChannels() : MutableSet<Channel> {
-        return outboundChannels
+    override fun removeConnectedPeer(channel: Channel) {
+        connectedPeers.remove(channel)
+    }
+
+    override fun connectedPeers() : Set<Peer> {
+        val peers = mutableSetOf<Peer>()
+        peers.addAll(connectedPeers.values)
+        return peers
+    }
+
+    override fun addKnownPeers(peers: List<CommunicationProtocol.Peer>) {
+        peers.forEach {
+            knownPeers.add(Peer(it.networkId, it.host, it.port))
+        }
     }
 
     override fun isConnected(networkId : String) : Boolean {
-        for (channel in inboundChannels.plus(outboundChannels)) {
-            val id = channel.attr(ChannelAttributes.REMOTE_NETWORK_ID).get()
-            if (id == networkId) {
+        for (peer in connectedPeers.values) {
+            if (peer.networkId == networkId) {
                 return true
             }
         }
         return false
     }
 
-    override fun getNetworkId() : String? {
+    override fun getNetworkId() : String {
         return networkId
     }
 
-    override fun setNetworkId(networkId : String) {
-        this.networkId = networkId
+    override fun getPeerInfo(): Peer {
+        return Peer(networkId, properties.host!!, properties.port!!)
     }
 
-    private fun createJoinNetworkMessage() : CommunicationProtocol.Packet{
+    private fun createGetPeersMessage() : CommunicationProtocol.Packet{
         return CommunicationProtocol.Packet.newBuilder()
-            .setType(CommunicationProtocol.Type.JOIN_NETWORK_REQUEST)
-            .setJoinNetworkRequest(CommunicationProtocol.JoinNetworkRequest.newBuilder()
-                    .setPort(properties.port!!)
-                    .build())
+            .setType(CommunicationProtocol.Type.GET_PEER_REQUEST)
+            .setGetPeerRequest(CommunicationProtocol.GetPeerRequest.newBuilder()
+                .setId(networkId)
+                .build())
             .build()
     }
 

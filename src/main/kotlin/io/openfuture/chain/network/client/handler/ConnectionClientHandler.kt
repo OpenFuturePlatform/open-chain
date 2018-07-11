@@ -1,7 +1,9 @@
-package io.openfuture.chain.nio.client.handler
+package io.openfuture.chain.network.client.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
+import io.openfuture.chain.network.ChannelAttributes.REMOTE_PEER
+import io.openfuture.chain.network.server.handler.ConnectionServerHandler
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.protocol.CommunicationProtocol.Type
 import io.openfuture.chain.service.NetworkService
@@ -21,13 +23,13 @@ class ConnectionClientHandler(
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         log.info("Connection established")
-        networkService.activeInboundChannels().add(ctx.channel())
+        networkService.addConnectedPeer(ctx.channel(), ctx.channel().attr(REMOTE_PEER).get())
         ctx.fireChannelActive()
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
         log.info("Connection closed")
-        networkService.activeInboundChannels().remove(ctx.channel())
+        networkService.removeConnectedPeer(ctx.channel())
         ctx.fireChannelInactive()
     }
 
@@ -39,8 +41,8 @@ class ConnectionClientHandler(
         when (type) {
             Type.HEART_BEAT -> {}
             Type.TIME_SYNC_RESPONSE -> {}
-            Type.JOIN_NETWORK_RESPONSE -> {}
-            Type.PEER_EVENT -> {}
+            Type.GET_PEER_RESPONSE -> {}
+            Type.GET_PEER_REQUEST -> {}
             else -> {
                 log.error("Illegal packet type: {}", packet)
                 ctx.close()

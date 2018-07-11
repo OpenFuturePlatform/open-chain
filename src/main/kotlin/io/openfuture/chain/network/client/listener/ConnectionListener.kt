@@ -1,8 +1,8 @@
-package io.openfuture.chain.nio.client.listener
+package io.openfuture.chain.network.client.listener
 
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelFutureListener
-import io.openfuture.chain.nio.client.TcpClient
+import io.openfuture.chain.network.client.TcpClient
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
