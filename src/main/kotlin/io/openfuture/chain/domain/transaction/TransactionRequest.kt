@@ -2,17 +2,17 @@ package io.openfuture.chain.domain.transaction
 
 import io.openfuture.chain.crypto.util.HashUtils
 import org.jetbrains.annotations.NotNull
+import java.util.*
 import javax.validation.constraints.NotBlank
 
 class TransactionRequest(
     @NotNull val amount: Int?,
-    @NotNull val timestamp: Long?,
     @NotBlank val recipientKey: String?,
     @NotBlank val senderKey: String?,
     @NotBlank val signature: String?,
     @NotBlank val senderAddress: String?,
-    @NotBlank val recipientAddress: String?
-
+    @NotBlank val recipientAddress: String?,
+    @NotNull val timestamp: Long? = Date().time
 ) {
 
     var hash: String = calculateHash()

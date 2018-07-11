@@ -1,14 +1,13 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class DefaultBlockService (
+class DefaultBlockService(
     private val repository: BlockRepository,
     private val wallerService: WalletService,
     private val transactionService: TransactionService
@@ -31,17 +30,11 @@ class DefaultBlockService (
     override fun save(block: Block): Block {
         val savedBlock = repository.save(block)
 
-        block.transactions.forEach { savedBlock.transactions.add(saveTransaction(it))}
+        savedBlock.transactions.forEach {
+            wallerService.updateByTransaction(it)
+        }
 
         return savedBlock
-    }
-
-    private fun saveTransaction(transaction: Transaction) : Transaction {
-        val savedTransaction = transactionService.save(transaction)
-
-        wallerService.updateByTransaction(savedTransaction)
-
-        return savedTransaction
     }
 
 }
