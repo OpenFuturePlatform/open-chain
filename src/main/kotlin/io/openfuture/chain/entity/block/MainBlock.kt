@@ -8,26 +8,29 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "main_blocks")
-class MainBlock(hash: String, height: Long, previousHash: String,
-                merkleHash: String, timestamp: Long,
+class MainBlock(
+    hash: String,
+    height: Long,
+    previousHash: String,
+    merkleHash: String, timestamp: Long,
 
-                @Column(name = "signature", nullable = false)
-                var signature: String,
+    @Column(name = "signature", nullable = false)
+    var signature: String,
 
-                @OneToMany
-                @JoinColumn(name = "block_id", nullable = true)
-                var transactions: MutableSet<Transaction> = mutableSetOf()
+    @OneToMany
+    @JoinColumn(name = "block_id", nullable = true)
+    var transactions: MutableSet<Transaction> = mutableSetOf()
 
 ) : Block(hash, height, previousHash, merkleHash, timestamp, BlockVersion.MAIN.version) {
 
     companion object {
         fun of(dto: MainBlockDto): MainBlock = MainBlock(
-                dto.hash,
-                dto.height,
-                dto.previousHash,
-                dto.merkleHash,
-                dto.timestamp,
-                dto.signature)
+            dto.hash,
+            dto.height,
+            dto.previousHash,
+            dto.merkleHash,
+            dto.timestamp,
+            dto.signature)
     }
 
 }

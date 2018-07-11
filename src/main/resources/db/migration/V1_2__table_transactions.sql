@@ -8,6 +8,11 @@ CREATE TABLE transactions (
   hash             VARCHAR NOT NULL,
   block_id         INTEGER NULLABLE REFERENCES blocks
 );
+
+CREATE TABLE transfer_transactions (
+  id INTEGER PRIMARY KEY REFERENCES transactions
+);
+
 --
 CREATE TABLE vote_types (
   id  INT PRIMARY KEY,

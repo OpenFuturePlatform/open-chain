@@ -7,6 +7,7 @@ import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.Transaction
+import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
@@ -30,13 +31,16 @@ interface GenesisBlockRepository : BaseRepository<GenesisBlock>
 interface MainBlockRepository : BaseRepository<MainBlock>
 
 @Repository
-interface TransactionRepository<E : Transaction> : BaseRepository<E> {
+interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 
-    fun findOneByHash(hash: String): E?
+    fun findOneByHash(hash: String): Entity?
 
-    fun findAllByBlockIsNull(): MutableSet<E>
+    fun findAllByBlockIsNull(): MutableSet<Entity>
 
 }
+
+@Repository
+interface TransferTransactionRepository : TransactionRepository<TransferTransaction>
 
 @Repository
 interface VoteTransactionRepository : TransactionRepository<VoteTransaction>
@@ -51,9 +55,9 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 }
 
 @Repository
-interface StakeholderRepository<E : Stakeholder> : BaseRepository<E> {
+interface StakeholderRepository<Entity : Stakeholder> : BaseRepository<Entity> {
 
-    fun findOneByPublicKey(publicKey: String): E?
+    fun findOneByPublicKey(publicKey: String): Entity?
 
 }
 

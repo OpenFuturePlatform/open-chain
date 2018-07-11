@@ -12,14 +12,17 @@ import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.domain.stakeholder.DelegateDto
 import io.openfuture.chain.domain.stakeholder.StakeholderDto
 import io.openfuture.chain.domain.transaction.TransactionDto
+import io.openfuture.chain.domain.transaction.TransferTransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.TransactionData
-import io.openfuture.chain.domain.transaction.data.VoteDto
+import io.openfuture.chain.domain.transaction.data.TransferTransactionData
+import io.openfuture.chain.domain.vote.VoteDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.account.Stakeholder
 import io.openfuture.chain.entity.account.Delegate
 import io.openfuture.chain.entity.transaction.Transaction
+import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 
 interface HardwareInfoService {
@@ -70,7 +73,7 @@ interface CryptoService {
 
 }
 
-interface BaseTransactionService<Entity : Transaction, Dto : TransactionDto, Data : TransactionData> {
+interface BaseTransactionService<Entity : Transaction> {
 
     fun getAllPending(): MutableSet<Entity>
 
@@ -78,15 +81,21 @@ interface BaseTransactionService<Entity : Transaction, Dto : TransactionDto, Dat
 
     fun addToBlock(hash: String, block: Block): Entity
 
+}
+
+interface TransactionService<Entity : Transaction, Dto : TransactionDto, Data : TransactionData> :
+    BaseTransactionService<Entity> {
+
     fun add(dto: Dto): Entity
 
     fun create(data: Data): Dto
 
 }
 
-interface TransactionService : BaseTransactionService<Transaction, TransactionDto, TransactionData>
+interface TransferTransactionService : TransactionService<TransferTransaction, TransferTransactionDto,
+    TransferTransactionData>
 
-interface VoteTransactionService : BaseTransactionService<VoteTransaction, VoteTransactionDto, VoteTransactionData>
+interface VoteTransactionService : TransactionService<VoteTransaction, VoteTransactionDto, VoteTransactionData>
 
 interface BaseStakeholderService<Entity : Stakeholder, Dto : StakeholderDto> {
 

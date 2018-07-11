@@ -3,7 +3,7 @@ package io.openfuture.chain.entity.dictionary
 import io.openfuture.chain.entity.base.Dictionary
 
 enum class VoteType(
-        private val id: Int
+    private val id: Int
 ) : Dictionary {
 
     FOR(1),

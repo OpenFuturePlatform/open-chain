@@ -1,7 +1,7 @@
 package io.openfuture.chain.service.stakeholder
 
 import io.openfuture.chain.domain.stakeholder.DelegateDto
-import io.openfuture.chain.domain.transaction.data.VoteDto
+import io.openfuture.chain.domain.vote.VoteDto
 import io.openfuture.chain.entity.account.Delegate
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.nio.client.handler.ConnectionClientHandler

@@ -5,6 +5,7 @@ import io.openfuture.chain.domain.block.MainBlockDto
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.MainBlock
+import io.openfuture.chain.entity.transaction.Transaction
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.util.BlockUtils
@@ -12,9 +13,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class DefaultBlockService (
-        private val repository: BlockRepository,
-        private val transactionService: TransactionService
+class DefaultBlockService(
+    private val repository: BlockRepository,
+    private val transactionService: BaseTransactionService<Transaction>
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -22,7 +23,7 @@ class DefaultBlockService (
         ?: throw NotFoundException("Not found id $id")
 
     @Transactional(readOnly = true)
-    override fun getAll(): MutableList<Block> =  repository.findAll()
+    override fun getAll(): MutableList<Block> = repository.findAll()
 
     @Transactional(readOnly = true)
     override fun getLast(): Block = repository.findFirstByOrderByHeightDesc()
@@ -43,7 +44,7 @@ class DefaultBlockService (
         val time = System.currentTimeMillis()
         val hash = BlockUtils.calculateHash(previousBlock.hash, merkleRootHash, time, (previousBlock.height + 1))
         return MainBlockDto(HashUtils.bytesToHexString(hash), previousBlock.height + 1,
-                previousBlock.hash, merkleRootHash, time, "", transactions)
+            previousBlock.hash, merkleRootHash, time, "", transactions)
     }
 
 }

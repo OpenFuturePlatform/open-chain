@@ -1,7 +1,6 @@
 package io.openfuture.chain.entity.transaction
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.base.BaseModel
 import io.openfuture.chain.entity.block.Block
 import javax.persistence.*
@@ -9,7 +8,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "transactions")
 @Inheritance(strategy = InheritanceType.JOINED)
-open class Transaction(
+abstract class Transaction(
 
     @Column(name = "timestamp", nullable = false)
     var timestamp: Long,
@@ -34,17 +33,4 @@ open class Transaction(
     @JoinColumn(name = "block_id", nullable = true)
     var block: Block? = null
 
-) : BaseModel() {
-
-    companion object {
-        fun of(dto: TransactionDto): Transaction = Transaction(
-            dto.timestamp,
-            dto.amount,
-            dto.recipientKey,
-            dto.senderKey,
-            dto.senderSignature,
-            dto.hash
-        )
-    }
-
-}
+) : BaseModel()

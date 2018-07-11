@@ -5,9 +5,13 @@ import io.openfuture.chain.nio.client.handler.ConnectionClientHandler
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.MainBlockDto
 import io.openfuture.chain.domain.transaction.TransactionDto
+import io.openfuture.chain.domain.transaction.TransferTransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
+import io.openfuture.chain.domain.transaction.data.TransactionData
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.dictionary.VoteType
+import io.openfuture.chain.entity.transaction.Transaction
+import io.openfuture.chain.repository.TransactionRepository
 import io.openfuture.chain.service.*
 import io.openfuture.chain.util.BlockUtils
 import org.slf4j.LoggerFactory
@@ -20,11 +24,12 @@ import java.util.*
 
 @Component
 class BlockchainInitializer(
-        private val blockService: BlockService,
-        private val stakeholderService: StakeholderService,
-        private val delegateService: DelegateService,
-        private val transactionService: VoteTransactionService,
-        private val objectMapper: ObjectMapper
+    private val blockService: BlockService,
+    private val stakeholderService: StakeholderService,
+    private val delegateService: DelegateService,
+    private val transferTransactionService: TransferTransactionService,
+    private val voteTransactionService: VoteTransactionService,
+    private val objectMapper: ObjectMapper
 ) {
 
     companion object {
@@ -43,13 +48,16 @@ class BlockchainInitializer(
     @Scheduled(fixedDelayString = "2000")
     fun createTransactionSchedule() {
         val dto = createRandomTransaction()
-        val trx = transactionService.addVote(dto)
+        val trx = voteTransactionService.add(dto)
         log.info("Created new transaction {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(trx))
     }
 
     @Scheduled(fixedDelayString = "15000")
     fun createBlockSchedule() {
-        val transactions = transactionService.getAllPending().map { TransactionDto(it) }.toMutableSet()
+        val transactions =  mutableSetOf<TransactionDto>()
+        transactions.addAll(transferTransactionService.getAllPending().map { TransferTransactionDto(it) })
+        transactions.addAll(voteTransactionService.getAllPending().map { VoteTransactionDto(it) })
+
         if (CollectionUtils.isEmpty(transactions)) {
             return
         }
@@ -65,7 +73,7 @@ class BlockchainInitializer(
         val hash = HashUtils.bytesToHexString(BlockUtils.calculateHash(previousHash, merkleRoot, 0, 0))
 
         return MainBlockDto(hash, 0, previousHash, merkleRoot, 0,
-                "genesis_signature", mutableSetOf())
+            "genesis_signature", mutableSetOf())
     }
 
     @Deprecated("generate random transaction")
@@ -79,8 +87,8 @@ class BlockchainInitializer(
         val type = if (amount % 2 == 0L) VoteType.FOR else VoteType.AGAINST
 
         val data = VoteTransactionData(amount, recipientKey, recipientKey, "senderSignature",
-                type, delegateKey, 1)
-        return transactionService.createVote(data)
+            type, delegateKey, 1)
+        return voteTransactionService.create(data)
     }
 
     @Deprecated("generate block")

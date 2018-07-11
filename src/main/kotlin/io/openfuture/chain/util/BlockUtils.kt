@@ -11,7 +11,7 @@ object BlockUtils {
         }
         var previousTreeLayout = transactions.map { it.hash.toByteArray() }
         var treeLayout = mutableListOf<ByteArray>()
-        while(previousTreeLayout.size != 2) {
+        while (previousTreeLayout.size != 2) {
             for (i in 0 until previousTreeLayout.size step 2) {
                 val leftHash = previousTreeLayout[i]
                 val rightHash = if (i + 1 == previousTreeLayout.size) {

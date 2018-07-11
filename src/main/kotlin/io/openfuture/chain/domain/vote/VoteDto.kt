@@ -1,4 +1,4 @@
-package io.openfuture.chain.domain.transaction.data
+package io.openfuture.chain.domain.vote
 
 import io.openfuture.chain.entity.dictionary.VoteType
 

@@ -11,16 +11,16 @@ import javax.validation.constraints.NotNull
 @ConfigurationProperties(prefix = "delegates")
 class DelegateProperties(
 
-        /** The count of active delegates */
-        @field:NotNull
-        var count: Int? = null,
+    /** The count of active delegates */
+    @field:NotNull
+    var count: Int? = null,
 
-        /** The address of master nodes */
-        @field:NotNull
-        var address: String? = null,
+    /** The address of master nodes */
+    @field:NotNull
+    var address: String? = null,
 
-        /** The public keys of master node */
-        @field:NotEmpty
-        var publicKeys: List<String>? = null
+    /** The public keys of master node */
+    @field:NotEmpty
+    var publicKeys: List<String>? = null
 
 )

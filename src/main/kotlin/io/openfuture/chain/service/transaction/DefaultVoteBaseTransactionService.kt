@@ -2,7 +2,7 @@ package io.openfuture.chain.service.transaction
 
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
-import io.openfuture.chain.domain.transaction.data.VoteDto
+import io.openfuture.chain.domain.vote.VoteDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.repository.VoteTransactionRepository
@@ -17,8 +17,7 @@ class DefaultVoteTransactionService(
     repository: VoteTransactionRepository,
     private val nodeClock: NodeClock,
     private val delegateService: DelegateService
-) : DefaultBaseTransactionService<VoteTransaction, VoteTransactionDto, VoteTransactionData>(repository),
-    VoteTransactionService {
+) : DefaultBaseTransactionService<VoteTransaction>(repository), VoteTransactionService {
 
     @Transactional
     override fun add(dto: VoteTransactionDto): VoteTransaction {
