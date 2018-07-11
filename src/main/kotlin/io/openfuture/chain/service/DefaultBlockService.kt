@@ -15,29 +15,32 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultBlockService(
-    private val blockRepository: BlockRepository,
+    private val blockRepository: BlockRepository<Block>,
     private val transactionService: TransactionService,
     private val keyHolder: KeyHolder,
     private val signatureManager: SignatureManager,
-    @Value("\${block.capacity}")private val transactionCapacity: Int
+    @Value("\${block.capacity}") private val transactionCapacity: Int
 ) : BlockService {
 
     private var activeDelegates = emptyList<String>()
 
     @Transactional(readOnly = true)
-    override fun get(id: Int): Block = blockRepository.getOne(id)
-        ?: throw NotFoundException("Not found id $id")
+    override fun get(id: Int): Block =
+        blockRepository.getOne(id)
+            ?: throw NotFoundException("Not found id $id")
 
     @Transactional(readOnly = true)
     override fun getAll(): MutableList<Block> = blockRepository.findAll()
 
     @Transactional(readOnly = true)
-    override fun getLast(): Block = blockRepository.findFirstByOrderByHeightDesc()
-        ?: throw NotFoundException("Last block not exist!")
+    override fun getLast(): Block =
+        blockRepository.findFirstByOrderByHeightDesc()
+            ?: throw NotFoundException("Last block not exist!")
 
     @Transactional(readOnly = true)
-    fun getLastGenesisBlock(): GenesisBlock = blockRepository.findFirstByVersion(BlockVersion.GENESIS.version) as? GenesisBlock
-        ?: throw NotFoundException("Last Genesis block not exist!")
+    fun getLastGenesisBlock(): GenesisBlock =
+        blockRepository.findFirstByVersionOrderByHeight(BlockVersion.GENESIS.version) as? GenesisBlock
+            ?: throw NotFoundException("Last Genesis block not exist!")
 
     private fun create(transactions: List<Transaction>, previousBlock: Block): Block {
         val merkleRootHash = BlockUtils.calculateMerkleRoot(transactions)
