@@ -139,7 +139,7 @@ interface StakeholderService {
 
 interface ConsensusService {
 
-    fun getCurrentEpochHeight(): Long
+    fun getCurrentEpochHeight(): Int
 
     fun isGenesisBlockNeeded(): Boolean
 
