@@ -1,5 +1,6 @@
 package io.openfuture.chain.nio.converter
 
+import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.SignaturePublicKeyPair
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.BlockVersion
@@ -11,36 +12,20 @@ import org.springframework.stereotype.Component
 class BlockSignaturesConverter(
     private val genesisBlockConverter: GenesisBlockConverter,
     private val mainBlockConverter: MainBlockConverter
-): MessageConverter<Block, BlockSignatures> {
+): MessageConverter<PendingBlock, BlockSignatures> {
 
-    override fun fromEntity(entity: Block): BlockSignatures {
-        val blockSignaturesBuilder = BlockSignatures.newBuilder()
-        setBlockMessage(blockSignaturesBuilder, entity)
-        return blockSignaturesBuilder.build()
-    }
-
-    override fun fromMessage(message: BlockSignatures): Block {
-        if (message.mainBlock != null) {
-            return mainBlockConverter.fromMessage(message.mainBlock)
-        } else if (message.genesisBlock != null) {
-            return genesisBlockConverter.fromMessage(message.genesisBlock)
-        }
-
-        throw IllegalArgumentException("$message has no block")
-    }
-
-    fun getSignaturePublicKeyPairs(blockSignatures: BlockSignatures)
-            : HashSet<SignaturePublicKeyPair> {
-        return blockSignatures.signaturesList.map { SignaturePublicKeyPair(it.signature, it.publicKey) }.toHashSet()
-    }
-
-    fun toBlockSignaturesProto(block: Block, signaturePublicKeyPairs: HashSet<SignaturePublicKeyPair>)
-            : BlockSignatures {
+    override fun fromEntity(entity: PendingBlock): BlockSignatures {
         val blockSignaturesBuilder = BlockSignatures.newBuilder()
         val communicationProtocolBuilder = CommunicationProtocol.SignaturePublicKeyPair.newBuilder()
+        val block = entity.block
 
-        setBlockMessage(blockSignaturesBuilder, block)
-        val signatures = signaturePublicKeyPairs
+        if (block.version == BlockVersion.MAIN.version) {
+            blockSignaturesBuilder.mainBlock = mainBlockConverter.fromEntity(block)
+        } else if (block.version == BlockVersion.GENESIS.version) {
+            blockSignaturesBuilder.genesisBlock = genesisBlockConverter.fromEntity(block)
+        }
+
+        val signatures = entity.signatures
             .map {
                 communicationProtocolBuilder
                     .setSignature(it.signature)
@@ -53,13 +38,15 @@ class BlockSignaturesConverter(
             .build()
     }
 
-    fun setBlockMessage(blockSignaturesBuilder: BlockSignatures.Builder, block: Block): BlockSignatures.Builder {
-        if (block.version == BlockVersion.MAIN.version) {
-            blockSignaturesBuilder.mainBlock = mainBlockConverter.fromEntity(block)
-        } else if (block.version == BlockVersion.GENESIS.version) {
-            blockSignaturesBuilder.genesisBlock = genesisBlockConverter.fromEntity(block)
+    override fun fromMessage(message: BlockSignatures): PendingBlock {
+        val block = when {
+            message.mainBlock != null -> mainBlockConverter.fromMessage(message.mainBlock)
+            message.genesisBlock != null -> genesisBlockConverter.fromMessage(message.genesisBlock)
+            else -> throw IllegalArgumentException("$message has no block")
         }
-        return blockSignaturesBuilder
+
+        val signatures = message.signaturesList.map { SignaturePublicKeyPair(it.signature, it.publicKey) }.toHashSet()
+        return PendingBlock(block, signatures)
     }
 
 }

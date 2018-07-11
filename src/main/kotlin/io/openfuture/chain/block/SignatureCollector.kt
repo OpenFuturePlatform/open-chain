@@ -1,6 +1,6 @@
 package io.openfuture.chain.block
 
-import io.openfuture.chain.domain.block.SignaturePublicKeyPair
+import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.nio.converter.BlockSignaturesConverter
 import io.openfuture.chain.protocol.CommunicationProtocol
@@ -15,24 +15,21 @@ class SignatureCollector(
 
     private val lock = ReentrantReadWriteLock()
 
-    private val signaturePublicKeyPairs: HashSet<SignaturePublicKeyPair> = HashSet()
-
     // variable to collect the signatures from the same round only
-    private lateinit var pendingBlock: Block
+    private lateinit var pendingBlock: PendingBlock
 
 
-    fun getBlock(): Block = pendingBlock
+    fun getBlock(): Block = pendingBlock.block
 
     fun getBlockSignatures(): BlockSignatures {
-        return blockSignaturesConverter.toBlockSignaturesProto(pendingBlock, signaturePublicKeyPairs)
+        return blockSignaturesConverter.fromEntity(pendingBlock)
     }
 
     fun setPendingBlock(generatedBlock: Block) {
         CommunicationProtocol.Packet.BodyCase.TIME_SYNC_REQUEST
         try {
             lock.writeLock().lock()
-            this.pendingBlock = generatedBlock
-            signaturePublicKeyPairs.clear()
+            this.pendingBlock = PendingBlock(generatedBlock)
         } finally {
             lock.writeLock().unlock()
         }
@@ -42,17 +39,18 @@ class SignatureCollector(
         try {
             lock.writeLock().lock()
 
-            val block = blockSignaturesConverter.fromMessage(blockSignatures)
-            if (block.hash != pendingBlock.hash) {
+            val blockToSign = blockSignaturesConverter.fromMessage(blockSignatures)
+            val block = blockToSign.block
+            if (block.hash != pendingBlock.block.hash) {
                 return false
             }
 
-            val signaturesToAdd = blockSignaturesConverter.getSignaturePublicKeyPairs(blockSignatures)
-            if (signaturePublicKeyPairs == signaturesToAdd) {
+            val signaturesToAdd = blockToSign.signatures
+            if (pendingBlock.signatures == signaturesToAdd) {
                 return false
             }
 
-            signaturePublicKeyPairs.addAll(signaturesToAdd)
+            pendingBlock.signatures.addAll(signaturesToAdd)
         } finally {
             lock.writeLock().unlock()
         }

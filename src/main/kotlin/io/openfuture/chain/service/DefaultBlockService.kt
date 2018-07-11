@@ -5,6 +5,7 @@ import io.openfuture.chain.block.SignatureCollector
 import io.openfuture.chain.crypto.key.KeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.SignaturePublicKeyPair
 import io.openfuture.chain.entity.*
 import io.openfuture.chain.events.BlockCreationEvent
@@ -76,26 +77,20 @@ class DefaultBlockService(
             }, timeSlot)
 
         val signature = signatureManager.sign(HashUtils.hexStringToBytes(block.hash), keyHolder.getPrivateKey())
-
-        val builder = CommunicationProtocol.BlockSignatures.newBuilder()
-        blockSignaturesConverter.setBlockMessage(builder, block)
-        val signatures = listOf<CommunicationProtocol.SignaturePublicKeyPair>(
-            CommunicationProtocol.SignaturePublicKeyPair.newBuilder()
-                .setSignature(signature)
-                .setPublicKey(HashUtils.bytesToHexString(keyHolder.getPublicKey()))
-                .build()
-        )
-        return builder
-            .addAllSignatures(signatures)
-            .build()
+        val publicKey = HashUtils.bytesToHexString(keyHolder.getPublicKey())
+        val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
+        val signaturePublicKeyPairs = hashSetOf(signaturePublicKeyPair)
+        val firstSignedBlock = PendingBlock(block, signaturePublicKeyPairs)
+        return blockSignaturesConverter.fromEntity(firstSignedBlock)
     }
 
     override fun signBlock(blockSignatures: CommunicationProtocol.BlockSignatures) {
-        val block = blockSignaturesConverter.fromMessage(blockSignatures)
+        val blockToSign = blockSignaturesConverter.fromMessage(blockSignatures)
+        val block = blockToSign.block
 
         val lastChainBlock = getLast()
         if (!blockValidationService.isValid(block, lastChainBlock)) {
-            throw IllegalArgumentException("$block is not valid")
+            throw IllegalArgumentException("$blockToSign is not valid")
         }
 
         val signature = signatureManager.sign(HashUtils.hexStringToBytes(block.hash), keyHolder.getPrivateKey())
