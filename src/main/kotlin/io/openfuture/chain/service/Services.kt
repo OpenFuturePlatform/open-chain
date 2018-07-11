@@ -3,12 +3,14 @@ package io.openfuture.chain.service
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
+import io.openfuture.chain.domain.block.MainBlockDto
 import io.openfuture.chain.domain.crypto.RootAccountDto
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.domain.stakeholder.DelegateDto
+import io.openfuture.chain.domain.stakeholder.StakeholderDto
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteDto
