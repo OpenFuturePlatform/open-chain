@@ -11,8 +11,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: validateAddress
 - Calculation wallet balance
 - Database: add Wallet entity
-- Calculation wallet balance
-- Database: add Wallet entity
 - RPC requests: getWalletBalance
 
 ### Changed
