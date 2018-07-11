@@ -22,7 +22,7 @@ data class ECDSASignature(
     )
 
     /**
-     * DER encoding
+     * DER (Distinguished Encoding Rules) encoding
      */
     fun encode(): ByteArray {
         val bos = ByteArrayOutputStream(DER_ENCODED_SIGN_LENGTH)
