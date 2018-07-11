@@ -4,6 +4,7 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.MainBlockDto
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.entity.block.Block
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.util.BlockUtils
@@ -29,7 +30,7 @@ class DefaultBlockService (
 
     @Transactional
     override fun add(dto: MainBlockDto): Block {
-        val persistBlock = repository.save(dto.toEntity())
+        val persistBlock = repository.save(MainBlock.of(dto))
         val transactions = dto.transactions.map { transactionService.addToBlock(it.hash, persistBlock) }
         persistBlock.transactions.addAll(transactions)
         return persistBlock
