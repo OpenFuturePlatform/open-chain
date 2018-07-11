@@ -3,6 +3,8 @@ package io.openfuture.chain.service
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
+import io.openfuture.chain.domain.block.PendingBlock
+import io.openfuture.chain.domain.block.SignaturePublicKeyPair
 import io.openfuture.chain.domain.crypto.RootAccountDto
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
@@ -40,11 +42,9 @@ interface BlockService {
 
     fun save(block: Block): Block
 
-    fun signBlock(block: Block): CommunicationProtocol.BlockSignatures
+    fun signCreatedBlock(block: Block): PendingBlock
 
-    fun signBlock(blockSignatures: CommunicationProtocol.BlockSignatures)
-
-    fun addSignatures(blockSignature: CommunicationProtocol.BlockSignatures): Boolean
+    fun approveBlock(blockWithSignatures: PendingBlock): SignaturePublicKeyPair
 
 }
 

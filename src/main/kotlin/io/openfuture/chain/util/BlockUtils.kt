@@ -34,7 +34,7 @@ object BlockUtils {
         return HashUtils.doubleSha256(headers.toByteArray())
     }
 
-    fun getBlockProducer(delegates: List<String>, previousBlock: Block): String {
+    fun getBlockProducer(delegates: Set<String>, previousBlock: Block): String {
         val random = Random(previousBlock.timestamp)
         return delegates.shuffled(random).first()
     }

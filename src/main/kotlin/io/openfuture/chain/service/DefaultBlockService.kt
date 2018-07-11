@@ -33,7 +33,13 @@ class DefaultBlockService(
     @Value("\${block.time.slot}") private val timeSlot: Long
 ) : BlockService {
 
-    private var activeDelegates = emptyList<String>()
+    companion object {
+        private const val APPROVAL_THRESHOLD = 0.67
+    }
+
+    private val taskScheduler = ThreadPoolTaskScheduler()
+
+    private var activeDelegates = emptySet<String>()
 
     @Transactional(readOnly = true)
     override fun get(id: Int): Block =
@@ -61,51 +67,50 @@ class DefaultBlockService(
             for (transaction in transactions) {
                 transaction.blockId = savedBlock.id
             }
-
             transactionService.saveAll(transactions)
         }
-
         return savedBlock
     }
 
-    val taskScheduler = ThreadPoolTaskScheduler()
-
-    override fun signBlock(block: Block): CommunicationProtocol.BlockSignatures {
-        taskScheduler.scheduleAtFixedRate(
-            {
-                applyBlock()
-            }, timeSlot)
-
+    override fun signCreatedBlock(block: Block): PendingBlock {
         val signature = signatureManager.sign(HashUtils.hexStringToBytes(block.hash), keyHolder.getPrivateKey())
         val publicKey = HashUtils.bytesToHexString(keyHolder.getPublicKey())
         val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
         val signaturePublicKeyPairs = hashSetOf(signaturePublicKeyPair)
         val firstSignedBlock = PendingBlock(block, signaturePublicKeyPairs)
-        return blockSignaturesConverter.fromEntity(firstSignedBlock)
+        taskScheduler.scheduleAtFixedRate({ applyBlock() }, timeSlot)
+        return firstSignedBlock
     }
 
-    override fun signBlock(blockSignatures: CommunicationProtocol.BlockSignatures) {
-        val blockToSign = blockSignaturesConverter.fromMessage(blockSignatures)
-        val block = blockToSign.block
+    override fun approveBlock(blockWithSignatures: PendingBlock): SignaturePublicKeyPair {
+        taskScheduler.scheduleAtFixedRate({ applyBlock() }, timeSlot)
 
+        val block = blockWithSignatures.block
         val lastChainBlock = getLast()
         if (!blockValidationService.isValid(block, lastChainBlock)) {
-            throw IllegalArgumentException("$blockToSign is not valid")
+            throw IllegalArgumentException("$blockWithSignatures is not valid")
         }
 
         val signature = signatureManager.sign(HashUtils.hexStringToBytes(block.hash), keyHolder.getPrivateKey())
-        val signaturePublicKeyPair = SignaturePublicKeyPair(
-            signature,
-            HashUtils.bytesToHexString(keyHolder.getPublicKey())
-        )
-
-        val signatures = blockSignatures.signaturesList
-            .map { SignaturePublicKeyPair(it.signature, it.publicKey) }.toHashSet()
-        signatures.add(signaturePublicKeyPair)
+        val publicKey = HashUtils.bytesToHexString(keyHolder.getPublicKey())
+        return SignaturePublicKeyPair(signature, publicKey)
     }
 
-    override fun addSignatures(blockSignature: CommunicationProtocol.BlockSignatures): Boolean {
-        return signatureCollector.addBlockSignatures(blockSignature)
+    @EventListener
+    fun fireBlockCreation(event: BlockCreationEvent) {
+        val pendingTransactions = transactionService.getPendingTransactions()
+        if (transactionCapacity == pendingTransactions.size) {
+            val delegates = if (activeDelegates.isEmpty()) {
+                getLastGenesisBlock().activeDelegateKeys
+            } else {
+                activeDelegates
+            }
+            val publicKey = HashUtils.bytesToHexString(keyHolder.getPublicKey())
+            val previousBlock = getLast()
+            if (publicKey == BlockUtils.getBlockProducer(delegates, previousBlock)) {
+                this.create(pendingTransactions, previousBlock)
+            }
+        }
     }
 
     private fun create(transactions: List<Transaction>, previousBlock: Block): Block {
@@ -126,32 +131,12 @@ class DefaultBlockService(
             transactions
         )
         signatureCollector.setPendingBlock(block)
-        // broadcast will be here like this broadcastService.broadcastBlockToSign(block)
         return block
-    }
-
-    @EventListener
-    fun fireBlockCreation(event: BlockCreationEvent) {
-        val pendingTransactions = transactionService.getPendingTransactions()
-        if (transactionCapacity == pendingTransactions.size) {
-            val delegates = if (activeDelegates.isEmpty()) {
-                getLastGenesisBlock().activeDelegateKeys
-            } else {
-                activeDelegates
-            }.toList()
-            val publicKey = HashUtils.bytesToHexString(keyHolder.getPublicKey())
-            val previousBlock = getLast()
-            if (publicKey == BlockUtils.getBlockProducer(delegates, previousBlock)) {
-                this.create(pendingTransactions, previousBlock)
-            }
-        }
     }
 
     private fun applyBlock() {
         val blockSignatures = signatureCollector.getBlockSignatures()
-        val genesisBlock = getLastGenesisBlock()
-
-        if (blockSignatures.signaturesList.size.toDouble() / genesisBlock.activeDelegateKeys.size > 0.67) {
+        if (blockSignatures.signaturesList.size.toDouble() / activeDelegates.size > APPROVAL_THRESHOLD) {
             val block = signatureCollector.getBlock()
             save(block)
         }
