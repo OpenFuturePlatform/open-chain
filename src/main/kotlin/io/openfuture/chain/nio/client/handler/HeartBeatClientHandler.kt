@@ -39,7 +39,9 @@ class HeartBeatClientHandler : BaseHandler(Type.HEART_BEAT) {
         // response
         val packet = Packet.newBuilder()
                 .setType(Type.HEART_BEAT)
-                .setHeartBeat(HeartBeat.newBuilder().setType(HeartBeat.Type.PONG).build())
+                .setHeartBeat(HeartBeat.newBuilder()
+                    .setType(HeartBeat.Type.PONG)
+                    .build())
                 .build()
         ctx.writeAndFlush(packet)
     }

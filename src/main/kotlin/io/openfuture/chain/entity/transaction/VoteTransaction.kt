@@ -1,7 +1,7 @@
 package io.openfuture.chain.entity.transaction
 
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
-import io.openfuture.chain.entity.block.Block
+import io.openfuture.chain.entity.Block
 import javax.persistence.*
 
 @Entity

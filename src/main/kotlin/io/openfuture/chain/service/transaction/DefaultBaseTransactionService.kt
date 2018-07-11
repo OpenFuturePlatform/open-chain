@@ -1,6 +1,6 @@
 package io.openfuture.chain.service.transaction
 
-import io.openfuture.chain.entity.block.Block
+import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.exception.NotFoundException

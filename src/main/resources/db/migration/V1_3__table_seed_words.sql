@@ -29,7 +29,7 @@ INSERT INTO seed_words (ind, value) VALUES (21, 'actor');
 INSERT INTO seed_words (ind, value) VALUES (22, 'actress');
 INSERT INTO seed_words (ind, value) VALUES (23, 'actual');
 INSERT INTO seed_words (ind, value) VALUES (24, 'adapt');
-INSERT INTO seed_words (ind, value) VALUES (25, 'addAccount');
+INSERT INTO seed_words (ind, value) VALUES (25, 'add');
 INSERT INTO seed_words (ind, value) VALUES (26, 'addict');
 INSERT INTO seed_words (ind, value) VALUES (27, 'address');
 INSERT INTO seed_words (ind, value) VALUES (28, 'adjust');

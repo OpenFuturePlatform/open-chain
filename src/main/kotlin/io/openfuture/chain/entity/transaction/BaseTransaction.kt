@@ -2,7 +2,7 @@ package io.openfuture.chain.entity.transaction
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.openfuture.chain.entity.base.BaseModel
-import io.openfuture.chain.entity.block.Block
+import io.openfuture.chain.entity.Block
 import javax.persistence.*
 
 @Entity

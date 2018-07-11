@@ -18,11 +18,9 @@ object HashUtils {
     private const val KEY_SIZE = 512
     private const val ITERATION_COUNT = 2048
 
-    fun generateHash(bytes: ByteArray) = bytesToHexString(sha256(bytes))
+    fun generateHash(bytes: ByteArray) = sha256(bytes).fold(StringUtils.EMPTY) { str, it -> str + "%02x".format(it) }
 
     fun doubleSha256(bytes: ByteArray) = sha256(sha256(bytes))
-
-    fun bytesToHexString(bytes: ByteArray) = bytes.fold(StringUtils.EMPTY) { str, it -> str + "%02x".format(it) }
 
     fun keyHash(bytes: ByteArray): ByteArray {
         val result = ByteArray(20)
@@ -39,18 +37,18 @@ object HashUtils {
         return keccak.digest()
     }
 
-    fun sha256(bytes: ByteArray): ByteArray {
-        val digest = MessageDigest.getInstance(SHA256)
-        digest.update(bytes, 0, bytes.size)
-        return digest.digest()
-    }
+	fun sha256(bytes: ByteArray): ByteArray {
+		val digest = MessageDigest.getInstance(SHA256)
+		digest.update(bytes, 0, bytes.size)
+		return digest.digest()
+	}
 
-    fun hmacSha512(key: ByteArray, message: ByteArray): ByteArray {
-        val keySpec = SecretKeySpec(key, HMACSHA512)
-        val mac = Mac.getInstance(HMACSHA512)
-        mac.init(keySpec)
-        return mac.doFinal(message)
-    }
+	fun hmacSha512(key: ByteArray, message: ByteArray): ByteArray {
+		val keySpec = SecretKeySpec(key, HMACSHA512)
+		val mac = Mac.getInstance(HMACSHA512)
+		mac.init(keySpec)
+		return mac.doFinal(message)
+	}
 
     fun hashPBKDF2(chars: CharArray, salt: ByteArray): ByteArray {
         val generator = PKCS5S2ParametersGenerator(SHA512Digest())
