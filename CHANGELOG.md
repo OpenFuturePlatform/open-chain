@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: validateAddress
 - Sign data
 - Verify signed data
+- Define epoch duration in properties
 - Get current epoch height
 - Check is genesis block needed
 
