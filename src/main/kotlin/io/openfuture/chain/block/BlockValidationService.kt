@@ -11,7 +11,6 @@ import javax.annotation.PostConstruct
 
 @Service
 class BlockValidationService(
-    private val blockService: BlockService,
     private val applicationContext: ApplicationContext,
     @Value("\${block.time.slot}") private val interval: Long
 ) {
@@ -28,7 +27,7 @@ class BlockValidationService(
         }
     }
 
-    fun isValid(block: Block): Boolean {
+    fun isValid(block: Block, lastChainBlock: Block): Boolean {
         val currentTime = System.currentTimeMillis()
         if (getSlotNumber(currentTime) != getSlotNumber(block.timestamp)) {
             return false
@@ -51,20 +50,16 @@ class BlockValidationService(
             return false
         }
 
-        val lastChainBlock = blockService.getLast()
-        if (lastChainBlock != null) {
-            val lastBlockHeight = lastChainBlock.height
-            if (block.height != lastBlockHeight + 1) {
-                return false
-            }
+        if (block.previousHash != lastChainBlock.hash) {
+            return false
+        }
 
-            if (block.previousHash != lastChainBlock.hash) {
-                return false
-            }
+        if (block.timestamp <= lastChainBlock.timestamp) {
+            return false
+        }
 
-            if (block.timestamp <= lastChainBlock.timestamp) {
-                return false
-            }
+        if (block.height != lastChainBlock.height + 1) {
+            return false
         }
 
         return true

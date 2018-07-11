@@ -21,6 +21,8 @@ class SignatureCollector(
     private lateinit var pendingBlock: Block
 
 
+    fun getBlock(): Block = pendingBlock
+
     fun getBlockSignatures(): BlockSignatures {
         return blockSignaturesConverter.toBlockSignaturesProto(pendingBlock, signaturePublicKeyPairs)
     }

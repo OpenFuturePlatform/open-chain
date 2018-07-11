@@ -18,6 +18,9 @@ class DefaultTransactionService(
         return savedTransaction
     }
 
+    override fun saveAll(transactions: List<Transaction>): List<Transaction>
+        = transactionRepository.saveAll(transactions)
+
     override fun getPendingTransactions(): List<Transaction> {
         return transactionRepository.findAllByBlockIdIsNull()
     }

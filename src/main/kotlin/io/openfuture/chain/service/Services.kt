@@ -9,6 +9,7 @@ import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.protocol.CommunicationProtocol
 import java.nio.channels.Channel
@@ -34,6 +35,16 @@ interface BlockService {
     fun getAll(): MutableList<Block>
 
     fun getLast(): Block?
+
+    fun getLastGenesisBlock(): GenesisBlock
+
+    fun save(block: Block): Block
+
+    fun signBlock(block: Block): CommunicationProtocol.BlockSignatures
+
+    fun signBlock(blockSignatures: CommunicationProtocol.BlockSignatures)
+
+    fun addSignatures(blockSignature: CommunicationProtocol.BlockSignatures): Boolean
 
 }
 
@@ -61,17 +72,9 @@ interface TransactionService {
 
     fun save(transaction: Transaction): Transaction
 
+    fun saveAll(transactions: List<Transaction>): List<Transaction>
+
     fun getPendingTransactions(): List<Transaction>
-
-}
-
-interface BlockSignService {
-
-    fun signBlock(block: Block): CommunicationProtocol.BlockSignatures
-
-    fun signBlock(blockSignatures: CommunicationProtocol.BlockSignatures)
-
-    fun addSignatures(blockSignature: CommunicationProtocol.BlockSignatures): Boolean
 
 }
 

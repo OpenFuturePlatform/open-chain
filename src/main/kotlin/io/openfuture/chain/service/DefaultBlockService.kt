@@ -1,16 +1,21 @@
 package io.openfuture.chain.service
 
+import io.openfuture.chain.block.BlockValidationService
 import io.openfuture.chain.block.SignatureCollector
 import io.openfuture.chain.crypto.key.KeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.domain.block.SignaturePublicKeyPair
 import io.openfuture.chain.entity.*
 import io.openfuture.chain.events.BlockCreationEvent
 import io.openfuture.chain.exception.NotFoundException
+import io.openfuture.chain.nio.converter.BlockSignaturesConverter
+import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.event.EventListener
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -21,7 +26,10 @@ class DefaultBlockService(
     private val signatureCollector: SignatureCollector,
     private val keyHolder: KeyHolder,
     private val signatureManager: SignatureManager,
-    @Value("\${block.capacity}")private val transactionCapacity: Int
+    private val blockValidationService: BlockValidationService,
+    private val blockSignaturesConverter: BlockSignaturesConverter,
+    @Value("\${block.capacity}") private val transactionCapacity: Int,
+    @Value("\${block.time.slot}") private val timeSlot: Long
 ) : BlockService {
 
     private var activeDelegates = emptyList<String>()
@@ -38,8 +46,69 @@ class DefaultBlockService(
         ?: throw NotFoundException("Last block not exist!")
 
     @Transactional(readOnly = true)
-    fun getLastGenesisBlock(): GenesisBlock = blockRepository.findFirstByVersion(BlockVersion.GENESIS.version) as? GenesisBlock
+    override fun getLastGenesisBlock(): GenesisBlock = blockRepository.findFirstByVersion(BlockVersion.GENESIS.version) as? GenesisBlock
         ?: throw NotFoundException("Last Genesis block not exist!")
+
+    @Transactional
+    override fun save(block: Block): Block {
+        val savedBlock = blockRepository.save(block)
+        if (block is MainBlock) {
+            val transactions = block.transactions
+            for (transaction in transactions) {
+                transaction.blockId = savedBlock.id
+            }
+
+            transactionService.saveAll(transactions)
+        }
+
+        return block
+    }
+
+    val taskScheduler = ThreadPoolTaskScheduler()
+
+    override fun signBlock(block: Block): CommunicationProtocol.BlockSignatures {
+        taskScheduler.scheduleAtFixedRate(
+            {
+                applyBlock()
+            }, timeSlot)
+
+        val signature = signatureManager.sign(HashUtils.hexStringToBytes(block.hash), keyHolder.getPrivateKey())
+
+        val builder = CommunicationProtocol.BlockSignatures.newBuilder()
+        blockSignaturesConverter.setBlockMessage(builder, block)
+        val signatures = listOf<CommunicationProtocol.SignaturePublicKeyPair>(
+            CommunicationProtocol.SignaturePublicKeyPair.newBuilder()
+                .setSignature(signature)
+                .setPublicKey(HashUtils.bytesToHexString(keyHolder.getPublicKey()))
+                .build()
+        )
+        return builder
+            .addAllSignatures(signatures)
+            .build()
+    }
+
+    override fun signBlock(blockSignatures: CommunicationProtocol.BlockSignatures) {
+        val block = blockSignaturesConverter.fromMessage(blockSignatures)
+
+        val lastChainBlock = getLast()
+        if (!blockValidationService.isValid(block, lastChainBlock)) {
+            throw IllegalArgumentException("$block is not valid")
+        }
+
+        val signature = signatureManager.sign(HashUtils.hexStringToBytes(block.hash), keyHolder.getPrivateKey())
+        val signaturePublicKeyPair = SignaturePublicKeyPair(
+            signature,
+            HashUtils.bytesToHexString(keyHolder.getPublicKey())
+        )
+
+        val signatures = blockSignatures.signaturesList
+            .map { SignaturePublicKeyPair(it.signature, it.publicKey) }.toHashSet()
+        signatures.add(signaturePublicKeyPair)
+    }
+
+    override fun addSignatures(blockSignature: CommunicationProtocol.BlockSignatures): Boolean {
+        return signatureCollector.addBlockSignatures(blockSignature)
+    }
 
     private fun create(transactions: List<Transaction>, previousBlock: Block): Block {
         val merkleRootHash = BlockUtils.calculateMerkleRoot(transactions)
@@ -77,6 +146,16 @@ class DefaultBlockService(
             if (publicKey == BlockUtils.getBlockProducer(delegates, previousBlock)) {
                 this.create(pendingTransactions, previousBlock)
             }
+        }
+    }
+
+    private fun applyBlock() {
+        val blockSignatures = signatureCollector.getBlockSignatures()
+        val genesisBlock = getLastGenesisBlock()
+
+        if (blockSignatures.signaturesList.size.toDouble() / genesisBlock.activeDelegateKeys.size > 0.67) {
+            val block = signatureCollector.getBlock()
+            save(block)
         }
     }
 

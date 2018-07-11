@@ -1,6 +1,6 @@
 CREATE TABLE transactions (
   id            INTEGER PRIMARY KEY,
-  block_id      INTEGER NOT NULL REFERENCES blocks,
+  block_id      INTEGER REFERENCES blocks,
   hash          VARCHAR NOT NULL,
   amount        INTEGER NOT NULL,
   timestamp     BIGINT  NOT NULL,
