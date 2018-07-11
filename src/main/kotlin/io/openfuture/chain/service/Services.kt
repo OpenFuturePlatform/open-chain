@@ -43,15 +43,11 @@ interface HardwareInfoService {
 
 interface BlockService {
 
-    fun get(id: Int): Block
+    fun get(hash: String): Block
 
-    fun getAll(): MutableList<Block>
+    fun getLast(): Block
 
-    fun getLast(): Block?
-
-    fun add(dto: MainBlockDto): Block
-
-    fun create(transactions: MutableSet<out BaseTransactionDto>): MainBlockDto
+    fun getLastGenesis(): Block
 
 }
 
@@ -140,5 +136,13 @@ interface StakeholderService {
     fun add(dto: StakeholderDto): Stakeholder
 
     fun save(entity: Stakeholder): Stakeholder
+}
+
+interface ConsensusService {
+
+    fun getCurrentEpochHeight(): Int
+
+    fun isGenesisBlockNeeded(): Boolean
+
 }
 

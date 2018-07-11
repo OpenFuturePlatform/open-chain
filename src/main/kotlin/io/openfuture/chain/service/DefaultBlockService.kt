@@ -14,37 +14,20 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultBlockService(
-    private val repository: BlockRepository,
-    private val transactionService: BaseTransactionService<BaseTransaction>
+    private val blockRepository: BlockRepository
 ) : BlockService {
 
     @Transactional(readOnly = true)
-    override fun get(id: Int): Block = repository.getOne(id)
-        ?: throw NotFoundException("Not found id $id")
+    override fun get(hash: String): Block = blockRepository.findByHash(hash)
+        ?: throw NotFoundException("Block with hash:$hash not found")
 
     @Transactional(readOnly = true)
-    override fun getAll(): MutableList<Block> = repository.findAll()
+    override fun getLast(): Block = blockRepository.findFirstByOrderByHeightDesc()
+        ?: throw NotFoundException("Last block not found!")
 
     @Transactional(readOnly = true)
-    override fun getLast(): Block = repository.findFirstByOrderByHeightDesc()
-        ?: throw NotFoundException("Last block not exist!")
-
-    @Transactional
-    override fun add(dto: MainBlockDto): Block {
-        val persistBlock = repository.save(MainBlock.of(dto))
-        val transactions = dto.transactions.map { transactionService.addToBlock(it.hash, persistBlock) }
-        persistBlock.transactions.addAll(transactions)
-        return persistBlock
-    }
-
-    @Transactional
-    override fun create(transactions: MutableSet<out BaseTransactionDto>): MainBlockDto {
-        val previousBlock = getLast()
-        val merkleRootHash = BlockUtils.calculateMerkleRoot(transactions)
-        val time = System.currentTimeMillis()
-        val hash = BlockUtils.calculateHash(previousBlock.hash, merkleRootHash, time, (previousBlock.height + 1))
-        return MainBlockDto(HashUtils.bytesToHexString(hash), previousBlock.height + 1,
-            previousBlock.hash, merkleRootHash, time, "", transactions)
+    override fun getLastGenesis(): Block {
+        TODO("not implemented")
     }
 
 }
