@@ -48,6 +48,8 @@ interface BlockService {
 
     fun getLastGenesis(): Block
 
+    fun save(block: Block): Block
+
 }
 
 interface CryptoService {
@@ -145,3 +147,10 @@ interface ConsensusService {
 
 }
 
+interface WalletService {
+
+    fun getBalance(address: String): Double
+
+    fun updateByTransaction(transaction: BaseTransaction)
+
+}
