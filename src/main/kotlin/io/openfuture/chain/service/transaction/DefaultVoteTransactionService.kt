@@ -32,8 +32,8 @@ class DefaultVoteTransactionService(
         val networkTime = nodeClock.networkTime()
         val hash = TransactionUtils.calculateHash(networkTime, data)
         return VoteTransactionDto(networkTime, data.amount, data.recipientKey, data.recipientAddress,
-            data.senderKey, data.senderAddress, data.senderSignature, hash, data.voteType, data.delegateKey,
-            data.weight)
+            data.senderKey, data.senderAddress, data.senderSignature, hash, data.voteType,
+            data.delegateKey, data.weight)
     }
 
 }
