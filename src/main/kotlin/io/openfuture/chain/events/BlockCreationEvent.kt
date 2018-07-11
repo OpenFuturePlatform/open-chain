@@ -1,3 +1,7 @@
 package io.openfuture.chain.events
 
-class BlockCreationEvent
+import io.openfuture.chain.entity.Transaction
+
+class BlockCreationEvent(
+    val pendingTransactions: List<Transaction>
+)

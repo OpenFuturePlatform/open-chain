@@ -1,4 +1,4 @@
-package io.openfuture.chain.block
+package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.Block
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct
 
 @Service
-class BlockValidationService(
+class BlockValidationProvider(
     private val applicationContext: ApplicationContext,
     @Value("\${block.time.slot}") private val interval: Long
 ) {
@@ -22,7 +22,7 @@ class BlockValidationService(
     fun init() {
         val blockValidators = applicationContext.getBeansOfType(BlockValidator::class.java).values
         blockValidators.forEach {
-            validators[it.getVersion()] = it
+            validators[it.getTypeId()] = it
         }
     }
 
@@ -32,9 +32,9 @@ class BlockValidationService(
             return false
         }
 
-        val blockVersion = block.version
+        val blockTypeId = block.typeId
 
-        val blockValidator = validators[blockVersion]
+        val blockValidator = validators[blockTypeId]
 
         if (!blockValidator!!.isValid(block)) {
             return false

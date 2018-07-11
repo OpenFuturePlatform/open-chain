@@ -86,5 +86,5 @@ message BlockSignatures {
         MainBlock mainBlock = 2;
     }
 
-    repeated SignaturePublicKeyPair signatures = 3;
+    SignaturePublicKeyPair signature = 3;
 }

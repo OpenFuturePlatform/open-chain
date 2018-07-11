@@ -1,10 +1,12 @@
 package io.openfuture.chain.block
 
+import io.openfuture.chain.block.validation.BlockValidationProvider
+import io.openfuture.chain.block.validation.BlockValidator
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.BlockVersion
+import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.service.BlockService
@@ -24,7 +26,7 @@ class BlockValidationServiceTests : ServiceTests() {
 
     @Mock private lateinit var blockValidator: BlockValidator
 
-    private lateinit var blockValidationService: BlockValidationService
+    private lateinit var blockValidationService: BlockValidationProvider
 
     private val currentTime = System.currentTimeMillis()
 
@@ -33,9 +35,9 @@ class BlockValidationServiceTests : ServiceTests() {
     fun setUp() {
         val validators = HashMap<String, BlockValidator>()
         validators[""] = blockValidator
-        given(blockValidator.getVersion()).willReturn(BlockVersion.MAIN.version)
+        given(blockValidator.getTypeId()).willReturn(BlockType.MAIN.typeId)
         given(applicationContext.getBeansOfType(BlockValidator::class.java)).willReturn(validators)
-        blockValidationService = BlockValidationService(applicationContext, 3000)
+        blockValidationService = BlockValidationProvider(applicationContext, 3000)
         blockValidationService.init()
         blockValidationService.setEpochTime(currentTime)
     }

@@ -1,4 +1,4 @@
-package io.openfuture.chain.block
+package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.entity.Block
 
@@ -6,6 +6,6 @@ interface BlockValidator {
 
     fun isValid(block: Block): Boolean
 
-    fun getVersion(): Int
+    fun getTypeId(): Int
 
 }

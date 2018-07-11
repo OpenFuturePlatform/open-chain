@@ -1,9 +1,7 @@
 package io.openfuture.chain.nio.converter
 
 import io.openfuture.chain.domain.block.PendingBlock
-import io.openfuture.chain.domain.block.SignaturePublicKeyPair
-import io.openfuture.chain.entity.BlockVersion
-import io.openfuture.chain.protocol.CommunicationProtocol
+import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.protocol.CommunicationProtocol.BlockSignatures
 import org.springframework.stereotype.Component
 
@@ -19,14 +17,14 @@ class BlockSignaturesConverter(
     override fun fromEntity(entity: PendingBlock): BlockSignatures {
         val block = entity.block
 
-        if (block.version == BlockVersion.MAIN.version) {
+        if (block.typeId == BlockType.MAIN.typeId) {
             blockSignaturesBuilder.mainBlock = mainBlockConverter.fromEntity(block)
-        } else if (block.version == BlockVersion.GENESIS.version) {
+        } else if (block.typeId == BlockType.GENESIS.typeId) {
             blockSignaturesBuilder.genesisBlock = genesisBlockConverter.fromEntity(block)
         }
 
-        val signatures = entity.signatures.map { signaturePublicKeyPairConverter.fromEntity(it) }.toList()
-        return blockSignaturesBuilder.addAllSignatures(signatures).build()
+        val signature = signaturePublicKeyPairConverter.fromEntity(entity.signature)
+        return blockSignaturesBuilder.setSignature(signature).build()
     }
 
     override fun fromMessage(message: BlockSignatures): PendingBlock {
@@ -36,8 +34,8 @@ class BlockSignaturesConverter(
             else -> throw IllegalArgumentException("$message has no block")
         }
 
-        val signatures = message.signaturesList.map { signaturePublicKeyPairConverter.fromMessage(it) }.toHashSet()
-        return PendingBlock(block, signatures)
+        val signature = signaturePublicKeyPairConverter.fromMessage(message.signature)
+        return PendingBlock(block, signature)
     }
 
 }

@@ -18,8 +18,9 @@ class DefaultTransactionService(
     @Transactional
     override fun save(transaction: Transaction): Transaction {
         val savedTransaction = transactionRepository.save(transaction)
-        if (getPendingTransactions().size >= transactionCapacity) {
-            eventPublisher.publishEvent(BlockCreationEvent())
+        val pendingTransactions = getPendingTransactions()
+        if (pendingTransactions.size >= transactionCapacity) {
+            eventPublisher.publishEvent(BlockCreationEvent(pendingTransactions))
         }
         return savedTransaction
     }

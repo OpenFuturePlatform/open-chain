@@ -1,7 +1,7 @@
-package io.openfuture.chain.block
+package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.BlockVersion
+import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.util.BlockUtils
@@ -29,8 +29,8 @@ class MainBlockValidator : BlockValidator {
         return true
     }
 
-    override fun getVersion(): Int {
-        return BlockVersion.MAIN.version
+    override fun getTypeId(): Int {
+        return BlockType.MAIN.typeId
     }
 
     private fun transactionsIsWellFormed(transactions: List<Transaction>): Boolean {

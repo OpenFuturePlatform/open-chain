@@ -36,13 +36,11 @@ interface BlockService {
 
     fun getAll(): MutableList<Block>
 
-    fun getLast(): Block?
+    fun getLast(): Block
 
     fun getLastGenesisBlock(): GenesisBlock
 
     fun save(block: Block): Block
-
-    fun approveBlock(blockWithSignatures: PendingBlock)
 
 }
 
@@ -73,17 +71,5 @@ interface TransactionService {
     fun saveAll(transactions: List<Transaction>): List<Transaction>
 
     fun getPendingTransactions(): List<Transaction>
-
-}
-
-interface NetworkService {
-
-    fun joinNetwork(host : String, port: Int)
-
-    fun handleJoinResponse(message: CommunicationProtocol.Packet, channel: Channel)
-
-    fun connect(host : String, port: Int)
-
-    fun broadcast(packet: CommunicationProtocol.Packet)
 
 }

@@ -1,82 +1,59 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.domain.block.PendingBlock
+import io.openfuture.chain.domain.block.SignaturePublicKeyPair
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.nio.converter.BlockSignaturesConverter
-import io.openfuture.chain.protocol.CommunicationProtocol.BlockSignatures
+import io.openfuture.chain.service.BlockService
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 import org.springframework.stereotype.Component
-import java.util.concurrent.locks.ReentrantReadWriteLock
+import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class SignatureCollector(
-    private val blockSignaturesConverter: BlockSignaturesConverter
+    private val blockService: BlockService,
+    @Value("\${block.time.slot}") private val slotInterval: Long
 ) {
 
-    private val lock = ReentrantReadWriteLock()
     private val scheduler = ThreadPoolTaskScheduler()
+    private val signatures = ConcurrentHashMap.newKeySet<SignaturePublicKeyPair>()
 
-    // variable to collect the signatures from the same round only
-    private lateinit var pendingBlock: PendingBlock
+    private var pendingBlock: Block? = null
+    private var active: Boolean = false
 
-    fun isBlockEquals(block: Block): Boolean {
-        return try {
-            lock.readLock().lock()
-            pendingBlock.block.hash == block.hash
-        } finally {
-            lock.readLock().unlock()
-        }
-    }
-
-    fun getBlock(): Block {
-        return try {
-            lock.readLock().lock()
-            pendingBlock.block
-        } finally {
-            lock.readLock().unlock()
-        }
-    }
-
-    fun getBlockSignatures(): BlockSignatures {
-        return try {
-            lock.readLock().lock()
-            blockSignaturesConverter.fromEntity(pendingBlock)
-        } finally {
-            lock.readLock().unlock()
-        }
+    companion object {
+        private const val APPROVAL_THRESHOLD = 0.67
     }
 
     fun setPendingBlock(generatedBlock: PendingBlock) {
-        try {
-            lock.writeLock().lock()
-            if (generatedBlock.block.hash != pendingBlock.block.hash) {
-
-            }
-            this.pendingBlock = generatedBlock
-        } finally {
-            lock.writeLock().unlock()
+        if (!active) {
+            scheduler.scheduleWithFixedDelay({ applyBlock() }, slotInterval / 2)
+            this.pendingBlock = generatedBlock.block
+            this.active = true
         }
     }
 
-    fun addBlockSignatures(blockSignatures: PendingBlock): Boolean {
-        try {
-            lock.writeLock().lock()
+    fun addBlockSignature(blockSignature: PendingBlock): Boolean {
+        if (blockSignature.block.hash != pendingBlock!!.hash) {
+            return false
+        }
 
-            val block = blockSignatures.block
-            if (block.hash != pendingBlock.block.hash) {
-                return false
-            }
-
-            val signaturesToAdd = blockSignatures.signatures
-            if (pendingBlock.signatures == signaturesToAdd) {
-                return false
-            }
-
-            pendingBlock.signatures.addAll(signaturesToAdd)
-        } finally {
-            lock.writeLock().unlock()
+        if (!signatures.add(blockSignature.signature)) {
+            return false
         }
         return true
+    }
+
+    private fun applyBlock() {
+        try {
+            val genesisBlock = blockService.getLastGenesisBlock()
+            if (signatures.size.toDouble() / genesisBlock.activeDelegateKeys.size > APPROVAL_THRESHOLD) {
+                blockService.save(pendingBlock!!)
+            }
+        } finally {
+            this.active = false
+            signatures.clear()
+        }
     }
 
 }

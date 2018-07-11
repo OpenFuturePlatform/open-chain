@@ -1,7 +1,7 @@
-package io.openfuture.chain.block
+package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.BlockVersion
+import io.openfuture.chain.entity.BlockType
 import org.springframework.stereotype.Component
 
 @Component
@@ -11,8 +11,8 @@ class GenesisBlockValidator : BlockValidator {
         return true
     }
 
-    override fun getVersion(): Int {
-        return BlockVersion.GENESIS.version
+    override fun getTypeId(): Int {
+        return BlockType.GENESIS.typeId
     }
 
 }

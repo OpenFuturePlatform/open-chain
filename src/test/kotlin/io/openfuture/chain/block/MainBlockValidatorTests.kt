@@ -1,5 +1,6 @@
 package io.openfuture.chain.block
 
+import io.openfuture.chain.block.validation.MainBlockValidator
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Transaction

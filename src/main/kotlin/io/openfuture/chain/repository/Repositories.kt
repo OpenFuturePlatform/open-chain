@@ -13,7 +13,7 @@ interface BlockRepository<T: Block> : BaseRepository<T> {
 
     fun findFirstByOrderByHeightDesc(): T?
 
-    fun findFirstByVersionOrderByHeight(version: Int): T?
+    fun findFirstByTypeIdOrderByHeight(typeId: Int): T?
 
 }
 

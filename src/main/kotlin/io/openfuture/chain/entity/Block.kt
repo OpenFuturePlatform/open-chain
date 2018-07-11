@@ -23,8 +23,8 @@ abstract class Block(
     @Column(name = "timestamp", nullable = false)
     var timestamp: Long,
 
-    @Column(name = "version", nullable = false)
-    var version: Int
+    @Column(name = "typeId", nullable = false)
+    var typeId: Int
 
 ) : BaseModel()
 
