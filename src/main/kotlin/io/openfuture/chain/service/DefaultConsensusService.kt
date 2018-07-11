@@ -5,20 +5,22 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional(readOnly = true)
 class DefaultConsensusService(
-    private val consensusProperties: ConsensusProperties
+    private val consensusProperties: ConsensusProperties,
+    private val blockService: BlockService
 ) : ConsensusService {
 
+    @Transactional(readOnly = true)
     override fun getCurrentEpochHeight(): Int {
-        val newHeight = 130 // TODO("blockService.getLast().height")
-        val lastGenesisBlockHeight = 100 // TODO("blockService.getLastGenesis().height")
+        val newHeight = blockService.getLast().height
+        val lastGenesisBlockHeight = blockService.getLastGenesis().height
 
         return newHeight - lastGenesisBlockHeight
     }
 
+    @Transactional(readOnly = true)
     override fun isGenesisBlockNeeded(): Boolean {
-        return (consensusProperties.epochHeight!! - 1) == getCurrentEpochHeight()
+        return (consensusProperties.epochHeight!! - 1) <= getCurrentEpochHeight()
     }
 
 }

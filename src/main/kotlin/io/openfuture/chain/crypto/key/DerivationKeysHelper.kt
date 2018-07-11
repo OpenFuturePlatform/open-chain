@@ -15,12 +15,11 @@ class DerivationKeysHelper {
     companion object {
         private const val PATH_SEPARATOR = '/'
         private const val HARDENED_DERIVATION_FLAG = 'h'
-        private const val CORRECT_PATH_PATTERN = "^m([/]+[0-9]+[h]?){1,4}"
+        private const val CORRECT_PATH_PATTERN = "^m([/]+[0-9]+[h]?){1,3}"
 
-        private const val PURPOSE_NUMBER_POSITION = 1
-        private const val ACCOUNT_NUMBER_POSITION = 2
-        private const val WALLET_NUMBER_POSITION = 3
-        private const val ADDRESS_NUMBER_POSITION = 4
+        private const val ACCOUNT_NUMBER_POSITION = 1
+        private const val WALLET_NUMBER_POSITION = 2
+        private const val ADDRESS_NUMBER_POSITION = 3
 
         private const val DEFAULT_ACCOUNT_INDEX = 0
     }
@@ -32,27 +31,20 @@ class DerivationKeysHelper {
         }
 
         val separatedPath = derivationPath.split(PATH_SEPARATOR)
-        val purposeNumber = translatePathIndex(separatedPath[PURPOSE_NUMBER_POSITION])
-        val purposeRoot = rootKey.derive(purposeNumber)
-
-        if (PURPOSE_NUMBER_POSITION == separatedPath.size - 1) {
-            return purposeRoot
-        }
-
         val accountNumber = translatePathIndex(separatedPath[ACCOUNT_NUMBER_POSITION])
 
         if (ACCOUNT_NUMBER_POSITION == separatedPath.size - 1) {
-            return purposeRoot.derive(accountNumber)
+            return rootKey.derive(accountNumber)
         }
 
         val walletNumber = translatePathIndex(separatedPath[WALLET_NUMBER_POSITION])
 
         if (WALLET_NUMBER_POSITION == separatedPath.size - 1) {
-            return deriveWalletChainKeys(purposeRoot, accountNumber, walletNumber)
+            return deriveWalletChainKeys(rootKey, accountNumber, walletNumber)
         }
 
         val addressNumber = translatePathIndex(separatedPath[ADDRESS_NUMBER_POSITION])
-        val base = deriveWalletChainKeys(purposeRoot, accountNumber, walletNumber)
+        val base = deriveWalletChainKeys(rootKey, accountNumber, walletNumber)
 
         return base.derive(addressNumber)
     }
@@ -60,7 +52,7 @@ class DerivationKeysHelper {
     fun deriveDefaultAddress(rootKey: ExtendedKey): ExtendedKey {
         val base = deriveWalletChainKeys(rootKey, 0, 0)
 
-        return base.derive(hardenedIndex(DEFAULT_ACCOUNT_INDEX))
+        return base.derive(DEFAULT_ACCOUNT_INDEX)
     }
 
     private fun deriveWalletChainKeys(rootKey: ExtendedKey, accountNumber: Int, walletNumber: Int): ExtendedKey {
