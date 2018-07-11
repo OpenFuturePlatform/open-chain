@@ -9,12 +9,12 @@ import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.DelegateRepository
 import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.service.StakeholderService
-import org.apache.commons.collections4.CollectionUtils
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.util.CollectionUtils
 
 @Service
 class DefaultDelegateService(

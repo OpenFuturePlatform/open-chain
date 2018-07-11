@@ -24,7 +24,8 @@ class DefaultTransferTransactionService(
     override fun create(data: TransferTransactionData): TransferTransactionDto {
         val networkTime = nodeClock.networkTime()
         val hash = TransactionUtils.calculateHash(networkTime, data)
-        return TransferTransactionDto(networkTime, data.amount, data.recipientKey, data.senderKey, data.senderSignature, hash)
+        return TransferTransactionDto(networkTime, data.amount, data.recipientKey, data.recipientAddress,
+            data.senderKey, data.senderAddress, data.senderSignature, hash)
     }
 
 }

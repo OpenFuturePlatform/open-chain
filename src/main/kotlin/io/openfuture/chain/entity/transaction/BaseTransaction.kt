@@ -19,8 +19,14 @@ abstract class BaseTransaction(
     @Column(name = "recipient_key", nullable = false)
     var recipientKey: String,
 
+    @Column(name = "recipient_address", nullable = false)
+    var recipientAddress: String,
+
     @Column(name = "sender_key", nullable = false)
     var senderKey: String,
+
+    @Column(name = "sender_address", nullable = false)
+    var senderAddress: String,
 
     @Column(name = "sender_signature", nullable = false)
     var senderSignature: String,

@@ -1,7 +1,7 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.entity.Wallet
+import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.repository.WalletRepository
 import org.springframework.stereotype.Service
 
@@ -18,13 +18,13 @@ class DefaultWalletService(
     override fun getBalance(address: String): Double =
         repository.findOneByAddress(address)?.balance ?: DEFAULT_WALLET_BALANCE
 
-    override fun updateByTransaction(transaction: Transaction) {
+    override fun updateByTransaction(transaction: BaseTransaction) {
         updateByAddress(transaction.senderAddress, -transaction.amount)
 
         updateByAddress(transaction.recipientAddress, transaction.amount)
     }
 
-    private fun updateByAddress(address: String, amount: Int) {
+    private fun updateByAddress(address: String, amount: Long) {
         val wallet = repository.findOneByAddress(address) ?: Wallet(address)
 
         wallet.balance += amount

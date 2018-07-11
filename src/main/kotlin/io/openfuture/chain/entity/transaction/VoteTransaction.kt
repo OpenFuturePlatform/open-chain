@@ -10,7 +10,9 @@ class VoteTransaction(
     timestamp: Long,
     amount: Long,
     recipientKey: String,
+    recipientAddress: String,
     senderKey: String,
+    senderAddress: String,
     senderSignature: String,
     hash: String,
 
@@ -25,14 +27,17 @@ class VoteTransaction(
 
     block: Block? = null
 
-) : BaseTransaction(timestamp, amount, recipientKey, senderKey, senderSignature, hash, block) {
+) : BaseTransaction(timestamp, amount, recipientKey, recipientAddress, senderKey, senderAddress, senderSignature,
+    hash, block) {
 
     companion object {
         fun of(dto: VoteTransactionDto): VoteTransaction = VoteTransaction(
             dto.timestamp,
             dto.amount,
             dto.recipientKey,
+            dto.recipientAddress,
             dto.senderKey,
+            dto.senderAddress,
             dto.senderSignature,
             dto.hash,
             dto.voteType.getId(),
