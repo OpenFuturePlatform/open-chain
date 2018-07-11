@@ -69,13 +69,13 @@ interface CryptoService {
 
 }
 
-interface BaseTransactionService<Entity : Transaction> {
+interface BaseTransactionService<E : Transaction> {
 
-    fun getAllPending(): MutableSet<Entity>
+    fun getAllPending(): MutableSet<E>
 
-    fun get(hash: String): Entity
+    fun get(hash: String): E
 
-    fun addToBlock(hash: String, block: Block): Entity
+    fun addToBlock(hash: String, block: Block): E
 
 }
 
@@ -89,15 +89,15 @@ interface VoteTransactionService : BaseTransactionService<VoteTransaction> {
 
 }
 
-interface BaseStakeholderService<Entity : Stakeholder, Dto : StakeholderDto> {
+interface BaseStakeholderService<E : Stakeholder, D : StakeholderDto> {
 
-    fun getAll(): List<Entity>
+    fun getAll(): List<E>
 
-    fun getByPublicKey(publicKey: String): Entity
+    fun getByPublicKey(publicKey: String): E
 
-    fun add(dto: Dto): Entity
+    fun add(dto: D): E
 
-    fun save(entity: Entity): Entity
+    fun save(entity: E): E
 
 }
 
