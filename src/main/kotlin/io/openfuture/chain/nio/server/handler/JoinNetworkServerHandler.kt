@@ -30,7 +30,6 @@ class JoinNetworkServerHandler(
             .setType(Type.JOIN_NETWORK_RESPONSE)
             .setJoinNetworkResponse(JoinNetworkResponse.newBuilder()
                 .addAllPeers(peerService.findAll())
-                .setHost(clientHost)
                 .setNetworkId(clientNetworkId)
                 .build())
             .build()

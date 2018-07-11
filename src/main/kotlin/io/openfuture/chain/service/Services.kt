@@ -87,7 +87,7 @@ interface NetworkService {
 
     fun join(host : String, port: Int)
 
-    fun connect(host : String, port: Int)
+    fun connect(host: String, port: Int)
 
     fun broadcast(packet: CommunicationProtocol.Packet)
 
@@ -95,4 +95,7 @@ interface NetworkService {
 
     fun activeChannels(): MutableSet<Channel>
 
+    fun getNetworkId(): String?
+
+    fun setNetworkId(networkId: String)
 }

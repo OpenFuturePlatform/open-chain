@@ -61,7 +61,6 @@ message JoinNetworkRequest {
 
 message JoinNetworkResponse {
     string network_id = 1;
-    string host = 2;
     repeated Peer peers = 3;
 }
 
