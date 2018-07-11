@@ -61,4 +61,5 @@ class ECKeyTest {
         val serializedKey = if (fromPrivate) xpriv else xpub
         return ExtendedKeyDeserializer().deserialize(serializedKey).ecKey
     }
+    
 }
