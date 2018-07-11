@@ -17,7 +17,7 @@ class DefaultBlockService (
 
     @Transactional(readOnly = true)
     override fun get(id: Int): Block = repository.getOne(id)
-        ?: throw NotFoundException("Not found id $id")
+        ?: throw NotFoundException("Not found block with id $id")
 
     @Transactional(readOnly = true)
     override fun getAll(): MutableList<Block> =  repository.findAll()
