@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Address mixed-case checksum
 - Address validation
 - RPC requests: validateAddress
-- Definition of epoch
+- Definition of epoch: get current epoch height
+- Definition of epoch: is genesis block needed
 
 ### Changed
 - Default account info is added to the doGenerateMaster end-point response

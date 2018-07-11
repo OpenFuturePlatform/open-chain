@@ -64,10 +64,10 @@ interface TransactionService {
 
 }
 
-interface EpochService {
+interface ConsensusService {
 
-    fun getActualSizeCurrentEpoch(): Int
+    fun getCurrentEpochHeight(): Int
 
-    fun isCreateGenesisBlock(): Boolean
+    fun isGenesisBlockNeeded(): Boolean
 
 }

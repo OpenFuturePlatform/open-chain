@@ -7,11 +7,11 @@ import javax.validation.constraints.NotNull
 
 @Component
 @Validated
-@ConfigurationProperties(prefix = "epoch")
-class EpochProperties(
+@ConfigurationProperties(prefix = "consensus")
+class ConsensusProperties(
 
     /** The count of blocks in epoch */
     @field:NotNull
-    var size: Int? = null
+    var epochHeight: Int? = null
 
 )
