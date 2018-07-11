@@ -11,7 +11,7 @@ class GenesisBlock(hash: String, height: Long,
     var epochIndex: Long,
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name="active_delegates", joinColumns=[JoinColumn(name = "genesis_block_key")])
+    @CollectionTable(name="active_delegates", joinColumns=[JoinColumn(name = "genesis_block_id")])
     @Column(name="delegate_key")
     var activeDelegateKeys: Set<String>
 
