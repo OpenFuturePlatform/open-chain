@@ -55,16 +55,9 @@ class DefaultBlockService(
     @Transactional
     override fun save(block: Block): Block {
         val savedBlock = blockRepository.save(block)
-        if (block is MainBlock) {
-            val transactions = block.transactions
-            for (transaction in transactions) {
-                transaction.blockId = savedBlock.id
-            }
 
-            transactionService.saveAll(transactions)
-        }
 
-        return block
+        return savedBlock
     }
 
     val taskScheduler = ThreadPoolTaskScheduler()

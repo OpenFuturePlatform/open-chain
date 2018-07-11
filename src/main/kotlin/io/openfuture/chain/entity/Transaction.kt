@@ -27,7 +27,7 @@ class Transaction(
     @Column(name = "signature", nullable = false)
     var signature: String,
 
-    @Column(name = "block_id", nullable = true, insertable = false, updatable = false)
+    @Column(name = "block_id", nullable = true)
     var blockId: Int? = null
 
 ) : BaseModel()
