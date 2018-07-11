@@ -3,8 +3,8 @@ package io.openfuture.chain.block
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.nio.converter.BlockSignaturesConverter
-import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.protocol.CommunicationProtocol.BlockSignatures
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 import org.springframework.stereotype.Component
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
@@ -14,50 +14,60 @@ class SignatureCollector(
 ) {
 
     private val lock = ReentrantReadWriteLock()
+    private val scheduler = ThreadPoolTaskScheduler()
 
     // variable to collect the signatures from the same round only
     private lateinit var pendingBlock: PendingBlock
 
+    fun isBlockEquals(block: Block): Boolean {
+        return try {
+            lock.readLock().lock()
+            pendingBlock.block.hash == block.hash
+        } finally {
+            lock.readLock().unlock()
+        }
+    }
 
     fun getBlock(): Block {
-        try {
+        return try {
             lock.readLock().lock()
-            return pendingBlock.block
+            pendingBlock.block
         } finally {
             lock.readLock().unlock()
         }
     }
 
     fun getBlockSignatures(): BlockSignatures {
-        try {
+        return try {
             lock.readLock().lock()
-            return blockSignaturesConverter.fromEntity(pendingBlock)
+            blockSignaturesConverter.fromEntity(pendingBlock)
         } finally {
             lock.readLock().unlock()
         }
     }
 
-    fun setPendingBlock(generatedBlock: Block) {
-        CommunicationProtocol.Packet.BodyCase.TIME_SYNC_REQUEST
+    fun setPendingBlock(generatedBlock: PendingBlock) {
         try {
             lock.writeLock().lock()
-            this.pendingBlock = PendingBlock(generatedBlock)
+            if (generatedBlock.block.hash != pendingBlock.block.hash) {
+
+            }
+            this.pendingBlock = generatedBlock
         } finally {
             lock.writeLock().unlock()
         }
     }
 
-    fun addBlockSignatures(blockSignatures: BlockSignatures): Boolean {
+    fun addBlockSignatures(blockSignatures: PendingBlock): Boolean {
         try {
             lock.writeLock().lock()
 
-            val blockToSign = blockSignaturesConverter.fromMessage(blockSignatures)
-            val block = blockToSign.block
+            val block = blockSignatures.block
             if (block.hash != pendingBlock.block.hash) {
                 return false
             }
 
-            val signaturesToAdd = blockToSign.signatures
+            val signaturesToAdd = blockSignatures.signatures
             if (pendingBlock.signatures == signaturesToAdd) {
                 return false
             }

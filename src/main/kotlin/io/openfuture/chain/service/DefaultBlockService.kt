@@ -10,13 +10,9 @@ import io.openfuture.chain.domain.block.SignaturePublicKeyPair
 import io.openfuture.chain.entity.*
 import io.openfuture.chain.events.BlockCreationEvent
 import io.openfuture.chain.exception.NotFoundException
-import io.openfuture.chain.nio.converter.BlockSignaturesConverter
-import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.util.BlockUtils
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.event.EventListener
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -27,17 +23,12 @@ class DefaultBlockService(
     private val signatureCollector: SignatureCollector,
     private val keyHolder: KeyHolder,
     private val signatureManager: SignatureManager,
-    private val blockValidationService: BlockValidationService,
-    private val blockSignaturesConverter: BlockSignaturesConverter,
-    @Value("\${block.capacity}") private val transactionCapacity: Int,
-    @Value("\${block.time.slot}") private val timeSlot: Long
+    private val blockValidationService: BlockValidationService
 ) : BlockService {
 
     companion object {
         private const val APPROVAL_THRESHOLD = 0.67
     }
-
-    private val taskScheduler = ThreadPoolTaskScheduler()
 
     private var activeDelegates = emptySet<String>()
 
@@ -72,48 +63,38 @@ class DefaultBlockService(
         return savedBlock
     }
 
-    override fun signCreatedBlock(block: Block): PendingBlock {
-        val signature = signatureManager.sign(HashUtils.hexStringToBytes(block.hash), keyHolder.getPrivateKey())
-        val publicKey = HashUtils.bytesToHexString(keyHolder.getPublicKey())
-        val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
-        val signaturePublicKeyPairs = hashSetOf(signaturePublicKeyPair)
-        val firstSignedBlock = PendingBlock(block, signaturePublicKeyPairs)
-        taskScheduler.scheduleAtFixedRate({ applyBlock() }, timeSlot)
-        return firstSignedBlock
-    }
-
-    override fun approveBlock(blockWithSignatures: PendingBlock): SignaturePublicKeyPair {
-        taskScheduler.scheduleAtFixedRate({ applyBlock() }, timeSlot)
-
+    override fun approveBlock(blockWithSignatures: PendingBlock) {
         val block = blockWithSignatures.block
         val lastChainBlock = getLast()
         if (!blockValidationService.isValid(block, lastChainBlock)) {
             throw IllegalArgumentException("$blockWithSignatures is not valid")
         }
-
         val signature = signatureManager.sign(HashUtils.hexStringToBytes(block.hash), keyHolder.getPrivateKey())
         val publicKey = HashUtils.bytesToHexString(keyHolder.getPublicKey())
-        return SignaturePublicKeyPair(signature, publicKey)
+        blockWithSignatures.signatures.add(SignaturePublicKeyPair(signature, publicKey))
+        signatureCollector.setPendingBlock(blockWithSignatures)
+        signatureCollector.addBlockSignatures(blockWithSignatures)
     }
 
     @EventListener
     fun fireBlockCreation(event: BlockCreationEvent) {
         val pendingTransactions = transactionService.getPendingTransactions()
-        if (transactionCapacity == pendingTransactions.size) {
-            val delegates = if (activeDelegates.isEmpty()) {
-                getLastGenesisBlock().activeDelegateKeys
-            } else {
-                activeDelegates
-            }
-            val publicKey = HashUtils.bytesToHexString(keyHolder.getPublicKey())
-            val previousBlock = getLast()
-            if (publicKey == BlockUtils.getBlockProducer(delegates, previousBlock)) {
-                this.create(pendingTransactions, previousBlock)
-            }
+        val publicKey = HashUtils.bytesToHexString(keyHolder.getPublicKey())
+        val previousBlock = getLast()
+        if (publicKey == BlockUtils.getBlockProducer(activeDelegates, previousBlock)) {
+            this.create(pendingTransactions, previousBlock)
         }
     }
 
-    private fun create(transactions: List<Transaction>, previousBlock: Block): Block {
+    private fun signCreatedBlock(block: Block): PendingBlock {
+        val signature = signatureManager.sign(HashUtils.hexStringToBytes(block.hash), keyHolder.getPrivateKey())
+        val publicKey = HashUtils.bytesToHexString(keyHolder.getPublicKey())
+        val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
+        val signaturePublicKeyPairs = hashSetOf(signaturePublicKeyPair)
+        return PendingBlock(block, signaturePublicKeyPairs)
+    }
+
+    private fun create(transactions: List<Transaction>, previousBlock: Block) {
         val merkleRootHash = BlockUtils.calculateMerkleRoot(transactions)
         val time = System.currentTimeMillis()
         val hash = BlockUtils.calculateHash(previousBlock.hash, merkleRootHash, time, (previousBlock.height + 1))
@@ -130,8 +111,9 @@ class DefaultBlockService(
             signature,
             transactions
         )
-        signatureCollector.setPendingBlock(block)
-        return block
+        val pendingBlock = signCreatedBlock(block)
+        signatureCollector.setPendingBlock(pendingBlock)
+        signatureCollector.addBlockSignatures(pendingBlock)
     }
 
     private fun applyBlock() {

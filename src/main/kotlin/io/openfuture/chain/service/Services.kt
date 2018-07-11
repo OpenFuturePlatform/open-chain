@@ -42,9 +42,7 @@ interface BlockService {
 
     fun save(block: Block): Block
 
-    fun signCreatedBlock(block: Block): PendingBlock
-
-    fun approveBlock(blockWithSignatures: PendingBlock): SignaturePublicKeyPair
+    fun approveBlock(blockWithSignatures: PendingBlock)
 
 }
 
