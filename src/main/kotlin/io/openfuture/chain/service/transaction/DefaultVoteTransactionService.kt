@@ -14,24 +14,25 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultVoteTransactionService(
-        repository: VoteTransactionRepository,
-        private val nodeClock: NodeClock,
-        private val delegateService: DelegateService
-) : DefaultBaseTransactionService<VoteTransaction>(repository), VoteTransactionService {
+    repository: VoteTransactionRepository,
+    private val nodeClock: NodeClock,
+    private val delegateService: DelegateService
+) : DefaultBaseTransactionService<VoteTransaction, VoteTransactionDto, VoteTransactionData>(repository),
+    VoteTransactionService {
 
     @Transactional
-    override fun addVote(dto: VoteTransactionDto): VoteTransaction {
+    override fun add(dto: VoteTransactionDto): VoteTransaction {
         //todo need to add validation
         val vote = VoteDto(dto.senderKey, dto.delegateKey, dto.voteType, dto.weight) //todo need to think about calculate the vote weight
         delegateService.updateDelegateRatingByVote(vote)
         return repository.save(VoteTransaction.of(dto))
     }
 
-    override fun createVote(data: VoteTransactionData): VoteTransactionDto {
+    override fun create(data: VoteTransactionData): VoteTransactionDto {
         val networkTime = nodeClock.networkTime()
         val hash = TransactionUtils.calculateHash(networkTime, data)
         return VoteTransactionDto(networkTime, data.amount, data.recipientKey, data.senderKey, data.senderSignature,
-                hash, data.voteType, data.delegateKey, data.weight)
+            hash, data.voteType, data.delegateKey, data.weight)
     }
 
 }

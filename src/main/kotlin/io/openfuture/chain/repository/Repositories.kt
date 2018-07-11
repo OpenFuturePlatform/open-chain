@@ -30,7 +30,7 @@ interface GenesisBlockRepository : BaseRepository<GenesisBlock>
 interface MainBlockRepository : BaseRepository<MainBlock>
 
 @Repository
-interface TransactionRepository<E : Transaction>: BaseRepository<E> {
+interface TransactionRepository<E : Transaction> : BaseRepository<E> {
 
     fun findOneByHash(hash: String): E?
 
@@ -39,7 +39,7 @@ interface TransactionRepository<E : Transaction>: BaseRepository<E> {
 }
 
 @Repository
-interface VoteTransactionRepository: TransactionRepository<VoteTransaction>
+interface VoteTransactionRepository : TransactionRepository<VoteTransaction>
 
 @Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {

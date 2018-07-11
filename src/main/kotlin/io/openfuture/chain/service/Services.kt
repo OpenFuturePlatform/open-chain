@@ -13,6 +13,7 @@ import io.openfuture.chain.domain.stakeholder.DelegateDto
 import io.openfuture.chain.domain.stakeholder.StakeholderDto
 import io.openfuture.chain.domain.transaction.TransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
+import io.openfuture.chain.domain.transaction.data.TransactionData
 import io.openfuture.chain.domain.transaction.data.VoteDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.block.Block
@@ -69,41 +70,39 @@ interface CryptoService {
 
 }
 
-interface BaseTransactionService<E : Transaction> {
+interface BaseTransactionService<Entity : Transaction, Dto : TransactionDto, Data : TransactionData> {
 
-    fun getAllPending(): MutableSet<E>
+    fun getAllPending(): MutableSet<Entity>
 
-    fun get(hash: String): E
+    fun get(hash: String): Entity
 
-    fun addToBlock(hash: String, block: Block): E
+    fun addToBlock(hash: String, block: Block): Entity
 
-}
+    fun add(dto: Dto): Entity
 
-interface TransactionService : BaseTransactionService<Transaction>
-
-interface VoteTransactionService : BaseTransactionService<VoteTransaction> {
-
-    fun addVote(dto: VoteTransactionDto): VoteTransaction
-
-    fun createVote(data: VoteTransactionData): VoteTransactionDto
+    fun create(data: Data): Dto
 
 }
 
-interface BaseStakeholderService<E : Stakeholder, D : StakeholderDto> {
+interface TransactionService : BaseTransactionService<Transaction, TransactionDto, TransactionData>
 
-    fun getAll(): List<E>
+interface VoteTransactionService : BaseTransactionService<VoteTransaction, VoteTransactionDto, VoteTransactionData>
 
-    fun getByPublicKey(publicKey: String): E
+interface BaseStakeholderService<Entity : Stakeholder, Dto : StakeholderDto> {
 
-    fun add(dto: D): E
+    fun getAll(): List<Entity>
 
-    fun save(entity: E): E
+    fun getByPublicKey(publicKey: String): Entity
+
+    fun add(dto: Dto): Entity
+
+    fun save(entity: Entity): Entity
 
 }
 
-interface StakeholderService: BaseStakeholderService<Stakeholder, StakeholderDto>
+interface StakeholderService : BaseStakeholderService<Stakeholder, StakeholderDto>
 
-interface DelegateService : BaseStakeholderService<Delegate, DelegateDto>{
+interface DelegateService : BaseStakeholderService<Delegate, DelegateDto> {
 
     fun getActiveDelegates(): List<Delegate>
 

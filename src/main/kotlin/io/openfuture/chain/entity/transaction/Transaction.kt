@@ -11,39 +11,39 @@ import javax.persistence.*
 @Inheritance(strategy = InheritanceType.JOINED)
 open class Transaction(
 
-        @Column(name = "timestamp", nullable = false)
-        var timestamp: Long,
+    @Column(name = "timestamp", nullable = false)
+    var timestamp: Long,
 
-        @Column(name = "amount", nullable = false)
-        var amount: Long,
+    @Column(name = "amount", nullable = false)
+    var amount: Long,
 
-        @Column(name = "recipient_key", nullable = false)
-        var recipientKey: String,
+    @Column(name = "recipient_key", nullable = false)
+    var recipientKey: String,
 
-        @Column(name = "sender_key", nullable = false)
-        var senderKey: String,
+    @Column(name = "sender_key", nullable = false)
+    var senderKey: String,
 
-        @Column(name = "sender_signature", nullable = false)
-        var senderSignature: String,
+    @Column(name = "sender_signature", nullable = false)
+    var senderSignature: String,
 
-        @Column(name = "hash", nullable = false)
-        var hash: String,
+    @Column(name = "hash", nullable = false)
+    var hash: String,
 
-        @JsonIgnore
-        @ManyToOne
-        @JoinColumn(name = "block_id", nullable = true)
-        var block: Block? = null
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "block_id", nullable = true)
+    var block: Block? = null
 
 ) : BaseModel() {
 
     companion object {
         fun of(dto: TransactionDto): Transaction = Transaction(
-                dto.timestamp,
-                dto.amount,
-                dto.recipientKey,
-                dto.senderKey,
-                dto.senderSignature,
-                dto.hash
+            dto.timestamp,
+            dto.amount,
+            dto.recipientKey,
+            dto.senderKey,
+            dto.senderSignature,
+            dto.hash
         )
     }
 

@@ -7,20 +7,18 @@ import io.openfuture.chain.repository.StakeholderRepository
 import io.openfuture.chain.service.BaseStakeholderService
 import org.springframework.transaction.annotation.Transactional
 
-abstract class DefaultBaseStakeholderService<E : Stakeholder, D : StakeholderDto>(
-        private val repository: StakeholderRepository<E>
-) : BaseStakeholderService<E, D> {
+abstract class DefaultBaseStakeholderService<Entity : Stakeholder, Dto : StakeholderDto>(
+    private val repository: StakeholderRepository<Entity>
+) : BaseStakeholderService<Entity, Dto> {
 
     @Transactional(readOnly = true)
-    override fun getAll(): List<E> = repository.findAll()
+    override fun getAll(): List<Entity> = repository.findAll()
 
     @Transactional(readOnly = true)
-    override fun getByPublicKey(publicKey: String): E = repository.findOneByPublicKey(publicKey)
-            ?: throw NotFoundException("Stakeholder with publicKey: $publicKey not exist!")
+    override fun getByPublicKey(publicKey: String): Entity = repository.findOneByPublicKey(publicKey)
+        ?: throw NotFoundException("Stakeholder with publicKey: $publicKey not exist!")
 
     @Transactional
-    override fun save(entity: E): E = repository.save(entity)
-
-    abstract override fun add(dto: D): E
+    override fun save(entity: Entity): Entity = repository.save(entity)
 
 }

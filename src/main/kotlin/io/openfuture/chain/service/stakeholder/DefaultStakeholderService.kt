@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class DefaultStakeholderService (
-        private val repository: StakeholderRepository<Stakeholder>
+class DefaultStakeholderService(
+    private val repository: StakeholderRepository<Stakeholder>
 ) : DefaultBaseStakeholderService<Stakeholder, StakeholderDto>(repository), StakeholderService {
 
     @Transactional
-    override fun add(dto: StakeholderDto): Stakeholder  = repository.save(Stakeholder.of(dto))
+    override fun add(dto: StakeholderDto): Stakeholder = repository.save(Stakeholder.of(dto))
 
 }

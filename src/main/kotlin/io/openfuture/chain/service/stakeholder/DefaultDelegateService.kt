@@ -18,10 +18,10 @@ import org.springframework.transaction.annotation.Transactional
 import javax.annotation.PostConstruct
 
 @Service
-class DefaultDelegateService (
-        private val repository: DelegateRepository,
-        private val delegateProperties: DelegateProperties,
-        private val stakeholderService: StakeholderService
+class DefaultDelegateService(
+    private val repository: DelegateRepository,
+    private val delegateProperties: DelegateProperties,
+    private val stakeholderService: StakeholderService
 ) : DefaultBaseStakeholderService<Delegate, DelegateDto>(repository), DelegateService {
 
     companion object {
@@ -43,7 +43,7 @@ class DefaultDelegateService (
     @Transactional(readOnly = true)
     override fun getActiveDelegates(): List<Delegate> {
         val result = mutableListOf<Delegate>()
-        val request = PageRequest.of(0, 21, Sort(Sort.Direction.DESC, "rating"))
+        val request = PageRequest.of(0, delegateProperties.count!!, Sort(Sort.Direction.DESC, "rating"))
         result.addAll(repository.findAll(request).content)
         return result
     }
@@ -68,22 +68,22 @@ class DefaultDelegateService (
         if (stakeholder.votes.contains(delegate) && dto.voteType == VoteType.FOR) {
             //todo need to throw exception ?
             log.error("Stakeholder with publicKey ${stakeholder.publicKey} already voted for stakeholder with publicKey " +
-                    "${delegate.publicKey}!")
+                "${delegate.publicKey}!")
             return
         }
 
         if (!stakeholder.votes.contains(delegate) && dto.voteType == VoteType.AGAINST) {
             //todo need to throw exception ?
             log.error("Stakeholder with publicKey ${stakeholder.publicKey} can't remove vote from stakeholder with " +
-                    "publicKey ${delegate.publicKey}!")
+                "publicKey ${delegate.publicKey}!")
             return
         }
 
         if (dto.voteType == VoteType.FOR) {
-            delegate.rating+= dto.value
+            delegate.rating += dto.value
             stakeholder.votes.add(delegate)
         } else {
-            delegate.rating-= dto.value
+            delegate.rating -= dto.value
             stakeholder.votes.remove(delegate)
         }
 
