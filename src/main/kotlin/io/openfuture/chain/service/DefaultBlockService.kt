@@ -10,25 +10,25 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultBlockService (
-    private val blockRepository: BlockRepository,
+    private val repository: BlockRepository,
     private val wallerService: WalletService,
     private val transactionService: TransactionService
 ) : BlockService {
 
     @Transactional(readOnly = true)
-    override fun get(id: Int): Block = blockRepository.getOne(id)
+    override fun get(id: Int): Block = repository.getOne(id)
         ?: throw NotFoundException("Not found id $id")
 
     @Transactional(readOnly = true)
-    override fun getAll(): MutableList<Block> =  blockRepository.findAll()
+    override fun getAll(): MutableList<Block> =  repository.findAll()
 
     @Transactional(readOnly = true)
-    override fun getLast(): Block = blockRepository.findFirstByOrderByOrderNumberDesc()
+    override fun getLast(): Block = repository.findFirstByOrderByOrderNumberDesc()
         ?: throw NotFoundException("Last block not exist!")
 
     @Transactional
     override fun save(request: BlockRequest): Block {
-        val savedBlock = blockRepository.save(Block.of(request))
+        val savedBlock = repository.save(Block.of(request))
 
         request.transactions.forEach { saveTransactionRequest(savedBlock, it)}
 
