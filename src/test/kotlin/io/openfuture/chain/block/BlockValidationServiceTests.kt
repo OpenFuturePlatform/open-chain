@@ -28,10 +28,10 @@ class BlockValidationServiceTests : ServiceTests() {
     @Before
     fun setUp() {
         val validators = HashMap<String, BlockValidator>()
-        validators.put("", blockValidator)
+        validators[""] = blockValidator
         given(blockValidator.getVersion()).willReturn(BlockVersion.MAIN.version)
         given(applicationContext.getBeansOfType(BlockValidator::class.java)).willReturn(validators)
-        blockValidationService = BlockValidationService(blockService, applicationContext)
+        blockValidationService = BlockValidationService(blockService, applicationContext, 1000)
         blockValidationService.init()
     }
 
