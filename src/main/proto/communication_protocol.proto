@@ -22,9 +22,7 @@ enum Type {
     HEART_BEAT = 0;
     TIME_SYNC_REQUEST = 1;
     TIME_SYNC_RESPONSE = 2;
-    MAIN_BLOCK = 3;
-    SIGNED_BLOCK = 4;
-    FULL_SIGNED_BLOCK = 5;
+    SIGNED_BLOCK = 3;
 }
 
 message HeartBeat {
