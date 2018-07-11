@@ -1,7 +1,9 @@
 package io.openfuture.chain.util
 
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
+import java.util.*
 
 object BlockUtils {
 
@@ -30,6 +32,11 @@ object BlockUtils {
     fun calculateHash(previousHash: String, merkleRoot: String, timestamp: Long, height: Long): ByteArray {
         val headers = previousHash + merkleRoot + timestamp + height
         return HashUtils.doubleSha256(headers.toByteArray())
+    }
+
+    fun getBlockProducer(delegates: List<String>, previousBlock: Block): String {
+        val random = Random(previousBlock.timestamp)
+        return delegates.shuffled(random).first()
     }
 
 }

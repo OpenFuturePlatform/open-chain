@@ -3,7 +3,7 @@ package io.openfuture.chain.service
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
-import io.openfuture.chain.domain.crypto.key.WalletDto
+import io.openfuture.chain.domain.crypto.RootAccountDto
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
@@ -41,7 +41,9 @@ interface CryptoService {
 
     fun generateSeedPhrase(): String
 
-    fun getMasterKey(seedPhrase: String): ExtendedKey
+    fun generateNewAccount(): RootAccountDto
+
+    fun getRootAccount(seedPhrase: String): RootAccountDto
 
     fun getDerivationKey(seedPhrase: String, derivationPath: String): ExtendedKey
 
@@ -53,8 +55,6 @@ interface CryptoService {
 
     fun serializePrivateKey(key: ExtendedKey): String
 
-    fun generateKey(): WalletDto
-
 }
 
 interface TransactionService {
@@ -65,19 +65,13 @@ interface TransactionService {
 
 }
 
-interface BlockApplyingService {
+interface BlockSignService {
 
-    fun broadcastBlockToSign(block: Block)
+    fun signBlock(block: Block): CommunicationProtocol.BlockSignatures
 
-    fun signBlock(block: Block): CommunicationProtocol.BlockSignature
+    fun signBlock(blockSignatures: CommunicationProtocol.BlockSignatures)
 
-    fun broadcastSignature(blockSignature: CommunicationProtocol.BlockSignature)
-
-    fun addSignature(blockSignature: CommunicationProtocol.BlockSignature)
-
-    fun broadcastFullSignedBlock(fullSignedBlock: CommunicationProtocol.FullSignedBlock)
-
-    fun applyBlock(fullSignedBlock: CommunicationProtocol.FullSignedBlock)
+    fun addSignatures(blockSignature: CommunicationProtocol.BlockSignatures): Boolean
 
 }
 

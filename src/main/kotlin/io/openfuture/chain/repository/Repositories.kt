@@ -16,6 +16,8 @@ interface BlockRepository : BaseRepository<Block> {
 
     fun findFirstByOrderByHeightDesc(): Block?
 
+    fun findFirstByVersion(version: Int): Block?
+
 }
 
 @Repository
@@ -30,6 +32,6 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 
     fun findOneByIndex(index: Int): SeedWord
 
-    fun findOneByValue(value: String): Optional<SeedWord>
+    fun findOneByValue(value: String): SeedWord?
 
 }

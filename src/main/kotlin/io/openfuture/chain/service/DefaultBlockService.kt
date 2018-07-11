@@ -4,9 +4,7 @@ import io.openfuture.chain.block.SignatureCollector
 import io.openfuture.chain.crypto.key.KeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.MainBlock
-import io.openfuture.chain.entity.Transaction
+import io.openfuture.chain.entity.*
 import io.openfuture.chain.events.BlockCreationEvent
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
@@ -20,12 +18,13 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultBlockService(
     private val blockRepository: BlockRepository,
     private val transactionService: TransactionService,
-    private val blockApplyingService: BlockApplyingService,
     private val signatureCollector: SignatureCollector,
     private val keyHolder: KeyHolder,
     private val signatureManager: SignatureManager,
     @Value("\${block.capacity}")private val transactionCapacity: Int
 ) : BlockService {
+
+    private var activeDelegates = emptyList<String>()
 
     @Transactional(readOnly = true)
     override fun get(id: Int): Block = blockRepository.getOne(id)
@@ -34,11 +33,15 @@ class DefaultBlockService(
     @Transactional(readOnly = true)
     override fun getAll(): MutableList<Block> = blockRepository.findAll()
 
+    @Transactional(readOnly = true)
     override fun getLast(): Block = blockRepository.findFirstByOrderByHeightDesc()
         ?: throw NotFoundException("Last block not exist!")
 
-    fun create(transactions: List<Transaction>): Block {
-        val previousBlock = getLast()
+    @Transactional(readOnly = true)
+    fun getLastGenesisBlock(): GenesisBlock = blockRepository.findFirstByVersion(BlockVersion.GENESIS.version) as? GenesisBlock
+        ?: throw NotFoundException("Last Genesis block not exist!")
+
+    private fun create(transactions: List<Transaction>, previousBlock: Block): Block {
         val merkleRootHash = BlockUtils.calculateMerkleRoot(transactions)
         val time = System.currentTimeMillis()
         val hash = BlockUtils.calculateHash(previousBlock.hash, merkleRootHash, time, (previousBlock.height + 1))
@@ -56,7 +59,7 @@ class DefaultBlockService(
             transactions
         )
         signatureCollector.setPendingBlock(block)
-        blockApplyingService.broadcastBlockToSign(block)
+        // broadcast will be here like this broadcastService.broadcastBlockToSign(block)
         return block
     }
 
@@ -64,7 +67,16 @@ class DefaultBlockService(
     fun fireBlockCreation(event: BlockCreationEvent) {
         val pendingTransactions = transactionService.getPendingTransactions()
         if (transactionCapacity == pendingTransactions.size) {
-            this.create(pendingTransactions.toList())
+            val delegates = if (activeDelegates.isEmpty()) {
+                getLastGenesisBlock().activeDelegateKeys
+            } else {
+                activeDelegates
+            }.toList()
+            val publicKey = HashUtils.bytesToHexString(keyHolder.getPublicKey())
+            val previousBlock = getLast()
+            if (publicKey == BlockUtils.getBlockProducer(delegates, previousBlock)) {
+                this.create(pendingTransactions, previousBlock)
+            }
         }
     }
 
