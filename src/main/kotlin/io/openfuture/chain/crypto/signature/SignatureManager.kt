@@ -1,6 +1,5 @@
 package io.openfuture.chain.crypto.signature
 
-import org.apache.commons.lang3.RandomStringUtils
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.util.HashUtils
 import org.springframework.stereotype.Component
