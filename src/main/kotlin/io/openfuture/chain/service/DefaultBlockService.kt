@@ -16,15 +16,16 @@ class DefaultBlockService (
 ) : BlockService {
 
     @Transactional(readOnly = true)
-    override fun get(id: Int): Block = repository.getOne(id)
-        ?: throw NotFoundException("Not found block with id $id")
+    override fun get(hash: String): Block = blockRepository.findByHash(hash)
+        ?: throw NotFoundException("Block with hash:$hash not found")
 
     @Transactional(readOnly = true)
-    override fun getAll(): MutableList<Block> =  repository.findAll()
+    override fun getLast(): Block = blockRepository.findFirstByOrderByHeightDesc()
+        ?: throw NotFoundException("Last block not found!")
 
     @Transactional(readOnly = true)
-    override fun getLast(): Block = repository.findFirstByOrderByOrderNumberDesc()
-        ?: throw NotFoundException("Last block not exist!")
+    override fun getLastGenesis(): Block {
+        TODO("not implemented")
 
     @Transactional
     override fun save(request: BlockRequest): Block {

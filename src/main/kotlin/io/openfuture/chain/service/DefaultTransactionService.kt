@@ -9,14 +9,13 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultTransactionService(
     private val transactionRepository: TransactionRepository,
-    private val blockService: BlockService
+    private val blockService: DefaultBlockService
 ): TransactionService {
 
     @Transactional
-    override fun save(request: TransactionRequest): Transaction {
+    override fun save(request: TransactionRequest) {
         val block = blockService.get(request.blockId)
-
-        return transactionRepository.save(Transaction.of(block, request))
+        transactionRepository.save(Transaction.of(block, request))
     }
 
 }

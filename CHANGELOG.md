@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Database: add Wallet entity
 - Sign data
 - Verify signed data
+- Define epoch duration in properties
+- Get current epoch height
+- Check is genesis block needed
 
 ### Changed
 - Default account info is added to the doGenerateMaster end-point response

@@ -9,8 +9,8 @@ import javax.persistence.*
 class Transaction(
 
     @ManyToOne
-    @JoinColumn(name = "block_id", nullable = false)
-    var block: Block,
+    @JoinColumn(name = "block_hash", referencedColumnName = "hash", nullable = true)
+    var block: Block?,
 
     @Column(name = "hash", nullable = false)
     var hash: String,
@@ -51,4 +51,5 @@ class Transaction(
             request.recipientAddress
         )
     }
+
 }
