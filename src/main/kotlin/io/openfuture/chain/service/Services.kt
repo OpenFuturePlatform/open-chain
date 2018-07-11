@@ -52,12 +52,6 @@ interface CryptoService {
 
 }
 
-interface TransactionService {
-
-    fun save(request: TransactionRequest)
-
-}
-
 interface ConsensusService {
 
     fun getCurrentEpochHeight(): Int
