@@ -5,7 +5,7 @@ import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
 import io.openfuture.chain.domain.block.BlockRequest
-import io.openfuture.chain.domain.crypto.key.WalletDto
+import io.openfuture.chain.domain.crypto.RootAccountDto
 import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
@@ -47,7 +47,9 @@ interface CryptoService {
 
     fun generateSeedPhrase(): String
 
-    fun getMasterKey(seedPhrase: String): ExtendedKey
+    fun generateNewAccount(): RootAccountDto
+
+    fun getRootAccount(seedPhrase: String): RootAccountDto
 
     fun getDerivationKey(seedPhrase: String, derivationPath: String): ExtendedKey
 
@@ -58,8 +60,6 @@ interface CryptoService {
     fun serializePublicKey(key: ExtendedKey): String
 
     fun serializePrivateKey(key: ExtendedKey): String
-
-    fun generateKey(): WalletDto
 
 }
 
