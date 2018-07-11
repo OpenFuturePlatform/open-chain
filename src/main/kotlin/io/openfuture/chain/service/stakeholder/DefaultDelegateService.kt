@@ -26,7 +26,8 @@ class DefaultDelegateService(
 
     companion object {
         private val log = LoggerFactory.getLogger(ConnectionClientHandler::class.java)
-        const val VOTES_LIMIT = 20
+        private const val VOTES_LIMIT = 21
+        private const val RATING = "rating"
     }
 
     @PostConstruct
@@ -42,10 +43,8 @@ class DefaultDelegateService(
 
     @Transactional(readOnly = true)
     override fun getActiveDelegates(): List<Delegate> {
-        val result = mutableListOf<Delegate>()
-        val request = PageRequest.of(0, delegateProperties.count!!, Sort(Sort.Direction.DESC, "rating"))
-        result.addAll(repository.findAll(request).content)
-        return result
+        val request = PageRequest.of(0, delegateProperties.count!!, Sort(Sort.Direction.DESC, RATING))
+        return repository.findAll(request).content
     }
 
     @Transactional(readOnly = true)
