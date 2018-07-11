@@ -1,6 +1,7 @@
 package io.openfuture.chain.crypto.domain
 
 import io.openfuture.chain.crypto.key.ExtendedKeyDeserializer
+import io.openfuture.chain.crypto.util.HashUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -8,14 +9,57 @@ class ECKeyTest {
 
     @Test
     fun getAddressShouldReturnAddressWithMixedCaseCheckSum() {
-        val deserializer = ExtendedKeyDeserializer()
-        val xpub = "xpub661MyMwAqRbcEnKbXcCqD2GT1di5zQxVqoHPAgHNe8dv5JP8gWmDproS6kFHJnLZd23tWevhdn4urGJ6b264DfTGKr8zjmYDjyDTi9U7iyT"
-        val ecKey = deserializer.deserialize(xpub).ecKey
+        val address = createECKey(false).getAddress()
 
-        val address = ecKey.getAddress()
-
-        assertThat(address).isNotBlank()
-        assertThat(address).isEqualTo("0x5aF3B0FFB89C09D7A38Fd01E42E0A5e32011e36e")
+        assertThat(address).isEqualTo("0x5d446C3f03a61f2B4321443aEf1f66DFf97C1882")
     }
 
+    @Test
+    fun signShouldReturnSignature() {
+        val data = HashUtils.sha256("Hello".toByteArray())
+        val key = createECKey(true)
+
+        val signature = key.sign(data)
+
+        assertThat(signature).isNotEmpty()
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun signShouldThrowIllegalArgumentExceptionWhenPrivateKeyIsEmpty() {
+        val data = HashUtils.sha256("Hello".toByteArray())
+        val key = createECKey(false)
+
+        key.sign(data)
+    }
+
+    @Test
+    fun verifyShouldReturnTrueWhenValidSignature() {
+        val data = HashUtils.sha256("Hello".toByteArray())
+        val key = createECKey(true)
+
+        val signature = key.sign(data)
+        val verify = key.verify(data, signature)
+
+        assertThat(verify).isTrue()
+    }
+
+    @Test
+    fun verifyShouldReturnFalseWhenInvalidSignature() {
+        val data = HashUtils.sha256("Hello".toByteArray())
+        val key = createECKey(true)
+
+        val signature = key.sign(data)
+        signature[signature.size - 1] = 0
+        val verify = key.verify(data, signature)
+
+        assertThat(verify).isFalse()
+    }
+
+    private fun createECKey(fromPrivate: Boolean): ECKey {
+        val xpub = "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8"
+        val xpriv = "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
+        val serializedKey = if (fromPrivate) xpriv else xpub
+        return ExtendedKeyDeserializer().deserialize(serializedKey).ecKey
+    }
+    
 }
