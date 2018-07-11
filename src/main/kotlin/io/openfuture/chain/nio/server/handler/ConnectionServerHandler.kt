@@ -1,6 +1,5 @@
 package io.openfuture.chain.nio.server.handler
 
-import io.netty.channel.Channel
 import io.netty.channel.ChannelHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
@@ -27,7 +26,7 @@ class ConnectionServerHandler(
         val address = ctx.channel().remoteAddress()
 
         if (check(ctx)) {
-            networkService.activeChannels().add(ctx.channel())
+            networkService.activeOutboundChannels().add(ctx.channel())
 
             log.info("Connection with {} established", address)
 
@@ -66,7 +65,7 @@ class ConnectionServerHandler(
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        networkService.activeChannels().remove(ctx.channel())
+        networkService.activeOutboundChannels().remove(ctx.channel())
     }
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {

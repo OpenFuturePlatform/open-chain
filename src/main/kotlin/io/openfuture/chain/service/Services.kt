@@ -14,6 +14,8 @@ import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Peer
 import io.openfuture.chain.protocol.CommunicationProtocol
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.event.EventListener
 
 interface HardwareInfoService {
 
@@ -85,7 +87,8 @@ interface PeerService {
 
 interface NetworkService {
 
-    fun join(host : String, port: Int)
+    @EventListener
+    fun start(event: ApplicationReadyEvent)
 
     fun connect(host: String, port: Int)
 
@@ -93,9 +96,15 @@ interface NetworkService {
 
     fun disconnect(channel: Channel)
 
-    fun activeChannels(): MutableSet<Channel>
+    fun activeInboundChannels(): MutableSet<Channel>
+
+    fun activeOutboundChannels(): MutableSet<Channel>
+
+    fun isConnected(networkId: String): Boolean
 
     fun getNetworkId(): String?
 
     fun setNetworkId(networkId: String)
+
+    fun maintainInboundConnections()
 }

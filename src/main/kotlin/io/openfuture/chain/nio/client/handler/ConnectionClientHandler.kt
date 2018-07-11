@@ -21,13 +21,13 @@ class ConnectionClientHandler(
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         log.info("Connection established")
-        networkService.activeChannels().add(ctx.channel())
+        networkService.activeInboundChannels().add(ctx.channel())
         ctx.fireChannelActive()
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
         log.info("Connection closed")
-        networkService.activeChannels().remove(ctx.channel())
+        networkService.activeInboundChannels().remove(ctx.channel())
         ctx.fireChannelInactive()
     }
 
