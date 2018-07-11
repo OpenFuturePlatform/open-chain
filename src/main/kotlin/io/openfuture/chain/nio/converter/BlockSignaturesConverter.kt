@@ -25,12 +25,8 @@ class BlockSignaturesConverter(
             blockSignaturesBuilder.genesisBlock = genesisBlockConverter.fromEntity(block)
         }
 
-        val signatures = entity.signatures
-            .map { signaturePublicKeyPairConverter.fromEntity(it) }.toList()
-
-        return blockSignaturesBuilder
-            .addAllSignatures(signatures)
-            .build()
+        val signatures = entity.signatures.map { signaturePublicKeyPairConverter.fromEntity(it) }.toList()
+        return blockSignaturesBuilder.addAllSignatures(signatures).build()
     }
 
     override fun fromMessage(message: BlockSignatures): PendingBlock {
@@ -40,7 +36,7 @@ class BlockSignaturesConverter(
             else -> throw IllegalArgumentException("$message has no block")
         }
 
-        val signatures = message.signaturesList.map { SignaturePublicKeyPair(it.signature, it.publicKey) }.toHashSet()
+        val signatures = message.signaturesList.map { signaturePublicKeyPairConverter.fromMessage(it) }.toHashSet()
         return PendingBlock(block, signatures)
     }
 
