@@ -7,7 +7,6 @@ abstract class BaseTransactionData(
     val senderKey: String,
     val senderAddress: String,
     val senderSignature: String
-
 ) {
 
     abstract fun getByteData(): ByteArray

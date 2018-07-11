@@ -17,8 +17,8 @@ class TransferTransaction(
     senderSignature: String,
     hash: String,
     block: Block? = null
-) : BaseTransaction(timestamp, amount, recipientKey, recipientAddress, senderKey, senderAddress, senderSignature,
-    hash, block) {
+) : BaseTransaction(timestamp, amount, recipientKey, recipientAddress, senderKey, senderAddress,
+    senderSignature, hash, block) {
 
     companion object {
         fun of(dto: TransferTransactionDto): TransferTransaction = TransferTransaction(

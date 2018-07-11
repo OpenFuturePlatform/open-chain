@@ -94,7 +94,8 @@ interface TransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto,
 interface TransferTransactionService : TransactionService<TransferTransaction, TransferTransactionDto,
     TransferTransactionData>
 
-interface VoteTransactionService : TransactionService<VoteTransaction, VoteTransactionDto, VoteTransactionData>
+interface VoteTransactionService : TransactionService<VoteTransaction, VoteTransactionDto,
+    VoteTransactionData>
 
 interface BasePeerService<Entity : Peer, Dto : PeerDto> {
 
