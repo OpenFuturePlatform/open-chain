@@ -57,15 +57,15 @@ class DefaultDelegateService(
 
         if (stakeholder.votes.contains(delegate) && dto.voteType == VoteType.FOR) {
             //todo need to throw exception ?
-            log.error("Stakeholder with publicKey ${stakeholder.publicKey} already voted for delegate with network_id " +
-                "${delegate.networkId}!")
+            log.error("Stakeholder with publicKey ${stakeholder.publicKey} already voted for delegate with " +
+                "network_id ${delegate.networkId}!")
             return
         }
 
         if (!stakeholder.votes.contains(delegate) && dto.voteType == VoteType.AGAINST) {
             //todo need to throw exception ?
-            log.error("Stakeholder with publicKey ${stakeholder.publicKey} can't remove vote from delegate with " +
-                "network_id ${delegate.networkId}!")
+            log.error("Stakeholder with publicKey ${stakeholder.publicKey} can't remove vote from delegate " +
+                "with network_id ${delegate.networkId}!")
             return
         }
 
