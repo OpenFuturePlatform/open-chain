@@ -12,7 +12,7 @@ class ExtendedKeySerializerTests : ServiceTests() {
 
 
     @Test
-    fun serializePublicTest() {
+    fun serializePublicTestShouldReturnSerializedPublicKey() {
         val ecKey = ECKey("""xpub68GHhbqGdkJSJ4Ly8C1furjPtHAdDUzAzaVQzVJavjLt2DvvKYq
             t9UdcNrmk6JKU8h1rK2nWAV6yqPV6Hpvuf33dezACzKmFEbK3fWN4Za6""".toByteArray())
         val extendedKey = ExtendedKey(
@@ -27,9 +27,9 @@ class ExtendedKeySerializerTests : ServiceTests() {
     }
 
     @Test
-    fun serializePrivateTest() {
+    fun serializePrivateTestShouldReturnSerializedPrivateKey() {
         val ecKey = ECKey(("""xpub68GHhbqGdzevrk1tp6iue1kXNHKqWnqevMYjBH9d3kmqfDgPyLVsMy
-            |SVsbDZfF9Uq8wmb5uzBW2wAbTpTEjLWbCnvWeyMFkaMNqe9Z8j43v""".trimMargin().toByteArray()))
+            SVsbDZfF9Uq8wmb5uzBW2wAbTpTEjLWbCnvWeyMFkaMNqe9Z8j43v""".toByteArray()))
         val extendedKey = ExtendedKey(
             keyHash = ByteArray(64),
             ecKey = ecKey,
