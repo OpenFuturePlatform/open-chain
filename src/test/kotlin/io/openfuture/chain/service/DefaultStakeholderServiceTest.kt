@@ -3,7 +3,7 @@ package io.openfuture.chain.service
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.domain.stakeholder.StakeholderDto
-import io.openfuture.chain.entity.account.Stakeholder
+import io.openfuture.chain.entity.Stakeholder
 import io.openfuture.chain.repository.StakeholderRepository
 import io.openfuture.chain.service.stakeholder.DefaultStakeholderService
 import org.assertj.core.api.Java6Assertions.assertThat
@@ -17,7 +17,7 @@ class DefaultStakeholderServiceTest : ServiceTests() {
 
     private lateinit var serviceBase: StakeholderService
 
-    @Mock private lateinit var repository: StakeholderRepository<Stakeholder>
+    @Mock private lateinit var repository: StakeholderRepository
 
 
     @Before
@@ -49,18 +49,16 @@ class DefaultStakeholderServiceTest : ServiceTests() {
 
     @Test
     fun add() {
-        val stakeholderDto = StakeholderDto("username", "address", "publicKey")
+        val stakeholderDto = StakeholderDto("address", "publicKey")
         val stakeholder = Stakeholder.of(stakeholderDto)
 
         given(repository.save(any(Stakeholder::class.java))).will { invocation -> invocation.arguments[0] }
 
         val actualDelegate = serviceBase.add(stakeholderDto)
-
-        assertThat(actualDelegate.username).isEqualTo(stakeholder.username)
         assertThat(actualDelegate.address).isEqualTo(stakeholder.address)
         assertThat(actualDelegate.publicKey).isEqualTo(stakeholder.publicKey)
     }
 
-    private fun createStakeholder(publicKey: String): Stakeholder = Stakeholder("username", "address", publicKey)
+    private fun createStakeholder(publicKey: String): Stakeholder = Stakeholder("address", publicKey)
 
 }

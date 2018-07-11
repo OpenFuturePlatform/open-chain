@@ -1,15 +1,13 @@
 package io.openfuture.chain.domain.stakeholder
 
-import io.openfuture.chain.entity.account.Stakeholder
+import io.openfuture.chain.entity.Stakeholder
 
-open class StakeholderDto(
-    val username: String,
+class StakeholderDto(
     val address: String,
     val publicKey: String
 ) {
 
     constructor(stakeholder: Stakeholder) : this(
-        stakeholder.username,
         stakeholder.address,
         stakeholder.publicKey
     )

@@ -1,11 +1,12 @@
 package io.openfuture.chain.repository
 
 import io.openfuture.chain.entity.*
-import io.openfuture.chain.entity.account.Stakeholder
-import io.openfuture.chain.entity.account.Delegate
+import io.openfuture.chain.entity.Stakeholder
+import io.openfuture.chain.entity.peer.Delegate
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
+import io.openfuture.chain.entity.peer.Peer
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
@@ -54,11 +55,20 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 }
 
 @Repository
-interface StakeholderRepository<Entity : Stakeholder> : BaseRepository<Entity> {
+interface PeerRepository<Entity : Peer> : BaseRepository<Entity> {
 
-    fun findOneByPublicKey(publicKey: String): Entity?
+    fun deleteOneByNetworkId(networkId: String)
+
+    fun findOneByNetworkId(networkId: String): Entity?
 
 }
 
 @Repository
-interface DelegateRepository : StakeholderRepository<Delegate>
+interface DelegateRepository : PeerRepository<Delegate>
+
+@Repository
+interface StakeholderRepository : BaseRepository<Stakeholder> {
+
+    fun findOneByPublicKey(publicKey: String): Stakeholder?
+
+}

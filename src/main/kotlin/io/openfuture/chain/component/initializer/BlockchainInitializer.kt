@@ -8,7 +8,9 @@ import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.TransferTransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
+import io.openfuture.chain.entity.Stakeholder
 import io.openfuture.chain.entity.dictionary.VoteType
+import io.openfuture.chain.entity.peer.Delegate
 import io.openfuture.chain.service.*
 import io.openfuture.chain.util.BlockUtils
 import org.slf4j.LoggerFactory
@@ -17,7 +19,6 @@ import javax.annotation.PostConstruct
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.util.CollectionUtils
 import java.util.*
-
 
 @Component
 class BlockchainInitializer(
@@ -35,6 +36,9 @@ class BlockchainInitializer(
 
     @PostConstruct
     fun initBlockChain() {
+        initDelegates()
+        initStakeholders()
+
         if (0 == blockService.getAll().size) {
             blockService.add(createGenesisBlock())
         }
@@ -80,7 +84,7 @@ class BlockchainInitializer(
         val stakeholders = stakeholderService.getAll()
 
         val recipientKey = stakeholders[Random().nextInt(2)].publicKey
-        val delegateKey = delegates[Random().nextInt(21)].publicKey
+        val delegateKey = delegates[Random().nextInt(21)].networkId
         val type = if (amount % 2 == 0L) VoteType.FOR else VoteType.AGAINST
 
         val data = VoteTransactionData(amount, recipientKey, recipientKey, "senderSignature",
@@ -91,6 +95,22 @@ class BlockchainInitializer(
     @Deprecated("generate block")
     private fun createBlock(transactions: MutableSet<out BaseTransactionDto>): MainBlockDto {
         return blockService.create(transactions)
+    }
+
+    private fun initDelegates() {
+        var port = 9090
+        val host = "localhost"
+        for (i in 1..21) {
+            delegateService.save(Delegate(host + port, host, port))
+            port += i
+        }
+    }
+
+    private fun initStakeholders() {
+        for (i in 1..21) {
+            val key = UUID.randomUUID().toString()
+            stakeholderService.save(Stakeholder(key, key.substring(0, 10)))
+        }
     }
 
 }

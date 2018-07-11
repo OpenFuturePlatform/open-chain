@@ -1,0 +1,4 @@
+CREATE TABLE delegates (
+  id     INTEGER PRIMARY KEY REFERENCES peers,
+  rating INTEGER NOT NULL DEFAULT 0
+);

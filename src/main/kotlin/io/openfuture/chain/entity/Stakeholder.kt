@@ -1,16 +1,13 @@
-package io.openfuture.chain.entity.account
+package io.openfuture.chain.entity
 
 import io.openfuture.chain.domain.stakeholder.StakeholderDto
 import io.openfuture.chain.entity.base.BaseModel
+import io.openfuture.chain.entity.peer.Delegate
 import javax.persistence.*
 
 @Entity
 @Table(name = "stakeholders")
-@Inheritance(strategy = InheritanceType.JOINED)
-open class Stakeholder(
-
-    @Column(name = "username", nullable = false)
-    val username: String,
+class Stakeholder(
 
     @Column(name = "address", nullable = false)
     val address: String,
@@ -29,10 +26,9 @@ open class Stakeholder(
 ) : BaseModel() {
 
     companion object {
-        fun of(delegateDto: StakeholderDto): Stakeholder = Stakeholder(
-            delegateDto.username,
-            delegateDto.address,
-            delegateDto.publicKey
+        fun of(dto: StakeholderDto): Stakeholder = Stakeholder(
+            dto.address,
+            dto.publicKey
         )
     }
 

@@ -1,8 +1,8 @@
-package io.openfuture.chain.service.stakeholder
+package io.openfuture.chain.service.peer
 
-import io.openfuture.chain.domain.stakeholder.DelegateDto
+import io.openfuture.chain.domain.node.DelegateDto
 import io.openfuture.chain.domain.vote.VoteDto
-import io.openfuture.chain.entity.account.Delegate
+import io.openfuture.chain.entity.peer.Delegate
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.nio.client.handler.ConnectionClientHandler
 import io.openfuture.chain.property.DelegateProperties
@@ -15,27 +15,18 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import javax.annotation.PostConstruct
 
 @Service
 class DefaultDelegateService(
-    private val repository: DelegateRepository,
+    repository: DelegateRepository,
     private val delegateProperties: DelegateProperties,
     private val stakeholderService: StakeholderService
-) : DefaultBaseStakeholderService<Delegate, DelegateDto>(repository), DelegateService {
+) : DefaultBasePeerService<Delegate, DelegateDto>(repository), DelegateService {
 
     companion object {
         private val log = LoggerFactory.getLogger(ConnectionClientHandler::class.java)
         private const val VOTES_LIMIT = 21
         private const val RATING = "rating"
-    }
-
-    @PostConstruct
-    fun initGenesisDelegate() {
-        for ((index, publicKey) in delegateProperties.publicKeys!!.withIndex()) {
-            val genesisDelegate = Delegate("genesisDelegate$index", delegateProperties.address!!, publicKey)
-            repository.save(genesisDelegate)
-        }
     }
 
     @Transactional
@@ -56,9 +47,9 @@ class DefaultDelegateService(
     @Transactional
     override fun updateDelegateRatingByVote(dto: VoteDto) {
         val stakeholder = stakeholderService.getByPublicKey(dto.stakeholderKey)
-        val delegate = this.getByPublicKey(dto.delegateKey)
+        val delegate = this.getByNetworkId(dto.delegateKey)
 
-        if (VOTES_LIMIT <= delegate.votes.size && dto.voteType == VoteType.FOR) {
+        if (VOTES_LIMIT <= stakeholder.votes.size && dto.voteType == VoteType.FOR) {
             //todo need to throw exception ?
             log.error("Stakeholder with publicKey ${stakeholder.publicKey} already spent all votes!")
             return
@@ -66,15 +57,15 @@ class DefaultDelegateService(
 
         if (stakeholder.votes.contains(delegate) && dto.voteType == VoteType.FOR) {
             //todo need to throw exception ?
-            log.error("Stakeholder with publicKey ${stakeholder.publicKey} already voted for stakeholder with publicKey " +
-                "${delegate.publicKey}!")
+            log.error("Stakeholder with publicKey ${stakeholder.publicKey} already voted for delegate with network_id " +
+                "${delegate.networkId}!")
             return
         }
 
         if (!stakeholder.votes.contains(delegate) && dto.voteType == VoteType.AGAINST) {
             //todo need to throw exception ?
-            log.error("Stakeholder with publicKey ${stakeholder.publicKey} can't remove vote from stakeholder with " +
-                "publicKey ${delegate.publicKey}!")
+            log.error("Stakeholder with publicKey ${stakeholder.publicKey} can't remove vote from delegate with " +
+                "network_id ${delegate.networkId}!")
             return
         }
 
@@ -88,6 +79,11 @@ class DefaultDelegateService(
 
         stakeholderService.save(stakeholder)
         repository.save(delegate)
+    }
+
+    override fun addAll(list: List<DelegateDto>) {
+        val delegates = list.map { Delegate.of(it) }
+        repository.saveAll(delegates)
     }
 
 }

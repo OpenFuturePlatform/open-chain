@@ -17,10 +17,6 @@ class DelegateProperties(
 
     /** The address of master nodes */
     @field:NotNull
-    var address: String? = null,
-
-    /** The public keys of master node */
-    @field:NotEmpty
-    var publicKeys: List<String>? = null
+    var address: String? = null
 
 )

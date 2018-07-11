@@ -9,7 +9,8 @@ import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
-import io.openfuture.chain.domain.stakeholder.DelegateDto
+import io.openfuture.chain.domain.node.DelegateDto
+import io.openfuture.chain.domain.node.PeerDto
 import io.openfuture.chain.domain.stakeholder.StakeholderDto
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.TransferTransactionDto
@@ -19,8 +20,9 @@ import io.openfuture.chain.domain.transaction.data.TransferTransactionData
 import io.openfuture.chain.domain.vote.VoteDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.block.Block
-import io.openfuture.chain.entity.account.Stakeholder
-import io.openfuture.chain.entity.account.Delegate
+import io.openfuture.chain.entity.Stakeholder
+import io.openfuture.chain.entity.peer.Delegate
+import io.openfuture.chain.entity.peer.Peer
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
@@ -97,21 +99,29 @@ interface TransferTransactionService : TransactionService<TransferTransaction, T
 
 interface VoteTransactionService : TransactionService<VoteTransaction, VoteTransactionDto, VoteTransactionData>
 
-interface BaseStakeholderService<Entity : Stakeholder, Dto : StakeholderDto> {
+interface BasePeerService<Entity : Peer, Dto : PeerDto> {
 
-    fun getAll(): List<Entity>
+    fun findByNetworkId(networkId: String) : Entity?
 
-    fun getByPublicKey(publicKey: String): Entity
+    fun getByNetworkId(networkId: String) : Entity
+
+    fun findAll() : List<Entity>
 
     fun add(dto: Dto): Entity
 
-    fun save(entity: Entity): Entity
+    fun addAll(list: List<Dto>)
+
+    fun save(entity: Entity)
+
+    fun deleteAll()
+
+    fun deleteByNetworkId(networkId: String)
 
 }
 
-interface StakeholderService : BaseStakeholderService<Stakeholder, StakeholderDto>
+interface PeerService : BasePeerService<Peer, PeerDto>
 
-interface DelegateService : BaseStakeholderService<Delegate, DelegateDto> {
+interface DelegateService : BasePeerService<Delegate, DelegateDto> {
 
     fun getActiveDelegates(): List<Delegate>
 
@@ -120,3 +130,15 @@ interface DelegateService : BaseStakeholderService<Delegate, DelegateDto> {
     fun updateDelegateRatingByVote(dto: VoteDto)
 
 }
+
+interface StakeholderService {
+
+    fun getAll(): List<Stakeholder>
+
+    fun getByPublicKey(publicKey: String): Stakeholder
+
+    fun add(dto: StakeholderDto): Stakeholder
+
+    fun save(entity: Stakeholder): Stakeholder
+}
+
