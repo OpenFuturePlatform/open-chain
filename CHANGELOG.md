@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Calculation wallet balance
 - Database: add Wallet entity
 - RPC requests: getWalletBalance
+- Sign data
+- Verify signed data
 
 ### Changed
 - Default account info is added to the doGenerateMaster end-point response
