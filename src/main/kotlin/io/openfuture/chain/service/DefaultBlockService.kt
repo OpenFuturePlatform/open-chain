@@ -2,10 +2,10 @@ package io.openfuture.chain.service
 
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.MainBlockDto
-import io.openfuture.chain.domain.transaction.TransactionDto
+import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.MainBlock
-import io.openfuture.chain.entity.transaction.Transaction
+import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.util.BlockUtils
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultBlockService(
     private val repository: BlockRepository,
-    private val transactionService: BaseTransactionService<Transaction>
+    private val transactionService: BaseTransactionService<BaseTransaction>
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -38,7 +38,7 @@ class DefaultBlockService(
     }
 
     @Transactional
-    override fun create(transactions: MutableSet<out TransactionDto>): MainBlockDto {
+    override fun create(transactions: MutableSet<out BaseTransactionDto>): MainBlockDto {
         val previousBlock = getLast()
         val merkleRootHash = BlockUtils.calculateMerkleRoot(transactions)
         val time = System.currentTimeMillis()

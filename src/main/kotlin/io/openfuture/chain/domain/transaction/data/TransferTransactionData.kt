@@ -5,7 +5,7 @@ class TransferTransactionData(
     recipientKey: String,
     senderKey: String,
     senderSignature: String
-) : TransactionData(amount, recipientKey, senderKey, senderSignature) {
+) : BaseTransactionData(amount, recipientKey, senderKey, senderSignature) {
 
     override fun getByteData(): ByteArray {
         val builder = StringBuilder()

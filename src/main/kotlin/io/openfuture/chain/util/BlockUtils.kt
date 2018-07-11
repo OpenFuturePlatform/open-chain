@@ -1,11 +1,11 @@
 package io.openfuture.chain.util
 
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.domain.transaction.TransactionDto
+import io.openfuture.chain.domain.transaction.BaseTransactionDto
 
 object BlockUtils {
 
-    fun calculateMerkleRoot(transactions: MutableSet<out TransactionDto>): String {
+    fun calculateMerkleRoot(transactions: MutableSet<out BaseTransactionDto>): String {
         if (transactions.size == 1) {
             return transactions.single().hash
         }

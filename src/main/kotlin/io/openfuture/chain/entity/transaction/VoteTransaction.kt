@@ -25,7 +25,7 @@ class VoteTransaction(
 
     block: Block? = null
 
-) : Transaction(timestamp, amount, recipientKey, senderKey, senderSignature, hash, block) {
+) : BaseTransaction(timestamp, amount, recipientKey, senderKey, senderSignature, hash, block) {
 
     companion object {
         fun of(dto: VoteTransactionDto): VoteTransaction = VoteTransaction(

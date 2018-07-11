@@ -1,8 +1,7 @@
 package io.openfuture.chain.entity.block
 
 import io.openfuture.chain.domain.block.MainBlockDto
-import io.openfuture.chain.domain.transaction.TransactionDto
-import io.openfuture.chain.entity.transaction.Transaction
+import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.dictionary.BlockVersion
 import javax.persistence.*
 
@@ -19,7 +18,7 @@ class MainBlock(
 
     @OneToMany
     @JoinColumn(name = "block_id", nullable = true)
-    var transactions: MutableSet<Transaction> = mutableSetOf()
+    var transactions: MutableSet<BaseTransaction> = mutableSetOf()
 
 ) : Block(hash, height, previousHash, merkleHash, timestamp, BlockVersion.MAIN.version) {
 

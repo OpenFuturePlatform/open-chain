@@ -6,13 +6,12 @@ import io.openfuture.chain.entity.account.Delegate
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
-import io.openfuture.chain.entity.transaction.Transaction
+import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.stereotype.Repository
-import java.util.*
 
 @NoRepositoryBean
 interface BaseRepository<T> : JpaRepository<T, Int>
@@ -31,7 +30,7 @@ interface GenesisBlockRepository : BaseRepository<GenesisBlock>
 interface MainBlockRepository : BaseRepository<MainBlock>
 
 @Repository
-interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
+interface BaseTransactionRepository<Entity : BaseTransaction> : BaseRepository<Entity> {
 
     fun findOneByHash(hash: String): Entity?
 
@@ -40,10 +39,10 @@ interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 }
 
 @Repository
-interface TransferTransactionRepository : TransactionRepository<TransferTransaction>
+interface TransferTransactionRepository : BaseTransactionRepository<TransferTransaction>
 
 @Repository
-interface VoteTransactionRepository : TransactionRepository<VoteTransaction>
+interface VoteTransactionRepository : BaseTransactionRepository<VoteTransaction>
 
 @Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {

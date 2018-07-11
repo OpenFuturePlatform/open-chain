@@ -1,6 +1,6 @@
 package io.openfuture.chain.domain.transaction
 
-abstract class TransactionDto(
+abstract class BaseTransactionDto(
     var timestamp: Long,
     var amount: Long,
     var recipientKey: String,

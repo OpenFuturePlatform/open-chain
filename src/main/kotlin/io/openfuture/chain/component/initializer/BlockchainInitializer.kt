@@ -4,14 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.openfuture.chain.nio.client.handler.ConnectionClientHandler
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.MainBlockDto
-import io.openfuture.chain.domain.transaction.TransactionDto
+import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.TransferTransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
-import io.openfuture.chain.domain.transaction.data.TransactionData
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.dictionary.VoteType
-import io.openfuture.chain.entity.transaction.Transaction
-import io.openfuture.chain.repository.TransactionRepository
 import io.openfuture.chain.service.*
 import io.openfuture.chain.util.BlockUtils
 import org.slf4j.LoggerFactory
@@ -54,7 +51,7 @@ class BlockchainInitializer(
 
     @Scheduled(fixedDelayString = "15000")
     fun createBlockSchedule() {
-        val transactions =  mutableSetOf<TransactionDto>()
+        val transactions =  mutableSetOf<BaseTransactionDto>()
         transactions.addAll(transferTransactionService.getAllPending().map { TransferTransactionDto(it) })
         transactions.addAll(voteTransactionService.getAllPending().map { VoteTransactionDto(it) })
 
@@ -92,7 +89,7 @@ class BlockchainInitializer(
     }
 
     @Deprecated("generate block")
-    private fun createBlock(transactions: MutableSet<out TransactionDto>): MainBlockDto {
+    private fun createBlock(transactions: MutableSet<out BaseTransactionDto>): MainBlockDto {
         return blockService.create(transactions)
     }
 

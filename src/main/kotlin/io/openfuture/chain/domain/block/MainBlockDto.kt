@@ -1,7 +1,6 @@
 package io.openfuture.chain.domain.block
 
-import io.openfuture.chain.domain.transaction.TransactionDto
-import io.openfuture.chain.entity.block.MainBlock
+import io.openfuture.chain.domain.transaction.BaseTransactionDto
 
 class MainBlockDto(
     var hash: String,
@@ -10,5 +9,5 @@ class MainBlockDto(
     var merkleHash: String,
     var timestamp: Long,
     var signature: String,
-    var transactions: Set<TransactionDto>
+    var transactions: Set<BaseTransactionDto>
 )

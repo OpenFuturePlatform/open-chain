@@ -10,7 +10,7 @@ class VoteTransactionData(
     var voteType: VoteType,
     var delegateKey: String,
     var weight: Int
-) : TransactionData(amount, recipientKey, senderKey, senderSignature) {
+) : BaseTransactionData(amount, recipientKey, senderKey, senderSignature) {
 
     override fun getByteData(): ByteArray {
         val builder = StringBuilder()

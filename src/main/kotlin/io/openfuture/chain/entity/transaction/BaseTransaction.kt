@@ -8,7 +8,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "transactions")
 @Inheritance(strategy = InheritanceType.JOINED)
-abstract class Transaction(
+abstract class BaseTransaction(
 
     @Column(name = "timestamp", nullable = false)
     var timestamp: Long,

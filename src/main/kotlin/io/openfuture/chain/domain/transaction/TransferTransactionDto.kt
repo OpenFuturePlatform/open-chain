@@ -9,7 +9,7 @@ class TransferTransactionDto(
     senderKey: String,
     senderSignature: String,
     hash: String
-): TransactionDto(timestamp, amount, recipientKey, senderKey, senderSignature, hash) {
+): BaseTransactionDto(timestamp, amount, recipientKey, senderKey, senderSignature, hash) {
 
     constructor(transaction: TransferTransaction) : this(
         transaction.timestamp,

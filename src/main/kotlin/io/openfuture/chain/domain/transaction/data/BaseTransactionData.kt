@@ -1,6 +1,6 @@
 package io.openfuture.chain.domain.transaction.data
 
-abstract class TransactionData(
+abstract class BaseTransactionData(
     val amount: Long,
     val recipientKey: String,
     val senderKey: String,
