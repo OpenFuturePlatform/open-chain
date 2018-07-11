@@ -94,7 +94,6 @@ class BlockValidationServiceTests : ServiceTests() {
         )
 
         given(blockValidator.isValid(any(Block::class.java))).willReturn(true)
-        given(blockService.getLast()).willReturn(previousBlock)
 
         val isValid = blockValidationService.isValid(block)
 
@@ -129,8 +128,6 @@ class BlockValidationServiceTests : ServiceTests() {
                 )
             )
         )
-
-        given(blockValidator.isValid(any(Block::class.java))).willReturn(false)
 
         val isValid = blockValidationService.isValid(block)
 
