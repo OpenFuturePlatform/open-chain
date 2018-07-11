@@ -106,7 +106,7 @@ interface BasePeerService<Entity : Peer, Dto : PeerDto> {
 
     fun addAll(list: List<Dto>)
 
-    fun save(entity: Entity)
+    fun save(entity: Entity): Entity
 
     fun deleteAll()
 

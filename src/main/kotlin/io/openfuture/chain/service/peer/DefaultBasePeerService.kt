@@ -13,20 +13,20 @@ abstract class DefaultBasePeerService<Entity : Peer, Dto : PeerDto>(
 ) : BasePeerService<Entity, Dto> {
 
     @Transactional(readOnly = true)
-    override fun findByNetworkId(networkId: String) : Entity?{
+    override fun findByNetworkId(networkId: String): Entity? {
         return repository.findOneByNetworkId(networkId)
     }
 
     @Transactional(readOnly = true)
     override fun getByNetworkId(networkId: String): Entity = repository.findOneByNetworkId(networkId)
         ?: throw NotFoundException("Peer with network_id: $networkId not exist!")
-    
+
     @Transactional(readOnly = true)
     override fun findAll(): List<Entity> = repository.findAll()
 
     @Transactional
-    override fun save(entity: Entity) {
-        repository.save(entity)
+    override fun save(entity: Entity): Entity {
+        return repository.save(entity)
     }
 
     @Transactional
