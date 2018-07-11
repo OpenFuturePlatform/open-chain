@@ -1,16 +1,15 @@
 package io.openfuture.chain.crypto.seed.validator
 
+import io.openfuture.chain.crypto.seed.PhraseLength
 import io.openfuture.chain.crypto.seed.SeedConstant
 import io.openfuture.chain.crypto.seed.SeedConstant.BYTE_SIZE
 import io.openfuture.chain.crypto.seed.SeedConstant.DOUBLE_BYTE_SIZE
-import io.openfuture.chain.crypto.seed.SeedConstant.MULTIPLICITY_VALUE
 import io.openfuture.chain.crypto.seed.SeedConstant.SECOND_BYTE_OFFSET
 import io.openfuture.chain.crypto.seed.SeedConstant.SECOND_BYTE_SKIP_BIT_SIZE
 import io.openfuture.chain.crypto.seed.SeedConstant.THIRD_BYTE_OFFSET
 import io.openfuture.chain.crypto.seed.SeedConstant.WORD_INDEX_SIZE
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.SeedWord
-import io.openfuture.chain.exception.SeedValidationException
 import io.openfuture.chain.repository.SeedWordRepository
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
@@ -21,50 +20,33 @@ import kotlin.experimental.xor
 
 @Component
 class SeedPhraseValidator(
-        private val seedWordRepository: SeedWordRepository
+    private val seedWordRepository: SeedWordRepository
 ) {
 
     companion object {
-        private const val MULTIPLICITY_WITH_CHECKSUM_VALUE = 33
         private const val MAX_BYTE_SIZE_MOD = 7
         private const val OUT_OF_BYTE_SIZE = WORD_INDEX_SIZE - BYTE_SIZE
         private const val MAX_FIRST_BIT_INDEX_IN_TWO_BYTE = DOUBLE_BYTE_SIZE - WORD_INDEX_SIZE
         private const val THIRD_BYTE_SKIP_BIT_SIZE = BYTE_SIZE + MAX_FIRST_BIT_INDEX_IN_TWO_BYTE
     }
 
-    fun validate(seedPhrase: String) {
+    fun isValid(seedPhrase: String): Boolean {
         val seedPhraseWords = seedPhrase.split(StringUtils.SPACE)
-        val seedWordIndexes = seedPhraseWords.map { getWord(it).index }.toIntArray()
-        validate(seedWordIndexes)
-    }
+        val phaseLength = PhraseLength.fromValue(seedPhraseWords.size) ?: return false
 
-    private fun validate(seedWordIndexes: IntArray) {
-        val seedWordSize = seedWordIndexes.size
-        val entropyPlusChecksumSize = seedWordSize * WORD_INDEX_SIZE
-        val entropySize = entropyPlusChecksumSize * MULTIPLICITY_VALUE / MULTIPLICITY_WITH_CHECKSUM_VALUE
-        val checksumSize = entropySize / MULTIPLICITY_VALUE
-
-        if (entropyPlusChecksumSize != entropySize + checksumSize) {
-            throw SeedValidationException("Invalid word count = $seedWordSize")
-        }
-
-        val entropyWithChecksum = ByteArray((entropyPlusChecksumSize + MAX_BYTE_SIZE_MOD) / BYTE_SIZE)
+        val byteArraySize = (phaseLength.entropyLength + phaseLength.checkSumLength + MAX_BYTE_SIZE_MOD) / BYTE_SIZE
+        val entropyWithChecksum = ByteArray(byteArraySize)
+        val seedWordIndexes = seedPhraseWords.map { getWord(it)?.index ?: return false }.toIntArray()
         wordIndexesToEntropyWithCheckSum(seedWordIndexes, entropyWithChecksum)
+
         val entropy = Arrays.copyOf(entropyWithChecksum, entropyWithChecksum.size - 1)
-        val lastByte = entropyWithChecksum[entropyWithChecksum.size - 1]
         val entropySha = HashUtils.sha256(entropy)[0]
-        val mask = ((1 shl (BYTE_SIZE - checksumSize)) - 1).inv().toByte()
-
-        if (((entropySha xor lastByte) and mask) != 0.toByte()) {
-            throw SeedValidationException("Invalid checksum for seed phrase")
-        }
+        val mask = ((1 shl (BYTE_SIZE - phaseLength.checkSumLength)) - 1).inv().toByte()
+        val lastByte = entropyWithChecksum[entropyWithChecksum.size - 1]
+        return (entropySha xor lastByte) and mask == 0.toByte()
     }
 
-    private fun getWord(value: String): SeedWord {
-        return seedWordRepository.findOneByValue(value).orElseThrow {
-            throw SeedValidationException("Word $value not found")
-        }
-    }
+    private fun getWord(word: String): SeedWord? = seedWordRepository.findOneByValue(word)
 
     private fun wordIndexesToEntropyWithCheckSum(wordIndexes: IntArray, entropyWithChecksum: ByteArray) {
         var wordIndex = 0

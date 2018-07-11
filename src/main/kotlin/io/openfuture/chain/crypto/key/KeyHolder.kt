@@ -1,5 +1,7 @@
 package io.openfuture.chain.crypto.key
 
+import io.openfuture.chain.crypto.domain.ExtendedKey
+import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.service.CryptoService
@@ -11,7 +13,8 @@ import javax.annotation.PostConstruct
 @Component
 class KeyHolder(
     private val properties: NodeProperties,
-    private val cryptoService: CryptoService
+    private val cryptoService: CryptoService,
+    private val seedCalculator: SeedCalculator
 ) {
 
     private var privateKey: ByteArray? = null
@@ -44,9 +47,9 @@ class KeyHolder(
 
         if (!privateKeyFile.exists() || !publicKeyFile.exists()) {
             val seedPhrase = cryptoService.generateSeedPhrase()
-            val rootExtendedKey = cryptoService.getMasterKey(seedPhrase)
-            val privateKeyValue = HashUtils.bytesToHexString(rootExtendedKey.ecKey.private!!.toByteArray())
-            val publicKeyValue = HashUtils.bytesToHexString(rootExtendedKey.ecKey.public)
+            val masterKey = ExtendedKey.root(seedCalculator.calculateSeed(seedPhrase))
+            val privateKeyValue = HashUtils.bytesToHexString(masterKey.ecKey.private!!.toByteArray())
+            val publicKeyValue = HashUtils.bytesToHexString(masterKey.ecKey.public)
 
             privateKeyFile.writeText(privateKeyValue, Charset.forName("UTF-8"))
             publicKeyFile.writeText(publicKeyValue, Charset.forName("UTF-8"))
