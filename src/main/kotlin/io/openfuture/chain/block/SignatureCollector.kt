@@ -22,22 +22,7 @@ class SignatureCollector(
 
 
     fun getBlockSignatures(): BlockSignatures {
-        val blockSignaturesBuilder = BlockSignatures.newBuilder()
-        val communicationProtocolBuilder = CommunicationProtocol.SignaturePublicKeyPair.newBuilder()
-
-        blockSignaturesConverter.setBlockProto(blockSignaturesBuilder, pendingBlock)
-
-        val signatures = signaturePublicKeyPairs
-            .map {
-                communicationProtocolBuilder
-                    .setSignature(it.signature)
-                    .setPublicKey(it.publicKey)
-                    .build()
-            }.toList()
-
-        return blockSignaturesBuilder
-            .addAllSignatures(signatures)
-            .build()
+        return blockSignaturesConverter.toBlockSignaturesProto(pendingBlock, signaturePublicKeyPairs)
     }
 
     fun setPendingBlock(generatedBlock: Block) {
@@ -55,15 +40,17 @@ class SignatureCollector(
         try {
             lock.writeLock().lock()
 
-            if (!signaturePublicKeyPairs.equals(blockSignatures.signaturesList)) {
+            val block = blockSignaturesConverter.toBlock(blockSignatures)
+            if (block.hash != pendingBlock.hash) {
                 return false
             }
 
-            val block = blockSignaturesConverter.toBlock(blockSignatures)
-            val signaturesList = blockSignatures.signaturesList.map { SignaturePublicKeyPair(it.signature, it.publicKey) }
-            if (block.hash == pendingBlock.hash) {
-                signaturePublicKeyPairs.addAll(signaturesList)
+            val signaturesToAdd = blockSignaturesConverter.getSignaturePublicKeyPairs(blockSignatures)
+            if (signaturePublicKeyPairs == signaturesToAdd) {
+                return false
             }
+
+            signaturePublicKeyPairs.addAll(signaturesToAdd)
         } finally {
             lock.writeLock().unlock()
         }

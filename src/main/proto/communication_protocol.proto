@@ -73,7 +73,7 @@ message GenesisBlock {
     int64 timestamp = 5;
     int32 version = 6;
     int64 epochIndex = 7;
-    repeated string activeDelegateIps = 8;
+    repeated string activeDelegateKeys = 8;
 }
 
 message SignaturePublicKeyPair {
