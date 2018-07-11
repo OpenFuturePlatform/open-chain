@@ -10,12 +10,13 @@ import org.springframework.stereotype.Component
 @Component
 class BlockSignaturesConverter(
     private val genesisBlockConverter: GenesisBlockConverter,
-    private val mainBlockConverter: MainBlockConverter
+    private val mainBlockConverter: MainBlockConverter,
+    private val signaturePublicKeyPairConverter: SignaturePublicKeyPairConverter
 ): MessageConverter<PendingBlock, BlockSignatures> {
 
+    private val blockSignaturesBuilder = BlockSignatures.newBuilder()
+
     override fun fromEntity(entity: PendingBlock): BlockSignatures {
-        val blockSignaturesBuilder = BlockSignatures.newBuilder()
-        val communicationProtocolBuilder = CommunicationProtocol.SignaturePublicKeyPair.newBuilder()
         val block = entity.block
 
         if (block.version == BlockVersion.MAIN.version) {
@@ -25,12 +26,7 @@ class BlockSignaturesConverter(
         }
 
         val signatures = entity.signatures
-            .map {
-                communicationProtocolBuilder
-                    .setSignature(it.signature)
-                    .setPublicKey(it.publicKey)
-                    .build()
-            }.toList()
+            .map { signaturePublicKeyPairConverter.fromEntity(it) }.toList()
 
         return blockSignaturesBuilder
             .addAllSignatures(signatures)

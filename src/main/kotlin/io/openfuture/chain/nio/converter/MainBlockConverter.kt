@@ -10,6 +10,8 @@ class MainBlockConverter(
     private val transactionConverter: TransactionConverter
 ): MessageConverter<Block,  CommunicationProtocol.MainBlock> {
 
+    private val mainBlockBuilder = CommunicationProtocol.MainBlock.newBuilder()
+
     override fun fromMessage(message: CommunicationProtocol.MainBlock): MainBlock {
         return MainBlock(
             message.hash,
@@ -23,7 +25,7 @@ class MainBlockConverter(
 
     override fun fromEntity(entity: Block): CommunicationProtocol.MainBlock {
         val mainBlock = entity as MainBlock
-        return CommunicationProtocol.MainBlock.newBuilder()
+        return mainBlockBuilder
             .setHash(mainBlock.hash)
             .setHeight(mainBlock.height)
             .setPreviousHash(mainBlock.previousHash)

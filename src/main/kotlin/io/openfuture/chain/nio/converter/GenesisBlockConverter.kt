@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component
 @Component
 class GenesisBlockConverter: MessageConverter<Block,  CommunicationProtocol.GenesisBlock> {
 
+    private val genesisBlockBuilder = CommunicationProtocol.GenesisBlock.newBuilder()
+
     override fun fromMessage(message: CommunicationProtocol.GenesisBlock): GenesisBlock {
         return GenesisBlock(
             message.hash,
@@ -21,7 +23,7 @@ class GenesisBlockConverter: MessageConverter<Block,  CommunicationProtocol.Gene
 
     override fun fromEntity(entity: Block): CommunicationProtocol.GenesisBlock {
         val genesisBlock = entity as GenesisBlock
-        return CommunicationProtocol.GenesisBlock.newBuilder()
+        return genesisBlockBuilder
             .setHash(genesisBlock.hash)
             .setHeight(genesisBlock.height)
             .setPreviousHash(genesisBlock.previousHash)

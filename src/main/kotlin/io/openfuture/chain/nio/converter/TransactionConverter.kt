@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component
 @Component
 class TransactionConverter: MessageConverter<Transaction, CommunicationProtocol.Transaction> {
 
+    private val transactionBuilder = CommunicationProtocol.Transaction.newBuilder()
+
     override fun fromMessage(message: CommunicationProtocol.Transaction): Transaction {
         return Transaction(
             message.hash,
@@ -19,7 +21,7 @@ class TransactionConverter: MessageConverter<Transaction, CommunicationProtocol.
     }
 
     override fun fromEntity(entity: Transaction): CommunicationProtocol.Transaction {
-        return CommunicationProtocol.Transaction.newBuilder()
+        return transactionBuilder
             .setHash(entity.hash)
             .setAmount(entity.amount)
             .setTimestamp(entity.timestamp)
