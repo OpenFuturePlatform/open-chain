@@ -1,8 +1,8 @@
-package io.openfuture.chain.nio.server.handler
+package io.openfuture.chain.network.server.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.component.node.NodeClock
-import io.openfuture.chain.nio.base.BaseHandler
+import io.openfuture.chain.network.base.BaseHandler
 import io.openfuture.chain.protocol.CommunicationProtocol.Packet
 import io.openfuture.chain.protocol.CommunicationProtocol.TimeSyncResponse
 import io.openfuture.chain.protocol.CommunicationProtocol.Type.TIME_SYNC_REQUEST
