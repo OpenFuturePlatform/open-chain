@@ -31,15 +31,15 @@ class BlockValidationProvider(
     fun isValid(block: Block): Boolean {
         val currentTime = System.currentTimeMillis()
         val blockTypeId = block.typeId
-        val blockValidator = validators[blockTypeId]
+        val blockValidator = validators[blockTypeId] ?: throw IllegalArgumentException("Unknown block type")
         val lastBlock = blockService.getLast()
 
-        return (!verifyTimeSlot(currentTime, block)
-                || !blockValidator!!.isValid(block)
-                || !verifyHash(block)
-                || !verifyPreviousHash(block, lastBlock)
-                || !verifyHeight(block, lastBlock)
-                || !verifyTimestamp(block, lastBlock))
+        return verifyTimeSlot(currentTime, block)
+                && blockValidator.isValid(block)
+                && verifyHash(block)
+                && verifyPreviousHash(block, lastBlock)
+                && verifyHeight(block, lastBlock)
+                && verifyTimestamp(block, lastBlock)
     }
 
     fun getSlotNumber(time: Long): Long {
