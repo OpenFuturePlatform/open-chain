@@ -7,6 +7,7 @@ stages:
   - test
   - build
   - package
+  - deploy
 
 variables:
   DOCKER_DRIVER: overlay2
@@ -90,3 +91,17 @@ package-native:
   only:
     - tags
 
+
+###########################
+# Deploy
+###########################
+deploy-production:
+  stage: deploy
+  image: openplatform/ansible
+  script:
+    - echo "${DEPLOY_KEY_PROD}" | tr -d '\r' > ansible/key.pem
+    - chmod 600 ansible/key.pem
+    - export ANSIBLE_HOST_KEY_CHECKING=False
+    - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -e "image_tag=${IMAGE_TAG}" -e "count=1" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.yml
+  only:
+    - tags

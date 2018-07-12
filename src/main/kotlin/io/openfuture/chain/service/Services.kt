@@ -8,21 +8,8 @@ import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
-import io.openfuture.chain.domain.delegate.DelegateDto
-import io.openfuture.chain.domain.stakeholder.StakeholderDto
-import io.openfuture.chain.domain.transaction.BaseTransactionDto
-import io.openfuture.chain.domain.transaction.TransferTransactionDto
-import io.openfuture.chain.domain.transaction.VoteTransactionDto
-import io.openfuture.chain.domain.transaction.data.BaseTransactionData
-import io.openfuture.chain.domain.transaction.data.TransferTransactionData
-import io.openfuture.chain.domain.vote.VoteDto
-import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.Stakeholder
-import io.openfuture.chain.entity.peer.Delegate
-import io.openfuture.chain.entity.transaction.BaseTransaction
-import io.openfuture.chain.entity.transaction.TransferTransaction
-import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.entity.Transaction
 
 interface HardwareInfoService {
 
@@ -133,5 +120,21 @@ interface WalletService {
     fun getBalance(address: String): Double
 
     fun updateByTransaction(transaction: BaseTransaction)
+
+}
+
+interface NetworkService {
+
+    fun broadcast(packet: CommunicationProtocol.Packet)
+
+    fun maintainConnectionNumber()
+
+    fun addPeer(channel: Channel, peer: Peer)
+
+    fun removePeer(channel: Channel) : Peer?
+
+    fun getPeers(): Set<Peer>
+
+    fun connect(peers: List<CommunicationProtocol.Peer>)
 
 }
