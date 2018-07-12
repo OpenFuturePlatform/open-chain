@@ -1,6 +1,7 @@
 package io.openfuture.chain.entity
 
 import io.openfuture.chain.entity.base.BaseModel
+import io.openfuture.chain.entity.transaction.BaseTransaction
 import javax.persistence.*
 
 @Entity
@@ -32,7 +33,7 @@ class Block(
     var nodeSignature: String,
 
     @OneToMany(mappedBy = "block", fetch = FetchType.EAGER)
-    var transactions: MutableList<Transaction> = mutableListOf()
+    var transactions: MutableList<BaseTransaction> = mutableListOf()
 
 
 ) : BaseModel()

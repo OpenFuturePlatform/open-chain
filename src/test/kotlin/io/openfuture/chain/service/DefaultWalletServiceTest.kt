@@ -2,8 +2,10 @@ package io.openfuture.chain.service
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.entity.Wallet
+import io.openfuture.chain.entity.dictionary.VoteType
+import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.repository.WalletRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -11,6 +13,7 @@ import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
 import org.mockito.Mockito.verify
+import java.util.*
 
 class DefaultWalletServiceTest : ServiceTests() {
 
@@ -68,10 +71,13 @@ class DefaultWalletServiceTest : ServiceTests() {
         verify(repository).save(recipientWallet.apply { balance -= amount })
     }
 
-    private fun createTransaction(amount: Double, senderAddress: String, recipientAddress: String): Transaction {
-        val block = Block(1, 1L, 1L, "previousHash", "hash", "merkleHash", "nodeKey", "nodeSignature")
+    private fun createTransaction(amount: Double, senderAddress: String, recipientAddress: String): BaseTransaction {
+        val block = Block(1, 1L, 1L, "previousHash", "hash",
+            "merkleHash", "nodeKey", "nodeSignature")
 
-        return Transaction(block, "hash", amount.toInt(), 1L, "recipientKey", "senderKey", "signature", senderAddress, recipientAddress)
+        return VoteTransaction(Date().time, amount, "recipientKey", recipientAddress,
+            "senderKey", senderAddress, "signature", "hash", VoteType.FOR.getId(),
+            "delegateKey", 1, block)
     }
 
 }
