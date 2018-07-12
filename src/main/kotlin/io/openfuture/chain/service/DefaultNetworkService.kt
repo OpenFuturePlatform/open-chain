@@ -65,7 +65,7 @@ class DefaultNetworkService(
                 }
             }
         }
-        if (connectionNeeded > 0 && connectedPeers.isNotEmpty()) {
+        if (connectedPeers.isNotEmpty()) {
             knownPeers.clear()
             connectedPeers.keys.shuffled(SecureRandom())[0].writeAndFlush(createGetPeersMessage())
         }
