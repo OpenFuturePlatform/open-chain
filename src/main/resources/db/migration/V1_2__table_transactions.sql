@@ -1,7 +1,7 @@
 CREATE TABLE transactions (
   id                INTEGER PRIMARY KEY,
   timestamp         BIGINT  NOT NULL,
-  amount            BIGINT  NOT NULL,
+  amount            DOUBLE  NOT NULL,
   recipient_key     VARCHAR NOT NULL,
   recipient_address VARCHAR NOT NULL,
   sender_key        VARCHAR NOT NULL,

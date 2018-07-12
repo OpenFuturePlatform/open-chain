@@ -14,7 +14,7 @@ abstract class BaseTransaction(
     var timestamp: Long,
 
     @Column(name = "amount", nullable = false)
-    var amount: Long,
+    var amount: Double,
 
     @Column(name = "recipient_key", nullable = false)
     var recipientKey: String,

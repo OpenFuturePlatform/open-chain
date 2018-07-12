@@ -7,7 +7,7 @@ import io.openfuture.chain.util.TransactionUtils
 
 class VoteTransactionDto(
     timestamp: Long,
-    amount: Long,
+    amount: Double,
     recipientKey: String,
     recipientAddress: String,
     senderKey: String,

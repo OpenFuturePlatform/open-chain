@@ -75,7 +75,7 @@ class DefaultWalletServiceTest : ServiceTests() {
         val block = Block(1, 1L, 1L, "previousHash", "hash",
             "merkleHash", "nodeKey", "nodeSignature")
 
-        return VoteTransaction(Date().time, amount.toLong(), "recipientKey", recipientAddress,
+        return VoteTransaction(Date().time, amount, "recipientKey", recipientAddress,
             "senderKey", senderAddress, "signature", "hash", VoteType.FOR.getId(),
             "delegateKey", 1, block)
     }

@@ -35,7 +35,7 @@ class DefaultDelegateService(
     @Transactional(readOnly = true)
     override fun getActiveDelegates(): List<Delegate> {
         val request = PageRequest.of(0, consensusProperties.delegatesCount!!)
-        return repository.findAllOrderByRatingByDesc(request)
+        return repository.findAllByOrderByRatingDesc(request)
     }
 
     @Transactional

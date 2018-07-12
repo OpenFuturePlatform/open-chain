@@ -9,7 +9,7 @@ import javax.persistence.Table
 @Table(name = "transfer_transactions")
 class TransferTransaction(
     timestamp: Long,
-    amount: Long,
+    amount: Double,
     recipientKey: String,
     recipientAddress: String,
     senderKey: String,

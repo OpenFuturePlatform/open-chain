@@ -8,7 +8,7 @@ import javax.persistence.*
 @Table(name = "vote_transactions")
 class VoteTransaction(
     timestamp: Long,
-    amount: Long,
+    amount: Double,
     recipientKey: String,
     recipientAddress: String,
     senderKey: String,
