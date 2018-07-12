@@ -58,7 +58,7 @@ class ConnectionServerHandler(
     override fun channelInactive(ctx: ChannelHandlerContext) {
         log.info("Connection with ${ctx.channel().remoteAddress()} closed")
 
-        val peer = networkService.removeConnectedPeer(ctx.channel())
+        val peer = networkService.removePeer(ctx.channel())
 
         if (peer != null) {
             log.info("Connection with $peer closed")

@@ -13,7 +13,7 @@ class PeersHandler(
 ) : BaseHandler(CommunicationProtocol.Type.PEERS) {
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: CommunicationProtocol.Packet) {
-        networkService.addKnownPeers(message.peers.peersList)
+        networkService.connect(message.peers.peersList)
     }
 
 }

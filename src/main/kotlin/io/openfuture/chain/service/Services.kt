@@ -88,19 +88,13 @@ interface NetworkService {
 
     fun broadcast(packet: CommunicationProtocol.Packet)
 
-    fun isConnected(networkId: String): Boolean
-
-    fun getNetworkId(): String
-
     fun maintainConnectionNumber()
 
-    fun addConnectedPeer(channel: Channel, peer: Peer)
+    fun addPeer(channel: Channel, peer: Peer)
 
-    fun removeConnectedPeer(channel: Channel) : Peer?
+    fun removePeer(channel: Channel) : Peer?
 
-    fun addKnownPeers(peers: List<CommunicationProtocol.Peer>)
+    fun getPeers(): Set<Peer>
 
-    fun getOwnPeerInfo() : Peer
-
-    fun connectedPeers(): Set<Peer>
+    fun connect(peers: List<CommunicationProtocol.Peer>)
 }

@@ -14,21 +14,12 @@ class GetPeersHandler(
 ) : BaseHandler(Type.GET_PEERS) {
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: CommunicationProtocol.Packet) {
-        val peers = ArrayList<CommunicationProtocol.Peer>()
 
-        networkService.connectedPeers().forEach {
-            peers.add(CommunicationProtocol.Peer.newBuilder()
-                .setNetworkId(it.networkId)
-                .setHost(it.host)
-                .setPort(it.port)
-                .build())
-        }
+        val peers = networkService.getPeers().map { it -> Peer.newBuilder().setHost(it.host).setPort(it.port).build() }
 
         val response = Packet.newBuilder()
             .setType(Type.PEERS)
-            .setPeers(Peers.newBuilder()
-                .addAllPeers(peers)
-                .build())
+            .setPeers(Peers.newBuilder().addAllPeers(peers).build())
             .build()
 
         ctx.writeAndFlush(response)
