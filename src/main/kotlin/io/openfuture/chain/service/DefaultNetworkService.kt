@@ -11,12 +11,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import java.security.SecureRandom
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 
-@Component
+@Service
 class DefaultNetworkService(
     private val clientBootstrap: Bootstrap,
     private val tcpServer: TcpServer,
