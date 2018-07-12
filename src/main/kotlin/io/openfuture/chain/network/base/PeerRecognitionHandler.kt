@@ -47,7 +47,7 @@ class PeerRecognitionHandler(
         val peer = networkService.removePeer(ctx.channel())
 
         if (peer != null) {
-            log.info("Disconnected from $peer")
+            log.info("Disconnected to $peer")
         }
 
         ctx.fireChannelInactive()
