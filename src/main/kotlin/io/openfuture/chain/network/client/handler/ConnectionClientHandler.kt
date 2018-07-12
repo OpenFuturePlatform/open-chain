@@ -2,8 +2,6 @@ package io.openfuture.chain.network.client.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
-import io.openfuture.chain.network.ChannelAttributes.REMOTE_PEER
-import io.openfuture.chain.network.server.handler.ConnectionServerHandler
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.protocol.CommunicationProtocol.Type
 import io.openfuture.chain.service.NetworkService
@@ -22,15 +20,10 @@ class ConnectionClientHandler(
     }
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        log.info("Connection established")
-        networkService.addConnectedPeer(ctx.channel(), ctx.channel().attr(REMOTE_PEER).get())
-        ctx.fireChannelActive()
-    }
+        val address = ctx.channel().remoteAddress()
+        log.info("Connection with {} established", address)
 
-    override fun channelInactive(ctx: ChannelHandlerContext) {
-        log.info("Connection closed")
-        networkService.removeConnectedPeer(ctx.channel())
-        ctx.fireChannelInactive()
+        ctx.fireChannelActive()
     }
 
     override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {
@@ -51,6 +44,18 @@ class ConnectionClientHandler(
         }
 
         ctx.fireChannelRead(packet)
+    }
+
+    override fun channelInactive(ctx: ChannelHandlerContext) {
+        val address = ctx.channel().remoteAddress()
+        log.info("Connection with {} closed", address)
+
+        val peer = networkService.removeConnectedPeer(ctx.channel())
+
+        if (peer != null) {
+            log.info("Connection with $peer closed")
+        }
+        ctx.fireChannelInactive()
     }
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {

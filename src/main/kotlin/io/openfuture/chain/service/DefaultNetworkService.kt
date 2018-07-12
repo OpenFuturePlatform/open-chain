@@ -81,8 +81,8 @@ class DefaultNetworkService(
         connectedPeers[channel] = peer
     }
 
-    override fun removeConnectedPeer(channel: Channel) {
-        connectedPeers.remove(channel)
+    override fun removeConnectedPeer(channel: Channel) : Peer? {
+        return connectedPeers.remove(channel)
     }
 
     override fun connectedPeers() : Set<Peer> {

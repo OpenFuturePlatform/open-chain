@@ -96,7 +96,7 @@ interface NetworkService {
 
     fun addConnectedPeer(channel: Channel, peer: Peer)
 
-    fun removeConnectedPeer(channel: Channel)
+    fun removeConnectedPeer(channel: Channel) : Peer?
 
     fun addKnownPeers(peers: List<CommunicationProtocol.Peer>)
 

@@ -2,7 +2,6 @@ package io.openfuture.chain.network.server.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
-import io.openfuture.chain.network.ChannelAttributes.REMOTE_PEER
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.protocol.CommunicationProtocol.HeartBeat
 import io.openfuture.chain.protocol.CommunicationProtocol.Packet
@@ -25,9 +24,6 @@ class ConnectionServerHandler(
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         val address = ctx.channel().remoteAddress()
-
-        networkService.addConnectedPeer(ctx.channel(), ctx.channel().attr(REMOTE_PEER).get())
-
         log.info("Connection with {} established", address)
 
         // start heart beat
@@ -61,7 +57,16 @@ class ConnectionServerHandler(
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        networkService.removeConnectedPeer(ctx.channel())
+        val address = ctx.channel().remoteAddress()
+        log.info("Connection with {} closed", address)
+
+        val peer = networkService.removeConnectedPeer(ctx.channel())
+
+        if (peer != null) {
+            log.info("Connection with $peer closed")
+        }
+
+        ctx.fireChannelInactive()
     }
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
