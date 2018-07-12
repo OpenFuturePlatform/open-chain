@@ -16,8 +16,8 @@ class VoteTransactionDto(
     val voteType: VoteType,
     val delegateKey: String,
     val weight: Int
-) : BaseTransactionDto(timestamp, amount, recipientKey, recipientAddress, senderKey, senderAddress, senderSignature,
-    hash) {
+) : BaseTransactionDto(timestamp, amount, recipientKey, recipientAddress, senderKey, senderAddress,
+    senderSignature, hash) {
 
     constructor(transaction: VoteTransaction) : this(
         transaction.timestamp,
