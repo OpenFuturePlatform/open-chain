@@ -31,6 +31,7 @@ class ExtendedKeyDeserializer {
         private const val KEY_BYTES_INDEX = CHAIN_CODE_INDEX + CHAIN_CODE_LENGTH
     }
 
+    
     fun deserialize(serializedKey: String): ExtendedKey {
         val decodedSerializedKey = Base58CoderUtils.decodeWithChecksum(serializedKey)
 
