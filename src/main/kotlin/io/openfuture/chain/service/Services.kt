@@ -121,6 +121,7 @@ interface StakeholderService {
     fun add(dto: StakeholderDto): Stakeholder
 
     fun save(entity: Stakeholder): Stakeholder
+
 }
 
 interface ConsensusService {
