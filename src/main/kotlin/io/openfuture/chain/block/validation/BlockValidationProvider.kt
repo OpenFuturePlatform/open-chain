@@ -30,27 +30,16 @@ class BlockValidationProvider(
 
     fun isValid(block: Block): Boolean {
         val currentTime = System.currentTimeMillis()
-        if (getSlotNumber(currentTime) != getSlotNumber(block.timestamp)) {
-            return false
-        }
-
         val blockTypeId = block.typeId
-
         val blockValidator = validators[blockTypeId]
-
-        if (!blockValidator!!.isValid(block)) {
-            return false
-        }
-
         val lastBlock = blockService.getLast()
-        if (!verifyHash(block)
+
+        return (!verifyTimeSlot(currentTime, block)
+                || !blockValidator!!.isValid(block)
+                || !verifyHash(block)
                 || !verifyPreviousHash(block, lastBlock)
                 || !verifyHeight(block, lastBlock)
-                || !verifyTimestamp(block, lastBlock)) {
-            return false
-        }
-
-        return true
+                || !verifyTimestamp(block, lastBlock))
     }
 
     fun getSlotNumber(time: Long): Long {
@@ -61,6 +50,9 @@ class BlockValidationProvider(
         this.epochTime = value
     }
 
+    private fun verifyTimeSlot(currentTime: Long, block: Block)
+        = (getSlotNumber(currentTime) == getSlotNumber(block.timestamp))
+
     private fun verifyHash(block: Block): Boolean {
         val calculatedHashBytes = BlockUtils.calculateHash(
             block.previousHash,
@@ -70,16 +62,13 @@ class BlockValidationProvider(
         return (HashUtils.bytesToHexString(calculatedHashBytes) == block.hash)
     }
 
-    private fun verifyPreviousHash(block: Block, lastBlock: Block): Boolean {
-        return (block.previousHash == lastBlock.hash)
-    }
+    private fun verifyPreviousHash(block: Block, lastBlock: Block): Boolean
+        = (block.previousHash == lastBlock.hash)
 
-    private fun verifyTimestamp(block: Block, lastBlock: Block): Boolean {
-        return (block.timestamp > lastBlock.timestamp)
-    }
+    private fun verifyTimestamp(block: Block, lastBlock: Block): Boolean
+        = (block.timestamp > lastBlock.timestamp)
 
-    private fun verifyHeight(block: Block, lastBlock: Block): Boolean {
-        return (block.height == lastBlock.height + 1)
-    }
+    private fun verifyHeight(block: Block, lastBlock: Block): Boolean
+        = (block.height == lastBlock.height + 1)
 
 }
