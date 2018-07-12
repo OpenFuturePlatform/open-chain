@@ -14,8 +14,7 @@ class FindPeersHandler(
 ) : BaseHandler(Type.FIND_PEERS) {
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: CommunicationProtocol.Packet) {
-
-        val peers = networkService.getPeers().map { it -> Peer.newBuilder().setHost(it.host).setPort(it.port).build() }
+        val peers = networkService.getPeers().map { Peer.newBuilder().setHost(it.host).setPort(it.port).build() }
 
         val response = Packet.newBuilder()
             .setType(Type.PEERS)

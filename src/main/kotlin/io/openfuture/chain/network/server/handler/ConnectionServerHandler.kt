@@ -5,8 +5,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.protocol.CommunicationProtocol.HeartBeat
 import io.openfuture.chain.protocol.CommunicationProtocol.Packet
-import io.openfuture.chain.protocol.CommunicationProtocol.Type.*
-import io.openfuture.chain.service.NetworkService
+import io.openfuture.chain.protocol.CommunicationProtocol.Type.HEART_BEAT
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -37,18 +36,10 @@ class ConnectionServerHandler : ChannelInboundHandlerAdapter() {
         packet as CommunicationProtocol.Packet
 
         // check packet type
-        val type = packet.type
-        when (type) {
-            HEART_BEAT -> {}
-            TIME_SYNC_REQUEST -> {}
-            FIND_PEERS -> {}
-            PEERS -> {}
-            PEER_RECOGNITION -> {}
-            else -> {
-                log.error("Illegal packet type: {}", packet)
-                ctx.close()
-                return
-            }
+        if (!CommunicationProtocol.Type.values().contains(packet.type)) {
+            log.error("Illegal packet type: {}", packet)
+            ctx.close()
+            return
         }
 
         ctx.fireChannelRead(packet)

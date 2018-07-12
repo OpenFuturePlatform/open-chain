@@ -23,7 +23,7 @@ class DefaultNetworkService(
     private val properties: NodeProperties
 ) : NetworkService, ApplicationListener<ApplicationReadyEvent> {
 
-    private val connectedPeers : MutableMap<Channel, Peer> = ConcurrentHashMap()
+    private val connectedPeers: MutableMap<Channel, Peer> = ConcurrentHashMap()
 
     companion object {
         private val log = LoggerFactory.getLogger(DefaultNetworkService::class.java)
@@ -52,26 +52,20 @@ class DefaultNetworkService(
         }
     }
 
-    @Scheduled(cron="*/30 * * * * *")
+    @Scheduled(cron = "*/30 * * * * *")
     override fun maintainConnectionNumber() {
         if (isConnectionNeeded()) {
             findPeers()
         }
     }
 
-    override fun addPeer(channel : Channel, peer: Peer) {
+    override fun addPeer(channel: Channel, peer: Peer) {
         connectedPeers[channel] = peer
     }
 
-    override fun removePeer(channel: Channel) : Peer? {
-        return connectedPeers.remove(channel)
-    }
+    override fun removePeer(channel: Channel): Peer? = connectedPeers.remove(channel)
 
-    override fun getPeers() : Set<Peer> {
-        val peers = mutableSetOf<Peer>()
-        peers.addAll(connectedPeers.values)
-        return peers
-    }
+    override fun getPeers(): Set<Peer> = connectedPeers.values.toSet()
 
     override fun connect(peers: List<CommunicationProtocol.Peer>) {
         peers.map { Peer(it.host, it.port) }
@@ -79,23 +73,20 @@ class DefaultNetworkService(
             .forEach { clientBootstrap.connect(it.host, it.port) }
     }
 
-    private fun createFindPeersMessage() : CommunicationProtocol.Packet{
+    private fun createFindPeersMessage(): CommunicationProtocol.Packet {
         return CommunicationProtocol.Packet.newBuilder()
             .setType(CommunicationProtocol.Type.FIND_PEERS)
-            .setFindPeers(CommunicationProtocol.FindPeers.newBuilder()
-                .build())
+            .setFindPeers(CommunicationProtocol.FindPeers.newBuilder().build())
             .build()
     }
 
     private fun isConnectionNeeded(): Boolean = properties.peersNumber!! > connectedPeers.size
 
     private fun findPeers() {
-        val message = createFindPeersMessage()
+        val peer = connectedPeers.values.shuffled(SecureRandom()).firstOrNull()
+            ?: properties.getRootPeers().shuffled().first()
 
-        val peer = connectedPeers.values.shuffled(SecureRandom()).firstOrNull() ?:
-        properties.getRootPeers().shuffled().first()
-
-        send(peer, message)
+        send(peer, createFindPeersMessage())
     }
 
     private fun send(peer: Peer, message: CommunicationProtocol.Packet) {

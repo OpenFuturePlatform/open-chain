@@ -5,16 +5,11 @@ import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
 import io.openfuture.chain.domain.crypto.RootAccountDto
-import io.openfuture.chain.domain.hardware.CpuInfo
-import io.openfuture.chain.domain.hardware.NetworkInfo
-import io.openfuture.chain.domain.hardware.RamInfo
-import io.openfuture.chain.domain.hardware.StorageInfo
+import io.openfuture.chain.domain.hardware.*
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.network.domain.Peer
 import io.openfuture.chain.protocol.CommunicationProtocol
-import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.context.event.EventListener
 
 interface HardwareInfoService {
 
@@ -97,4 +92,5 @@ interface NetworkService {
     fun getPeers(): Set<Peer>
 
     fun connect(peers: List<CommunicationProtocol.Peer>)
+
 }
