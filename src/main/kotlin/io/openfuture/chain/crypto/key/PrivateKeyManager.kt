@@ -20,6 +20,7 @@ class PrivateKeyManager {
         private const val CHECKSUM_SIZE = 4
     }
 
+
     fun exportPrivateKey(key: ECKey): String = Base58CoderUtils.encode(getWifBytes(key))
 
     fun importPrivateKey(serializedKey: String): ECKey = parseWifBytes(Base58CoderUtils.decode(serializedKey))

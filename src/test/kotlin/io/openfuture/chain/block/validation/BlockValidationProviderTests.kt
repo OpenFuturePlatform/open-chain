@@ -64,12 +64,10 @@ class BlockValidationProviderTests : ServiceTests() {
 
     @Test
     fun isValidShouldReturnTrue() {
-
-
         val height = 123L
         val prevHash = "prev_block_hash"
         val merkleHash = "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"
-        val hash = BlockUtils.calculateHash(prevHash, merkleHash, currentTime, height)
+        val hash = BlockUtils.calculateHash(prevHash, currentTime, height, merkleHash)
 
         val block = MainBlock(
             HashUtils.bytesToHexString(hash),

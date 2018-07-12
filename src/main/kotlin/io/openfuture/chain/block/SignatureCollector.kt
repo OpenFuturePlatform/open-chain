@@ -38,10 +38,7 @@ class SignatureCollector(
             return false
         }
 
-        if (!signatures.add(blockSignature.signature)) {
-            return false
-        }
-        return true
+        return signatures.add(blockSignature.signature)
     }
 
     fun applyBlock() {

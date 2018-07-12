@@ -1,7 +1,7 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.domain.block.BlockCreationEvent
+import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.repository.TransactionRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationEventPublisher
@@ -10,14 +10,14 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultTransactionService(
-    private val transactionRepository: TransactionRepository,
+    private val repository: TransactionRepository,
     private val eventPublisher: ApplicationEventPublisher,
     @Value("\${block.capacity}") private val transactionCapacity: Int
 ): TransactionService {
 
     @Transactional
     override fun save(transaction: Transaction): Transaction {
-        val savedTransaction = transactionRepository.save(transaction)
+        val savedTransaction = repository.save(transaction)
         val pendingTransactions = getPendingTransactions()
         if (pendingTransactions.size >= transactionCapacity) {
             eventPublisher.publishEvent(BlockCreationEvent(pendingTransactions))
@@ -27,11 +27,11 @@ class DefaultTransactionService(
 
     @Transactional
     override fun saveAll(transactions: List<Transaction>): List<Transaction>
-        = transactionRepository.saveAll(transactions)
+        = repository.saveAll(transactions)
 
     @Transactional(readOnly = true)
     override fun getPendingTransactions(): List<Transaction>
-        = transactionRepository.findAllByBlockHashIsNull()
+        = repository.findAllByBlockHashIsNull()
 
 
 }

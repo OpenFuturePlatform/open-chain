@@ -9,6 +9,7 @@ class SeedCalculator {
 
     private val fixedSalt = getUtf8Bytes("Openfuture")
 
+
     fun calculateSeed(seedPhrase: String, passwordPhrase: String = ""): ByteArray {
         val mnemonicChars = Normalizer.normalize(seedPhrase, Normalizer.Form.NFKD).toCharArray()
         val normalizedPassphrase = Normalizer.normalize(passwordPhrase, Normalizer.Form.NFKD)

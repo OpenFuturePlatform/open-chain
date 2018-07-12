@@ -64,19 +64,15 @@ class BlockCreationProcessor(
     }
 
     private fun create(transactions: List<Transaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
-        val blockType = if (consensusService.isGenesisBlockNeeded()) {
-            BlockType.GENESIS
-        } else {
-            BlockType.MAIN
-        }
+        val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
 
-        val merkleRootHash = BlockUtils.calculateMerkleRoot(transactions)
         val time = System.currentTimeMillis()
-        val hash = BlockUtils.calculateHash(previousBlock.hash, merkleRootHash, time, (previousBlock.height + 1))
         val privateKey = keyHolder.getPrivateKey()
-        val signature = signatureManager.sign(hash, privateKey)
         val block = when(blockType) {
             BlockType.MAIN -> {
+                val merkleRootHash = BlockUtils.calculateMerkleRoot(transactions)
+                val hash = BlockUtils.calculateHash(previousBlock.hash, time, (previousBlock.height + 1), merkleRootHash)
+                val signature = signatureManager.sign(hash, privateKey)
                 MainBlock(
                     HashUtils.bytesToHexString(hash),
                     previousBlock.height + 1,
@@ -88,6 +84,8 @@ class BlockCreationProcessor(
                 )
             }
             BlockType.GENESIS -> {
+                val hash = BlockUtils.calculateHash(previousBlock.hash, time, (previousBlock.height + 1))
+                val signature = signatureManager.sign(hash, privateKey)
                 GenesisBlock(
                     HashUtils.bytesToHexString(hash),
                     previousBlock.height + 1,

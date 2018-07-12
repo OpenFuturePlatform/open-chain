@@ -29,7 +29,7 @@ object BlockUtils {
         return HashUtils.generateHash(previousTreeLayout[0] + previousTreeLayout[1])
     }
 
-    fun calculateHash(previousHash: String, merkleRoot: String, timestamp: Long, height: Long): ByteArray {
+    fun calculateHash(previousHash: String, timestamp: Long, height: Long, merkleRoot: String = ""): ByteArray {
         val headers = previousHash + merkleRoot + timestamp + height
         return HashUtils.doubleSha256(headers.toByteArray())
     }

@@ -50,8 +50,8 @@ class NodeKeyHolder(
             val privateKeyValue = HashUtils.bytesToHexString(masterKey.ecKey.getPrivate())
             val publicKeyValue = HashUtils.bytesToHexString(masterKey.ecKey.public)
 
-            privateKeyFile.writeText(privateKeyValue, Charset.forName("UTF-8"))
-            publicKeyFile.writeText(publicKeyValue, Charset.forName("UTF-8"))
+            privateKeyFile.writeText(privateKeyValue, Charsets.UTF_8)
+            publicKeyFile.writeText(publicKeyValue, Charsets.UTF_8)
         }
     }
 

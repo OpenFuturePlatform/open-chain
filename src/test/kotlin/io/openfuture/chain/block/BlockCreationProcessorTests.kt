@@ -9,6 +9,7 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.SignaturePublicKeyPair
+import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Transaction
@@ -44,7 +45,7 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Test
     fun approveBlockShouldValidateAndSignInboundBlock() {
         val block = createMainBlock()
-        val pendingBlock = PendingBlock(block, SignaturePublicKeyPair("sign", "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"))
+        val pendingBlock = createPendingBlock(block)
         val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
         val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
 
@@ -64,7 +65,7 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Test(expected = IllegalArgumentException::class)
     fun approveBlockFailsIfBlockIsInvalid() {
         val block = createMainBlock()
-        val pendingBlock = PendingBlock(block, SignaturePublicKeyPair("sign", "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"))
+        val pendingBlock = createPendingBlock(block)
         given(blockValidationService.isValid(block)).willReturn(false)
 
         processor.approveBlock(pendingBlock)
@@ -73,7 +74,7 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Test(expected = IllegalArgumentException::class)
     fun approveBlockFailsIfSignatureVerificationFailed() {
         val block = createMainBlock()
-        val pendingBlock = PendingBlock(block, SignaturePublicKeyPair("sign", "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"))
+        val pendingBlock = createPendingBlock(block)
         val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
         val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
 
@@ -86,7 +87,7 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Test
     fun approveBlockFailsIfBlockSignatureIsAlreadyExists() {
         val block = createMainBlock()
-        val pendingBlock = PendingBlock(block, SignaturePublicKeyPair("sign", "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"))
+        val pendingBlock = createPendingBlock(block)
         val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
         val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
 
@@ -114,6 +115,13 @@ class BlockCreationProcessorTests: ServiceTests() {
         given(signatureManager.sign(any(ByteArray::class.java), any(ByteArray::class.java))).willReturn("sign")
 
         processor.fireBlockCreation(event)
+    }
+
+    private fun createPendingBlock(block: Block): PendingBlock {
+        return PendingBlock(
+            block,
+            SignaturePublicKeyPair("sign", "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719")
+        )
     }
 
     private fun createMainBlock() = MainBlock(
@@ -159,5 +167,4 @@ class BlockCreationProcessorTests: ServiceTests() {
             "recip_address"
         )
     )
-
 }

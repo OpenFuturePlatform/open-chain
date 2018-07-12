@@ -30,41 +30,16 @@ class BlockValidationProvider(
 
     fun isValid(block: Block): Boolean {
         val currentTime = System.currentTimeMillis()
-        if (getSlotNumber(currentTime) != getSlotNumber(block.timestamp)) {
-            return false
-        }
-
         val blockTypeId = block.typeId
+        val blockValidator = validators[blockTypeId] ?: throw IllegalArgumentException("Unknown block type")
+        val lastBlock = blockService.getLast()
 
-        val blockValidator = validators[blockTypeId]
-
-        if (!blockValidator!!.isValid(block)) {
-            return false
-        }
-
-        val calculatedHashBytes = BlockUtils.calculateHash(
-            block.previousHash,
-            block.merkleHash,
-            block.timestamp,
-            block.height)
-        if (HashUtils.bytesToHexString(calculatedHashBytes) != block.hash) {
-            return false
-        }
-
-        val lastChainBlock = blockService.getLast()
-        if (block.previousHash != lastChainBlock.hash) {
-            return false
-        }
-
-        if (block.timestamp <= lastChainBlock.timestamp) {
-            return false
-        }
-
-        if (block.height != lastChainBlock.height + 1) {
-            return false
-        }
-
-        return true
+        return verifyTimeSlot(currentTime, block)
+                && blockValidator.isValid(block)
+                && verifyHash(block)
+                && verifyPreviousHash(block, lastBlock)
+                && verifyHeight(block, lastBlock)
+                && verifyTimestamp(block, lastBlock)
     }
 
     fun getSlotNumber(time: Long): Long {
@@ -74,5 +49,23 @@ class BlockValidationProvider(
     fun setEpochTime(value: Long) {
         this.epochTime = value
     }
+
+    private fun verifyTimeSlot(currentTime: Long, block: Block)
+        = (getSlotNumber(currentTime) == getSlotNumber(block.timestamp))
+
+    private fun verifyHash(block: Block): Boolean {
+        val calculatedHashBytes = BlockUtils.calculateHash(
+            block.previousHash,
+            block.timestamp,
+            block.height,
+            block.merkleHash)
+        return (HashUtils.bytesToHexString(calculatedHashBytes) == block.hash)
+    }
+
+    private fun verifyPreviousHash(block: Block, lastBlock: Block): Boolean = (block.previousHash == lastBlock.hash)
+
+    private fun verifyTimestamp(block: Block, lastBlock: Block): Boolean = (block.timestamp > lastBlock.timestamp)
+
+    private fun verifyHeight(block: Block, lastBlock: Block): Boolean = (block.height == lastBlock.height + 1)
 
 }
