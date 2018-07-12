@@ -17,8 +17,9 @@ class DefaultStakeholderService(
     override fun getAll(): List<Stakeholder> = repository.findAll()
 
     @Transactional(readOnly = true)
-    override fun getByPublicKey(publicKey: String): Stakeholder = repository.findOneByPublicKey(publicKey)
-        ?: throw NotFoundException("Stakeholder with publicKey: $publicKey not exist!")
+    override fun getByPublicKey(publicKey: String): Stakeholder =
+        repository.findOneByPublicKey(publicKey) ?: throw NotFoundException("Stakeholder with " +
+            "publicKey: $publicKey not exist!")
 
     @Transactional
     override fun add(dto: StakeholderDto): Stakeholder = repository.save(Stakeholder.of(dto))
