@@ -3,7 +3,6 @@ package io.openfuture.chain.nio.converter
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.SignaturePublicKeyPair
-import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.protocol.CommunicationProtocol
@@ -49,7 +48,14 @@ class BlockSignaturesConverterTests : ServiceTests() {
             signature,
             listOf()
         )
-        val mainBlock = createMainBlock(hash, height, previousHash, merkleHash, timestamp, signature)
+        val mainBlock = MainBlockConverterTests.createMainBlock(
+            hash,
+            height,
+            previousHash,
+            merkleHash,
+            timestamp,
+            signature
+        )
         val signatureMessage = CommunicationProtocol.SignaturePublicKeyPair.newBuilder()
             .setSignature(signature)
             .setPublicKey(publicKey)
@@ -95,7 +101,14 @@ class BlockSignaturesConverterTests : ServiceTests() {
             epochIndex,
             setOf()
         )
-        val genesisBlock = createGenesisBlock(hash, height, previousHash, merkleHash, timestamp, epochIndex)
+        val genesisBlock = GenesisBlockConverterTests.createGenesisBlockMessage(
+            hash,
+            height,
+            previousHash,
+            merkleHash,
+            timestamp,
+            epochIndex
+        )
         val signatureMessage = createSignaturePublicKeyPair(signature, publicKey)
         val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
         val pendingBlock = PendingBlock(block, signaturePublicKeyPair)
@@ -128,7 +141,14 @@ class BlockSignaturesConverterTests : ServiceTests() {
         val previousHash = "previousHash"
         val merkleHash = "merkleHash"
         val timestamp = 2L
-        val mainBlockMessage = createMainBlock(hash, height, previousHash, merkleHash, timestamp, signature)
+        val mainBlockMessage = MainBlockConverterTests.createMainBlock(
+            hash,
+            height,
+            previousHash,
+            merkleHash,
+            timestamp,
+            signature
+        )
         val signatureKeyPair = createSignaturePublicKeyPair(signature, publicKey)
         val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
         val blockSignatures = CommunicationProtocol.BlockSignatures.newBuilder()
@@ -173,7 +193,14 @@ class BlockSignaturesConverterTests : ServiceTests() {
         val merkleHash = "merkleHash"
         val timestamp = 2L
         val epochIndex = 1L
-        val genesisBlockMessage = createGenesisBlock(hash, height, previousHash, merkleHash, timestamp, epochIndex)
+        val genesisBlockMessage = GenesisBlockConverterTests.createGenesisBlockMessage(
+            hash,
+            height,
+            previousHash,
+            merkleHash,
+            timestamp,
+            epochIndex
+        )
         val signatureKeyPair = createSignaturePublicKeyPair(signature, publicKey)
         val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
         val blockSignatures = CommunicationProtocol.BlockSignatures.newBuilder()
@@ -206,46 +233,6 @@ class BlockSignaturesConverterTests : ServiceTests() {
         Assertions.assertThat(genesisBlockResult.activeDelegateKeys).isEmpty()
 
         Assertions.assertThat(pendingBlock.signature).isEqualTo(signaturePublicKeyPair)
-    }
-
-    private fun createMainBlock(
-        hash: String,
-        height: Long,
-        previousHash: String,
-        merkleHash: String,
-        timestamp: Long,
-        signature: String
-    ): CommunicationProtocol.MainBlock {
-        return CommunicationProtocol.MainBlock.newBuilder()
-            .setHash(hash)
-            .setHeight(height)
-            .setPreviousHash(previousHash)
-            .setMerkleHash(merkleHash)
-            .setTimestamp(timestamp)
-            .setSignature(signature)
-            .setTypeId(BlockType.MAIN.typeId)
-            .addAllTransactions(listOf())
-            .build()
-    }
-
-    private fun createGenesisBlock(
-        hash: String,
-        height: Long,
-        previousHash: String,
-        merkleHash: String,
-        timestamp: Long,
-        epochIndex: Long
-    ): CommunicationProtocol.GenesisBlock {
-        return CommunicationProtocol.GenesisBlock.newBuilder()
-            .setHash(hash)
-            .setHeight(height)
-            .setPreviousHash(previousHash)
-            .setMerkleHash(merkleHash)
-            .setTimestamp(timestamp)
-            .setEpochIndex(epochIndex)
-            .setTypeId(BlockType.GENESIS.typeId)
-            .addAllActiveDelegateKeys(listOf())
-            .build()
     }
 
     private fun createSignaturePublicKeyPair(
