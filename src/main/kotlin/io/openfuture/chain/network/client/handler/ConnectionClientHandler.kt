@@ -20,8 +20,7 @@ class ConnectionClientHandler(
     }
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        val address = ctx.channel().remoteAddress()
-        log.info("Connection with {} established", address)
+        log.info("Connection with ${ctx.channel().remoteAddress()} established")
 
         ctx.fireChannelActive()
     }
@@ -47,8 +46,7 @@ class ConnectionClientHandler(
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        val address = ctx.channel().remoteAddress()
-        log.info("Connection with {} closed", address)
+        log.info("Connection with ${ctx.channel().remoteAddress()} closed")
 
         val peer = networkService.removeConnectedPeer(ctx.channel())
 
