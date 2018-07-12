@@ -1,12 +1,14 @@
 CREATE TABLE transactions (
-  id               INTEGER PRIMARY KEY,
-  timestamp        BIGINT  NOT NULL,
-  amount           BIGINT  NOT NULL,
-  recipient_key    VARCHAR NOT NULL,
-  sender_key       VARCHAR NOT NULL,
-  sender_signature VARCHAR NOT NULL,
-  hash             VARCHAR NOT NULL,
-  block_id         INTEGER NULLABLE REFERENCES blocks
+  id                INTEGER PRIMARY KEY,
+  timestamp         BIGINT  NOT NULL,
+  amount            BIGINT  NOT NULL,
+  recipient_key     VARCHAR NOT NULL,
+  recipient_address VARCHAR NOT NULL,
+  sender_key        VARCHAR NOT NULL,
+  sender_address    VARCHAR NOT NULL,
+  sender_signature  VARCHAR NOT NULL,
+  hash              VARCHAR NOT NULL,
+  block_id          INTEGER NULLABLE REFERENCES blocks
 );
 --
 CREATE TABLE transfer_transactions (

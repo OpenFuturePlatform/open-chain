@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Voting store
 - Delegate rating calculation
 - Active delegates store
+- Calculation wallet balance
+- Database: add Wallet entity
+- RPC requests: getWalletBalance
 - Sign data
 - Verify signed data
 - Define epoch duration in properties

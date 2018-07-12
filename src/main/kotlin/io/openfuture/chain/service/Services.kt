@@ -48,6 +48,8 @@ interface BlockService {
 
     fun getLastGenesis(): Block
 
+    fun save(block: Block): Block
+
 }
 
 interface CryptoService {
@@ -92,7 +94,8 @@ interface TransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto,
 interface TransferTransactionService : TransactionService<TransferTransaction, TransferTransactionDto,
     TransferTransactionData>
 
-interface VoteTransactionService : TransactionService<VoteTransaction, VoteTransactionDto, VoteTransactionData>
+interface VoteTransactionService : TransactionService<VoteTransaction, VoteTransactionDto,
+    VoteTransactionData>
 
 interface BasePeerService<Entity : Peer, Dto : PeerDto> {
 
@@ -145,3 +148,10 @@ interface ConsensusService {
 
 }
 
+interface WalletService {
+
+    fun getBalance(address: String): Double
+
+    fun updateByTransaction(transaction: BaseTransaction)
+
+}

@@ -7,7 +7,6 @@ import io.openfuture.chain.repository.PeerRepository
 import io.openfuture.chain.service.BasePeerService
 import org.springframework.transaction.annotation.Transactional
 
-
 abstract class DefaultBasePeerService<Entity : Peer, Dto : PeerDto>(
     protected val repository: PeerRepository<Entity>
 ) : BasePeerService<Entity, Dto> {

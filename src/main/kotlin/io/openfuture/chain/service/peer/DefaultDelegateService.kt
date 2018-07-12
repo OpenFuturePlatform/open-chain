@@ -9,12 +9,12 @@ import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.DelegateRepository
 import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.service.StakeholderService
-import org.apache.commons.collections4.CollectionUtils
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.util.CollectionUtils
 
 @Service
 class DefaultDelegateService(
@@ -58,15 +58,15 @@ class DefaultDelegateService(
 
         if (stakeholder.votes.contains(delegate) && dto.voteType == VoteType.FOR) {
             //todo need to throw exception ?
-            log.error("Stakeholder with publicKey ${stakeholder.publicKey} already voted for delegate with " +
-                "network_id ${delegate.networkId}!")
+            log.error("Stakeholder with publicKey ${stakeholder.publicKey} already voted for " +
+                "delegate with network_id ${delegate.networkId}!")
             return
         }
 
         if (!stakeholder.votes.contains(delegate) && dto.voteType == VoteType.AGAINST) {
             //todo need to throw exception ?
-            log.error("Stakeholder with publicKey ${stakeholder.publicKey} can't remove vote from delegate " +
-                "with network_id ${delegate.networkId}!")
+            log.error("Stakeholder with publicKey ${stakeholder.publicKey} can't remove vote from " +
+                "delegate with network_id ${delegate.networkId}!")
             return
         }
 

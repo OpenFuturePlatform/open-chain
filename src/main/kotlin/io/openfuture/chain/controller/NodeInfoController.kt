@@ -19,13 +19,13 @@ class NodeInfoController(
 ) {
 
     @GetMapping("/getVersion")
-    fun getVersion() = NodeVersionResponse()
+    fun getVersion(): NodeVersionResponse = NodeVersionResponse()
 
     @GetMapping("/getTimestamp")
-    fun getTimestamp() = NodeTimestampResponse(System.currentTimeMillis())
+    fun getTimestamp(): NodeTimestampResponse = NodeTimestampResponse(System.currentTimeMillis())
 
     @GetMapping("/getUptime")
-    fun getUptime() = UptimeResponse(System.currentTimeMillis() - context.startupDate)
+    fun getUptime(): UptimeResponse = UptimeResponse(System.currentTimeMillis() - context.startupDate)
 
     @GetMapping("/getHardwareInfo")
     fun getHardwareInfo(): HardwareInfo = hardwareInfoService.getHardwareInfo()
