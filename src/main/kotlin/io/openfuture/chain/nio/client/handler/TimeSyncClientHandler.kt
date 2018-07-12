@@ -22,6 +22,7 @@ class TimeSyncClientHandler(
         private val log = LoggerFactory.getLogger(TimeSyncClientHandler::class.java)
     }
 
+
     override fun channelActive(ctx: ChannelHandlerContext) {
         val request = Packet.newBuilder()
                 .setType(TIME_SYNC_REQUEST)

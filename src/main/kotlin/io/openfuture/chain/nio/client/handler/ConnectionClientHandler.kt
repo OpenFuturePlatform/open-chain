@@ -16,6 +16,7 @@ class ConnectionClientHandler : ChannelInboundHandlerAdapter() {
         private val log = LoggerFactory.getLogger(ConnectionClientHandler::class.java)
     }
 
+
     override fun channelActive(ctx: ChannelHandlerContext) {
         log.info("Connection established")
         ctx.fireChannelActive()

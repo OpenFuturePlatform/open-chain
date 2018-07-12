@@ -17,6 +17,7 @@ class TransactionRequest(
 
     var hash: String = calculateHash()
 
+
     private fun calculateHash(): String {
         val builder = StringBuilder()
         builder.append(this.amount)

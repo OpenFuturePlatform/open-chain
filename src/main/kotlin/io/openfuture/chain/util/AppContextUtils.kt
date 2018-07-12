@@ -9,6 +9,7 @@ object AppContextUtils : ApplicationContextAware {
 
     lateinit var context: ApplicationContext
 
+
     fun <T> getBean(type: Class<T>): T {
         return context.getBean(type)
     }
