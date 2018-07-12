@@ -6,7 +6,6 @@ import io.openfuture.chain.crypto.util.Base58CoderUtils
 import org.bouncycastle.util.Arrays
 import org.bouncycastle.util.Arrays.areEqual
 import org.springframework.stereotype.Component
-import kotlin.experimental.and
 
 /**
  * Component for deserialization public and private serialized keys to ExtendedKey entity.
@@ -18,6 +17,18 @@ class ExtendedKeyDeserializer {
 
     companion object {
         private const val DECODED_SERIALIZED_KEY_LENGTH = 78
+
+        private const val KEY_TYPE_LENGTH = 4
+        private const val DEPTH_LENGTH = 1
+        private const val FINGERPRINT_LENGTH = 4
+        private const val SEQUENCE_LENGTH = 4
+        private const val CHAIN_CODE_LENGTH = 32
+
+        private const val DEPTH_INDEX = KEY_TYPE_LENGTH
+        private const val FINGERPRINT_INDEX = DEPTH_INDEX + DEPTH_LENGTH
+        private const val SEQUENCE_INDEX = FINGERPRINT_INDEX + FINGERPRINT_LENGTH
+        private const val CHAIN_CODE_INDEX = SEQUENCE_INDEX + SEQUENCE_LENGTH
+        private const val KEY_BYTES_INDEX = CHAIN_CODE_INDEX + CHAIN_CODE_LENGTH
     }
 
     fun deserialize(serializedKey: String): ExtendedKey {
@@ -27,26 +38,15 @@ class ExtendedKeyDeserializer {
             throw IllegalArgumentException("Invalid serialized key value")
         }
 
-        val depth = toIntFromByte(decodedSerializedKey[4])
-
-        var parentFingerprint = toIntFromByte(decodedSerializedKey[5])
-        parentFingerprint = parentFingerprint shl 8
-        parentFingerprint = parentFingerprint or toIntFromByte(decodedSerializedKey[6])
-        parentFingerprint = parentFingerprint shl 8
-        parentFingerprint = parentFingerprint or toIntFromByte(decodedSerializedKey[7])
-        parentFingerprint = parentFingerprint shl 8
-        parentFingerprint = parentFingerprint or toIntFromByte(decodedSerializedKey[8])
-
-        var sequence = toIntFromByte(decodedSerializedKey[9])
-        sequence = sequence shl 8
-        sequence = sequence or toIntFromByte(decodedSerializedKey[10])
-        sequence = sequence shl 8
-        sequence = sequence or toIntFromByte(decodedSerializedKey[11])
-        sequence = sequence shl 8
-        sequence = sequence or toIntFromByte(decodedSerializedKey[12])
-
-        val chainCode = Arrays.copyOfRange(decodedSerializedKey, 13, 13 + 32)
-        val keyBytes = Arrays.copyOfRange(decodedSerializedKey, 13 + 32, decodedSerializedKey.size)
+        val depth = intFromByte(decodedSerializedKey[DEPTH_INDEX])
+        val parentFingerprint = byteArrayToInt(
+            Arrays.copyOfRange(decodedSerializedKey, FINGERPRINT_INDEX, SEQUENCE_INDEX)
+        )
+        val sequence = byteArrayToInt(
+            Arrays.copyOfRange(decodedSerializedKey, SEQUENCE_INDEX, CHAIN_CODE_INDEX)
+        )
+        val chainCode = Arrays.copyOfRange(decodedSerializedKey, CHAIN_CODE_INDEX, KEY_BYTES_INDEX)
+        val keyBytes = Arrays.copyOfRange(decodedSerializedKey, KEY_BYTES_INDEX, decodedSerializedKey.size)
         val ecKey = ECKey(keyBytes, isSerializedKeyPrivate(decodedSerializedKey))
 
         return ExtendedKey(
@@ -60,7 +60,7 @@ class ExtendedKeyDeserializer {
     }
 
     private fun isSerializedKeyPrivate(decodedSerializedKey: ByteArray): Boolean {
-        val keyType = Arrays.copyOf(decodedSerializedKey, 4)
+        val keyType = Arrays.copyOf(decodedSerializedKey, KEY_TYPE_LENGTH)
 
         return when {
             areEqual(keyType, ExtendedKeySerializer.xprv) -> true
@@ -69,6 +69,12 @@ class ExtendedKeyDeserializer {
         }
     }
 
-    private fun toIntFromByte(byte: Byte): Int = (byte and 0xff.toByte()).toInt()
+    private fun intFromByte(byte: Byte): Int = (byte.toInt() and 0xff)
+
+    private fun byteArrayToInt(bytes: ByteArray): Int =
+        intFromByte(bytes[3])
+            .or(intFromByte(bytes[2]) shl 8)
+            .or(intFromByte(bytes[1]) shl 16)
+            .or(intFromByte(bytes[0]) shl 24)
 
 }
