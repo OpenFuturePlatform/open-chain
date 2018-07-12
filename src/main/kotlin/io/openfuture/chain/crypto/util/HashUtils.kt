@@ -7,6 +7,7 @@ import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
 import org.bouncycastle.crypto.params.KeyParameter
 import org.bouncycastle.jcajce.provider.digest.Keccak
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.security.MessageDigest
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -19,13 +20,14 @@ object HashUtils {
     private const val KEY_SIZE = 512
     private const val ITERATION_COUNT = 2048
 
+
     fun generateHash(bytes: ByteArray) = bytesToHexString(sha256(bytes))
 
     fun doubleSha256(bytes: ByteArray) = sha256(sha256(bytes))
 
-    fun bytesToHexString(bytes: ByteArray) = bytes.fold(StringUtils.EMPTY) { str, it -> str + "%02x".format(it) }
+    fun bytesToHexString(bytes: ByteArray) = ByteUtils.toHexString(bytes)
 
-    fun hexStringToBytes(hex: String): ByteArray = DatatypeConverter.parseHexBinary(hex)
+    fun hexStringToBytes(hex: String): ByteArray = ByteUtils.fromHexString(hex)
 
     fun keyHash(bytes: ByteArray): ByteArray {
         val result = ByteArray(20)

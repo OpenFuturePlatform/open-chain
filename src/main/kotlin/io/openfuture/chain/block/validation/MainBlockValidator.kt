@@ -30,7 +30,7 @@ class MainBlockValidator : BlockValidator {
     }
 
     override fun getTypeId(): Int {
-        return BlockType.MAIN.typeId
+        return BlockType.MAIN.id
     }
 
     private fun transactionsIsWellFormed(transactions: List<Transaction>): Boolean {

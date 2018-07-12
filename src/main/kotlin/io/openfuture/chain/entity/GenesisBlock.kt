@@ -15,4 +15,4 @@ class GenesisBlock(hash: String, height: Long,
     @Column(name="delegate_key")
     var activeDelegateKeys: Set<String>
 
-) : Block(hash, height, previousHash, merkleHash, timestamp, signature, BlockType.GENESIS.typeId)
+) : Block(hash, height, previousHash, merkleHash, timestamp, signature, BlockType.GENESIS.id)

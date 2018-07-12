@@ -10,6 +10,7 @@ class SignaturePublicKeyPairConverter
 
     private val signaturePublicKeyPairBuilder = CommunicationProtocol.SignaturePublicKeyPair.newBuilder()
 
+
     override fun fromEntity(entity: SignaturePublicKeyPair): CommunicationProtocol.SignaturePublicKeyPair {
         return signaturePublicKeyPairBuilder
             .setSignature(entity.signature)

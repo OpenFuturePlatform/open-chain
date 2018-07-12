@@ -47,8 +47,8 @@ class BlockCreationProcessor(
     @EventListener
     fun fireBlockCreation(event: BlockCreationEvent) {
         val publicKey = HashUtils.bytesToHexString(keyHolder.getPublicKey())
-        val previousBlock = blockService.getLast()
-        val genesisBlock = blockService.getLastGenesisBlock()
+        val previousBlock = blockService.getLastMain()
+        val genesisBlock = blockService.getLastGenesis()
         if (publicKey == BlockUtils.getBlockProducer(genesisBlock.activeDelegateKeys, previousBlock)) {
             create(event.pendingTransactions, previousBlock, genesisBlock)
         }

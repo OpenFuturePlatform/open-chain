@@ -12,6 +12,7 @@ class MainBlockConverter(
 
     private val mainBlockBuilder = CommunicationProtocol.MainBlock.newBuilder()
 
+
     override fun fromMessage(message: CommunicationProtocol.MainBlock): MainBlock {
         return MainBlock(
             message.hash,

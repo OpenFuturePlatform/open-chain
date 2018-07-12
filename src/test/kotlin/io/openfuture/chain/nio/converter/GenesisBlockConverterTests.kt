@@ -30,8 +30,8 @@ class GenesisBlockConverterTests : ServiceTests() {
                 .setMerkleHash(merkleHash)
                 .setTimestamp(timestamp)
                 .setEpochIndex(epochIndex)
-                .setTypeId(BlockType.GENESIS.typeId)
                 .setSignature(signature)
+                .setTypeId(BlockType.GENESIS.id)
                 .addAllActiveDelegateKeys(listOf())
                 .build()
         }

@@ -34,7 +34,7 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Before
     fun init() {
         val block = createMainBlock()
-        given(blockService.getLast()).willReturn(block)
+        given(blockService.getLastMain()).willReturn(block)
         processor = BlockCreationProcessor(
             blockService, signatureCollector,
             keyHolder, signatureManager,
@@ -47,7 +47,6 @@ class BlockCreationProcessorTests: ServiceTests() {
         val pendingBlock = PendingBlock(block, SignaturePublicKeyPair("sign", "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"))
         val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
         val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
-
 
         given(blockValidationService.isValid(block)).willReturn(true)
         given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
@@ -111,7 +110,7 @@ class BlockCreationProcessorTests: ServiceTests() {
 
         given(keyHolder.getPublicKey()).willReturn("pubKey".toByteArray())
         given(keyHolder.getPrivateKey()).willReturn("prvKey".toByteArray())
-        given(blockService.getLastGenesisBlock()).willReturn(genesisBlock)
+        given(blockService.getLastGenesis()).willReturn(genesisBlock)
         given(signatureManager.sign(any(ByteArray::class.java), any(ByteArray::class.java))).willReturn("sign")
 
         processor.fireBlockCreation(event)

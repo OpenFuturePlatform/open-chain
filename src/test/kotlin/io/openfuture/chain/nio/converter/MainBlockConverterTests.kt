@@ -32,7 +32,7 @@ class MainBlockConverterTests : ServiceTests() {
                 .setMerkleHash(merkleHash)
                 .setTimestamp(timestamp)
                 .setSignature(signature)
-                .setTypeId(BlockType.MAIN.typeId)
+                .setTypeId(BlockType.MAIN.id)
                 .addAllTransactions(listOf())
                 .build()
         }

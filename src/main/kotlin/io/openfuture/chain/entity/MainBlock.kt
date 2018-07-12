@@ -14,4 +14,4 @@ class MainBlock(hash: String, height: Long, previousHash: String,
     @JoinColumn(name = "block_hash", nullable = true)
     var transactions: List<Transaction>
 
-) : Block(hash, height, previousHash, merkleHash, timestamp, signature, BlockType.MAIN.typeId)
+) : Block(hash, height, previousHash, merkleHash, timestamp, signature, BlockType.MAIN.id)

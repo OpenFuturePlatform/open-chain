@@ -14,12 +14,13 @@ class BlockSignaturesConverter(
 
     private val blockSignaturesBuilder = BlockSignatures.newBuilder()
 
+
     override fun fromEntity(entity: PendingBlock): BlockSignatures {
         val block = entity.block
 
-        if (block.typeId == BlockType.MAIN.typeId) {
+        if (block.typeId == BlockType.MAIN.id) {
             blockSignaturesBuilder.mainBlock = mainBlockConverter.fromEntity(block)
-        } else if (block.typeId == BlockType.GENESIS.typeId) {
+        } else if (block.typeId == BlockType.GENESIS.id) {
             blockSignaturesBuilder.genesisBlock = genesisBlockConverter.fromEntity(block)
         }
 
@@ -29,8 +30,8 @@ class BlockSignaturesConverter(
 
     override fun fromMessage(message: BlockSignatures): PendingBlock {
         val block = when {
-            message.mainBlock.typeId == BlockType.MAIN.typeId -> mainBlockConverter.fromMessage(message.mainBlock)
-            message.genesisBlock.typeId == BlockType.GENESIS.typeId -> genesisBlockConverter.fromMessage(message.genesisBlock)
+            message.mainBlock.typeId == BlockType.MAIN.id -> mainBlockConverter.fromMessage(message.mainBlock)
+            message.genesisBlock.typeId == BlockType.GENESIS.id -> genesisBlockConverter.fromMessage(message.genesisBlock)
             else -> throw IllegalArgumentException("$message has no block")
         }
 

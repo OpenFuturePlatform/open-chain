@@ -12,8 +12,8 @@ class DefaultConsensusService(
 
     @Transactional(readOnly = true)
     override fun getCurrentEpochHeight(): Long {
-        val newHeight = blockService.getLast().height
-        val lastGenesisBlockHeight = blockService.getLastGenesisBlock().height
+        val newHeight = blockService.getLastMain().height
+        val lastGenesisBlockHeight = blockService.getLastGenesis().height
 
         return newHeight - lastGenesisBlockHeight
     }

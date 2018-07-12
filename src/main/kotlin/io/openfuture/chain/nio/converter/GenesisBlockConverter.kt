@@ -10,6 +10,7 @@ class GenesisBlockConverter: MessageConverter<Block,  CommunicationProtocol.Gene
 
     private val genesisBlockBuilder = CommunicationProtocol.GenesisBlock.newBuilder()
 
+
     override fun fromMessage(message: CommunicationProtocol.GenesisBlock): GenesisBlock {
         return GenesisBlock(
             message.hash,
