@@ -44,9 +44,9 @@ class BlockValidationProvider(
 
         val calculatedHashBytes = BlockUtils.calculateHash(
             block.previousHash,
-            block.merkleHash,
             block.timestamp,
-            block.height)
+            block.height,
+            block.merkleHash)
         if (HashUtils.bytesToHexString(calculatedHashBytes) != block.hash) {
             return false
         }
