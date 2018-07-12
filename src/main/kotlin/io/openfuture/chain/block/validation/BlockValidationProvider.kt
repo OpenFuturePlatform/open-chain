@@ -62,13 +62,10 @@ class BlockValidationProvider(
         return (HashUtils.bytesToHexString(calculatedHashBytes) == block.hash)
     }
 
-    private fun verifyPreviousHash(block: Block, lastBlock: Block): Boolean
-        = (block.previousHash == lastBlock.hash)
+    private fun verifyPreviousHash(block: Block, lastBlock: Block): Boolean = (block.previousHash == lastBlock.hash)
 
-    private fun verifyTimestamp(block: Block, lastBlock: Block): Boolean
-        = (block.timestamp > lastBlock.timestamp)
+    private fun verifyTimestamp(block: Block, lastBlock: Block): Boolean = (block.timestamp > lastBlock.timestamp)
 
-    private fun verifyHeight(block: Block, lastBlock: Block): Boolean
-        = (block.height == lastBlock.height + 1)
+    private fun verifyHeight(block: Block, lastBlock: Block): Boolean = (block.height == lastBlock.height + 1)
 
 }
