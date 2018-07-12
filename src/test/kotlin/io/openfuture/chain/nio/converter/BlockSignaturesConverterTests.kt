@@ -109,7 +109,7 @@ class BlockSignaturesConverterTests : ServiceTests() {
             timestamp,
             epochIndex
         )
-        val signatureMessage = createSignaturePublicKeyPair(signature, publicKey)
+        val signatureMessage = SignaturePublicKeyPairConverterTests.createSignaturePublicKeyPair(signature, publicKey)
         val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
         val pendingBlock = PendingBlock(block, signaturePublicKeyPair)
 
@@ -149,7 +149,7 @@ class BlockSignaturesConverterTests : ServiceTests() {
             timestamp,
             signature
         )
-        val signatureKeyPair = createSignaturePublicKeyPair(signature, publicKey)
+        val signatureKeyPair = SignaturePublicKeyPairConverterTests.createSignaturePublicKeyPair(signature, publicKey)
         val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
         val blockSignatures = CommunicationProtocol.BlockSignatures.newBuilder()
             .setMainBlock(mainBlockMessage)
@@ -201,7 +201,7 @@ class BlockSignaturesConverterTests : ServiceTests() {
             timestamp,
             epochIndex
         )
-        val signatureKeyPair = createSignaturePublicKeyPair(signature, publicKey)
+        val signatureKeyPair = SignaturePublicKeyPairConverterTests.createSignaturePublicKeyPair(signature, publicKey)
         val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
         val blockSignatures = CommunicationProtocol.BlockSignatures.newBuilder()
             .setGenesisBlock(genesisBlockMessage)
@@ -233,16 +233,6 @@ class BlockSignaturesConverterTests : ServiceTests() {
         Assertions.assertThat(genesisBlockResult.activeDelegateKeys).isEmpty()
 
         Assertions.assertThat(pendingBlock.signature).isEqualTo(signaturePublicKeyPair)
-    }
-
-    private fun createSignaturePublicKeyPair(
-        signature: String,
-        publicKey: String
-    ): CommunicationProtocol.SignaturePublicKeyPair {
-        return CommunicationProtocol.SignaturePublicKeyPair.newBuilder()
-            .setSignature(signature)
-            .setPublicKey(publicKey)
-            .build()
     }
 
 }
