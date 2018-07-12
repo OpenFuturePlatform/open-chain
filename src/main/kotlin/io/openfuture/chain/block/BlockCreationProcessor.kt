@@ -64,11 +64,7 @@ class BlockCreationProcessor(
     }
 
     private fun create(transactions: List<Transaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
-        val blockType = if (consensusService.isGenesisBlockNeeded()) {
-            BlockType.GENESIS
-        } else {
-            BlockType.MAIN
-        }
+        val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
 
         val time = System.currentTimeMillis()
         val privateKey = keyHolder.getPrivateKey()
