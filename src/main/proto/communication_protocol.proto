@@ -48,7 +48,7 @@ message Transaction {
     string hash = 1;
     int32 amount = 2;
     int64 timestamp = 3;
-    string recipientkey = 4;
+    string recipientKey = 4;
     string senderKey = 5;
     string signature = 6;
     string senderAddress = 7;

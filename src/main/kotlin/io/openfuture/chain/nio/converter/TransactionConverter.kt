@@ -14,7 +14,7 @@ class TransactionConverter: MessageConverter<Transaction, CommunicationProtocol.
             message.hash,
             message.amount,
             message.timestamp,
-            message.recipientkey,
+            message.recipientKey,
             message.senderKey,
             message.signature,
             message.senderAddress,
@@ -27,9 +27,11 @@ class TransactionConverter: MessageConverter<Transaction, CommunicationProtocol.
             .setHash(entity.hash)
             .setAmount(entity.amount)
             .setTimestamp(entity.timestamp)
-            .setRecipientkey(entity.recipientKey)
+            .setRecipientKey(entity.recipientKey)
             .setSenderKey(entity.senderKey)
             .setSignature(entity.signature)
+            .setSenderAddress(entity.senderAddress)
+            .setRecipientAddress(entity.recipientAddress)
             .build()
     }
 

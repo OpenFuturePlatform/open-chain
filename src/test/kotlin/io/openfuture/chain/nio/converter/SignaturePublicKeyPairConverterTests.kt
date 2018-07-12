@@ -11,6 +11,7 @@ class SignaturePublicKeyPairConverterTests : ServiceTests() {
 
     private lateinit var signaturePublicKeyPairConverter: SignaturePublicKeyPairConverter
 
+
     companion object {
         fun createSignaturePublicKeyPair(
             signature: String,
