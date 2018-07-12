@@ -65,7 +65,7 @@ class BlockValidationProvider(
     }
 
     fun getSlotNumber(time: Long): Long {
-        return (time - epochTime) / interval
+        return (time - epochTime) / interval / 2
     }
 
     fun setEpochTime(value: Long) {
