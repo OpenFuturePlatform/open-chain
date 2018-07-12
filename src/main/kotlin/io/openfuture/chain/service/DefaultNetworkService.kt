@@ -30,10 +30,10 @@ class DefaultNetworkService(
         val address = shuffledNodes[0].split(":")
         clientBootstrap.connect(address[0], address[1].toInt()).addListener {
             future -> future as ChannelFuture
-            if (!future.isSuccess) {
-                logger.warn("Can not connect to ${address[0]}:${address[1]}")
-            } else {
+            if (future.isSuccess) {
                 future.channel().writeAndFlush(createGetPeersMessage())
+            } else {
+                logger.warn("Can not connect to ${address[0]}:${address[1]}")
             }
         }
     }

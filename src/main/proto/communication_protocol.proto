@@ -14,7 +14,7 @@ message Packet {
         TimeSyncResponse time_sync_response = 4;
         GetPeerRequest get_peer_request = 5;
         GetPeerResponse get_peer_response = 6;
-        Connect connect = 7;
+        Handshake handshake = 7;
     }
 }
 
@@ -24,7 +24,7 @@ enum Type {
     TIME_SYNC_RESPONSE = 2;
     GET_PEER_REQUEST = 4;
     GET_PEER_RESPONSE = 5;
-    CONNECT = 6;
+    HANDSHAKE = 6;
 }
 
 message HeartBeat {
@@ -59,6 +59,6 @@ message GetPeerResponse {
     repeated Peer peers = 3;
 }
 
-message Connect {
+message Handshake {
     Peer peer = 1;
 }

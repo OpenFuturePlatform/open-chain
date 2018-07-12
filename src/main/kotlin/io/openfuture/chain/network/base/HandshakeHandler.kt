@@ -10,16 +10,16 @@ import org.springframework.stereotype.Component
 
 @Component
 @Scope("prototype")
-class ConnectHandler(
+class HandshakeHandler(
     private val networkService: NetworkService
-) : BaseHandler(CommunicationProtocol.Type.CONNECT) {
+) : BaseHandler(CommunicationProtocol.Type.HANDSHAKE) {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         val peer = networkService.getPeerInfo()
 
         val message = CommunicationProtocol.Packet.newBuilder()
-            .setType(CommunicationProtocol.Type.CONNECT)
-            .setConnect(CommunicationProtocol.Connect.newBuilder()
+            .setType(CommunicationProtocol.Type.HANDSHAKE)
+            .setHandshake(CommunicationProtocol.Handshake.newBuilder()
                 .setPeer(CommunicationProtocol.Peer.newBuilder()
                     .setNetworkId(peer.networkId)
                     .setHost(peer.host)
@@ -30,10 +30,11 @@ class ConnectHandler(
     }
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: CommunicationProtocol.Packet) {
-        val messagePeer = message.connect.peer
+        val messagePeer = message.handshake.peer
         val peer = Peer(messagePeer.networkId, messagePeer.host, messagePeer.port)
         ctx.channel().attr(ChannelAttributes.REMOTE_PEER).set(peer)
 
         ctx.fireChannelActive()
     }
+
 }

@@ -7,7 +7,7 @@ import io.netty.handler.codec.protobuf.ProtobufEncoder
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender
 import io.netty.handler.timeout.ReadTimeoutHandler
-import io.openfuture.chain.network.base.ConnectHandler
+import io.openfuture.chain.network.base.HandshakeHandler
 import io.openfuture.chain.network.server.handler.GetPeerServerHandler
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.context.ApplicationContext
@@ -31,7 +31,7 @@ class ClientChannelInitializer(
 
         // Handlers
         pipeline.addLast(ReadTimeoutHandler(60))
-        pipeline.addLast(context.getBean(ConnectHandler::class.java))
+        pipeline.addLast(context.getBean(HandshakeHandler::class.java))
         pipeline.addLast(context.getBean(ConnectionClientHandler::class.java))
 
         pipeline.addLast(context.getBean(GetPeerClientHandler::class.java))
