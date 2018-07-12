@@ -94,9 +94,6 @@ class BlockCreationProcessorTests: ServiceTests() {
         given(blockValidationService.isValid(block)).willReturn(true)
         given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
         given(signatureCollector.addBlockSignature(pendingBlock)).willReturn(false)
-        given(keyHolder.getPrivateKey()).willReturn("prvKey".toByteArray())
-        given(signatureManager.sign(hashAsBytes, keyHolder.getPrivateKey())).willReturn("sign")
-        given(keyHolder.getPublicKey()).willReturn("pubKey".toByteArray())
 
         processor.approveBlock(pendingBlock)
     }
