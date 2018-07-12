@@ -43,7 +43,7 @@ class TransactionConverterTests {
     }
 
     @Test
-    fun fromMessageReturnTransactionEntity() {
+    fun fromMessageShouldReturnTransactionEntity() {
         val hash = "hash"
         val amount = 1
         val timestamp = 1L
