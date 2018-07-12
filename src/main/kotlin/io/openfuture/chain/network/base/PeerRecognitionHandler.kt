@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.domain.Peer
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.protocol.CommunicationProtocol
+import io.openfuture.chain.protocol.CommunicationProtocol.*
 import io.openfuture.chain.service.NetworkService
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Scope
@@ -11,19 +12,20 @@ import org.springframework.stereotype.Component
 
 @Component
 @Scope("prototype")
-class HandshakeHandler(
+class PeerRecognitionHandler(
     private val networkService: NetworkService,
     private val properties: NodeProperties
-) : BaseHandler(CommunicationProtocol.Type.HANDSHAKE) {
+) : BaseHandler(Type.PEER_RECOGNITION) {
 
     companion object {
-        private val log = LoggerFactory.getLogger(HandshakeHandler::class.java)
+        private val log = LoggerFactory.getLogger(PeerRecognitionHandler::class.java)
     }
 
+
     override fun channelActive(ctx: ChannelHandlerContext) {
-        val message = CommunicationProtocol.Packet.newBuilder()
-            .setType(CommunicationProtocol.Type.HANDSHAKE)
-            .setHandshake(CommunicationProtocol.Handshake.newBuilder()
+        val message = Packet.newBuilder()
+            .setType(Type.PEER_RECOGNITION)
+            .setPeerRecognition(PeerRecognition.newBuilder()
                 .setPeer(CommunicationProtocol.Peer.newBuilder()
                     .setHost(properties.host)
                     .setPort(properties.port!!))
@@ -35,10 +37,19 @@ class HandshakeHandler(
     }
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: CommunicationProtocol.Packet) {
-        val messagePeer = message.handshake.peer
+        val messagePeer = message.peerRecognition.peer
         val peer = Peer(messagePeer.host, messagePeer.port)
         networkService.addPeer(ctx.channel(), peer)
-        log.info("Connection with $peer established")
+        log.info("Connected with $peer")
     }
 
+    override fun channelInactive(ctx: ChannelHandlerContext) {
+        val peer = networkService.removePeer(ctx.channel())
+
+        if (peer != null) {
+            log.info("Disconnected from $peer")
+        }
+
+        ctx.fireChannelInactive()
+    }
 }

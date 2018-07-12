@@ -11,13 +11,12 @@ import org.springframework.stereotype.Component
 
 @Component
 @Scope("prototype")
-class ConnectionClientHandler(
-    private val networkService: NetworkService
-) : ChannelInboundHandlerAdapter() {
+class ConnectionClientHandler : ChannelInboundHandlerAdapter() {
 
     companion object {
         private val log = LoggerFactory.getLogger(ConnectionClientHandler::class.java)
     }
+
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         log.info("Connection with ${ctx.channel().remoteAddress()} established")
@@ -33,8 +32,9 @@ class ConnectionClientHandler(
         when (type) {
             Type.HEART_BEAT -> {}
             Type.TIME_SYNC_RESPONSE -> {}
-            Type.GET_PEERS -> {}
+            Type.FIND_PEERS -> {}
             Type.PEERS -> {}
+            Type.PEER_RECOGNITION -> {}
             else -> {
                 log.error("Illegal packet type: {}", packet)
                 ctx.close()
@@ -47,12 +47,6 @@ class ConnectionClientHandler(
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
         log.info("Connection with ${ctx.channel().remoteAddress()} closed")
-
-        val peer = networkService.removePeer(ctx.channel())
-
-        if (peer != null) {
-            log.info("Connection with $peer closed")
-        }
         ctx.fireChannelInactive()
     }
 

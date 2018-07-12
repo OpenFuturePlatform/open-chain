@@ -29,6 +29,7 @@ class DefaultNetworkService(
         private val log = LoggerFactory.getLogger(DefaultNetworkService::class.java)
     }
 
+
     override fun onApplicationEvent(event: ApplicationReadyEvent) {
         // Start Server
         Executors.newSingleThreadExecutor().execute(tcpServer)
@@ -38,7 +39,7 @@ class DefaultNetworkService(
         clientBootstrap.connect(address[0], address[1].toInt()).addListener { future ->
             future as ChannelFuture
             if (future.isSuccess) {
-                future.channel().writeAndFlush(createGetPeersMessage())
+                future.channel().writeAndFlush(createFindPeersMessage())
             } else {
                 log.warn("Can not connect to ${address[0]}:${address[1]}")
             }
@@ -74,14 +75,14 @@ class DefaultNetworkService(
 
     override fun connect(peers: List<CommunicationProtocol.Peer>) {
         peers.map { Peer(it.host, it.port) }
-            .filter { connectedPeers.values.contains(it) }
+            .filter { !connectedPeers.values.contains(it) && it != Peer(properties.host!!, properties.port!!) }
             .forEach { clientBootstrap.connect(it.host, it.port) }
     }
 
-    private fun createGetPeersMessage() : CommunicationProtocol.Packet{
+    private fun createFindPeersMessage() : CommunicationProtocol.Packet{
         return CommunicationProtocol.Packet.newBuilder()
-            .setType(CommunicationProtocol.Type.GET_PEERS)
-            .setGetPeers(CommunicationProtocol.GetPeers.newBuilder()
+            .setType(CommunicationProtocol.Type.FIND_PEERS)
+            .setFindPeers(CommunicationProtocol.FindPeers.newBuilder()
                 .build())
             .build()
     }
@@ -89,16 +90,20 @@ class DefaultNetworkService(
     private fun isConnectionNeeded(): Boolean = properties.peersNumber!! > connectedPeers.size
 
     private fun findPeers() {
-        val message = createGetPeersMessage()
+        val message = createFindPeersMessage()
 
         val peer = connectedPeers.values.shuffled(SecureRandom()).firstOrNull() ?:
         properties.getRootPeers().shuffled().first()
 
-        connectAndSend(peer.host, peer.port, message)
+        send(peer, message)
     }
 
-    private fun connectAndSend(host: String, port: Int, message: CommunicationProtocol.Packet) {
-        clientBootstrap.connect(host, port).channel().writeAndFlush(message)
+    private fun send(peer: Peer, message: CommunicationProtocol.Packet) {
+        var channel = connectedPeers.filter { it -> it.value == peer }.map { it -> it.key }.firstOrNull()
+        if (channel == null) {
+            channel = clientBootstrap.connect(peer.host, peer.port).channel()
+        }
+        channel!!.writeAndFlush(message)
     }
 
 }

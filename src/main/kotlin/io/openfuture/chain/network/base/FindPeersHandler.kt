@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component
 
 @Component
 @Scope("prototype")
-class GetPeersHandler(
+class FindPeersHandler(
     private val networkService: NetworkService
-) : BaseHandler(Type.GET_PEERS) {
+) : BaseHandler(Type.FIND_PEERS) {
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: CommunicationProtocol.Packet) {
 

@@ -12,9 +12,9 @@ message Packet {
         HeartBeat heart_beat = 2;
         TimeSyncRequest time_sync_request = 3;
         TimeSyncResponse time_sync_response = 4;
-        GetPeers get_peers = 5;
+        FindPeers find_peers = 5;
         Peers peers = 6;
-        Handshake handshake = 7;
+        PeerRecognition peer_recognition = 7;
     }
 }
 
@@ -22,9 +22,9 @@ enum Type {
     HEART_BEAT = 0;
     TIME_SYNC_REQUEST = 1;
     TIME_SYNC_RESPONSE = 2;
-    GET_PEERS = 4;
-    PEERS = 5;
-    HANDSHAKE = 6;
+    FIND_PEERS = 3;
+    PEERS = 4;
+    PEER_RECOGNITION = 5;
 }
 
 message HeartBeat {
@@ -50,13 +50,13 @@ message Peer {
     int32 port = 2;
 }
 
-message GetPeers {
+message FindPeers {
 }
 
 message Peers {
-    repeated Peer peers = 3;
+    repeated Peer peers = 1;
 }
 
-message Handshake {
+message PeerRecognition {
     Peer peer = 1;
 }
