@@ -17,10 +17,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Define epoch duration in properties
 - Get current epoch height
 - Check is genesis block needed
+- Generating private and public key pairs on app start and saving in files if not exist
+- Getting private and public key
+- Shuffle active delegates
+- Calculating transaction merkle hash
+- Block production
+- Block validation
+- Converters for block, transaction, signature from prototype to business object and backward
+- Accumulation signatures from nodes
+- Block approving
+- Block applying by scheduling
 
 ### Changed
 - Default account info is added to the doGenerateMaster end-point response
 - doGenerateMaster end-point renamed to doRestore
+- Block separated by types: GenesisBlock and MainBlock
 
 ## [0.2.0] - 2018-06-29
 ### Added
