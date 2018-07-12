@@ -1,4 +1,4 @@
-package io.openfuture.chain.nio.server
+package io.openfuture.chain.network.server
 
 import io.netty.bootstrap.ServerBootstrap
 import io.openfuture.chain.property.NodeProperties

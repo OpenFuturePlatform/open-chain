@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Define epoch duration in properties
 - Get current epoch height
 - Check is genesis block needed
+- Sharing peers between nodes
+- Maintaining necessary connections count
+- Connection establishing logic
+- Scheduled check of connections
+- Reconnect logic
 - Generating private and public key pairs on app start and saving in files if not exist
 - Shuffle active delegates
 - Transaction merkle hash calculation

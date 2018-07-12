@@ -1,4 +1,4 @@
-package io.openfuture.chain.nio.client.handler
+package io.openfuture.chain.network.client.handler
 
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
@@ -7,6 +7,9 @@ import io.netty.handler.codec.protobuf.ProtobufEncoder
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender
 import io.netty.handler.timeout.ReadTimeoutHandler
+import io.openfuture.chain.network.base.PeersHandler
+import io.openfuture.chain.network.base.PeerRecognitionHandler
+import io.openfuture.chain.network.base.FindPeersHandler
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
@@ -30,8 +33,10 @@ class ClientChannelInitializer(
         // Handlers
         pipeline.addLast(ReadTimeoutHandler(60))
         pipeline.addLast(context.getBean(ConnectionClientHandler::class.java))
-
+        pipeline.addLast(context.getBean(PeerRecognitionHandler::class.java))
         pipeline.addLast(context.getBean(TimeSyncClientHandler::class.java))
+        pipeline.addLast(context.getBean(FindPeersHandler::class.java))
+        pipeline.addLast(context.getBean(PeersHandler::class.java))
         pipeline.addLast(context.getBean(HeartBeatClientHandler::class.java))
     }
 

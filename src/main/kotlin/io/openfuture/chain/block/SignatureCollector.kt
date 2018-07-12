@@ -27,9 +27,9 @@ class SignatureCollector(
 
     fun setPendingBlock(generatedBlock: PendingBlock) {
         if (!active) {
-            scheduler.scheduleWithFixedDelay({ applyBlock() }, slotInterval / 2)
-            this.pendingBlock = generatedBlock.block
             this.active = true
+            this.pendingBlock = generatedBlock.block
+            scheduler.scheduleWithFixedDelay({ applyBlock() }, slotInterval / 2)
         }
     }
 

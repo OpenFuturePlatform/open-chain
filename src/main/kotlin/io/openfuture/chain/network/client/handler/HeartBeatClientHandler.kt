@@ -1,7 +1,7 @@
-package io.openfuture.chain.nio.client.handler
+package io.openfuture.chain.network.client.handler
 
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.nio.base.BaseHandler
+import io.openfuture.chain.network.base.BaseHandler
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.protocol.CommunicationProtocol.*
 import org.slf4j.LoggerFactory

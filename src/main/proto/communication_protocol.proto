@@ -12,10 +12,13 @@ message Packet {
         HeartBeat heart_beat = 2;
         TimeSyncRequest time_sync_request = 3;
         TimeSyncResponse time_sync_response = 4;
-        Transaction transaction = 5;
-        MainBlock main_block = 6;
-        GenesisBlock genesis_block = 7;
-        BlockSignatures block_signatures = 8;
+        FindPeers find_peers = 5;
+        Peers peers = 6;
+        PeerRecognition peer_recognition = 7;
+        Transaction transaction = 8;
+        MainBlock main_block = 9;
+        GenesisBlock genesis_block = 10;
+        BlockSignatures block_signatures = 11;
     }
 }
 
@@ -23,7 +26,9 @@ enum Type {
     HEART_BEAT = 0;
     TIME_SYNC_REQUEST = 1;
     TIME_SYNC_RESPONSE = 2;
-    SIGNED_BLOCK = 3;
+    FIND_PEERS = 3;
+    PEERS = 4;
+    PEER_RECOGNITION = 5;
 }
 
 message HeartBeat {
@@ -36,12 +41,28 @@ message HeartBeat {
 }
 
 message TimeSyncResponse {
-    int64 nodeTimestamp = 1;
-    int64 networkTimestamp = 2;
+    int64 node_timestamp = 1;
+    int64 network_timestamp = 2;
 }
 
 message TimeSyncRequest {
-    int64 nodeTimestamp = 1;
+    int64 node_timestamp = 1;
+}
+
+message Peer {
+    string host = 1;
+    int32 port = 2;
+}
+
+message FindPeers {
+}
+
+message Peers {
+    repeated Peer peers = 1;
+}
+
+message PeerRecognition {
+    Peer peer = 1;
 }
 
 message Transaction {

@@ -88,8 +88,6 @@ class BlockCreationProcessor(
                 )
             }
             BlockType.GENESIS -> {
-                val time = System.currentTimeMillis()
-                val hash = BlockUtils.calculateHash(previousBlock.hash, StringUtils.EMPTY, time, (previousBlock.height + 1))
                 GenesisBlock(
                     HashUtils.bytesToHexString(hash),
                     previousBlock.height + 1,
@@ -98,7 +96,7 @@ class BlockCreationProcessor(
                     time,
                     signature,
                     genesisBlock.epochIndex + 1,
-                    emptySet()  //replace with active delegates
+                    emptySet()  // place active delegates
                 )
             }
         }

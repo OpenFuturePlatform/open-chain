@@ -1,4 +1,4 @@
-package io.openfuture.chain.nio.client.handler
+package io.openfuture.chain.network.client.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
@@ -16,33 +16,29 @@ class ConnectionClientHandler : ChannelInboundHandlerAdapter() {
         private val log = LoggerFactory.getLogger(ConnectionClientHandler::class.java)
     }
 
-    override fun channelActive(ctx: ChannelHandlerContext) {
-        log.info("Connection established")
-        ctx.fireChannelActive()
-    }
 
-    override fun channelInactive(ctx: ChannelHandlerContext) {
-        log.info("Connection closed")
-        ctx.fireChannelInactive()
+    override fun channelActive(ctx: ChannelHandlerContext) {
+        log.info("Connection with ${ctx.channel().remoteAddress()} established")
+
+        ctx.fireChannelActive()
     }
 
     override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {
         packet as CommunicationProtocol.Packet
 
         // check packet type
-        val type = packet.type
-        when (type) {
-            Type.HEART_BEAT -> {}
-            Type.TIME_SYNC_REQUEST -> {}
-            Type.TIME_SYNC_RESPONSE -> {}
-            else -> {
-                log.error("Illegal packet type: {}", packet)
-                ctx.close()
-                return
-            }
+        if (!Type.values().contains(packet.type)) {
+            log.error("Illegal packet type: {}", packet)
+            ctx.close()
+            return
         }
 
         ctx.fireChannelRead(packet)
+    }
+
+    override fun channelInactive(ctx: ChannelHandlerContext) {
+        log.info("Connection with ${ctx.channel().remoteAddress()} closed")
+        ctx.fireChannelInactive()
     }
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
