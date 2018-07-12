@@ -1,13 +1,13 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.block.validation.BlockValidationProvider
-import io.openfuture.chain.crypto.key.KeyHolder
+import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.SignaturePublicKeyPair
 import io.openfuture.chain.entity.*
-import io.openfuture.chain.events.BlockCreationEvent
+import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.ConsensusService
 import io.openfuture.chain.util.BlockUtils
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component
 class BlockCreationProcessor(
     private val blockService: BlockService,
     private val signatureCollector: SignatureCollector,
-    private val keyHolder: KeyHolder,
+    private val keyHolder: NodeKeyHolder,
     private val signatureManager: SignatureManager,
     private val blockValidationService: BlockValidationProvider,
     private val consensusService: ConsensusService

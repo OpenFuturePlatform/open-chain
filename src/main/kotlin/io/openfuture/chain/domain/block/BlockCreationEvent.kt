@@ -1,4 +1,4 @@
-package io.openfuture.chain.events
+package io.openfuture.chain.domain.block
 
 import io.openfuture.chain.entity.Transaction
 

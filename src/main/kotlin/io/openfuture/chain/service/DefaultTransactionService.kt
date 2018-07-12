@@ -1,7 +1,7 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.entity.Transaction
-import io.openfuture.chain.events.BlockCreationEvent
+import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.repository.TransactionRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationEventPublisher

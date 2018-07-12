@@ -11,7 +11,7 @@ import java.nio.charset.Charset
 import javax.annotation.PostConstruct
 
 @Component
-class KeyHolder(
+class NodeKeyHolder(
     private val properties: NodeProperties,
     private val cryptoService: CryptoService,
     private val seedCalculator: SeedCalculator
