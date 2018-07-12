@@ -5,7 +5,7 @@ import io.openfuture.chain.domain.vote.VoteDto
 import io.openfuture.chain.entity.peer.Delegate
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.exception.NotFoundException
-import io.openfuture.chain.nio.client.handler.ConnectionClientHandler
+import io.openfuture.chain.network.client.handler.ConnectionClientHandler
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.DelegateRepository
 import io.openfuture.chain.service.DelegateService
