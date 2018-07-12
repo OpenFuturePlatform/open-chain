@@ -30,9 +30,9 @@ interface BlockService {
 
     fun get(hash: String): Block
 
-    fun getLast(): Block
+    fun getLastMain(): Block
 
-    fun getLastGenesisBlock(): GenesisBlock
+    fun getLastGenesis(): GenesisBlock
 
     fun save(block: Block): Block
 

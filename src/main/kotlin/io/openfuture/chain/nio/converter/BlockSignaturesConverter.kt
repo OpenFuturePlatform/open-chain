@@ -14,12 +14,13 @@ class BlockSignaturesConverter(
 
     private val blockSignaturesBuilder = BlockSignatures.newBuilder()
 
+
     override fun fromEntity(entity: PendingBlock): BlockSignatures {
         val block = entity.block
 
-        if (block.typeId == BlockType.MAIN.typeId) {
+        if (block.typeId == BlockType.MAIN.id) {
             blockSignaturesBuilder.mainBlock = mainBlockConverter.fromEntity(block)
-        } else if (block.typeId == BlockType.GENESIS.typeId) {
+        } else if (block.typeId == BlockType.GENESIS.id) {
             blockSignaturesBuilder.genesisBlock = genesisBlockConverter.fromEntity(block)
         }
 

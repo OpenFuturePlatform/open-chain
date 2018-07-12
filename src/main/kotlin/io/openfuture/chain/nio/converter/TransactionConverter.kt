@@ -9,6 +9,7 @@ class TransactionConverter: MessageConverter<Transaction, CommunicationProtocol.
 
     private val transactionBuilder = CommunicationProtocol.Transaction.newBuilder()
 
+
     override fun fromMessage(message: CommunicationProtocol.Transaction): Transaction {
         return Transaction(
             message.hash,

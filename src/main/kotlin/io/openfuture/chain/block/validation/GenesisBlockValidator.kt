@@ -12,7 +12,7 @@ class GenesisBlockValidator : BlockValidator {
     }
 
     override fun getTypeId(): Int {
-        return BlockType.GENESIS.typeId
+        return BlockType.GENESIS.id
     }
 
 }

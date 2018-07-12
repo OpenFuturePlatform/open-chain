@@ -15,15 +15,15 @@ class SignatureCollector(
     @Value("\${block.time.slot}") private val slotInterval: Long
 ) {
 
-    private val scheduler = ThreadPoolTaskScheduler()
-    private val signatures = ConcurrentHashMap.newKeySet<SignaturePublicKeyPair>()
-
-    private var pendingBlock: Block? = null
-    private var active: Boolean = false
-
     companion object {
         private const val APPROVAL_THRESHOLD = 0.67
     }
+
+    private val scheduler = ThreadPoolTaskScheduler()
+    private val signatures = ConcurrentHashMap.newKeySet<SignaturePublicKeyPair>()
+    private var pendingBlock: Block? = null
+    private var active: Boolean = false
+
 
     fun setPendingBlock(generatedBlock: PendingBlock) {
         if (!active) {
@@ -44,9 +44,9 @@ class SignatureCollector(
         return true
     }
 
-    private fun applyBlock() {
+    fun applyBlock() {
         try {
-            val genesisBlock = blockService.getLastGenesisBlock()
+            val genesisBlock = blockService.getLastGenesis()
             if (signatures.size.toDouble() / genesisBlock.activeDelegateKeys.size > APPROVAL_THRESHOLD) {
                 blockService.save(pendingBlock!!)
             }

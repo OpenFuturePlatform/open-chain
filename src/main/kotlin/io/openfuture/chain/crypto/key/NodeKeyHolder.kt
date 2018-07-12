@@ -18,7 +18,6 @@ class NodeKeyHolder(
 ) {
 
     private var privateKey: ByteArray? = null
-
     private var publicKey: ByteArray? = null
 
 
@@ -48,7 +47,7 @@ class NodeKeyHolder(
         if (!privateKeyFile.exists() || !publicKeyFile.exists()) {
             val seedPhrase = cryptoService.generateSeedPhrase()
             val masterKey = ExtendedKey.root(seedCalculator.calculateSeed(seedPhrase))
-            val privateKeyValue = HashUtils.bytesToHexString(masterKey.ecKey.private!!.toByteArray())
+            val privateKeyValue = HashUtils.bytesToHexString(masterKey.ecKey.getPrivate())
             val publicKeyValue = HashUtils.bytesToHexString(masterKey.ecKey.public)
 
             privateKeyFile.writeText(privateKeyValue, Charset.forName("UTF-8"))

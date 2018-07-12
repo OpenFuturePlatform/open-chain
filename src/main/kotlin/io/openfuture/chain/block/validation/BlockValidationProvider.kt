@@ -15,8 +15,8 @@ class BlockValidationProvider(
 ) {
 
     private val validators = HashMap<Int, BlockValidator>()
-
     private var epochTime: Long = 0L
+
 
     @PostConstruct
     fun init() {

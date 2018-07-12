@@ -33,7 +33,7 @@ class BlockValidationProviderTests : ServiceTests() {
     fun setUp() {
         val validators = HashMap<String, BlockValidator>()
         validators[""] = blockValidator
-        given(blockValidator.getTypeId()).willReturn(BlockType.MAIN.typeId)
+        given(blockValidator.getTypeId()).willReturn(BlockType.MAIN.id)
         given(applicationContext.getBeansOfType(BlockValidator::class.java)).willReturn(validators)
         blockValidationService = BlockValidationProvider(applicationContext, 3000)
         blockValidationService.init()

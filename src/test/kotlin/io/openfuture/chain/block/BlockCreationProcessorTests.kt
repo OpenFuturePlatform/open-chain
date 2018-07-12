@@ -17,10 +17,8 @@ import io.openfuture.chain.service.ConsensusService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.*
 import org.mockito.Mock
-import org.mockito.Mockito
 
 class BlockCreationProcessorTests: ServiceTests() {
 
@@ -48,7 +46,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
         val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
 
-        given(blockService.getLast()).willReturn(block)
+        given(blockService.getLastMain()).willReturn(block)
         given(blockValidationService.isValid(block, block)).willReturn(true)
         given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
         given(signatureCollector.addBlockSignature(pendingBlock)).willReturn(true)
@@ -67,7 +65,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         val block = createMainBlock()
         val pendingBlock = PendingBlock(block, SignaturePublicKeyPair("sign", "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"))
 
-        given(blockService.getLast()).willReturn(block)
+        given(blockService.getLastMain()).willReturn(block)
         given(blockValidationService.isValid(block, block)).willReturn(false)
 
         processor.approveBlock(pendingBlock)
@@ -80,7 +78,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
         val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
 
-        given(blockService.getLast()).willReturn(block)
+        given(blockService.getLastMain()).willReturn(block)
         given(blockValidationService.isValid(block, block)).willReturn(true)
         given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
 
@@ -94,7 +92,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
         val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
 
-        given(blockService.getLast()).willReturn(block)
+        given(blockService.getLastMain()).willReturn(block)
         given(blockValidationService.isValid(block, block)).willReturn(true)
         given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
         given(signatureCollector.addBlockSignature(pendingBlock)).willReturn(true)
@@ -116,8 +114,8 @@ class BlockCreationProcessorTests: ServiceTests() {
 
         given(keyHolder.getPublicKey()).willReturn("pubKey".toByteArray())
         given(keyHolder.getPrivateKey()).willReturn("prvKey".toByteArray())
-        given(blockService.getLast()).willReturn(previousBlock)
-        given(blockService.getLastGenesisBlock()).willReturn(genesisBlock)
+        given(blockService.getLastMain()).willReturn(previousBlock)
+        given(blockService.getLastGenesis()).willReturn(genesisBlock)
         given(signatureManager.sign(any(ByteArray::class.java), any(ByteArray::class.java))).willReturn("sign")
 
         processor.fireBlockCreation(event)
