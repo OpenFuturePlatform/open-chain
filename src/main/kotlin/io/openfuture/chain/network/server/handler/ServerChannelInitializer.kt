@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class ServerChannelInitializer(
-    private val connectionServerHandler: ConnectionServerHandler,
     private val context: ApplicationContext
 ) : ChannelInitializer<SocketChannel>() {
 
@@ -34,7 +33,7 @@ class ServerChannelInitializer(
         // Handlers
         pipeline.addLast(ReadTimeoutHandler(60))
         pipeline.addLast(context.getBean(HandshakeHandler::class.java))
-        pipeline.addLast(connectionServerHandler)
+        pipeline.addLast(context.getBean(ConnectionServerHandler::class.java))
 
         pipeline.addLast(context.getBean(TimeSyncServerHandler::class.java))
         pipeline.addLast(context.getBean(GetPeersHandler::class.java))

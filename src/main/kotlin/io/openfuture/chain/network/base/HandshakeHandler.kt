@@ -15,7 +15,7 @@ class HandshakeHandler(
 ) : BaseHandler(CommunicationProtocol.Type.HANDSHAKE) {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        val peer = networkService.getPeer()
+        val peer = networkService.getOwnPeerInfo()
 
         val message = CommunicationProtocol.Packet.newBuilder()
             .setType(CommunicationProtocol.Type.HANDSHAKE)

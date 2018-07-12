@@ -1,6 +1,5 @@
 package io.openfuture.chain.network.server.handler
 
-import io.netty.channel.ChannelHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
 import io.openfuture.chain.network.ChannelAttributes.REMOTE_PEER
@@ -10,10 +9,11 @@ import io.openfuture.chain.protocol.CommunicationProtocol.Packet
 import io.openfuture.chain.protocol.CommunicationProtocol.Type.*
 import io.openfuture.chain.service.NetworkService
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 @Component
-@ChannelHandler.Sharable
+@Scope("prototype")
 class ConnectionServerHandler(
     private val networkService: NetworkService
 ) : ChannelInboundHandlerAdapter() {

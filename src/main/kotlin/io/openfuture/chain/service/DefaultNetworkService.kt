@@ -1,39 +1,48 @@
 package io.openfuture.chain.service
 
 import io.netty.bootstrap.Bootstrap
+import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
 import io.openfuture.chain.network.domain.Peer
+import io.openfuture.chain.network.server.TcpServer
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.slf4j.LoggerFactory
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.ApplicationListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.security.SecureRandom
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
 
 @Component
 class DefaultNetworkService(
     private val clientBootstrap: Bootstrap,
+    private val tcpServer: TcpServer,
     private val properties: NodeProperties
-) : NetworkService {
+) : NetworkService, ApplicationListener<ApplicationReadyEvent> {
+
     private val connectedPeers : MutableMap<Channel, Peer> = ConcurrentHashMap()
     private val knownPeers : MutableSet<Peer> = ConcurrentHashMap.newKeySet()
     private val networkId = properties.host!! + properties.port
 
     companion object {
-        private val logger = LoggerFactory.getLogger(DefaultNetworkService::class.java)
+        private val log = LoggerFactory.getLogger(DefaultNetworkService::class.java)
     }
 
-    override fun start() {
+    override fun onApplicationEvent(event: ApplicationReadyEvent) {
+        Executors.newSingleThreadExecutor().execute(tcpServer)
+
         val shuffledNodes = properties.rootNodes.shuffled(SecureRandom())
         val address = shuffledNodes[0].split(":")
-        clientBootstrap.connect(address[0], address[1].toInt()).addListener {
-            future -> future as ChannelFuture
+        clientBootstrap.connect(address[0], address[1].toInt()).addListener { future ->
+            future as ChannelFuture
             if (future.isSuccess) {
                 future.channel().writeAndFlush(createGetPeersMessage())
             } else {
-                logger.warn("Can not connect to ${address[0]}:${address[1]}")
+                log.warn("Can not connect to ${address[0]}:${address[1]}")
             }
         }
     }
@@ -47,7 +56,7 @@ class DefaultNetworkService(
                 clientBootstrap.connect(peer.host, peer.port).addListener {
                     future -> future as ChannelFuture
                         if (!future.isSuccess) {
-                            logger.warn("Can not connect to ${peer.host}:${peer.port}")
+                            log.warn("Can not connect to ${peer.host}:${peer.port}")
                         }
                 }
                 connectionNeeded.dec()
@@ -101,7 +110,7 @@ class DefaultNetworkService(
         return networkId
     }
 
-    override fun getPeer(): Peer {
+    override fun getOwnPeerInfo(): Peer {
         return Peer(networkId, properties.host!!, properties.port!!)
     }
 

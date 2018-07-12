@@ -86,8 +86,6 @@ interface WalletService {
 
 interface NetworkService {
 
-    fun start()
-
     fun broadcast(packet: CommunicationProtocol.Packet)
 
     fun isConnected(networkId: String): Boolean
@@ -102,7 +100,7 @@ interface NetworkService {
 
     fun addKnownPeers(peers: List<CommunicationProtocol.Peer>)
 
-    fun getPeer() : Peer
+    fun getOwnPeerInfo() : Peer
 
     fun connectedPeers(): Set<Peer>
 }
