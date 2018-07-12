@@ -5,7 +5,6 @@ import io.openfuture.chain.entity.Stakeholder
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Wallet
 import io.openfuture.chain.entity.peer.Delegate
-import io.openfuture.chain.entity.peer.Peer
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
@@ -50,16 +49,11 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 }
 
 @Repository
-interface PeerRepository<Entity : Peer> : BaseRepository<Entity> {
+interface DelegateRepository : BaseRepository<Delegate> {
 
-    fun deleteOneByNetworkId(networkId: String)
-
-    fun findOneByNetworkId(networkId: String): Entity?
+    fun findOneByHostAndPort(host: String, port: Int): Delegate?
 
 }
-
-@Repository
-interface DelegateRepository : PeerRepository<Delegate>
 
 @Repository
 interface StakeholderRepository : BaseRepository<Stakeholder> {

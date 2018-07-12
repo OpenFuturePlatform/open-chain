@@ -23,7 +23,7 @@ class DefaultVoteTransactionService(
     override fun add(dto: VoteTransactionDto): VoteTransaction {
         //todo need to add validation
         //todo need to think about calculate the vote weight
-        val vote = VoteDto(dto.senderKey, dto.delegateKey, dto.voteType, dto.weight)
+        val vote = VoteDto(dto.voteType, dto.senderKey, dto.delegateInfo)
         delegateService.updateDelegateRatingByVote(vote)
         return repository.save(VoteTransaction.of(dto))
     }
@@ -32,8 +32,7 @@ class DefaultVoteTransactionService(
         val networkTime = nodeClock.networkTime()
         val hash = TransactionUtils.calculateHash(networkTime, data)
         return VoteTransactionDto(networkTime, data.amount, data.recipientKey, data.recipientAddress,
-            data.senderKey, data.senderAddress, data.senderSignature, hash, data.voteType,
-            data.delegateKey, data.weight)
+            data.senderKey, data.senderAddress, data.senderSignature, hash, data.voteType, data.delegateInfo)
     }
 
 }

@@ -8,8 +8,7 @@ import io.openfuture.chain.domain.hardware.CpuInfo
 import io.openfuture.chain.domain.hardware.NetworkInfo
 import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
-import io.openfuture.chain.domain.node.DelegateDto
-import io.openfuture.chain.domain.node.PeerDto
+import io.openfuture.chain.domain.delegate.DelegateDto
 import io.openfuture.chain.domain.stakeholder.StakeholderDto
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.TransferTransactionDto
@@ -21,7 +20,6 @@ import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Stakeholder
 import io.openfuture.chain.entity.peer.Delegate
-import io.openfuture.chain.entity.peer.Peer
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
@@ -97,33 +95,15 @@ interface TransferTransactionService : TransactionService<TransferTransaction, T
 interface VoteTransactionService : TransactionService<VoteTransaction, VoteTransactionDto,
     VoteTransactionData>
 
-interface BasePeerService<Entity : Peer, Dto : PeerDto> {
+interface DelegateService {
 
-    fun findByNetworkId(networkId: String) : Entity?
-
-    fun getByNetworkId(networkId: String) : Entity
-
-    fun findAll() : List<Entity>
-
-    fun add(dto: Dto): Entity
-
-    fun addAll(list: List<Dto>)
-
-    fun save(entity: Entity): Entity
-
-    fun deleteAll()
-
-    fun deleteByNetworkId(networkId: String)
-
-}
-
-interface PeerService : BasePeerService<Peer, PeerDto>
-
-interface DelegateService : BasePeerService<Delegate, DelegateDto> {
+    fun getByHostAndPort(host: String, port: Int) : Delegate
 
     fun getActiveDelegates(): List<Delegate>
 
     fun isValidActiveDelegates(publicKeysDelegates: List<String>): Boolean
+
+    fun add(dto: DelegateDto): Delegate
 
     fun updateDelegateRatingByVote(dto: VoteDto)
 

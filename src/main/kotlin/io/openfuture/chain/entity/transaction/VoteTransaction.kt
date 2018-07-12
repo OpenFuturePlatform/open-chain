@@ -19,11 +19,11 @@ class VoteTransaction(
     @Column(name = "vote_type_id", nullable = false)
     var voteTypeId: Int,
 
-    @Column(name = "delegate_key", nullable = false)
-    var delegateKey: String,
+    @Column(name = "delegate_host", nullable = false)
+    var delegateHost: String,
 
-    @Column(name = "weight", nullable = false)
-    var weight: Int,
+    @Column(name = "delegate_port", nullable = false)
+    var delegatePort: Int,
 
     block: Block? = null
 
@@ -41,8 +41,8 @@ class VoteTransaction(
             dto.senderSignature,
             dto.hash,
             dto.voteType.getId(),
-            dto.delegateKey,
-            dto.weight
+            dto.delegateInfo.host,
+            dto.delegateInfo.port
         )
     }
 

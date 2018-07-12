@@ -1,25 +1,28 @@
 package io.openfuture.chain.entity.peer
 
-import io.openfuture.chain.domain.node.DelegateDto
+import io.openfuture.chain.domain.delegate.DelegateDto
+import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.*
 
 @Entity
 @Table(name = "delegates")
 class Delegate(
-    networkId: String,
-    host: String,
-    port: Int,
+
+    @Column(name = "host", nullable = false)
+    var host: String,
+
+    @Column(name = "port", nullable = false)
+    var port: Int,
 
     @Column(name = "rating", nullable = false)
     var rating: Int = 0
 
-) : Peer(networkId, host, port) {
+) : BaseModel() {
 
     companion object {
         fun of(delegateDto: DelegateDto): Delegate = Delegate(
-            delegateDto.networkId,
-            delegateDto.host,
-            delegateDto.port,
+            delegateDto.delegateInfo.host,
+            delegateDto.delegateInfo.port,
             delegateDto.rating
         )
     }

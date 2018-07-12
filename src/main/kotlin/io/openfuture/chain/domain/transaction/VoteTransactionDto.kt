@@ -1,5 +1,6 @@
 package io.openfuture.chain.domain.transaction
 
+import io.openfuture.chain.domain.delegate.DelegateNetworkInfo
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.util.DictionaryUtils
@@ -14,8 +15,7 @@ class VoteTransactionDto(
     senderSignature: String,
     hash: String,
     val voteType: VoteType,
-    val delegateKey: String,
-    val weight: Int
+    val delegateInfo: DelegateNetworkInfo
 ) : BaseTransactionDto(timestamp, amount, recipientKey, recipientAddress, senderKey, senderAddress,
     senderSignature, hash) {
 
@@ -29,8 +29,7 @@ class VoteTransactionDto(
         transaction.senderSignature,
         transaction.hash,
         DictionaryUtils.valueOf(VoteType::class.java, transaction.voteTypeId),
-        transaction.delegateKey,
-        transaction.weight
+        DelegateNetworkInfo(transaction.delegateHost, transaction.delegatePort)
     )
 
 }
