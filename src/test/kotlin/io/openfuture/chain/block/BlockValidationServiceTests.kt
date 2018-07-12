@@ -33,17 +33,6 @@ class BlockValidationServiceTests : ServiceTests() {
 
     @Before
     fun setUp() {
-        val validators = HashMap<String, BlockValidator>()
-        validators[""] = blockValidator
-        given(blockValidator.getTypeId()).willReturn(BlockType.MAIN.typeId)
-        given(applicationContext.getBeansOfType(BlockValidator::class.java)).willReturn(validators)
-        blockValidationService = BlockValidationProvider(applicationContext, 3000)
-        blockValidationService.init()
-        blockValidationService.setEpochTime(currentTime)
-    }
-
-    @Test
-    fun isValidShouldReturnTrue() {
         val previousBlock = MainBlock(
             "prev_block_hash",
             122,
@@ -64,6 +53,20 @@ class BlockValidationServiceTests : ServiceTests() {
                 )
             )
         )
+
+        val validators = HashMap<String, BlockValidator>()
+        validators[""] = blockValidator
+        given(blockService.getLast()).willReturn(previousBlock)
+        given(blockValidator.getTypeId()).willReturn(BlockType.MAIN.typeId)
+        given(applicationContext.getBeansOfType(BlockValidator::class.java)).willReturn(validators)
+        blockValidationService = BlockValidationProvider(applicationContext, blockService, 3000)
+        blockValidationService.init()
+        blockValidationService.setEpochTime(currentTime)
+    }
+
+    @Test
+    fun isValidShouldReturnTrue() {
+
 
         val height = 123L
         val prevHash = "prev_block_hash"
@@ -103,34 +106,13 @@ class BlockValidationServiceTests : ServiceTests() {
 
         given(blockValidator.isValid(any(Block::class.java))).willReturn(true)
 
-        val isValid = blockValidationService.isValid(block, previousBlock)
+        val isValid = blockValidationService.isValid(block)
 
         assertThat(isValid).isTrue()
     }
 
     @Test
     fun isValidShouldReturnFalse() {
-        val previousBlock = MainBlock(
-            "prev_block_hash",
-            122,
-            "previous_hash",
-            "merkle_hash",
-            1510000000L,
-            "prev_signature",
-            listOf(
-                Transaction(
-                    "prev_transaction_hash1",
-                    2000,
-                    1500000000L,
-                    "prev_recipient_key1",
-                    "prev_sender_key1",
-                    "prev_signature1",
-                    "send_address",
-                    "recip_address"
-                )
-            )
-        )
-
         val block = MainBlock(
             "454ebbef16f93d174ab0e5e020f8ab80f2cf117e1b6beeeae3151bc87e99f081",
             123,
@@ -162,7 +144,7 @@ class BlockValidationServiceTests : ServiceTests() {
             )
         )
 
-        val isValid = blockValidationService.isValid(block, previousBlock)
+        val isValid = blockValidationService.isValid(block)
 
         assertThat(isValid).isFalse()
     }

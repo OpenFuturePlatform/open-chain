@@ -29,8 +29,8 @@ class BlockSignaturesConverter(
 
     override fun fromMessage(message: BlockSignatures): PendingBlock {
         val block = when {
-            message.mainBlock != null -> mainBlockConverter.fromMessage(message.mainBlock)
-            message.genesisBlock != null -> genesisBlockConverter.fromMessage(message.genesisBlock)
+            message.mainBlock.typeId == BlockType.MAIN.typeId -> mainBlockConverter.fromMessage(message.mainBlock)
+            message.genesisBlock.typeId == BlockType.GENESIS.typeId -> genesisBlockConverter.fromMessage(message.genesisBlock)
             else -> throw IllegalArgumentException("$message has no block")
         }
 
