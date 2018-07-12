@@ -83,8 +83,8 @@ interface BaseTransactionService<Entity : BaseTransaction> {
 
 }
 
-interface TransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto, Data : BaseTransactionData> :
-    BaseTransactionService<Entity> {
+interface TransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto,
+    Data : BaseTransactionData> : BaseTransactionService<Entity> {
 
     fun add(dto: Dto): Entity
 
