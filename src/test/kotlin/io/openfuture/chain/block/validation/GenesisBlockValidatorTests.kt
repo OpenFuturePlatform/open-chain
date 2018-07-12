@@ -1,4 +1,4 @@
-package io.openfuture.chain.block
+package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.block.validation.GenesisBlockValidator
 import io.openfuture.chain.entity.GenesisBlock
