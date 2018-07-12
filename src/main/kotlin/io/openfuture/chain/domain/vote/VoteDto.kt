@@ -4,7 +4,7 @@ import io.openfuture.chain.entity.dictionary.VoteType
 
 data class VoteDto(
     val stakeholderKey: String,
-    val delegateKey: String,
+    val networkId: String,
     val voteType: VoteType,
     val value: Int
 )

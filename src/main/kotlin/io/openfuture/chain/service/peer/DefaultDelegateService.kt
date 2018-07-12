@@ -48,7 +48,7 @@ class DefaultDelegateService(
     @Transactional
     override fun updateDelegateRatingByVote(dto: VoteDto) {
         val stakeholder = stakeholderService.getByPublicKey(dto.stakeholderKey)
-        val delegate = this.getByNetworkId(dto.delegateKey)
+        val delegate = this.getByNetworkId(dto.networkId)
 
         if (VOTES_LIMIT <= stakeholder.votes.size && dto.voteType == VoteType.FOR) {
             //todo need to throw exception ?
