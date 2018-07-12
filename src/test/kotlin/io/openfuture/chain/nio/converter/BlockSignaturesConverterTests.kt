@@ -49,7 +49,7 @@ class BlockSignaturesConverterTests : ServiceTests() {
             signature,
             listOf()
         )
-        val mainBlock = createMainBlockMessage(hash, height, previousHash, merkleHash, timestamp, signature)
+        val mainBlock = createMainBlock(hash, height, previousHash, merkleHash, timestamp, signature)
         val signatureMessage = CommunicationProtocol.SignaturePublicKeyPair.newBuilder()
             .setSignature(signature)
             .setPublicKey(publicKey)
@@ -95,7 +95,7 @@ class BlockSignaturesConverterTests : ServiceTests() {
             epochIndex,
             setOf()
         )
-        val genesisBlock = createGenesisBlockMessage(hash, height, previousHash, merkleHash, timestamp, epochIndex)
+        val genesisBlock = createGenesisBlock(hash, height, previousHash, merkleHash, timestamp, epochIndex)
         val signatureMessage = createSignaturePublicKeyPair(signature, publicKey)
         val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
         val pendingBlock = PendingBlock(block, signaturePublicKeyPair)
@@ -119,7 +119,96 @@ class BlockSignaturesConverterTests : ServiceTests() {
         Assertions.assertThat(blockSignatures.signature.publicKey).isEqualTo(signatureMessage.publicKey)
     }
 
-    private fun createMainBlockMessage(
+    @Test
+    fun fromMessageShouldReturnPendingBlockWithMainBlockInside() {
+        val signature = "signature"
+        val publicKey = "publicKey"
+        val hash = "hash"
+        val height = 1L
+        val previousHash = "previousHash"
+        val merkleHash = "merkleHash"
+        val timestamp = 2L
+        val mainBlockMessage = createMainBlock(hash, height, previousHash, merkleHash, timestamp, signature)
+        val signatureKeyPair = createSignaturePublicKeyPair(signature, publicKey)
+        val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
+        val blockSignatures = CommunicationProtocol.BlockSignatures.newBuilder()
+            .setMainBlock(mainBlockMessage)
+            .setSignature(signatureKeyPair)
+            .build()
+        val mainBlock = MainBlock(
+            hash,
+            height,
+            previousHash,
+            merkleHash,
+            timestamp,
+            signature,
+            listOf()
+        )
+
+        given(mainBlockConverter.fromMessage(mainBlockMessage)).willReturn(mainBlock)
+        given(signaturePublicKeyPairConverter.fromMessage(signatureKeyPair)).willReturn(signaturePublicKeyPair)
+
+        val pendingBlock = blockSignaturesConverter.fromMessage(blockSignatures)
+
+        val mainBlockResult = pendingBlock.block as MainBlock
+        Assertions.assertThat(mainBlockResult).isNotNull
+        Assertions.assertThat(mainBlockResult.hash).isEqualTo(hash)
+        Assertions.assertThat(mainBlockResult.height).isEqualTo(height)
+        Assertions.assertThat(mainBlockResult.merkleHash).isEqualTo(merkleHash)
+        Assertions.assertThat(mainBlockResult.signature).isEqualTo(signature)
+        Assertions.assertThat(mainBlockResult.previousHash).isEqualTo(previousHash)
+        Assertions.assertThat(mainBlockResult.timestamp).isEqualTo(timestamp)
+        Assertions.assertThat(mainBlockResult.transactions).isEmpty()
+
+        Assertions.assertThat(pendingBlock.signature).isEqualTo(signaturePublicKeyPair)
+    }
+
+    @Test
+    fun fromMessageShouldReturnPendingBlockWithGenesisBlockInside() {
+        val signature = "signature"
+        val publicKey = "publicKey"
+        val hash = "hash"
+        val height = 1L
+        val previousHash = "previousHash"
+        val merkleHash = "merkleHash"
+        val timestamp = 2L
+        val epochIndex = 1L
+        val genesisBlockMessage = createGenesisBlock(hash, height, previousHash, merkleHash, timestamp, epochIndex)
+        val signatureKeyPair = createSignaturePublicKeyPair(signature, publicKey)
+        val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
+        val blockSignatures = CommunicationProtocol.BlockSignatures.newBuilder()
+            .setGenesisBlock(genesisBlockMessage)
+            .setSignature(signatureKeyPair)
+            .build()
+        val genesisBlock = GenesisBlock(
+            hash,
+            height,
+            previousHash,
+            merkleHash,
+            timestamp,
+            epochIndex,
+            setOf()
+        )
+
+        given(genesisBlockConverter.fromMessage(genesisBlockMessage)).willReturn(genesisBlock)
+        given(signaturePublicKeyPairConverter.fromMessage(signatureKeyPair)).willReturn(signaturePublicKeyPair)
+
+        val pendingBlock = blockSignaturesConverter.fromMessage(blockSignatures)
+
+        val genesisBlockResult = pendingBlock.block as GenesisBlock
+        Assertions.assertThat(genesisBlockResult).isNotNull
+        Assertions.assertThat(genesisBlockResult.hash).isEqualTo(hash)
+        Assertions.assertThat(genesisBlockResult.height).isEqualTo(height)
+        Assertions.assertThat(genesisBlockResult.merkleHash).isEqualTo(merkleHash)
+        Assertions.assertThat(genesisBlockResult.epochIndex).isEqualTo(epochIndex)
+        Assertions.assertThat(genesisBlockResult.previousHash).isEqualTo(previousHash)
+        Assertions.assertThat(genesisBlockResult.timestamp).isEqualTo(timestamp)
+        Assertions.assertThat(genesisBlockResult.activeDelegateKeys).isEmpty()
+
+        Assertions.assertThat(pendingBlock.signature).isEqualTo(signaturePublicKeyPair)
+    }
+
+    private fun createMainBlock(
         hash: String,
         height: Long,
         previousHash: String,
@@ -139,7 +228,7 @@ class BlockSignaturesConverterTests : ServiceTests() {
             .build()
     }
 
-    private fun createGenesisBlockMessage(
+    private fun createGenesisBlock(
         hash: String,
         height: Long,
         previousHash: String,
