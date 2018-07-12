@@ -1,7 +1,6 @@
-package io.openfuture.chain.network.client.handler
+package io.openfuture.chain.network.base
 
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.network.base.BaseHandler
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.service.NetworkService
 import org.springframework.context.annotation.Scope
@@ -9,12 +8,12 @@ import org.springframework.stereotype.Component
 
 @Component
 @Scope("prototype")
-class GetPeerClientHandler(
+class PeersHandler(
     private val networkService: NetworkService
-) : BaseHandler(CommunicationProtocol.Type.GET_PEER_RESPONSE) {
+) : BaseHandler(CommunicationProtocol.Type.PEERS) {
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: CommunicationProtocol.Packet) {
-        networkService.addKnownPeers(message.getPeerResponse.peersList)
+        networkService.addKnownPeers(message.peers.peersList)
     }
 
 }

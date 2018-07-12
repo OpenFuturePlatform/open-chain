@@ -41,8 +41,8 @@ class ConnectionClientHandler(
         when (type) {
             Type.HEART_BEAT -> {}
             Type.TIME_SYNC_RESPONSE -> {}
-            Type.GET_PEER_RESPONSE -> {}
-            Type.GET_PEER_REQUEST -> {}
+            Type.GET_PEERS -> {}
+            Type.PEERS -> {}
             else -> {
                 log.error("Illegal packet type: {}", packet)
                 ctx.close()

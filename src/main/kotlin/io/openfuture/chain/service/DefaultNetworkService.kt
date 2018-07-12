@@ -107,8 +107,8 @@ class DefaultNetworkService(
 
     private fun createGetPeersMessage() : CommunicationProtocol.Packet{
         return CommunicationProtocol.Packet.newBuilder()
-            .setType(CommunicationProtocol.Type.GET_PEER_REQUEST)
-            .setGetPeerRequest(CommunicationProtocol.GetPeerRequest.newBuilder()
+            .setType(CommunicationProtocol.Type.GET_PEERS)
+            .setGetPeers(CommunicationProtocol.GetPeers.newBuilder()
                 .setId(networkId)
                 .build())
             .build()
