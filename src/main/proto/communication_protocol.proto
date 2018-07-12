@@ -52,7 +52,6 @@ message Peer {
 }
 
 message GetPeers {
-    string id = 1;
 }
 
 message Peers {

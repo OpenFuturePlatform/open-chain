@@ -109,7 +109,6 @@ class DefaultNetworkService(
         return CommunicationProtocol.Packet.newBuilder()
             .setType(CommunicationProtocol.Type.GET_PEERS)
             .setGetPeers(CommunicationProtocol.GetPeers.newBuilder()
-                .setId(networkId)
                 .build())
             .build()
     }
