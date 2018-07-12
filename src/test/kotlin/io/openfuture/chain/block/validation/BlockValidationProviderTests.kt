@@ -1,7 +1,5 @@
-package io.openfuture.chain.block
+package io.openfuture.chain.block.validation
 
-import io.openfuture.chain.block.validation.BlockValidationProvider
-import io.openfuture.chain.block.validation.BlockValidator
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.crypto.util.HashUtils
@@ -18,7 +16,7 @@ import org.mockito.BDDMockito.given
 import org.mockito.Mock
 import org.springframework.context.ApplicationContext
 
-class BlockValidationServiceTests : ServiceTests() {
+class BlockValidationProviderTests : ServiceTests() {
 
     @Mock private lateinit var blockService: BlockService
 

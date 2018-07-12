@@ -34,11 +34,11 @@ class BlockCreationProcessor(
 
         val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
         val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
-        if (signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)) {
+        if (!signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)) {
             throw IllegalArgumentException("Inbound block's signature is invalid")
         }
 
-        if(signatureCollector.addBlockSignature(pendingBlock)) {
+        if(!signatureCollector.addBlockSignature(pendingBlock)) {
             throw IllegalArgumentException("Either signature is already exists, or not related to pending block")
         }
         return signCreatedBlock(block)
