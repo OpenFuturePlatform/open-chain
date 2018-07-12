@@ -23,10 +23,16 @@ class DefaultBlockService(
     override fun get(hash: String): Block = blockRepository.findByHash(hash)
         ?: throw NotFoundException("Block with hash:$hash not found ")
 
+
     @Transactional(readOnly = true)
-    override fun getLastMain():Block =
-        mainBlockRepository.findFirstByOrderByHeightDesc()
+    override fun getLast():Block =
+        blockRepository.findFirstByOrderByHeightDesc()
             ?: throw NotFoundException("Last block not found!")
+
+    @Transactional(readOnly = true)
+    override fun getLastMain(): MainBlock =
+        mainBlockRepository.findFirstByOrderByHeightDesc()
+            ?: throw NotFoundException("Last Main block not found!")
 
     @Transactional(readOnly = true)
     override fun getLastGenesis(): GenesisBlock =

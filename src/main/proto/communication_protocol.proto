@@ -48,7 +48,7 @@ message Transaction {
     string hash = 1;
     int32 amount = 2;
     int64 timestamp = 3;
-    string recipientkey = 4;
+    string recipientKey = 4;
     string senderKey = 5;
     string signature = 6;
     string senderAddress = 7;
@@ -61,7 +61,7 @@ message MainBlock {
     string previousHash = 3;
     string merkleHash = 4;
     int64 timestamp = 5;
-    int32 version = 6;
+    int32 typeId = 6;
     string signature = 7;
     repeated Transaction transactions = 8;
 }
@@ -72,7 +72,7 @@ message GenesisBlock {
     string previousHash = 3;
     string merkleHash = 4;
     int64 timestamp = 5;
-    int32 version = 6;
+    int32 typeId = 6;
     int64 epochIndex = 7;
     repeated string activeDelegateKeys = 8;
 }

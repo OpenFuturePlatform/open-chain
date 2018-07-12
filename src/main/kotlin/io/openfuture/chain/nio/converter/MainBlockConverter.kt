@@ -33,6 +33,7 @@ class MainBlockConverter(
             .setMerkleHash(mainBlock.merkleHash)
             .setTimestamp(mainBlock.timestamp)
             .setSignature(mainBlock.signature)
+            .setTypeId(mainBlock.typeId)
             .addAllTransactions(mainBlock.transactions.map { transactionConverter.fromEntity(it) }.toList())
             .build()
     }

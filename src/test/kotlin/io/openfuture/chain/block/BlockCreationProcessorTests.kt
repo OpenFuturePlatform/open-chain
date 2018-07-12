@@ -17,7 +17,7 @@ import io.openfuture.chain.service.ConsensusService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
-import org.mockito.BDDMockito.*
+import org.mockito.BDDMockito.given
 import org.mockito.Mock
 
 class BlockCreationProcessorTests: ServiceTests() {
@@ -33,6 +33,8 @@ class BlockCreationProcessorTests: ServiceTests() {
 
     @Before
     fun init() {
+        val block = createMainBlock()
+        given(blockService.getLastMain()).willReturn(block)
         processor = BlockCreationProcessor(
             blockService, signatureCollector,
             keyHolder, signatureManager,
@@ -46,8 +48,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
         val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
 
-        given(blockService.getLastMain()).willReturn(block)
-        given(blockValidationService.isValid(block, block)).willReturn(true)
+        given(blockValidationService.isValid(block)).willReturn(true)
         given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
         given(signatureCollector.addBlockSignature(pendingBlock)).willReturn(true)
         given(keyHolder.getPrivateKey()).willReturn("prvKey".toByteArray())
@@ -64,9 +65,7 @@ class BlockCreationProcessorTests: ServiceTests() {
     fun approveBlockFailsIfBlockIsInvalid() {
         val block = createMainBlock()
         val pendingBlock = PendingBlock(block, SignaturePublicKeyPair("sign", "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"))
-
-        given(blockService.getLastMain()).willReturn(block)
-        given(blockValidationService.isValid(block, block)).willReturn(false)
+        given(blockValidationService.isValid(block)).willReturn(false)
 
         processor.approveBlock(pendingBlock)
     }
@@ -78,8 +77,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
         val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
 
-        given(blockService.getLastMain()).willReturn(block)
-        given(blockValidationService.isValid(block, block)).willReturn(true)
+        given(blockValidationService.isValid(block)).willReturn(true)
         given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
 
         processor.approveBlock(pendingBlock)
@@ -92,8 +90,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
         val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
 
-        given(blockService.getLastMain()).willReturn(block)
-        given(blockValidationService.isValid(block, block)).willReturn(true)
+        given(blockValidationService.isValid(block)).willReturn(true)
         given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
         given(signatureCollector.addBlockSignature(pendingBlock)).willReturn(true)
         given(keyHolder.getPrivateKey()).willReturn("prvKey".toByteArray())
@@ -106,7 +103,6 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Test
     fun fireBlockCreationShouldCreateMainBlock() {
         val transactions = createTransactions()
-        val previousBlock = createMainBlock()
         val genesisBlock = createGenesisBlock()
         val nodeKey = HashUtils.bytesToHexString("pubKey".toByteArray())
         genesisBlock.activeDelegateKeys = setOf(nodeKey, nodeKey)
@@ -114,7 +110,6 @@ class BlockCreationProcessorTests: ServiceTests() {
 
         given(keyHolder.getPublicKey()).willReturn("pubKey".toByteArray())
         given(keyHolder.getPrivateKey()).willReturn("prvKey".toByteArray())
-        given(blockService.getLastMain()).willReturn(previousBlock)
         given(blockService.getLastGenesis()).willReturn(genesisBlock)
         given(signatureManager.sign(any(ByteArray::class.java), any(ByteArray::class.java))).willReturn("sign")
 

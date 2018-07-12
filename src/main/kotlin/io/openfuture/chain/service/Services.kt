@@ -10,6 +10,7 @@ import io.openfuture.chain.domain.hardware.RamInfo
 import io.openfuture.chain.domain.hardware.StorageInfo
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Transaction
 
 interface HardwareInfoService {
@@ -30,7 +31,9 @@ interface BlockService {
 
     fun get(hash: String): Block
 
-    fun getLastMain(): Block
+    fun getLast(): Block
+
+    fun getLastMain(): MainBlock
 
     fun getLastGenesis(): GenesisBlock
 

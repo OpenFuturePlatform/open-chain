@@ -27,8 +27,8 @@ class BlockCreationProcessor(
 
     fun approveBlock(pendingBlock: PendingBlock): PendingBlock {
         val block = pendingBlock.block
-        val lastChainBlock = blockService.getLastMain()
-        if (!blockValidationService.isValid(block, lastChainBlock)) {
+
+        if (!blockValidationService.isValid(block)) {
             throw IllegalArgumentException("Inbound block is not valid")
         }
 
