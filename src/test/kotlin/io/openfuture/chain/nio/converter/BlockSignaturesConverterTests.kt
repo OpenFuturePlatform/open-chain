@@ -49,7 +49,7 @@ class BlockSignaturesConverterTests : ServiceTests() {
             signature,
             listOf()
         )
-        val mainBlock = createMainBlock(hash, height, previousHash, merkleHash, timestamp, signature)
+        val mainBlock = createMainBlockMessage(hash, height, previousHash, merkleHash, timestamp, signature)
         val signatureMessage = CommunicationProtocol.SignaturePublicKeyPair.newBuilder()
             .setSignature(signature)
             .setPublicKey(publicKey)
@@ -95,7 +95,7 @@ class BlockSignaturesConverterTests : ServiceTests() {
             epochIndex,
             setOf()
         )
-        val genesisBlock = createGenesisBlock(hash, height, previousHash, merkleHash, timestamp, epochIndex)
+        val genesisBlock = createGenesisBlockMessage(hash, height, previousHash, merkleHash, timestamp, epochIndex)
         val signatureMessage = createSignaturePublicKeyPair(signature, publicKey)
         val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
         val pendingBlock = PendingBlock(block, signaturePublicKeyPair)
@@ -119,7 +119,7 @@ class BlockSignaturesConverterTests : ServiceTests() {
         Assertions.assertThat(blockSignatures.signature.publicKey).isEqualTo(signatureMessage.publicKey)
     }
 
-    private fun createMainBlock(
+    private fun createMainBlockMessage(
         hash: String,
         height: Long,
         previousHash: String,
@@ -139,7 +139,7 @@ class BlockSignaturesConverterTests : ServiceTests() {
             .build()
     }
 
-    private fun createGenesisBlock(
+    private fun createGenesisBlockMessage(
         hash: String,
         height: Long,
         previousHash: String,

@@ -33,6 +33,8 @@ class BlockCreationProcessorTests: ServiceTests() {
 
     @Before
     fun init() {
+        val block = createMainBlock()
+        given(blockService.getLast()).willReturn(block)
         processor = BlockCreationProcessor(
             blockService, signatureCollector,
             keyHolder, signatureManager,
@@ -46,7 +48,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
         val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
 
-        given(blockService.getLast()).willReturn(block)
+
         given(blockValidationService.isValid(block)).willReturn(true)
         given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
         given(signatureCollector.addBlockSignature(pendingBlock)).willReturn(true)
@@ -64,8 +66,6 @@ class BlockCreationProcessorTests: ServiceTests() {
     fun approveBlockFailsIfBlockIsInvalid() {
         val block = createMainBlock()
         val pendingBlock = PendingBlock(block, SignaturePublicKeyPair("sign", "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"))
-
-        given(blockService.getLast()).willReturn(block)
         given(blockValidationService.isValid(block)).willReturn(false)
 
         processor.approveBlock(pendingBlock)
@@ -78,7 +78,6 @@ class BlockCreationProcessorTests: ServiceTests() {
         val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
         val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
 
-        given(blockService.getLast()).willReturn(block)
         given(blockValidationService.isValid(block)).willReturn(true)
         given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
 
@@ -92,7 +91,6 @@ class BlockCreationProcessorTests: ServiceTests() {
         val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
         val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
 
-        given(blockService.getLast()).willReturn(block)
         given(blockValidationService.isValid(block)).willReturn(true)
         given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
         given(signatureCollector.addBlockSignature(pendingBlock)).willReturn(true)
@@ -106,7 +104,6 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Test
     fun fireBlockCreationShouldCreateMainBlock() {
         val transactions = createTransactions()
-        val previousBlock = createMainBlock()
         val genesisBlock = createGenesisBlock()
         val nodeKey = HashUtils.bytesToHexString("pubKey".toByteArray())
         genesisBlock.activeDelegateKeys = setOf(nodeKey, nodeKey)
@@ -114,7 +111,6 @@ class BlockCreationProcessorTests: ServiceTests() {
 
         given(keyHolder.getPublicKey()).willReturn("pubKey".toByteArray())
         given(keyHolder.getPrivateKey()).willReturn("prvKey".toByteArray())
-        given(blockService.getLast()).willReturn(previousBlock)
         given(blockService.getLastGenesisBlock()).willReturn(genesisBlock)
         given(signatureManager.sign(any(ByteArray::class.java), any(ByteArray::class.java))).willReturn("sign")
 
