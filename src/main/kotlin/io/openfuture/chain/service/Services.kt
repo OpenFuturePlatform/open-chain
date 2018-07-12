@@ -94,7 +94,7 @@ interface NetworkService {
 
     fun getNetworkId(): String
 
-    fun maintainInboundConnections()
+    fun maintainConnectionNumber()
 
     fun addConnectedPeer(channel: Channel, peer: Peer)
 
@@ -102,7 +102,7 @@ interface NetworkService {
 
     fun addKnownPeers(peers: List<CommunicationProtocol.Peer>)
 
-    fun getPeerInfo() : Peer
+    fun getPeer() : Peer
 
     fun connectedPeers(): Set<Peer>
 }

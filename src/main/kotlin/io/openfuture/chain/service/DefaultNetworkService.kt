@@ -39,7 +39,7 @@ class DefaultNetworkService(
     }
 
     @Scheduled(cron="*/30 * * * * *")
-    override fun maintainInboundConnections() {
+    override fun maintainConnectionNumber() {
         val connectionNeeded = properties.peersNumber!! - connectedPeers.size
         val peers = knownPeers.shuffled(SecureRandom())
         for (peer in peers) {
@@ -101,7 +101,7 @@ class DefaultNetworkService(
         return networkId
     }
 
-    override fun getPeerInfo(): Peer {
+    override fun getPeer(): Peer {
         return Peer(networkId, properties.host!!, properties.port!!)
     }
 
