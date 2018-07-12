@@ -6,12 +6,12 @@ import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.SignaturePublicKeyPair
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.MainBlock
-import io.openfuture.chain.entity.Transaction
+import io.openfuture.chain.entity.*
 import io.openfuture.chain.events.BlockCreationEvent
 import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.ConsensusService
 import io.openfuture.chain.util.BlockUtils
+import org.apache.commons.lang3.StringUtils
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 
@@ -21,7 +21,8 @@ class BlockCreationProcessor(
     private val signatureCollector: SignatureCollector,
     private val keyHolder: KeyHolder,
     private val signatureManager: SignatureManager,
-    private val blockValidationService: BlockValidationProvider
+    private val blockValidationService: BlockValidationProvider,
+    private val consensusService: ConsensusService
 ) {
 
     fun approveBlock(pendingBlock: PendingBlock): PendingBlock {
@@ -49,7 +50,7 @@ class BlockCreationProcessor(
         val previousBlock = blockService.getLast()
         val genesisBlock = blockService.getLastGenesisBlock()
         if (publicKey == BlockUtils.getBlockProducer(genesisBlock.activeDelegateKeys, previousBlock)) {
-            create(event.pendingTransactions, previousBlock)
+            create(event.pendingTransactions, previousBlock, genesisBlock)
         }
     }
 
@@ -62,22 +63,44 @@ class BlockCreationProcessor(
         return pendingBlock
     }
 
-    private fun create(transactions: List<Transaction>, previousBlock: Block) {
-        val merkleRootHash = BlockUtils.calculateMerkleRoot(transactions)
-        val time = System.currentTimeMillis()
-        val hash = BlockUtils.calculateHash(previousBlock.hash, merkleRootHash, time, (previousBlock.height + 1))
+    private fun create(transactions: List<Transaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
+        val blockType = if (consensusService.isGenesisBlockNeeded()) {
+            BlockType.GENESIS
+        } else {
+            BlockType.MAIN
+        }
 
-        val privateKey = keyHolder.getPrivateKey()
-        val signature = signatureManager.sign(hash, privateKey)
-        val block = MainBlock(
-            HashUtils.bytesToHexString(hash),
-            previousBlock.height + 1,
-            previousBlock.hash,
-            merkleRootHash,
-            time,
-            signature,
-            transactions
-        )
+        val block = when(blockType) {
+            BlockType.MAIN -> {
+                val merkleRootHash = BlockUtils.calculateMerkleRoot(transactions)
+                val time = System.currentTimeMillis()
+                val hash = BlockUtils.calculateHash(previousBlock.hash, merkleRootHash, time, (previousBlock.height + 1))
+                val privateKey = keyHolder.getPrivateKey()
+                val signature = signatureManager.sign(hash, privateKey)
+                MainBlock(
+                    HashUtils.bytesToHexString(hash),
+                    previousBlock.height + 1,
+                    previousBlock.hash,
+                    merkleRootHash,
+                    time,
+                    signature,
+                    transactions
+                )
+            }
+            BlockType.GENESIS -> {
+                val time = System.currentTimeMillis()
+                val hash = BlockUtils.calculateHash(previousBlock.hash, StringUtils.EMPTY, time, (previousBlock.height + 1))
+                GenesisBlock(
+                    HashUtils.bytesToHexString(hash),
+                    previousBlock.height + 1,
+                    previousBlock.hash,
+                    StringUtils.EMPTY,
+                    time,
+                    genesisBlock.epochIndex + 1,
+                    emptySet()  //replace with active delegates
+                )
+            }
+        }
         signCreatedBlock(block)
     }
 
