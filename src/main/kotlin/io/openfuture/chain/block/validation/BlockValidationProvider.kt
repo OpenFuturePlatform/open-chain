@@ -42,25 +42,11 @@ class BlockValidationProvider(
             return false
         }
 
-        val calculatedHashBytes = BlockUtils.calculateHash(
-            block.previousHash,
-            block.timestamp,
-            block.height,
-            block.merkleHash)
-        if (HashUtils.bytesToHexString(calculatedHashBytes) != block.hash) {
-            return false
-        }
-
-        val lastChainBlock = blockService.getLast()
-        if (block.previousHash != lastChainBlock.hash) {
-            return false
-        }
-
-        if (block.timestamp <= lastChainBlock.timestamp) {
-            return false
-        }
-
-        if (block.height != lastChainBlock.height + 1) {
+        val lastBlock = blockService.getLast()
+        if (!verifyHash(block)
+                || !verifyPreviousHash(block, lastBlock)
+                || !verifyHeight(block, lastBlock)
+                || !verifyTimestamp(block, lastBlock)) {
             return false
         }
 
@@ -73,6 +59,27 @@ class BlockValidationProvider(
 
     fun setEpochTime(value: Long) {
         this.epochTime = value
+    }
+
+    private fun verifyHash(block: Block): Boolean {
+        val calculatedHashBytes = BlockUtils.calculateHash(
+            block.previousHash,
+            block.timestamp,
+            block.height,
+            block.merkleHash)
+        return (HashUtils.bytesToHexString(calculatedHashBytes) == block.hash)
+    }
+
+    private fun verifyPreviousHash(block: Block, lastBlock: Block): Boolean {
+        return (block.previousHash == lastBlock.hash)
+    }
+
+    private fun verifyTimestamp(block: Block, lastBlock: Block): Boolean {
+        return (block.timestamp > lastBlock.timestamp)
+    }
+
+    private fun verifyHeight(block: Block, lastBlock: Block): Boolean {
+        return (block.height == lastBlock.height + 1)
     }
 
 }
