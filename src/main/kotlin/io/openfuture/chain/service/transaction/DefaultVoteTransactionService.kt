@@ -2,13 +2,12 @@ package io.openfuture.chain.service.transaction
 
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
-import io.openfuture.chain.domain.vote.VoteDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
+import io.openfuture.chain.domain.vote.VoteDto
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.repository.VoteTransactionRepository
 import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.service.VoteTransactionService
-import io.openfuture.chain.util.TransactionUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -28,11 +27,6 @@ class DefaultVoteTransactionService(
         return repository.save(VoteTransaction.of(dto))
     }
 
-    override fun create(data: VoteTransactionData): VoteTransactionDto {
-        val networkTime = nodeClock.networkTime()
-        val hash = TransactionUtils.calculateHash(networkTime, data)
-        return VoteTransactionDto(networkTime, data.amount, data.recipientKey, data.recipientAddress,
-            data.senderKey, data.senderAddress, data.senderSignature, hash, data.voteType, data.delegateInfo)
-    }
+    override fun create(data: VoteTransactionData): VoteTransactionDto = VoteTransactionDto.of(nodeClock.networkTime(), data)
 
 }

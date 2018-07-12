@@ -1,9 +1,9 @@
 package io.openfuture.chain.domain.transaction
 
 import io.openfuture.chain.domain.delegate.DelegateNetworkInfo
-import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.dictionary.VoteType
-import io.openfuture.chain.util.DictionaryUtils
+import io.openfuture.chain.util.TransactionUtils
 
 class VoteTransactionDto(
     timestamp: Long,
@@ -19,17 +19,19 @@ class VoteTransactionDto(
 ) : BaseTransactionDto(timestamp, amount, recipientKey, recipientAddress, senderKey, senderAddress,
     senderSignature, hash) {
 
-    constructor(transaction: VoteTransaction) : this(
-        transaction.timestamp,
-        transaction.amount,
-        transaction.recipientKey,
-        transaction.recipientAddress,
-        transaction.senderKey,
-        transaction.senderAddress,
-        transaction.senderSignature,
-        transaction.hash,
-        DictionaryUtils.valueOf(VoteType::class.java, transaction.voteTypeId),
-        DelegateNetworkInfo(transaction.delegateHost, transaction.delegatePort)
-    )
+    companion object {
+        fun of(networkTime: Long, data: VoteTransactionData) = VoteTransactionDto(
+            networkTime,
+            data.amount!!,
+            data.recipientKey!!,
+            data.recipientAddress!!,
+            data.senderKey!!,
+            data.senderAddress!!,
+            data.senderSignature!!,
+            TransactionUtils.calculateHash(networkTime, data),
+            data.voteType,
+            data.delegateInfo
+        )
+    }
 
 }

@@ -1,13 +1,6 @@
 package io.openfuture.chain.domain.transaction.data
 
-class TransferTransactionData(
-    amount: Long,
-    recipientKey: String,
-    recipientAddress: String,
-    senderKey: String,
-    senderAddress: String,
-    senderSignature: String
-) : BaseTransactionData(amount, recipientKey, recipientAddress, senderKey, senderAddress, senderSignature) {
+class TransferTransactionData : BaseTransactionData() {
 
     override fun getByteData(): ByteArray {
         val builder = StringBuilder()

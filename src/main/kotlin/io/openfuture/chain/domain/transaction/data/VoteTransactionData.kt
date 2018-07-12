@@ -4,15 +4,9 @@ import io.openfuture.chain.domain.delegate.DelegateNetworkInfo
 import io.openfuture.chain.entity.dictionary.VoteType
 
 class VoteTransactionData(
-    amount: Long,
-    recipientKey: String,
-    recipientAddress: String,
-    senderKey: String,
-    senderAddress: String,
-    senderSignature: String,
     var voteType: VoteType,
     var delegateInfo: DelegateNetworkInfo
-) : BaseTransactionData(amount, recipientKey, recipientAddress, senderKey, senderAddress, senderSignature) {
+) : BaseTransactionData() {
 
     override fun getByteData(): ByteArray {
         val builder = StringBuilder()

@@ -21,8 +21,8 @@ class Delegate(
 
     companion object {
         fun of(delegateDto: DelegateDto): Delegate = Delegate(
-            delegateDto.delegateInfo.host,
-            delegateDto.delegateInfo.port,
+            delegateDto.networkInfo.host,
+            delegateDto.networkInfo.port,
             delegateDto.rating
         )
     }

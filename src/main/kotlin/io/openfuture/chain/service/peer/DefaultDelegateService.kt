@@ -2,8 +2,9 @@ package io.openfuture.chain.service.peer
 
 import io.openfuture.chain.domain.delegate.DelegateDto
 import io.openfuture.chain.domain.vote.VoteDto
-import io.openfuture.chain.entity.peer.Delegate
+import io.openfuture.chain.entity.Stakeholder
 import io.openfuture.chain.entity.dictionary.VoteType
+import io.openfuture.chain.entity.peer.Delegate
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.network.client.handler.ConnectionClientHandler
 import io.openfuture.chain.property.ConsensusProperties
@@ -12,10 +13,8 @@ import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.service.StakeholderService
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.util.CollectionUtils
 
 @Service
 class DefaultDelegateService(
@@ -26,8 +25,6 @@ class DefaultDelegateService(
 
     companion object {
         private val log = LoggerFactory.getLogger(ConnectionClientHandler::class.java)
-        private const val VOTES_LIMIT = 21
-        private const val RATING = "rating"
     }
 
 
@@ -37,14 +34,8 @@ class DefaultDelegateService(
 
     @Transactional(readOnly = true)
     override fun getActiveDelegates(): List<Delegate> {
-        val request = PageRequest.of(0, consensusProperties.delegatesCount!!, Sort(Sort.Direction.DESC, RATING))
-        return repository.findAll(request).content
-    }
-
-    @Transactional(readOnly = true)
-    override fun isValidActiveDelegates(publicKeysDelegates: List<String>): Boolean {
-        val publicKeysActiveDelegates = this.getActiveDelegates()
-        return CollectionUtils.containsAny(publicKeysActiveDelegates, publicKeysDelegates)
+        val request = PageRequest.of(0, consensusProperties.delegatesCount!!)
+        return repository.findAllOrderByRatingByDesc(request)
     }
 
     @Transactional
@@ -55,25 +46,7 @@ class DefaultDelegateService(
         val stakeholder = stakeholderService.getByPublicKey(dto.stakeholderKey)
         val delegate = this.getByHostAndPort(dto.delegateInfo.host, dto.delegateInfo.port)
 
-        if (VOTES_LIMIT <= stakeholder.votes.size && dto.voteType == VoteType.FOR) {
-            //todo need to throw exception ?
-            log.error("Stakeholder with publicKey ${stakeholder.publicKey} already spent all votes!")
-            return
-        }
-
-        if (stakeholder.votes.contains(delegate) && dto.voteType == VoteType.FOR) {
-            //todo need to throw exception ?
-            log.error("Stakeholder with publicKey ${stakeholder.publicKey} already voted for " +
-                "delegate with host ${delegate.host} and port ${delegate.port}!")
-            return
-        }
-
-        if (!stakeholder.votes.contains(delegate) && dto.voteType == VoteType.AGAINST) {
-            //todo need to throw exception ?
-            log.error("Stakeholder with publicKey ${stakeholder.publicKey} can't remove vote from " +
-                "delegate with host ${delegate.host} and port ${delegate.port}!")
-            return
-        }
+        check(stakeholder, delegate, dto.voteType)
 
         if (dto.voteType == VoteType.FOR) {
             delegate.rating += 1
@@ -85,6 +58,28 @@ class DefaultDelegateService(
 
         stakeholderService.save(stakeholder)
         repository.save(delegate)
+    }
+
+    private fun check(stakeholder: Stakeholder, delegate: Delegate, voteType: VoteType) {
+        if (consensusProperties.delegatesCount!! <= stakeholder.votes.size && voteType == VoteType.FOR) {
+            //todo need to throw exception ?
+            log.error("Stakeholder with publicKey ${stakeholder.publicKey} already spent all votes!")
+            return
+        }
+
+        if (stakeholder.votes.contains(delegate) && voteType == VoteType.FOR) {
+            //todo need to throw exception ?
+            log.error("Stakeholder with publicKey ${stakeholder.publicKey} already voted for " +
+                "delegate with host ${delegate.host} and port ${delegate.port}!")
+            return
+        }
+
+        if (!stakeholder.votes.contains(delegate) && voteType == VoteType.AGAINST) {
+            //todo need to throw exception ?
+            log.error("Stakeholder with publicKey ${stakeholder.publicKey} can't remove vote from " +
+                "delegate with host ${delegate.host} and port ${delegate.port}!")
+            return
+        }
     }
 
 }

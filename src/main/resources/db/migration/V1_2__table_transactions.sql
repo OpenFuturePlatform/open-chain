@@ -7,8 +7,8 @@ CREATE TABLE transactions (
   sender_key        VARCHAR NOT NULL,
   sender_address    VARCHAR NOT NULL,
   sender_signature  VARCHAR NOT NULL,
-  hash              VARCHAR NOT NULL,
-  block_id          INTEGER NULLABLE REFERENCES blocks
+  hash              VARCHAR UNIQUE NOT NULL,
+  block_id          INTEGER REFERENCES blocks
 );
 --
 CREATE TABLE transfer_transactions (
@@ -19,6 +19,7 @@ CREATE TABLE vote_types (
   id  INT PRIMARY KEY,
   key VARCHAR NOT NULL UNIQUE
 );
+
 INSERT INTO vote_types (id, key) VALUES (1, 'FOR');
 INSERT INTO vote_types (id, key) VALUES (2, 'AGAINST');
 --

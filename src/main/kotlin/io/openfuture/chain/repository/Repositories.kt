@@ -8,6 +8,7 @@ import io.openfuture.chain.entity.peer.Delegate
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.stereotype.Repository
@@ -50,6 +51,8 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 
 @Repository
 interface DelegateRepository : BaseRepository<Delegate> {
+
+    fun findAllOrderByRatingByDesc(pageRequest: PageRequest): List<Delegate>
 
     fun findOneByHostAndPort(host: String, port: Int): Delegate?
 

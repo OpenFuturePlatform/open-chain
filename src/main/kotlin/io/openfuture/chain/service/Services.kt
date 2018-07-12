@@ -83,8 +83,7 @@ interface BaseTransactionService<Entity : BaseTransaction> {
 
 }
 
-interface TransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto,
-    Data : BaseTransactionData> : BaseTransactionService<Entity> {
+interface TransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto, Data : BaseTransactionData> : BaseTransactionService<Entity> {
 
     fun add(dto: Dto): Entity
 
@@ -92,19 +91,15 @@ interface TransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto,
 
 }
 
-interface TransferTransactionService : TransactionService<TransferTransaction, TransferTransactionDto,
-    TransferTransactionData>
+interface TransferTransactionService : TransactionService<TransferTransaction, TransferTransactionDto, TransferTransactionData>
 
-interface VoteTransactionService : TransactionService<VoteTransaction, VoteTransactionDto,
-    VoteTransactionData>
+interface VoteTransactionService : TransactionService<VoteTransaction, VoteTransactionDto, VoteTransactionData>
 
 interface DelegateService {
 
     fun getByHostAndPort(host: String, port: Int) : Delegate
 
     fun getActiveDelegates(): List<Delegate>
-
-    fun isValidActiveDelegates(publicKeysDelegates: List<String>): Boolean
 
     fun add(dto: DelegateDto): Delegate
 
