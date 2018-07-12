@@ -2,7 +2,7 @@ package io.openfuture.chain.nio.converter
 
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.protocol.CommunicationProtocol
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
@@ -91,14 +91,14 @@ class TransactionConverterTests {
     }
 
     private fun assertTransaction(transactionMessage: CommunicationProtocol.Transaction, transaction: Transaction) {
-        Assertions.assertThat(transactionMessage.hash).isEqualTo(transaction.hash)
-        Assertions.assertThat(transactionMessage.amount).isEqualTo(transaction.amount)
-        Assertions.assertThat(transactionMessage.timestamp).isEqualTo(transaction.timestamp)
-        Assertions.assertThat(transactionMessage.recipientKey).isEqualTo(transaction.recipientKey)
-        Assertions.assertThat(transactionMessage.senderKey).isEqualTo(transaction.senderKey)
-        Assertions.assertThat(transactionMessage.signature).isEqualTo(transaction.signature)
-        Assertions.assertThat(transactionMessage.senderAddress).isEqualTo(transaction.senderAddress)
-        Assertions.assertThat(transactionMessage.recipientAddress).isEqualTo(transaction.recipientAddress)
+        assertThat(transactionMessage.hash).isEqualTo(transaction.hash)
+        assertThat(transactionMessage.amount).isEqualTo(transaction.amount)
+        assertThat(transactionMessage.timestamp).isEqualTo(transaction.timestamp)
+        assertThat(transactionMessage.recipientKey).isEqualTo(transaction.recipientKey)
+        assertThat(transactionMessage.senderKey).isEqualTo(transaction.senderKey)
+        assertThat(transactionMessage.signature).isEqualTo(transaction.signature)
+        assertThat(transactionMessage.senderAddress).isEqualTo(transaction.senderAddress)
+        assertThat(transactionMessage.recipientAddress).isEqualTo(transaction.recipientAddress)
     }
 
 }

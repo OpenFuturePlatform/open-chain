@@ -6,7 +6,7 @@ import io.openfuture.chain.domain.block.SignaturePublicKeyPair
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.protocol.CommunicationProtocol
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -14,9 +14,12 @@ import org.mockito.Mock
 
 class BlockSignaturesConverterTests : ServiceTests() {
 
-    @Mock private lateinit var genesisBlockConverter: GenesisBlockConverter
-    @Mock private lateinit var mainBlockConverter: MainBlockConverter
-    @Mock private lateinit var signaturePublicKeyPairConverter: SignaturePublicKeyPairConverter
+    @Mock
+    private lateinit var genesisBlockConverter: GenesisBlockConverter
+    @Mock
+    private lateinit var mainBlockConverter: MainBlockConverter
+    @Mock
+    private lateinit var signaturePublicKeyPairConverter: SignaturePublicKeyPairConverter
 
     private lateinit var blockSignaturesConverter: BlockSignaturesConverter
 
@@ -68,18 +71,18 @@ class BlockSignaturesConverterTests : ServiceTests() {
 
         val blockSignatures = blockSignaturesConverter.fromEntity(pendingBlock)
 
-        Assertions.assertThat(blockSignatures.genesisBlock.typeId).isEqualTo(0)
-        Assertions.assertThat(blockSignatures.mainBlock).isNotNull
-        Assertions.assertThat(blockSignatures.mainBlock.hash).isEqualTo(hash)
-        Assertions.assertThat(blockSignatures.mainBlock.height).isEqualTo(height)
-        Assertions.assertThat(blockSignatures.mainBlock.merkleHash).isEqualTo(merkleHash)
-        Assertions.assertThat(blockSignatures.mainBlock.signature).isEqualTo(signature)
-        Assertions.assertThat(blockSignatures.mainBlock.previousHash).isEqualTo(previousHash)
-        Assertions.assertThat(blockSignatures.mainBlock.timestamp).isEqualTo(timestamp)
-        Assertions.assertThat(blockSignatures.mainBlock.transactionsList).isEmpty()
-        Assertions.assertThat(blockSignatures.signature).isEqualTo(signatureMessage)
-        Assertions.assertThat(blockSignatures.signature.signature).isEqualTo(signatureMessage.signature)
-        Assertions.assertThat(blockSignatures.signature.publicKey).isEqualTo(signatureMessage.publicKey)
+        assertThat(blockSignatures.genesisBlock.typeId).isEqualTo(0)
+        assertThat(blockSignatures.mainBlock).isNotNull
+        assertThat(blockSignatures.mainBlock.hash).isEqualTo(hash)
+        assertThat(blockSignatures.mainBlock.height).isEqualTo(height)
+        assertThat(blockSignatures.mainBlock.merkleHash).isEqualTo(merkleHash)
+        assertThat(blockSignatures.mainBlock.signature).isEqualTo(signature)
+        assertThat(blockSignatures.mainBlock.previousHash).isEqualTo(previousHash)
+        assertThat(blockSignatures.mainBlock.timestamp).isEqualTo(timestamp)
+        assertThat(blockSignatures.mainBlock.transactionsList).isEmpty()
+        assertThat(blockSignatures.signature).isEqualTo(signatureMessage)
+        assertThat(blockSignatures.signature.signature).isEqualTo(signatureMessage.signature)
+        assertThat(blockSignatures.signature.publicKey).isEqualTo(signatureMessage.publicKey)
     }
 
     @Test
@@ -98,6 +101,7 @@ class BlockSignaturesConverterTests : ServiceTests() {
             previousHash,
             merkleHash,
             timestamp,
+            signature,
             epochIndex,
             setOf()
         )
@@ -107,7 +111,8 @@ class BlockSignaturesConverterTests : ServiceTests() {
             previousHash,
             merkleHash,
             timestamp,
-            epochIndex
+            epochIndex,
+            signature
         )
         val signatureMessage = SignaturePublicKeyPairConverterTests.createSignaturePublicKeyPair(signature, publicKey)
         val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
@@ -118,18 +123,18 @@ class BlockSignaturesConverterTests : ServiceTests() {
 
         val blockSignatures = blockSignaturesConverter.fromEntity(pendingBlock)
 
-        Assertions.assertThat(blockSignatures.mainBlock.typeId).isEqualTo(0)
-        Assertions.assertThat(blockSignatures.genesisBlock).isNotNull
-        Assertions.assertThat(blockSignatures.genesisBlock.hash).isEqualTo(hash)
-        Assertions.assertThat(blockSignatures.genesisBlock.height).isEqualTo(height)
-        Assertions.assertThat(blockSignatures.genesisBlock.merkleHash).isEqualTo(merkleHash)
-        Assertions.assertThat(blockSignatures.genesisBlock.epochIndex).isEqualTo(epochIndex)
-        Assertions.assertThat(blockSignatures.genesisBlock.previousHash).isEqualTo(previousHash)
-        Assertions.assertThat(blockSignatures.genesisBlock.timestamp).isEqualTo(timestamp)
-        Assertions.assertThat(blockSignatures.genesisBlock.activeDelegateKeysList).isEmpty()
-        Assertions.assertThat(blockSignatures.signature).isEqualTo(signatureMessage)
-        Assertions.assertThat(blockSignatures.signature.signature).isEqualTo(signatureMessage.signature)
-        Assertions.assertThat(blockSignatures.signature.publicKey).isEqualTo(signatureMessage.publicKey)
+        assertThat(blockSignatures.mainBlock.typeId).isEqualTo(0)
+        assertThat(blockSignatures.genesisBlock).isNotNull
+        assertThat(blockSignatures.genesisBlock.hash).isEqualTo(hash)
+        assertThat(blockSignatures.genesisBlock.height).isEqualTo(height)
+        assertThat(blockSignatures.genesisBlock.merkleHash).isEqualTo(merkleHash)
+        assertThat(blockSignatures.genesisBlock.epochIndex).isEqualTo(epochIndex)
+        assertThat(blockSignatures.genesisBlock.previousHash).isEqualTo(previousHash)
+        assertThat(blockSignatures.genesisBlock.timestamp).isEqualTo(timestamp)
+        assertThat(blockSignatures.genesisBlock.activeDelegateKeysList).isEmpty()
+        assertThat(blockSignatures.signature).isEqualTo(signatureMessage)
+        assertThat(blockSignatures.signature.signature).isEqualTo(signatureMessage.signature)
+        assertThat(blockSignatures.signature.publicKey).isEqualTo(signatureMessage.publicKey)
     }
 
     @Test
@@ -171,16 +176,16 @@ class BlockSignaturesConverterTests : ServiceTests() {
         val pendingBlock = blockSignaturesConverter.fromMessage(blockSignatures)
 
         val mainBlockResult = pendingBlock.block as MainBlock
-        Assertions.assertThat(mainBlockResult).isNotNull
-        Assertions.assertThat(mainBlockResult.hash).isEqualTo(hash)
-        Assertions.assertThat(mainBlockResult.height).isEqualTo(height)
-        Assertions.assertThat(mainBlockResult.merkleHash).isEqualTo(merkleHash)
-        Assertions.assertThat(mainBlockResult.signature).isEqualTo(signature)
-        Assertions.assertThat(mainBlockResult.previousHash).isEqualTo(previousHash)
-        Assertions.assertThat(mainBlockResult.timestamp).isEqualTo(timestamp)
-        Assertions.assertThat(mainBlockResult.transactions).isEmpty()
+        assertThat(mainBlockResult).isNotNull
+        assertThat(mainBlockResult.hash).isEqualTo(hash)
+        assertThat(mainBlockResult.height).isEqualTo(height)
+        assertThat(mainBlockResult.merkleHash).isEqualTo(merkleHash)
+        assertThat(mainBlockResult.signature).isEqualTo(signature)
+        assertThat(mainBlockResult.previousHash).isEqualTo(previousHash)
+        assertThat(mainBlockResult.timestamp).isEqualTo(timestamp)
+        assertThat(mainBlockResult.transactions).isEmpty()
 
-        Assertions.assertThat(pendingBlock.signature).isEqualTo(signaturePublicKeyPair)
+        assertThat(pendingBlock.signature).isEqualTo(signaturePublicKeyPair)
     }
 
     @Test
@@ -199,7 +204,8 @@ class BlockSignaturesConverterTests : ServiceTests() {
             previousHash,
             merkleHash,
             timestamp,
-            epochIndex
+            epochIndex,
+            signature
         )
         val signatureKeyPair = SignaturePublicKeyPairConverterTests.createSignaturePublicKeyPair(signature, publicKey)
         val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
@@ -213,6 +219,7 @@ class BlockSignaturesConverterTests : ServiceTests() {
             previousHash,
             merkleHash,
             timestamp,
+            signature,
             epochIndex,
             setOf()
         )
@@ -223,16 +230,16 @@ class BlockSignaturesConverterTests : ServiceTests() {
         val pendingBlock = blockSignaturesConverter.fromMessage(blockSignatures)
 
         val genesisBlockResult = pendingBlock.block as GenesisBlock
-        Assertions.assertThat(genesisBlockResult).isNotNull
-        Assertions.assertThat(genesisBlockResult.hash).isEqualTo(hash)
-        Assertions.assertThat(genesisBlockResult.height).isEqualTo(height)
-        Assertions.assertThat(genesisBlockResult.merkleHash).isEqualTo(merkleHash)
-        Assertions.assertThat(genesisBlockResult.epochIndex).isEqualTo(epochIndex)
-        Assertions.assertThat(genesisBlockResult.previousHash).isEqualTo(previousHash)
-        Assertions.assertThat(genesisBlockResult.timestamp).isEqualTo(timestamp)
-        Assertions.assertThat(genesisBlockResult.activeDelegateKeys).isEmpty()
+        assertThat(genesisBlockResult).isNotNull
+        assertThat(genesisBlockResult.hash).isEqualTo(hash)
+        assertThat(genesisBlockResult.height).isEqualTo(height)
+        assertThat(genesisBlockResult.merkleHash).isEqualTo(merkleHash)
+        assertThat(genesisBlockResult.epochIndex).isEqualTo(epochIndex)
+        assertThat(genesisBlockResult.previousHash).isEqualTo(previousHash)
+        assertThat(genesisBlockResult.timestamp).isEqualTo(timestamp)
+        assertThat(genesisBlockResult.activeDelegateKeys).isEmpty()
 
-        Assertions.assertThat(pendingBlock.signature).isEqualTo(signaturePublicKeyPair)
+        assertThat(pendingBlock.signature).isEqualTo(signaturePublicKeyPair)
     }
 
 }

@@ -3,7 +3,7 @@ package io.openfuture.chain.nio.converter
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.domain.block.SignaturePublicKeyPair
 import io.openfuture.chain.protocol.CommunicationProtocol
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
@@ -38,8 +38,8 @@ class SignaturePublicKeyPairConverterTests : ServiceTests() {
 
         val signatureMessage = signaturePublicKeyPairConverter.fromEntity(signaturePublicKeyPair)
 
-        Assertions.assertThat(signatureMessage.signature).isEqualTo(signature)
-        Assertions.assertThat(signatureMessage.publicKey).isEqualTo(publicKey)
+        assertThat(signatureMessage.signature).isEqualTo(signature)
+        assertThat(signatureMessage.publicKey).isEqualTo(publicKey)
     }
 
     @Test
@@ -51,8 +51,8 @@ class SignaturePublicKeyPairConverterTests : ServiceTests() {
 
         val signaturePublicKeyPair = signaturePublicKeyPairConverter.fromMessage(signatureMessage)
 
-        Assertions.assertThat(signaturePublicKeyPair.signature).isEqualTo(signature)
-        Assertions.assertThat(signaturePublicKeyPair.publicKey).isEqualTo(publicKey)
+        assertThat(signaturePublicKeyPair.signature).isEqualTo(signature)
+        assertThat(signaturePublicKeyPair.publicKey).isEqualTo(publicKey)
     }
 
 }

@@ -4,10 +4,10 @@ import io.openfuture.chain.block.validation.BlockValidationProvider
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.SignaturePublicKeyPair
 import io.openfuture.chain.entity.*
-import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.ConsensusService
 import io.openfuture.chain.util.BlockUtils
@@ -70,13 +70,13 @@ class BlockCreationProcessor(
             BlockType.MAIN
         }
 
+        val merkleRootHash = BlockUtils.calculateMerkleRoot(transactions)
+        val time = System.currentTimeMillis()
+        val hash = BlockUtils.calculateHash(previousBlock.hash, merkleRootHash, time, (previousBlock.height + 1))
+        val privateKey = keyHolder.getPrivateKey()
+        val signature = signatureManager.sign(hash, privateKey)
         val block = when(blockType) {
             BlockType.MAIN -> {
-                val merkleRootHash = BlockUtils.calculateMerkleRoot(transactions)
-                val time = System.currentTimeMillis()
-                val hash = BlockUtils.calculateHash(previousBlock.hash, merkleRootHash, time, (previousBlock.height + 1))
-                val privateKey = keyHolder.getPrivateKey()
-                val signature = signatureManager.sign(hash, privateKey)
                 MainBlock(
                     HashUtils.bytesToHexString(hash),
                     previousBlock.height + 1,
@@ -96,6 +96,7 @@ class BlockCreationProcessor(
                     previousBlock.hash,
                     StringUtils.EMPTY,
                     time,
+                    signature,
                     genesisBlock.epochIndex + 1,
                     emptySet()  //replace with active delegates
                 )

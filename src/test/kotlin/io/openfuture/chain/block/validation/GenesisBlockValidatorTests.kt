@@ -1,6 +1,5 @@
 package io.openfuture.chain.block.validation
 
-import io.openfuture.chain.block.validation.GenesisBlockValidator
 import io.openfuture.chain.entity.GenesisBlock
 import org.assertj.core.api.Assertions
 import org.junit.Before
@@ -23,6 +22,7 @@ class GenesisBlockValidatorTests {
             "1",
             "1",
             1L,
+            "signature",
             1L,
             emptySet()
         )

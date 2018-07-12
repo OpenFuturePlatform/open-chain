@@ -73,8 +73,9 @@ message GenesisBlock {
     string merkleHash = 4;
     int64 timestamp = 5;
     int32 typeId = 6;
-    int64 epochIndex = 7;
-    repeated string activeDelegateKeys = 8;
+    string signature = 7;
+    int64 epochIndex = 8;
+    repeated string activeDelegateKeys = 9;
 }
 
 message SignaturePublicKeyPair {

@@ -17,6 +17,7 @@ class GenesisBlockConverter: MessageConverter<Block,  CommunicationProtocol.Gene
             message.previousHash,
             message.merkleHash,
             message.timestamp,
+            message.signature,
             message.epochIndex,
             message.activeDelegateKeysList.toSet())
     }
@@ -30,6 +31,7 @@ class GenesisBlockConverter: MessageConverter<Block,  CommunicationProtocol.Gene
             .setMerkleHash(genesisBlock.merkleHash)
             .setTimestamp(genesisBlock.timestamp)
             .setEpochIndex(genesisBlock.epochIndex)
+            .setSignature(genesisBlock.signature)
             .addAllActiveDelegateKeys(genesisBlock.activeDelegateKeys.toList())
             .build()
     }

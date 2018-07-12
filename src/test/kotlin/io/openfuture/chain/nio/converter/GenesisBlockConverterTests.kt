@@ -4,7 +4,7 @@ import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.protocol.CommunicationProtocol
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
@@ -20,7 +20,8 @@ class GenesisBlockConverterTests : ServiceTests() {
             previousHash: String,
             merkleHash: String,
             timestamp: Long,
-            epochIndex: Long
+            epochIndex: Long,
+            signature: String
         ): CommunicationProtocol.GenesisBlock {
             return CommunicationProtocol.GenesisBlock.newBuilder()
                 .setHash(hash)
@@ -30,6 +31,7 @@ class GenesisBlockConverterTests : ServiceTests() {
                 .setTimestamp(timestamp)
                 .setEpochIndex(epochIndex)
                 .setTypeId(BlockType.GENESIS.typeId)
+                .setSignature(signature)
                 .addAllActiveDelegateKeys(listOf())
                 .build()
         }
@@ -42,6 +44,7 @@ class GenesisBlockConverterTests : ServiceTests() {
 
     @Test
     fun fromMessageShouldCreateGenesisBlockEntity() {
+        val signature = "signature"
         val hash = "hash"
         val height = 1L
         val previousHash = "previousHash"
@@ -49,22 +52,31 @@ class GenesisBlockConverterTests : ServiceTests() {
         val timestamp = 2L
         val epochIndex = 1L
         val genesisBlockMessage = createGenesisBlockMessage(
-            hash, height, previousHash, merkleHash, timestamp, epochIndex)
+            hash,
+            height,
+            previousHash,
+            merkleHash,
+            timestamp,
+            epochIndex,
+            signature
+        )
 
         val genesisBlock = genesisBlockConverter.fromMessage(genesisBlockMessage)
 
-        Assertions.assertThat(genesisBlock).isNotNull
-        Assertions.assertThat(genesisBlock.hash).isEqualTo(hash)
-        Assertions.assertThat(genesisBlock.height).isEqualTo(height)
-        Assertions.assertThat(genesisBlock.merkleHash).isEqualTo(merkleHash)
-        Assertions.assertThat(genesisBlock.epochIndex).isEqualTo(epochIndex)
-        Assertions.assertThat(genesisBlock.previousHash).isEqualTo(previousHash)
-        Assertions.assertThat(genesisBlock.timestamp).isEqualTo(timestamp)
-        Assertions.assertThat(genesisBlock.activeDelegateKeys).isEmpty()
+        assertThat(genesisBlock).isNotNull
+        assertThat(genesisBlock.hash).isEqualTo(hash)
+        assertThat(genesisBlock.height).isEqualTo(height)
+        assertThat(genesisBlock.merkleHash).isEqualTo(merkleHash)
+        assertThat(genesisBlock.epochIndex).isEqualTo(epochIndex)
+        assertThat(genesisBlock.previousHash).isEqualTo(previousHash)
+        assertThat(genesisBlock.timestamp).isEqualTo(timestamp)
+        assertThat(genesisBlock.signature).isEqualTo(signature)
+        assertThat(genesisBlock.activeDelegateKeys).isEmpty()
     }
 
     @Test
     fun fromEntityShouldCreateGenesisBlockMessage() {
+        val signature = "signature"
         val hash = "hash"
         val height = 1L
         val previousHash = "previousHash"
@@ -77,20 +89,22 @@ class GenesisBlockConverterTests : ServiceTests() {
             previousHash,
             merkleHash,
             timestamp,
+            signature,
             epochIndex,
             setOf()
         )
 
         val genesisBlockMessage = genesisBlockConverter.fromEntity(genesisBlock)
 
-        Assertions.assertThat(genesisBlockMessage).isNotNull
-        Assertions.assertThat(genesisBlockMessage.hash).isEqualTo(hash)
-        Assertions.assertThat(genesisBlockMessage.height).isEqualTo(height)
-        Assertions.assertThat(genesisBlockMessage.merkleHash).isEqualTo(merkleHash)
-        Assertions.assertThat(genesisBlockMessage.epochIndex).isEqualTo(epochIndex)
-        Assertions.assertThat(genesisBlockMessage.previousHash).isEqualTo(previousHash)
-        Assertions.assertThat(genesisBlockMessage.timestamp).isEqualTo(timestamp)
-        Assertions.assertThat(genesisBlockMessage.activeDelegateKeysList).isEmpty()
+        assertThat(genesisBlockMessage).isNotNull
+        assertThat(genesisBlockMessage.hash).isEqualTo(hash)
+        assertThat(genesisBlockMessage.height).isEqualTo(height)
+        assertThat(genesisBlockMessage.merkleHash).isEqualTo(merkleHash)
+        assertThat(genesisBlockMessage.epochIndex).isEqualTo(epochIndex)
+        assertThat(genesisBlockMessage.previousHash).isEqualTo(previousHash)
+        assertThat(genesisBlockMessage.timestamp).isEqualTo(timestamp)
+        assertThat(genesisBlockMessage.signature).isEqualTo(signature)
+        assertThat(genesisBlockMessage.activeDelegateKeysList).isEmpty()
     }
 
 }

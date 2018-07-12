@@ -23,6 +23,9 @@ abstract class Block(
     @Column(name = "timestamp", nullable = false)
     var timestamp: Long,
 
+    @Column(name = "signature", nullable = false)
+    var signature: String,
+
     @Column(name = "typeId", nullable = false)
     var typeId: Int
 
