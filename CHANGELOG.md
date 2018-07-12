@@ -18,12 +18,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Get current epoch height
 - Check is genesis block needed
 - Generating private and public key pairs on app start and saving in files if not exist
-- Getting private and public key
 - Shuffle active delegates
-- Calculating transaction merkle hash
+- Transaction merkle hash calculation
 - Block production
 - Block validation
-- Converters for block, transaction, signature from prototype to business object and backward
+- Converters for block, transaction, signature from prototype to business object and vice versa
 - Accumulation signatures from nodes
 - Block approving
 - Block applying by scheduling
