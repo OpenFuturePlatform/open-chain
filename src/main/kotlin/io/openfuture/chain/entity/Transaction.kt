@@ -1,5 +1,6 @@
 package io.openfuture.chain.entity
 
+import io.openfuture.chain.domain.transaction.TransactionRequest
 import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -19,7 +20,7 @@ class Transaction(
     var timestamp: Long,
 
     @Column(name = "recipient_key", nullable = false)
-    var recipientkey: String,
+    var recipientKey: String,
 
     @Column(name = "sender_key", nullable = false)
     var senderKey: String,
@@ -27,7 +28,27 @@ class Transaction(
     @Column(name = "signature", nullable = false)
     var signature: String,
 
-    @Column(name = "block_id", nullable = true)
-    var blockId: Int? = null
+    @Column(name = "sender_address", nullable = false)
+    var senderAddress: String,
 
-) : BaseModel()
+    @Column(name = "recipient_address", nullable = false)
+    var recipientAddress: String,
+
+    @Column(name = "block_hash", nullable = true)
+    var blockHash: String? = null
+
+) : BaseModel() {
+
+    companion object {
+        fun of(request: TransactionRequest): Transaction = Transaction(
+            request.hash,
+            request.amount!!,
+            request.timestamp!!,
+            request.recipientKey!!,
+            request.senderKey!!,
+            request.signature!!,
+            request.senderAddress!!,
+            request.recipientAddress!!
+        )
+    }
+}

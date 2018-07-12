@@ -11,7 +11,7 @@ class MainBlock(hash: String, height: Long, previousHash: String,
     var signature: String,
 
     @OneToMany
-    @JoinColumn(name = "block_id", nullable = true)
+    @JoinColumn(name = "block_hash", nullable = true)
     var transactions: List<Transaction>
 
 ) : Block(hash, height, previousHash, merkleHash, timestamp, BlockType.MAIN.typeId)

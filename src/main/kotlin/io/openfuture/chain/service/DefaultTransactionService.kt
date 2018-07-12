@@ -31,7 +31,7 @@ class DefaultTransactionService(
 
     @Transactional(readOnly = true)
     override fun getPendingTransactions(): List<Transaction>
-        = transactionRepository.findAllByBlockIdIsNull()
+        = transactionRepository.findAllByBlockHashIsNull()
 
 
 }

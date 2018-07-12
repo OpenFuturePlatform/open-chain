@@ -11,6 +11,8 @@ interface BaseRepository<T> : JpaRepository<T, Int>
 @Repository
 interface BlockRepository<T: Block> : BaseRepository<T> {
 
+    fun findByHash(hash: String): Block?
+
     fun findFirstByOrderByHeightDesc(): T?
 
     fun findFirstByTypeIdOrderByHeight(typeId: Int): T?
@@ -26,7 +28,7 @@ interface GenesisBlockRepository : BlockRepository<GenesisBlock>
 @Repository
 interface TransactionRepository : BaseRepository<Transaction> {
 
-    fun findAllByBlockIdIsNull(): List<Transaction>
+    fun findAllByBlockHashIsNull(): List<Transaction>
 
 }
 
@@ -36,5 +38,12 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
     fun findOneByIndex(index: Int): SeedWord
 
     fun findOneByValue(value: String): SeedWord?
+
+}
+
+@Repository
+interface WalletRepository : BaseRepository<Wallet> {
+
+    fun findOneByAddress(address: String): Wallet?
 
 }

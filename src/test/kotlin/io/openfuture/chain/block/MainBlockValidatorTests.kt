@@ -33,7 +33,9 @@ class MainBlockValidatorTests : ServiceTests() {
                     1500000000L,
                     "recipient_key1",
                     "sender_key1",
-                    "signature1"
+                    "signature1",
+                    "send_address",
+                    "recip_address"
                 ),
                 Transaction(
                     "transaction_hash2",
@@ -41,7 +43,9 @@ class MainBlockValidatorTests : ServiceTests() {
                     1500000002L,
                     "recipient_ke2",
                     "sender_key2",
-                    "signature2"
+                    "signature2",
+                    "send_address",
+                    "recip_address"
                 )
             )
         )
@@ -67,7 +71,9 @@ class MainBlockValidatorTests : ServiceTests() {
                     1500000000L,
                     "recipient_key1",
                     "sender_key1",
-                    "signature1"
+                    "signature1",
+                    "send_address",
+                    "recip_address"
                 ),
                 Transaction(
                     "transaction_hash2",
@@ -75,7 +81,9 @@ class MainBlockValidatorTests : ServiceTests() {
                     1500000002L,
                     "recipient_ke2",
                     "sender_key2",
-                    "signature2"
+                    "signature2",
+                    "send_address",
+                    "recip_address"
                 )
             )
         )

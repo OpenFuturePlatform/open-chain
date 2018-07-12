@@ -51,6 +51,8 @@ message Transaction {
     string recipientkey = 4;
     string senderKey = 5;
     string signature = 6;
+    string senderAddress = 7;
+    string recipientAddress = 8;
 }
 
 message MainBlock {
