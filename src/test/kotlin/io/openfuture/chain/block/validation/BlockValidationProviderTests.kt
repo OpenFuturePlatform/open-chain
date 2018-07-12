@@ -19,9 +19,7 @@ import org.springframework.context.ApplicationContext
 class BlockValidationProviderTests : ServiceTests() {
 
     @Mock private lateinit var blockService: BlockService
-
     @Mock private lateinit var applicationContext: ApplicationContext
-
     @Mock private lateinit var blockValidator: BlockValidator
 
     private lateinit var blockValidationService: BlockValidationProvider

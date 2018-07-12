@@ -14,12 +14,9 @@ import org.mockito.Mock
 
 class BlockSignaturesConverterTests : ServiceTests() {
 
-    @Mock
-    private lateinit var genesisBlockConverter: GenesisBlockConverter
-    @Mock
-    private lateinit var mainBlockConverter: MainBlockConverter
-    @Mock
-    private lateinit var signaturePublicKeyPairConverter: SignaturePublicKeyPairConverter
+    @Mock private lateinit var genesisBlockConverter: GenesisBlockConverter
+    @Mock private lateinit var mainBlockConverter: MainBlockConverter
+    @Mock private lateinit var signaturePublicKeyPairConverter: SignaturePublicKeyPairConverter
 
     private lateinit var blockSignaturesConverter: BlockSignaturesConverter
 
