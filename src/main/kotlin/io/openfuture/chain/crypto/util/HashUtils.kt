@@ -1,6 +1,5 @@
 package io.openfuture.chain.crypto.util
 
-import org.apache.commons.lang3.StringUtils
 import org.bouncycastle.crypto.PBEParametersGenerator
 import org.bouncycastle.crypto.digests.RIPEMD160Digest
 import org.bouncycastle.crypto.digests.SHA512Digest
@@ -11,7 +10,6 @@ import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.security.MessageDigest
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
-import javax.xml.bind.DatatypeConverter
 
 object HashUtils {
 
@@ -21,13 +19,9 @@ object HashUtils {
     private const val ITERATION_COUNT = 2048
 
 
-    fun generateHash(bytes: ByteArray) = bytesToHexString(sha256(bytes))
+    fun generateHash(bytes: ByteArray) = ByteUtils.toHexString(sha256(bytes))!!
 
     fun doubleSha256(bytes: ByteArray) = sha256(sha256(bytes))
-
-    fun bytesToHexString(bytes: ByteArray) = ByteUtils.toHexString(bytes)
-
-    fun hexStringToBytes(hex: String): ByteArray = ByteUtils.fromHexString(hex)
 
     fun keyHash(bytes: ByteArray): ByteArray {
         val result = ByteArray(20)

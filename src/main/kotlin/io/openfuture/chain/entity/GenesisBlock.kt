@@ -1,11 +1,12 @@
 package io.openfuture.chain.entity
 
+import org.apache.commons.lang3.StringUtils
 import javax.persistence.*
 
 @Entity
 @Table(name = "genesis_blocks")
-class GenesisBlock(hash: String, height: Long,
-        previousHash: String, merkleHash: String, timestamp: Long, signature: String,
+class GenesisBlock(height: Long,
+        previousHash: String, timestamp: Long, signature: String,
 
     @Column(name = "epoch_index", nullable = false)
     var epochIndex: Long,
@@ -15,4 +16,4 @@ class GenesisBlock(hash: String, height: Long,
     @Column(name="delegate_key")
     var activeDelegateKeys: Set<String>
 
-) : Block(hash, height, previousHash, merkleHash, timestamp, signature, BlockType.GENESIS.id)
+) : Block(height, previousHash, StringUtils.EMPTY, timestamp, signature, BlockType.GENESIS.id)

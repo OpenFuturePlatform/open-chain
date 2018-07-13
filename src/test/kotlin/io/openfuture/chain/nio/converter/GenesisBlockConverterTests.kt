@@ -45,10 +45,10 @@ class GenesisBlockConverterTests : ServiceTests() {
     @Test
     fun fromMessageShouldCreateGenesisBlockEntity() {
         val signature = "signature"
-        val hash = "hash"
+        val hash = "2c9acf0a1f90c65e343cac0c0894be7d44f4230b484e50862d2a2437af943efc"
         val height = 1L
         val previousHash = "previousHash"
-        val merkleHash = "merkleHash"
+        val merkleHash = ""
         val timestamp = 2L
         val epochIndex = 1L
         val genesisBlockMessage = createGenesisBlockMessage(
@@ -77,16 +77,14 @@ class GenesisBlockConverterTests : ServiceTests() {
     @Test
     fun fromEntityShouldCreateGenesisBlockMessage() {
         val signature = "signature"
-        val hash = "hash"
+        val hash = "9fc9db3c58c3226c1b38c454ca28ae89bb5cc1ea6fa55f510c3853e422ec04a7"
         val height = 1L
-        val previousHash = "previousHash"
-        val merkleHash = "merkleHash"
+        val previousHash = ""
+        val merkleHash = ""
         val timestamp = 2L
         val epochIndex = 1L
         val genesisBlock = GenesisBlock(
-            hash,
             height,
-            previousHash,
             merkleHash,
             timestamp,
             signature,

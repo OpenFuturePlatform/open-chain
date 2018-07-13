@@ -13,10 +13,8 @@ class GenesisBlockConverter: MessageConverter<Block,  CommunicationProtocol.Gene
 
     override fun fromMessage(message: CommunicationProtocol.GenesisBlock): GenesisBlock {
         return GenesisBlock(
-            message.hash,
             message.height,
             message.previousHash,
-            message.merkleHash,
             message.timestamp,
             message.signature,
             message.epochIndex,

@@ -1,9 +1,9 @@
 package io.openfuture.chain.block.validation
 
-import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.util.BlockUtils
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
@@ -59,7 +59,7 @@ class BlockValidationProvider(
             block.timestamp,
             block.height,
             block.merkleHash)
-        return (HashUtils.bytesToHexString(calculatedHashBytes) == block.hash)
+        return (ByteUtils.toHexString(calculatedHashBytes) == block.hash)
     }
 
     private fun verifyPreviousHash(block: Block, lastBlock: Block): Boolean = (block.previousHash == lastBlock.hash)

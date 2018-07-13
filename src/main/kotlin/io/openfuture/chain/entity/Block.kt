@@ -1,15 +1,14 @@
 package io.openfuture.chain.entity
 
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.base.BaseModel
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import javax.persistence.*
 
 @Entity
 @Table(name = "blocks")
 @Inheritance(strategy = InheritanceType.JOINED)
 abstract class Block(
-
-    @Column(name = "hash", nullable = false)
-    var hash: String,
 
     @Column(name = "height", nullable = false)
     var height: Long,
@@ -27,7 +26,10 @@ abstract class Block(
     var signature: String,
 
     @Column(name = "typeId", nullable = false)
-    var typeId: Int
+    var typeId: Int,
+
+    @Column(name = "hash", nullable = false)
+    var hash: String = ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height).toByteArray()))
 
 ) : BaseModel()
 

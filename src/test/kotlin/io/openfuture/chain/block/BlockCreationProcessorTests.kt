@@ -16,6 +16,7 @@ import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.ConsensusService
 import org.assertj.core.api.Assertions.assertThat
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -46,8 +47,8 @@ class BlockCreationProcessorTests: ServiceTests() {
     fun approveBlockShouldValidateAndSignInboundBlock() {
         val block = createMainBlock()
         val pendingBlock = createPendingBlock(block)
-        val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
-        val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
+        val hashAsBytes = ByteUtils.fromHexString(block.hash)
+        val keyAsBytes = ByteUtils.fromHexString(pendingBlock.signature.publicKey)
 
         given(blockValidationService.isValid(block)).willReturn(true)
         given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
@@ -75,8 +76,8 @@ class BlockCreationProcessorTests: ServiceTests() {
     fun approveBlockFailsIfSignatureVerificationFailed() {
         val block = createMainBlock()
         val pendingBlock = createPendingBlock(block)
-        val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
-        val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
+        val hashAsBytes = ByteUtils.fromHexString(block.hash)
+        val keyAsBytes = ByteUtils.fromHexString(pendingBlock.signature.publicKey)
 
         given(blockValidationService.isValid(block)).willReturn(true)
         given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
@@ -88,8 +89,8 @@ class BlockCreationProcessorTests: ServiceTests() {
     fun approveBlockFailsIfBlockSignatureIsAlreadyExists() {
         val block = createMainBlock()
         val pendingBlock = createPendingBlock(block)
-        val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
-        val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
+        val hashAsBytes = ByteUtils.fromHexString(block.hash)
+        val keyAsBytes = ByteUtils.fromHexString(pendingBlock.signature.publicKey)
 
         given(blockValidationService.isValid(block)).willReturn(true)
         given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
@@ -102,7 +103,7 @@ class BlockCreationProcessorTests: ServiceTests() {
     fun fireBlockCreationShouldCreateMainBlock() {
         val transactions = createTransactions()
         val genesisBlock = createGenesisBlock()
-        val nodeKey = HashUtils.bytesToHexString("pubKey".toByteArray())
+        val nodeKey = ByteUtils.toHexString("pubKey".toByteArray())
         genesisBlock.activeDelegateKeys = setOf(nodeKey, nodeKey)
         val event = BlockCreationEvent(transactions)
 
@@ -122,7 +123,6 @@ class BlockCreationProcessorTests: ServiceTests() {
     }
 
     private fun createMainBlock() = MainBlock(
-        "454ebbef16f93d174ab0e5e020f8ab80f2cf117e1b6beeeae3151bc87e99f081",
         123,
         "prev_block_hash",
         "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
@@ -132,10 +132,8 @@ class BlockCreationProcessorTests: ServiceTests() {
     )
 
     private fun createGenesisBlock() = GenesisBlock(
-        "454ebbef16f93d174ab0e5e020f8ab80f2cf117e1b6beeeae3151bc87e99f081",
         123,
         "prev_block_hash",
-        "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
         1512345678L,
         "signature",
         1,

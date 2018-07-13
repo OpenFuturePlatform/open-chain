@@ -3,7 +3,6 @@ package io.openfuture.chain.block
 import io.openfuture.chain.block.validation.BlockValidationProvider
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
-import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.SignaturePublicKeyPair
@@ -11,7 +10,7 @@ import io.openfuture.chain.entity.*
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.ConsensusService
 import io.openfuture.chain.util.BlockUtils
-import org.apache.commons.lang3.StringUtils
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 
@@ -32,8 +31,8 @@ class BlockCreationProcessor(
             throw IllegalArgumentException("Inbound block is not valid")
         }
 
-        val hashAsBytes = HashUtils.hexStringToBytes(block.hash)
-        val keyAsBytes = HashUtils.hexStringToBytes(pendingBlock.signature.publicKey)
+        val hashAsBytes = ByteUtils.fromHexString(block.hash)
+        val keyAsBytes = ByteUtils.fromHexString(pendingBlock.signature.publicKey)
         if (!signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)) {
             throw IllegalArgumentException("Inbound block's signature is invalid")
         }
@@ -46,7 +45,7 @@ class BlockCreationProcessor(
 
     @EventListener
     fun fireBlockCreation(event: BlockCreationEvent) {
-        val publicKey = HashUtils.bytesToHexString(keyHolder.getPublicKey())
+        val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
         val previousBlock = blockService.getLastMain()
         val genesisBlock = blockService.getLastGenesis()
         if (publicKey == BlockUtils.getBlockProducer(genesisBlock.activeDelegateKeys, previousBlock)) {
@@ -55,8 +54,8 @@ class BlockCreationProcessor(
     }
 
     private fun signCreatedBlock(block: Block): PendingBlock {
-        val signature = signatureManager.sign(HashUtils.hexStringToBytes(block.hash), keyHolder.getPrivateKey())
-        val publicKey = HashUtils.bytesToHexString(keyHolder.getPublicKey())
+        val signature = signatureManager.sign(ByteUtils.fromHexString(block.hash), keyHolder.getPrivateKey())
+        val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
         val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
         val pendingBlock = PendingBlock(block, signaturePublicKeyPair)
         signatureCollector.setPendingBlock(pendingBlock)
@@ -74,7 +73,6 @@ class BlockCreationProcessor(
                 val hash = BlockUtils.calculateHash(previousBlock.hash, time, (previousBlock.height + 1), merkleRootHash)
                 val signature = signatureManager.sign(hash, privateKey)
                 MainBlock(
-                    HashUtils.bytesToHexString(hash),
                     previousBlock.height + 1,
                     previousBlock.hash,
                     merkleRootHash,
@@ -87,10 +85,8 @@ class BlockCreationProcessor(
                 val hash = BlockUtils.calculateHash(previousBlock.hash, time, (previousBlock.height + 1))
                 val signature = signatureManager.sign(hash, privateKey)
                 GenesisBlock(
-                    HashUtils.bytesToHexString(hash),
                     previousBlock.height + 1,
                     previousBlock.hash,
-                    StringUtils.EMPTY,
                     time,
                     signature,
                     genesisBlock.epochIndex + 1,

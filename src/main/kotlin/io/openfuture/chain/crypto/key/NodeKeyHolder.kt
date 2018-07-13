@@ -5,6 +5,7 @@ import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.service.CryptoService
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Component
 import java.io.File
 import java.nio.charset.Charset
@@ -28,8 +29,8 @@ class NodeKeyHolder(
         val privateKeyValue = File(properties.privateKeyPath).readText(Charset.forName("UTF-8"))
         val publicKeyValue = File(properties.publicKeyPath).readText(Charset.forName("UTF-8"))
 
-        privateKey = HashUtils.hexStringToBytes(privateKeyValue)
-        publicKey = HashUtils.hexStringToBytes(publicKeyValue)
+        privateKey = ByteUtils.fromHexString(privateKeyValue)
+        publicKey = ByteUtils.fromHexString(publicKeyValue)
     }
 
     fun getPrivateKey(): ByteArray {
@@ -47,8 +48,8 @@ class NodeKeyHolder(
         if (!privateKeyFile.exists() || !publicKeyFile.exists()) {
             val seedPhrase = cryptoService.generateSeedPhrase()
             val masterKey = ExtendedKey.root(seedCalculator.calculateSeed(seedPhrase))
-            val privateKeyValue = HashUtils.bytesToHexString(masterKey.ecKey.getPrivate())
-            val publicKeyValue = HashUtils.bytesToHexString(masterKey.ecKey.public)
+            val privateKeyValue = ByteUtils.toHexString(masterKey.ecKey.getPrivate())
+            val publicKeyValue = ByteUtils.toHexString(masterKey.ecKey.public)
 
             privateKeyFile.writeText(privateKeyValue, Charsets.UTF_8)
             publicKeyFile.writeText(publicKeyValue, Charsets.UTF_8)

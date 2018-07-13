@@ -15,7 +15,6 @@ class MainBlockConverter(
 
     override fun fromMessage(message: CommunicationProtocol.MainBlock): MainBlock {
         return MainBlock(
-            message.hash,
             message.height,
             message.previousHash,
             message.merkleHash,

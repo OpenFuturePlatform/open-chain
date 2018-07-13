@@ -20,7 +20,6 @@ class MainBlockValidatorTests : ServiceTests() {
     @Test
     fun isValidShouldReturnTrue() {
         val block = MainBlock(
-            "454ebbef16f93d174ab0e5e020f8ab80f2cf117e1b6beeeae3151bc87e99f081",
             123,
             "prev_block_hash",
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
@@ -58,7 +57,6 @@ class MainBlockValidatorTests : ServiceTests() {
     @Test
     fun isValidShouldReturnFalse() {
         val block = MainBlock(
-            "454ebbef16f93d174ab0e5e020f8ab80f2cf117e1b6beeeae3151bc87e99f081",
             123,
             "prev_block_hash",
             "0000000000000000000000000000000000000000000000000000000000000000",

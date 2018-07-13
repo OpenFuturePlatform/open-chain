@@ -17,9 +17,7 @@ class GenesisBlockValidatorTests {
     @Test
     fun isValidShouldReturnTrue() {
         val block = GenesisBlock(
-            "1",
             1L,
-            "1",
             "1",
             1L,
             "signature",

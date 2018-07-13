@@ -40,7 +40,6 @@ class BlockSignaturesConverterTests : ServiceTests() {
         val merkleHash = "merkleHash"
         val timestamp = 2L
         val block = MainBlock(
-            hash,
             height,
             previousHash,
             merkleHash,
@@ -93,10 +92,8 @@ class BlockSignaturesConverterTests : ServiceTests() {
         val timestamp = 2L
         val epochIndex = 1L
         val block = GenesisBlock(
-            hash,
             height,
             previousHash,
-            merkleHash,
             timestamp,
             signature,
             epochIndex,
@@ -138,7 +135,7 @@ class BlockSignaturesConverterTests : ServiceTests() {
     fun fromMessageShouldReturnPendingBlockWithMainBlockInside() {
         val signature = "signature"
         val publicKey = "publicKey"
-        val hash = "hash"
+        val hash = "50c7c9f117c06ac6850f73e87bbcfa20118bb9349040b82b0635081ccab98975"
         val height = 1L
         val previousHash = "previousHash"
         val merkleHash = "merkleHash"
@@ -158,7 +155,6 @@ class BlockSignaturesConverterTests : ServiceTests() {
             .setSignature(signatureKeyPair)
             .build()
         val mainBlock = MainBlock(
-            hash,
             height,
             previousHash,
             merkleHash,
@@ -189,10 +185,10 @@ class BlockSignaturesConverterTests : ServiceTests() {
     fun fromMessageShouldReturnPendingBlockWithGenesisBlockInside() {
         val signature = "signature"
         val publicKey = "publicKey"
-        val hash = "hash"
+        val hash = "2c9acf0a1f90c65e343cac0c0894be7d44f4230b484e50862d2a2437af943efc"
         val height = 1L
         val previousHash = "previousHash"
-        val merkleHash = "merkleHash"
+        val merkleHash = ""
         val timestamp = 2L
         val epochIndex = 1L
         val genesisBlockMessage = GenesisBlockConverterTests.createGenesisBlockMessage(
@@ -211,10 +207,8 @@ class BlockSignaturesConverterTests : ServiceTests() {
             .setSignature(signatureKeyPair)
             .build()
         val genesisBlock = GenesisBlock(
-            hash,
             height,
             previousHash,
-            merkleHash,
             timestamp,
             signature,
             epochIndex,

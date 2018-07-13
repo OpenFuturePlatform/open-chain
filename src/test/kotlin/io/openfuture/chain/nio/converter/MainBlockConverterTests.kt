@@ -46,7 +46,7 @@ class MainBlockConverterTests : ServiceTests() {
     @Test
     fun fromMessageShouldCreateMainBlockEntity() {
         val signature = "signature"
-        val hash = "hash"
+        val hash = "50c7c9f117c06ac6850f73e87bbcfa20118bb9349040b82b0635081ccab98975"
         val height = 1L
         val previousHash = "previousHash"
         val merkleHash = "merkleHash"
@@ -68,12 +68,12 @@ class MainBlockConverterTests : ServiceTests() {
     @Test
     fun fromEntityShouldCreateMainBlockEntity() {
         val signature = "signature"
-        val hash = "hash"
+        val hash = "50c7c9f117c06ac6850f73e87bbcfa20118bb9349040b82b0635081ccab98975"
         val height = 1L
         val previousHash = "previousHash"
         val merkleHash = "merkleHash"
         val timestamp = 2L
-        val mainBlock = MainBlock(hash, height, previousHash, merkleHash, timestamp, signature, listOf())
+        val mainBlock = MainBlock(height, previousHash, merkleHash, timestamp, signature, listOf())
         val mainBlockMessage = mainBlockConverter.fromEntity(mainBlock)
 
         assertThat(mainBlockMessage).isNotNull

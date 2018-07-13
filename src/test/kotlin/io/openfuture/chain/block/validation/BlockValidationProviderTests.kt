@@ -2,13 +2,11 @@ package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
-import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Transaction
 import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.util.BlockUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -30,7 +28,6 @@ class BlockValidationProviderTests : ServiceTests() {
     @Before
     fun setUp() {
         val previousBlock = MainBlock(
-            "prev_block_hash",
             122,
             "previous_hash",
             "merkle_hash",
@@ -63,12 +60,10 @@ class BlockValidationProviderTests : ServiceTests() {
     @Test
     fun isValidShouldReturnTrue() {
         val height = 123L
-        val prevHash = "prev_block_hash"
+        val prevHash = "c78bac60ede7a9d10248ad4373d70b915a1c466e942aadce1f5703ebbb855aa4"
         val merkleHash = "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"
-        val hash = BlockUtils.calculateHash(prevHash, currentTime, height, merkleHash)
 
         val block = MainBlock(
-            HashUtils.bytesToHexString(hash),
             height,
             prevHash,
             merkleHash,
@@ -108,7 +103,6 @@ class BlockValidationProviderTests : ServiceTests() {
     @Test
     fun isValidShouldReturnFalse() {
         val block = MainBlock(
-            "454ebbef16f93d174ab0e5e020f8ab80f2cf117e1b6beeeae3151bc87e99f081",
             123,
             "prev_block_hash",
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
