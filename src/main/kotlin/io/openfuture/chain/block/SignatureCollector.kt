@@ -3,6 +3,8 @@ package io.openfuture.chain.block
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.SignaturePublicKeyPair
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.service.BlockService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
@@ -45,7 +47,11 @@ class SignatureCollector(
         try {
             val genesisBlock = blockService.getLastGenesis()
             if (signatures.size.toDouble() / genesisBlock.activeDelegateKeys.size > APPROVAL_THRESHOLD) {
-                blockService.save(pendingBlock!!)
+                if (pendingBlock is MainBlock) {
+                    blockService.save(pendingBlock!! as MainBlock)
+                } else if (pendingBlock is GenesisBlock) {
+                    blockService.save(pendingBlock!! as GenesisBlock)
+                }
             }
         } finally {
             this.active = false

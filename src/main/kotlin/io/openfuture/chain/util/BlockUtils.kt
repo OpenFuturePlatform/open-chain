@@ -2,12 +2,12 @@ package io.openfuture.chain.util
 
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.Transaction
+import io.openfuture.chain.entity.transaction.BaseTransaction
 import java.util.*
 
 object BlockUtils {
 
-    fun calculateMerkleRoot(transactions: List<Transaction>): String {
+    fun calculateMerkleRoot(transactions: List<BaseTransaction>): String {
         if (transactions.size == 1) {
             return transactions.single().hash
         }

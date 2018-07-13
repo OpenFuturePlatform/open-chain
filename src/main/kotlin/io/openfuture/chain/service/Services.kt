@@ -5,11 +5,27 @@ import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.HardwareInfo
 import io.openfuture.chain.domain.crypto.RootAccountDto
-import io.openfuture.chain.domain.hardware.*
+import io.openfuture.chain.domain.delegate.DelegateDto
+import io.openfuture.chain.domain.hardware.CpuInfo
+import io.openfuture.chain.domain.hardware.NetworkInfo
+import io.openfuture.chain.domain.hardware.RamInfo
+import io.openfuture.chain.domain.hardware.StorageInfo
+import io.openfuture.chain.domain.stakeholder.StakeholderDto
+import io.openfuture.chain.domain.transaction.BaseTransactionDto
+import io.openfuture.chain.domain.transaction.TransferTransactionDto
+import io.openfuture.chain.domain.transaction.VoteTransactionDto
+import io.openfuture.chain.domain.transaction.data.BaseTransactionData
+import io.openfuture.chain.domain.transaction.data.TransferTransactionData
+import io.openfuture.chain.domain.transaction.data.VoteTransactionData
+import io.openfuture.chain.domain.vote.VoteDto
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
-import io.openfuture.chain.entity.Transaction
+import io.openfuture.chain.entity.Stakeholder
+import io.openfuture.chain.entity.peer.Delegate
+import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.TransferTransaction
+import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.domain.Peer
 import io.openfuture.chain.protocol.CommunicationProtocol
 
@@ -37,7 +53,9 @@ interface BlockService {
 
     fun getLastGenesis(): GenesisBlock
 
-    fun save(block: Block): Block
+    fun save(block: MainBlock): MainBlock
+
+    fun save(block: GenesisBlock): GenesisBlock
 
 }
 
@@ -61,6 +79,54 @@ interface CryptoService {
 
 }
 
+interface BaseTransactionService<Entity : BaseTransaction> {
+
+    fun getAllPending(): MutableSet<Entity>
+
+    fun get(hash: String): Entity
+
+    fun addToBlock(hash: String, block: MainBlock): Entity
+
+}
+
+interface TransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto, Data : BaseTransactionData> : BaseTransactionService<Entity> {
+
+    fun add(dto: Dto): Entity
+
+    fun create(data: Data): Dto
+
+    fun saveAll(transaction: List<Entity>)
+
+}
+
+interface TransferTransactionService : TransactionService<TransferTransaction, TransferTransactionDto, TransferTransactionData>
+
+interface VoteTransactionService : TransactionService<VoteTransaction, VoteTransactionDto, VoteTransactionData>
+
+interface DelegateService {
+
+    fun getByHostAndPort(host: String, port: Int) : Delegate
+
+    fun getActiveDelegates(): List<Delegate>
+
+    fun add(dto: DelegateDto): Delegate
+
+    fun updateDelegateRatingByVote(dto: VoteDto)
+
+}
+
+interface StakeholderService {
+
+    fun getAll(): List<Stakeholder>
+
+    fun getByPublicKey(publicKey: String): Stakeholder
+
+    fun add(dto: StakeholderDto): Stakeholder
+
+    fun save(entity: Stakeholder): Stakeholder
+
+}
+
 interface ConsensusService {
 
     fun getCurrentEpochHeight(): Long
@@ -69,21 +135,11 @@ interface ConsensusService {
 
 }
 
-interface TransactionService {
-
-    fun save(transaction: Transaction): Transaction
-
-    fun saveAll(transactions: List<Transaction>): List<Transaction>
-
-    fun getPendingTransactions(): List<Transaction>
-
-}
-
 interface WalletService {
 
     fun getBalance(address: String): Double
 
-    fun updateByTransaction(transaction: Transaction)
+    fun updateByTransaction(transaction: BaseTransaction)
 
 }
 

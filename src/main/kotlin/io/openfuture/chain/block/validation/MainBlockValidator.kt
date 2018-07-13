@@ -3,7 +3,7 @@ package io.openfuture.chain.block.validation
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.MainBlock
-import io.openfuture.chain.entity.Transaction
+import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.stereotype.Component
 
@@ -23,17 +23,12 @@ class MainBlockValidator : BlockValidator {
         }
 
         val transactionsMerkleHash = BlockUtils.calculateMerkleRoot(transactions)
-        if (block.merkleHash != transactionsMerkleHash) {
-            return false
-        }
-        return true
+        return block.merkleHash == transactionsMerkleHash
     }
 
-    override fun getTypeId(): Int {
-        return BlockType.MAIN.id
-    }
+    override fun getTypeId(): Int = BlockType.MAIN.id
 
-    private fun transactionsIsWellFormed(transactions: List<Transaction>): Boolean {
+    private fun transactionsIsWellFormed(transactions: List<BaseTransaction>): Boolean {
         val transactionHashes = HashSet<String>()
         for (transaction in transactions) {
             val transactionHash = transaction.hash

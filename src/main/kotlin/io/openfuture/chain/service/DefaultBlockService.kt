@@ -3,6 +3,7 @@ package io.openfuture.chain.service
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.repository.GenesisBlockRepository
@@ -15,7 +16,7 @@ class DefaultBlockService(
     private val blockRepository: BlockRepository<Block>,
     private val mainBlockRepository: MainBlockRepository,
     private val genesisBlockRepository: GenesisBlockRepository,
-    private val transactionService: TransactionService,
+    private val transactionService: BaseTransactionService<BaseTransaction>,
     private val walletService: WalletService
 ) : BlockService {
 
@@ -25,7 +26,7 @@ class DefaultBlockService(
 
 
     @Transactional(readOnly = true)
-    override fun getLast():Block =
+    override fun getLast(): Block =
         blockRepository.findFirstByOrderByHeightDesc()
             ?: throw NotFoundException("Last block not found!")
 
@@ -40,17 +41,18 @@ class DefaultBlockService(
             ?: throw NotFoundException("Last Genesis block not exist!")
 
     @Transactional
-    override fun save(block: Block): Block {
-        val savedBlock = blockRepository.save(block)
-        if (block is MainBlock) {
-            val transactions = block.transactions
-            for (transaction in transactions) {
-                transaction.blockHash = savedBlock.hash
-                walletService.updateByTransaction(transaction)
-            }
-            transactionService.saveAll(transactions)
+    override fun save(block: MainBlock): MainBlock {
+        val savedBlock = mainBlockRepository.save(block)
+        val transactions = block.transactions
+        for (transaction in transactions) {
+            transactionService.addToBlock(transaction.hash, savedBlock)
+            walletService.updateByTransaction(transaction)
         }
         return savedBlock
+    }
+
+    override fun save(block: GenesisBlock): GenesisBlock {
+        return genesisBlockRepository.save(block)
     }
 
 }

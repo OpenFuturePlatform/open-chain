@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Address mixed-case checksum
 - Address validation
 - RPC requests: validateAddress
+- Vote transaction type
+- Voting algorithm mechanism
+- Voting store
+- Delegate rating calculation
+- Active delegates store
 - Calculation wallet balance
 - Database: add Wallet entity
 - RPC requests: getWalletBalance

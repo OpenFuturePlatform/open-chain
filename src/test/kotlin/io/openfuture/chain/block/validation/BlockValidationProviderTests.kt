@@ -5,7 +5,7 @@ import io.openfuture.chain.config.any
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.MainBlock
-import io.openfuture.chain.entity.Transaction
+import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.service.BlockService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -34,15 +34,31 @@ class BlockValidationProviderTests : ServiceTests() {
             1510000000L,
             "prev_signature",
             listOf(
-                Transaction(
-                    "prev_transaction_hash1",
-                    2000,
+                VoteTransaction(
                     1500000000L,
-                    "prev_recipient_key1",
-                    "prev_sender_key1",
-                    "prev_signature1",
-                    "send_address",
-                    "recip_address"
+                    1000.0,
+                    "recipient_key",
+                    "recipient_address",
+                    "sender_key",
+                    "sender_address",
+                    "sender_signature",
+                    "hash",
+                    1,
+                    "delegate_host",
+                    9999
+                ),
+                VoteTransaction(
+                    1500000001L,
+                    1002.0,
+                    "recipient_key2",
+                    "recipient_address2",
+                    "sender_key2",
+                    "sender_address2",
+                    "sender_signature2",
+                    "hash2",
+                    2,
+                    "delegate_host2",
+                    11999
                 )
             )
         )
@@ -70,25 +86,31 @@ class BlockValidationProviderTests : ServiceTests() {
             currentTime,
             "signature",
             listOf(
-                Transaction(
-                    "transaction_hash1",
-                    1000,
+                VoteTransaction(
                     1500000000L,
-                    "recipient_key1",
-                    "sender_key1",
-                    "signature1",
-                    "send_address",
-                    "recip_address"
+                    1000.0,
+                    "recipient_key",
+                    "recipient_address",
+                    "sender_key",
+                    "sender_address",
+                    "sender_signature",
+                    "hash",
+                    1,
+                    "delegate_host",
+                    9999
                 ),
-                Transaction(
-                    "transaction_hash2",
-                    1002,
-                    1500000002L,
-                    "recipient_ke2",
+                VoteTransaction(
+                    1500000001L,
+                    1002.0,
+                    "recipient_key2",
+                    "recipient_address2",
                     "sender_key2",
-                    "signature2",
-                    "send_address",
-                    "recip_address"
+                    "sender_address2",
+                    "sender_signature2",
+                    "hash2",
+                    2,
+                    "delegate_host2",
+                    11999
                 )
             )
         )
@@ -109,25 +131,31 @@ class BlockValidationProviderTests : ServiceTests() {
             1512345678L,
             "signature",
             listOf(
-                Transaction(
-                    "transaction_hash1",
-                    1000,
+                VoteTransaction(
                     1500000000L,
-                    "recipient_key1",
-                    "sender_key1",
-                    "signature1",
-                    "send_address",
-                    "recip_address"
+                    1000.0,
+                    "recipient_key",
+                    "recipient_address",
+                    "sender_key",
+                    "sender_address",
+                    "sender_signature",
+                    "hash",
+                    1,
+                    "delegate_host",
+                    9999
                 ),
-                Transaction(
-                    "transaction_hash2",
-                    1002,
-                    1500000002L,
-                    "recipient_ke2",
+                VoteTransaction(
+                    1500000001L,
+                    1002.0,
+                    "recipient_key2",
+                    "recipient_address2",
                     "sender_key2",
-                    "signature2",
-                    "send_address",
-                    "recip_address"
+                    "sender_address2",
+                    "sender_signature2",
+                    "hash2",
+                    2,
+                    "delegate_host2",
+                    11999
                 )
             )
         )
