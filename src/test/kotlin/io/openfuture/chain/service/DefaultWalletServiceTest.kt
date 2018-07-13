@@ -75,7 +75,7 @@ class DefaultWalletServiceTest : ServiceTests() {
         val block = MainBlock(ByteArray(1), 1L, "previousHash", "hash", 1L, mutableListOf())
 
         return VoteTransaction(Date().time, amount, "recipientKey", recipientAddress,
-            "senderKey", senderAddress, "signature", "hash", VoteType.FOR.getId(),
+            "senderKey", senderAddress, "value", "hash", VoteType.FOR.getId(),
             "delegateKey", 1, block)
     }
 

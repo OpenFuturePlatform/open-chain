@@ -4,5 +4,5 @@ import io.openfuture.chain.entity.Block
 
 data class PendingBlock(
     val block: Block,
-    val signature: SignaturePublicKeyPair
+    val signature: Signature
 )

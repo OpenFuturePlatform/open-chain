@@ -1,6 +1,6 @@
 package io.openfuture.chain.domain.block
 
-data class SignaturePublicKeyPair(
-    val signature: String,
+data class Signature(
+    val value: String,
     val publicKey: String
 )

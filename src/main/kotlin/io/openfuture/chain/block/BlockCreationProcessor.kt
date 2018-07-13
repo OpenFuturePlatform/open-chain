@@ -1,42 +1,46 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.block.validation.BlockValidationProvider
+import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.domain.block.PendingBlock
-import io.openfuture.chain.domain.block.SignaturePublicKeyPair
+import io.openfuture.chain.domain.block.Signature
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
-import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.service.ConsensusService
+import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.service.*
 import io.openfuture.chain.util.BlockUtils
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 
 @Component
 class BlockCreationProcessor(
-    private val blockService: BlockService,
+    private val service: BlockService,
     private val signatureCollector: SignatureCollector,
     private val keyHolder: NodeKeyHolder,
-    private val blockValidationService: BlockValidationProvider,
-    private val consensusService: ConsensusService
+    private val validationService: BlockValidationProvider,
+    private val consensusService: ConsensusService,
+    private val clock: NodeClock,
+    private val delegateService: DelegateService,
+    private val properties: NodeProperties
 ) {
 
     fun approveBlock(pendingBlock: PendingBlock): PendingBlock {
         val block = pendingBlock.block
 
-        if (!blockValidationService.isValid(block)) {
+        if (!validationService.isValid(block)) {
             throw IllegalArgumentException("Inbound block is not valid")
         }
 
-        val hashAsBytes = ByteUtils.fromHexString(block.hash)
-        val keyAsBytes = ByteUtils.fromHexString(pendingBlock.signature.publicKey)
-        if (!SignatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)) {
+        val hash = HashUtils.fromHexString(block.hash)
+        val key = HashUtils.fromHexString(pendingBlock.signature.publicKey)
+        if (!SignatureManager.verify(hash, pendingBlock.signature.value, key)) {
             throw IllegalArgumentException("Inbound block's signature is invalid")
         }
 
@@ -48,19 +52,19 @@ class BlockCreationProcessor(
 
     @EventListener
     fun fireBlockCreation(event: BlockCreationEvent) {
-        val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
-        val previousBlock = blockService.getLastMain()
-        val genesisBlock = blockService.getLastGenesis()
-        if (publicKey == BlockUtils.getBlockProducer(genesisBlock.activeDelegateKeys, previousBlock)) {
+        val previousBlock = service.getLastMain()
+        val genesisBlock = service.getLastGenesis()
+        val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
+        if (properties.host == nextProducer.host && properties.port == nextProducer.port) {
             create(event.pendingTransactions, previousBlock, genesisBlock)
         }
     }
 
     private fun signCreatedBlock(block: Block): PendingBlock {
-        val signature = SignatureManager.sign(ByteUtils.fromHexString(block.hash), keyHolder.getPrivateKey())
-        val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
-        val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
-        val pendingBlock = PendingBlock(block, signaturePublicKeyPair)
+        val publicKey = HashUtils.toHexString(keyHolder.getPublicKey())
+        val value = SignatureManager.sign(HashUtils.fromHexString(block.hash), keyHolder.getPrivateKey())
+        val signature = Signature(value, publicKey)
+        val pendingBlock = PendingBlock(block, signature)
         signatureCollector.setPendingBlock(pendingBlock)
         return pendingBlock
     }
@@ -68,11 +72,11 @@ class BlockCreationProcessor(
     private fun create(transactions: MutableList<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
         val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
 
-        val time = System.currentTimeMillis()
+        val time = clock.networkTime()
         val privateKey = keyHolder.getPrivateKey()
         val block = when(blockType) {
             BlockType.MAIN -> {
-                val mainBlock = MainBlock(
+                MainBlock(
                     privateKey,
                     previousBlock.height + 1,
                     previousBlock.hash,
@@ -80,20 +84,19 @@ class BlockCreationProcessor(
                     time,
                     transactions
                 )
-                mainBlock
             }
             BlockType.GENESIS -> {
-                val genBlock = GenesisBlock(
+                GenesisBlock(
                     privateKey,
                     previousBlock.height + 1,
                     previousBlock.hash,
                     time,
                     genesisBlock.epochIndex + 1,
-                    emptySet()  // place active delegates
+                    delegateService.getActiveDelegates()
                 )
-                genBlock
             }
         }
+
         signCreatedBlock(block)
     }
 

@@ -2,6 +2,7 @@ package io.openfuture.chain.util
 
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import java.util.*
 
@@ -34,7 +35,7 @@ object BlockUtils {
         return HashUtils.doubleSha256(headers.toByteArray())
     }
 
-    fun getBlockProducer(delegates: Set<String>, previousBlock: Block): String {
+    fun getBlockProducer(delegates: Set<Delegate>, previousBlock: Block): Delegate {
         val random = Random(previousBlock.timestamp)
         return delegates.shuffled(random).first()
     }

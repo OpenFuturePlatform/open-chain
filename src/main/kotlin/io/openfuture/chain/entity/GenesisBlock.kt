@@ -11,9 +11,10 @@ class GenesisBlock(privateKey: ByteArray, height: Long,
     @Column(name = "epoch_index", nullable = false)
     var epochIndex: Long,
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name="active_delegates", joinColumns=[JoinColumn(name = "genesis_block_id")])
-    @Column(name="delegate_key")
-    var activeDelegateKeys: Set<String>
+    @ManyToMany
+    @JoinTable(name = "delegate2genesis",
+        joinColumns = [JoinColumn(name = "genesis_id")],
+        inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
+    var activeDelegates: Set<Delegate>
 
 ) : Block(privateKey, height, previousHash, StringUtils.EMPTY, timestamp, BlockType.GENESIS.id)

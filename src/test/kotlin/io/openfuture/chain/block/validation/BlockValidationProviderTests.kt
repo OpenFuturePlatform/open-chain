@@ -2,10 +2,9 @@ package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.BlockType
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -19,6 +18,7 @@ class BlockValidationProviderTests : ServiceTests() {
     @Mock private lateinit var blockService: BlockService
     @Mock private lateinit var applicationContext: ApplicationContext
     @Mock private lateinit var blockValidator: BlockValidator
+    @Mock private lateinit var properties: ConsensusProperties
 
     private lateinit var blockValidationService: BlockValidationProvider
 
@@ -26,7 +26,7 @@ class BlockValidationProviderTests : ServiceTests() {
 
 
     @Before
-    fun setUp() {
+    fun init() {
         val previousBlock = MainBlock(
             ByteArray(1),
             122,
@@ -66,9 +66,10 @@ class BlockValidationProviderTests : ServiceTests() {
         val validators = HashMap<String, BlockValidator>()
         validators[""] = blockValidator
         given(blockService.getLast()).willReturn(previousBlock)
+        given(properties.timeSlotDuration).willReturn(6000)
         given(blockValidator.getTypeId()).willReturn(BlockType.MAIN.id)
         given(applicationContext.getBeansOfType(BlockValidator::class.java)).willReturn(validators)
-        blockValidationService = BlockValidationProvider(applicationContext, blockService, 3000)
+        blockValidationService = BlockValidationProvider(applicationContext, blockService, properties)
         blockValidationService.init()
         blockValidationService.setEpochTime(currentTime)
     }

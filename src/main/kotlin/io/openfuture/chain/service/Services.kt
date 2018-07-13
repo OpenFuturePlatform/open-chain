@@ -22,7 +22,7 @@ import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Stakeholder
-import io.openfuture.chain.entity.peer.Delegate
+import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
@@ -105,7 +105,7 @@ interface DelegateService {
 
     fun getByHostAndPort(host: String, port: Int) : Delegate
 
-    fun getActiveDelegates(): List<Delegate>
+    fun getActiveDelegates(): Set<Delegate>
 
     fun add(dto: DelegateDto): Delegate
 

@@ -1,12 +1,10 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.domain.block.PendingBlock
-import io.openfuture.chain.domain.block.SignaturePublicKeyPair
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.GenesisBlock
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.domain.block.Signature
+import io.openfuture.chain.entity.*
+import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
@@ -14,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
 @Component
 class SignatureCollector(
     private val blockService: BlockService,
-    @Value("\${block.time.slot}") private val slotInterval: Long
+    private val properties: ConsensusProperties
 ) {
 
     companion object {
@@ -22,7 +20,7 @@ class SignatureCollector(
     }
 
     private val scheduler = ThreadPoolTaskScheduler()
-    private val signatures = ConcurrentHashMap.newKeySet<SignaturePublicKeyPair>()
+    private val signatures = ConcurrentHashMap.newKeySet<Signature>()
     private var pendingBlock: Block? = null
     private var active: Boolean = false
 
@@ -31,7 +29,7 @@ class SignatureCollector(
         if (!active) {
             this.active = true
             this.pendingBlock = generatedBlock.block
-            scheduler.scheduleWithFixedDelay({ applyBlock() }, slotInterval / 2)
+            scheduler.scheduleWithFixedDelay({ applyBlock() }, properties.timeSlotDuration!! / 2)
         }
     }
 
@@ -46,7 +44,7 @@ class SignatureCollector(
     fun applyBlock() {
         try {
             val genesisBlock = blockService.getLastGenesis()
-            if (signatures.size.toDouble() / genesisBlock.activeDelegateKeys.size > APPROVAL_THRESHOLD) {
+            if (signatures.size.toDouble() / genesisBlock.activeDelegates.size > APPROVAL_THRESHOLD) {
                 if (pendingBlock is MainBlock) {
                     blockService.save(pendingBlock!! as MainBlock)
                 } else if (pendingBlock is GenesisBlock) {

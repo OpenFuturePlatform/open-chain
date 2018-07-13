@@ -1,10 +1,10 @@
 package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.util.BlockUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct
@@ -13,7 +13,7 @@ import javax.annotation.PostConstruct
 class BlockValidationProvider(
     private val applicationContext: ApplicationContext,
     private val blockService: BlockService,
-    @Value("\${block.time.slot}") private val interval: Long
+    private val properties: ConsensusProperties
 ) {
 
     private val validators = HashMap<Int, BlockValidator>()
@@ -43,7 +43,7 @@ class BlockValidationProvider(
     }
 
     fun getSlotNumber(time: Long): Long {
-        return (time - epochTime) / interval / 2
+        return (time - epochTime) / properties.timeSlotDuration!! / 2
     }
 
     fun setEpochTime(value: Long) {

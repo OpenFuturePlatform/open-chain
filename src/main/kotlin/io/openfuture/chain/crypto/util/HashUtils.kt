@@ -58,4 +58,8 @@ object HashUtils {
         return key.key
     }
 
+    fun toHexString(bytes: ByteArray): String = ByteUtils.toHexString(bytes)
+
+    fun fromHexString(input: String): ByteArray = ByteUtils.fromHexString(input)
+
 }
