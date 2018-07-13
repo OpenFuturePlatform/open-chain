@@ -1,4 +1,4 @@
-package io.openfuture.chain.entity.peer
+package io.openfuture.chain.entity
 
 import io.openfuture.chain.domain.delegate.DelegateDto
 import io.openfuture.chain.entity.base.BaseModel

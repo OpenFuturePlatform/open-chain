@@ -1,6 +1,7 @@
 package io.openfuture.chain.service.transaction
 
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.exception.NotFoundException
@@ -22,7 +23,7 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction>(
         ?: throw NotFoundException("Transaction with hash: $hash not exist!")
 
     @Transactional
-    override fun addToBlock(hash: String, block: Block): Entity {
+    override fun addToBlock(hash: String, block: MainBlock): Entity {
         val persistTransaction = this.get(hash)
         if (null != persistTransaction.block) {
             throw LogicException("Transaction with hash: $hash already belong to block!")

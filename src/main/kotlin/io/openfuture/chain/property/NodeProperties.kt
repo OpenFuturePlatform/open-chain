@@ -47,7 +47,15 @@ class NodeProperties(
     /** Directly Connected Peers Number */
     @field:NotNull
     @field:Min(5)
-    var peersNumber: Int? = null
+    var peersNumber: Int? = null,
+
+    /** Private key path */
+    @field:NotNull
+    var privateKeyPath: String? = null,
+
+    /** Public key path */
+    @field:NotNull
+    var publicKeyPath: String? = null
 
 ) {
 

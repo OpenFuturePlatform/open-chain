@@ -16,6 +16,18 @@ class ConsensusProperties(
 
     /** The count of active delegates */
     @field:NotNull
-    var delegatesCount: Int? = null
+    var delegatesCount: Int? = null,
+
+    /**
+     * The count of transactions
+     */
+    @field:NotNull
+    var blockCapacity: Int? = null,
+
+    /**
+     * Time slot duration
+     */
+    @field:NotNull
+    var timeSlotDuration: Long? = null
 
 )

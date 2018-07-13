@@ -2,6 +2,7 @@ package io.openfuture.chain.entity.transaction
 
 import io.openfuture.chain.domain.transaction.TransferTransactionDto
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.MainBlock
 import javax.persistence.Entity
 import javax.persistence.Table
 
@@ -16,7 +17,7 @@ class TransferTransaction(
     senderAddress: String,
     senderSignature: String,
     hash: String,
-    block: Block? = null
+    block: MainBlock? = null
 ) : BaseTransaction(timestamp, amount, recipientKey, recipientAddress, senderKey, senderAddress,
     senderSignature, hash, block) {
 

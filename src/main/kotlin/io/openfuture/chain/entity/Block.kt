@@ -1,40 +1,38 @@
 package io.openfuture.chain.entity
 
+import io.openfuture.chain.crypto.signature.SignatureManager
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.base.BaseModel
-import io.openfuture.chain.entity.transaction.BaseTransaction
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import javax.persistence.*
 
 @Entity
 @Table(name = "blocks")
-class Block(
+@Inheritance(strategy = InheritanceType.JOINED)
+abstract class Block(
+
+    privateKey: ByteArray,
 
     @Column(name = "height", nullable = false)
-    var height: Int = 0,
-
-    @Column(name = "nonce", nullable = false)
-    var nonce: Long = 0,
-
-    @Column(name = "timestamp", nullable = false)
-    var timestamp: Long,
+    var height: Long,
 
     @Column(name = "previous_hash", nullable = false)
     var previousHash: String,
 
-    @Column(name = "hash", nullable = false)
-    var hash: String,
-
     @Column(name = "merkle_hash", nullable = false)
     var merkleHash: String,
 
-    @Column(name = "node_key", nullable = false)
-    var nodeKey: String,
+    @Column(name = "timestamp", nullable = false)
+    var timestamp: Long,
 
-    @Column(name = "node_signature", nullable = false)
-    var nodeSignature: String,
+    @Column(name = "typeId", nullable = false)
+    var typeId: Int,
 
-    @OneToMany(mappedBy = "block", fetch = FetchType.EAGER)
-    var transactions: MutableList<BaseTransaction> = mutableListOf()
+    @Column(name = "hash", nullable = false)
+    var hash: String = ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height).toByteArray())),
 
+    @Column(name = "signature", nullable = false)
+    var signature: String = SignatureManager.sign(hash.toByteArray(), privateKey)
 
 ) : BaseModel()
 

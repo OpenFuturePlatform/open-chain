@@ -25,6 +25,7 @@ class SeedPhraseGenerator(
         private const val WORD_INDEX_MASK = (1 shl WORD_INDEX_SIZE) - 1
     }
 
+
     fun createSeedPhrase(length: PhraseLength): String {
         val entropy = ByteArray(length.entropyLength / BYTE_SIZE)
         SecureRandom().nextBytes(entropy)

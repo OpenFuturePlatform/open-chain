@@ -14,6 +14,7 @@ class ConnectionListener(
         private val log = LoggerFactory.getLogger(ConnectionListener::class.java)
     }
 
+
     override fun operationComplete(future: ChannelFuture) {
         if (!future.isSuccess) {
             log.info("Reconnect...")

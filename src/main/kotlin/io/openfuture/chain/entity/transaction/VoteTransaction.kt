@@ -2,6 +2,7 @@ package io.openfuture.chain.entity.transaction
 
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.MainBlock
 import javax.persistence.*
 
 @Entity
@@ -25,7 +26,7 @@ class VoteTransaction(
     @Column(name = "delegate_port", nullable = false)
     var delegatePort: Int,
 
-    block: Block? = null
+    block: MainBlock? = null
 
 ) : BaseTransaction(timestamp, amount, recipientKey, recipientAddress, senderKey, senderAddress,
     senderSignature, hash, block) {

@@ -19,8 +19,10 @@ import io.openfuture.chain.domain.transaction.data.TransferTransactionData
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.domain.vote.VoteDto
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Stakeholder
-import io.openfuture.chain.entity.peer.Delegate
+import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
@@ -47,9 +49,13 @@ interface BlockService {
 
     fun getLast(): Block
 
-    fun getLastGenesis(): Block
+    fun getLastMain(): MainBlock
 
-    fun save(block: Block): Block
+    fun getLastGenesis(): GenesisBlock
+
+    fun save(block: MainBlock): MainBlock
+
+    fun save(block: GenesisBlock): GenesisBlock
 
 }
 
@@ -79,7 +85,7 @@ interface BaseTransactionService<Entity : BaseTransaction> {
 
     fun get(hash: String): Entity
 
-    fun addToBlock(hash: String, block: Block): Entity
+    fun addToBlock(hash: String, block: MainBlock): Entity
 
 }
 
@@ -99,7 +105,7 @@ interface DelegateService {
 
     fun getByHostAndPort(host: String, port: Int) : Delegate
 
-    fun getActiveDelegates(): List<Delegate>
+    fun getActiveDelegates(): Set<Delegate>
 
     fun add(dto: DelegateDto): Delegate
 
@@ -121,7 +127,7 @@ interface StakeholderService {
 
 interface ConsensusService {
 
-    fun getCurrentEpochHeight(): Int
+    fun getCurrentEpochHeight(): Long
 
     fun isGenesisBlockNeeded(): Boolean
 

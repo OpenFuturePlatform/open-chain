@@ -4,7 +4,7 @@ import io.openfuture.chain.domain.delegate.DelegateDto
 import io.openfuture.chain.domain.vote.VoteDto
 import io.openfuture.chain.entity.Stakeholder
 import io.openfuture.chain.entity.dictionary.VoteType
-import io.openfuture.chain.entity.peer.Delegate
+import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.network.client.handler.ConnectionClientHandler
 import io.openfuture.chain.property.ConsensusProperties
@@ -33,9 +33,9 @@ class DefaultDelegateService(
         ?: throw NotFoundException("Delegate with host: $host and port $port not exist!")
 
     @Transactional(readOnly = true)
-    override fun getActiveDelegates(): List<Delegate> {
+    override fun getActiveDelegates(): Set<Delegate> {
         val request = PageRequest.of(0, consensusProperties.delegatesCount!!)
-        return repository.findAllByOrderByRatingDesc(request)
+        return repository.findAllByOrderByRatingDesc(request).toSet()
     }
 
     @Transactional
