@@ -28,11 +28,11 @@ class BlockValidationProviderTests : ServiceTests() {
     @Before
     fun setUp() {
         val previousBlock = MainBlock(
+            ByteArray(1),
             122,
             "previous_hash",
             "merkle_hash",
             1510000000L,
-            "prev_signature",
             mutableListOf(
                 VoteTransaction(
                     1500000000L,
@@ -80,11 +80,11 @@ class BlockValidationProviderTests : ServiceTests() {
         val merkleHash = "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"
 
         val block = MainBlock(
+            ByteArray(1),
             height,
             prevHash,
             merkleHash,
             currentTime,
-            "signature",
             mutableListOf(
                 VoteTransaction(
                     1500000000L,
@@ -125,11 +125,11 @@ class BlockValidationProviderTests : ServiceTests() {
     @Test
     fun isValidShouldReturnFalse() {
         val block = MainBlock(
+            ByteArray(1),
             123,
             "prev_block_hash",
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             1512345678L,
-            "signature",
             mutableListOf(
                 VoteTransaction(
                     1500000000L,

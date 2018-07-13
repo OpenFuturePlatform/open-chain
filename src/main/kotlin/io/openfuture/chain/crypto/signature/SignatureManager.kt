@@ -5,8 +5,7 @@ import io.openfuture.chain.crypto.util.HashUtils
 import org.springframework.stereotype.Component
 import java.util.*
 
-@Component
-class SignatureManager {
+object SignatureManager {
 
     /**
      * Sign data with ECDSA

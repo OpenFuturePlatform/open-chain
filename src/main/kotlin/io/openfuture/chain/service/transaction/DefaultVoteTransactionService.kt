@@ -29,8 +29,4 @@ class DefaultVoteTransactionService(
 
     override fun create(data: VoteTransactionData): VoteTransactionDto = VoteTransactionDto.of(nodeClock.networkTime(), data)
 
-    override fun saveAll(transactions: List<VoteTransaction>) {
-        repository.saveAll(transactions)
-    }
-
 }

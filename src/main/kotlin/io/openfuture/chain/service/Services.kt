@@ -95,8 +95,6 @@ interface TransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto,
 
     fun create(data: Data): Dto
 
-    fun saveAll(transaction: List<Entity>)
-
 }
 
 interface TransferTransactionService : TransactionService<TransferTransaction, TransferTransactionDto, TransferTransactionData>

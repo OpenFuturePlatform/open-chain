@@ -20,9 +20,4 @@ class DefaultTransferTransactionService(
 
     override fun create(data: TransferTransactionData): TransferTransactionDto = TransferTransactionDto.of(nodeClock.networkTime(), data)
 
-    @Transactional
-    override fun saveAll(transactions: List<TransferTransaction>) {
-        repository.saveAll(transactions)
-    }
-
 }

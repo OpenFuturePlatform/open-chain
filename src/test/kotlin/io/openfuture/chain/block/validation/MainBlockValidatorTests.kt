@@ -19,11 +19,11 @@ class MainBlockValidatorTests : ServiceTests() {
     @Test
     fun isValidShouldReturnTrue() {
         val block = MainBlock(
+            ByteArray(1),
             123,
             "prev_block_hash",
             "63b92f8cdd3e55803d0542467ba2a49b5eb5089efb305d94929c0bdac2dc065f",
             1512345678L,
-            "signature",
             mutableListOf(
                 VoteTransaction(
                     1500000000L,
@@ -62,11 +62,11 @@ class MainBlockValidatorTests : ServiceTests() {
     @Test
     fun isValidShouldReturnFalse() {
         val block = MainBlock(
+            ByteArray(1),
             123,
             "prev_block_hash",
             "0000000000000000000000000000000000000000000000000000000000000000",
             1512345678L,
-            "signature",
             mutableListOf(
                 VoteTransaction(
                     1500000000L,

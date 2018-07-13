@@ -27,7 +27,6 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Mock private lateinit var blockService: BlockService
     @Mock private lateinit var signatureCollector: SignatureCollector
     @Mock private lateinit var keyHolder: NodeKeyHolder
-    @Mock private lateinit var signatureManager: SignatureManager
     @Mock private lateinit var blockValidationService: BlockValidationProvider
     @Mock private lateinit var consensusService: ConsensusService
 
@@ -39,28 +38,8 @@ class BlockCreationProcessorTests: ServiceTests() {
         given(blockService.getLastMain()).willReturn(block)
         processor = BlockCreationProcessor(
             blockService, signatureCollector,
-            keyHolder, signatureManager,
+            keyHolder,
             blockValidationService, consensusService)
-    }
-
-    @Test
-    fun approveBlockShouldValidateAndSignInboundBlock() {
-        val block = createMainBlock()
-        val pendingBlock = createPendingBlock(block)
-        val hashAsBytes = ByteUtils.fromHexString(block.hash)
-        val keyAsBytes = ByteUtils.fromHexString(pendingBlock.signature.publicKey)
-
-        given(blockValidationService.isValid(block)).willReturn(true)
-        given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
-        given(signatureCollector.addBlockSignature(pendingBlock)).willReturn(true)
-        given(keyHolder.getPrivateKey()).willReturn("prvKey".toByteArray())
-        given(signatureManager.sign(hashAsBytes, keyHolder.getPrivateKey())).willReturn("sign")
-        given(keyHolder.getPublicKey()).willReturn("pubKey".toByteArray())
-
-        val resultBlock = processor.approveBlock(pendingBlock)
-
-        assertThat(resultBlock.block).isEqualTo(pendingBlock.block)
-        assertThat(resultBlock.block).isNotEqualTo(pendingBlock.signature)
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -76,11 +55,8 @@ class BlockCreationProcessorTests: ServiceTests() {
     fun approveBlockFailsIfSignatureVerificationFailed() {
         val block = createMainBlock()
         val pendingBlock = createPendingBlock(block)
-        val hashAsBytes = ByteUtils.fromHexString(block.hash)
-        val keyAsBytes = ByteUtils.fromHexString(pendingBlock.signature.publicKey)
 
         given(blockValidationService.isValid(block)).willReturn(true)
-        given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
 
         processor.approveBlock(pendingBlock)
     }
@@ -89,12 +65,8 @@ class BlockCreationProcessorTests: ServiceTests() {
     fun approveBlockFailsIfBlockSignatureIsAlreadyExists() {
         val block = createMainBlock()
         val pendingBlock = createPendingBlock(block)
-        val hashAsBytes = ByteUtils.fromHexString(block.hash)
-        val keyAsBytes = ByteUtils.fromHexString(pendingBlock.signature.publicKey)
 
         given(blockValidationService.isValid(block)).willReturn(true)
-        given(signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)).willReturn(true)
-        given(signatureCollector.addBlockSignature(pendingBlock)).willReturn(false)
 
         processor.approveBlock(pendingBlock)
     }
@@ -110,7 +82,6 @@ class BlockCreationProcessorTests: ServiceTests() {
         given(keyHolder.getPublicKey()).willReturn("pubKey".toByteArray())
         given(keyHolder.getPrivateKey()).willReturn("prvKey".toByteArray())
         given(blockService.getLastGenesis()).willReturn(genesisBlock)
-        given(signatureManager.sign(any(ByteArray::class.java), any(ByteArray::class.java))).willReturn("sign")
 
         processor.fireBlockCreation(event)
     }
@@ -123,19 +94,19 @@ class BlockCreationProcessorTests: ServiceTests() {
     }
 
     private fun createMainBlock() = MainBlock(
+        ByteArray(1),
         123,
         "prev_block_hash",
         "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
         1512345678L,
-        "signature",
         createTransactions()
     )
 
     private fun createGenesisBlock() = GenesisBlock(
+        ByteArray(1),
         123,
         "prev_block_hash",
         1512345678L,
-        "signature",
         1,
         setOf("delegate1", "delegate2", "delegate3")
     )

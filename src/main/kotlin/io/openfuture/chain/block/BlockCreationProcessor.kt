@@ -23,7 +23,6 @@ class BlockCreationProcessor(
     private val blockService: BlockService,
     private val signatureCollector: SignatureCollector,
     private val keyHolder: NodeKeyHolder,
-    private val signatureManager: SignatureManager,
     private val blockValidationService: BlockValidationProvider,
     private val consensusService: ConsensusService
 ) {
@@ -37,7 +36,7 @@ class BlockCreationProcessor(
 
         val hashAsBytes = ByteUtils.fromHexString(block.hash)
         val keyAsBytes = ByteUtils.fromHexString(pendingBlock.signature.publicKey)
-        if (!signatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)) {
+        if (!SignatureManager.verify(hashAsBytes, pendingBlock.signature.signature, keyAsBytes)) {
             throw IllegalArgumentException("Inbound block's signature is invalid")
         }
 
@@ -58,7 +57,7 @@ class BlockCreationProcessor(
     }
 
     private fun signCreatedBlock(block: Block): PendingBlock {
-        val signature = signatureManager.sign(ByteUtils.fromHexString(block.hash), keyHolder.getPrivateKey())
+        val signature = SignatureManager.sign(ByteUtils.fromHexString(block.hash), keyHolder.getPrivateKey())
         val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
         val signaturePublicKeyPair = SignaturePublicKeyPair(signature, publicKey)
         val pendingBlock = PendingBlock(block, signaturePublicKeyPair)
@@ -73,29 +72,26 @@ class BlockCreationProcessor(
         val privateKey = keyHolder.getPrivateKey()
         val block = when(blockType) {
             BlockType.MAIN -> {
-                val merkleRootHash = BlockUtils.calculateMerkleRoot(transactions)
-                val hash = BlockUtils.calculateHash(previousBlock.hash, time, (previousBlock.height + 1), merkleRootHash)
-                val signature = signatureManager.sign(hash, privateKey)
-                MainBlock(
+                val mainBlock = MainBlock(
+                    privateKey,
                     previousBlock.height + 1,
                     previousBlock.hash,
-                    merkleRootHash,
+                    BlockUtils.calculateMerkleRoot(transactions),
                     time,
-                    signature,
                     transactions
                 )
+                mainBlock
             }
             BlockType.GENESIS -> {
-                val hash = BlockUtils.calculateHash(previousBlock.hash, time, (previousBlock.height + 1))
-                val signature = signatureManager.sign(hash, privateKey)
-                GenesisBlock(
+                val genBlock = GenesisBlock(
+                    privateKey,
                     previousBlock.height + 1,
                     previousBlock.hash,
                     time,
-                    signature,
                     genesisBlock.epochIndex + 1,
                     emptySet()  // place active delegates
                 )
+                genBlock
             }
         }
         signCreatedBlock(block)

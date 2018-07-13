@@ -17,10 +17,10 @@ class GenesisBlockValidatorTests {
     @Test
     fun isValidShouldReturnTrue() {
         val block = GenesisBlock(
+            ByteArray(1),
             1L,
             "1",
             1L,
-            "signature",
             1L,
             emptySet()
         )

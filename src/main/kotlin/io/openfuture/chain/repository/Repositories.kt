@@ -20,12 +20,13 @@ interface BaseRepository<T> : JpaRepository<T, Int>
 @Repository
 interface BlockRepository<T: Block> : BaseRepository<T> {
 
-    fun findByHash(hash: String): Block?
+    fun findByHash(hash: String): T?
 
     fun findFirstByOrderByHeightDesc(): T?
 
 }
 
+@Repository
 interface MainBlockRepository : BlockRepository<MainBlock>
 
 @Repository
