@@ -1,9 +1,9 @@
 package io.openfuture.chain.controller
 
-import io.openfuture.chain.domain.HardwareInfo
-import io.openfuture.chain.domain.UptimeResponse
-import io.openfuture.chain.domain.node.NodeTimestampResponse
-import io.openfuture.chain.domain.node.NodeVersionResponse
+import io.openfuture.chain.domain.rpc.HardwareInfo
+import io.openfuture.chain.domain.rpc.UptimeResponse
+import io.openfuture.chain.domain.rpc.node.NodeTimestampResponse
+import io.openfuture.chain.domain.rpc.node.NodeVersionResponse
 import io.openfuture.chain.service.HardwareInfoService
 import org.springframework.context.ApplicationContext
 import org.springframework.web.bind.annotation.GetMapping

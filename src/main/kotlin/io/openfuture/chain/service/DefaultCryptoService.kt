@@ -10,9 +10,9 @@ import io.openfuture.chain.crypto.seed.PhraseLength
 import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
 import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
 import io.openfuture.chain.crypto.seed.validator.SeedPhraseValidator
-import io.openfuture.chain.domain.crypto.AccountDto
-import io.openfuture.chain.domain.crypto.RootAccountDto
-import io.openfuture.chain.domain.crypto.key.KeyDto
+import io.openfuture.chain.domain.rpc.crypto.WalletDto
+import io.openfuture.chain.domain.rpc.crypto.AccountDto
+import io.openfuture.chain.domain.rpc.crypto.key.KeyDto
 import org.springframework.stereotype.Service
 
 @Service
@@ -28,19 +28,19 @@ class DefaultCryptoService(
 
     override fun generateSeedPhrase(): String = seedPhraseGenerator.createSeedPhrase(PhraseLength.TWELVE)
 
-    override fun generateNewAccount(): RootAccountDto = getRootAccount(generateSeedPhrase())
+    override fun generateNewAccount(): AccountDto = getRootAccount(generateSeedPhrase())
 
-    override fun getRootAccount(seedPhrase: String): RootAccountDto {
+    override fun getRootAccount(seedPhrase: String): AccountDto {
         if (!seedPhraseValidator.isValid(seedPhrase))
             throw IllegalArgumentException("Invalid seed phrase")
 
         val rootExtendedKey = ExtendedKey.root(seedCalculator.calculateSeed(seedPhrase))
         val extendedKey = derivationKeysHelper.deriveDefaultAddress(rootExtendedKey)
 
-        return RootAccountDto(
+        return AccountDto(
             seedPhrase,
             KeyDto(serializer.serializePublic(rootExtendedKey), serializer.serializePrivate(rootExtendedKey)),
-            AccountDto(
+            WalletDto(
                 KeyDto(serializer.serializePublic(extendedKey), serializer.serializePrivate(extendedKey)),
                 extendedKey.ecKey.getAddress()
             )

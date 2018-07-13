@@ -7,9 +7,9 @@ import io.netty.handler.codec.protobuf.ProtobufEncoder
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender
 import io.netty.handler.timeout.ReadTimeoutHandler
-import io.openfuture.chain.network.base.PeersHandler
-import io.openfuture.chain.network.base.PeerRecognitionHandler
-import io.openfuture.chain.network.base.FindPeersHandler
+import io.openfuture.chain.network.base.AddressHandler
+import io.openfuture.chain.network.base.GreetingHandler
+import io.openfuture.chain.network.base.AddressDiscoveryHandler
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
@@ -33,10 +33,10 @@ class ClientChannelInitializer(
         // Handlers
         pipeline.addLast(ReadTimeoutHandler(60))
         pipeline.addLast(context.getBean(ConnectionClientHandler::class.java))
-        pipeline.addLast(context.getBean(PeerRecognitionHandler::class.java))
+        pipeline.addLast(context.getBean(GreetingHandler::class.java))
         pipeline.addLast(context.getBean(TimeSyncClientHandler::class.java))
-        pipeline.addLast(context.getBean(FindPeersHandler::class.java))
-        pipeline.addLast(context.getBean(PeersHandler::class.java))
+        pipeline.addLast(context.getBean(AddressDiscoveryHandler::class.java))
+        pipeline.addLast(context.getBean(AddressHandler::class.java))
         pipeline.addLast(context.getBean(HeartBeatClientHandler::class.java))
     }
 

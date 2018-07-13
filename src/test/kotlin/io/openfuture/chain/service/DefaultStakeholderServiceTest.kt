@@ -5,7 +5,6 @@ import io.openfuture.chain.config.any
 import io.openfuture.chain.domain.stakeholder.StakeholderDto
 import io.openfuture.chain.entity.Stakeholder
 import io.openfuture.chain.repository.StakeholderRepository
-import io.openfuture.chain.service.stakeholder.DefaultStakeholderService
 import org.assertj.core.api.Java6Assertions.assertThat
 import org.junit.Before
 import org.junit.Test

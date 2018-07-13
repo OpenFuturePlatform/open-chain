@@ -3,7 +3,7 @@ package io.openfuture.chain.service
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
-import io.openfuture.chain.network.domain.Peer
+import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.network.server.TcpServer
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.protocol.CommunicationProtocol
@@ -23,7 +23,7 @@ class DefaultNetworkService(
     private val properties: NodeProperties
 ) : NetworkService, ApplicationListener<ApplicationReadyEvent> {
 
-    private val connectedPeers: MutableMap<Channel, Peer> = ConcurrentHashMap()
+    private val connections: MutableMap<Channel, NetworkAddress> = ConcurrentHashMap()
 
     companion object {
         private val log = LoggerFactory.getLogger(DefaultNetworkService::class.java)
@@ -35,19 +35,19 @@ class DefaultNetworkService(
         Executors.newSingleThreadExecutor().execute(tcpServer)
 
         // Start Clients
-        val address = properties.rootNodes.shuffled(SecureRandom()).first().split(":")
-        clientBootstrap.connect(address[0], address[1].toInt()).addListener { future ->
+        val address = properties.getRootAddresses().shuffled(SecureRandom()).first()
+        clientBootstrap.connect(address.host, address.port).addListener { future ->
             future as ChannelFuture
             if (future.isSuccess) {
-                future.channel().writeAndFlush(createFindPeersMessage())
+                future.channel().writeAndFlush(createFindAddressMessage())
             } else {
-                log.warn("Can not connect to ${address[0]}:${address[1]}")
+                log.warn("Can not connect to ${address.host}:${address.port}")
             }
         }
     }
 
     override fun broadcast(packet: CommunicationProtocol.Packet) {
-        connectedPeers.keys.forEach {
+        connections.keys.forEach {
             it.writeAndFlush(packet)
         }
     }
@@ -55,44 +55,44 @@ class DefaultNetworkService(
     @Scheduled(cron = "*/30 * * * * *")
     override fun maintainConnectionNumber() {
         if (isConnectionNeeded()) {
-            findPeers()
+            requestAddresses()
         }
     }
 
-    override fun addPeer(channel: Channel, peer: Peer) {
-        connectedPeers[channel] = peer
+    override fun addConnection(channel: Channel, networkAddress: NetworkAddress) {
+        connections[channel] = networkAddress
     }
 
-    override fun removePeer(channel: Channel): Peer? = connectedPeers.remove(channel)
+    override fun removeConnection(channel: Channel): NetworkAddress? = connections.remove(channel)
 
-    override fun getPeers(): Set<Peer> = connectedPeers.values.toSet()
+    override fun getConnections(): Set<NetworkAddress> = connections.values.toSet()
 
-    override fun connect(peers: List<CommunicationProtocol.Peer>) {
-        peers.map { Peer(it.host, it.port) }
-            .filter { !connectedPeers.values.contains(it) && it != Peer(properties.host!!, properties.port!!) }
+    override fun connect(peers: List<CommunicationProtocol.NetworkAddress>) {
+        peers.map { NetworkAddress(it.host, it.port) }
+            .filter { !connections.values.contains(it) && it != NetworkAddress(properties.host!!, properties.port!!) }
             .forEach { clientBootstrap.connect(it.host, it.port) }
     }
 
-    private fun createFindPeersMessage(): CommunicationProtocol.Packet {
+    private fun createFindAddressMessage(): CommunicationProtocol.Packet {
         return CommunicationProtocol.Packet.newBuilder()
-            .setType(CommunicationProtocol.Type.FIND_PEERS)
-            .setFindPeers(CommunicationProtocol.FindPeers.newBuilder().build())
+            .setType(CommunicationProtocol.Type.ADDRESSES)
+            .setFindAddresses(CommunicationProtocol.FindAddresses.newBuilder().build())
             .build()
     }
 
-    private fun isConnectionNeeded(): Boolean = properties.peersNumber!! > connectedPeers.size
+    private fun isConnectionNeeded(): Boolean = properties.peersNumber!! > connections.size
 
-    private fun findPeers() {
-        val peer = connectedPeers.values.shuffled(SecureRandom()).firstOrNull()
-            ?: properties.getRootPeers().shuffled().first()
+    private fun requestAddresses() {
+        val address = connections.values.shuffled(SecureRandom()).firstOrNull()
+            ?: properties.getRootAddresses().shuffled().first()
 
-        send(peer, createFindPeersMessage())
+        send(address, createFindAddressMessage())
     }
 
-    private fun send(peer: Peer, message: CommunicationProtocol.Packet) {
-        var channel = connectedPeers.filter { it -> it.value == peer }.map { it -> it.key }.firstOrNull()
+    private fun send(networkAddress: NetworkAddress, message: CommunicationProtocol.Packet) {
+        var channel = connections.filter { it -> it.value == networkAddress }.map { it -> it.key }.firstOrNull()
         if (channel == null) {
-            channel = clientBootstrap.connect(peer.host, peer.port).channel()
+            channel = clientBootstrap.connect(networkAddress.host, networkAddress.port).channel()
         }
         channel!!.writeAndFlush(message)
     }
