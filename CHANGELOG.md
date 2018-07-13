@@ -5,42 +5,44 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.3.0] - 2018-07-13
 ### Added
 - Address mixed-case checksum
 - Address validation
 - RPC requests: validateAddress
 - Vote transaction type
 - Voting algorithm mechanism
-- Voting store
+- Voting storing
 - Delegate rating calculation
-- Active delegates store
-- Calculation wallet balance
-- Database: add Wallet entity
+- Active delegates storing
+- Wallet balance calculation
+- Database: added Wallet entity
 - RPC requests: getWalletBalance
 - Sign data
 - Verify signed data
 - Define epoch duration in properties
 - Get current epoch height
-- Check is genesis block needed
+- Check if genesis block is needed
 - Sharing peers between nodes
 - Maintaining necessary connections count
 - Connection establishing logic
 - Scheduled check of connections
-- Reconnect logic
-- Generating private and public key pairs on app start and saving in files if not exist
+- Reconnection logic
+- Generating private and public key pairs on app start and saving in a file if not existing
 - Shuffle active delegates
-- Transaction merkle hash calculation
+- Transaction Merkle hash calculation
 - Block production
 - Block validation
-- Converters for block, transaction, signature from prototype to business object and vice versa
-- Accumulation signatures from nodes
+- Block, transaction, signature conversion from protobuff to the business object and vice versa
+- Accumulation of signatures from nodes
 - Block approving
 - Block applying by scheduling
 
 ### Changed
 - Default account info is added to the doGenerateMaster end-point response
 - doGenerateMaster end-point renamed to doRestore
-- Block separated by types: GenesisBlock and MainBlock
+- Block are divided by types: GenesisBlock and MainBlock
 
 ## [0.2.0] - 2018-06-29
 ### Added
@@ -87,5 +89,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[0.3.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/OpenFuturePlatform/open-chain/compare/fea19b11de90c89689eff8d2187fd332ee566d19...v0.1.0
