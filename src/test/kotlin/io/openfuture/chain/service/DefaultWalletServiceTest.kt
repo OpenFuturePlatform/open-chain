@@ -1,7 +1,6 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.config.ServiceTests
-import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Wallet
 import io.openfuture.chain.entity.dictionary.VoteType
@@ -74,7 +73,7 @@ class DefaultWalletServiceTest : ServiceTests() {
 
     private fun createTransaction(amount: Double, senderAddress: String, recipientAddress: String): BaseTransaction {
         val block = MainBlock(1L, "previousHash", "hash", 1L,
-            "merkleHash", emptyList())
+            "merkleHash", mutableListOf())
 
         return VoteTransaction(Date().time, amount, "recipientKey", recipientAddress,
             "senderKey", senderAddress, "signature", "hash", VoteType.FOR.getId(),

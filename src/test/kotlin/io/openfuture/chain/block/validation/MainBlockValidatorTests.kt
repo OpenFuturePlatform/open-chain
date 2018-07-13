@@ -24,7 +24,7 @@ class MainBlockValidatorTests : ServiceTests() {
             "63b92f8cdd3e55803d0542467ba2a49b5eb5089efb305d94929c0bdac2dc065f",
             1512345678L,
             "signature",
-            listOf(
+            mutableListOf(
                 VoteTransaction(
                     1500000000L,
                     1000.0,
@@ -67,7 +67,7 @@ class MainBlockValidatorTests : ServiceTests() {
             "0000000000000000000000000000000000000000000000000000000000000000",
             1512345678L,
             "signature",
-            listOf(
+            mutableListOf(
                 VoteTransaction(
                     1500000000L,
                     1000.0,

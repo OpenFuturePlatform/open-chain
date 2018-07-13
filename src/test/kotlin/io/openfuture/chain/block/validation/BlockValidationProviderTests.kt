@@ -33,7 +33,7 @@ class BlockValidationProviderTests : ServiceTests() {
             "merkle_hash",
             1510000000L,
             "prev_signature",
-            listOf(
+            mutableListOf(
                 VoteTransaction(
                     1500000000L,
                     1000.0,
@@ -85,7 +85,7 @@ class BlockValidationProviderTests : ServiceTests() {
             merkleHash,
             currentTime,
             "signature",
-            listOf(
+            mutableListOf(
                 VoteTransaction(
                     1500000000L,
                     1000.0,
@@ -130,7 +130,7 @@ class BlockValidationProviderTests : ServiceTests() {
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             1512345678L,
             "signature",
-            listOf(
+            mutableListOf(
                 VoteTransaction(
                     1500000000L,
                     1000.0,

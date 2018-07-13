@@ -11,6 +11,7 @@ import io.openfuture.chain.domain.block.SignaturePublicKeyPair
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.ConsensusService
@@ -139,7 +140,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         setOf("delegate1", "delegate2", "delegate3")
     )
 
-    private fun createTransactions() = listOf(
+    private fun createTransactions(): MutableList<BaseTransaction> = mutableListOf(
         VoteTransaction(
             1500000000L,
             1000.0,

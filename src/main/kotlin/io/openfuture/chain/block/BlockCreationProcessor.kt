@@ -6,7 +6,10 @@ import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.SignaturePublicKeyPair
-import io.openfuture.chain.entity.*
+import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.BlockType
+import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.ConsensusService
@@ -63,7 +66,7 @@ class BlockCreationProcessor(
         return pendingBlock
     }
 
-    private fun create(transactions: List<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
+    private fun create(transactions: MutableList<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
         val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
 
         val time = System.currentTimeMillis()
