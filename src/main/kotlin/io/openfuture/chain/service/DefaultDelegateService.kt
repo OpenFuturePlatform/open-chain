@@ -1,17 +1,10 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.domain.delegate.DelegateDto
-import io.openfuture.chain.domain.vote.VoteDto
-import io.openfuture.chain.entity.Stakeholder
-import io.openfuture.chain.entity.dictionary.VoteType
-import io.openfuture.chain.entity.peer.Delegate
+import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.exception.NotFoundException
-import io.openfuture.chain.network.client.handler.ConnectionClientHandler
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.DelegateRepository
-import io.openfuture.chain.service.DelegateService
-import io.openfuture.chain.service.StakeholderService
-import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -27,9 +20,9 @@ class DefaultDelegateService(
         ?: throw NotFoundException("Delegate with host: $host and port $port not exist!")
 
     @Transactional(readOnly = true)
-    override fun getActiveDelegates(): List<Delegate> {
+    override fun getActiveDelegates(): Set<Delegate> {
         val request = PageRequest.of(0, consensusProperties.delegatesCount!!)
-        return repository.findAllByOrderByRatingDesc(request)
+        return repository.findAllByOrderByRatingDesc(request).toSet()
     }
 
     @Transactional

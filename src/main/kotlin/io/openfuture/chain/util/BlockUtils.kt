@@ -1,6 +1,7 @@
 package io.openfuture.chain.util
 
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.crypto.util.HashUtils.doubleSha256
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.transaction.BaseTransaction
@@ -27,7 +28,7 @@ object BlockUtils {
             previousTreeLayout = treeLayout
             treeLayout = mutableListOf()
         }
-        return HashUtils.generateHash(previousTreeLayout[0] + previousTreeLayout[1])
+        return HashUtils.toHexString(doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
     }
 
     fun calculateHash(previousHash: String, timestamp: Long, height: Long, merkleRoot: String = ""): ByteArray {

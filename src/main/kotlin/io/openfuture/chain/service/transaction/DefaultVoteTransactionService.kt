@@ -4,9 +4,9 @@ import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.delegate.DelegateInfo
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
+import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.Stakeholder
 import io.openfuture.chain.entity.dictionary.VoteType
-import io.openfuture.chain.entity.peer.Delegate
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.VoteTransactionRepository
@@ -20,8 +20,7 @@ class DefaultVoteTransactionService(
     private val nodeClock: NodeClock,
     private val delegateService: DelegateService,
     private val stakeholderService: StakeholderService,
-    private val consensusProperties: ConsensusProperties,
-    private val networkService: NetworkService
+    private val consensusProperties: ConsensusProperties
 ) : DefaultBaseTransactionService<VoteTransaction>(repository), VoteTransactionService {
 
     @Transactional
