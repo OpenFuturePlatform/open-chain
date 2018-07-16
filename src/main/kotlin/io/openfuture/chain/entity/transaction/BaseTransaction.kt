@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.base.BaseModel
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.MainBlock
 import javax.persistence.*
 
 @Entity
@@ -35,7 +36,7 @@ abstract class BaseTransaction(
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "block_id", nullable = true)
-    var block: Block? = null
+    var block: MainBlock? = null
 
 ) : BaseModel() {
 

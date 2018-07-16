@@ -1,10 +1,11 @@
 package io.openfuture.chain.repository
 
+import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.SeedWord
 import io.openfuture.chain.entity.Stakeholder
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Wallet
-import io.openfuture.chain.entity.peer.Delegate
+import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
@@ -17,13 +18,19 @@ import org.springframework.stereotype.Repository
 interface BaseRepository<T> : JpaRepository<T, Int>
 
 @Repository
-interface BlockRepository : BaseRepository<Block> {
+interface BlockRepository<T: Block> : BaseRepository<T> {
 
-    fun findByHash(hash: String): Block?
+    fun findByHash(hash: String): T?
 
-    fun findFirstByOrderByHeightDesc(): Block?
+    fun findFirstByOrderByHeightDesc(): T?
 
 }
+
+@Repository
+interface MainBlockRepository : BlockRepository<MainBlock>
+
+@Repository
+interface GenesisBlockRepository : BlockRepository<GenesisBlock>
 
 @Repository
 interface BaseTransactionRepository<Entity : BaseTransaction> : BaseRepository<Entity> {

@@ -2,7 +2,6 @@ package io.openfuture.chain.entity
 
 import io.openfuture.chain.domain.stakeholder.StakeholderDto
 import io.openfuture.chain.entity.base.BaseModel
-import io.openfuture.chain.entity.peer.Delegate
 import javax.persistence.*
 
 @Entity

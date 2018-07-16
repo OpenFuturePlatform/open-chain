@@ -7,7 +7,7 @@ CREATE TABLE transactions (
   sender_address    VARCHAR NOT NULL,
   sender_signature  VARCHAR NOT NULL,
   hash              VARCHAR UNIQUE NOT NULL,
-  block_id          INTEGER REFERENCES blocks
+  block_id          INTEGER REFERENCES main_blocks
 );
 --
 CREATE TABLE transfer_transactions (

@@ -15,6 +15,7 @@ class DefaultHardwareInfoService : HardwareInfoService {
 
     private val hardwareLayer = SystemInfo().hardware
 
+
     override fun getHardwareInfo(): HardwareInfo {
         val cpuInfo = getCpuInfo()
         val ramInfo = getRamInfo()

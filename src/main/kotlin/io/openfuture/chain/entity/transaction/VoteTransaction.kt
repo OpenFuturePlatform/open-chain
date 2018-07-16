@@ -3,6 +3,7 @@ package io.openfuture.chain.entity.transaction
 import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.util.DictionaryUtils
 import javax.persistence.*
@@ -21,7 +22,7 @@ class VoteTransaction(timestamp: Long, amount: Double, recipientAddress: String,
     @Column(name = "delegate_port", nullable = false)
     var delegatePort: Int,
 
-    block: Block? = null
+    block: MainBlock? = null
 
 ) : BaseTransaction(timestamp, amount, recipientAddress, senderKey, senderAddress,
     senderSignature, hash, block) {

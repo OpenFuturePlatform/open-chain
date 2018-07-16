@@ -18,6 +18,7 @@ class HeartBeatClientHandler : BaseHandler(Type.HEART_BEAT) {
         private val log = LoggerFactory.getLogger(ConnectionClientHandler::class.java)
     }
 
+
     @Volatile
     private var heartBeatTask: ScheduledFuture<*>? = null
 

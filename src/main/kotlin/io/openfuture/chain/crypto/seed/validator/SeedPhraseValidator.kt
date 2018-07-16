@@ -30,6 +30,7 @@ class SeedPhraseValidator(
         private const val THIRD_BYTE_SKIP_BIT_SIZE = BYTE_SIZE + MAX_FIRST_BIT_INDEX_IN_TWO_BYTE
     }
 
+
     fun isValid(seedPhrase: String): Boolean {
         val seedPhraseWords = seedPhrase.split(StringUtils.SPACE)
         val phaseLength = PhraseLength.fromValue(seedPhraseWords.size) ?: return false

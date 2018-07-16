@@ -16,6 +16,7 @@ class ExtendedKeySerializer {
         val xprv = byteArrayOf(0x04.toByte(), 0x88.toByte(), 0xAD.toByte(), 0xE4.toByte())
     }
 
+
     fun serializePublic(extendedKey: ExtendedKey): String {
         return serialize(xpub, extendedKey, extendedKey.ecKey.public)
     }

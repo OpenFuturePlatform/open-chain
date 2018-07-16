@@ -10,6 +10,7 @@ object Base58CoderUtils {
     private val ENCODED_ZERO = ALPHABET[0]
     private val INDEXES = IntArray(128)
 
+
     init {
         INDEXES.fill(-1)
         for (i in ALPHABET.indices) {
