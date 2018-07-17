@@ -19,8 +19,6 @@ object HashUtils {
     private const val ITERATION_COUNT = 2048
 
 
-    fun generateHash(bytes: ByteArray) = ByteUtils.toHexString(sha256(bytes))!!
-
     fun doubleSha256(bytes: ByteArray) = sha256(sha256(bytes))
 
     fun keyHash(bytes: ByteArray): ByteArray {

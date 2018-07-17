@@ -71,9 +71,9 @@ class CryptoServiceTests : ServiceTests() {
         assertThat(actualRootAccount.seedPhrase).isEqualTo(seedPhrase)
         assertThat(actualRootAccount.masterKeys.publicKey).isEqualTo("1")
         assertThat(actualRootAccount.masterKeys.privateKey).isEqualTo("2")
-        assertThat(actualRootAccount.defaultAccount.keys.publicKey).isEqualTo("1")
-        assertThat(actualRootAccount.defaultAccount.keys.privateKey).isEqualTo("2")
-        assertThat(actualRootAccount.defaultAccount.address).isNotNull()
+        assertThat(actualRootAccount.defaultWallet.keys.publicKey).isEqualTo("1")
+        assertThat(actualRootAccount.defaultWallet.keys.privateKey).isEqualTo("2")
+        assertThat(actualRootAccount.defaultWallet.address).isNotNull()
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -152,9 +152,9 @@ class CryptoServiceTests : ServiceTests() {
         assertThat(actualRootAccount.seedPhrase).isEqualTo(seedPhrase)
         assertThat(actualRootAccount.masterKeys.publicKey).isEqualTo(publicKey)
         assertThat(actualRootAccount.masterKeys.privateKey).isEqualTo(privateKey)
-        assertThat(actualRootAccount.defaultAccount.keys.publicKey).isEqualTo(publicKey)
-        assertThat(actualRootAccount.defaultAccount.keys.privateKey).isEqualTo(privateKey)
-        assertThat(actualRootAccount.defaultAccount.address).isNotNull()
+        assertThat(actualRootAccount.defaultWallet.keys.publicKey).isEqualTo(publicKey)
+        assertThat(actualRootAccount.defaultWallet.keys.privateKey).isEqualTo(privateKey)
+        assertThat(actualRootAccount.defaultWallet.address).isNotNull()
     }
 
     fun importKeyShouldReturnKeysValuesAndAddressWhenPrivateKeyImporting() {

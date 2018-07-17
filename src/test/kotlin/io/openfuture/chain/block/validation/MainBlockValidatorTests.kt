@@ -22,13 +22,12 @@ class MainBlockValidatorTests : ServiceTests() {
             ByteArray(1),
             123,
             "prev_block_hash",
-            "63b92f8cdd3e55803d0542467ba2a49b5eb5089efb305d94929c0bdac2dc065f",
+            "0e09773036394004cb8c340e639a89d7a18e924e8a3d048b49864aeb017e07a0",
             1512345678L,
             mutableListOf(
                 VoteTransaction(
                     1500000000L,
                     1000.0,
-                    "recipient_key",
                     "recipient_address",
                     "sender_key",
                     "sender_address",
@@ -41,7 +40,6 @@ class MainBlockValidatorTests : ServiceTests() {
                 VoteTransaction(
                     1500000001L,
                     1002.0,
-                    "recipient_key2",
                     "recipient_address2",
                     "sender_key2",
                     "sender_address2",
@@ -71,7 +69,6 @@ class MainBlockValidatorTests : ServiceTests() {
                 VoteTransaction(
                     1500000000L,
                     1000.0,
-                    "recipient_key",
                     "recipient_address",
                     "sender_key",
                     "sender_address",
@@ -84,7 +81,6 @@ class MainBlockValidatorTests : ServiceTests() {
                 VoteTransaction(
                     1500000001L,
                     1002.0,
-                    "recipient_key2",
                     "recipient_address2",
                     "sender_key2",
                     "sender_address2",

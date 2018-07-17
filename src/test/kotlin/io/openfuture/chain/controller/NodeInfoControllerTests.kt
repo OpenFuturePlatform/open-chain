@@ -1,12 +1,12 @@
 package io.openfuture.chain.controller
 
 import io.openfuture.chain.config.ControllerTests
-import io.openfuture.chain.domain.HardwareInfo
-import io.openfuture.chain.domain.UptimeResponse
-import io.openfuture.chain.domain.hardware.CpuInfo
-import io.openfuture.chain.domain.hardware.NetworkInfo
-import io.openfuture.chain.domain.hardware.RamInfo
-import io.openfuture.chain.domain.node.NodeTimestampResponse
+import io.openfuture.chain.domain.rpc.HardwareInfo
+import io.openfuture.chain.domain.rpc.UptimeResponse
+import io.openfuture.chain.domain.rpc.hardware.CpuInfo
+import io.openfuture.chain.domain.rpc.hardware.NetworkInfo
+import io.openfuture.chain.domain.rpc.hardware.RamInfo
+import io.openfuture.chain.domain.rpc.node.NodeTimestampResponse
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.service.HardwareInfoService
 import org.assertj.core.api.Assertions.assertThat
@@ -61,10 +61,10 @@ class NodeInfoControllerTests : ControllerTests() {
     @Test
     fun getHardwareInfoShoutReturnHardwareInfo() {
         val expected = HardwareInfo(
-                CpuInfo("1", 1L, 1),
-                RamInfo(1L, 1L, 2L),
-                1L,
-                listOf(NetworkInfo("IN", listOf("192.168.1.1")))
+            CpuInfo("1", 1L, 1),
+            RamInfo(1L, 1L, 2L),
+            1L,
+            listOf(NetworkInfo("IN", listOf("192.168.1.1")))
         )
 
         given(hardwareInfoService.getHardwareInfo()).willReturn(expected)
