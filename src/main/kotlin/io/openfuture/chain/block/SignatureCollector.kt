@@ -1,5 +1,6 @@
 package io.openfuture.chain.block
 
+import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
 import io.openfuture.chain.entity.*
@@ -12,7 +13,9 @@ import java.util.concurrent.ConcurrentHashMap
 @Component
 class SignatureCollector(
     private val blockService: BlockService,
-    private val properties: ConsensusProperties
+    private val properties: ConsensusProperties,
+    private val timeSlot: TimeSlot,
+    private val clock: NodeClock
 ) {
 
     companion object {
@@ -43,6 +46,9 @@ class SignatureCollector(
 
     fun applyBlock() {
         try {
+            if (timeSlot.roundStartTime + properties.timeSlotDuration!! > clock.networkTime()) {
+                return
+            }
             val genesisBlock = blockService.getLastGenesis()
             if (signatures.size.toDouble() / genesisBlock.activeDelegates.size > APPROVAL_THRESHOLD) {
                 if (pendingBlock is MainBlock) {

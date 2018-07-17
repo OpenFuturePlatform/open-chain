@@ -13,6 +13,7 @@ import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.service.*
 import io.openfuture.chain.util.BlockUtils
@@ -28,10 +29,17 @@ class BlockCreationProcessor(
     private val consensusService: ConsensusService,
     private val clock: NodeClock,
     private val delegateService: DelegateService,
-    private val properties: NodeProperties
+    private val properties: NodeProperties,
+    private val consensusProperties: ConsensusProperties,
+    private val timeSlot: TimeSlot
 ) {
 
     fun approveBlock(pendingBlock: PendingBlock): PendingBlock {
+        val blockCreateDuration = consensusProperties.timeSlotDuration!! / 3
+        if (timeSlot.roundStartTime + blockCreateDuration > clock.networkTime()) {
+            throw IllegalArgumentException("Time to approve block is over")
+        }
+
         val block = pendingBlock.block
 
         if (!validationService.isValid(block)) {
@@ -52,6 +60,7 @@ class BlockCreationProcessor(
 
     @EventListener
     fun fireBlockCreation(event: BlockCreationEvent) {
+        timeSlot.roundStartTime = clock.networkTime()
         val previousBlock = service.getLastMain()
         val genesisBlock = service.getLastGenesis()
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
