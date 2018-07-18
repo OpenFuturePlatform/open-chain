@@ -2,8 +2,7 @@ package io.openfuture.chain.network.client.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
-import io.openfuture.chain.protocol.CommunicationProtocol
-import io.openfuture.chain.protocol.CommunicationProtocol.Type
+import io.openfuture.chain.network.domain.*
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -16,6 +15,13 @@ class ConnectionClientHandler : ChannelInboundHandlerAdapter() {
         private val log = LoggerFactory.getLogger(ConnectionClientHandler::class.java)
     }
 
+    private val allowablePacketTypes = setOf(
+        Addresses::class,
+        FindAddresses::class,
+        Greeting::class,
+        HeartBeat::class,
+        TimeSyncResponse::class)
+
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         log.info("Connection with ${ctx.channel().remoteAddress()} established")
@@ -24,10 +30,10 @@ class ConnectionClientHandler : ChannelInboundHandlerAdapter() {
     }
 
     override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {
-        packet as CommunicationProtocol.Packet
+        log.info("Message received $packet from ${ctx.channel().remoteAddress()}")
 
         // check packet type
-        if (!Type.values().contains(packet.type)) {
+        if (!allowablePacketTypes.contains(packet::class)) {
             log.error("Illegal packet type: {}", packet)
             ctx.close()
             return

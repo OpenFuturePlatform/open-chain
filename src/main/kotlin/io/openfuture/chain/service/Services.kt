@@ -26,7 +26,6 @@ import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.domain.NetworkAddress
-import io.openfuture.chain.protocol.CommunicationProtocol
 
 interface HardwareInfoService {
 
@@ -142,7 +141,7 @@ interface WalletService {
 
 interface NetworkService {
 
-    fun broadcast(packet: CommunicationProtocol.Packet)
+    fun broadcast(packet: Any)
 
     fun maintainConnectionNumber()
 
@@ -152,6 +151,6 @@ interface NetworkService {
 
     fun getConnections(): Set<NetworkAddress>
 
-    fun connect(peers: List<CommunicationProtocol.NetworkAddress>)
+    fun connect(peers: List<NetworkAddress>)
 
 }

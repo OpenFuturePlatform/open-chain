@@ -2,10 +2,7 @@ package io.openfuture.chain.network.server.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
-import io.openfuture.chain.protocol.CommunicationProtocol
-import io.openfuture.chain.protocol.CommunicationProtocol.HeartBeat
-import io.openfuture.chain.protocol.CommunicationProtocol.Packet
-import io.openfuture.chain.protocol.CommunicationProtocol.Type.HEART_BEAT
+import io.openfuture.chain.network.domain.*
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -18,25 +15,28 @@ class ConnectionServerHandler : ChannelInboundHandlerAdapter() {
         private val log = LoggerFactory.getLogger(ConnectionServerHandler::class.java)
     }
 
+    private val allowablePacketTypes = setOf(
+        Addresses::class,
+        FindAddresses::class,
+        Greeting::class,
+        HeartBeat::class,
+        TimeSyncRequest::class)
+
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         log.info("Connection with ${ctx.channel().remoteAddress()} established")
 
         // start heart beat
-        val packet = Packet.newBuilder()
-            .setType(HEART_BEAT)
-            .setHeartBeat(HeartBeat.newBuilder().setType(HeartBeat.Type.PING).build())
-            .build()
-        ctx.writeAndFlush(packet)
+        ctx.writeAndFlush(HeartBeat(HeartBeat.Type.PING))
 
         ctx.fireChannelActive()
     }
 
     override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {
-        packet as CommunicationProtocol.Packet
+        log.info("Message received $packet from ${ctx.channel().remoteAddress()}")
 
         // check packet type
-        if (!CommunicationProtocol.Type.values().contains(packet.type)) {
+        if (!allowablePacketTypes.contains(packet::class)) {
             log.error("Illegal packet type: {}", packet)
             ctx.close()
             return

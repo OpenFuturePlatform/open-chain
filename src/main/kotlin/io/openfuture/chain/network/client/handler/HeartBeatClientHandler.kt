@@ -2,9 +2,8 @@ package io.openfuture.chain.network.client.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.base.BaseHandler
-import io.openfuture.chain.protocol.CommunicationProtocol
-import io.openfuture.chain.protocol.CommunicationProtocol.*
-import org.slf4j.LoggerFactory
+import io.openfuture.chain.network.domain.HeartBeat
+import io.openfuture.chain.network.domain.HeartBeat.Type.*
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import java.util.concurrent.ScheduledFuture
@@ -12,22 +11,14 @@ import java.util.concurrent.TimeUnit
 
 @Component
 @Scope("prototype")
-class HeartBeatClientHandler : BaseHandler(Type.HEART_BEAT) {
-
-    companion object {
-        private val log = LoggerFactory.getLogger(ConnectionClientHandler::class.java)
-    }
-
+class HeartBeatClientHandler : BaseHandler<HeartBeat>() {
 
     @Volatile
     private var heartBeatTask: ScheduledFuture<*>? = null
 
 
-    override fun packetReceived(ctx: ChannelHandlerContext, message: CommunicationProtocol.Packet) {
-        val body = message.heartBeat
-        log.info("Heartbeat ({}) from: {}", body.type, ctx.channel().remoteAddress())
-
-        if (body.type == HeartBeat.Type.PONG) {
+    override fun packetReceived(ctx: ChannelHandlerContext, message: HeartBeat) {
+        if (message.type == PONG) {
             return
         }
 
@@ -38,11 +29,7 @@ class HeartBeatClientHandler : BaseHandler(Type.HEART_BEAT) {
                 .scheduleAtFixedRate(HeartBeatTask(ctx), 20, 20, TimeUnit.SECONDS)
 
         // response
-        val packet = Packet.newBuilder()
-                .setType(Type.HEART_BEAT)
-                .setHeartBeat(HeartBeat.newBuilder().setType(HeartBeat.Type.PONG).build())
-                .build()
-        ctx.writeAndFlush(packet)
+        ctx.writeAndFlush(HeartBeat(PONG))
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext?) {
@@ -52,11 +39,7 @@ class HeartBeatClientHandler : BaseHandler(Type.HEART_BEAT) {
     class HeartBeatTask(private val ctx: ChannelHandlerContext) : Runnable {
 
         override fun run() {
-            val packet = Packet.newBuilder()
-                    .setType(Type.HEART_BEAT)
-                    .setHeartBeat(HeartBeat.newBuilder().setType(HeartBeat.Type.PING).build())
-                    .build()
-            ctx.writeAndFlush(packet)
+            ctx.writeAndFlush(HeartBeat(PING))
         }
 
     }

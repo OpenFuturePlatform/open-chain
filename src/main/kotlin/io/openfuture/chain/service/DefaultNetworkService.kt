@@ -3,10 +3,10 @@ package io.openfuture.chain.service
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
+import io.openfuture.chain.network.domain.FindAddresses
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.network.server.TcpServer
 import io.openfuture.chain.property.NodeProperties
-import io.openfuture.chain.protocol.CommunicationProtocol
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationListener
@@ -39,14 +39,14 @@ class DefaultNetworkService(
         clientBootstrap.connect(address.host, address.port).addListener { future ->
             future as ChannelFuture
             if (future.isSuccess) {
-                future.channel().writeAndFlush(createFindAddressMessage())
+                future.channel().writeAndFlush(FindAddresses())
             } else {
                 log.warn("Can not connect to ${address.host}:${address.port}")
             }
         }
     }
 
-    override fun broadcast(packet: CommunicationProtocol.Packet) {
+    override fun broadcast(packet: Any) {
         connections.keys.forEach {
             it.writeAndFlush(packet)
         }
@@ -67,18 +67,12 @@ class DefaultNetworkService(
 
     override fun getConnections(): Set<NetworkAddress> = connections.values.toSet()
 
-    override fun connect(peers: List<CommunicationProtocol.NetworkAddress>) {
+    override fun connect(peers: List<NetworkAddress>) {
         peers.map { NetworkAddress(it.host, it.port) }
             .filter { !connections.values.contains(it) && it != NetworkAddress(properties.host!!, properties.port!!) }
             .forEach { clientBootstrap.connect(it.host, it.port) }
     }
 
-    private fun createFindAddressMessage(): CommunicationProtocol.Packet {
-        return CommunicationProtocol.Packet.newBuilder()
-            .setType(CommunicationProtocol.Type.ADDRESSES)
-            .setFindAddresses(CommunicationProtocol.FindAddresses.newBuilder().build())
-            .build()
-    }
 
     private fun isConnectionNeeded(): Boolean = properties.peersNumber!! > connections.size
 
@@ -86,10 +80,10 @@ class DefaultNetworkService(
         val address = connections.values.shuffled(SecureRandom()).firstOrNull()
             ?: properties.getRootAddresses().shuffled().first()
 
-        send(address, createFindAddressMessage())
+        send(address, FindAddresses())
     }
 
-    private fun send(networkAddress: NetworkAddress, message: CommunicationProtocol.Packet) {
+    private fun send(networkAddress: NetworkAddress, message: Any) {
         var channel = connections.filter { it -> it.value == networkAddress }.map { it -> it.key }.firstOrNull()
         if (channel == null) {
             channel = clientBootstrap.connect(networkAddress.host, networkAddress.port).channel()

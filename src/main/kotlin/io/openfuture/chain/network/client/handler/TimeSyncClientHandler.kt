@@ -3,11 +3,8 @@ package io.openfuture.chain.network.client.handler
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.network.base.BaseHandler
-import io.openfuture.chain.protocol.CommunicationProtocol
-import io.openfuture.chain.protocol.CommunicationProtocol.Packet
-import io.openfuture.chain.protocol.CommunicationProtocol.TimeSyncRequest
-import io.openfuture.chain.protocol.CommunicationProtocol.Type.TIME_SYNC_REQUEST
-import io.openfuture.chain.protocol.CommunicationProtocol.Type.TIME_SYNC_RESPONSE
+import io.openfuture.chain.network.domain.TimeSyncRequest
+import io.openfuture.chain.network.domain.TimeSyncResponse
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -16,31 +13,16 @@ import org.springframework.stereotype.Component
 @Scope("prototype")
 class TimeSyncClientHandler(
         private val clock: NodeClock
-) : BaseHandler(TIME_SYNC_RESPONSE) {
-
-    companion object {
-        private val log = LoggerFactory.getLogger(TimeSyncClientHandler::class.java)
-    }
-
+) : BaseHandler<TimeSyncResponse>() {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        val request = Packet.newBuilder()
-                .setType(TIME_SYNC_REQUEST)
-                .setTimeSyncRequest(TimeSyncRequest.newBuilder()
-                        .setNodeTimestamp(clock.nodeTime())
-                        .build())
-                .build()
-        ctx.writeAndFlush(request)
-
-        log.info("Message $TIME_SYNC_REQUEST was sent to ${ctx.channel().remoteAddress()}")
-
+        val message = TimeSyncRequest(clock.nodeTime())
+        ctx.writeAndFlush(message)
         ctx.fireChannelActive()
     }
 
-    override fun packetReceived(ctx: ChannelHandlerContext, message: Packet) {
-        log.info("Message $TIME_SYNC_RESPONSE received from ${ctx.channel().remoteAddress()}")
-
-        val offset = calculateTimeOffset(message.timeSyncResponse)
+    override fun packetReceived(ctx: ChannelHandlerContext, message: TimeSyncResponse) {
+        val offset = calculateTimeOffset(message)
         clock.addTimeOffset(ctx.channel().remoteAddress().toString(), offset)
     }
 
@@ -49,7 +31,7 @@ class TimeSyncClientHandler(
         ctx.fireChannelInactive()
     }
 
-    fun calculateTimeOffset(response: CommunicationProtocol.TimeSyncResponse): Long {
+    fun calculateTimeOffset(response: TimeSyncResponse): Long {
         val networkLatency = (clock.nodeTime() - response.nodeTimestamp) / 2
         val expectedNetworkTimestamp = response.nodeTimestamp + networkLatency
         return response.networkTimestamp - expectedNetworkTimestamp
