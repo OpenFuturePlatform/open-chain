@@ -41,7 +41,18 @@ class DefaultWalletService(
     }
 
     @Transactional
-    override fun addVote(address: String, delegate: Delegate) {
+    override fun changeWalletVote(address: String, delegate: Delegate, type: VoteType) {
+        when (type) {
+            VoteType.FOR -> {
+                addVote(address, delegate)
+            }
+            VoteType.AGAINST -> {
+                removeVote(address, delegate)
+            }
+        }
+    }
+
+    private fun addVote(address: String, delegate: Delegate) {
         val wallet = getByAddress(address)
 
         if (consensusProperties.delegatesCount!! <= wallet.votes.size) {
@@ -56,8 +67,7 @@ class DefaultWalletService(
         repository.save(wallet)
     }
 
-    @Transactional
-    override fun removeVote(address: String, delegate: Delegate) {
+    private fun removeVote(address: String, delegate: Delegate) {
         val wallet = getByAddress(address)
 
         if (!wallet.votes.contains(delegate)) {

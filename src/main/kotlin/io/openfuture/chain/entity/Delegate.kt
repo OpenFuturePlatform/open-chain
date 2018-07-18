@@ -19,10 +19,9 @@ class Delegate(
     @Column(name = "port", nullable = false)
     var port: Int,
 
-    @Column(name = "rating", nullable = false)
-    var rating: Double = 0.0
+    id: Int = 0
 
-) : BaseModel() {
+) : BaseModel(id) {
 
     companion object {
         fun of(dto: DelegateDto): Delegate = Delegate(

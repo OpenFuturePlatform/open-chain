@@ -3,8 +3,10 @@ package io.openfuture.chain.service.transaction
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.main
 import io.openfuture.chain.repository.VoteTransactionRepository
 import io.openfuture.chain.service.*
 import org.springframework.stereotype.Service
@@ -40,21 +42,11 @@ class DefaultVoteTransactionService(
         //todo: networkService.broadcast(transaction.toMessage)
     }
 
-    override fun beforeAddToBlock(tx: VoteTransaction) {
-        updateWalletVotes(tx.senderAddress, tx.delegateKey, tx.getVoteType())
-        updateWalletBalance(tx.senderAddress, tx.recipientAddress, tx.amount)
-    }
-
-    private fun updateWalletVotes(address: String, delegateKey: String, type: VoteType) {
-        val delegate = delegateService.getByPublicKey(delegateKey)
-        when (type) {
-            VoteType.FOR -> {
-                walletService.addVote(address, delegate)
-            }
-            VoteType.AGAINST -> {
-                walletService.removeVote(address, delegate)
-            }
-        }
+    @Transactional
+    override fun addToBlock(tx: VoteTransaction, block: MainBlock): VoteTransaction {
+        val delegate = delegateService.getByPublicKey(tx.delegateKey)
+        walletService.changeWalletVote(tx.senderAddress, delegate, tx.getVoteType())
+        return super.commonAddToBlock(tx, block)
     }
 
 }

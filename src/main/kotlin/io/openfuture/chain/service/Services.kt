@@ -17,6 +17,7 @@ import io.openfuture.chain.domain.rpc.transaction.TransactionRequest
 import io.openfuture.chain.domain.rpc.transaction.TransferTransactionRequest
 import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
 import io.openfuture.chain.entity.*
+import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
@@ -80,7 +81,7 @@ interface BaseTransactionService<Entity : BaseTransaction> {
 
     fun get(hash: String): Entity
 
-    fun addToBlock(hash: String, block: MainBlock): Entity
+    fun addToBlock(tx: Entity, block: MainBlock): Entity
 
 }
 
@@ -126,9 +127,7 @@ interface WalletService {
 
     fun updateBalance(from: String, to: String, amount: Double)
 
-    fun addVote(address: String, delegate: Delegate)
-
-    fun removeVote(address: String, delegate: Delegate)
+    fun changeWalletVote(address: String, delegate: Delegate, type: VoteType)
 
 }
 

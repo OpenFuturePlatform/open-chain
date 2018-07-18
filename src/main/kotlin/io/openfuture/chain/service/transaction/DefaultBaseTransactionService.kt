@@ -23,22 +23,15 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction>(
     override fun get(hash: String): Entity = repository.findOneByHash(hash)
         ?: throw NotFoundException("Transaction with hash: $hash not exist!")
 
-    @Transactional
-    override fun addToBlock(hash: String, block: MainBlock): Entity {
-        val persistTransaction = this.get(hash)
-        if (null != persistTransaction.block) {
-            throw LogicException("Transaction with hash: $hash already belong to block!")
+    protected fun commonAddToBlock(tx: Entity, block: MainBlock): Entity {
+        val persistTx = this.get(tx.hash)
+
+        if (null != persistTx.block) {
+            throw LogicException("Transaction with hash: ${tx.hash} already belong to block!")
         }
-        persistTransaction.block = block
-
-        beforeAddToBlock(persistTransaction)
-        return repository.save(persistTransaction)
-    }
-
-    protected abstract fun beforeAddToBlock(entity: Entity)
-
-    protected fun updateWalletBalance(senderAddress: String, recipientAddress: String, amount: Double) {
-        walletService.updateBalance(senderAddress, recipientAddress, amount)
+        persistTx.block = block
+        walletService.updateBalance(persistTx.senderAddress, persistTx.recipientAddress, persistTx.amount)
+        return repository.save(persistTx)
     }
 
 }

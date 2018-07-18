@@ -1,15 +1,9 @@
 package io.openfuture.chain.repository
 
 import io.openfuture.chain.entity.*
-import io.openfuture.chain.entity.SeedWord
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.Wallet
-import io.openfuture.chain.entity.Delegate
-import io.openfuture.chain.entity.memory.MemVote
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.stereotype.Repository
@@ -48,9 +42,6 @@ interface TransferTransactionRepository : BaseTransactionRepository<TransferTran
 interface VoteTransactionRepository : BaseTransactionRepository<VoteTransaction>
 
 @Repository
-interface MemVoteRepository : BaseRepository<MemVote>
-
-@Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {
 
     fun findOneByIndex(index: Int): SeedWord
@@ -61,8 +52,6 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 
 @Repository
 interface DelegateRepository : BaseRepository<Delegate> {
-
-    fun findAllByOrderByRatingDesc(pageable: Pageable): List<Delegate>
 
     fun findOneByPublicKey(key: String): Delegate?
 

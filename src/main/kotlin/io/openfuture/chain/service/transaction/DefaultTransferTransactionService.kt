@@ -3,6 +3,7 @@ package io.openfuture.chain.service.transaction
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.transaction.TransferTransactionDto
 import io.openfuture.chain.domain.rpc.transaction.TransferTransactionRequest
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.repository.TransferTransactionRepository
 import io.openfuture.chain.service.TransferTransactionService
@@ -30,8 +31,8 @@ class DefaultTransferTransactionService(
         repository.save(transaction)
     }
 
-    override fun beforeAddToBlock(tx: TransferTransaction) {
-        updateWalletBalance(tx.senderAddress, tx.recipientAddress, tx.amount)
+    override fun addToBlock(tx: TransferTransaction, block: MainBlock): TransferTransaction {
+        return this.commonAddToBlock(tx, block)
     }
 
 }
