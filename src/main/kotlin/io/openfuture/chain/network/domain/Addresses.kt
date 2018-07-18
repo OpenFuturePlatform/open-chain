@@ -27,9 +27,6 @@ class Addresses() : Packet() {
         }
     }
 
-    override fun toString(): String {
-        return "Addresses(values=$values)"
-    }
-
+    override fun toString() = "Addresses(values=$values)"
 
 }

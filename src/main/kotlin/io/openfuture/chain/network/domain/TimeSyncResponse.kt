@@ -23,8 +23,6 @@ class TimeSyncResponse() : Packet() {
         buffer.writeLong(networkTimestamp)
     }
 
-    override fun toString(): String {
-        return "TimeSyncResponse(nodeTimestamp=$nodeTimestamp,networkTimestamp=$networkTimestamp)"
-    }
+    override fun toString() = "TimeSyncResponse(nodeTimestamp=$nodeTimestamp,networkTimestamp=$networkTimestamp)"
 
 }

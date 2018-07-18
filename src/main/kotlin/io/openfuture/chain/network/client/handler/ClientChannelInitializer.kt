@@ -16,7 +16,6 @@ class ClientChannelInitializer(
     override fun initChannel(channel: SocketChannel) {
         val pipeline = channel.pipeline()
 
-        pipeline.addLast(LoggingHandler())
         pipeline.addLast(context.getBean(PacketDecoder::class.java))
         pipeline.addLast(context.getBean(PacketEncoder::class.java))
 

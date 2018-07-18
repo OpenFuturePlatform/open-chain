@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component
 class PacketDecoder : ReplayingDecoder<ByteBuf>() {
 
     override fun decode(ctx: ChannelHandlerContext, bytes: ByteBuf, out: MutableList<Any>) {
-        val packet = Packet.read(bytes)
-        out.add(packet)
+        out.add(Packet.read(bytes))
     }
 }

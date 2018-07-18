@@ -34,7 +34,7 @@ class ConnectionClientHandler : ChannelInboundHandlerAdapter() {
 
         // check packet type
         if (!allowablePacketTypes.contains(packet::class)) {
-            log.error("Illegal packet type: {}", packet)
+            log.error("Illegal packet type: ${packet::class}")
             ctx.close()
             return
         }

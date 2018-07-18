@@ -26,7 +26,6 @@ class NetworkAddress() : Packet() {
         buffer.writeInt(port)
     }
 
-    override fun toString(): String {
-        return "NetworkAddress(host=$host,port=$port)"
-    }
+    override fun toString() = "NetworkAddress(host=$host,port=$port)"
+
 }

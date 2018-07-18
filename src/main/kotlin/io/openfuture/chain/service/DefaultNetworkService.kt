@@ -5,6 +5,7 @@ import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
 import io.openfuture.chain.network.domain.FindAddresses
 import io.openfuture.chain.network.domain.NetworkAddress
+import io.openfuture.chain.network.domain.Packet
 import io.openfuture.chain.network.server.TcpServer
 import io.openfuture.chain.property.NodeProperties
 import org.slf4j.LoggerFactory
@@ -46,7 +47,7 @@ class DefaultNetworkService(
         }
     }
 
-    override fun broadcast(packet: Any) {
+    override fun broadcast(packet: Packet) {
         connections.keys.forEach {
             it.writeAndFlush(packet)
         }
@@ -83,7 +84,7 @@ class DefaultNetworkService(
         send(address, FindAddresses())
     }
 
-    private fun send(networkAddress: NetworkAddress, message: Any) {
+    private fun send(networkAddress: NetworkAddress, message: Packet) {
         var channel = connections.filter { it -> it.value == networkAddress }.map { it -> it.key }.firstOrNull()
         if (channel == null) {
             channel = clientBootstrap.connect(networkAddress.host, networkAddress.port).channel()

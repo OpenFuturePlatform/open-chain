@@ -19,9 +19,6 @@ class Greeting() : Packet() {
         address.send(buffer)
     }
 
-    override fun toString(): String {
-        return "Greeting(address=$address)"
-    }
-
+    override fun toString() = "Greeting(address=$address)"
 
 }

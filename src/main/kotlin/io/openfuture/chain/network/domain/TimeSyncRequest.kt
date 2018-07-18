@@ -19,7 +19,5 @@ class TimeSyncRequest() : Packet() {
         buffer.writeLong(nodeTimestamp)
     }
 
-    override fun toString(): String {
-        return "TimeSyncRequest(nodeTimestamp=$nodeTimestamp)"
-    }
+    override fun toString() = "TimeSyncRequest(nodeTimestamp=$nodeTimestamp)"
 }
