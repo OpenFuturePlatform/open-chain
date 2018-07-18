@@ -15,14 +15,12 @@ class NetworkAddress() : Packet() {
     }
 
     override fun get(buffer: ByteBuf) {
-        val length = buffer.readInt()
-        host = buffer.readCharSequence(length, UTF_8).toString()
+        host = readString(buffer)
         port = buffer.readInt()
     }
 
     override fun send(buffer: ByteBuf) {
-        buffer.writeInt(host.length)
-        buffer.writeCharSequence(host, UTF_8)
+        writeString(buffer, host)
         buffer.writeInt(port)
     }
 
