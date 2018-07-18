@@ -15,7 +15,9 @@ abstract class Packet : Serializable{
             Pair(Greeting::class, 3),
             Pair(HeartBeat::class, 4),
             Pair(TimeSyncRequest::class, 5),
-            Pair(TimeSyncResponse::class, 6))
+            Pair(TimeSyncResponse::class, 6),
+            Pair(NetworkBlock::class, 7),
+            Pair(NetworkBlockRequest::class, 8))
 
         private val classMapping = idMapping.entries.associateBy({ it.value }) { it.key }
 

@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultBlockService(
-    private val blockRepository: BlockRepository<Block>,
+    private val repository: BlockRepository<Block>,
     private val mainBlockRepository: MainBlockRepository,
     private val genesisBlockRepository: GenesisBlockRepository,
     private val transactionService: BaseTransactionService<BaseTransaction>,
@@ -21,13 +21,13 @@ class DefaultBlockService(
 ) : BlockService {
 
     @Transactional(readOnly = true)
-    override fun get(hash: String): Block = blockRepository.findByHash(hash)
+    override fun get(hash: String): Block = repository.findByHash(hash)
         ?: throw NotFoundException("Block with hash:$hash not found ")
 
 
     @Transactional(readOnly = true)
     override fun getLast(): Block =
-        blockRepository.findFirstByOrderByHeightDesc()
+        repository.findFirstByOrderByHeightDesc()
             ?: throw NotFoundException("Last block not found!")
 
     @Transactional(readOnly = true)
@@ -39,6 +39,14 @@ class DefaultBlockService(
     override fun getLastGenesis(): GenesisBlock =
         genesisBlockRepository.findFirstByOrderByHeightDesc()
             ?: throw NotFoundException("Last Genesis block not exist!")
+
+    override fun getBlocksAfterCurrentHash(hash: String): List<Block>? {
+        val block = repository.findByHash(hash)
+
+        block.let { return repository.findByHeightGreaterThan(block!!.height) }
+    }
+
+    override fun isExists(hash: String): Boolean = repository.existsByHash(hash)
 
     @Transactional
     override fun save(block: MainBlock): MainBlock {

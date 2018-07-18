@@ -2,7 +2,6 @@ package io.openfuture.chain.network.client.handler
 
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
-import io.netty.handler.logging.LoggingHandler
 import io.netty.handler.timeout.ReadTimeoutHandler
 import io.openfuture.chain.network.base.*
 import org.springframework.context.ApplicationContext
@@ -26,6 +25,7 @@ class ClientChannelInitializer(
         pipeline.addLast(context.getBean(TimeSyncClientHandler::class.java))
         pipeline.addLast(context.getBean(AddressDiscoveryHandler::class.java))
         pipeline.addLast(context.getBean(AddressHandler::class.java))
+        pipeline.addLast(context.getBean(SyncClientHandler::class.java))
         pipeline.addLast(context.getBean(HeartBeatClientHandler::class.java))
     }
 

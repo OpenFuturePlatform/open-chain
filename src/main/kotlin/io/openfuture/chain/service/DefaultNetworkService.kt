@@ -5,6 +5,7 @@ import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
 import io.openfuture.chain.network.domain.FindAddresses
 import io.openfuture.chain.network.domain.NetworkAddress
+import io.openfuture.chain.network.domain.NetworkBlockRequest
 import io.openfuture.chain.network.domain.Packet
 import io.openfuture.chain.network.server.TcpServer
 import io.openfuture.chain.property.NodeProperties
@@ -20,6 +21,7 @@ import java.util.concurrent.Executors
 @Service
 class DefaultNetworkService(
     private val clientBootstrap: Bootstrap,
+    private val blockService: BlockService,
     private val tcpServer: TcpServer,
     private val properties: NodeProperties
 ) : NetworkService, ApplicationListener<ApplicationReadyEvent> {
@@ -40,6 +42,7 @@ class DefaultNetworkService(
         clientBootstrap.connect(address.host, address.port).addListener { future ->
             future as ChannelFuture
             if (future.isSuccess) {
+                requestBlock()
                 future.channel().writeAndFlush(FindAddresses())
             } else {
                 log.warn("Can not connect to ${address.host}:${address.port}")
@@ -78,13 +81,19 @@ class DefaultNetworkService(
     private fun isConnectionNeeded(): Boolean = properties.peersNumber!! > connections.size
 
     private fun requestAddresses() {
-        val address = connections.values.shuffled(SecureRandom()).firstOrNull()
-            ?: properties.getRootAddresses().shuffled().first()
-
-        send(address, FindAddresses())
+        send(FindAddresses())
     }
 
-    private fun send(networkAddress: NetworkAddress, message: Packet) {
+    private fun requestBlock() {
+        val lastBlockHash = blockService.getLast().hash
+
+        send(NetworkBlockRequest(lastBlockHash))
+    }
+
+    private fun send(message: Packet) {
+        val networkAddress = connections.values.shuffled(SecureRandom()).firstOrNull()
+            ?: properties.getRootAddresses().shuffled().first()
+
         var channel = connections.filter { it -> it.value == networkAddress }.map { it -> it.key }.firstOrNull()
         if (channel == null) {
             channel = clientBootstrap.connect(networkAddress.host, networkAddress.port).channel()

@@ -20,7 +20,8 @@ class ConnectionServerHandler : ChannelInboundHandlerAdapter() {
         FindAddresses::class,
         Greeting::class,
         HeartBeat::class,
-        TimeSyncRequest::class)
+        TimeSyncRequest::class,
+        NetworkBlockRequest::class)
 
 
     override fun channelActive(ctx: ChannelHandlerContext) {

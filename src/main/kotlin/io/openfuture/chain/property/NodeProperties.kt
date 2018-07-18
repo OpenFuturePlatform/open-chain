@@ -4,7 +4,10 @@ import io.openfuture.chain.network.domain.NetworkAddress
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
-import javax.validation.constraints.*
+import javax.validation.constraints.Min
+import javax.validation.constraints.NotEmpty
+import javax.validation.constraints.NotNull
+import javax.validation.constraints.Size
 
 @Component
 @Validated
@@ -46,7 +49,7 @@ class NodeProperties(
 
     /** Directly Connected Peers Number */
     @field:NotNull
-    @field:Min(5)
+    @field:Min(1)
     var peersNumber: Int? = null,
 
     /** Private key path */
