@@ -19,7 +19,7 @@ class HeartBeatTest {
 
     @Test
     fun getShouldFillEntityWithExactValuesFromBuffer() {
-        val actualEntity = HeartBeat()
+        val actualEntity = HeartBeat::class.java.newInstance()
         actualEntity.get(buffer)
         Assertions.assertThat(actualEntity).isEqualTo(entity)
     }

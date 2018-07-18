@@ -1,7 +1,9 @@
 package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
+import io.openfuture.chain.annotation.NonArgConstructor
 
+@NonArgConstructor
 class FindAddresses : Packet() {
 
     override fun get(buffer: ByteBuf) {}

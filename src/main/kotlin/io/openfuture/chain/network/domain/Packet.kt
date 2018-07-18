@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBuf
 import java.io.Serializable
 import java.nio.charset.StandardCharsets.UTF_8
 import kotlin.reflect.KClass
-import kotlin.reflect.full.createInstance
 
 
 abstract class Packet : Serializable{
@@ -13,7 +12,7 @@ abstract class Packet : Serializable{
                     val id: Int) {
 
         ADDRESSES(Addresses::class, 1),
-        FIND_ADDRESSES(FindAddresses::class, 1),
+        FIND_ADDRESSES(FindAddresses::class, 2),
         GREETING(Greeting::class, 3),
         HEART_BEAT(HeartBeat::class, 4),
         TIME_SYNC_REQUEST(TimeSyncRequest::class, 5),
@@ -34,7 +33,7 @@ abstract class Packet : Serializable{
         fun read(buffer: ByteBuf) : Packet {
             val id = buffer.readInt()
             val clazz = Type.getById(id).clazz
-            val instance = clazz.createInstance()
+            val instance = clazz.java.newInstance()
             instance.get(buffer)
             return instance
         }

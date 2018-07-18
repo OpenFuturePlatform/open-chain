@@ -20,7 +20,7 @@ class TimeSyncResponseTest {
 
     @Test
     fun getShouldFillEntityWithExactValuesFromBuffer() {
-        val actualEntity = TimeSyncResponse()
+        val actualEntity = TimeSyncResponse::class.java.newInstance()
         actualEntity.get(buffer)
         Assertions.assertThat(actualEntity).isEqualTo(entity)
     }

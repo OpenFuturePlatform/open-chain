@@ -20,7 +20,7 @@ class GreetingTest {
 
     @Test
     fun getShouldFillEntityWithExactValuesFromBuffer() {
-        val actualEntity = Greeting()
+        val actualEntity = Greeting::class.java.newInstance()
         actualEntity.get(buffer)
         assertThat(actualEntity).isEqualTo(entity)
     }

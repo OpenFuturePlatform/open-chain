@@ -22,7 +22,7 @@ class AddressesTest{
 
     @Test
     fun getShouldFillEntityWithExactValuesFromBuffer() {
-        val actualEntity = Addresses()
+        val actualEntity = Addresses::class.java.newInstance()
         actualEntity.get(buffer)
         assertThat(actualEntity).isEqualTo(entity)
     }

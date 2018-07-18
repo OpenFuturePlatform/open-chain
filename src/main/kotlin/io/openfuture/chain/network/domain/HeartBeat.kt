@@ -1,17 +1,15 @@
 package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
+import io.openfuture.chain.annotation.NonArgConstructor
 
-class HeartBeat() : Packet() {
+@NonArgConstructor
+data class HeartBeat(
+    var type: Type
+) : Packet() {
 
     enum class Type {
         PING, PONG
-    }
-
-    lateinit var type: Type
-
-    constructor(type: Type) : this() {
-        this.type = type
     }
 
     override fun get(buffer: ByteBuf) {
@@ -20,23 +18,6 @@ class HeartBeat() : Packet() {
 
     override fun send(buffer: ByteBuf) {
         buffer.writeBoolean(type == Type.PING)
-    }
-
-    override fun toString() = "HeartBeat(type=$type)"
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as HeartBeat
-
-        if (type != other.type) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return type.hashCode()
     }
 
 }
