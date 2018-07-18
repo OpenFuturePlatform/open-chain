@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultWalletService(
     private val repository: WalletRepository,
-    private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties
 ) : WalletService {
 

@@ -34,6 +34,7 @@ class MainBlockValidatorTests : ServiceTests() {
                     "sender_signature",
                     "hash",
                     1,
+                    "delegate_key",
                     "delegate_host",
                     9999
                 ),
@@ -46,6 +47,7 @@ class MainBlockValidatorTests : ServiceTests() {
                     "sender_signature2",
                     "hash2",
                     2,
+                    "delegate_key2",
                     "delegate_host2",
                     11999
                 )
@@ -75,6 +77,7 @@ class MainBlockValidatorTests : ServiceTests() {
                     "sender_signature",
                     "hash",
                     1,
+                    "delegate_key",
                     "delegate_host",
                     9999
                 ),
@@ -87,6 +90,7 @@ class MainBlockValidatorTests : ServiceTests() {
                     "sender_signature2",
                     "hash2",
                     2,
+                    "delegate_key2",
                     "delegate_host2",
                     11999
                 )

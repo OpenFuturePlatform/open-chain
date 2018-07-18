@@ -1,14 +1,12 @@
 package io.openfuture.chain.controller
 
-import io.openfuture.chain.domain.rpc.crypto.WalletDto
 import io.openfuture.chain.domain.rpc.crypto.AccountDto
+import io.openfuture.chain.domain.rpc.crypto.WalletDto
 import io.openfuture.chain.domain.rpc.crypto.key.DerivationKeyRequest
 import io.openfuture.chain.domain.rpc.crypto.key.ImportKeyRequest
 import io.openfuture.chain.domain.rpc.crypto.key.KeyDto
 import io.openfuture.chain.domain.rpc.crypto.key.RestoreRequest
-import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.service.CryptoService
-import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.service.WalletService
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -17,8 +15,7 @@ import javax.validation.Valid
 @RequestMapping("${PathConstant.RPC}/accounts")
 class AccountController(
     private val cryptoService: CryptoService,
-    private val walletService: WalletService,
-    private val delegateService: DelegateService
+    private val walletService: WalletService
 ) {
 
     @GetMapping("/doGenerate")
@@ -50,8 +47,5 @@ class AccountController(
 
     @GetMapping("/wallets/{address}/balance")
     fun getBalance(@PathVariable address: String): Double = walletService.getBalance(address)
-
-    @GetMapping("test")
-    fun getDelegates(): Set<Delegate> = delegateService.getActiveDelegates()
 
 }
