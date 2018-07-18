@@ -6,7 +6,7 @@ import kotlin.properties.Delegates
 
 class NetworkAddress() : Packet() {
 
-    lateinit var host: String
+    var host: String by Delegates.notNull()
     var port: Int by Delegates.notNull()
 
     constructor(host : String, port : Int) : this(){

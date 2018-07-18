@@ -4,15 +4,15 @@ import io.netty.buffer.ByteBuf
 
 class Addresses() : Packet() {
 
-    lateinit var values : MutableList<NetworkAddress>
+    val values : MutableList<NetworkAddress> = mutableListOf()
 
     constructor(values : List<NetworkAddress>) : this(){
-        this.values = values.toMutableList()
+        this.values.addAll(values)
     }
 
     override fun get(buffer: ByteBuf) {
         val size = buffer.readInt()
-        values = mutableListOf()
+        values.clear()
         for (index in 1..size) {
             val address = NetworkAddress()
             address.get(buffer)
