@@ -90,7 +90,9 @@ class BlockCreationProcessor(
                     privateKey,
                     previousBlock.height + 1,
                     previousBlock.hash,
+                    BlockUtils.calculateMerkleRoot(transactions),
                     time,
+                    transactions,
                     genesisBlock.epochIndex + 1,
                     delegateService.getActiveDelegates()
                 )
