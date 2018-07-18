@@ -1,5 +1,9 @@
 package io.openfuture.chain.service.transaction
 
+import io.openfuture.chain.component.converter.transaction.TransactionEntityConverter
+import io.openfuture.chain.component.node.NodeClock
+import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
+import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.exception.LogicException
@@ -9,10 +13,12 @@ import io.openfuture.chain.service.BaseTransactionService
 import io.openfuture.chain.service.WalletService
 import org.springframework.transaction.annotation.Transactional
 
-abstract class DefaultBaseTransactionService<Entity : BaseTransaction>(
+abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto, Req : BaseTransactionRequest>(
     protected val repository: BaseTransactionRepository<Entity>,
-    protected val walletService: WalletService
-) : BaseTransactionService<Entity> {
+    protected val walletService: WalletService,
+    private val nodeClock: NodeClock,
+    private val entityConverter: TransactionEntityConverter<Entity, Dto, Req>
+) : BaseTransactionService<Entity, Dto, Req> {
 
     @Transactional(readOnly = true)
     override fun getAllPending(): MutableSet<Entity> {
@@ -23,6 +29,22 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction>(
     override fun get(hash: String): Entity = repository.findOneByHash(hash)
         ?: throw NotFoundException("Transaction with hash: $hash not exist!")
 
+    @Transactional
+    override fun add(dto: Dto) {
+        //todo need to add validation
+        val transaction = repository.findOneByHash(dto.hash)
+        if (null != transaction) {
+            return
+        }
+
+        saveAndBroadcast(entityConverter.toEntity(dto))
+    }
+
+    @Transactional
+    override fun add(request: Req) {
+        saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), request))
+    }
+
     protected fun commonAddToBlock(tx: Entity, block: MainBlock): Entity {
         val persistTx = this.get(tx.hash)
 
@@ -32,6 +54,11 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction>(
         persistTx.block = block
         walletService.updateBalance(persistTx.senderAddress, persistTx.recipientAddress, persistTx.amount)
         return repository.save(persistTx)
+    }
+
+    private fun saveAndBroadcast(tx: Entity) {
+        repository.save(tx)
+        //todo: networkService.broadcast(transaction.toMessage)
     }
 
 }

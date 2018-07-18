@@ -43,9 +43,7 @@ class BlockValidationProviderTests : ServiceTests() {
                     "sender_signature",
                     "hash",
                     1,
-                    "delegate_key",
-                    "delegate_host",
-                    9999
+                    "delegate_key"
                 ),
                 VoteTransaction(
                     1500000001L,
@@ -56,9 +54,7 @@ class BlockValidationProviderTests : ServiceTests() {
                     "sender_signature2",
                     "hash2",
                     2,
-                    "delegate_key2",
-                    "delegate_host2",
-                    11999
+                    "delegate_key2"
                 )
             )
         )
@@ -96,9 +92,7 @@ class BlockValidationProviderTests : ServiceTests() {
                     "sender_signature",
                     "hash",
                     1,
-                    "delegate_key",
-                    "delegate_host",
-                    9999
+                    "delegate_key"
                 ),
                 VoteTransaction(
                     1500000001L,
@@ -109,9 +103,7 @@ class BlockValidationProviderTests : ServiceTests() {
                     "sender_signature2",
                     "hash2",
                     2,
-                    "delegate_key2",
-                    "delegate_host2",
-                    11999
+                    "delegate_key2"
                 )
             )
         )
@@ -141,9 +133,7 @@ class BlockValidationProviderTests : ServiceTests() {
                     "sender_signature",
                     "hash",
                     1,
-                    "delegate_key",
-                    "delegate_host",
-                    9999
+                    "delegate_key"
                 ),
                 VoteTransaction(
                     1500000001L,
@@ -154,9 +144,7 @@ class BlockValidationProviderTests : ServiceTests() {
                     "sender_signature2",
                     "hash2",
                     2,
-                    "delegate_key2",
-                    "delegate_host2",
-                    11999
+                    "delegate_key2"
                 )
             )
         )

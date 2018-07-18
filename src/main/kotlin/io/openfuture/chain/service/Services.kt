@@ -10,20 +10,22 @@ import io.openfuture.chain.domain.rpc.hardware.CpuInfo
 import io.openfuture.chain.domain.rpc.hardware.NetworkInfo
 import io.openfuture.chain.domain.rpc.hardware.RamInfo
 import io.openfuture.chain.domain.rpc.hardware.StorageInfo
+import io.openfuture.chain.domain.rpc.transaction.DelegateTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.TransferTransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
-import io.openfuture.chain.domain.rpc.transaction.TransactionRequest
+import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.rpc.transaction.TransferTransactionRequest
 import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
+import io.openfuture.chain.domain.transaction.DelegateTransactionDto
 import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.DelegateTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.protocol.CommunicationProtocol
-import org.springframework.transaction.annotation.Transactional
 
 interface HardwareInfoService {
 
@@ -75,7 +77,7 @@ interface CryptoService {
 
 }
 
-interface BaseTransactionService<Entity : BaseTransaction> {
+interface BaseTransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto, Req : BaseTransactionRequest> {
 
     fun getAllPending(): MutableSet<Entity>
 
@@ -83,19 +85,17 @@ interface BaseTransactionService<Entity : BaseTransaction> {
 
     fun addToBlock(tx: Entity, block: MainBlock): Entity
 
-}
-
-interface TransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto, Req : TransactionRequest> : BaseTransactionService<Entity> {
-
     fun add(dto: Dto)
 
     fun add(request: Req)
 
 }
 
-interface TransferTransactionService : TransactionService<TransferTransaction, TransferTransactionDto, TransferTransactionRequest>
+interface TransferTransactionService : BaseTransactionService<TransferTransaction, TransferTransactionDto, TransferTransactionRequest>
 
-interface VoteTransactionService : TransactionService<VoteTransaction, VoteTransactionDto, VoteTransactionRequest>
+interface VoteTransactionService : BaseTransactionService<VoteTransaction, VoteTransactionDto, VoteTransactionRequest>
+
+interface DelegateTransactionService : BaseTransactionService<DelegateTransaction, DelegateTransactionDto, DelegateTransactionRequest>
 
 interface DelegateService {
 

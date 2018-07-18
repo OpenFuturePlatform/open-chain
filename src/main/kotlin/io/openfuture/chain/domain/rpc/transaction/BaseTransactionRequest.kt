@@ -4,7 +4,7 @@ import io.openfuture.chain.domain.rpc.base.BaseRequest
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
-abstract class TransactionRequest(
+abstract class BaseTransactionRequest(
     @field:NotNull var amount: Double? = null,
     @field:NotBlank var recipientKey: String? = null,
     @field:NotBlank var recipientAddress: String? = null,

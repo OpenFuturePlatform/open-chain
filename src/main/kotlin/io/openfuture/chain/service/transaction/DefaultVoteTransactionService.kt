@@ -1,5 +1,6 @@
 package io.openfuture.chain.service.transaction
 
+import io.openfuture.chain.component.converter.transaction.impl.VoteTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
@@ -16,31 +17,11 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultVoteTransactionService(
     repository: VoteTransactionRepository,
     walletService: WalletService,
-    private val nodeClock: NodeClock,
+    nodeClock: NodeClock,
+    entityConverter: VoteTransactionEntityConverter,
     private val delegateService: DelegateService
-) : DefaultBaseTransactionService<VoteTransaction>(repository, walletService), VoteTransactionService {
-
-    @Transactional
-    override fun add(dto: VoteTransactionDto) {
-        //todo need to add validation
-        //todo need to think about calculate the vote weight
-        val transaction = repository.findOneByHash(dto.hash)
-        if (null != transaction) {
-            return
-        }
-
-        saveAndBroadcast(VoteTransaction.of(dto))
-    }
-
-    @Transactional
-    override fun add(request: VoteTransactionRequest) {
-        saveAndBroadcast(VoteTransaction.of(nodeClock.networkTime(), request))
-    }
-
-    private fun saveAndBroadcast(tx: VoteTransaction) {
-        repository.save(tx)
-        //todo: networkService.broadcast(transaction.toMessage)
-    }
+) : DefaultBaseTransactionService<VoteTransaction, VoteTransactionDto, VoteTransactionRequest>(repository,
+    walletService, nodeClock, entityConverter), VoteTransactionService {
 
     @Transactional
     override fun addToBlock(tx: VoteTransaction, block: MainBlock): VoteTransaction {

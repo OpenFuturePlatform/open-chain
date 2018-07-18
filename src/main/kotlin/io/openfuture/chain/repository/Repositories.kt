@@ -2,6 +2,7 @@ package io.openfuture.chain.repository
 
 import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.DelegateTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import org.springframework.data.jpa.repository.JpaRepository
@@ -40,6 +41,9 @@ interface TransferTransactionRepository : BaseTransactionRepository<TransferTran
 
 @Repository
 interface VoteTransactionRepository : BaseTransactionRepository<VoteTransaction>
+
+@Repository
+interface DelegateTransactionRepository : BaseTransactionRepository<DelegateTransaction>
 
 @Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {
