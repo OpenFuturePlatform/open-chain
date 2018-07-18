@@ -24,4 +24,19 @@ class HeartBeat() : Packet() {
 
     override fun toString() = "HeartBeat(type=$type)"
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as HeartBeat
+
+        if (type != other.type) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return type.hashCode()
+    }
+
 }
