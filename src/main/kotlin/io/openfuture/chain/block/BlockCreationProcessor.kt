@@ -35,8 +35,8 @@ class BlockCreationProcessor(
 ) {
 
     fun approveBlock(pendingBlock: PendingBlock): PendingBlock {
-        val blockCreateDuration = consensusProperties.timeSlotDuration!! / 3
-        if (timeSlot.roundStartTime + blockCreateDuration > clock.networkTime()) {
+        val blockCreateDuration = consensusProperties.timeSlotDuration!! / 2
+        if (timeSlot.getEpochTime() + blockCreateDuration > clock.networkTime()) {
             throw IllegalArgumentException("Time to approve block is over")
         }
 
@@ -60,10 +60,10 @@ class BlockCreationProcessor(
 
     @EventListener
     fun fireBlockCreation(event: BlockCreationEvent) {
-        timeSlot.roundStartTime = clock.networkTime()
         val previousBlock = service.getLastMain()
         val genesisBlock = service.getLastGenesis()
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
+        timeSlot.setProducer(nextProducer)
         if (properties.host == nextProducer.host && properties.port == nextProducer.port) {
             create(event.pendingTransactions, previousBlock, genesisBlock)
         }

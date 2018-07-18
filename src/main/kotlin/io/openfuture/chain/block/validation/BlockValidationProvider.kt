@@ -1,5 +1,7 @@
 package io.openfuture.chain.block.validation
 
+import io.openfuture.chain.block.TimeSlot
+import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
@@ -13,11 +15,11 @@ import javax.annotation.PostConstruct
 class BlockValidationProvider(
     private val applicationContext: ApplicationContext,
     private val blockService: BlockService,
-    private val properties: ConsensusProperties
+    private val timeSlot: TimeSlot,
+    private val clock: NodeClock
 ) {
 
     private val validators = HashMap<Int, BlockValidator>()
-    private var epochTime: Long = 0L
 
 
     @PostConstruct
@@ -29,29 +31,18 @@ class BlockValidationProvider(
     }
 
     fun isValid(block: Block): Boolean {
-        val currentTime = System.currentTimeMillis()
+        val currentTime = clock.networkTime()
         val blockTypeId = block.typeId
         val blockValidator = validators[blockTypeId] ?: throw IllegalArgumentException("Unknown block type")
         val lastBlock = blockService.getLast()
 
-        return verifyTimeSlot(currentTime, block)
+        return timeSlot.verifyTimeSlot(currentTime, block)
                 && blockValidator.isValid(block)
                 && verifyHash(block)
                 && verifyPreviousHash(block, lastBlock)
                 && verifyHeight(block, lastBlock)
                 && verifyTimestamp(block, lastBlock)
     }
-
-    fun getSlotNumber(time: Long): Long {
-        return (time - epochTime) / properties.timeSlotDuration!! / 2
-    }
-
-    fun setEpochTime(value: Long) {
-        this.epochTime = value
-    }
-
-    private fun verifyTimeSlot(currentTime: Long, block: Block)
-        = (getSlotNumber(currentTime) == getSlotNumber(block.timestamp))
 
     private fun verifyHash(block: Block): Boolean {
         val calculatedHashBytes = BlockUtils.calculateHash(

@@ -46,7 +46,7 @@ class SignatureCollector(
 
     fun applyBlock() {
         try {
-            if (timeSlot.roundStartTime + properties.timeSlotDuration!! > clock.networkTime()) {
+            if (timeSlot.getEpochTime() + properties.timeSlotDuration!! > clock.networkTime()) {
                 return
             }
             val genesisBlock = blockService.getLastGenesis()

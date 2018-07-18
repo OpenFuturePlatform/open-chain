@@ -1,5 +1,7 @@
 package io.openfuture.chain.block.validation
 
+import io.openfuture.chain.block.TimeSlot
+import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.entity.*
@@ -18,7 +20,8 @@ class BlockValidationProviderTests : ServiceTests() {
     @Mock private lateinit var blockService: BlockService
     @Mock private lateinit var applicationContext: ApplicationContext
     @Mock private lateinit var blockValidator: BlockValidator
-    @Mock private lateinit var properties: ConsensusProperties
+    @Mock private lateinit var timeSlot: TimeSlot
+    @Mock private lateinit var clock: NodeClock
 
     private lateinit var blockValidationService: BlockValidationProvider
 
@@ -64,12 +67,11 @@ class BlockValidationProviderTests : ServiceTests() {
         val validators = HashMap<String, BlockValidator>()
         validators[""] = blockValidator
         given(blockService.getLast()).willReturn(previousBlock)
-        given(properties.timeSlotDuration).willReturn(6000)
         given(blockValidator.getTypeId()).willReturn(BlockType.MAIN.id)
         given(applicationContext.getBeansOfType(BlockValidator::class.java)).willReturn(validators)
-        blockValidationService = BlockValidationProvider(applicationContext, blockService, properties)
+        given(timeSlot.verifyTimeSlot(any(Long::class.java), any(MainBlock::class.java))).willReturn(true)
+        blockValidationService = BlockValidationProvider(applicationContext, blockService, timeSlot, clock)
         blockValidationService.init()
-        blockValidationService.setEpochTime(currentTime)
     }
 
     @Test

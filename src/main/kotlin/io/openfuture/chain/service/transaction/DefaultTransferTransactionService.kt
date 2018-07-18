@@ -20,6 +20,7 @@ class DefaultTransferTransactionService(
         save(TransferTransaction.of(dto))
     }
 
+    @Transactional
     override fun add(request: TransferTransactionRequest) {
         save(TransferTransaction.of(nodeClock.networkTime(), request))
     }
