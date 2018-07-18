@@ -20,7 +20,9 @@ class GenesisBlockValidatorTests {
             ByteArray(1),
             1L,
             "1",
+            "merkle_hash",
             1L,
+            mutableListOf(),
             1L,
             emptySet()
         )

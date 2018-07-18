@@ -10,7 +10,6 @@ import io.openfuture.chain.repository.GenesisBlockRepository
 import io.openfuture.chain.repository.MainBlockRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import javax.annotation.PostConstruct
 
 @Service
 class DefaultBlockService(
@@ -20,19 +19,6 @@ class DefaultBlockService(
     private val transactionService: BaseTransactionService<BaseTransaction>,
     private val walletService: WalletService
 ) : BlockService {
-
-    @PostConstruct
-    fun init(){
-        println("1")
-
-        val block1 = blockRepository.findByHash("111")
-
-        println("1")
-
-        val block2 = blockRepository.findByHash("111")
-
-        println("2")
-    }
 
     @Transactional(readOnly = true)
     override fun get(hash: String): Block = blockRepository.findByHash(hash)

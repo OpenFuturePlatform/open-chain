@@ -98,7 +98,9 @@ class BlockCreationProcessorTests: ServiceTests() {
         ByteArray(1),
         123,
         "prev_block_hash",
+        "merkle_hash",
         1512345678L,
+        mutableListOf(),
         1,
         setOf(Delegate("host1", 1234), Delegate("host2", 1234), Delegate("host3", 1234))
     )
