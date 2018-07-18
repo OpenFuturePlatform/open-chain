@@ -2,32 +2,19 @@ package io.openfuture.chain.network.server.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.base.BaseHandler
-import io.openfuture.chain.protocol.CommunicationProtocol
-import io.openfuture.chain.protocol.CommunicationProtocol.*
-import io.openfuture.chain.protocol.CommunicationProtocol.HeartBeat.Type.PING
-import io.openfuture.chain.protocol.CommunicationProtocol.HeartBeat.Type.PONG
+import io.openfuture.chain.network.domain.HeartBeat
+import io.openfuture.chain.network.domain.HeartBeat.Type.*
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 @Component
 @Scope("prototype")
-class HeartBeatServerHandler : BaseHandler(Type.HEART_BEAT) {
+class HeartBeatServerHandler : BaseHandler<HeartBeat>() {
 
-    companion object {
-        private val log = LoggerFactory.getLogger(HeartBeatServerHandler::class.java)
-    }
-
-    override fun packetReceived(ctx: ChannelHandlerContext, message: CommunicationProtocol.Packet) {
-        val body = message.heartBeat
-        log.info("Heartbeat ({}) from: {}", body.type, ctx.channel().remoteAddress())
-
-        if (body.type == PING) {
-            val response = Packet.newBuilder()
-                    .setType(Type.HEART_BEAT)
-                    .setHeartBeat(HeartBeat.newBuilder().setType(PONG).build())
-                    .build()
-            ctx.writeAndFlush(response)
+    override fun packetReceived(ctx: ChannelHandlerContext, message: HeartBeat) {
+        if (message.type == PING) {
+            ctx.writeAndFlush(HeartBeat(PONG))
         }
     }
 

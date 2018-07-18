@@ -1,10 +1,9 @@
 package io.openfuture.chain.network.base
 
 import io.netty.channel.ChannelHandlerContext
+import io.openfuture.chain.network.domain.Greeting
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.property.NodeProperties
-import io.openfuture.chain.protocol.CommunicationProtocol
-import io.openfuture.chain.protocol.CommunicationProtocol.*
 import io.openfuture.chain.service.NetworkService
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -14,26 +13,15 @@ import org.springframework.stereotype.Component
 class GreetingHandler(
     private val networkService: NetworkService,
     private val properties: NodeProperties
-) : BaseHandler(Type.GREETING) {
+) : BaseHandler<Greeting>() {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        val message = Packet.newBuilder()
-            .setType(Type.GREETING)
-            .setGreeting(Greeting.newBuilder()
-                .setAddress(CommunicationProtocol.NetworkAddress.newBuilder()
-                    .setHost(properties.host)
-                    .setPort(properties.port!!))
-                .build())
-            .build()
-        ctx.writeAndFlush(message)
-
+        ctx.writeAndFlush(Greeting(NetworkAddress(properties.host!!, properties.port!!)))
         ctx.fireChannelActive()
     }
 
-    override fun packetReceived(ctx: ChannelHandlerContext, message: CommunicationProtocol.Packet) {
-        val addressMessage = message.greeting.address
-        val address = NetworkAddress(addressMessage.host, addressMessage.port)
-        networkService.addConnection(ctx.channel(), address)
+    override fun packetReceived(ctx: ChannelHandlerContext, message: Greeting) {
+        networkService.addConnection(ctx.channel(), message.address)
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {

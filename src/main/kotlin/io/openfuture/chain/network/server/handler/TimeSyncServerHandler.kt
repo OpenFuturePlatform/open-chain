@@ -3,10 +3,8 @@ package io.openfuture.chain.network.server.handler
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.network.base.BaseHandler
-import io.openfuture.chain.protocol.CommunicationProtocol.Packet
-import io.openfuture.chain.protocol.CommunicationProtocol.TimeSyncResponse
-import io.openfuture.chain.protocol.CommunicationProtocol.Type.TIME_SYNC_REQUEST
-import io.openfuture.chain.protocol.CommunicationProtocol.Type.TIME_SYNC_RESPONSE
+import io.openfuture.chain.network.domain.TimeSyncRequest
+import io.openfuture.chain.network.domain.TimeSyncResponse
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
@@ -14,17 +12,10 @@ import org.springframework.stereotype.Component
 @Scope("prototype")
 class TimeSyncServerHandler(
         private val clock: NodeClock
-) : BaseHandler(TIME_SYNC_REQUEST) {
+) : BaseHandler<TimeSyncRequest>() {
 
-    override fun packetReceived(ctx: ChannelHandlerContext, message: Packet) {
-        val response = Packet.newBuilder()
-                .setType(TIME_SYNC_RESPONSE)
-                .setTimeSyncResponse(TimeSyncResponse.newBuilder()
-                        .setNetworkTimestamp(clock.networkTime())
-                        .setNodeTimestamp(message.timeSyncRequest.nodeTimestamp)
-                        .build())
-                .build()
-        ctx.channel().writeAndFlush(response)
+    override fun packetReceived(ctx: ChannelHandlerContext, message: TimeSyncRequest) {
+        ctx.channel().writeAndFlush(TimeSyncResponse(clock.networkTime(), message.nodeTimestamp))
     }
 
 }
