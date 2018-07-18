@@ -1,7 +1,8 @@
 package io.openfuture.chain.domain.delegate
 
+import io.openfuture.chain.network.domain.NetworkAddress
 
-class DelegateDto(
-    val info: DelegateInfo,
-    val rating: Int = 0
+data class DelegateDto(
+    val publicKey: String,
+    val networkAddress: NetworkAddress
 )

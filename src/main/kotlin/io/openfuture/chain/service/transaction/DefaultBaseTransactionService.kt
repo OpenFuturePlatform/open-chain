@@ -1,16 +1,17 @@
 package io.openfuture.chain.service.transaction
 
-import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BaseTransactionRepository
 import io.openfuture.chain.service.BaseTransactionService
+import io.openfuture.chain.service.WalletService
 import org.springframework.transaction.annotation.Transactional
 
 abstract class DefaultBaseTransactionService<Entity : BaseTransaction>(
-    protected val repository: BaseTransactionRepository<Entity>
+    protected val repository: BaseTransactionRepository<Entity>,
+    protected val walletService: WalletService
 ) : BaseTransactionService<Entity> {
 
     @Transactional(readOnly = true)
@@ -28,9 +29,16 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction>(
         if (null != persistTransaction.block) {
             throw LogicException("Transaction with hash: $hash already belong to block!")
         }
-
         persistTransaction.block = block
+
+        beforeAddToBlock(persistTransaction)
         return repository.save(persistTransaction)
+    }
+
+    protected abstract fun beforeAddToBlock(entity: Entity)
+
+    protected fun updateWalletBalance(senderAddress: String, recipientAddress: String, amount: Double) {
+        walletService.updateBalance(senderAddress, recipientAddress, amount)
     }
 
 }

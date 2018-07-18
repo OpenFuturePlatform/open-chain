@@ -16,8 +16,8 @@ class DefaultDelegateService(
 ) : DelegateService {
 
     @Transactional(readOnly = true)
-    override fun getByHostAndPort(host: String, port: Int): Delegate = repository.findOneByHostAndPort(host, port)
-        ?: throw NotFoundException("Delegate with host: $host and port $port not exist!")
+    override fun getByPublicKey(key: String): Delegate = repository.findOneByPublicKey(key)
+        ?: throw NotFoundException("Delegate with key: $key not exist!")
 
     @Transactional(readOnly = true)
     override fun getActiveDelegates(): Set<Delegate> {

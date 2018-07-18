@@ -4,9 +4,14 @@ import io.openfuture.chain.domain.delegate.DelegateDto
 import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.*
 
+@Embeddable
+
 @Entity
 @Table(name = "delegates")
 class Delegate(
+
+    @Column(name = "public_key", nullable = false)
+    var publicKey: String,
 
     @Column(name = "host", nullable = false)
     var host: String,
@@ -15,15 +20,15 @@ class Delegate(
     var port: Int,
 
     @Column(name = "rating", nullable = false)
-    var rating: Int = 0
+    var rating: Double = 0.0
 
 ) : BaseModel() {
 
     companion object {
-        fun of(delegateDto: DelegateDto): Delegate = Delegate(
-            delegateDto.info.networkAddress.host,
-            delegateDto.info.networkAddress.port,
-            delegateDto.rating
+        fun of(dto: DelegateDto): Delegate = Delegate(
+            dto.publicKey,
+            dto.networkAddress.host,
+            dto.networkAddress.port
         )
     }
 

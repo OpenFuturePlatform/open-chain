@@ -46,7 +46,6 @@ class DefaultBlockService(
         val transactions = block.transactions
         for (transaction in transactions) {
             transactionService.addToBlock(transaction.hash, savedBlock)
-            walletService.updateByTransaction(transaction)
         }
         return savedBlock
     }

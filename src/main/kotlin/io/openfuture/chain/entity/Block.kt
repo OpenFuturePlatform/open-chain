@@ -35,5 +35,3 @@ abstract class Block(
     var signature: String = SignatureManager.sign(hash.toByteArray(), privateKey)
 
 ) : BaseModel()
-
-

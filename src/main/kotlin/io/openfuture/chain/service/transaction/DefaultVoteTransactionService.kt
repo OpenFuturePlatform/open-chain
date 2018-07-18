@@ -1,14 +1,10 @@
 package io.openfuture.chain.service.transaction
 
 import io.openfuture.chain.component.node.NodeClock
-import io.openfuture.chain.domain.delegate.DelegateInfo
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
-import io.openfuture.chain.entity.Delegate
-import io.openfuture.chain.entity.Stakeholder
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.VoteTransactionRepository
 import io.openfuture.chain.service.*
 import org.springframework.stereotype.Service
@@ -17,11 +13,10 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultVoteTransactionService(
     repository: VoteTransactionRepository,
+    walletService: WalletService,
     private val nodeClock: NodeClock,
-    private val delegateService: DelegateService,
-    private val stakeholderService: StakeholderService,
-    private val consensusProperties: ConsensusProperties
-) : DefaultBaseTransactionService<VoteTransaction>(repository), VoteTransactionService {
+    private val delegateService: DelegateService
+) : DefaultBaseTransactionService<VoteTransaction>(repository, walletService), VoteTransactionService {
 
     @Transactional
     override fun add(dto: VoteTransactionDto) {
@@ -41,40 +36,24 @@ class DefaultVoteTransactionService(
     }
 
     private fun saveAndBroadcast(tx: VoteTransaction) {
-        updateDelegateRatingByVote(tx.getVoteType(), tx.senderKey, DelegateInfo(tx.delegateHost, tx.delegatePort))
         repository.save(tx)
         //todo: networkService.broadcast(transaction.toMessage)
     }
 
-    private fun updateDelegateRatingByVote(voteType: VoteType, stakeholderKey: String, delegateInfo: DelegateInfo) {
-        val stakeholder = stakeholderService.getByPublicKey(stakeholderKey)
-        val delegate = delegateService.getByHostAndPort(delegateInfo.networkAddress.host, delegateInfo.networkAddress.port)
-
-        check(stakeholder, delegate, voteType)
-
-        if (voteType == VoteType.FOR) {
-            delegate.rating += 1
-            stakeholder.votes.add(delegate)
-        } else {
-            delegate.rating -= 1
-            stakeholder.votes.remove(delegate)
-        }
-
-        stakeholderService.save(stakeholder)
-        delegateService.save(delegate)
+    override fun beforeAddToBlock(tx: VoteTransaction) {
+        updateWalletVotes(tx.senderAddress, tx.delegateKey, tx.getVoteType())
+        updateWalletBalance(tx.senderAddress, tx.recipientAddress, tx.amount)
     }
 
-    private fun check(stakeholder: Stakeholder, delegate: Delegate, voteType: VoteType) {
-        if (consensusProperties.delegatesCount!! <= stakeholder.votes.size && voteType == VoteType.FOR) {
-            throw IllegalStateException("Bad vote transaction")
-        }
-
-        if (stakeholder.votes.contains(delegate) && voteType == VoteType.FOR) {
-            throw IllegalStateException("Bad vote transaction")
-        }
-
-        if (!stakeholder.votes.contains(delegate) && voteType == VoteType.AGAINST) {
-            throw IllegalStateException("Bad vote transaction")
+    private fun updateWalletVotes(address: String, delegateKey: String, type: VoteType) {
+        val delegate = delegateService.getByPublicKey(delegateKey)
+        when (type) {
+            VoteType.FOR -> {
+                walletService.addVote(address, delegate)
+            }
+            VoteType.AGAINST -> {
+                walletService.removeVote(address, delegate)
+            }
         }
     }
 

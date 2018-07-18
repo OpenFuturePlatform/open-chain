@@ -3,7 +3,6 @@ package io.openfuture.chain.service
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.domain.stakeholder.StakeholderDto
-import io.openfuture.chain.entity.Stakeholder
 import io.openfuture.chain.repository.StakeholderRepository
 import org.assertj.core.api.Java6Assertions.assertThat
 import org.junit.Before

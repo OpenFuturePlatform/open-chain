@@ -2,7 +2,6 @@ package io.openfuture.chain.entity.transaction
 
 import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
-import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.util.DictionaryUtils
@@ -15,6 +14,9 @@ class VoteTransaction(timestamp: Long, amount: Double, recipientAddress: String,
 
     @Column(name = "vote_type_id", nullable = false)
     private var voteTypeId: Int,
+
+    @Column(name = "delegate_key", nullable = false)
+    var delegateKey: String,
 
     @Column(name = "delegate_host", nullable = false)
     var delegateHost: String,
@@ -37,8 +39,9 @@ class VoteTransaction(timestamp: Long, amount: Double, recipientAddress: String,
             dto.senderSignature,
             dto.hash,
             dto.voteType.getId(),
-            dto.delegateInfo.networkAddress.host,
-            dto.delegateInfo.networkAddress.port
+            dto.delegateDto.publicKey,
+            dto.delegateDto.networkAddress.host,
+            dto.delegateDto.networkAddress.port
         )
 
         fun of(timestamp: Long, request: VoteTransactionRequest): VoteTransaction = VoteTransaction(
@@ -50,9 +53,9 @@ class VoteTransaction(timestamp: Long, amount: Double, recipientAddress: String,
             request.senderSignature!!,
             request.getHash(),
             request.voteType!!.getId(),
-            request.delegateInfo!!.networkAddress.host,
-            request.delegateInfo!!.networkAddress.port
-
+            request.delegateDto!!.publicKey,
+            request.delegateDto!!.networkAddress.host,
+            request.delegateDto!!.networkAddress.port
         )
     }
 

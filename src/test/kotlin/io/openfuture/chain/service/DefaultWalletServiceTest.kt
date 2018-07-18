@@ -65,7 +65,7 @@ class DefaultWalletServiceTest : ServiceTests() {
         given(repository.findOneByAddress(senderAddress)).willReturn(senderWallet)
         given(repository.findOneByAddress(recipientAddress)).willReturn(recipientWallet)
 
-        service.updateByTransaction(transaction)
+        service.updateBalance(transaction)
 
         verify(repository).save(senderWallet.apply { balance += amount })
         verify(repository).save(recipientWallet.apply { balance -= amount })
@@ -75,7 +75,7 @@ class DefaultWalletServiceTest : ServiceTests() {
         val block = MainBlock(ByteArray(1), 1L, "previousHash", "hash", 1L, mutableListOf())
 
         return VoteTransaction(Date().time, amount, recipientAddress,
-            "senderKey", senderAddress, "value", "hash", VoteType.FOR.getId(),
+            "senderPublicKey", senderAddress, "value", "hash", VoteType.FOR.getId(),
             "delegateKey", 1, block)
     }
 
