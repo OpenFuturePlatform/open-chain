@@ -74,7 +74,6 @@ class DefaultNetworkService(
             .forEach { clientBootstrap.connect(it.host, it.port) }
     }
 
-
     private fun isConnectionNeeded(): Boolean = properties.peersNumber!! > connections.size
 
     private fun requestAddresses() {
