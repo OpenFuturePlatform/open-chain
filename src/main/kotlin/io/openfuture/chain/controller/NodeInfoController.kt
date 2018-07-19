@@ -1,5 +1,8 @@
 package io.openfuture.chain.controller
 
+import io.openfuture.chain.component.node.NodeClock
+import io.openfuture.chain.controller.common.BaseController
+import io.openfuture.chain.controller.common.RestResponse
 import io.openfuture.chain.domain.rpc.HardwareInfo
 import io.openfuture.chain.domain.rpc.UptimeResponse
 import io.openfuture.chain.domain.rpc.node.NodeTimestampResponse
@@ -14,20 +17,29 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("${PathConstant.RPC}/info")
 class NodeInfoController(
+    nodeClock: NodeClock,
     private val context: ApplicationContext,
     private val hardwareInfoService: HardwareInfoService
-) {
+) : BaseController(nodeClock) {
 
     @GetMapping("/getVersion")
-    fun getVersion(): NodeVersionResponse = NodeVersionResponse()
+    fun getVersion(): RestResponse {
+        return RestResponse(getResponseHeader(), NodeVersionResponse())
+    }
 
     @GetMapping("/getTimestamp")
-    fun getTimestamp(): NodeTimestampResponse = NodeTimestampResponse(System.currentTimeMillis())
+    fun getTimestamp(): RestResponse {
+        return RestResponse(getResponseHeader(), nodeClock.nodeTime())
+    }
 
     @GetMapping("/getUptime")
-    fun getUptime(): UptimeResponse = UptimeResponse(System.currentTimeMillis() - context.startupDate)
+    fun getUptime(): RestResponse {
+        return RestResponse(getResponseHeader(), nodeClock.nodeTime() - context.startupDate)
+    }
 
     @GetMapping("/getHardwareInfo")
-    fun getHardwareInfo(): HardwareInfo = hardwareInfoService.getHardwareInfo()
+    fun getHardwareInfo(): RestResponse {
+        return RestResponse(getResponseHeader(), hardwareInfoService.getHardwareInfo())
+    }
 
 }

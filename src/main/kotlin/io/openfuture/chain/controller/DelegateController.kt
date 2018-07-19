@@ -1,6 +1,7 @@
 package io.openfuture.chain.controller
 
 import io.openfuture.chain.component.node.NodeClock
+import io.openfuture.chain.controller.common.BaseController
 import io.openfuture.chain.controller.common.ResponseHeader
 import io.openfuture.chain.controller.common.RestResponse
 import io.openfuture.chain.domain.base.PageRequest
@@ -14,14 +15,14 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("${PathConstant.RPC}/delegates")
 class DelegateController(
-    private val delegateService: DelegateService,
-    private val nodeClock: NodeClock
-) {
+    nodeClock: NodeClock,
+    private val delegateService: DelegateService
+): BaseController(nodeClock) {
 
     @GetMapping
     fun getAll(request: PageRequest): RestResponse {
         val body = PageResponse(delegateService.getAll(request))
-        return RestResponse(ResponseHeader(nodeClock.networkTime(), NodeVersionResponse().version), body)
+        return RestResponse(getResponseHeader(), body)
     }
 
 }
