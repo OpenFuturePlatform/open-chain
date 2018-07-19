@@ -4,8 +4,10 @@ import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.CoinBaseTransaction
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.stereotype.Component
+import java.util.stream.Collectors
 
 @Component
 class MainBlockValidator : BlockValidator {
@@ -18,28 +20,35 @@ class MainBlockValidator : BlockValidator {
             return false
         }
 
-        if (!transactionsIsWellFormed(transactions)) {
+        if (!verifyCoinBaseTransaction(transactions)) {
             return false
         }
 
-        val transactionsMerkleHash = BlockUtils.calculateMerkleRoot(transactions)
-        return block.merkleHash == transactionsMerkleHash
+        if (!verifyDuplicatedTransactions(transactions)) {
+            return false
+        }
+
+        return block.merkleHash == BlockUtils.calculateMerkleRoot(transactions)
     }
 
     override fun getTypeId(): Int = BlockType.MAIN.id
 
-    private fun transactionsIsWellFormed(transactions: List<BaseTransaction>): Boolean {
-        val transactionHashes = HashSet<String>()
-        for (transaction in transactions) {
-            val transactionHash = transaction.hash
-            if (transactionHashes.contains(transactionHash)) {
-                return false
-            }
-
-            transactionHashes.add(transactionHash)
+    private fun verifyCoinBaseTransaction(transactions: List<BaseTransaction>): Boolean {
+        if (transactions.first() !is CoinBaseTransaction) {
+            return false
         }
 
-        return true
+        if (transactions.stream().skip(1).anyMatch { it is CoinBaseTransaction }) {
+            return false
+        }
+
+        val fees = transactions.stream().skip(1).map { it.fee }.collect(Collectors.toList())
+        return transactions.first().amount == (fees.sumByDouble { it } + 10.0)
+    }
+
+    private fun verifyDuplicatedTransactions(transactions: List<BaseTransaction>): Boolean {
+        val transactionHashes = transactions.map { it.hash }.toSet()
+        return transactionHashes.size == transactions.size
     }
 
 }

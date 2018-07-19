@@ -2,6 +2,7 @@ package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.transaction.CoinBaseTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import org.assertj.core.api.Assertions
 import org.junit.Before
@@ -26,16 +27,13 @@ class MainBlockValidatorTests : ServiceTests() {
             "0e09773036394004cb8c340e639a89d7a18e924e8a3d048b49864aeb017e07a0",
             1512345678L,
             mutableListOf(
-                VoteTransaction(
+                CoinBaseTransaction(
                     1500000000L,
-                    1000.0,
-                    10.0,
+                    20.0,
+                    0.0,
                     "recipient_address",
                     "sender_key",
                     "sender_address",
-                    1,
-                    "delegate_host",
-                    9999,
                     "hash",
                     "sender_signature"
                 ),
@@ -102,4 +100,5 @@ class MainBlockValidatorTests : ServiceTests() {
 
         Assertions.assertThat(isBlockValid).isFalse()
     }
+
 }
