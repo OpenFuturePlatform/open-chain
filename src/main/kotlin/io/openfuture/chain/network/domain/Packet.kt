@@ -18,6 +18,7 @@ abstract class Packet : Serializable{
         TIME_SYNC_REQUEST(TimeSyncRequest::class, 5),
         TIME_SYNC_RESPONSE(TimeSyncResponse::class, 6);
 
+
         companion object {
 
             fun getById(id: Int) = values().single { id == it.id }
@@ -45,6 +46,7 @@ abstract class Packet : Serializable{
         }
 
     }
+
 
     abstract fun get(buffer: ByteBuf)
 

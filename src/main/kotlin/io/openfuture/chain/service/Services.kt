@@ -102,7 +102,7 @@ interface VoteTransactionService : TransactionService<VoteTransaction, VoteTrans
 
 interface DelegateService {
 
-    fun getByHostAndPort(host: String, port: Int) : Delegate
+    fun getByHostAndPort(host: String, port: Int): Delegate
 
     fun getActiveDelegates(): Set<Delegate>
 
@@ -148,7 +148,7 @@ interface NetworkService {
 
     fun addConnection(channel: Channel, networkAddress: NetworkAddress)
 
-    fun removeConnection(channel: Channel) : NetworkAddress?
+    fun removeConnection(channel: Channel): NetworkAddress?
 
     fun getConnections(): Set<NetworkAddress>
 

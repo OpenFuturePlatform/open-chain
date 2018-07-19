@@ -7,7 +7,7 @@ import org.junit.Test
 
 class NetworkAddressTest {
 
-    private val buffer =  Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump(
+    private val buffer = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump(
         "000000093132372e302e302e3100002382"))
     private val entity = NetworkAddress("127.0.0.1", 9090)
 

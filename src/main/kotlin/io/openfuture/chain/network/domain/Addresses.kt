@@ -5,7 +5,7 @@ import io.openfuture.chain.annotation.NoArgConstructor
 
 @NoArgConstructor
 data class Addresses(
-    var values : List<NetworkAddress>
+    var values: List<NetworkAddress>
 ) : Packet() {
 
     override fun get(buffer: ByteBuf) {

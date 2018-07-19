@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class ClientChannelInitializer(
-        private val context: ApplicationContext
+    private val context: ApplicationContext
 ) : ChannelInitializer<SocketChannel>() {
 
     override fun initChannel(channel: SocketChannel) {

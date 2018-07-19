@@ -7,7 +7,7 @@ import org.junit.Test
 
 class TimeSyncResponseTest {
 
-    private val buffer =  Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump(
+    private val buffer = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump(
         "000000000756b5b3000000001b34f908"))
     private val entity = TimeSyncResponse(123123123, 456456456)
 

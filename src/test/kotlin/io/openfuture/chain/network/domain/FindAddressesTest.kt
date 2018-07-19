@@ -7,7 +7,7 @@ import org.junit.Test
 
 class FindAddressesTest {
 
-    private val buffer =  Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump(""))
+    private val buffer = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump(""))
     private val entity = FindAddresses()
 
     @Test
@@ -23,6 +23,5 @@ class FindAddressesTest {
         actualEntity.get(buffer)
         assertThat(actualEntity).isEqualTo(entity)
     }
-
 
 }

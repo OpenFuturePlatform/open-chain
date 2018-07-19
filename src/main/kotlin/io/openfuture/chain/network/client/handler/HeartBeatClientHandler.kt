@@ -25,8 +25,8 @@ class HeartBeatClientHandler : BaseHandler<HeartBeat>() {
         // heartbeat
         heartBeatTask?.cancel(true)
         heartBeatTask = ctx.channel()
-                .eventLoop()
-                .scheduleAtFixedRate(HeartBeatTask(ctx), 20, 20, TimeUnit.SECONDS)
+            .eventLoop()
+            .scheduleAtFixedRate(HeartBeatTask(ctx), 20, 20, TimeUnit.SECONDS)
 
         // response
         ctx.writeAndFlush(HeartBeat(PONG))
@@ -43,4 +43,5 @@ class HeartBeatClientHandler : BaseHandler<HeartBeat>() {
         }
 
     }
+
 }

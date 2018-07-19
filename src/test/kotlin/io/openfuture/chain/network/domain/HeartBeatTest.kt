@@ -7,7 +7,7 @@ import org.junit.Test
 
 class HeartBeatTest {
 
-    private val buffer =  Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump("01"))
+    private val buffer = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump("01"))
     private val entity = HeartBeat(HeartBeat.Type.PING)
 
     @Test

@@ -14,4 +14,5 @@ class PacketDecoder : ReplayingDecoder<ByteBuf>() {
     override fun decode(ctx: ChannelHandlerContext, bytes: ByteBuf, out: MutableList<Any>) {
         out.add(Packet.read(bytes))
     }
+
 }

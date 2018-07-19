@@ -8,9 +8,7 @@ data class HeartBeat(
     var type: Type
 ) : Packet() {
 
-    enum class Type {
-        PING, PONG
-    }
+    enum class Type { PING, PONG }
 
     override fun get(buffer: ByteBuf) {
         type = if (buffer.readBoolean()) Type.PING else Type.PONG

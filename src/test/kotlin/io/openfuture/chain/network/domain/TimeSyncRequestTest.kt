@@ -7,7 +7,7 @@ import org.junit.Test
 
 class TimeSyncRequestTest {
 
-    private val buffer =  Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump("0000001caab5c3b3"))
+    private val buffer = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump("0000001caab5c3b3"))
     private val entity = TimeSyncRequest(123123123123)
 
     @Test

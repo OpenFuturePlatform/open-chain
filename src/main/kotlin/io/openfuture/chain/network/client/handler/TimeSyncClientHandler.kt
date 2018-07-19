@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 @Component
 @Scope("prototype")
 class TimeSyncClientHandler(
-        private val clock: NodeClock
+    private val clock: NodeClock
 ) : BaseHandler<TimeSyncResponse>() {
 
     override fun channelActive(ctx: ChannelHandlerContext) {

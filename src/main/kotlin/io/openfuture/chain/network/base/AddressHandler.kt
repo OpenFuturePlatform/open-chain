@@ -9,7 +9,8 @@ import org.springframework.stereotype.Component
 @Component
 @Scope("prototype")
 class AddressHandler(
-    private val networkService: NetworkService) : BaseHandler<Addresses>() {
+    private val networkService: NetworkService
+) : BaseHandler<Addresses>() {
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: Addresses) {
         networkService.connect(message.values)
