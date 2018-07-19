@@ -18,7 +18,8 @@ class DelegateTransactionEntityConverter : TransactionEntityConverter<DelegateTr
         dto.senderAddress,
         dto.senderSignature,
         dto.hash,
-        dto.delegateDto.publicKey,
+        dto.delegateDto.key,
+        dto.delegateDto.address,
         dto.delegateDto.networkAddress.host,
         dto.delegateDto.networkAddress.port
     )
@@ -31,7 +32,8 @@ class DelegateTransactionEntityConverter : TransactionEntityConverter<DelegateTr
         request.senderAddress!!,
         request.senderSignature!!,
         request.getHash(),
-        request.delegateDto!!.publicKey,
+        request.delegateDto!!.key,
+        request.delegateDto!!.address,
         request.delegateDto!!.networkAddress.host,
         request.delegateDto!!.networkAddress.port
     )

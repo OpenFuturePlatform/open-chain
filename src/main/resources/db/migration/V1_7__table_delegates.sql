@@ -1,6 +1,7 @@
 CREATE TABLE delegates (
   id         INTEGER PRIMARY KEY,
   public_key VARCHAR NULL UNIQUE,
+  address    VARCHAR NULL,
   host       VARCHAR NOT NULL,
   port       INTEGER NOT NULL
 );

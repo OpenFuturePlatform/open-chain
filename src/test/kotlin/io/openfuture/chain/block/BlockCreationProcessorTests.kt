@@ -8,7 +8,7 @@ import io.openfuture.chain.domain.block.*
 import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.property.NodeProperty
 import io.openfuture.chain.service.*
 import org.junit.Before
 import org.junit.Test
@@ -24,7 +24,7 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Mock private lateinit var consensusService: ConsensusService
     @Mock private lateinit var clock: NodeClock
     @Mock private lateinit var delegateService: DelegateService
-    @Mock private lateinit var properties: NodeProperties
+    @Mock private lateinit var properties: NodeProperty
 
     private lateinit var processor: BlockCreationProcessor
 

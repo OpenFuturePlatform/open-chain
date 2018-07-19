@@ -10,7 +10,7 @@ import javax.persistence.*
 @Table(name = "delegates")
 class Delegate(
 
-    @Column(name = "public_key", nullable = false)
+    @Column(name = "public_key", nullable = false, unique = true)
     var publicKey: String,
 
     @Column(name = "host", nullable = false)
@@ -25,7 +25,7 @@ class Delegate(
 
     companion object {
         fun of(dto: DelegateDto): Delegate = Delegate(
-            dto.publicKey,
+            dto.key,
             dto.networkAddress.host,
             dto.networkAddress.port
         )

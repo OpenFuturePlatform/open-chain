@@ -7,11 +7,20 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "delegate_transactions")
-class DelegateTransaction(timestamp: Long, amount: Double, recipientAddress: String, senderKey: String,
-                          senderAddress: String, senderSignature: String, hash: String,
+class DelegateTransaction(
+    timestamp: Long,
+    amount: Double,
+    recipientAddress: String,
+    senderKey: String,
+    senderAddress: String,
+    senderSignature: String,
+    hash: String,
 
-    @Column(name = "key", nullable = false)
+    @Column(name = "key", nullable = false, unique = true)
     var key: String,
+
+    @Column(name = "address", nullable = false)
+    var address: String,
 
     @Column(name = "host", nullable = false)
     var host: String,

@@ -20,6 +20,7 @@ class DelegateTransactionDto(timestamp: Long, amount: Double, recipientAddress: 
         tx.hash,
         DelegateDto(
             tx.key,
+            tx.address,
             NetworkAddress(
                 tx.host,
                 tx.port

@@ -1,8 +1,6 @@
 package io.openfuture.chain.controller.common
 
-import java.io.Serializable
-
-data class RestResponse(
+data class RestResponse<T>(
     val header: ResponseHeader,
-    val body: Any?
-) : Serializable
+    val body: T?
+)
