@@ -28,6 +28,12 @@ class ConsensusProperties(
      * Time slot duration
      */
     @field:NotNull
-    var timeSlotDuration: Long? = null
+    var timeSlotDuration: Long? = null,
+
+    /**
+     * Genesis address
+     */
+    @field:NotNull
+    var genesisAddress: String? = null
 
 )

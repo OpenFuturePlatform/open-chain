@@ -97,7 +97,7 @@ interface CoinBaseTransactionService : BaseTransactionService<CoinBaseTransactio
 
     fun save(tx: CoinBaseTransaction): CoinBaseTransaction
 
-    fun create(): CoinBaseTransaction
+    fun create(fees: Double): CoinBaseTransaction
 
 }
 

@@ -1,5 +1,6 @@
 package io.openfuture.chain.entity.transaction
 
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.transaction.CoinBaseTransactionDto
 import io.openfuture.chain.entity.MainBlock
 import javax.persistence.Entity
@@ -14,10 +15,13 @@ class CoinBaseTransaction(
     recipientAddress: String,
     senderKey: String,
     senderAddress: String,
-    senderSignature: String,
-    hash: String,
+    hash: String? = null,
+    senderSignature: String? = null,
     block: MainBlock? = null
-) : BaseTransaction(timestamp, amount, fee, recipientAddress, senderKey, senderAddress, senderSignature, hash, block) {
+) : BaseTransaction(timestamp, amount, fee, recipientAddress, senderKey, senderAddress,
+    hash ?: HashUtils.toHexString(
+        HashUtils.sha256((senderAddress + recipientAddress + timestamp + amount + fee).toByteArray())),
+    senderSignature, block) {
 
     companion object {
         fun of(dto: CoinBaseTransactionDto): CoinBaseTransaction = CoinBaseTransaction(
@@ -27,8 +31,8 @@ class CoinBaseTransaction(
             dto.recipientAddress,
             dto.senderKey,
             dto.senderAddress,
-            dto.senderSignature,
-            dto.hash
+            dto.hash,
+            dto.senderSignature
         )
     }
 
