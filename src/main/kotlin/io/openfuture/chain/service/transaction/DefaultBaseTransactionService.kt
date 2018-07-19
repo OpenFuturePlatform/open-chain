@@ -22,6 +22,9 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction>(
     override fun get(hash: String): Entity = repository.findOneByHash(hash)
         ?: throw NotFoundException("Transaction with hash: $hash not exist!")
 
+    @Transactional(readOnly = true)
+    override fun getByBlock(block: Block): List<Entity> = repository.findAllByBlock(block)
+
     @Transactional
     override fun addToBlock(hash: String, block: MainBlock): Entity {
         val persistTransaction = this.get(hash)
@@ -32,5 +35,8 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction>(
         persistTransaction.block = block
         return repository.save(persistTransaction)
     }
+
+    @Transactional
+    override fun save(transaction: Entity): Entity = repository.save(transaction)
 
 }

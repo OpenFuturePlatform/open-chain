@@ -84,7 +84,11 @@ interface BaseTransactionService<Entity : BaseTransaction> {
 
     fun get(hash: String): Entity
 
+    fun getByBlock(block: Block): List<Entity>
+
     fun addToBlock(hash: String, block: MainBlock): Entity
+
+    fun save(entity: Entity): Entity
 
 }
 

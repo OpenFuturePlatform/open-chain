@@ -18,5 +18,5 @@ class NetworkBlockRequest() : Packet() {
         buffer.writeInt(hash.length)
         buffer.writeCharSequence(hash, StandardCharsets.UTF_8)    }
 
-    override fun toString() = "BlockRequest(nodeTimestamp=$hash)"
+    override fun toString() = "BlockRequest(hash=$hash)"
 }

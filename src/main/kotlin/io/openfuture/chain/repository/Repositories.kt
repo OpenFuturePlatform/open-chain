@@ -38,6 +38,8 @@ interface BaseTransactionRepository<Entity : BaseTransaction> : BaseRepository<E
 
     fun findAllByBlockIsNull(): MutableSet<Entity>
 
+    fun findAllByBlock(block: Block): List<Entity>
+
     fun existsByHash(hash: String): Boolean
 
 }
