@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Genesis address to properties
 - Sign transactions
 - Create and save CoinBaseTransaction
+- Validation of CoinBaseTransaction
 
 ## [0.3.0] - 2018-07-13
 ### Added
