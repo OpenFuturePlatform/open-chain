@@ -20,9 +20,9 @@ class TimeSlot(
     private val lock = ReentrantReadWriteLock()
 
 
-    fun getEpochTime(): Long = synchronizedGet(epochTime)
+    fun getEpochTime(): Long = getSynchronized(epochTime)
 
-    fun getProducer(): Delegate = synchronizedGet(producer)
+    fun getProducer(): Delegate = getSynchronized(producer)
 
     fun setRoundStartTime(epochTime: Long) {
         try {
@@ -53,7 +53,7 @@ class TimeSlot(
     fun verifyTimeSlot(currentTime: Long, block: Block)
         = (getSlotNumber(currentTime) == getSlotNumber(block.timestamp))
 
-    private fun <T> synchronizedGet(value: T): T {
+    private fun <T> getSynchronized(value: T): T {
         try {
             lock.readLock().lock()
             return value
