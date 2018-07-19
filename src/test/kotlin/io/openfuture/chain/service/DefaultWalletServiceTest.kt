@@ -17,7 +17,8 @@ import java.util.*
 
 class DefaultWalletServiceTest : ServiceTests() {
 
-    @Mock private lateinit var repository: WalletRepository
+    @Mock
+    private lateinit var repository: WalletRepository
 
     private lateinit var service: WalletService
 
@@ -75,8 +76,8 @@ class DefaultWalletServiceTest : ServiceTests() {
         val block = MainBlock(ByteArray(1), 1L, "previousHash", "hash", 1L, mutableListOf())
 
         return VoteTransaction(Date().time, amount, 10.0, recipientAddress,
-            "senderKey", senderAddress, "value", "hash", VoteType.FOR.getId(),
-            "delegateKey", 1, block)
+            "senderKey", senderAddress, VoteType.FOR.getId(), "value", 1, "hash",
+            "signature", block)
     }
 
 }

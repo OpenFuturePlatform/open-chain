@@ -28,7 +28,8 @@ class BlockCreationProcessor(
     private val consensusService: ConsensusService,
     private val clock: NodeClock,
     private val delegateService: DelegateService,
-    private val properties: NodeProperties
+    private val properties: NodeProperties,
+    private val coinBaseTransactionService: CoinBaseTransactionService
 ) {
 
     fun approveBlock(pendingBlock: PendingBlock): PendingBlock {
@@ -44,7 +45,7 @@ class BlockCreationProcessor(
             throw IllegalArgumentException("Inbound block's signature is invalid")
         }
 
-        if(!signatureCollector.addBlockSignature(pendingBlock)) {
+        if (!signatureCollector.addBlockSignature(pendingBlock)) {
             throw IllegalArgumentException("Either signature is already exists, or not related to pending block")
         }
         return signCreatedBlock(block)
@@ -69,13 +70,17 @@ class BlockCreationProcessor(
         return pendingBlock
     }
 
-    private fun create(transactions: MutableList<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
+    private fun create(transactionsFromPool: MutableList<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
         val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
 
         val time = clock.networkTime()
         val privateKey = keyHolder.getPrivateKey()
-        val block = when(blockType) {
+        val block = when (blockType) {
             BlockType.MAIN -> {
+                val fees = transactionsFromPool.sumByDouble { it.fee }
+                val transactions = mutableListOf<BaseTransaction>(coinBaseTransactionService.create(fees))
+                transactions.addAll(transactionsFromPool)
+
                 MainBlock(
                     privateKey,
                     previousBlock.height + 1,

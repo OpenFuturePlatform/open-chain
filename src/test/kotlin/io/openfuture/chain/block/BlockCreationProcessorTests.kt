@@ -25,6 +25,7 @@ class BlockCreationProcessorTests : ServiceTests() {
     @Mock private lateinit var clock: NodeClock
     @Mock private lateinit var delegateService: DelegateService
     @Mock private lateinit var properties: NodeProperties
+    @Mock private lateinit var coinBaseTransactionService: CoinBaseTransactionService
 
     private lateinit var processor: BlockCreationProcessor
 
@@ -34,7 +35,7 @@ class BlockCreationProcessorTests : ServiceTests() {
         val block = createMainBlock()
         given(blockService.getLastMain()).willReturn(block)
         processor = BlockCreationProcessor(blockService, signatureCollector, keyHolder, blockValidationService,
-            consensusService, clock, delegateService, properties)
+            consensusService, clock, delegateService, properties, coinBaseTransactionService)
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -112,11 +113,11 @@ class BlockCreationProcessorTests : ServiceTests() {
             "recipient_address",
             "sender_key",
             "sender_address",
-            "sender_signature",
-            "hash",
             1,
             "delegate_host",
-            9999
+            9999,
+            "hash",
+            "sender_signature"
         ),
         VoteTransaction(
             1500000001L,
@@ -125,11 +126,11 @@ class BlockCreationProcessorTests : ServiceTests() {
             "recipient_address2",
             "sender_key2",
             "sender_address2",
-            "sender_signature2",
-            "hash2",
             2,
             "delegate_host2",
-            11999
+            11999,
+            "hash2",
+            "sender_signature2"
         )
     )
 

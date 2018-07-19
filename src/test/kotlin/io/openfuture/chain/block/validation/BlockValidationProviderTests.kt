@@ -41,11 +41,11 @@ class BlockValidationProviderTests : ServiceTests() {
                     "recipient_address",
                     "sender_key",
                     "sender_address",
-                    "sender_signature",
-                    "hash",
                     1,
                     "delegate_host",
-                    9999
+                    9999,
+                    "hash",
+                    "sender_signature"
                 ),
                 VoteTransaction(
                     1500000001L,
@@ -54,11 +54,11 @@ class BlockValidationProviderTests : ServiceTests() {
                     "recipient_address2",
                     "sender_key2",
                     "sender_address2",
-                    "sender_signature2",
-                    "hash2",
                     2,
                     "delegate_host2",
-                    11999
+                    11999,
+                    "hash2",
+                    "sender_signature2"
                 )
             )
         )
@@ -94,11 +94,11 @@ class BlockValidationProviderTests : ServiceTests() {
                     "recipient_address",
                     "sender_key",
                     "sender_address",
-                    "sender_signature",
-                    "hash",
                     1,
                     "delegate_host",
-                    9999
+                    9999,
+                    "hash",
+                    "sender_signature"
                 ),
                 VoteTransaction(
                     1500000001L,
@@ -107,11 +107,11 @@ class BlockValidationProviderTests : ServiceTests() {
                     "recipient_address2",
                     "sender_key2",
                     "sender_address2",
-                    "sender_signature2",
-                    "hash2",
                     2,
                     "delegate_host2",
-                    11999
+                    11999,
+                    "hash2",
+                    "sender_signature2"
                 )
             )
         )
@@ -139,11 +139,11 @@ class BlockValidationProviderTests : ServiceTests() {
                     "recipient_address",
                     "sender_key",
                     "sender_address",
-                    "sender_signature",
-                    "hash",
                     1,
                     "delegate_host",
-                    9999
+                    9999,
+                    "hash",
+                    "sender_signature"
                 ),
                 VoteTransaction(
                     1500000001L,
@@ -152,11 +152,11 @@ class BlockValidationProviderTests : ServiceTests() {
                     "recipient_address2",
                     "sender_key2",
                     "sender_address2",
-                    "sender_signature2",
-                    "hash2",
                     2,
                     "delegate_host2",
-                    11999
+                    11999,
+                    "hash2",
+                    "sender_signature2"
                 )
             )
         )
