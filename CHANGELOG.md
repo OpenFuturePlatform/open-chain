@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - Fees to transactions
+- New type of transaction: CoinBaseTransaction
 
 ## [0.3.0] - 2018-07-13
 ### Added

@@ -15,6 +15,10 @@ CREATE TABLE transfer_transactions (
   id INTEGER PRIMARY KEY REFERENCES transactions
 );
 --
+CREATE TABLE coinbase_transactions (
+  id INTEGER PRIMARY KEY REFERENCES transactions
+);
+--
 CREATE TABLE vote_types (
   id  INT PRIMARY KEY,
   key VARCHAR NOT NULL UNIQUE

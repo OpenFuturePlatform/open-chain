@@ -3,26 +3,23 @@ package io.openfuture.chain.service
 import io.netty.channel.Channel
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
+import io.openfuture.chain.domain.delegate.DelegateDto
 import io.openfuture.chain.domain.rpc.HardwareInfo
 import io.openfuture.chain.domain.rpc.crypto.AccountDto
-import io.openfuture.chain.domain.delegate.DelegateDto
 import io.openfuture.chain.domain.rpc.hardware.CpuInfo
 import io.openfuture.chain.domain.rpc.hardware.NetworkInfo
 import io.openfuture.chain.domain.rpc.hardware.RamInfo
 import io.openfuture.chain.domain.rpc.hardware.StorageInfo
+import io.openfuture.chain.domain.rpc.transaction.TransactionRequest
+import io.openfuture.chain.domain.rpc.transaction.TransferTransactionRequest
+import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
 import io.openfuture.chain.domain.stakeholder.StakeholderDto
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.TransferTransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
-import io.openfuture.chain.domain.rpc.transaction.TransactionRequest
-import io.openfuture.chain.domain.rpc.transaction.TransferTransactionRequest
-import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.GenesisBlock
-import io.openfuture.chain.entity.MainBlock
-import io.openfuture.chain.entity.Stakeholder
-import io.openfuture.chain.entity.Delegate
+import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.CoinBaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.domain.NetworkAddress
@@ -96,13 +93,23 @@ interface TransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto,
 
 }
 
+interface CoinBaseTransactionService : BaseTransactionService<CoinBaseTransaction> {
+
+    fun save(tx: CoinBaseTransaction): CoinBaseTransaction
+
+    fun create(): CoinBaseTransaction
+
+}
+
 interface TransferTransactionService : TransactionService<TransferTransaction, TransferTransactionDto, TransferTransactionRequest>
 
 interface VoteTransactionService : TransactionService<VoteTransaction, VoteTransactionDto, VoteTransactionRequest>
 
 interface DelegateService {
 
-    fun getByHostAndPort(host: String, port: Int) : Delegate
+    fun getByHostAndPort(host: String, port: Int): Delegate
+
+    fun getByPublicKey(publicKey: String): Delegate
 
     fun getActiveDelegates(): Set<Delegate>
 
@@ -148,7 +155,7 @@ interface NetworkService {
 
     fun addConnection(channel: Channel, networkAddress: NetworkAddress)
 
-    fun removeConnection(channel: Channel) : NetworkAddress?
+    fun removeConnection(channel: Channel): NetworkAddress?
 
     fun getConnections(): Set<NetworkAddress>
 
