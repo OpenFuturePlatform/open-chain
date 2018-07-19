@@ -9,9 +9,9 @@ class TransferTransactionDto(
     recipientAddress: String,
     senderKey: String,
     senderAddress: String,
-    senderSignature: String,
-    hash: String
-) : BaseTransactionDto(timestamp, amount, fee, recipientAddress, senderKey, senderAddress, senderSignature, hash) {
+    hash: String,
+    senderSignature: String
+) : BaseTransactionDto(timestamp, amount, fee, recipientAddress, senderKey, senderAddress, hash, senderSignature) {
 
     constructor(tx: TransferTransaction) : this(
         tx.timestamp,
@@ -20,8 +20,8 @@ class TransferTransactionDto(
         tx.recipientAddress,
         tx.senderKey,
         tx.senderAddress,
-        tx.senderSignature,
-        tx.hash
+        tx.hash,
+        tx.senderSignature!!
     )
 
 }

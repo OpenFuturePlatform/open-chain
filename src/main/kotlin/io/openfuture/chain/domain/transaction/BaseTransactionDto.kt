@@ -7,6 +7,6 @@ abstract class BaseTransactionDto(
     val recipientAddress: String,
     val senderKey: String,
     val senderAddress: String,
-    val senderSignature: String,
-    val hash: String
+    val hash: String,
+    val senderSignature: String
 )
