@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Fees to transactions
 - New type of transaction: CoinBaseTransaction
+- Genesis address to properties
 
 ## [0.3.0] - 2018-07-13
 ### Added
