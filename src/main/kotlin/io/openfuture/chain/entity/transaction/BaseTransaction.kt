@@ -18,6 +18,9 @@ abstract class BaseTransaction(
     @Column(name = "amount", nullable = false)
     var amount: Double,
 
+    @Column(name = "fee", nullable = false)
+    var fee: Double,
+
     @Column(name = "recipient_address", nullable = false)
     var recipientAddress: String,
 
@@ -38,17 +41,4 @@ abstract class BaseTransaction(
     @JoinColumn(name = "block_id", nullable = true)
     var block: MainBlock? = null
 
-) : BaseModel() {
-
-
-
-    fun getBytes(): ByteArray = StringBuilder()
-        .append(timestamp)
-        .append(amount)
-        .append(recipientAddress)
-        .append(senderKey)
-        .append(senderAddress)
-        .append(senderSignature)
-        .toString().toByteArray()
-
-}
+) : BaseModel()

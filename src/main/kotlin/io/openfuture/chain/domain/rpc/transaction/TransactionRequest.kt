@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull
 
 abstract class TransactionRequest(
     @field:NotNull var amount: Double? = null,
-    @field:NotBlank var recipientKey: String? = null,
+    @field:NotNull var fee: Double? = null,
     @field:NotBlank var recipientAddress: String? = null,
     @field:NotBlank var senderKey: String? = null,
     @field:NotBlank var senderAddress: String? = null,

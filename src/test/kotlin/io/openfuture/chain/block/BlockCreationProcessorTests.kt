@@ -15,7 +15,7 @@ import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
 
-class BlockCreationProcessorTests: ServiceTests() {
+class BlockCreationProcessorTests : ServiceTests() {
 
     @Mock private lateinit var blockService: BlockService
     @Mock private lateinit var signatureCollector: SignatureCollector
@@ -27,6 +27,7 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Mock private lateinit var properties: NodeProperties
 
     private lateinit var processor: BlockCreationProcessor
+
 
     @Before
     fun init() {
@@ -107,6 +108,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         VoteTransaction(
             1500000000L,
             1000.0,
+            10.0,
             "recipient_address",
             "sender_key",
             "sender_address",
@@ -119,6 +121,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         VoteTransaction(
             1500000001L,
             1002.0,
+            10.0,
             "recipient_address2",
             "sender_key2",
             "sender_address2",
@@ -129,4 +132,5 @@ class BlockCreationProcessorTests: ServiceTests() {
             11999
         )
     )
+
 }
