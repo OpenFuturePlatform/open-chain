@@ -9,6 +9,7 @@ class GenesisBlockValidatorTests {
 
     private lateinit var genesisBlockValidator: GenesisBlockValidator
 
+
     @Before
     fun setUp() {
         genesisBlockValidator = GenesisBlockValidator()

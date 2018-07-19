@@ -17,8 +17,7 @@ import java.util.*
 
 class DefaultWalletServiceTest : ServiceTests() {
 
-    @Mock
-    private lateinit var repository: WalletRepository
+    @Mock private lateinit var repository: WalletRepository
 
     private lateinit var service: WalletService
 
