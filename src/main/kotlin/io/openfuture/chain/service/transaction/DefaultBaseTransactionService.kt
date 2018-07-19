@@ -30,19 +30,19 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Dto : Bas
         ?: throw NotFoundException("Transaction with hash: $hash not exist!")
 
     @Transactional
-    override fun add(dto: Dto) {
+    override fun add(dto: Dto): Entity {
         //todo need to add validation
         val transaction = repository.findOneByHash(dto.hash)
         if (null != transaction) {
-            return
+            return transaction
         }
 
-        saveAndBroadcast(entityConverter.toEntity(dto))
+        return saveAndBroadcast(entityConverter.toEntity(dto))
     }
 
     @Transactional
-    override fun add(request: Req) {
-        saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), request))
+    override fun add(request: Req): Entity {
+        return saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), request))
     }
 
     protected fun commonAddToBlock(tx: Entity, block: MainBlock): Entity {
@@ -56,8 +56,8 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Dto : Bas
         return repository.save(persistTx)
     }
 
-    private fun saveAndBroadcast(tx: Entity) {
-        repository.save(tx)
+    private fun saveAndBroadcast(tx: Entity): Entity {
+        return repository.save(tx)
         //todo: networkService.broadcast(transaction.toMessage)
     }
 

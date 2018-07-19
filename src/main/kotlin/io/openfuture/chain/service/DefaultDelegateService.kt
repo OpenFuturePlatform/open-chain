@@ -1,10 +1,12 @@
 package io.openfuture.chain.service
 
+import io.openfuture.chain.domain.base.PageRequest
 import io.openfuture.chain.domain.delegate.DelegateDto
 import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.DelegateRepository
+import org.springframework.data.domain.Page
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -22,6 +24,10 @@ class DefaultDelegateService(
         const val HOST = "host"
         const val PORT = "port"
     }
+
+
+    @Transactional(readOnly = true)
+    override fun getAll(request: PageRequest): Page<Delegate> = repository.findAll(request)
 
     @Transactional(readOnly = true)
     override fun getByPublicKey(key: String): Delegate = repository.findOneByPublicKey(key)

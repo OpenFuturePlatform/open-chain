@@ -3,6 +3,7 @@ package io.openfuture.chain.service
 import io.netty.channel.Channel
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
+import io.openfuture.chain.domain.base.PageRequest
 import io.openfuture.chain.domain.delegate.DelegateDto
 import io.openfuture.chain.domain.rpc.HardwareInfo
 import io.openfuture.chain.domain.rpc.crypto.AccountDto
@@ -26,6 +27,7 @@ import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.protocol.CommunicationProtocol
+import org.springframework.data.domain.Page
 
 interface HardwareInfoService {
 
@@ -85,9 +87,9 @@ interface BaseTransactionService<Entity : BaseTransaction, Dto : BaseTransaction
 
     fun addToBlock(tx: Entity, block: MainBlock): Entity
 
-    fun add(dto: Dto)
+    fun add(dto: Dto): Entity
 
-    fun add(request: Req)
+    fun add(request: Req): Entity
 
 }
 
@@ -99,7 +101,9 @@ interface DelegateTransactionService : BaseTransactionService<DelegateTransactio
 
 interface DelegateService {
 
-    fun getByPublicKey(key: String) : Delegate
+    fun getAll(request: PageRequest): Page<Delegate>
+
+    fun getByPublicKey(key: String): Delegate
 
     fun getActiveDelegates(): Set<Delegate>
 
@@ -139,7 +143,7 @@ interface NetworkService {
 
     fun addConnection(channel: Channel, networkAddress: NetworkAddress)
 
-    fun removeConnection(channel: Channel) : NetworkAddress?
+    fun removeConnection(channel: Channel): NetworkAddress?
 
     fun getConnections(): Set<NetworkAddress>
 
