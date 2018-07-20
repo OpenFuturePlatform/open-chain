@@ -16,15 +16,15 @@ class TimeSlot(
 
     fun getEpochTime(): Long {
         val genesis = blockService.getLastGenesis()
-        return genesis.epochIndex
+        return genesis.timestamp
     }
 
-    fun getSlotTimestamp(time: Long = clock.networkTime()): Long {
-        return time + getSlotTime()
+    fun getSlotTimestamp(): Long {
+        return getEpochTime() + getSlotTime()
     }
 
     fun getSlotTime(): Long {
-        return getEpochTime() + getSlotNumber() * properties.timeSlotDuration!!
+        return getSlotNumber() * properties.timeSlotDuration!!
     }
 
     fun getSlotNumber(time: Long = clock.networkTime()): Long

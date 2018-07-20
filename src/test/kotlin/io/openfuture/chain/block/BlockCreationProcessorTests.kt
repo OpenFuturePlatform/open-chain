@@ -11,6 +11,7 @@ import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.service.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -34,7 +35,9 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Before
     fun init() {
         val block = createMainBlock()
+    //    given(blockValidationService.isValid(block)).willReturn(true)
         given(blockService.getLastMain()).willReturn(block)
+        given(timeSlot.getSlotTimestamp()).willReturn(1L)
         processor = BlockCreationProcessor(blockService, signatureCollector, keyHolder, blockValidationService,
             consensusService, clock, delegateService, properties, consensusProperties, timeSlot)
     }
@@ -43,7 +46,6 @@ class BlockCreationProcessorTests: ServiceTests() {
     fun approveBlockFailsIfBlockIsInvalid() {
         val block = createMainBlock()
         val pendingBlock = createPendingBlock(block)
-        given(blockValidationService.isValid(block)).willReturn(false)
 
         processor.approveBlock(pendingBlock)
     }
@@ -53,8 +55,6 @@ class BlockCreationProcessorTests: ServiceTests() {
         val block = createMainBlock()
         val pendingBlock = createPendingBlock(block)
 
-        given(blockValidationService.isValid(block)).willReturn(true)
-
         processor.approveBlock(pendingBlock)
     }
 
@@ -62,8 +62,6 @@ class BlockCreationProcessorTests: ServiceTests() {
     fun approveBlockFailsIfBlockSignatureIsAlreadyExists() {
         val block = createMainBlock()
         val pendingBlock = createPendingBlock(block)
-
-        given(blockValidationService.isValid(block)).willReturn(true)
 
         processor.approveBlock(pendingBlock)
     }
