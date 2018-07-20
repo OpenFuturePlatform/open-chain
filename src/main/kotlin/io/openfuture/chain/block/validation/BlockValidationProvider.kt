@@ -28,7 +28,7 @@ class BlockValidationProvider(
             lastBlock = mainBlockService.getLast()
         } else if (block is GenesisBlock) {
             blockIsValid = genesisBlockService.isValid(block)
-            lastBlock = mainBlockService.getLast()
+            lastBlock = genesisBlockService.getLast()
         } else {
             throw IllegalArgumentException("wrong block type is found")
         }

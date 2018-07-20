@@ -30,11 +30,12 @@ class BlockValidationProviderTests : ServiceTests() {
     @Before
     fun init() {
         given(timeSlot.verifyTimeSlot(any(Long::class.java), any(MainBlock::class.java))).willReturn(true)
+        given(timeSlot.verifyTimeSlot(any(Long::class.java), any(GenesisBlock::class.java))).willReturn(true)
         blockValidationService = BlockValidationProvider(mainBlockService, genesisBlockService, timeSlot, clock)
     }
 
     @Test
-    fun isValidShouldReturnTrue() {
+    fun isValidShouldReturnTrueWhenItIsMainBlock() {
         val height = 123L
         val prevHash = "c78bac60ede7a9d10248ad4373d70b915a1c466e942aadce1f5703ebbb855aa4"
         val merkleHash = "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"
@@ -114,7 +115,7 @@ class BlockValidationProviderTests : ServiceTests() {
     }
 
     @Test
-    fun isValidShouldReturnFalse() {
+    fun isValidShouldReturnFalseWhenItIsMainBlock() {
         val block = MainBlock(
             ByteArray(1),
             123,
@@ -147,6 +148,51 @@ class BlockValidationProviderTests : ServiceTests() {
                     11999
                 )
             )
+        )
+
+        val isValid = blockValidationService.isValid(block)
+
+        assertThat(isValid).isFalse()
+    }
+
+    @Test
+    fun isValidShouldReturnTrueWhenItIsGenesisBlock() {
+        val height = 123L
+        val prevHash = "08a6f91ee999e7d8c89861ee5eee401b0fed8ba2a83f7ab32de5f8dae0c06024"
+        val previousBlock = GenesisBlock(
+            ByteArray(1),
+            122,
+            "previous_hash",
+            1510000000L,
+            1L,
+            setOf()
+        )
+        val block = GenesisBlock(
+            ByteArray(1),
+            height,
+            prevHash,
+            currentTime,
+            2L,
+            setOf()
+        )
+
+        given(genesisBlockService.isValid(block)).willReturn(true)
+        given(genesisBlockService.getLast()).willReturn(previousBlock)
+
+        val isValid = blockValidationService.isValid(block)
+
+        assertThat(isValid).isTrue()
+    }
+
+    @Test
+    fun isValidShouldReturnFalseWhenItIsGenesisBlock() {
+        val block = GenesisBlock(
+            ByteArray(1),
+            123,
+            "prev_block_hash",
+            1512345678L,
+            1L,
+            setOf()
         )
 
         val isValid = blockValidationService.isValid(block)
