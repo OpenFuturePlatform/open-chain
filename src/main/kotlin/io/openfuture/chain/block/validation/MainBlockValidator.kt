@@ -37,11 +37,7 @@ class MainBlockValidator(
     override fun getTypeId(): Int = BlockType.MAIN.id
 
     private fun verifyCoinBaseTransaction(transactions: List<BaseTransaction>): Boolean {
-        val coinBaseTransaction = transactions.first()
-
-        if (transactions.first() !is CoinBaseTransaction) {
-            return false
-        }
+        val coinBaseTransaction = transactions.first() as? CoinBaseTransaction ?: return false
 
         if (properties.genesisAddress!! != coinBaseTransaction.senderAddress) {
             return false
@@ -52,7 +48,7 @@ class MainBlockValidator(
         }
 
         val fees = transactions.stream().skip(1).map { it.fee }.collect(Collectors.toList())
-        return transactions.first().amount == (fees.sumByDouble { it } + 10.0)
+        return coinBaseTransaction.amount == (fees.sumByDouble { it } + 10.0)
     }
 
     private fun verifyDuplicatedTransactions(transactions: List<BaseTransaction>): Boolean {
