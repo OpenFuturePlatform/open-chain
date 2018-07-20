@@ -5,12 +5,15 @@ import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.CoinBaseTransaction
+import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.stereotype.Component
 import java.util.stream.Collectors
 
 @Component
-class MainBlockValidator : BlockValidator {
+class MainBlockValidator(
+    private val properties: ConsensusProperties
+) : BlockValidator {
 
     override fun isValid(block: Block): Boolean {
         val mainBlock = block as MainBlock
@@ -34,7 +37,13 @@ class MainBlockValidator : BlockValidator {
     override fun getTypeId(): Int = BlockType.MAIN.id
 
     private fun verifyCoinBaseTransaction(transactions: List<BaseTransaction>): Boolean {
+        val coinBaseTransaction = transactions.first()
+
         if (transactions.first() !is CoinBaseTransaction) {
+            return false
+        }
+
+        if (properties.genesisAddress!! != coinBaseTransaction.senderAddress) {
             return false
         }
 

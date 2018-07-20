@@ -4,18 +4,29 @@ import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.CoinBaseTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import org.assertj.core.api.Assertions
+import io.openfuture.chain.property.ConsensusProperties
+import org.assertj.core.api.Java6Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.mockito.BDDMockito.given
+import org.mockito.Mock
 
 class MainBlockValidatorTests : ServiceTests() {
 
+    @Mock private lateinit var properties: ConsensusProperties
+
     private lateinit var mainBlockValidator: MainBlockValidator
+
+    companion object {
+        private const val GENESIS_ADDRESS = "0x00000"
+    }
 
 
     @Before
     fun setUp() {
-        mainBlockValidator = MainBlockValidator()
+        mainBlockValidator = MainBlockValidator(properties)
+
+        given(properties.genesisAddress).willReturn(GENESIS_ADDRESS)
     }
 
     @Test
@@ -33,7 +44,7 @@ class MainBlockValidatorTests : ServiceTests() {
                     0.0,
                     "recipient_address",
                     "sender_key",
-                    "sender_address",
+                    GENESIS_ADDRESS,
                     "hash",
                     "sender_signature"
                 ),
@@ -55,7 +66,8 @@ class MainBlockValidatorTests : ServiceTests() {
 
         val isBlockValid = mainBlockValidator.isValid(block)
 
-        Assertions.assertThat(isBlockValid).isTrue()
+
+        assertThat(isBlockValid).isTrue()
     }
 
     @Test
@@ -98,7 +110,7 @@ class MainBlockValidatorTests : ServiceTests() {
 
         val isBlockValid = mainBlockValidator.isValid(block)
 
-        Assertions.assertThat(isBlockValid).isFalse()
+        assertThat(isBlockValid).isFalse()
     }
 
 }
