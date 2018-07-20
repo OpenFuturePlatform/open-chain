@@ -19,6 +19,7 @@ class MainBlockValidatorTests : ServiceTests() {
 
     companion object {
         private const val GENESIS_ADDRESS = "0x00000"
+        private const val REWARD_BLOCK = 10.0
     }
 
 
@@ -27,6 +28,7 @@ class MainBlockValidatorTests : ServiceTests() {
         mainBlockValidator = MainBlockValidator(properties)
 
         given(properties.genesisAddress).willReturn(GENESIS_ADDRESS)
+        given(properties.rewardBlock).willReturn(REWARD_BLOCK)
     }
 
     @Test
@@ -40,7 +42,7 @@ class MainBlockValidatorTests : ServiceTests() {
             mutableListOf(
                 CoinBaseTransaction(
                     1500000000L,
-                    20.0,
+                    10.0 + REWARD_BLOCK,
                     0.0,
                     "recipient_address",
                     "sender_key",

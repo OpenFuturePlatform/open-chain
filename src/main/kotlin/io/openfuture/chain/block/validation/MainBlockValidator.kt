@@ -48,7 +48,7 @@ class MainBlockValidator(
         }
 
         val fees = transactions.stream().skip(1).map { it.fee }.collect(Collectors.toList())
-        return coinBaseTransaction.amount == (fees.sumByDouble { it } + 10.0)
+        return coinBaseTransaction.amount == (fees.sumByDouble { it } + properties.rewardBlock!!)
     }
 
     private fun verifyDuplicatedTransactions(transactions: List<BaseTransaction>): Boolean {

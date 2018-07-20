@@ -17,7 +17,7 @@ class DefaultCoinBaseTransactionService(
     private val nodeClock: NodeClock,
     private val keyHolder: NodeKeyHolder,
     private val delegateService: DelegateService,
-    private val consensusProperties: ConsensusProperties
+    private val properties: ConsensusProperties
 ) : DefaultBaseTransactionService<CoinBaseTransaction>(repository), CoinBaseTransactionService {
 
     @Transactional
@@ -26,9 +26,10 @@ class DefaultCoinBaseTransactionService(
     override fun create(fees: Double): CoinBaseTransaction {
         val publicKey = HashUtils.toHexString(keyHolder.getPublicKey())
         val delegate = delegateService.getByPublicKey(publicKey)
+        val amount = fees + properties.rewardBlock!!
 
-        return CoinBaseTransaction(nodeClock.networkTime(), fees + 10.0, 0.0, delegate.getAddress(),
-            publicKey, consensusProperties.genesisAddress!!).sign(keyHolder.getPrivateKey())
+        return CoinBaseTransaction(nodeClock.networkTime(), amount, properties.feeCoinBaseTx!!, delegate.getAddress(),
+            publicKey, properties.genesisAddress!!).sign(keyHolder.getPrivateKey())
     }
 
 }
