@@ -15,10 +15,9 @@ import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.ConsensusService
-import io.openfuture.chain.service.DefaultGenesisBlockService
 import io.openfuture.chain.service.DelegateService
-import io.openfuture.chain.service.MainBlockService
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -26,8 +25,8 @@ import org.mockito.Mock
 
 class BlockCreationProcessorTests: ServiceTests() {
 
-    @Mock private lateinit var mainBlockService: MainBlockService
-    @Mock private lateinit var genesisBlockService: DefaultGenesisBlockService
+    @Mock private lateinit var mainBlockService: BlockService<MainBlock>
+    @Mock private lateinit var genesisBlockService: BlockService<GenesisBlock>
     @Mock private lateinit var signatureCollector: SignatureCollector
     @Mock private lateinit var keyHolder: NodeKeyHolder
     @Mock private lateinit var blockValidationService: BlockValidationProvider
@@ -43,7 +42,6 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Before
     fun init() {
         val block = createMainBlock()
-    //    given(blockValidationService.isValid(block)).willReturn(true)
         given(mainBlockService.getLast()).willReturn(block)
         given(timeSlot.getSlotTimestamp()).willReturn(1L)
         processor = BlockCreationProcessor(mainBlockService, genesisBlockService, signatureCollector, keyHolder,

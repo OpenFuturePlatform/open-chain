@@ -22,8 +22,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class BlockCreationProcessor(
-    private val mainBlockService: MainBlockService,
-    private val genesisBlockService: DefaultGenesisBlockService,
+    private val mainBlockService: BlockService<MainBlock>,
+    private val genesisBlockService: BlockService<GenesisBlock>,
     private val signatureCollector: SignatureCollector,
     private val keyHolder: NodeKeyHolder,
     private val validationService: BlockValidationProvider,

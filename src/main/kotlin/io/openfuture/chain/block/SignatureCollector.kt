@@ -3,18 +3,19 @@ package io.openfuture.chain.block
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
-import io.openfuture.chain.entity.*
+import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.service.DefaultGenesisBlockService
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class SignatureCollector(
-    private val blockService: BlockService,
-    private val genesisBlockService: DefaultGenesisBlockService,
+    private val mainBlockService: BlockService<MainBlock>,
+    private val genesisBlockService: BlockService<GenesisBlock>,
     private val properties: ConsensusProperties,
     private val timeSlot: TimeSlot,
     private val clock: NodeClock
@@ -26,7 +27,7 @@ class SignatureCollector(
 
     private val scheduler = ThreadPoolTaskScheduler()
     private val signatures = ConcurrentHashMap.newKeySet<Signature>()
-    private var pendingBlock: Block? = null
+    private lateinit var pendingBlock: Block
     private var active: Boolean = false
 
 
@@ -39,7 +40,7 @@ class SignatureCollector(
     }
 
     fun addBlockSignature(blockSignature: PendingBlock): Boolean {
-        if (blockSignature.block.hash != pendingBlock!!.hash) {
+        if (blockSignature.block.hash != pendingBlock.hash) {
             return false
         }
 
@@ -54,9 +55,9 @@ class SignatureCollector(
             val genesisBlock = genesisBlockService.getLast()
             if (signatures.size.toDouble() / genesisBlock.activeDelegates.size > APPROVAL_THRESHOLD) {
                 if (pendingBlock is MainBlock) {
-                    blockService.save(pendingBlock!! as MainBlock)
+                    mainBlockService.save(pendingBlock as MainBlock)
                 } else if (pendingBlock is GenesisBlock) {
-                    blockService.save(pendingBlock!! as GenesisBlock)
+                    genesisBlockService.save(pendingBlock as GenesisBlock)
                 }
             }
         } finally {

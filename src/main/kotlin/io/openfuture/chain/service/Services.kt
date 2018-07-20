@@ -42,27 +42,16 @@ interface HardwareInfoService {
 
 }
 
-interface BlockService {
+interface BlockService<T: Block> {
 
-    fun get(hash: String): Block
+    fun get(hash: String): T
 
-    fun getLast(): Block
+    fun getLast(): T
 
-    fun save(block: MainBlock): MainBlock
+    fun save(block: T): T
 
-    fun save(block: GenesisBlock): GenesisBlock
+    fun isValid(block: T): Boolean
 
-}
-
-interface MainBlockService {
-
-    fun getLast(): MainBlock
-
-}
-
-interface GenesisBlockService {
-
-    fun getLast(): GenesisBlock
 }
 
 interface CryptoService {

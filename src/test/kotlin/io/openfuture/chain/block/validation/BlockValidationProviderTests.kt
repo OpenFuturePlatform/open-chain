@@ -4,9 +4,9 @@ import io.openfuture.chain.block.TimeSlot
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
-import io.openfuture.chain.entity.*
+import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -17,9 +17,8 @@ import org.springframework.context.ApplicationContext
 
 class BlockValidationProviderTests : ServiceTests() {
 
-    @Mock private lateinit var blockService: BlockService
-    @Mock private lateinit var applicationContext: ApplicationContext
-    @Mock private lateinit var blockValidator: BlockValidator
+    @Mock private lateinit var mainBlockService: BlockService<MainBlock>
+    @Mock private lateinit var genesisBlockService: BlockService<GenesisBlock>
     @Mock private lateinit var timeSlot: TimeSlot
     @Mock private lateinit var clock: NodeClock
 
@@ -30,6 +29,15 @@ class BlockValidationProviderTests : ServiceTests() {
 
     @Before
     fun init() {
+        given(timeSlot.verifyTimeSlot(any(Long::class.java), any(MainBlock::class.java))).willReturn(true)
+        blockValidationService = BlockValidationProvider(mainBlockService, genesisBlockService, timeSlot, clock)
+    }
+
+    @Test
+    fun isValidShouldReturnTrue() {
+        val height = 123L
+        val prevHash = "c78bac60ede7a9d10248ad4373d70b915a1c466e942aadce1f5703ebbb855aa4"
+        val merkleHash = "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"
         val previousBlock = MainBlock(
             ByteArray(1),
             122,
@@ -63,23 +71,6 @@ class BlockValidationProviderTests : ServiceTests() {
                 )
             )
         )
-
-        val validators = HashMap<String, BlockValidator>()
-        validators[""] = blockValidator
-        given(blockService.getLast()).willReturn(previousBlock)
-        given(blockValidator.getTypeId()).willReturn(BlockType.MAIN.id)
-        given(applicationContext.getBeansOfType(BlockValidator::class.java)).willReturn(validators)
-        given(timeSlot.verifyTimeSlot(any(Long::class.java), any(MainBlock::class.java))).willReturn(true)
-        blockValidationService = BlockValidationProvider(applicationContext, blockService, timeSlot, clock)
-        blockValidationService.init()
-    }
-
-    @Test
-    fun isValidShouldReturnTrue() {
-        val height = 123L
-        val prevHash = "c78bac60ede7a9d10248ad4373d70b915a1c466e942aadce1f5703ebbb855aa4"
-        val merkleHash = "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"
-
         val block = MainBlock(
             ByteArray(1),
             height,
@@ -114,7 +105,8 @@ class BlockValidationProviderTests : ServiceTests() {
             )
         )
 
-        given(blockValidator.isValid(any(Block::class.java))).willReturn(true)
+        given(mainBlockService.isValid(block)).willReturn(true)
+        given(mainBlockService.getLast()).willReturn(previousBlock)
 
         val isValid = blockValidationService.isValid(block)
 
