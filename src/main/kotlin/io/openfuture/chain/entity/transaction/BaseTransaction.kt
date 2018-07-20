@@ -36,15 +36,4 @@ abstract class BaseTransaction(
     @JoinColumn(name = "block_id", nullable = true)
     var block: MainBlock? = null
 
-) : BaseModel() {
-
-    fun getBytes(): ByteArray = StringBuilder()
-        .append(timestamp)
-        .append(amount)
-        .append(recipientAddress)
-        .append(senderPublicKey)
-        .append(senderAddress)
-        .append(senderSignature)
-        .toString().toByteArray()
-
-}
+) : BaseModel()

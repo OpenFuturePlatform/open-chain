@@ -15,11 +15,11 @@ CREATE TABLE transfer_transactions (
 );
 --
 CREATE TABLE delegate_transactions (
-  id      INTEGER PRIMARY KEY REFERENCES transactions,
-  key     VARCHAR NOT NULL UNIQUE,
-  address VARCHAR NOT NULL,
-  host    VARCHAR NOT NULL,
-  port    INTEGER NOT NULL
+  id               INTEGER PRIMARY KEY REFERENCES transactions,
+  delegate_key     VARCHAR NOT NULL UNIQUE,
+  delegate_address VARCHAR NOT NULL,
+  host             VARCHAR NOT NULL,
+  port             INTEGER NOT NULL
 );
 --
 CREATE TABLE vote_types (

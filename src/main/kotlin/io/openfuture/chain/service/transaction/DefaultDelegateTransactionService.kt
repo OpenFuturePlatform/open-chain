@@ -2,8 +2,7 @@ package io.openfuture.chain.service.transaction
 
 import io.openfuture.chain.component.converter.transaction.impl.DelegateTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
-import io.openfuture.chain.domain.rpc.transaction.DelegateTransactionRequest
-import io.openfuture.chain.domain.transaction.DelegateTransactionDto
+import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.DelegateTransaction
 import io.openfuture.chain.repository.DelegateTransactionRepository
@@ -18,8 +17,8 @@ class DefaultDelegateTransactionService(
     walletService: WalletService,
     nodeClock: NodeClock,
     entityConverter: DelegateTransactionEntityConverter
-) : DefaultBaseTransactionService<DelegateTransaction, DelegateTransactionDto, DelegateTransactionRequest>(repository,
-    walletService, nodeClock, entityConverter), DelegateTransactionService {
+) : DefaultBaseTransactionService<DelegateTransaction, DelegateTransactionData>(repository, walletService, nodeClock,
+    entityConverter), DelegateTransactionService {
 
     @Transactional
     override fun addToBlock(tx: DelegateTransaction, block: MainBlock): DelegateTransaction {
