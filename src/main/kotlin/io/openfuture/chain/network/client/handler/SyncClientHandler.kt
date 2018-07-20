@@ -28,27 +28,25 @@ class SyncClientHandler(
 
         if (message.typeId == BlockType.MAIN.id) {
             val block = MainBlock(message.height, message.previousHash,
-                message.merkleHash, message.timestamp, message.hash, message.signature, Collections.emptyList())
+                message.merkleHash, message.timestamp, Collections.emptyList()).apply { signature = message.signature }
             val savedBlock = blockService.save(block)
 
             message.transactions.forEach {
-                val transaction = TransferTransaction(it.timestamp, it.amount, it.recipientAddress, it.senderKey,
+                val transaction = TransferTransaction(it.timestamp, it.amount, it.fee, it.recipientAddress, it.senderKey,
                     it.senderAddress, it.senderSignature, it.hash, savedBlock)
 
                 transactionService.save(transaction)
             }
         } else {
-            val block = GenesisBlock(message.height, message.previousHash, message.merkleHash,
-                message.timestamp, message.hash, message.signature, Collections.emptyList(), 1, Collections.emptySet())
+            val block = GenesisBlock(message.height, message.previousHash, message.timestamp, 1, Collections.emptySet())
+                .apply { signature = message.signature }
             blockService.save(block)
-            }
         }
-
+    }
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         ctx.fireChannelActive()
     }
-
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
         ctx.fireChannelInactive()

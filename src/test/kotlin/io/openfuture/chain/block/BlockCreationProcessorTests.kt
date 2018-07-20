@@ -4,12 +4,20 @@ import io.openfuture.chain.block.validation.BlockValidationProvider
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.crypto.key.NodeKeyHolder
-import io.openfuture.chain.domain.block.*
-import io.openfuture.chain.entity.*
+import io.openfuture.chain.domain.block.BlockCreationEvent
+import io.openfuture.chain.domain.block.PendingBlock
+import io.openfuture.chain.domain.block.Signature
+import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.Delegate
+import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.property.NodeProperties
-import io.openfuture.chain.service.*
+import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.CoinBaseTransactionService
+import io.openfuture.chain.service.ConsensusService
+import io.openfuture.chain.service.DelegateService
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -88,24 +96,19 @@ class BlockCreationProcessorTests : ServiceTests() {
     }
 
     private fun createMainBlock() = MainBlock(
-        ByteArray(1),
         123,
         "prev_block_hash",
         "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
         1512345678L,
         createTransactions()
-    )
+    ).sign<MainBlock>(ByteArray(1))
 
     private fun createGenesisBlock() = GenesisBlock(
-        ByteArray(1),
         123,
         "prev_block_hash",
-        "merkle_hash",
         1512345678L,
-        mutableListOf(),
         1,
-        setOf(Delegate("host1", 1234), Delegate("host2", 1234), Delegate("host3", 1234))
-    )
+        setOf(Delegate("host1", 1234), Delegate("host2", 1234), Delegate("host3", 1234))).sign<GenesisBlock>(ByteArray(1))
 
     private fun createTransactions(): MutableList<BaseTransaction> = mutableListOf(
         VoteTransaction(

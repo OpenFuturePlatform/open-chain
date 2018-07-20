@@ -7,16 +7,18 @@ class NetworkTransaction() : Packet() {
 
     var timestamp: Long = 0
     var amount: Double = 0.0
+    var fee: Double = 0.0
     lateinit var recipientAddress: String
     lateinit var senderKey: String
     lateinit var senderAddress: String
     lateinit var senderSignature: String
     lateinit var hash: String
 
-    constructor(timestamp: Long, amount: Double, recipientAddress: String, senderKey: String, senderAddress: String,
+    constructor(timestamp: Long, amount: Double, fee: Double, recipientAddress: String, senderKey: String, senderAddress: String,
                 senderSignature: String, hash: String) : this() {
         this.timestamp = timestamp
         this.amount = amount
+        this.fee = fee
         this.recipientAddress = recipientAddress
         this.senderKey = senderKey
         this.senderAddress = senderAddress

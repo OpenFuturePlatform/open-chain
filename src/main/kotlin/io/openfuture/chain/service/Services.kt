@@ -103,8 +103,6 @@ interface TransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto,
 
 interface CoinBaseTransactionService : BaseTransactionService<CoinBaseTransaction> {
 
-    fun save(tx: CoinBaseTransaction): CoinBaseTransaction
-
     fun create(fees: Double): CoinBaseTransaction
 
 }

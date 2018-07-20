@@ -1,34 +1,19 @@
 package io.openfuture.chain.entity
 
-import io.openfuture.chain.entity.transaction.BaseTransaction
+import org.apache.commons.lang3.StringUtils
 import javax.persistence.*
 
 @Entity
 @Table(name = "genesis_blocks")
-class GenesisBlock : Block {
+class GenesisBlock(height: Long, previousHash: String, timestamp: Long,
 
-    @Column(name = "epoch_index", nullable = false)
-    var epochIndex: Long = 0
+                   @Column(name = "epoch_index", nullable = false)
+                   var epochIndex: Long,
 
-    @ManyToMany
-    @JoinTable(name = "delegate2genesis",
-        joinColumns = [JoinColumn(name = "genesis_id")],
-        inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
-    var activeDelegates: Set<Delegate> = setOf()
+                   @ManyToMany
+                   @JoinTable(name = "delegate2genesis",
+                       joinColumns = [JoinColumn(name = "genesis_id")],
+                       inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
+                   var activeDelegates: Set<Delegate>
 
-
-    constructor(height: Long, previousHash: String, merkleHash: String, timestamp: Long, hash: String, signature: String,
-                transactions: MutableList<BaseTransaction>, epochIndex: Long, activeDelegates: Set<Delegate>)
-        : super(height, previousHash, merkleHash, timestamp, BlockType.GENESIS.id, hash, signature, transactions) {
-        this.epochIndex = epochIndex
-        this.activeDelegates = activeDelegates
-    }
-
-    constructor(privateKey: ByteArray, height: Long, previousHash: String, merkleHash: String, timestamp: Long,
-                transactions: MutableList<BaseTransaction>, epochIndex: Long, activeDelegates: Set<Delegate>)
-        : super(privateKey, height, previousHash, merkleHash, timestamp, BlockType.GENESIS.id, transactions) {
-        this.epochIndex = epochIndex
-        this.activeDelegates = activeDelegates
-    }
-
-}
+) : Block(height, previousHash, StringUtils.EMPTY, timestamp, BlockType.GENESIS.id)

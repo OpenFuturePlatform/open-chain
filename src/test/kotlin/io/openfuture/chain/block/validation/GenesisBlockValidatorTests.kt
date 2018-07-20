@@ -18,15 +18,12 @@ class GenesisBlockValidatorTests {
     @Test
     fun isValidShouldReturnTrue() {
         val block = GenesisBlock(
-            ByteArray(1),
             1L,
             "1",
-            "merkle_hash",
             1L,
-            mutableListOf(),
             1L,
             emptySet()
-        )
+        ).sign<GenesisBlock>(ByteArray(1))
 
         val isBlockValid = genesisBlockValidator.isValid(block)
 

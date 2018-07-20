@@ -34,7 +34,6 @@ class MainBlockValidatorTests : ServiceTests() {
     @Test
     fun isValidShouldReturnTrue() {
         val block = MainBlock(
-            ByteArray(1),
             123,
             "prev_block_hash",
             "0e09773036394004cb8c340e639a89d7a18e924e8a3d048b49864aeb017e07a0",
@@ -64,7 +63,7 @@ class MainBlockValidatorTests : ServiceTests() {
                     "sender_signature2"
                 )
             )
-        )
+        ).sign<MainBlock>(ByteArray(1))
 
         val isBlockValid = mainBlockValidator.isValid(block)
 
@@ -75,7 +74,6 @@ class MainBlockValidatorTests : ServiceTests() {
     @Test
     fun isValidShouldReturnFalse() {
         val block = MainBlock(
-            ByteArray(1),
             123,
             "prev_block_hash",
             "0000000000000000000000000000000000000000000000000000000000000000",
@@ -108,7 +106,7 @@ class MainBlockValidatorTests : ServiceTests() {
                     "sender_signature2"
                 )
             )
-        )
+        ).sign<MainBlock>(ByteArray(1))
 
         val isBlockValid = mainBlockValidator.isValid(block)
 

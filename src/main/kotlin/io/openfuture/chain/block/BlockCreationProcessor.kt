@@ -14,7 +14,10 @@ import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.property.NodeProperties
-import io.openfuture.chain.service.*
+import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.CoinBaseTransactionService
+import io.openfuture.chain.service.ConsensusService
+import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
@@ -82,25 +85,21 @@ class BlockCreationProcessor(
                 transactions.addAll(transactionsFromPool)
 
                 MainBlock(
-                    privateKey,
                     previousBlock.height + 1,
                     previousBlock.hash,
                     BlockUtils.calculateMerkleRoot(transactions),
                     time,
                     transactions
-                )
+                ).sign<MainBlock>(privateKey)
             }
             BlockType.GENESIS -> {
                 GenesisBlock(
-                    privateKey,
                     previousBlock.height + 1,
                     previousBlock.hash,
-                    BlockUtils.calculateMerkleRoot(transactions),
                     time,
-                    transactions,
                     genesisBlock.epochIndex + 1,
                     delegateService.getActiveDelegates()
-                )
+                ).sign(privateKey)
             }
         }
 

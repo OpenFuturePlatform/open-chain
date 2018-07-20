@@ -23,10 +23,10 @@ class SyncServerHandler(
 
         blocks?.forEach {
             val transactions = transferTransactionService.getByBlock(it)
-            val networkTransactions = transactions.map { NetworkTransaction(it.timestamp, it.amount, it.recipientAddress,
-                it.senderKey, it.senderAddress, it.senderSignature, it.hash) }
+            val networkTransactions = transactions.map { NetworkTransaction(it.timestamp, it.amount, it.fee, it.recipientAddress,
+                it.senderKey, it.senderAddress, it.senderSignature!!, it.hash) }
             val block = NetworkBlock(it.height, it.previousHash, it.merkleHash, it.timestamp, it.typeId,
-                it.hash, it.signature, networkTransactions as MutableList<NetworkTransaction>)
+                it.hash, it.signature!!, networkTransactions as MutableList<NetworkTransaction>)
             ctx.writeAndFlush(block)
         }
     }
