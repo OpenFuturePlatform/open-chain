@@ -25,6 +25,7 @@ import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.protocol.CommunicationProtocol
 
@@ -99,6 +100,8 @@ interface VoteTransactionService : TransactionService<VoteTransaction, VoteTrans
 interface DelegateService {
 
     fun getByHostAndPort(host: String, port: Int) : Delegate
+
+    fun findByPublicKey(key: String): Delegate?
 
     fun getActiveDelegates(): Set<Delegate>
 

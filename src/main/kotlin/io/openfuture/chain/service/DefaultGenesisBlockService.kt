@@ -15,12 +15,19 @@ class DefaultGenesisBlockService(
         ?: throw NotFoundException("Block with hash:$hash not found ")
 
     @Transactional(readOnly = true)
-    override fun getLast(): GenesisBlock =
-        genesisBlockRepository.findFirstByOrderByHeightDesc()
-            ?: throw NotFoundException("Last Genesis block not exist!")
+    override fun getLast(): GenesisBlock = genesisBlockRepository.findFirstByOrderByHeightDesc()
+        ?: throw NotFoundException("Last Genesis block not exist!")
 
     override fun save(block: GenesisBlock): GenesisBlock = genesisBlockRepository.save(block)
 
-    override fun isValid(block: GenesisBlock): Boolean = true
+    override fun isValid(block: GenesisBlock): Boolean {
+        val lastBlock = getLast()
+        val blockFound = genesisBlockRepository.findByHash(block.hash)
 
+        return (isValidEpochIndex(lastBlock, block) && blockFound != null)
+    }
+
+    private fun isValidEpochIndex(lastBlock: GenesisBlock, block: GenesisBlock): Boolean {
+        return (lastBlock.epochIndex + 1 == block.epochIndex)
+    }
 }

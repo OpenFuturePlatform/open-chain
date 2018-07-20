@@ -20,6 +20,9 @@ class DefaultDelegateService(
         ?: throw NotFoundException("Delegate with host: $host and port $port not exist!")
 
     @Transactional(readOnly = true)
+    override fun findByPublicKey(key: String): Delegate? = repository.findOneByPublicKey(key)
+
+    @Transactional(readOnly = true)
     override fun getActiveDelegates(): Set<Delegate> {
         val request = PageRequest.of(0, consensusProperties.delegatesCount!!)
         return repository.findAllByOrderByRatingDesc(request).toSet()

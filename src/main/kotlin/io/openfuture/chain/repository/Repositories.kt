@@ -65,6 +65,8 @@ interface DelegateRepository : BaseRepository<Delegate> {
 
     fun findOneByHostAndPort(host: String, port: Int): Delegate?
 
+    fun findOneByPublicKey(publicKey: String): Delegate?
+
 }
 
 @Repository

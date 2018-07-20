@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class BlockValidationProvider(
+    private val blockService: BlockService<Block>,
     private val mainBlockService: BlockService<MainBlock>,
     private val genesisBlockService: BlockService<GenesisBlock>,
     private val timeSlot: TimeSlot,
@@ -21,14 +22,12 @@ class BlockValidationProvider(
     fun isValid(block: Block): Boolean {
         val currentTime = clock.networkTime()
 
-        val lastBlock: Block?
+        val lastBlock = blockService.getLast()
         val blockIsValid: Boolean
         if (block is MainBlock) {
             blockIsValid = mainBlockService.isValid(block)
-            lastBlock = mainBlockService.getLast()
         } else if (block is GenesisBlock) {
             blockIsValid = genesisBlockService.isValid(block)
-            lastBlock = genesisBlockService.getLast()
         } else {
             throw IllegalArgumentException("wrong block type is found")
         }
