@@ -46,6 +46,6 @@ class AccountController(
         WalletDto(cryptoService.importWifKey(request.decodedKey!!))
 
     @GetMapping("/wallets/{address}/balance")
-    fun getBalance(@PathVariable address: String): Double = walletService.getBalance(address)
+    fun getBalance(@PathVariable address: String): Long = walletService.getBalance(address)
 
 }

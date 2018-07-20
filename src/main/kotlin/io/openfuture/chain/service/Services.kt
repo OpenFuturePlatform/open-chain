@@ -134,7 +134,7 @@ interface ConsensusService {
 
 interface WalletService {
 
-    fun getBalance(address: String): Double
+    fun getBalance(address: String): Long
 
     fun updateByTransaction(transaction: BaseTransaction)
 

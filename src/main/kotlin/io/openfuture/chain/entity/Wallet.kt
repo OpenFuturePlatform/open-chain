@@ -13,6 +13,6 @@ class Wallet(
     var address: String,
 
     @Column(name = "balance", nullable = false)
-    var balance: Double = 0.0
+    var balance: Long = 0L
 
 ) : BaseModel()

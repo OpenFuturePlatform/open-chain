@@ -63,14 +63,14 @@ class AccountControllerTests : ControllerTests() {
     @Test
     fun getBalanceShouldReturnWalletBalanceTest() {
         val address = "address"
-        val expectedBalance = 1.0
+        val expectedBalance = 1L
 
         given(walletService.getBalance(address)).willReturn(expectedBalance)
 
         val actualResult = webClient.get().uri("${PathConstant.RPC}/accounts/wallets/$address/balance")
             .exchange()
             .expectStatus().isOk
-            .expectBody(Double::class.java)
+            .expectBody(Long::class.java)
             .returnResult().responseBody!!
 
         Assertions.assertThat(actualResult).isEqualTo(expectedBalance)

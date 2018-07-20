@@ -4,7 +4,7 @@ import io.openfuture.chain.entity.transaction.TransferTransaction
 
 class TransferTransactionDto(
     timestamp: Long,
-    amount: Double,
+    amount: Long,
     recipientAddress: String,
     senderKey: String,
     senderAddress: String,

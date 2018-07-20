@@ -11,11 +11,11 @@ class DefaultWalletService(
 ) : WalletService {
 
     companion object {
-        private const val DEFAULT_WALLET_BALANCE = 0.0
+        private const val DEFAULT_WALLET_BALANCE = 0L
     }
 
 
-    override fun getBalance(address: String): Double =
+    override fun getBalance(address: String): Long =
         repository.findOneByAddress(address)?.balance ?: DEFAULT_WALLET_BALANCE
 
     override fun updateByTransaction(transaction: BaseTransaction) {
@@ -24,7 +24,7 @@ class DefaultWalletService(
         updateByAddress(transaction.recipientAddress, transaction.amount)
     }
 
-    private fun updateByAddress(address: String, amount: Double) {
+    private fun updateByAddress(address: String, amount: Long) {
         val wallet = repository.findOneByAddress(address) ?: Wallet(address)
 
         wallet.balance += amount

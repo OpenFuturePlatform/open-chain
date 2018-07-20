@@ -30,7 +30,7 @@ class DefaultWalletServiceTest : ServiceTests() {
     @Test
     fun getBalanceShouldReturnBalanceFromAllTransactionsByAddressTest() {
         val address = "address"
-        val expectedBalance = 10.0
+        val expectedBalance = 10L
         val wallet = Wallet(address, expectedBalance)
 
         given(repository.findOneByAddress(address)).willReturn(wallet)
@@ -43,7 +43,7 @@ class DefaultWalletServiceTest : ServiceTests() {
     @Test
     fun getBalanceWhenNotExistsWalletByAddressShouldReturnDefaultBalanceValueTest() {
         val address = "address"
-        val expectedBalance = 0.0
+        val expectedBalance = 0L
 
         given(repository.findOneByAddress(address)).willReturn(null)
 
@@ -54,13 +54,13 @@ class DefaultWalletServiceTest : ServiceTests() {
 
     @Test
     fun updateByTransactionShouldChangeWalletsBalanceValueTest() {
-        val amount = 1.0
+        val amount = 1L
         val senderAddress = "senderAddress"
         val recipientAddress = "recipientAddress"
 
         val transaction = createTransaction(amount, senderAddress, recipientAddress)
-        val senderWallet = Wallet(senderAddress, 1.0)
-        val recipientWallet = Wallet(recipientAddress, 5.0)
+        val senderWallet = Wallet(senderAddress, 1L)
+        val recipientWallet = Wallet(recipientAddress, 5L)
 
         given(repository.findOneByAddress(senderAddress)).willReturn(senderWallet)
         given(repository.findOneByAddress(recipientAddress)).willReturn(recipientWallet)
@@ -71,7 +71,7 @@ class DefaultWalletServiceTest : ServiceTests() {
         verify(repository).save(recipientWallet.apply { balance -= amount })
     }
 
-    private fun createTransaction(amount: Double, senderAddress: String, recipientAddress: String): BaseTransaction {
+    private fun createTransaction(amount: Long, senderAddress: String, recipientAddress: String): BaseTransaction {
         val block = MainBlock(ByteArray(1), 1L, "previousHash", "hash", 1L, mutableListOf())
 
         return VoteTransaction(Date().time, amount, recipientAddress,

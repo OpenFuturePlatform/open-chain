@@ -36,7 +36,7 @@ class BlockValidationProviderTests : ServiceTests() {
             mutableListOf(
                 VoteTransaction(
                     1500000000L,
-                    1000.0,
+                    1000L,
                     "recipient_address",
                     "sender_key",
                     "sender_address",
@@ -48,7 +48,7 @@ class BlockValidationProviderTests : ServiceTests() {
                 ),
                 VoteTransaction(
                     1500000001L,
-                    1002.0,
+                    1002L,
                     "recipient_address2",
                     "sender_key2",
                     "sender_address2",
@@ -87,7 +87,7 @@ class BlockValidationProviderTests : ServiceTests() {
             mutableListOf(
                 VoteTransaction(
                     1500000000L,
-                    1000.0,
+                    1000L,
                     "recipient_address",
                     "sender_key",
                     "sender_address",
@@ -99,7 +99,7 @@ class BlockValidationProviderTests : ServiceTests() {
                 ),
                 VoteTransaction(
                     1500000001L,
-                    1002.0,
+                    1002L,
                     "recipient_address2",
                     "sender_key2",
                     "sender_address2",
@@ -130,7 +130,7 @@ class BlockValidationProviderTests : ServiceTests() {
             mutableListOf(
                 VoteTransaction(
                     1500000000L,
-                    1000.0,
+                    1000L,
                     "recipient_address",
                     "sender_key",
                     "sender_address",
@@ -142,7 +142,7 @@ class BlockValidationProviderTests : ServiceTests() {
                 ),
                 VoteTransaction(
                     1500000001L,
-                    1002.0,
+                    1002L,
                     "recipient_address2",
                     "sender_key2",
                     "sender_address2",

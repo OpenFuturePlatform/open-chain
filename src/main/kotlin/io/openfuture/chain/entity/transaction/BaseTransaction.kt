@@ -16,7 +16,7 @@ abstract class BaseTransaction(
     var timestamp: Long,
 
     @Column(name = "amount", nullable = false)
-    var amount: Double,
+    var amount: Long,
 
     @Column(name = "recipient_address", nullable = false)
     var recipientAddress: String,
@@ -39,8 +39,6 @@ abstract class BaseTransaction(
     var block: MainBlock? = null
 
 ) : BaseModel() {
-
-
 
     fun getBytes(): ByteArray = StringBuilder()
         .append(timestamp)

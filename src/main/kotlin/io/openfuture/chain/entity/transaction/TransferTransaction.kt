@@ -2,7 +2,6 @@ package io.openfuture.chain.entity.transaction
 
 import io.openfuture.chain.domain.rpc.transaction.TransferTransactionRequest
 import io.openfuture.chain.domain.transaction.TransferTransactionDto
-import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.MainBlock
 import javax.persistence.Entity
 import javax.persistence.Table
@@ -11,7 +10,7 @@ import javax.persistence.Table
 @Table(name = "transfer_transactions")
 class TransferTransaction(
     timestamp: Long,
-    amount: Double,
+    amount: Long,
     recipientAddress: String,
     senderKey: String,
     senderAddress: String,
