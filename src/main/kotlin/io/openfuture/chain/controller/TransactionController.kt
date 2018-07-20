@@ -30,16 +30,31 @@ class TransactionController(
     private val delegateTransactionService: DelegateTransactionService
 ) : BaseController(nodeClock, nodeProperty) {
 
+    @PostMapping("/votes/doGenerateHash")
+    fun getVoteDataHash(@Valid @RequestBody data: VoteTransactionData): RestResponse<String> {
+        return RestResponse(getResponseHeader(), data.getHash())
+    }
+
     @PostMapping("/votes")
     fun addVote(@Valid @RequestBody request: BaseTransactionRequest<VoteTransactionData>): RestResponse<VoteTransactionDto> {
         val tx = voteTransactionService.add(request)
         return RestResponse(getResponseHeader(), VoteTransactionDto(tx))
     }
 
+    @PostMapping("/transfers/doGenerateHash")
+    fun getTransferDataHash(@Valid @RequestBody data: TransferTransactionData): RestResponse<String> {
+        return RestResponse(getResponseHeader(), data.getHash())
+    }
+
     @PostMapping("/transfers")
     fun addTransfer(@Valid @RequestBody request: BaseTransactionRequest<TransferTransactionData>): RestResponse<TransferTransactionDto> {
         val tx = transferTransactionService.add(request)
         return RestResponse(getResponseHeader(), TransferTransactionDto(tx))
+    }
+
+    @PostMapping("/delegates/doGenerateHash")
+    fun getDelegateDataHash(@Valid @RequestBody data: DelegateTransactionData): RestResponse<String> {
+        return RestResponse(getResponseHeader(), data.getHash())
     }
 
     @PostMapping("/delegates")
