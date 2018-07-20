@@ -5,11 +5,11 @@ import io.netty.buffer.Unpooled
 import org.assertj.core.api.Assertions
 import org.junit.Test
 
-class TimeSyncResponseTest {
+class TimeTest {
 
     private val buffer = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump(
-        "000000000756b5b3000000001b34f908"))
-    private val entity = TimeSyncResponse(123123123, 456456456)
+        "0000000000000756b5b3000000001b34f908"))
+    private val entity = Time(123123123, 456456456)
 
     @Test
     fun sendShouldWriteExactValuesInBuffer() {
@@ -20,7 +20,7 @@ class TimeSyncResponseTest {
 
     @Test
     fun getShouldFillEntityWithExactValuesFromBuffer() {
-        val actualEntity = TimeSyncResponse::class.java.newInstance()
+        val actualEntity = Time::class.java.newInstance()
         actualEntity.get(buffer)
         Assertions.assertThat(actualEntity).isEqualTo(entity)
     }

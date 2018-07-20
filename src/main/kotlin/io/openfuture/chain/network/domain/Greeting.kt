@@ -9,11 +9,15 @@ data class Greeting(
 ) : Packet() {
 
     override fun get(buffer: ByteBuf) {
+        super.get(buffer)
+
         address = NetworkAddress::class.java.newInstance()
         address.get(buffer)
     }
 
     override fun send(buffer: ByteBuf) {
+        super.send(buffer)
+
         address.send(buffer)
     }
 

@@ -7,7 +7,7 @@ import org.junit.Test
 
 class FindAddressesTest {
 
-    private val buffer = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump(""))
+    private val buffer = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump("0000"))
     private val entity = FindAddresses()
 
     @Test

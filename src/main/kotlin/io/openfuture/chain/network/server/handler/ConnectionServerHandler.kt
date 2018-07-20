@@ -20,7 +20,7 @@ class ConnectionServerHandler : ChannelInboundHandlerAdapter() {
         FindAddresses::class,
         Greeting::class,
         HeartBeat::class,
-        TimeSyncRequest::class)
+        AskTime::class)
 
 
     override fun channelActive(ctx: ChannelHandlerContext) {
@@ -33,8 +33,6 @@ class ConnectionServerHandler : ChannelInboundHandlerAdapter() {
     }
 
     override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {
-        log.info("Message received $packet from ${ctx.channel().remoteAddress()}")
-
         // check packet type
         if (!allowablePacketTypes.contains(packet::class)) {
             log.error("Illegal packet type: ${packet::class}")

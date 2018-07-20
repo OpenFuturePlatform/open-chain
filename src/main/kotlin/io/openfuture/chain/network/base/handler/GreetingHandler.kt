@@ -1,4 +1,4 @@
-package io.openfuture.chain.network.base
+package io.openfuture.chain.network.base.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.domain.Greeting

@@ -11,10 +11,14 @@ data class HeartBeat(
     enum class Type { PING, PONG }
 
     override fun get(buffer: ByteBuf) {
+        super.get(buffer)
+
         type = if (buffer.readBoolean()) Type.PING else Type.PONG
     }
 
     override fun send(buffer: ByteBuf) {
+        super.send(buffer)
+
         buffer.writeBoolean(type == Type.PING)
     }
 

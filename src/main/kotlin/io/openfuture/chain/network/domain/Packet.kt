@@ -5,61 +5,87 @@ import java.io.Serializable
 import java.nio.charset.StandardCharsets.UTF_8
 import kotlin.reflect.KClass
 
-
-abstract class Packet : Serializable{
-
-    enum class Type(val clazz: KClass<out Packet>,
-                    val id: Int) {
-
-        ADDRESSES(Addresses::class, 1),
-        FIND_ADDRESSES(FindAddresses::class, 2),
-        GREETING(Greeting::class, 3),
-        HEART_BEAT(HeartBeat::class, 4),
-        TIME_SYNC_REQUEST(TimeSyncRequest::class, 5),
-        TIME_SYNC_RESPONSE(TimeSyncResponse::class, 6);
-
-
-        companion object {
-
-            fun getById(id: Int) = values().single { id == it.id }
-
-            fun getByClass(id: KClass<out Packet>) = values().single { id == it.clazz }
-
-        }
-
-    }
+abstract class Packet(
+    var version: String? = null,
+    var timestamp: Long? = null
+) : Serializable {
 
     companion object {
 
-        fun read(buffer: ByteBuf) : Packet {
-            val id = buffer.readInt()
-            val clazz = Type.getById(id).clazz
+        fun read(buffer: ByteBuf): Packet {
+            val id = buffer.readShort()
+            val clazz = PacketType.getById(id).clazz
             val instance = clazz.java.newInstance()
             instance.get(buffer)
             return instance
         }
 
         fun write(packet: Packet, buffer: ByteBuf) {
-            val id = Type.getByClass(packet::class).id
-            buffer.writeInt(id)
+            val id = PacketType.getByClass(packet::class).id
+            buffer.writeShort(id.toInt())
             packet.send(buffer)
         }
 
     }
 
 
-    abstract fun get(buffer: ByteBuf)
+    open fun get(buffer: ByteBuf) {
+        if (readExistence(buffer)) {
+            version = readString(buffer)
+        }
+        if (readExistence(buffer)) {
+            timestamp = buffer.readLong()
+        }
+    }
 
-    abstract fun send(buffer: ByteBuf)
+    open fun send(buffer: ByteBuf) {
+        writeExistence(buffer, version)
+        if (version != null) {
+            writeString(buffer, version!!)
+        }
+        writeExistence(buffer, timestamp)
+        if (timestamp != null) {
+            buffer.writeLong(timestamp!!)
+        }
+    }
 
     fun writeString(buffer: ByteBuf, string: String) {
         buffer.writeInt(string.length)
         buffer.writeCharSequence(string, UTF_8)
     }
 
-    fun readString(buffer: ByteBuf) : String {
+    fun readString(buffer: ByteBuf): String {
         val length = buffer.readInt()
         return buffer.readCharSequence(length, UTF_8).toString()
+    }
+
+    fun writeExistence(buffer: ByteBuf, nullableObject: Any?) {
+        buffer.writeBoolean(nullableObject != null)
+    }
+
+    fun readExistence(buffer: ByteBuf): Boolean {
+        return buffer.readBoolean()
+    }
+
+}
+
+enum class PacketType(val clazz: KClass<out Packet>,
+                      val id: Short) {
+
+    ADDRESSES(Addresses::class, 1),
+    FIND_ADDRESSES(FindAddresses::class, 2),
+    GREETING(Greeting::class, 3),
+    HEART_BEAT(HeartBeat::class, 4),
+    ASK_TIME(AskTime::class, 5),
+    TIME(Time::class, 6);
+
+
+    companion object {
+
+        fun getById(id: Short) = values().single { id == it.id }
+
+        fun getByClass(id: KClass<out Packet>) = values().single { id == it.clazz }
+
     }
 
 }

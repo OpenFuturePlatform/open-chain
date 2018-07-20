@@ -8,7 +8,7 @@ import org.junit.Test
 class AddressesTest {
 
     private val buffer = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump(
-        "00000002000000093132372e302e302e3100002382000000093132372e302e302e3100002383"))
+        "000000000002000000093132372e302e302e3100002382000000093132372e302e302e3100002383"))
     private val entity = Addresses(listOf(
         NetworkAddress("127.0.0.1", 9090),
         NetworkAddress("127.0.0.1", 9091)))
