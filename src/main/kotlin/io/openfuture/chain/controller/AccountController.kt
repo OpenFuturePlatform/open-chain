@@ -4,6 +4,7 @@ import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.controller.common.BaseController
 import io.openfuture.chain.controller.common.RestResponse
 import io.openfuture.chain.domain.rpc.crypto.AccountDto
+import io.openfuture.chain.domain.rpc.crypto.ValidateAddressRequest
 import io.openfuture.chain.domain.rpc.crypto.WalletDto
 import io.openfuture.chain.domain.rpc.crypto.key.DerivationKeyRequest
 import io.openfuture.chain.domain.rpc.crypto.key.ImportKeyRequest
@@ -32,6 +33,9 @@ class AccountController(
         val body = walletService.getBalance(address)
         return RestResponse(getResponseHeader(), body)
     }
+
+    @PostMapping("/wallets/validateAddress")
+    fun validateAddress(@RequestBody @Valid request: ValidateAddressRequest): ValidateAddressRequest = request
 
     @PostMapping("/doRestore")
     fun restore(@RequestBody @Valid keyRequest: RestoreRequest): RestResponse<AccountDto> {
