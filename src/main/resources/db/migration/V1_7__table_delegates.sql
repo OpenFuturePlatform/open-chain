@@ -1,13 +1,13 @@
 CREATE TABLE delegates (
-  id     INTEGER PRIMARY KEY,
-  host   VARCHAR NOT NULL,
-  port   INTEGER NOT NULL,
-  rating INTEGER NOT NULL DEFAULT 0,
-  UNIQUE (host, port)
+  id         INTEGER PRIMARY KEY,
+  public_key VARCHAR NULL UNIQUE,
+  address    VARCHAR NULL,
+  host       VARCHAR NOT NULL,
+  port       INTEGER NOT NULL
 );
 
 CREATE TABLE delegate2genesis (
   delegate_id INTEGER NOT NULL REFERENCES delegates,
-  genesis_id INTEGER NOT NULL REFERENCES genesis_blocks,
+  genesis_id  INTEGER NOT NULL REFERENCES genesis_blocks,
   PRIMARY KEY (delegate_id, genesis_id)
 );

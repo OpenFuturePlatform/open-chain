@@ -1,17 +1,24 @@
 package io.openfuture.chain.service.transaction
 
-import io.openfuture.chain.entity.Block
+import io.openfuture.chain.component.converter.transaction.TransactionEntityConverter
+import io.openfuture.chain.component.node.NodeClock
+import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
+import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BaseTransactionRepository
 import io.openfuture.chain.service.BaseTransactionService
+import io.openfuture.chain.service.WalletService
 import org.springframework.transaction.annotation.Transactional
 
-abstract class DefaultBaseTransactionService<Entity : BaseTransaction>(
-    protected val repository: BaseTransactionRepository<Entity>
-) : BaseTransactionService<Entity> {
+abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto, Req : BaseTransactionRequest>(
+    protected val repository: BaseTransactionRepository<Entity>,
+    protected val walletService: WalletService,
+    private val nodeClock: NodeClock,
+    private val entityConverter: TransactionEntityConverter<Entity, Dto, Req>
+) : BaseTransactionService<Entity, Dto, Req> {
 
     @Transactional(readOnly = true)
     override fun getAllPending(): MutableSet<Entity> {
@@ -23,14 +30,35 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction>(
         ?: throw NotFoundException("Transaction with hash: $hash not exist!")
 
     @Transactional
-    override fun addToBlock(hash: String, block: MainBlock): Entity {
-        val persistTransaction = this.get(hash)
-        if (null != persistTransaction.block) {
-            throw LogicException("Transaction with hash: $hash already belong to block!")
+    override fun add(dto: Dto): Entity {
+        //todo need to add validation
+        val transaction = repository.findOneByHash(dto.hash)
+        if (null != transaction) {
+            return transaction
         }
 
-        persistTransaction.block = block
-        return repository.save(persistTransaction)
+        return saveAndBroadcast(entityConverter.toEntity(dto))
+    }
+
+    @Transactional
+    override fun add(request: Req): Entity {
+        return saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), request))
+    }
+
+    protected fun commonAddToBlock(tx: Entity, block: MainBlock): Entity {
+        val persistTx = this.get(tx.hash)
+
+        if (null != persistTx.block) {
+            throw LogicException("Transaction with hash: ${tx.hash} already belong to block!")
+        }
+        persistTx.block = block
+        walletService.updateBalance(persistTx.senderAddress, persistTx.recipientAddress, persistTx.amount)
+        return repository.save(persistTx)
+    }
+
+    private fun saveAndBroadcast(tx: Entity): Entity {
+        return repository.save(tx)
+        //todo: networkService.broadcast(transaction.toMessage)
     }
 
 }

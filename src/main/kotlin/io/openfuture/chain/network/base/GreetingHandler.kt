@@ -2,7 +2,7 @@ package io.openfuture.chain.network.base
 
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.domain.NetworkAddress
-import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.property.NodeProperty
 import io.openfuture.chain.protocol.CommunicationProtocol
 import io.openfuture.chain.protocol.CommunicationProtocol.*
 import io.openfuture.chain.service.NetworkService
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 @Scope("prototype")
 class GreetingHandler(
     private val networkService: NetworkService,
-    private val properties: NodeProperties
+    private val properties: NodeProperty
 ) : BaseHandler(Type.GREETING) {
 
     override fun channelActive(ctx: ChannelHandlerContext) {

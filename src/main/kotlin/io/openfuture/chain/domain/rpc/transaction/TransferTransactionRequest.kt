@@ -1,6 +1,6 @@
 package io.openfuture.chain.domain.rpc.transaction
 
-class TransferTransactionRequest : TransactionRequest() {
+class TransferTransactionRequest : BaseTransactionRequest() {
 
     override fun getBytes(): ByteArray {
         val builder = StringBuilder()
