@@ -19,6 +19,7 @@ import io.openfuture.chain.domain.transaction.TransferTransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.CoinBaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.domain.NetworkAddress
@@ -100,13 +101,23 @@ interface TransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto,
 
 }
 
+interface CoinBaseTransactionService : BaseTransactionService<CoinBaseTransaction> {
+
+    fun save(tx: CoinBaseTransaction): CoinBaseTransaction
+
+    fun create(fees: Double): CoinBaseTransaction
+
+}
+
 interface TransferTransactionService : TransactionService<TransferTransaction, TransferTransactionDto, TransferTransactionRequest>
 
 interface VoteTransactionService : TransactionService<VoteTransaction, VoteTransactionDto, VoteTransactionRequest>
 
 interface DelegateService {
 
-    fun getByHostAndPort(host: String, port: Int) : Delegate
+    fun getByHostAndPort(host: String, port: Int): Delegate
+
+    fun getByPublicKey(publicKey: String): Delegate
 
     fun getActiveDelegates(): Set<Delegate>
 
@@ -152,7 +163,7 @@ interface NetworkService {
 
     fun addConnection(channel: Channel, networkAddress: NetworkAddress)
 
-    fun removeConnection(channel: Channel) : NetworkAddress?
+    fun removeConnection(channel: Channel): NetworkAddress?
 
     fun getConnections(): Set<NetworkAddress>
 

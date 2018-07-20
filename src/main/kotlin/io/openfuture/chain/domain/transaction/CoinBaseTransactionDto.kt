@@ -1,8 +1,8 @@
 package io.openfuture.chain.domain.transaction
 
-import io.openfuture.chain.entity.transaction.TransferTransaction
+import io.openfuture.chain.entity.transaction.CoinBaseTransaction
 
-class TransferTransactionDto(
+class CoinBaseTransactionDto(
     timestamp: Long,
     amount: Double,
     fee: Double,
@@ -13,7 +13,7 @@ class TransferTransactionDto(
     senderSignature: String
 ) : BaseTransactionDto(timestamp, amount, fee, recipientAddress, senderKey, senderAddress, hash, senderSignature) {
 
-    constructor(tx: TransferTransaction) : this(
+    constructor(tx: CoinBaseTransaction) : this(
         tx.timestamp,
         tx.amount,
         tx.fee,

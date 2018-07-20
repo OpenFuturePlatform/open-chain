@@ -15,7 +15,7 @@ import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
 
-class BlockCreationProcessorTests: ServiceTests() {
+class BlockCreationProcessorTests : ServiceTests() {
 
     @Mock private lateinit var blockService: BlockService
     @Mock private lateinit var signatureCollector: SignatureCollector
@@ -25,15 +25,17 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Mock private lateinit var clock: NodeClock
     @Mock private lateinit var delegateService: DelegateService
     @Mock private lateinit var properties: NodeProperties
+    @Mock private lateinit var coinBaseTransactionService: CoinBaseTransactionService
 
     private lateinit var processor: BlockCreationProcessor
+
 
     @Before
     fun init() {
         val block = createMainBlock()
         given(blockService.getLastMain()).willReturn(block)
         processor = BlockCreationProcessor(blockService, signatureCollector, keyHolder, blockValidationService,
-            consensusService, clock, delegateService, properties)
+            consensusService, clock, delegateService, properties, coinBaseTransactionService)
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -109,26 +111,29 @@ class BlockCreationProcessorTests: ServiceTests() {
         VoteTransaction(
             1500000000L,
             1000.0,
+            10.0,
             "recipient_address",
             "sender_key",
             "sender_address",
-            "sender_signature",
-            "hash",
             1,
             "delegate_host",
-            9999
+            9999,
+            "hash",
+            "sender_signature"
         ),
         VoteTransaction(
             1500000001L,
             1002.0,
+            10.0,
             "recipient_address2",
             "sender_key2",
             "sender_address2",
-            "sender_signature2",
-            "hash2",
             2,
             "delegate_host2",
-            11999
+            11999,
+            "hash2",
+            "sender_signature2"
         )
     )
+
 }

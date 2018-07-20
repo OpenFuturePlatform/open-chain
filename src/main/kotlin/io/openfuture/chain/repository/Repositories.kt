@@ -2,6 +2,7 @@ package io.openfuture.chain.repository
 
 import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.CoinBaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import org.springframework.data.domain.Pageable
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Repository
 interface BaseRepository<T> : JpaRepository<T, Int>
 
 @Repository
-interface BlockRepository<T: Block> : BaseRepository<T> {
+interface BlockRepository<T : Block> : BaseRepository<T> {
 
     fun findByHash(hash: String): T?
 
@@ -46,6 +47,9 @@ interface BaseTransactionRepository<Entity : BaseTransaction> : BaseRepository<E
 
 @Repository
 interface TransferTransactionRepository : BaseTransactionRepository<TransferTransaction>
+
+@Repository
+interface CoinBaseTransactionRepository : BaseTransactionRepository<CoinBaseTransaction>
 
 @Repository
 interface VoteTransactionRepository : BaseTransactionRepository<VoteTransaction>

@@ -4,11 +4,16 @@ import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.CoinBaseTransaction
+import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.stereotype.Component
+import java.util.stream.Collectors
 
 @Component
-class MainBlockValidator : BlockValidator {
+class MainBlockValidator(
+    private val properties: ConsensusProperties
+) : BlockValidator {
 
     override fun isValid(block: Block): Boolean {
         val mainBlock = block as MainBlock
@@ -18,28 +23,37 @@ class MainBlockValidator : BlockValidator {
             return false
         }
 
-        if (!transactionsIsWellFormed(transactions)) {
+        if (!verifyCoinBaseTransaction(transactions)) {
             return false
         }
 
-        val transactionsMerkleHash = BlockUtils.calculateMerkleRoot(transactions)
-        return block.merkleHash == transactionsMerkleHash
+        if (!verifyDuplicatedTransactions(transactions)) {
+            return false
+        }
+
+        return block.merkleHash == BlockUtils.calculateMerkleRoot(transactions)
     }
 
     override fun getTypeId(): Int = BlockType.MAIN.id
 
-    private fun transactionsIsWellFormed(transactions: List<BaseTransaction>): Boolean {
-        val transactionHashes = HashSet<String>()
-        for (transaction in transactions) {
-            val transactionHash = transaction.hash
-            if (transactionHashes.contains(transactionHash)) {
-                return false
-            }
+    private fun verifyCoinBaseTransaction(transactions: List<BaseTransaction>): Boolean {
+        val coinBaseTransaction = transactions.first() as? CoinBaseTransaction ?: return false
 
-            transactionHashes.add(transactionHash)
+        if (properties.genesisAddress!! != coinBaseTransaction.senderAddress) {
+            return false
         }
 
-        return true
+        if (transactions.stream().skip(1).anyMatch { it is CoinBaseTransaction }) {
+            return false
+        }
+
+        val fees = transactions.stream().skip(1).map { it.fee }.collect(Collectors.toList())
+        return coinBaseTransaction.amount == (fees.sumByDouble { it } + properties.rewardBlock!!)
+    }
+
+    private fun verifyDuplicatedTransactions(transactions: List<BaseTransaction>): Boolean {
+        val transactionHashes = transactions.map { it.hash }.toSet()
+        return transactionHashes.size == transactions.size
     }
 
 }

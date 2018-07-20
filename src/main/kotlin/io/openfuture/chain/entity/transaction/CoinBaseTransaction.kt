@@ -1,15 +1,14 @@
 package io.openfuture.chain.entity.transaction
 
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.domain.rpc.transaction.TransferTransactionRequest
-import io.openfuture.chain.domain.transaction.TransferTransactionDto
+import io.openfuture.chain.domain.transaction.CoinBaseTransactionDto
 import io.openfuture.chain.entity.MainBlock
 import javax.persistence.Entity
 import javax.persistence.Table
 
 @Entity
-@Table(name = "transfer_transactions")
-class TransferTransaction(
+@Table(name = "coinbase_transactions")
+class CoinBaseTransaction(
     timestamp: Long,
     amount: Double,
     fee: Double,
@@ -25,7 +24,7 @@ class TransferTransaction(
     senderSignature, block) {
 
     companion object {
-        fun of(dto: TransferTransactionDto): TransferTransaction = TransferTransaction(
+        fun of(dto: CoinBaseTransactionDto): CoinBaseTransaction = CoinBaseTransaction(
             dto.timestamp,
             dto.amount,
             dto.fee,
@@ -34,17 +33,6 @@ class TransferTransaction(
             dto.senderAddress,
             dto.hash,
             dto.senderSignature
-        )
-
-        fun of(timestamp: Long, request: TransferTransactionRequest): TransferTransaction = TransferTransaction(
-            timestamp,
-            request.amount!!,
-            request.fee!!,
-            request.recipientAddress!!,
-            request.senderKey!!,
-            request.senderAddress!!,
-            request.getHash(),
-            request.senderSignature!!
         )
     }
 
