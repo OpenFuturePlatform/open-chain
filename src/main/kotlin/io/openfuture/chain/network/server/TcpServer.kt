@@ -1,14 +1,14 @@
 package io.openfuture.chain.network.server
 
 import io.netty.bootstrap.ServerBootstrap
-import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.property.NodeProperty
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class TcpServer(
     private val serverBootstrap: ServerBootstrap,
-    private val properties: NodeProperties
+    private val properties: NodeProperty
 ) : Runnable {
 
     companion object {

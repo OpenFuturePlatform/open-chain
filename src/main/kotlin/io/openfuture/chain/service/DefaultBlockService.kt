@@ -4,6 +4,8 @@ import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.TransferTransaction
+import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.repository.GenesisBlockRepository
@@ -16,8 +18,8 @@ class DefaultBlockService(
     private val blockRepository: BlockRepository<Block>,
     private val mainBlockRepository: MainBlockRepository,
     private val genesisBlockRepository: GenesisBlockRepository,
-    private val transactionService: BaseTransactionService<BaseTransaction>,
-    private val walletService: WalletService
+    private val voteTransactionService: VoteTransactionService,
+    private val transferTransactionService: TransferTransactionService
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -45,14 +47,21 @@ class DefaultBlockService(
         val savedBlock = mainBlockRepository.save(block)
         val transactions = block.transactions
         for (transaction in transactions) {
-            transactionService.addToBlock(transaction.hash, savedBlock)
-            walletService.updateByTransaction(transaction)
+            addTransactionToBlock(transaction, savedBlock)
         }
         return savedBlock
     }
 
+    @Transactional
     override fun save(block: GenesisBlock): GenesisBlock {
         return genesisBlockRepository.save(block)
+    }
+
+    private fun addTransactionToBlock(tx: BaseTransaction, block: MainBlock) {
+        when (tx) {
+            is VoteTransaction -> voteTransactionService.addToBlock(tx, block)
+            is TransferTransaction -> transferTransactionService.addToBlock(tx, block)
+        }
     }
 
 }

@@ -1,16 +1,22 @@
 package io.openfuture.chain.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.config.any
+import io.openfuture.chain.controller.common.ResponseHeader
+import io.openfuture.chain.controller.common.RestResponse
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.rpc.crypto.WalletDto
 import io.openfuture.chain.domain.rpc.crypto.AccountDto
 import io.openfuture.chain.domain.rpc.crypto.key.DerivationKeyRequest
 import io.openfuture.chain.domain.rpc.crypto.key.KeyDto
 import io.openfuture.chain.domain.rpc.crypto.key.RestoreRequest
+import io.openfuture.chain.property.NodeProperty
 import io.openfuture.chain.service.CryptoService
 import io.openfuture.chain.service.WalletService
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
@@ -24,6 +30,12 @@ class AccountControllerTests : ControllerTests() {
     private lateinit var cryptoService: CryptoService
 
     @MockBean
+    private lateinit var nodeClock: NodeClock
+
+    @MockBean
+    private lateinit var nodeProperty: NodeProperty
+
+    @MockBean
     private lateinit var walletService: WalletService
 
 
@@ -31,14 +43,19 @@ class AccountControllerTests : ControllerTests() {
     fun doRestoreShouldReturnRootAccountInfoWhenSeedPhraseSent() {
         val accountDto = createAccountDto()
         val expectedAccount = AccountDto("1 2 3 4 5 6 7 8 9 10 11 12", accountDto.keys, accountDto)
+        val expectedBody = getRestResponse(expectedAccount)
 
         given(cryptoService.getRootAccount(expectedAccount.seedPhrase)).willReturn(expectedAccount)
 
-        webClient.post().uri("${PathConstant.RPC}/accounts/doRestore")
+        val result = webClient.post().uri("${PathConstant.RPC}/accounts/doRestore")
             .body(Mono.just(RestoreRequest(expectedAccount.seedPhrase)), RestoreRequest::class.java)
             .exchange()
             .expectStatus().isOk
-            .expectBody(AccountDto::class.java).isEqualTo<Nothing>(expectedAccount)
+            .expectBody(RestResponse::class.java)
+            .returnResult().responseBody!!
+
+        assertThat(ObjectMapper().writeValueAsString(result.body))
+            .isEqualTo(ObjectMapper().writeValueAsString(expectedBody.body))
     }
 
     @Test
@@ -47,36 +64,50 @@ class AccountControllerTests : ControllerTests() {
         val derivationPath = "m/0"
         val masterKey = ExtendedKey.root(ByteArray(32))
         val derivationKeyRequest = DerivationKeyRequest(seedPhrase, derivationPath)
-        val expectedAccount = createAccountDto()
+        val expectedBody = getRestResponse(createAccountDto())
 
         given(cryptoService.serializePublicKey(any(ExtendedKey::class.java))).willReturn("1")
         given(cryptoService.serializePrivateKey(any(ExtendedKey::class.java))).willReturn("2")
         given(cryptoService.getDerivationKey(seedPhrase, derivationPath)).willReturn(masterKey)
 
-        webClient.post().uri("${PathConstant.RPC}/accounts/doDerive")
+        val result = webClient.post().uri("${PathConstant.RPC}/accounts/doDerive")
             .body(Mono.just(derivationKeyRequest), DerivationKeyRequest::class.java)
             .exchange()
             .expectStatus().isOk
-            .expectBody(WalletDto::class.java).isEqualTo<Nothing>(expectedAccount)
+            .expectBody(RestResponse::class.java)
+            .returnResult().responseBody!!
+
+        assertThat(ObjectMapper().writeValueAsString(result.body))
+            .isEqualTo(ObjectMapper().writeValueAsString(expectedBody.body))
     }
 
     @Test
     fun getBalanceShouldReturnWalletBalanceTest() {
         val address = "address"
         val expectedBalance = 1.0
+        val expectedResponse = RestResponse(ResponseHeader(0, "1"), expectedBalance)
 
         given(walletService.getBalance(address)).willReturn(expectedBalance)
+        given(nodeClock.networkTime()).willReturn(0)
+        given(nodeProperty.version).willReturn("1")
 
         val actualResult = webClient.get().uri("${PathConstant.RPC}/accounts/wallets/$address/balance")
             .exchange()
             .expectStatus().isOk
-            .expectBody(Double::class.java)
+            .expectBody(RestResponse::class.java)
             .returnResult().responseBody!!
 
-        Assertions.assertThat(actualResult).isEqualTo(expectedBalance)
+        Assertions.assertThat(actualResult).isEqualTo(expectedResponse)
     }
 
     private fun createAccountDto(): WalletDto =
         WalletDto(KeyDto("1", "2"), "0x83a1e77Bd25daADd7A889BC36AC207A7D39CFD02")
+
+    private fun <T> getRestResponse(body: T): RestResponse<T> {
+        given(nodeClock.networkTime()).willReturn(0)
+        given(nodeProperty.version).willReturn("0")
+
+        return RestResponse(ResponseHeader(0, "0"), body)
+    }
 
 }

@@ -16,7 +16,7 @@ class TransferTransactionDto(
         tx.timestamp,
         tx.amount,
         tx.recipientAddress,
-        tx.senderKey,
+        tx.senderPublicKey,
         tx.senderAddress,
         tx.senderSignature,
         tx.hash

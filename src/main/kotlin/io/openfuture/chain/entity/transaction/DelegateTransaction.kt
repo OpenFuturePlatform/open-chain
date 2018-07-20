@@ -1,12 +1,13 @@
 package io.openfuture.chain.entity.transaction
 
 import io.openfuture.chain.entity.MainBlock
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Table
 
 @Entity
-@Table(name = "transfer_transactions")
-class TransferTransaction(
+@Table(name = "delegate_transactions")
+class DelegateTransaction(
     timestamp: Long,
     amount: Double,
     recipientAddress: String,
@@ -14,6 +15,20 @@ class TransferTransaction(
     senderAddress: String,
     senderSignature: String,
     hash: String,
+
+    @Column(name = "key", nullable = false, unique = true)
+    var key: String,
+
+    @Column(name = "address", nullable = false)
+    var address: String,
+
+    @Column(name = "host", nullable = false)
+    var host: String,
+
+    @Column(name = "port", nullable = false)
+    var port: Int,
+
     block: MainBlock? = null
+
 ) : BaseTransaction(timestamp, amount, recipientAddress, senderKey, senderAddress,
     senderSignature, hash, block)

@@ -2,8 +2,7 @@ package io.openfuture.chain.crypto.key
 
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
-import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.property.NodeProperty
 import io.openfuture.chain.service.CryptoService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Component
@@ -13,7 +12,7 @@ import javax.annotation.PostConstruct
 
 @Component
 class NodeKeyHolder(
-    private val properties: NodeProperties,
+    private val properties: NodeProperty,
     private val cryptoService: CryptoService,
     private val seedCalculator: SeedCalculator
 ) {

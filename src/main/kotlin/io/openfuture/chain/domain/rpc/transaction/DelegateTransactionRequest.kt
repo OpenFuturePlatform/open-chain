@@ -1,11 +1,12 @@
 package io.openfuture.chain.domain.rpc.transaction
 
+import io.openfuture.chain.domain.delegate.DelegateDto
 import io.openfuture.chain.entity.dictionary.VoteType
 import javax.validation.constraints.NotNull
 
-class VoteTransactionRequest(
+class DelegateTransactionRequest(
     @field:NotNull var voteType: VoteType? = null,
-    @field:NotNull var delegateKey: String? = null
+    @field:NotNull var delegateDto: DelegateDto? = null
 ) : BaseTransactionRequest() {
 
     override fun getBytes(): ByteArray {
@@ -16,7 +17,7 @@ class VoteTransactionRequest(
         builder.append(senderAddress)
         builder.append(senderSignature)
         builder.append(voteType)
-        builder.append(delegateKey)
+        builder.append(delegateDto)
         return builder.toString().toByteArray()
     }
 

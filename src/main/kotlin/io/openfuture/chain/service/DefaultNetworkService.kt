@@ -5,7 +5,7 @@ import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.network.server.TcpServer
-import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.property.NodeProperty
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -20,7 +20,7 @@ import java.util.concurrent.Executors
 class DefaultNetworkService(
     private val clientBootstrap: Bootstrap,
     private val tcpServer: TcpServer,
-    private val properties: NodeProperties
+    private val properties: NodeProperty
 ) : NetworkService, ApplicationListener<ApplicationReadyEvent> {
 
     private val connections: MutableMap<Channel, NetworkAddress> = ConcurrentHashMap()
