@@ -19,16 +19,6 @@ class DelegateTransaction(
     @Column(name = "delegate_key", nullable = false, unique = true)
     var delegateKey: String,
 
-    @Column(name = "delegate_address", nullable = false)
-    var delegateAddress: String,
-
-    @Column(name = "host", nullable = false)
-    var host: String,
-
-    @Column(name = "port", nullable = false)
-    var port: Int,
-
     block: MainBlock? = null
 
-) : BaseTransaction(timestamp, amount, recipientAddress, senderPublicKey, senderAddress,
-    senderSignature, hash, block)
+) : BaseTransaction(timestamp, amount, recipientAddress, senderPublicKey, senderAddress, senderSignature, hash, block)

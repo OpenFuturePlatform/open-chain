@@ -4,7 +4,6 @@ import io.netty.channel.Channel
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.base.PageRequest
-import io.openfuture.chain.domain.delegate.DelegateDto
 import io.openfuture.chain.domain.rpc.HardwareInfo
 import io.openfuture.chain.domain.rpc.crypto.AccountDto
 import io.openfuture.chain.domain.rpc.hardware.CpuInfo
@@ -106,8 +105,6 @@ interface DelegateService {
     fun getByPublicKey(key: String): Delegate
 
     fun getActiveDelegates(): Set<Delegate>
-
-    fun add(dto: DelegateDto): Delegate
 
     fun save(delegate: Delegate): Delegate
 

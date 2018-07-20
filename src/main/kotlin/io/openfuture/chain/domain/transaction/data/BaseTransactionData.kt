@@ -1,13 +1,11 @@
 package io.openfuture.chain.domain.transaction.data
 
 import io.openfuture.chain.crypto.util.HashUtils
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotNull
 
 abstract class BaseTransactionData(
-    @field:NotNull var amount: Double? = null,
-    @field:NotBlank var recipientAddress: String? = null,
-    @field:NotBlank var senderAddress: String? = null
+    var amount: Double,
+    var recipientAddress: String,
+    var senderAddress: String
 ) {
 
     abstract fun getBytes(): ByteArray

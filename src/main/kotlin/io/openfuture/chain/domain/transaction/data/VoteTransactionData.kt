@@ -1,12 +1,14 @@
 package io.openfuture.chain.domain.transaction.data
 
 import io.openfuture.chain.entity.dictionary.VoteType
-import javax.validation.constraints.NotNull
 
 class VoteTransactionData(
-    @field:NotNull var voteType: VoteType? = null,
-    @field:NotNull var delegateKey: String? = null
-) : BaseTransactionData() {
+    amount: Double,
+    recipientAddress: String,
+    senderAddress: String,
+    var voteType: VoteType,
+    var delegateKey: String
+) : BaseTransactionData(amount, recipientAddress, senderAddress) {
 
     override fun getBytes(): ByteArray {
         val builder = StringBuilder()
