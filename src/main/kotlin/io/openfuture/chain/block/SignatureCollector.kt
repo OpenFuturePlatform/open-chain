@@ -6,6 +6,7 @@ import io.openfuture.chain.domain.block.Signature
 import io.openfuture.chain.entity.*
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.DefaultGenesisBlockService
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
 @Component
 class SignatureCollector(
     private val blockService: BlockService,
+    private val genesisBlockService: DefaultGenesisBlockService,
     private val properties: ConsensusProperties,
     private val timeSlot: TimeSlot,
     private val clock: NodeClock
@@ -49,7 +51,7 @@ class SignatureCollector(
             if (timeSlot.getEpochTime() + properties.timeSlotDuration!! > clock.networkTime()) {
                 return
             }
-            val genesisBlock = blockService.getLastGenesis()
+            val genesisBlock = genesisBlockService.getLast()
             if (signatures.size.toDouble() / genesisBlock.activeDelegates.size > APPROVAL_THRESHOLD) {
                 if (pendingBlock is MainBlock) {
                     blockService.save(pendingBlock!! as MainBlock)

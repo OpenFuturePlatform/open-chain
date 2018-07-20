@@ -4,14 +4,21 @@ import io.openfuture.chain.block.validation.BlockValidationProvider
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.crypto.key.NodeKeyHolder
-import io.openfuture.chain.domain.block.*
-import io.openfuture.chain.entity.*
+import io.openfuture.chain.domain.block.BlockCreationEvent
+import io.openfuture.chain.domain.block.PendingBlock
+import io.openfuture.chain.domain.block.Signature
+import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.Delegate
+import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.property.NodeProperties
-import io.openfuture.chain.service.*
-import org.assertj.core.api.Assertions.assertThat
+import io.openfuture.chain.service.ConsensusService
+import io.openfuture.chain.service.DefaultGenesisBlockService
+import io.openfuture.chain.service.DelegateService
+import io.openfuture.chain.service.MainBlockService
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -19,7 +26,8 @@ import org.mockito.Mock
 
 class BlockCreationProcessorTests: ServiceTests() {
 
-    @Mock private lateinit var blockService: BlockService
+    @Mock private lateinit var mainBlockService: MainBlockService
+    @Mock private lateinit var genesisBlockService: DefaultGenesisBlockService
     @Mock private lateinit var signatureCollector: SignatureCollector
     @Mock private lateinit var keyHolder: NodeKeyHolder
     @Mock private lateinit var blockValidationService: BlockValidationProvider
@@ -36,10 +44,10 @@ class BlockCreationProcessorTests: ServiceTests() {
     fun init() {
         val block = createMainBlock()
     //    given(blockValidationService.isValid(block)).willReturn(true)
-        given(blockService.getLastMain()).willReturn(block)
+        given(mainBlockService.getLast()).willReturn(block)
         given(timeSlot.getSlotTimestamp()).willReturn(1L)
-        processor = BlockCreationProcessor(blockService, signatureCollector, keyHolder, blockValidationService,
-            consensusService, clock, delegateService, properties, consensusProperties, timeSlot)
+        processor = BlockCreationProcessor(mainBlockService, genesisBlockService, signatureCollector, keyHolder,
+            blockValidationService, consensusService, clock, delegateService, properties, consensusProperties, timeSlot)
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -74,7 +82,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         genesisBlock.activeDelegates = setOf(delegate)
         val event = BlockCreationEvent(transactions)
 
-        given(blockService.getLastGenesis()).willReturn(genesisBlock)
+        given(genesisBlockService.getLast()).willReturn(genesisBlock)
 
         processor.fireBlockCreation(event)
     }

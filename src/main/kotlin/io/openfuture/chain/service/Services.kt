@@ -48,14 +48,21 @@ interface BlockService {
 
     fun getLast(): Block
 
-    fun getLastMain(): MainBlock
-
-    fun getLastGenesis(): GenesisBlock
-
     fun save(block: MainBlock): MainBlock
 
     fun save(block: GenesisBlock): GenesisBlock
 
+}
+
+interface MainBlockService {
+
+    fun getLast(): MainBlock
+
+}
+
+interface GenesisBlockService {
+
+    fun getLast(): GenesisBlock
 }
 
 interface CryptoService {

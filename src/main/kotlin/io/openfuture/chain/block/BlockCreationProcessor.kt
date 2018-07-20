@@ -22,7 +22,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class BlockCreationProcessor(
-    private val service: BlockService,
+    private val mainBlockService: MainBlockService,
+    private val genesisBlockService: DefaultGenesisBlockService,
     private val signatureCollector: SignatureCollector,
     private val keyHolder: NodeKeyHolder,
     private val validationService: BlockValidationProvider,
@@ -64,8 +65,8 @@ class BlockCreationProcessor(
 
     @EventListener
     fun fireBlockCreation(event: BlockCreationEvent) {
-        val previousBlock = service.getLastMain()
-        val genesisBlock = service.getLastGenesis()
+        val previousBlock = mainBlockService.getLast()
+        val genesisBlock = genesisBlockService.getLast()
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
         if (properties.host == nextProducer.host && properties.port == nextProducer.port) {
             create(event.pendingTransactions, previousBlock, genesisBlock)

@@ -30,16 +30,6 @@ class DefaultBlockService(
         blockRepository.findFirstByOrderByHeightDesc()
             ?: throw NotFoundException("Last block not found!")
 
-    @Transactional(readOnly = true)
-    override fun getLastMain(): MainBlock =
-        mainBlockRepository.findFirstByOrderByHeightDesc()
-            ?: throw NotFoundException("Last Main block not found!")
-
-    @Transactional(readOnly = true)
-    override fun getLastGenesis(): GenesisBlock =
-        genesisBlockRepository.findFirstByOrderByHeightDesc()
-            ?: throw NotFoundException("Last Genesis block not exist!")
-
     @Transactional
     override fun save(block: MainBlock): MainBlock {
         val savedBlock = mainBlockRepository.save(block)
