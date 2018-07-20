@@ -16,14 +16,14 @@ class AddressesTest {
     @Test
     fun sendShouldWriteExactValuesInBuffer() {
         val actualBuffer = Unpooled.buffer()
-        entity.send(actualBuffer)
+        entity.write(actualBuffer)
         assertThat(actualBuffer).isEqualTo(buffer)
     }
 
     @Test
     fun getShouldFillEntityWithExactValuesFromBuffer() {
         val actualEntity = Addresses::class.java.newInstance()
-        actualEntity.get(buffer)
+        actualEntity.read(buffer)
         assertThat(actualEntity).isEqualTo(entity)
     }
 

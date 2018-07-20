@@ -5,12 +5,10 @@ import io.openfuture.chain.annotation.NoArgConstructor
 
 @NoArgConstructor
 data class Addresses(
-    var values: List<NetworkAddress>
+        var values: List<NetworkAddress>
 ) : Packet() {
 
-    override fun get(buffer: ByteBuf) {
-        super.get(buffer)
-
+    override fun readParams(buffer: ByteBuf) {
         val size = buffer.readInt()
         val list = mutableListOf<NetworkAddress>()
         for (index in 1..size) {
@@ -21,9 +19,7 @@ data class Addresses(
         values = list
     }
 
-    override fun send(buffer: ByteBuf) {
-        super.send(buffer)
-
+    override fun writeParams(buffer: ByteBuf) {
         buffer.writeInt(values.size)
         for (address in values) {
             address.send(buffer)

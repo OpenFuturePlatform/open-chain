@@ -5,19 +5,15 @@ import io.openfuture.chain.annotation.NoArgConstructor
 
 @NoArgConstructor
 data class Greeting(
-    var address: NetworkAddress
+        var address: NetworkAddress
 ) : Packet() {
 
-    override fun get(buffer: ByteBuf) {
-        super.get(buffer)
-
+    override fun readParams(buffer: ByteBuf) {
         address = NetworkAddress::class.java.newInstance()
         address.get(buffer)
     }
 
-    override fun send(buffer: ByteBuf) {
-        super.send(buffer)
-
+    override fun writeParams(buffer: ByteBuf) {
         address.send(buffer)
     }
 

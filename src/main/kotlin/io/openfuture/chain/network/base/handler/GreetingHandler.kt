@@ -5,22 +5,23 @@ import io.openfuture.chain.network.domain.Greeting
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.service.NetworkService
+import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 @Component
-@Scope("prototype")
+@Scope(SCOPE_PROTOTYPE)
 class GreetingHandler(
-    private val networkService: NetworkService,
-    private val properties: NodeProperties
-) : BaseHandler<Greeting>() {
+        private val networkService: NetworkService,
+        private val properties: NodeProperties
+) : CommonHandler<Greeting>() {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         ctx.writeAndFlush(Greeting(NetworkAddress(properties.host!!, properties.port!!)))
         ctx.fireChannelActive()
     }
 
-    override fun packetReceived(ctx: ChannelHandlerContext, message: Greeting) {
+    override fun channelRead(ctx: ChannelHandlerContext, message: Greeting) {
         networkService.addConnection(ctx.channel(), message.address)
     }
 

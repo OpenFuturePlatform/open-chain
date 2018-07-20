@@ -9,16 +9,12 @@ data class Time(
     var networkTimestamp: Long
 ) : Packet() {
 
-    override fun get(buffer: ByteBuf) {
-        super.get(buffer)
-
+    override fun readParams(buffer: ByteBuf) {
         nodeTimestamp = buffer.readLong()
         networkTimestamp = buffer.readLong()
     }
 
-    override fun send(buffer: ByteBuf) {
-        super.send(buffer)
-
+    override fun writeParams(buffer: ByteBuf) {
         buffer.writeLong(nodeTimestamp)
         buffer.writeLong(networkTimestamp)
     }

@@ -13,14 +13,14 @@ class HeartBeatTest {
     @Test
     fun sendShouldWriteExactValuesInBuffer() {
         val actualBuffer = Unpooled.buffer()
-        entity.send(actualBuffer)
+        entity.write(actualBuffer)
         Assertions.assertThat(actualBuffer).isEqualTo(buffer)
     }
 
     @Test
     fun getShouldFillEntityWithExactValuesFromBuffer() {
         val actualEntity = HeartBeat::class.java.newInstance()
-        actualEntity.get(buffer)
+        actualEntity.read(buffer)
         Assertions.assertThat(actualEntity).isEqualTo(entity)
     }
 
