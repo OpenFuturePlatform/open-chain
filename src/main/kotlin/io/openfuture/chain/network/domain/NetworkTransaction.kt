@@ -54,6 +54,6 @@ class NetworkTransaction() : Packet() {
         buffer.writeCharSequence(hash, StandardCharsets.UTF_8)
     }
 
-    override fun toString() = "Networktransaction(height=$timestamp)"
+    override fun toString() = "Networktransaction(hash=$hash)"
 
 }

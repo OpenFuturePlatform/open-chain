@@ -5,6 +5,7 @@ import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.TransferTransaction
+import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.network.base.BaseHandler
 import io.openfuture.chain.network.domain.NetworkBlock
 import io.openfuture.chain.service.BaseTransactionService
@@ -16,7 +17,7 @@ import java.util.*
 
 @Component
 @Scope("prototype")
-class SyncClientHandler(
+class BlockClientHandler(
     private val blockService: BlockService,
     private val transactionService: BaseTransactionService<TransferTransaction>
 ) : BaseHandler<NetworkBlock>() {
@@ -29,18 +30,31 @@ class SyncClientHandler(
         if (message.typeId == BlockType.MAIN.id) {
             val block = MainBlock(message.height, message.previousHash,
                 message.merkleHash, message.timestamp, Collections.emptyList()).apply { signature = message.signature }
+
+            checkHash(message.hash, block.hash)
             val savedBlock = blockService.save(block)
 
             message.transactions.forEach {
                 val transaction = TransferTransaction(it.timestamp, it.amount, it.fee, it.recipientAddress, it.senderKey,
-                    it.senderAddress, it.senderSignature, it.hash, savedBlock)
+                    it.senderAddress, null, it.senderSignature, savedBlock)
+
+                checkHash(message.hash, transaction.hash)
 
                 transactionService.save(transaction)
             }
         } else {
             val block = GenesisBlock(message.height, message.previousHash, message.timestamp, 1, Collections.emptySet())
                 .apply { signature = message.signature }
+
+            checkHash(message.hash, block.hash)
+
             blockService.save(block)
+        }
+    }
+
+    private fun checkHash(hash: String, calculatedHash: String) {
+        if(hash != calculatedHash) {
+            throw LogicException("Block synchronization error, incorrect hash")
         }
     }
 

@@ -42,8 +42,9 @@ class DefaultNetworkService(
         clientBootstrap.connect(address.host, address.port).addListener { future ->
             future as ChannelFuture
             if (future.isSuccess) {
-                requestBlock()
                 future.channel().writeAndFlush(FindAddresses())
+
+                blocksSynchronization()
             } else {
                 log.warn("Can not connect to ${address.host}:${address.port}")
             }
@@ -84,7 +85,7 @@ class DefaultNetworkService(
         send(FindAddresses())
     }
 
-    private fun requestBlock() {
+    private fun blocksSynchronization() {
         val lastBlockHash = blockService.getLast().hash
 
         send(NetworkBlockRequest(lastBlockHash))

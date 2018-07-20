@@ -13,18 +13,20 @@ import org.springframework.stereotype.Component
 
 @Component
 @Scope("prototype")
-class SyncServerHandler(
+class BlockServerHandler(
     private val blockService: BlockService,
     private val transferTransactionService: BaseTransactionService<TransferTransaction>
-    ) : BaseHandler<NetworkBlockRequest>() {
+) : BaseHandler<NetworkBlockRequest>() {
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: NetworkBlockRequest) {
         val blocks = blockService.getBlocksAfterCurrentHash(message.hash)
 
         blocks?.forEach {
             val transactions = transferTransactionService.getByBlock(it)
-            val networkTransactions = transactions.map { NetworkTransaction(it.timestamp, it.amount, it.fee, it.recipientAddress,
-                it.senderKey, it.senderAddress, it.senderSignature!!, it.hash) }
+            val networkTransactions = transactions.map {
+                NetworkTransaction(it.timestamp, it.amount, it.fee, it.recipientAddress,
+                    it.senderKey, it.senderAddress, it.senderSignature!!, it.hash)
+            }
             val block = NetworkBlock(it.height, it.previousHash, it.merkleHash, it.timestamp, it.typeId,
                 it.hash, it.signature!!, networkTransactions as MutableList<NetworkTransaction>)
             ctx.writeAndFlush(block)

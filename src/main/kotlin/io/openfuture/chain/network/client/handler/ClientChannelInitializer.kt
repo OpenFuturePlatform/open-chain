@@ -25,7 +25,7 @@ class ClientChannelInitializer(
         pipeline.addLast(context.getBean(TimeSyncClientHandler::class.java))
         pipeline.addLast(context.getBean(AddressDiscoveryHandler::class.java))
         pipeline.addLast(context.getBean(AddressHandler::class.java))
-        pipeline.addLast(context.getBean(SyncClientHandler::class.java))
+        pipeline.addLast(context.getBean(BlockClientHandler::class.java))
         pipeline.addLast(context.getBean(HeartBeatClientHandler::class.java))
     }
 
