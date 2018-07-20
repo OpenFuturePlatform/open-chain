@@ -40,9 +40,21 @@ class SignatureCollectorTests : ServiceTests() {
     }
 
     @Test
-    fun addBlockSignatureShouldAddSignatureBlock() {
+    fun addBlockSignatureShouldReturnTrue() {
         val signatureBlock = createGenesisPendingBlock()
         signatureCollector.setPendingBlock(signatureBlock)
+
+        val result = signatureCollector.addSignatureBlock(signatureBlock)
+
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun addBlockSignatureShouldReturnFalse() {
+        val signatureBlock = createGenesisPendingBlock()
+        val anotherSignatureBlock = createGenesisPendingBlock()
+
+        signatureCollector.setPendingBlock(anotherSignatureBlock)
 
         val result = signatureCollector.addSignatureBlock(signatureBlock)
 
