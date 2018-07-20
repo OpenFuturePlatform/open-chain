@@ -4,12 +4,20 @@ import io.openfuture.chain.block.validation.BlockValidationProvider
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.crypto.key.NodeKeyHolder
-import io.openfuture.chain.domain.block.*
-import io.openfuture.chain.entity.*
+import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.domain.block.BlockCreationEvent
+import io.openfuture.chain.domain.block.PendingBlock
+import io.openfuture.chain.domain.block.Signature
+import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.Delegate
+import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.property.NodeProperty
-import io.openfuture.chain.service.*
+import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.ConsensusService
+import io.openfuture.chain.service.DelegateService
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -69,7 +77,11 @@ class BlockCreationProcessorTests: ServiceTests() {
     fun fireBlockCreationShouldCreateMainBlock() {
         val transactions = createTransactions()
         val genesisBlock = createGenesisBlock()
-        val delegate = Delegate("public_key", "host", 12)
+
+        given(keyHolder.getPublicKey()).willReturn(HashUtils.fromHexString("public_key"))
+        given(keyHolder.getPrivateKey()).willReturn(HashUtils.fromHexString("private_key"))
+
+        val delegate = Delegate(HashUtils.toHexString(keyHolder.getPublicKey()), "address", 1)
         genesisBlock.activeDelegates = setOf(delegate)
         val event = BlockCreationEvent(transactions)
 
