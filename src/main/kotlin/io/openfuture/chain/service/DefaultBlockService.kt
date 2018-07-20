@@ -22,8 +22,6 @@ class DefaultBlockService(
        return blockRepository.save(block)
     }
 
-    override fun isValid(block: Block): Boolean {
-        throw NotImplementedException("Method is not implemented")
-    }
+    override fun isValid(block: Block): Boolean = throw NotImplementedException("Method is not implemented")
 
 }

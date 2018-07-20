@@ -4,19 +4,21 @@ import io.openfuture.chain.block.TimeSlot
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
+import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.DefaultBlockService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
-import org.springframework.context.ApplicationContext
 
 class BlockValidationProviderTests : ServiceTests() {
 
+    @Mock private lateinit var blockService: BlockService<Block>
     @Mock private lateinit var mainBlockService: BlockService<MainBlock>
     @Mock private lateinit var genesisBlockService: BlockService<GenesisBlock>
     @Mock private lateinit var timeSlot: TimeSlot
@@ -31,7 +33,8 @@ class BlockValidationProviderTests : ServiceTests() {
     fun init() {
         given(timeSlot.verifyTimeSlot(any(Long::class.java), any(MainBlock::class.java))).willReturn(true)
         given(timeSlot.verifyTimeSlot(any(Long::class.java), any(GenesisBlock::class.java))).willReturn(true)
-        blockValidationService = BlockValidationProvider(mainBlockService, genesisBlockService, timeSlot, clock)
+        blockValidationService = BlockValidationProvider(
+            blockService, mainBlockService, genesisBlockService, timeSlot, clock)
     }
 
     @Test
@@ -107,7 +110,7 @@ class BlockValidationProviderTests : ServiceTests() {
         )
 
         given(mainBlockService.isValid(block)).willReturn(true)
-        given(mainBlockService.getLast()).willReturn(previousBlock)
+        given(blockService.getLast()).willReturn(previousBlock)
 
         val isValid = blockValidationService.isValid(block)
 
@@ -177,7 +180,7 @@ class BlockValidationProviderTests : ServiceTests() {
         )
 
         given(genesisBlockService.isValid(block)).willReturn(true)
-        given(genesisBlockService.getLast()).willReturn(previousBlock)
+        given(blockService.getLast()).willReturn(previousBlock)
 
         val isValid = blockValidationService.isValid(block)
 

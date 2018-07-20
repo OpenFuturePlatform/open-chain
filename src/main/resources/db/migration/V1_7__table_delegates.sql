@@ -1,5 +1,6 @@
 CREATE TABLE delegates (
   id     INTEGER PRIMARY KEY,
+  public_key VARCHAR NULL UNIQUE,
   host   VARCHAR NOT NULL,
   port   INTEGER NOT NULL,
   rating INTEGER NOT NULL DEFAULT 0,

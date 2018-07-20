@@ -76,7 +76,7 @@ class BlockCreationProcessorTests: ServiceTests() {
     fun fireBlockCreationShouldCreateMainBlock() {
         val transactions = createTransactions()
         val genesisBlock = createGenesisBlock()
-        val delegate = Delegate("host", 1234)
+        val delegate = Delegate("public_key", "host", 1234)
         genesisBlock.activeDelegates = setOf(delegate)
         val event = BlockCreationEvent(transactions)
 
@@ -107,7 +107,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         "prev_block_hash",
         1512345678L,
         1,
-        setOf(Delegate("host1", 1234), Delegate("host2", 1234), Delegate("host3", 1234))
+        setOf(Delegate("public_key", "host1", 1234), Delegate("public_key2", "host2", 1234), Delegate("public_key3", "host3", 1234))
     )
 
     private fun createTransactions(): MutableList<BaseTransaction> = mutableListOf(
