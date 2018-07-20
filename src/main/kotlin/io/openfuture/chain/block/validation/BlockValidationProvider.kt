@@ -22,7 +22,6 @@ class BlockValidationProvider(
     fun isValid(block: Block): Boolean {
         val currentTime = clock.networkTime()
 
-        val lastBlock = blockService.getLast()
         val blockIsValid: Boolean
         if (block is MainBlock) {
             blockIsValid = mainBlockService.isValid(block)
@@ -32,6 +31,7 @@ class BlockValidationProvider(
             throw IllegalArgumentException("wrong block type is found")
         }
 
+        val lastBlock = blockService.getLast()
         return blockIsValid
                 && timeSlot.verifyTimeSlot(currentTime, block)
                 && verifyHash(block)

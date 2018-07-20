@@ -14,7 +14,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
+import org.mockito.BDDMockito.mock
 import org.mockito.Mock
+import org.mockito.Mockito
+import java.lang.IllegalArgumentException
 
 class BlockValidationProviderTests : ServiceTests() {
 
@@ -201,6 +204,13 @@ class BlockValidationProviderTests : ServiceTests() {
         val isValid = blockValidationService.isValid(block)
 
         assertThat(isValid).isFalse()
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun isValidShouldThrowIllegalArgumentException() {
+        val block = Mockito.mock(Block::class.java)
+
+        blockValidationService.isValid(block)
     }
 
 }

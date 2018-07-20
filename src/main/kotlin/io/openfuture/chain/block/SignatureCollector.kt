@@ -35,16 +35,17 @@ class SignatureCollector(
         if (!active) {
             this.active = true
             this.pendingBlock = generatedBlock.block
+            scheduler.initialize()
             scheduler.scheduleWithFixedDelay({ applyBlock() }, properties.timeSlotDuration!! / 2)
         }
     }
 
-    fun addBlockSignature(blockSignature: PendingBlock): Boolean {
-        if (blockSignature.block.hash != pendingBlock.hash) {
+    fun addSignatureBlock(signatureBlock: PendingBlock): Boolean {
+        if (signatureBlock.block.hash != pendingBlock.hash) {
             return false
         }
 
-        return signatures.add(blockSignature.signature)
+        return signatures.add(signatureBlock.signature)
     }
 
     fun applyBlock() {
