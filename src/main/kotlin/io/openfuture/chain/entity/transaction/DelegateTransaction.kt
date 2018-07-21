@@ -10,6 +10,7 @@ import javax.persistence.Table
 class DelegateTransaction(
     timestamp: Long,
     amount: Double,
+    fee: Double,
     recipientAddress: String,
     senderAddress: String,
     senderPublicKey: String,
@@ -21,4 +22,4 @@ class DelegateTransaction(
 
     block: MainBlock? = null
 
-) : BaseTransaction(timestamp, amount, recipientAddress, senderPublicKey, senderAddress, senderSignature, hash, block)
+) : BaseTransaction(timestamp, amount, fee, recipientAddress, senderPublicKey, senderAddress, senderSignature, hash, block)

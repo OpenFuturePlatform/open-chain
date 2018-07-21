@@ -12,7 +12,7 @@ class VoteTransactionDto(
 ) : BaseTransactionDto<VoteTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
 
     constructor(tx: VoteTransaction) : this(
-        VoteTransactionData(tx.amount, tx.recipientAddress, tx.senderAddress, tx.getVoteType(), tx.delegateKey),
+        VoteTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress, tx.getVoteType(), tx.delegateKey),
         tx.timestamp,
         tx.senderPublicKey,
         tx.senderSignature,

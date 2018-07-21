@@ -4,6 +4,7 @@ import io.openfuture.chain.crypto.util.HashUtils
 
 abstract class BaseTransactionData(
     var amount: Double,
+    var fee: Double,
     var recipientAddress: String,
     var senderAddress: String
 ) {

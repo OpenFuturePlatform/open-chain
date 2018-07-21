@@ -9,10 +9,11 @@ import javax.persistence.Table
 class TransferTransaction(
     timestamp: Long,
     amount: Double,
+    fee: Double,
     recipientAddress: String,
     senderAddress: String,
     senderPublicKey: String,
     senderSignature: String,
     hash: String,
     block: MainBlock? = null
-) : BaseTransaction(timestamp, amount, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash, block)
+) : BaseTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash, block)
