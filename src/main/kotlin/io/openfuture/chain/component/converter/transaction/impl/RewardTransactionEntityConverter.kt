@@ -23,7 +23,8 @@ class RewardTransactionEntityConverter(
         dto.data.senderAddress,
         dto.senderPublicKey,
         dto.senderSignature,
-        dto.hash
+        dto.hash,
+        dto.data.hashCreatedBlock
     )
 
     override fun toEntity(timestamp: Long, request: BaseTransactionRequest<RewardTransactionData>): RewardTransaction =
@@ -35,7 +36,8 @@ class RewardTransactionEntityConverter(
             request.data!!.senderAddress,
             request.senderPublicKey!!,
             request.senderSignature!!,
-            request.data!!.getHash()
+            request.data!!.getHash(),
+            request.data!!.hashCreatedBlock
         )
 
     override fun toEntity(timestamp: Long, data: RewardTransactionData): RewardTransaction =
@@ -47,7 +49,8 @@ class RewardTransactionEntityConverter(
             data.senderAddress,
             HashUtils.toHexString(keyHolder.getPublicKey()),
             SignatureManager.sign(data.getBytes(), keyHolder.getPrivateKey()),
-            data.getHash()
+            data.getHash(),
+            data.hashCreatedBlock
         )
 
 }

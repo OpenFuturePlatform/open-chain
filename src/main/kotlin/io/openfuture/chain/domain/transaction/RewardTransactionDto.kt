@@ -12,7 +12,7 @@ class RewardTransactionDto(
 ) : BaseTransactionDto<RewardTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
 
     constructor(tx: RewardTransaction) : this(
-        RewardTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress),
+        RewardTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress, tx.hashCreatedBlock),
         tx.timestamp,
         tx.senderPublicKey,
         tx.senderSignature,

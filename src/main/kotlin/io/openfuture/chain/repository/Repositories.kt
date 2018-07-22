@@ -43,7 +43,11 @@ interface VoteTransactionRepository : BaseTransactionRepository<VoteTransaction>
 interface DelegateTransactionRepository : BaseTransactionRepository<DelegateTransaction>
 
 @Repository
-interface RewardTransactionRepository : BaseTransactionRepository<RewardTransaction>
+interface RewardTransactionRepository : BaseTransactionRepository<RewardTransaction> {
+
+    fun findByHashCreatedBlock(hash: String): RewardTransaction?
+
+}
 
 @Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {
