@@ -8,16 +8,21 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
+import io.openfuture.chain.domain.transaction.data.RewardTransactionData
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
-import io.openfuture.chain.property.NodeProperty
-import io.openfuture.chain.service.*
+import io.openfuture.chain.property.ConsensusProperties
+import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.ConsensusService
+import io.openfuture.chain.service.DelegateService
+import io.openfuture.chain.service.RewardTransactionService
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
+import java.util.concurrent.TimeUnit
 
 @Component
 class BlockCreationProcessor(
@@ -28,7 +33,8 @@ class BlockCreationProcessor(
     private val consensusService: ConsensusService,
     private val clock: NodeClock,
     private val delegateService: DelegateService,
-    private val properties: NodeProperty
+    private val rewardTransactionService: RewardTransactionService,
+    private val consensusProperties: ConsensusProperties
 ) {
 
     fun approveBlock(pendingBlock: PendingBlock): PendingBlock {
@@ -44,7 +50,7 @@ class BlockCreationProcessor(
             throw IllegalArgumentException("Inbound block's signature is invalid")
         }
 
-        if(!signatureCollector.addBlockSignature(pendingBlock)) {
+        if (!signatureCollector.addBlockSignature(pendingBlock)) {
             throw IllegalArgumentException("Either signature is already exists, or not related to pending block")
         }
         return signCreatedBlock(block)
@@ -74,7 +80,7 @@ class BlockCreationProcessor(
 
         val time = clock.networkTime()
         val privateKey = keyHolder.getPrivateKey()
-        val block = when(blockType) {
+        val block = when (blockType) {
             BlockType.MAIN -> {
                 MainBlock(
                     privateKey,
@@ -98,6 +104,26 @@ class BlockCreationProcessor(
         }
 
         signCreatedBlock(block)
+
+        createRewardTransaction(transactions, block)
+    }
+
+    private fun createRewardTransaction(transactions: MutableList<BaseTransaction>, block: Block) {
+        val fees = when (block) {
+            is MainBlock -> transactions.sumByDouble { it.fee }
+            is GenesisBlock -> 0.0
+            else -> throw IllegalStateException("Unknown block type")
+        }
+        val delegate = delegateService.getByPublicKey(HashUtils.toHexString(keyHolder.getPublicKey()))
+
+        val rewardTransactionData = RewardTransactionData((fees + consensusProperties.rewardBlock!!),
+            consensusProperties.feeRewardTx!!, delegate.address, consensusProperties.genesisAddress!!, block.hash)
+
+//        Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(
+//            { rewardTransactionService.add(rewardTransactionData) }, consensusProperties.timeSlotDuration!!,
+//            1, TimeUnit.SECONDS)
+        TimeUnit.SECONDS.sleep(consensusProperties.timeSlotDuration!!)
+        rewardTransactionService.add(rewardTransactionData)
     }
 
 }

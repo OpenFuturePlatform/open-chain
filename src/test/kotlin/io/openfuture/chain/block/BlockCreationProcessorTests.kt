@@ -4,26 +4,23 @@ import io.openfuture.chain.block.validation.BlockValidationProvider
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.crypto.key.NodeKeyHolder
-import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
 import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.Delegate
-import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import io.openfuture.chain.property.NodeProperty
+import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.ConsensusService
 import io.openfuture.chain.service.DelegateService
+import io.openfuture.chain.service.RewardTransactionService
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
 
-class BlockCreationProcessorTests: ServiceTests() {
+class BlockCreationProcessorTests : ServiceTests() {
 
     @Mock private lateinit var blockService: BlockService
     @Mock private lateinit var signatureCollector: SignatureCollector
@@ -32,16 +29,16 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Mock private lateinit var consensusService: ConsensusService
     @Mock private lateinit var clock: NodeClock
     @Mock private lateinit var delegateService: DelegateService
-    @Mock private lateinit var properties: NodeProperty
+    @Mock private lateinit var rewardTransactionService: RewardTransactionService
+    @Mock private lateinit var consensusProperties: ConsensusProperties
 
     private lateinit var processor: BlockCreationProcessor
 
+
     @Before
     fun init() {
-        val block = createMainBlock()
-        given(blockService.getLastMain()).willReturn(block)
         processor = BlockCreationProcessor(blockService, signatureCollector, keyHolder, blockValidationService,
-            consensusService, clock, delegateService, properties)
+            consensusService, clock, delegateService, rewardTransactionService, consensusProperties)
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -73,23 +70,6 @@ class BlockCreationProcessorTests: ServiceTests() {
         processor.approveBlock(pendingBlock)
     }
 
-    @Test
-    fun fireBlockCreationShouldCreateMainBlock() {
-        val transactions = createTransactions()
-        val genesisBlock = createGenesisBlock()
-
-        given(keyHolder.getPublicKey()).willReturn(HashUtils.fromHexString("public_key"))
-        given(keyHolder.getPrivateKey()).willReturn(HashUtils.fromHexString("private_key"))
-
-        val delegate = Delegate(HashUtils.toHexString(keyHolder.getPublicKey()), "address", 1)
-        genesisBlock.activeDelegates = setOf(delegate)
-        val event = BlockCreationEvent(transactions)
-
-        given(blockService.getLastGenesis()).willReturn(genesisBlock)
-
-        processor.fireBlockCreation(event)
-    }
-
     private fun createPendingBlock(block: Block): PendingBlock {
         return PendingBlock(
             block,
@@ -104,19 +84,6 @@ class BlockCreationProcessorTests: ServiceTests() {
         "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
         1512345678L,
         createTransactions()
-    )
-
-    private fun createGenesisBlock() = GenesisBlock(
-        ByteArray(1),
-        123,
-        "prev_block_hash",
-        1512345678L,
-        1,
-        setOf(
-            Delegate("public_key1", "host1", 1),
-            Delegate("public_key2", "host2", 2),
-            Delegate("public_key3", "host3", 3)
-        )
     )
 
     private fun createTransactions(): MutableList<BaseTransaction> = mutableListOf(
@@ -145,4 +112,5 @@ class BlockCreationProcessorTests: ServiceTests() {
             "delegate_key2"
         )
     )
+
 }
