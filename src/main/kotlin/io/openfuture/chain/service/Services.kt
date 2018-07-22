@@ -12,16 +12,10 @@ import io.openfuture.chain.domain.rpc.hardware.RamInfo
 import io.openfuture.chain.domain.rpc.hardware.StorageInfo
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
-import io.openfuture.chain.domain.transaction.data.BaseTransactionData
-import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
-import io.openfuture.chain.domain.transaction.data.TransferTransactionData
-import io.openfuture.chain.domain.transaction.data.VoteTransactionData
+import io.openfuture.chain.domain.transaction.data.*
 import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.dictionary.VoteType
-import io.openfuture.chain.entity.transaction.BaseTransaction
-import io.openfuture.chain.entity.transaction.DelegateTransaction
-import io.openfuture.chain.entity.transaction.TransferTransaction
-import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.data.domain.Page
@@ -76,7 +70,7 @@ interface CryptoService {
 
 }
 
-interface BaseTransactionService<Entity : BaseTransaction, Data: BaseTransactionData> {
+interface BaseTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> {
 
     fun getAllPending(): MutableSet<Entity>
 
@@ -94,9 +88,11 @@ interface BaseTransactionService<Entity : BaseTransaction, Data: BaseTransaction
 
 interface TransferTransactionService : BaseTransactionService<TransferTransaction, TransferTransactionData>
 
-interface VoteTransactionService : BaseTransactionService<VoteTransaction,  VoteTransactionData>
+interface VoteTransactionService : BaseTransactionService<VoteTransaction, VoteTransactionData>
 
 interface DelegateTransactionService : BaseTransactionService<DelegateTransaction, DelegateTransactionData>
+
+interface RewardTransactionService : BaseTransactionService<RewardTransaction, RewardTransactionData>
 
 interface DelegateService {
 

@@ -3,9 +3,7 @@ package io.openfuture.chain.service
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
-import io.openfuture.chain.entity.transaction.BaseTransaction
-import io.openfuture.chain.entity.transaction.TransferTransaction
-import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.repository.GenesisBlockRepository
@@ -19,7 +17,9 @@ class DefaultBlockService(
     private val mainBlockRepository: MainBlockRepository,
     private val genesisBlockRepository: GenesisBlockRepository,
     private val voteTransactionService: VoteTransactionService,
-    private val transferTransactionService: TransferTransactionService
+    private val transferTransactionService: TransferTransactionService,
+    private val delegateTransactionService: DelegateTransactionService,
+    private val rewardTransactionService: RewardTransactionService
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -61,6 +61,9 @@ class DefaultBlockService(
         when (tx) {
             is VoteTransaction -> voteTransactionService.addToBlock(tx, block)
             is TransferTransaction -> transferTransactionService.addToBlock(tx, block)
+            is DelegateTransaction -> delegateTransactionService.addToBlock(tx, block)
+            is RewardTransaction -> rewardTransactionService.addToBlock(tx, block)
+            else -> throw IllegalStateException("Unknown transaction type")
         }
     }
 
