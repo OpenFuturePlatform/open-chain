@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fees to transactions
 - New type transaction: RewardTransaction. New entity, repository, service
 - Addition to block
+- Creation of reward transaction
 
 ## [0.3.0] - 2018-07-13
 ### Added
