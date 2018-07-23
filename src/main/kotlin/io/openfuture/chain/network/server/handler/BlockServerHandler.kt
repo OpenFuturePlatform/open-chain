@@ -24,16 +24,16 @@ class BlockServerHandler(
         val blocks = blockService.getBlocksAfterCurrentHash(message.hash)
 
         blocks?.forEach {
-            var networkTransactions = listOf<NetworkTransaction>()
+            var networkTransactions = mutableListOf<NetworkTransaction>()
             if(it.typeId == BlockType.MAIN.id) {
                 val transactions = transferTransactionService.getByBlock(it as MainBlock)
                 networkTransactions = transactions.map {
                     NetworkTransaction(it.timestamp, it.amount, it.fee, it.recipientAddress,
                         it.senderKey, it.senderAddress, it.senderSignature!!, it.hash)
-                }
+                }.toMutableList()
             }
             val block = NetworkBlock(it.height, it.previousHash, it.merkleHash, it.timestamp, it.typeId,
-                it.hash, it.signature!!, listOf<NetworkTransaction>() as MutableList<NetworkTransaction>)
+                it.hash, it.signature!!, networkTransactions)
             ctx.writeAndFlush(block)
         }
     }

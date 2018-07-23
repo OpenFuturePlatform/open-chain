@@ -4,7 +4,6 @@ import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
-import io.openfuture.chain.entity.transaction.CoinBaseTransaction
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.repository.GenesisBlockRepository
@@ -52,11 +51,11 @@ class DefaultBlockService(
 
     @Transactional
     override fun save(block: MainBlock): MainBlock {
-        coinBaseTransactionService.save(block.transactions.first() as CoinBaseTransaction)
+    //    coinBaseTransactionService.save(block.transactions.first() as CoinBaseTransaction)
         val savedBlock = mainBlockRepository.save(block)
         val transactions = block.transactions
         for (transaction in transactions) {
-            transactionService.addToBlock(transaction.hash, savedBlock)
+            transactionService.save(transaction)
             walletService.updateByTransaction(transaction)
         }
         return savedBlock

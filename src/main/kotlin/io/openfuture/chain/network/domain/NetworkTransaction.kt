@@ -29,6 +29,7 @@ class NetworkTransaction() : Packet() {
     override fun get(buffer: ByteBuf) {
         timestamp = buffer.readLong()
         amount = buffer.readDouble()
+        fee = buffer.readDouble()
         var length = buffer.readInt()
         recipientAddress = buffer.readCharSequence(length, StandardCharsets.UTF_8).toString()
         length = buffer.readInt()
@@ -44,6 +45,9 @@ class NetworkTransaction() : Packet() {
     override fun send(buffer: ByteBuf) {
         buffer.writeLong(timestamp)
         buffer.writeDouble(amount)
+        buffer.writeDouble(fee)
+        buffer.writeInt(recipientAddress.length)
+        buffer.writeCharSequence(recipientAddress, StandardCharsets.UTF_8)
         buffer.writeInt(senderKey.length)
         buffer.writeCharSequence(senderKey, StandardCharsets.UTF_8)
         buffer.writeInt(senderAddress.length)

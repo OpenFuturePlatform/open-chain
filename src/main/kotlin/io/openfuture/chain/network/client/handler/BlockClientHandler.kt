@@ -33,7 +33,7 @@ class BlockClientHandler(
             checkHash(message.hash, block.hash)
             val savedBlock = blockService.save(block)
 
-            message.transactions.forEach {
+            message.transactions!!.forEach {
                 val transaction = TransferTransaction(it.timestamp, it.amount, it.fee, it.recipientAddress, it.senderKey,
                     it.senderAddress, null, it.senderSignature, savedBlock)
 
