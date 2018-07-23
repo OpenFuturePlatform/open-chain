@@ -35,6 +35,5 @@ CREATE TABLE vote_transactions (
 );
 --
 CREATE TABLE reward_transactions (
-  id                 INTEGER PRIMARY KEY REFERENCES transactions,
-  hash_created_block VARCHAR NOT NULL UNIQUE
+  id INTEGER PRIMARY KEY REFERENCES transactions
 );

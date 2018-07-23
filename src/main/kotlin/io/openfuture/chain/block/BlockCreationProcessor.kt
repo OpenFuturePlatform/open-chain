@@ -1,6 +1,7 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.block.validation.BlockValidationProvider
+import io.openfuture.chain.component.converter.transaction.impl.RewardTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
@@ -18,11 +19,9 @@ import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.ConsensusService
 import io.openfuture.chain.service.DelegateService
-import io.openfuture.chain.service.RewardTransactionService
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import java.util.concurrent.TimeUnit
 
 @Component
 class BlockCreationProcessor(
@@ -33,7 +32,7 @@ class BlockCreationProcessor(
     private val consensusService: ConsensusService,
     private val clock: NodeClock,
     private val delegateService: DelegateService,
-    private val rewardTransactionService: RewardTransactionService,
+    private val rewardTransactionEntityConverter: RewardTransactionEntityConverter,
     private val consensusProperties: ConsensusProperties
 ) {
 
@@ -75,13 +74,15 @@ class BlockCreationProcessor(
         return pendingBlock
     }
 
-    private fun create(transactions: MutableList<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
+    private fun create(transactionsFromPool: MutableList<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
         val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
 
         val time = clock.networkTime()
         val privateKey = keyHolder.getPrivateKey()
         val block = when (blockType) {
             BlockType.MAIN -> {
+                val transactions = prepareTransactions(transactionsFromPool)
+
                 MainBlock(
                     privateKey,
                     previousBlock.height + 1,
@@ -104,24 +105,17 @@ class BlockCreationProcessor(
         }
 
         signCreatedBlock(block)
-
-        createRewardTransaction(transactions, block)
     }
 
-    private fun createRewardTransaction(transactions: MutableList<BaseTransaction>, block: Block) {
-        val fees = when (block) {
-            is MainBlock -> transactions.sumByDouble { it.fee }
-            is GenesisBlock -> 0.0
-            else -> throw IllegalStateException("Unknown block type")
-        }
+    private fun prepareTransactions(transactionsFromPool: MutableList<BaseTransaction>): MutableList<BaseTransaction> {
+        val fees = transactionsFromPool.sumByDouble { it.fee }
         val delegate = delegateService.getByPublicKey(HashUtils.toHexString(keyHolder.getPublicKey()))
-
         val rewardTransactionData = RewardTransactionData((fees + consensusProperties.rewardBlock!!),
-            consensusProperties.feeRewardTx!!, delegate.address, consensusProperties.genesisAddress!!, block.hash)
+            consensusProperties.feeRewardTx!!, delegate.address, consensusProperties.genesisAddress!!)
 
-//        TODO("artificial delay before broadcast of reward transaction")
-        TimeUnit.SECONDS.sleep(consensusProperties.timeSlotDuration!!)
-        rewardTransactionService.add(rewardTransactionData)
+        val rewardTransaction = rewardTransactionEntityConverter.toEntity(clock.networkTime(), rewardTransactionData)
+
+        return mutableListOf(rewardTransaction, *transactionsFromPool.toTypedArray())
     }
 
 }

@@ -1,6 +1,7 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.block.validation.BlockValidationProvider
+import io.openfuture.chain.component.converter.transaction.impl.RewardTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.crypto.key.NodeKeyHolder
@@ -14,7 +15,6 @@ import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.ConsensusService
 import io.openfuture.chain.service.DelegateService
-import io.openfuture.chain.service.RewardTransactionService
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -29,7 +29,7 @@ class BlockCreationProcessorTests : ServiceTests() {
     @Mock private lateinit var consensusService: ConsensusService
     @Mock private lateinit var clock: NodeClock
     @Mock private lateinit var delegateService: DelegateService
-    @Mock private lateinit var rewardTransactionService: RewardTransactionService
+    @Mock private lateinit var rewardTransactionEntityConverter: RewardTransactionEntityConverter
     @Mock private lateinit var consensusProperties: ConsensusProperties
 
     private lateinit var processor: BlockCreationProcessor
@@ -38,7 +38,7 @@ class BlockCreationProcessorTests : ServiceTests() {
     @Before
     fun init() {
         processor = BlockCreationProcessor(blockService, signatureCollector, keyHolder, blockValidationService,
-            consensusService, clock, delegateService, rewardTransactionService, consensusProperties)
+            consensusService, clock, delegateService, rewardTransactionEntityConverter, consensusProperties)
     }
 
     @Test(expected = IllegalArgumentException::class)

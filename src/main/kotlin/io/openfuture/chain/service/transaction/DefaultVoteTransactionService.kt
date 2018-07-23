@@ -16,11 +16,11 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultVoteTransactionService(
     repository: VoteTransactionRepository,
     walletService: WalletService,
-    nodeClock: NodeClock,
     entityConverter: VoteTransactionEntityConverter,
+    nodeClock: NodeClock,
     private val delegateService: DelegateService
-) : DefaultBaseTransactionService<VoteTransaction, VoteTransactionData>(repository,
-    walletService, nodeClock, entityConverter), VoteTransactionService {
+) : DefaultManualTransactionService<VoteTransaction, VoteTransactionData>(repository,
+    walletService, entityConverter, nodeClock), VoteTransactionService {
 
     @Transactional
     override fun addToBlock(tx: VoteTransaction, block: MainBlock): VoteTransaction {

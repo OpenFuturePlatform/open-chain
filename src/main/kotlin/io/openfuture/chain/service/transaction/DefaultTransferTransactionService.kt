@@ -9,16 +9,18 @@ import io.openfuture.chain.repository.TransferTransactionRepository
 import io.openfuture.chain.service.TransferTransactionService
 import io.openfuture.chain.service.WalletService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
     walletService: WalletService,
-    nodeClock: NodeClock,
-    entityConverter: TransferTransactionEntityConverter
-) : DefaultBaseTransactionService<TransferTransaction, TransferTransactionData>(repository,
-    walletService, nodeClock, entityConverter), TransferTransactionService {
+    entityConverter: TransferTransactionEntityConverter,
+    nodeClock: NodeClock
+) : DefaultManualTransactionService<TransferTransaction, TransferTransactionData>(repository, walletService,
+    entityConverter, nodeClock), TransferTransactionService {
 
+    @Transactional
     override fun addToBlock(tx: TransferTransaction, block: MainBlock): TransferTransaction {
         return this.commonAddToBlock(tx, block)
     }

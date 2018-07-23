@@ -4,8 +4,7 @@ class RewardTransactionData(
     amount: Double,
     fee: Double,
     recipientAddress: String,
-    senderAddress: String,
-    val hashCreatedBlock: String
+    senderAddress: String
 ) : BaseTransactionData(amount, fee, recipientAddress, senderAddress) {
 
     override fun getBytes(): ByteArray {
@@ -14,7 +13,6 @@ class RewardTransactionData(
         builder.append(fee)
         builder.append(recipientAddress)
         builder.append(senderAddress)
-        builder.append(hashCreatedBlock)
         return builder.toString().toByteArray()
     }
 

@@ -80,19 +80,23 @@ interface BaseTransactionService<Entity : BaseTransaction, Data : BaseTransactio
 
     fun add(dto: BaseTransactionDto<Data>): Entity
 
-    fun add(request: BaseTransactionRequest<Data>): Entity
+}
 
-    fun add(data: Data): Entity
+interface ManualTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> : BaseTransactionService<Entity, Data> {
+
+    fun add(request: BaseTransactionRequest<Data>): Entity
 
 }
 
-interface TransferTransactionService : BaseTransactionService<TransferTransaction, TransferTransactionData>
+interface EmbeddedTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> : BaseTransactionService<Entity, Data>
 
-interface VoteTransactionService : BaseTransactionService<VoteTransaction, VoteTransactionData>
+interface TransferTransactionService : ManualTransactionService<TransferTransaction, TransferTransactionData>
 
-interface DelegateTransactionService : BaseTransactionService<DelegateTransaction, DelegateTransactionData>
+interface VoteTransactionService : ManualTransactionService<VoteTransaction, VoteTransactionData>
 
-interface RewardTransactionService : BaseTransactionService<RewardTransaction, RewardTransactionData>
+interface DelegateTransactionService : ManualTransactionService<DelegateTransaction, DelegateTransactionData>
+
+interface RewardTransactionService : EmbeddedTransactionService<RewardTransaction, RewardTransactionData>
 
 interface DelegateService {
 
