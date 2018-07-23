@@ -75,7 +75,6 @@ class BlockCreationProcessorTests: ServiceTests() {
 
     @Test
     fun fireBlockCreationShouldCreateMainBlock() {
-        val transactions = createTransactions()
         val genesisBlock = createGenesisBlock()
         val delegate = Delegate("public_key", "host", 1234)
         genesisBlock.activeDelegates = setOf(delegate)

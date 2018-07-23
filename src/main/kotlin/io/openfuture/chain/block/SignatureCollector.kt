@@ -43,12 +43,12 @@ class SignatureCollector(
         }
     }
 
-    fun addSignatureBlock(signatureBlock: PendingBlock): Boolean {
+    fun addSignatureBlock(signatureBlock: PendingBlock) {
         if (signatureBlock.block.hash != pendingBlock.hash) {
-            return false
+            throw IllegalArgumentException("Either signature is not related to pending block")
         }
 
-        return signatures.add(signatureBlock.signature)
+        signatures.add(signatureBlock.signature)
     }
 
     fun applyBlock() {
