@@ -8,3 +8,12 @@ CREATE TABLE blocks (
   signature     VARCHAR NOT NULL,
   type_id       INTEGER NOT NULL
 );
+--
+CREATE TABLE main_blocks (
+  id INTEGER PRIMARY KEY REFERENCES blocks
+);
+--
+CREATE TABLE genesis_blocks (
+  id          INTEGER PRIMARY KEY REFERENCES blocks,
+  epoch_index BIGINT NOT NULL
+);
