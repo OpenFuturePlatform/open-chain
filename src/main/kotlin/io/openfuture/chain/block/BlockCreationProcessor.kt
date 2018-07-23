@@ -13,7 +13,7 @@ import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
-import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.property.NodeProperty
 import io.openfuture.chain.service.*
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.context.event.EventListener
@@ -28,7 +28,7 @@ class BlockCreationProcessor(
     private val consensusService: ConsensusService,
     private val clock: NodeClock,
     private val delegateService: DelegateService,
-    private val properties: NodeProperties
+    private val properties: NodeProperty
 ) {
 
     fun approveBlock(pendingBlock: PendingBlock): PendingBlock {
@@ -55,7 +55,7 @@ class BlockCreationProcessor(
         val previousBlock = service.getLastMain()
         val genesisBlock = service.getLastGenesis()
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
-        if (properties.host == nextProducer.host && properties.port == nextProducer.port) {
+        if (HashUtils.toHexString(keyHolder.getPublicKey()) == nextProducer.publicKey) {
             create(event.pendingTransactions, previousBlock, genesisBlock)
         }
     }

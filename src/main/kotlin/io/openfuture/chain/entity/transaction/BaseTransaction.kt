@@ -1,9 +1,7 @@
 package io.openfuture.chain.entity.transaction
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.base.BaseModel
-import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.MainBlock
 import javax.persistence.*
 
@@ -21,11 +19,11 @@ abstract class BaseTransaction(
     @Column(name = "recipient_address", nullable = false)
     var recipientAddress: String,
 
-    @Column(name = "sender_key", nullable = false)
-    var senderKey: String,
-
     @Column(name = "sender_address", nullable = false)
     var senderAddress: String,
+
+    @Column(name = "sender_key", nullable = false)
+    var senderPublicKey: String,
 
     @Column(name = "sender_signature", nullable = false)
     var senderSignature: String,
@@ -38,15 +36,4 @@ abstract class BaseTransaction(
     @JoinColumn(name = "block_id", nullable = true)
     var block: MainBlock? = null
 
-) : BaseModel() {
-
-    fun getBytes(): ByteArray = StringBuilder()
-        .append(timestamp)
-        .append(amount)
-        .append(recipientAddress)
-        .append(senderKey)
-        .append(senderAddress)
-        .append(senderSignature)
-        .toString().toByteArray()
-
-}
+) : BaseModel()
