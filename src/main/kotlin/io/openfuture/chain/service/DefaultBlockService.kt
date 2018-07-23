@@ -1,5 +1,6 @@
 package io.openfuture.chain.service
 
+import io.openfuture.chain.domain.transaction.RewardTransactionDto
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
@@ -44,6 +45,8 @@ class DefaultBlockService(
 
     @Transactional
     override fun save(block: MainBlock): MainBlock {
+        rewardTransactionService.add(RewardTransactionDto(block.transactions.first() as RewardTransaction))
+
         val savedBlock = mainBlockRepository.save(block)
         val transactions = block.transactions
         for (transaction in transactions) {
