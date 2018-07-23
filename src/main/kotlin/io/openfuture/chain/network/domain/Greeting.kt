@@ -10,11 +10,11 @@ data class Greeting(
 
     override fun readParams(buffer: ByteBuf) {
         address = NetworkAddress::class.java.newInstance()
-        address.get(buffer)
+        address.read(buffer)
     }
 
     override fun writeParams(buffer: ByteBuf) {
-        address.send(buffer)
+        address.write(buffer)
     }
 
 }

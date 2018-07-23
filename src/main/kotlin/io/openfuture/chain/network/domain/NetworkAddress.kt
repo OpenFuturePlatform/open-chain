@@ -10,12 +10,12 @@ data class NetworkAddress(
         var port: Int
 ) {
 
-    fun get(buffer: ByteBuf) {
+    fun read(buffer: ByteBuf) {
         host = buffer.readCharSequence(buffer.readInt(), UTF_8).toString()
         port = buffer.readInt()
     }
 
-    fun send(buffer: ByteBuf) {
+    fun write(buffer: ByteBuf) {
         buffer.writeInt(host.length)
         buffer.writeCharSequence(host, UTF_8)
         buffer.writeInt(port)

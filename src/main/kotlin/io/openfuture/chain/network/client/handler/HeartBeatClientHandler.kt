@@ -6,14 +6,12 @@ import io.openfuture.chain.network.domain.HeartBeat.Type.PING
 import io.openfuture.chain.network.domain.HeartBeat.Type.PONG
 import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
 import org.springframework.context.annotation.Scope
-import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit.SECONDS
 
 @Component
 @Scope(SCOPE_PROTOTYPE)
-@Order(Int.MAX_VALUE)
 class HeartBeatClientHandler : ClientHandler<HeartBeat>() {
 
     private var heartBeatTask: ScheduledFuture<*>? = null
@@ -27,7 +25,7 @@ class HeartBeatClientHandler : ClientHandler<HeartBeat>() {
         heartBeatTask?.cancel(true)
         heartBeatTask = ctx.channel()
                 .eventLoop()
-                .scheduleAtFixedRate({ ctx.writeAndFlush(PING) }, 20, 20, SECONDS)
+                .scheduleAtFixedRate({ ctx.writeAndFlush(HeartBeat(PING)) }, 20, 20, SECONDS)
 
         ctx.writeAndFlush(HeartBeat(PONG))
     }

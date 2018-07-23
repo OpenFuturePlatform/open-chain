@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component
 @Component
 @Scope(SCOPE_PROTOTYPE)
 class PacketEncoder(
-        private val serializer: PacketSerializer,
-        private val properties: NodeProperties,
-        private val clock: NodeClock
+    private val serializer: Packet.Serializer,
+    private val properties: NodeProperties,
+    private val clock: NodeClock
 ) : MessageToMessageEncoder<Packet>() {
 
     companion object {

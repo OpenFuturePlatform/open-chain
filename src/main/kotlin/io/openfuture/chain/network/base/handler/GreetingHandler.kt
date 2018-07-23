@@ -4,7 +4,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.domain.Greeting
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.property.NodeProperties
-import io.openfuture.chain.service.NetworkService
+import io.openfuture.chain.service.ConnectionService
 import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component
 @Component
 @Scope(SCOPE_PROTOTYPE)
 class GreetingHandler(
-        private val networkService: NetworkService,
-        private val properties: NodeProperties
+    private val service: ConnectionService,
+    private val properties: NodeProperties
 ) : CommonHandler<Greeting>() {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
@@ -22,11 +22,11 @@ class GreetingHandler(
     }
 
     override fun channelRead(ctx: ChannelHandlerContext, message: Greeting) {
-        networkService.addConnection(ctx.channel(), message.address)
+        service.addConnection(ctx.channel(), message.address)
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        networkService.removeConnection(ctx.channel())
+        service.removeConnection(ctx.channel())
         ctx.fireChannelInactive()
     }
 

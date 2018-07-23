@@ -12,16 +12,16 @@ class NetworkAddressTest {
     private val entity = NetworkAddress("127.0.0.1", 9090)
 
     @Test
-    fun sendShouldWriteExactValuesInBuffer() {
+    fun writeShouldWriteExactValuesInBuffer() {
         val actualBuffer = Unpooled.buffer()
-        entity.send(actualBuffer)
+        entity.write(actualBuffer)
         Assertions.assertThat(actualBuffer).isEqualTo(buffer)
     }
 
     @Test
-    fun getShouldFillEntityWithExactValuesFromBuffer() {
+    fun readShouldFillEntityWithExactValuesFromBuffer() {
         val actualEntity = NetworkAddress::class.java.newInstance()
-        actualEntity.get(buffer)
+        actualEntity.read(buffer)
         Assertions.assertThat(actualEntity).isEqualTo(entity)
     }
 

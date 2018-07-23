@@ -13,7 +13,7 @@ data class Addresses(
         val list = mutableListOf<NetworkAddress>()
         for (index in 1..size) {
             val address = NetworkAddress::class.java.newInstance()
-            address.get(buffer)
+            address.read(buffer)
             list.add(address)
         }
         values = list
@@ -22,7 +22,7 @@ data class Addresses(
     override fun writeParams(buffer: ByteBuf) {
         buffer.writeInt(values.size)
         for (address in values) {
-            address.send(buffer)
+            address.write(buffer)
         }
     }
 

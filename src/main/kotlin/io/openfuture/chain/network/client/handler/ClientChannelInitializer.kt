@@ -1,23 +1,18 @@
 package io.openfuture.chain.network.client.handler
 
 import io.netty.channel.ChannelPipeline
-import io.openfuture.chain.network.base.PacketDecoder
-import io.openfuture.chain.network.base.PacketEncoder
 import io.openfuture.chain.network.base.handler.BaseChannelInitializer
-import io.openfuture.chain.network.base.handler.CommonHandler
+import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
 @Component
 class ClientChannelInitializer(
-        decoder: PacketDecoder,
-        encoder: PacketEncoder,
-        connectionHandler: ConnectionClientHandler,
-        commonHandlers: Array<CommonHandler<*>>,
-        private val clientHandlers: Array<ClientHandler<*>>
-) : BaseChannelInitializer(decoder, encoder, connectionHandler, commonHandlers) {
+    context: ApplicationContext
+) : BaseChannelInitializer(context, ConnectionClientHandler::class.java) {
 
     override fun initChannel(pipeline: ChannelPipeline) {
-        pipeline.addLast(*clientHandlers)
+        pipeline.addLast(context.getBean(TimeSyncClientHandler::class.java))
+        pipeline.addLast(context.getBean(HeartBeatClientHandler::class.java))
     }
 
 }
