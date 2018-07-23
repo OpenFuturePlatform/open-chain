@@ -5,8 +5,11 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "genesis_blocks")
-class GenesisBlock(privateKey: ByteArray, height: Long,
-        previousHash: String, timestamp: Long,
+class GenesisBlock(
+    privateKey: ByteArray,
+    height: Long,
+    previousHash: String,
+    timestamp: Long,
 
     @Column(name = "epoch_index", nullable = false)
     var epochIndex: Long,

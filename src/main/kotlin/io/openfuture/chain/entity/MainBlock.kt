@@ -7,8 +7,12 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "main_blocks")
-class MainBlock(privateKey: ByteArray, height: Long, previousHash: String,
-        merkleHash: String, timestamp: Long,
+class MainBlock(
+    privateKey: ByteArray,
+    height: Long,
+    previousHash: String,
+    merkleHash: String,
+    timestamp: Long,
 
     @OneToMany(mappedBy = "block")
     var transactions: MutableList<BaseTransaction>
