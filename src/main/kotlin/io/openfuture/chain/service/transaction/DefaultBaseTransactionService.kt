@@ -7,14 +7,17 @@ import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BaseTransactionRepository
 import io.openfuture.chain.service.BaseTransactionService
 import org.springframework.transaction.annotation.Transactional
+import java.util.stream.Collectors
 
 abstract class DefaultBaseTransactionService<Entity : BaseTransaction>(
     protected val repository: BaseTransactionRepository<Entity>
 ) : BaseTransactionService<Entity> {
 
     @Transactional(readOnly = true)
-    override fun getAllPending(): MutableSet<Entity> {
-        return repository.findAllByBlockIsNull()
+    override fun getAllPending(): MutableSet<Entity> = repository.findAllByBlockIsNull()
+
+    override fun getPendingFirstWithLimit(limit: Int): MutableSet<Entity> {
+        return getAllPending().stream().limit(limit.toLong()).collect(Collectors.toSet())
     }
 
     @Transactional(readOnly = true)

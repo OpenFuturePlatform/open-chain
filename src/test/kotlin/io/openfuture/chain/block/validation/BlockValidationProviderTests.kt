@@ -9,12 +9,10 @@ import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.service.DefaultBlockService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
-import org.mockito.BDDMockito.mock
 import org.mockito.Mock
 import org.mockito.Mockito
 import java.lang.IllegalArgumentException
@@ -115,7 +113,7 @@ class BlockValidationProviderTests : ServiceTests() {
         )
 
         given(mainBlockService.isValid(block)).willReturn(true)
-        given(blockService.getLast()).willReturn(previousBlock)
+        given(blockService.findLast()).willReturn(previousBlock)
 
         val isValid = blockValidationService.isValid(block)
 
@@ -124,6 +122,15 @@ class BlockValidationProviderTests : ServiceTests() {
 
     @Test
     fun isValidShouldReturnFalseWhenItIsMainBlock() {
+        val lastBlock = MainBlock(
+            ByteArray(1),
+            123,
+            "prev_block_hash",
+            "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
+            1512345678L,
+            ByteArray(1),
+            mutableListOf()
+        )
         val block = MainBlock(
             ByteArray(1),
             123,
@@ -159,6 +166,8 @@ class BlockValidationProviderTests : ServiceTests() {
             )
         )
 
+        given(blockService.findLast()).willReturn(lastBlock)
+
         val isValid = blockValidationService.isValid(block)
 
         assertThat(isValid).isFalse()
@@ -166,8 +175,6 @@ class BlockValidationProviderTests : ServiceTests() {
 
     @Test
     fun isValidShouldReturnTrueWhenItIsGenesisBlock() {
-        val height = 123L
-        val prevHash = "08a6f91ee999e7d8c89861ee5eee401b0fed8ba2a83f7ab32de5f8dae0c06024"
         val previousBlock = GenesisBlock(
             ByteArray(1),
             122,
@@ -179,8 +186,8 @@ class BlockValidationProviderTests : ServiceTests() {
         )
         val block = GenesisBlock(
             ByteArray(1),
-            height,
-            prevHash,
+            123L,
+            "3537267ead6dd974fbeef4be92999749b44c111bc24e1b2f8d67b8570b2b8a2d",
             currentTime,
             ByteArray(1),
             2L,
@@ -188,7 +195,7 @@ class BlockValidationProviderTests : ServiceTests() {
         )
 
         given(genesisBlockService.isValid(block)).willReturn(true)
-        given(blockService.getLast()).willReturn(previousBlock)
+        given(blockService.findLast()).willReturn(previousBlock)
 
         val isValid = blockValidationService.isValid(block)
 
@@ -197,6 +204,15 @@ class BlockValidationProviderTests : ServiceTests() {
 
     @Test
     fun isValidShouldReturnFalseWhenItIsGenesisBlock() {
+        val lastBlock = MainBlock(
+            ByteArray(1),
+            123,
+            "prev_block_hash",
+            "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
+            1512345678L,
+            ByteArray(1),
+            mutableListOf()
+        )
         val block = GenesisBlock(
             ByteArray(1),
             123,
@@ -206,6 +222,8 @@ class BlockValidationProviderTests : ServiceTests() {
             1L,
             setOf()
         )
+
+        given(blockService.findLast()).willReturn(lastBlock)
 
         val isValid = blockValidationService.isValid(block)
 

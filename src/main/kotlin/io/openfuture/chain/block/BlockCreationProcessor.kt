@@ -5,7 +5,6 @@ import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
 import io.openfuture.chain.entity.Block
@@ -15,15 +14,21 @@ import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.property.NodeProperties
-import io.openfuture.chain.service.*
+import io.openfuture.chain.service.BaseTransactionService
+import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.ConsensusService
+import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.util.BlockUtils
-import org.springframework.context.event.EventListener
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 import org.springframework.stereotype.Component
+import java.util.*
+import javax.annotation.PostConstruct
 
 @Component
 class BlockCreationProcessor(
     private val mainBlockService: BlockService<MainBlock>,
     private val genesisBlockService: BlockService<GenesisBlock>,
+    private val baseTransactionService: BaseTransactionService<BaseTransaction>,
     private val signatureCollector: SignatureCollector,
     private val keyHolder: NodeKeyHolder,
     private val validationService: BlockValidationProvider,
@@ -34,6 +39,21 @@ class BlockCreationProcessor(
     private val consensusProperties: ConsensusProperties,
     private val timeSlot: TimeSlot
 ) {
+
+    private val scheduler = ThreadPoolTaskScheduler()
+
+
+    @PostConstruct
+    private fun init() {
+        clock.networkTime()
+        val startBlockCreationDate = Date(clock.networkTime())
+        scheduler.initialize()
+        scheduler.scheduleAtFixedRate(
+            { fireBlockCreation() },
+            startBlockCreationDate,
+            consensusProperties.timeSlotDuration!!
+        )
+    }
 
     fun approveBlock(pendingBlock: PendingBlock): PendingBlock {
         val block = pendingBlock.block
@@ -59,13 +79,14 @@ class BlockCreationProcessor(
         return signCreatedBlock(block)
     }
 
-    @EventListener
-    fun fireBlockCreation(event: BlockCreationEvent) {
-        val previousBlock = mainBlockService.getLast()
-        val genesisBlock = genesisBlockService.getLast()
+    fun fireBlockCreation() {
+        val previousBlock = mainBlockService.findLast()
+        val genesisBlock = genesisBlockService.findLast()!!
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
         if (properties.host == nextProducer.host && properties.port == nextProducer.port) {
-            create(event.pendingTransactions, previousBlock, genesisBlock)
+            val pendingTransactions
+                = baseTransactionService.getPendingFirstWithLimit(consensusProperties.blockCapacity!!)
+            create(ArrayList(pendingTransactions), previousBlock, genesisBlock)
         }
     }
 
@@ -78,18 +99,33 @@ class BlockCreationProcessor(
         return pendingBlock
     }
 
-    private fun create(transactions: MutableList<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
+    private fun create(transactions: MutableList<BaseTransaction>, previousBlock: Block?, genesisBlock: GenesisBlock) {
+        if (transactions.size != consensusProperties.blockCapacity) {
+            return
+        }
+
         val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
 
         val time = clock.networkTime()
         val privateKey = keyHolder.getPrivateKey()
         val publicKey = keyHolder.getPublicKey()
+
+        val height: Long
+        val hash: String
+        if (previousBlock != null) {
+            height = previousBlock.height + 1
+            hash = previousBlock.hash
+        } else {
+            height = 1
+            hash = ""
+        }
+
         val block = when(blockType) {
             BlockType.MAIN -> {
                 MainBlock(
                     privateKey,
-                    previousBlock.height + 1,
-                    previousBlock.hash,
+                    height,
+                    hash,
                     BlockUtils.calculateMerkleRoot(transactions),
                     time,
                     publicKey,
@@ -99,8 +135,8 @@ class BlockCreationProcessor(
             BlockType.GENESIS -> {
                 GenesisBlock(
                     privateKey,
-                    previousBlock.height + 1,
-                    previousBlock.hash,
+                    height,
+                    hash,
                     time,
                     publicKey,
                     genesisBlock.epochIndex + 1,

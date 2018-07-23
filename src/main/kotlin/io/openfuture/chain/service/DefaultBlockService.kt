@@ -14,7 +14,7 @@ class DefaultBlockService(
         return blockRepository.findByHash(hash)!!
     }
 
-    override fun getLast(): Block {
+    override fun findLast(): Block {
         return blockRepository.findFirstByOrderByHeightDesc()!!
     }
 

@@ -31,13 +31,26 @@ object BlockUtils {
         return HashUtils.toHexString(doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
     }
 
+    fun calculateDelegatesHash(activeDelegates: Set<Delegate>): String {
+        val delegatesContent = StringBuilder()
+        for (activeDelegate in activeDelegates) {
+            delegatesContent.append(activeDelegate.host)
+            delegatesContent.append(activeDelegate.port)
+            delegatesContent.append(activeDelegate.publicKey)
+            delegatesContent.append(activeDelegate.rating)
+        }
+        val hash = HashUtils.doubleSha256(delegatesContent.toString().toByteArray(Charsets.UTF_8))
+        return HashUtils.toHexString(hash)
+    }
+
     fun calculateHash(previousHash: String, timestamp: Long, height: Long, merkleRoot: String = ""): ByteArray {
         val headers = previousHash + merkleRoot + timestamp + height
         return HashUtils.doubleSha256(headers.toByteArray())
     }
 
-    fun getBlockProducer(delegates: Set<Delegate>, previousBlock: Block): Delegate {
-        val random = Random(previousBlock.timestamp)
+    fun getBlockProducer(delegates: Set<Delegate>, previousBlock: Block?): Delegate {
+        val blocTimestamp = if (previousBlock != null) previousBlock.timestamp else 0
+        val random = Random(blocTimestamp)
         return delegates.shuffled(random).first()
     }
 

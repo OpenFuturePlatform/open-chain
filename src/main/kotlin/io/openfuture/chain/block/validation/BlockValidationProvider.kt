@@ -31,7 +31,7 @@ class BlockValidationProvider(
             throw IllegalArgumentException("wrong block type is found")
         }
 
-        val lastBlock = blockService.getLast()
+        val lastBlock = blockService.findLast()!!
         return blockIsValid
                 && timeSlot.verifyTimeSlot(currentTime, block)
                 && verifyHash(block)

@@ -81,7 +81,7 @@ class SignatureCollectorTests : ServiceTests() {
 
         given(clock.networkTime()).willReturn(10000L)
         given(timeSlot.getEpochTime()).willReturn(1L)
-        given(genesisBlockService.getLast()).willReturn(genesisBlock)
+        given(genesisBlockService.findLast()).willReturn(genesisBlock)
         val signatureBlock = createGenesisPendingBlock()
         signatureCollector.setPendingBlock(signatureBlock)
         signatureCollector.addSignatureBlock(signatureBlock)
@@ -103,7 +103,7 @@ class SignatureCollectorTests : ServiceTests() {
 
         given(clock.networkTime()).willReturn(10000L)
         given(timeSlot.getEpochTime()).willReturn(1L)
-        given(genesisBlockService.getLast()).willReturn(genesisBlock)
+        given(genesisBlockService.findLast()).willReturn(genesisBlock)
         val signatureBlock = createMainPendingBlock()
         signatureCollector.setPendingBlock(signatureBlock)
         signatureCollector.addSignatureBlock(signatureBlock)

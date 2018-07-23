@@ -4,7 +4,6 @@ import io.openfuture.chain.block.validation.BlockValidationProvider
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.crypto.key.NodeKeyHolder
-import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
 import io.openfuture.chain.entity.Block
@@ -15,6 +14,7 @@ import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.service.BaseTransactionService
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.ConsensusService
 import io.openfuture.chain.service.DelegateService
@@ -27,14 +27,15 @@ class BlockCreationProcessorTests: ServiceTests() {
 
     @Mock private lateinit var mainBlockService: BlockService<MainBlock>
     @Mock private lateinit var genesisBlockService: BlockService<GenesisBlock>
+    @Mock private lateinit var baseTransactionService: BaseTransactionService<BaseTransaction>
     @Mock private lateinit var signatureCollector: SignatureCollector
     @Mock private lateinit var keyHolder: NodeKeyHolder
     @Mock private lateinit var blockValidationService: BlockValidationProvider
     @Mock private lateinit var consensusService: ConsensusService
     @Mock private lateinit var clock: NodeClock
     @Mock private lateinit var delegateService: DelegateService
-    @Mock private lateinit var consensusProperties: ConsensusProperties
     @Mock private lateinit var properties: NodeProperties
+    @Mock private lateinit var consensusProperties: ConsensusProperties
     @Mock private lateinit var timeSlot: TimeSlot
 
     private lateinit var processor: BlockCreationProcessor
@@ -42,9 +43,10 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Before
     fun init() {
         val block = createMainBlock()
-        given(mainBlockService.getLast()).willReturn(block)
-        processor = BlockCreationProcessor(mainBlockService, genesisBlockService, signatureCollector, keyHolder,
-            blockValidationService, consensusService, clock, delegateService, properties, consensusProperties, timeSlot)
+        given(mainBlockService.findLast()).willReturn(block)
+        processor = BlockCreationProcessor(mainBlockService, genesisBlockService, baseTransactionService,
+            signatureCollector, keyHolder, blockValidationService, consensusService, clock, delegateService, properties,
+            consensusProperties, timeSlot)
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -77,11 +79,10 @@ class BlockCreationProcessorTests: ServiceTests() {
         val genesisBlock = createGenesisBlock()
         val delegate = Delegate("public_key", "host", 1234)
         genesisBlock.activeDelegates = setOf(delegate)
-        val event = BlockCreationEvent(transactions)
 
-        given(genesisBlockService.getLast()).willReturn(genesisBlock)
+        given(genesisBlockService.findLast()).willReturn(genesisBlock)
 
-        processor.fireBlockCreation(event)
+        processor.fireBlockCreation()
     }
 
     private fun createPendingBlock(block: Block): PendingBlock {

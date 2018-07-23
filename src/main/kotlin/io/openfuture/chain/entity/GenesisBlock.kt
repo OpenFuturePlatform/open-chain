@@ -1,8 +1,7 @@
 package io.openfuture.chain.entity
 
 import io.openfuture.chain.crypto.util.HashUtils
-import org.apache.commons.lang3.StringUtils
-import java.security.PublicKey
+import io.openfuture.chain.util.BlockUtils
 import javax.persistence.*
 
 @Entity
@@ -13,11 +12,11 @@ class GenesisBlock(privateKey: ByteArray, height: Long,
     @Column(name = "epoch_index", nullable = false)
     var epochIndex: Long,
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "delegate2genesis",
         joinColumns = [JoinColumn(name = "genesis_id")],
         inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
     var activeDelegates: Set<Delegate>
 
-) : Block(privateKey, height, previousHash, StringUtils.EMPTY, timestamp, BlockType.GENESIS.id,
-    HashUtils.toHexString(publicKey))
+) : Block(privateKey, height, previousHash, BlockUtils.calculateDelegatesHash(activeDelegates), timestamp,
+    BlockType.GENESIS.id, HashUtils.toHexString(publicKey))

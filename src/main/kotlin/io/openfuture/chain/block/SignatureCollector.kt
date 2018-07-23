@@ -30,12 +30,15 @@ class SignatureCollector(
     private lateinit var pendingBlock: Block
     private var active: Boolean = false
 
+    init {
+        scheduler.initialize()
+    }
+
 
     fun setPendingBlock(generatedBlock: PendingBlock) {
         if (!active) {
             this.active = true
             this.pendingBlock = generatedBlock.block
-            scheduler.initialize()
             scheduler.scheduleWithFixedDelay({ applyBlock() }, properties.timeSlotDuration!! / 2)
         }
     }
@@ -53,7 +56,7 @@ class SignatureCollector(
             if (timeSlot.getEpochTime() + properties.timeSlotDuration!! > clock.networkTime()) {
                 return
             }
-            val genesisBlock = genesisBlockService.getLast()
+            val genesisBlock = genesisBlockService.findLast()!!
             if (signatures.size.toDouble() / genesisBlock.activeDelegates.size > APPROVAL_THRESHOLD) {
                 if (pendingBlock is MainBlock) {
                     mainBlockService.save(pendingBlock as MainBlock)

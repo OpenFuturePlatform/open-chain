@@ -15,7 +15,7 @@ class TimeSlot(
 ) {
 
     fun getEpochTime(): Long {
-        val genesis = genesisBlockService.getLast()
+        val genesis = genesisBlockService.findLast()
         return genesis.timestamp
     }
 

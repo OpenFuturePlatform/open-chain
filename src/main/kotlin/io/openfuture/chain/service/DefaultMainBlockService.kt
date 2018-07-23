@@ -20,8 +20,7 @@ class DefaultMainBlockService(
 ) : BlockService<MainBlock> {
 
     @Transactional(readOnly = true)
-    override fun getLast(): MainBlock = blockRepository.findFirstByOrderByHeightDesc()
-        ?: throw NotFoundException("Last Main block not found!")
+    override fun findLast(): MainBlock? = blockRepository.findFirstByOrderByHeightDesc()
 
     override fun get(hash: String): MainBlock = blockRepository.findByHash(hash)
         ?: throw NotFoundException("Block with hash:$hash not found ")
@@ -30,14 +29,20 @@ class DefaultMainBlockService(
 
     override fun isValid(block: MainBlock): Boolean {
         val currentTime = clock.networkTime()
-        val lastBlock = getLast()
+        val lastBlock = findLast()
 
-        return timeSlot.verifyTimeSlot(currentTime, block)
+        val lastBlockIsValid = if (lastBlock != null) {
+            verifyPreviousHash(block, lastBlock)
+                && verifyHeight(block, lastBlock)
+                && verifyTimestamp(block, lastBlock)
+        } else {
+            true
+        }
+
+        return lastBlockIsValid
+            && timeSlot.verifyTimeSlot(currentTime, block)
             && isMainBlockValid(block)
             && verifyHash(block)
-            && verifyPreviousHash(block, lastBlock)
-            && verifyHeight(block, lastBlock)
-            && verifyTimestamp(block, lastBlock)
     }
 
     private fun isMainBlockValid(block: Block): Boolean {
