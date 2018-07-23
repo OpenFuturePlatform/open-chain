@@ -51,6 +51,7 @@ class BlockValidationProviderTests : ServiceTests() {
             "previous_hash",
             "merkle_hash",
             1510000000L,
+            ByteArray(1),
             mutableListOf(
                 VoteTransaction(
                     1500000000L,
@@ -84,6 +85,7 @@ class BlockValidationProviderTests : ServiceTests() {
             prevHash,
             merkleHash,
             currentTime,
+            ByteArray(1),
             mutableListOf(
                 VoteTransaction(
                     1500000000L,
@@ -128,6 +130,7 @@ class BlockValidationProviderTests : ServiceTests() {
             "prev_block_hash",
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             1512345678L,
+            ByteArray(1),
             mutableListOf(
                 VoteTransaction(
                     1500000000L,
@@ -170,6 +173,7 @@ class BlockValidationProviderTests : ServiceTests() {
             122,
             "previous_hash",
             1510000000L,
+            ByteArray(1),
             1L,
             setOf()
         )
@@ -178,6 +182,7 @@ class BlockValidationProviderTests : ServiceTests() {
             height,
             prevHash,
             currentTime,
+            ByteArray(1),
             2L,
             setOf()
         )
@@ -197,6 +202,7 @@ class BlockValidationProviderTests : ServiceTests() {
             123,
             "prev_block_hash",
             1512345678L,
+            ByteArray(1),
             1L,
             setOf()
         )

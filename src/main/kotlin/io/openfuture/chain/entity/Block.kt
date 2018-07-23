@@ -28,6 +28,9 @@ abstract class Block(
     @Column(name = "typeId", nullable = false)
     var typeId: Int,
 
+    @Column(name = "public_key", nullable = false)
+    val publicKey: String,
+
     @Column(name = "hash", nullable = false)
     var hash: String = ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height).toByteArray())),
 

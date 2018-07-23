@@ -93,19 +93,21 @@ class BlockCreationProcessorTests: ServiceTests() {
     }
 
     private fun createMainBlock() = MainBlock(
-        ByteArray(1),
+        ByteArray(32),
         123,
         "prev_block_hash",
         "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
         1512345678L,
+        ByteArray(32),
         createTransactions()
     )
 
     private fun createGenesisBlock() = GenesisBlock(
-        ByteArray(1),
+        ByteArray(32),
         123,
         "prev_block_hash",
         1512345678L,
+        ByteArray(32),
         1,
         setOf(Delegate("public_key", "host1", 1234), Delegate("public_key2", "host2", 1234), Delegate("public_key3", "host3", 1234))
     )

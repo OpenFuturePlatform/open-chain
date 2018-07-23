@@ -87,6 +87,7 @@ class BlockCreationProcessor(
 
         val time = clock.networkTime()
         val privateKey = keyHolder.getPrivateKey()
+        val publicKey = keyHolder.getPublicKey()
         val block = when(blockType) {
             BlockType.MAIN -> {
                 MainBlock(
@@ -95,6 +96,7 @@ class BlockCreationProcessor(
                     previousBlock.hash,
                     BlockUtils.calculateMerkleRoot(transactions),
                     time,
+                    publicKey,
                     transactions
                 )
             }
@@ -104,6 +106,7 @@ class BlockCreationProcessor(
                     previousBlock.height + 1,
                     previousBlock.hash,
                     time,
+                    publicKey,
                     genesisBlock.epochIndex + 1,
                     delegateService.getActiveDelegates()
                 )
