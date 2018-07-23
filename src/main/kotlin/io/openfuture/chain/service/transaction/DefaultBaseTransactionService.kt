@@ -1,6 +1,5 @@
 package io.openfuture.chain.service.transaction
 
-import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.exception.LogicException
@@ -23,7 +22,7 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction>(
         ?: throw NotFoundException("Transaction with hash: $hash not exist!")
 
     @Transactional(readOnly = true)
-    override fun getByBlock(block: Block): List<Entity> = repository.findAllByBlock(block)
+    override fun getByBlock(block: MainBlock): List<Entity> = repository.findAllByBlock(block)
 
     @Transactional
     override fun addToBlock(hash: String, block: MainBlock): Entity {

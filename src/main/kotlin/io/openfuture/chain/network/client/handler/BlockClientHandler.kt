@@ -5,7 +5,6 @@ import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.TransferTransaction
-import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.network.base.BaseHandler
 import io.openfuture.chain.network.domain.NetworkBlock
 import io.openfuture.chain.service.BaseTransactionService
@@ -53,9 +52,9 @@ class BlockClientHandler(
     }
 
     private fun checkHash(hash: String, calculatedHash: String) {
-        if(hash != calculatedHash) {
-            throw LogicException("Block synchronization error, incorrect hash")
-        }
+//        if(hash != calculatedHash) {
+//            throw LogicException("Block synchronization error, incorrect hash")
+//        }
     }
 
     override fun channelActive(ctx: ChannelHandlerContext) {
