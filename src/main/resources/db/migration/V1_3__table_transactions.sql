@@ -1,7 +1,7 @@
 CREATE TABLE transactions (
   id                INTEGER PRIMARY KEY,
-  timestamp         BIGINT NOT NULL,
-  amount            BIGINT NOT NULL,
+  timestamp         BIGINT  NOT NULL,
+  amount            BIGINT  NOT NULL,
   recipient_address VARCHAR NOT NULL,
   sender_key        VARCHAR NOT NULL,
   sender_address    VARCHAR NOT NULL,
@@ -15,13 +15,13 @@ CREATE TABLE transfer_transactions (
 );
 --
 CREATE TABLE delegate_transactions (
-  id               INTEGER PRIMARY KEY REFERENCES transactions,
-  delegate_key     VARCHAR NOT NULL UNIQUE
+  id           INTEGER PRIMARY KEY REFERENCES transactions,
+  delegate_key VARCHAR UNIQUE NOT NULL
 );
 --
 CREATE TABLE vote_types (
-  id  INT PRIMARY KEY,
-  key VARCHAR NOT NULL UNIQUE
+  id  INT     PRIMARY KEY,
+  key VARCHAR UNIQUE NOT NULL
 );
 
 INSERT INTO vote_types (id, key) VALUES (1, 'FOR');

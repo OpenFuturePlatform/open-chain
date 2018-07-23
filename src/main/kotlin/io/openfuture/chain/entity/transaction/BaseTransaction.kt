@@ -28,7 +28,7 @@ abstract class BaseTransaction(
     @Column(name = "sender_signature", nullable = false)
     var senderSignature: String,
 
-    @Column(name = "hash", nullable = false)
+    @Column(name = "hash", nullable = false, unique = true)
     var hash: String,
 
     @JsonIgnore

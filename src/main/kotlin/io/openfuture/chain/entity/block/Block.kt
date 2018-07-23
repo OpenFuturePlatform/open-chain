@@ -28,7 +28,7 @@ abstract class Block(
     @Column(name = "typeId", nullable = false)
     var typeId: Int,
 
-    @Column(name = "hash", nullable = false)
+    @Column(name = "hash", nullable = false, unique = true)
     var hash: String = ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height).toByteArray())),
 
     @Column(name = "signature", nullable = false)

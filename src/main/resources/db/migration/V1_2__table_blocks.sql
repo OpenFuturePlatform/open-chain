@@ -1,7 +1,7 @@
 CREATE TABLE blocks (
   id            INTEGER PRIMARY KEY,
-  hash          VARCHAR NOT NULL,
-  height        BIGINT NOT NULL,
+  hash          VARCHAR UNIQUE NOT NULL,
+  height        BIGINT  NOT NULL,
   previous_hash VARCHAR NOT NULL,
   merkle_hash   VARCHAR NOT NULL,
   timestamp     BIGINT  NOT NULL,
@@ -15,5 +15,5 @@ CREATE TABLE main_blocks (
 --
 CREATE TABLE genesis_blocks (
   id          INTEGER PRIMARY KEY REFERENCES blocks,
-  epoch_index BIGINT NOT NULL
+  epoch_index BIGINT  NOT NULL
 );
