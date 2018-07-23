@@ -2,7 +2,8 @@ package io.openfuture.chain.service.transaction
 
 import io.openfuture.chain.component.converter.transaction.TransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
-import io.openfuture.chain.component.validator.transaction.TransactionValidator
+import io.openfuture.chain.crypto.signature.SignatureManager
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
@@ -10,6 +11,7 @@ import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.exception.NotFoundException
+import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.repository.BaseTransactionRepository
 import io.openfuture.chain.service.BaseTransactionService
 import io.openfuture.chain.service.WalletService
@@ -19,8 +21,7 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
     protected val repository: BaseTransactionRepository<Entity>,
     protected val walletService: WalletService,
     private val nodeClock: NodeClock,
-    private val entityConverter: TransactionEntityConverter<Entity, Data>,
-    private val validator: TransactionValidator<Entity, Data>
+    private val entityConverter: TransactionEntityConverter<Entity, Data>
 ) : BaseTransactionService<Entity, Data> {
 
     @Transactional(readOnly = true)
@@ -34,7 +35,7 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
 
     @Transactional
     override fun add(dto: BaseTransactionDto<Data>): Entity {
-        validator.validate(dto)
+        validate(dto)
 
         val transaction = repository.findOneByHash(dto.hash)
         if (null != transaction) {
@@ -46,7 +47,7 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
 
     @Transactional
     override fun add(request: BaseTransactionRequest<Data>): Entity {
-        validator.validate(request)
+        validate(request)
         return saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), request))
     }
 
@@ -55,7 +56,7 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
         return saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), data))
     }
 
-    protected fun commonAddToBlock(tx: Entity, block: MainBlock): Entity {
+    protected fun commonToBlock(tx: Entity, block: MainBlock): Entity {
         val persistTx = this.get(tx.hash)
 
         if (null != persistTx.block) {
@@ -66,9 +67,41 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
         return repository.save(persistTx)
     }
 
+    protected abstract fun validate(dto: BaseTransactionDto<Data>)
+
+    protected abstract fun validate(request: BaseTransactionRequest<Data>)
+
     private fun saveAndBroadcast(tx: Entity): Entity {
         return repository.save(tx)
         //todo: networkService.broadcast(transaction.toMessage)
+    }
+
+    protected fun defaultValidate(data: Data, signature: String, publicKey: String) {
+        if (!isValidaSignature(data, signature, publicKey)) {
+            throw ValidationException("Invalid transaction signature")
+        }
+
+        if (!isValidSenderBalance(data.senderAddress, data.amount)) {
+            throw ValidationException("Invalid sender balance")
+        }
+    }
+
+    private fun isValidaSignature(data: Data, signature: String, publicKey: String): Boolean {
+        return SignatureManager.verify(data.getBytes(), signature, HashUtils.fromHexString(publicKey))
+    }
+
+    private fun isValidSenderBalance(senderAddress: String, amount: Long): Boolean {
+        val balance = walletService.getBalance(senderAddress)
+        val pendingTransactions= getAllPending()
+        val unconfirmedOutput = pendingTransactions
+            .filter { it.senderAddress == senderAddress }
+            .map { it.amount }.sum()
+
+        val unspentBalance = balance -  unconfirmedOutput
+        if (unspentBalance < amount) {
+            return false
+        }
+        return true
     }
 
 }

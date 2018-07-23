@@ -82,7 +82,7 @@ interface BaseTransactionService<Entity : BaseTransaction, Data: BaseTransaction
 
     fun get(hash: String): Entity
 
-    fun addToBlock(tx: Entity, block: MainBlock): Entity
+    fun toBlock(tx: Entity, block: MainBlock): Entity
 
     fun add(dto: BaseTransactionDto<Data>): Entity
 
@@ -123,8 +123,6 @@ interface WalletService {
     fun getByAddress(address: String): Wallet
 
     fun getBalance(address: String): Long
-
-    fun getUnspentBalance(address: String): Long
 
     fun save(wallet: Wallet)
 

@@ -27,8 +27,7 @@ class BlockCreationProcessor(
     private val validationService: BlockValidationProvider,
     private val consensusService: ConsensusService,
     private val clock: NodeClock,
-    private val delegateService: DelegateService,
-    private val properties: NodeProperty
+    private val delegateService: DelegateService
 ) {
 
     fun approveBlock(pendingBlock: PendingBlock): PendingBlock {

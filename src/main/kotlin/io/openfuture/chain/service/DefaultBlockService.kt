@@ -59,8 +59,8 @@ class DefaultBlockService(
 
     private fun addTransactionToBlock(tx: BaseTransaction, block: MainBlock) {
         when (tx) {
-            is VoteTransaction -> voteTransactionService.addToBlock(tx, block)
-            is TransferTransaction -> transferTransactionService.addToBlock(tx, block)
+            is VoteTransaction -> voteTransactionService.toBlock(tx, block)
+            is TransferTransaction -> transferTransactionService.toBlock(tx, block)
         }
     }
 

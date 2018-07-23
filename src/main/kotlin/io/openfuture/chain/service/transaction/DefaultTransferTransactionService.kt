@@ -2,7 +2,8 @@ package io.openfuture.chain.service.transaction
 
 import io.openfuture.chain.component.converter.transaction.impl.TransferTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
-import io.openfuture.chain.component.validator.transaction.impl.TransferTransactionValidator
+import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
+import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.TransferTransactionData
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.TransferTransaction
@@ -16,13 +17,20 @@ class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
     walletService: WalletService,
     nodeClock: NodeClock,
-    entityConverter: TransferTransactionEntityConverter,
-    validator: TransferTransactionValidator
+    entityConverter: TransferTransactionEntityConverter
 ) : DefaultBaseTransactionService<TransferTransaction, TransferTransactionData>(repository,
-    walletService, nodeClock, entityConverter, validator), TransferTransactionService {
+    walletService, nodeClock, entityConverter), TransferTransactionService {
 
-    override fun addToBlock(tx: TransferTransaction, block: MainBlock): TransferTransaction {
-        return this.commonAddToBlock(tx, block)
+    override fun toBlock(tx: TransferTransaction, block: MainBlock): TransferTransaction {
+        return this.commonToBlock(tx, block)
+    }
+
+    override fun validate(dto: BaseTransactionDto<TransferTransactionData>) {
+        this.defaultValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
+    }
+
+    override fun validate(request: BaseTransactionRequest<TransferTransactionData>) {
+        this.defaultValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
     }
 
 }

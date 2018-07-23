@@ -28,12 +28,6 @@ class DefaultWalletService(
     override fun getBalance(address: String): Long =
         repository.findOneByAddress(address)?.balance ?: DEFAULT_WALLET_BALANCE
 
-    @Transactional(readOnly = true)
-    override fun getUnspentBalance(address: String): Long {
-        val wallet = this.getByAddress(address)
-        return wallet.balance - wallet.unconfirmedOutput
-    }
-
     @Transactional
     override fun save(wallet: Wallet) {
         repository.save(wallet)
