@@ -23,7 +23,7 @@ class MainBlockValidator(
             return false
         }
 
-        if (!verifyRewardTransaction(mainBlock)) {
+        if (!verifyRewardTransaction(transactions, mainBlock.getPublicKey())) {
             return false
         }
 
@@ -36,12 +36,10 @@ class MainBlockValidator(
 
     override fun getTypeId(): Int = BlockType.MAIN.id
 
-    private fun verifyRewardTransaction(block: MainBlock): Boolean {
-        val transactions = block.transactions
-
+    private fun verifyRewardTransaction(transactions: List<BaseTransaction>, senderPublicKey: String): Boolean {
         val rewardTransaction = transactions.first() as? RewardTransaction ?: return false
 
-        if (rewardTransaction.senderPublicKey != block.getPublicKey()) {
+        if (rewardTransaction.senderPublicKey != senderPublicKey) {
             return false
         }
 
