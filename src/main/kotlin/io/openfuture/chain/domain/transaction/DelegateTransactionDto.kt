@@ -1,31 +1,22 @@
 package io.openfuture.chain.domain.transaction
 
-import io.openfuture.chain.domain.delegate.DelegateDto
+import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
 import io.openfuture.chain.entity.transaction.DelegateTransaction
-import io.openfuture.chain.network.domain.NetworkAddress
 
-class DelegateTransactionDto(timestamp: Long, amount: Double, recipientAddress: String, senderKey: String,
-                             senderAddress: String, senderSignature: String, hash: String,
-                             val delegateDto: DelegateDto
-) : BaseTransactionDto(timestamp, amount, recipientAddress, senderKey, senderAddress, senderSignature,
-    hash) {
+class DelegateTransactionDto(
+    data: DelegateTransactionData,
+    timestamp: Long,
+    senderPublicKey: String,
+    senderSignature: String,
+    hash: String
+) : BaseTransactionDto<DelegateTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
 
     constructor(tx: DelegateTransaction) : this(
+        DelegateTransactionData(tx.amount, tx.recipientAddress, tx.senderAddress, tx.delegateKey),
         tx.timestamp,
-        tx.amount,
-        tx.recipientAddress,
         tx.senderPublicKey,
-        tx.senderAddress,
         tx.senderSignature,
-        tx.hash,
-        DelegateDto(
-            tx.key,
-            tx.address,
-            NetworkAddress(
-                tx.host,
-                tx.port
-            )
-        )
+        tx.hash
     )
 
 }

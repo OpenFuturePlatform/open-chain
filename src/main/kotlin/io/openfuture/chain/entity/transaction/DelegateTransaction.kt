@@ -11,24 +11,14 @@ class DelegateTransaction(
     timestamp: Long,
     amount: Double,
     recipientAddress: String,
-    senderKey: String,
     senderAddress: String,
+    senderPublicKey: String,
     senderSignature: String,
     hash: String,
 
-    @Column(name = "key", nullable = false, unique = true)
-    var key: String,
-
-    @Column(name = "address", nullable = false)
-    var address: String,
-
-    @Column(name = "host", nullable = false)
-    var host: String,
-
-    @Column(name = "port", nullable = false)
-    var port: Int,
+    @Column(name = "delegate_key", nullable = false, unique = true)
+    var delegateKey: String,
 
     block: MainBlock? = null
 
-) : BaseTransaction(timestamp, amount, recipientAddress, senderKey, senderAddress,
-    senderSignature, hash, block)
+) : BaseTransaction(timestamp, amount, recipientAddress, senderPublicKey, senderAddress, senderSignature, hash, block)

@@ -9,8 +9,14 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "vote_transactions")
-class VoteTransaction(timestamp: Long, amount: Double, recipientAddress: String, senderKey: String,
-                      senderAddress: String, senderSignature: String, hash: String,
+class VoteTransaction(
+    timestamp: Long,
+    amount: Double,
+    recipientAddress: String,
+    senderAddress: String,
+    senderPublicKey: String,
+    senderSignature: String,
+    hash: String,
 
     @Column(name = "vote_type_id", nullable = false)
     private var voteTypeId: Int,
@@ -20,8 +26,7 @@ class VoteTransaction(timestamp: Long, amount: Double, recipientAddress: String,
 
     block: MainBlock? = null
 
-) : BaseTransaction(timestamp, amount, recipientAddress, senderKey, senderAddress,
-    senderSignature, hash, block) {
+) : BaseTransaction(timestamp, amount, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash, block) {
 
     fun getVoteType() = DictionaryUtils.valueOf(VoteType::class.java, voteTypeId)
 

@@ -10,10 +10,9 @@ class TransferTransaction(
     timestamp: Long,
     amount: Double,
     recipientAddress: String,
-    senderKey: String,
     senderAddress: String,
+    senderPublicKey: String,
     senderSignature: String,
     hash: String,
     block: MainBlock? = null
-) : BaseTransaction(timestamp, amount, recipientAddress, senderKey, senderAddress,
-    senderSignature, hash, block)
+) : BaseTransaction(timestamp, amount, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash, block)

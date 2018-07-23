@@ -2,8 +2,7 @@ package io.openfuture.chain.service.transaction
 
 import io.openfuture.chain.component.converter.transaction.impl.TransferTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
-import io.openfuture.chain.domain.rpc.transaction.TransferTransactionRequest
-import io.openfuture.chain.domain.transaction.TransferTransactionDto
+import io.openfuture.chain.domain.transaction.data.TransferTransactionData
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.repository.TransferTransactionRepository
@@ -17,7 +16,7 @@ class DefaultTransferTransactionService(
     walletService: WalletService,
     nodeClock: NodeClock,
     entityConverter: TransferTransactionEntityConverter
-) : DefaultBaseTransactionService<TransferTransaction, TransferTransactionDto, TransferTransactionRequest>(repository,
+) : DefaultBaseTransactionService<TransferTransaction, TransferTransactionData>(repository,
     walletService, nodeClock, entityConverter), TransferTransactionService {
 
     override fun addToBlock(tx: TransferTransaction, block: MainBlock): TransferTransaction {

@@ -9,6 +9,7 @@ import io.openfuture.chain.controller.common.RestResponse
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.rpc.crypto.WalletDto
 import io.openfuture.chain.domain.rpc.crypto.AccountDto
+import io.openfuture.chain.domain.rpc.crypto.ValidateAddressRequest
 import io.openfuture.chain.domain.rpc.crypto.key.DerivationKeyRequest
 import io.openfuture.chain.domain.rpc.crypto.key.KeyDto
 import io.openfuture.chain.domain.rpc.crypto.key.RestoreRequest
@@ -38,6 +39,29 @@ class AccountControllerTests : ControllerTests() {
     @MockBean
     private lateinit var walletService: WalletService
 
+
+    @Test
+    fun validateAddressShouldReturnAddressAndStatusOk() {
+        val address = "0x5aF3B0FFB89C09D7A38Fd01E42E0A5e32011e36e"
+        val request = ValidateAddressRequest(address)
+
+        webClient.post().uri("${PathConstant.RPC}/accounts/wallets/validateAddress")
+            .body(Mono.just(request), ValidateAddressRequest::class.java)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(ValidateAddressRequest::class.java).isEqualTo<Nothing>(request)
+    }
+
+    @Test
+    fun validateAddressShouldReturnStatusBadRequest() {
+        val address = "0x5aF3B0FFB89C09D7A38Fd01E42E0A5e32011e36eaaaa"
+        val request = ValidateAddressRequest(address)
+
+        webClient.post().uri("${PathConstant.RPC}/accounts/wallets/validateAddress")
+            .body(Mono.just(request), ValidateAddressRequest::class.java)
+            .exchange()
+            .expectStatus().isBadRequest
+    }
 
     @Test
     fun doRestoreShouldReturnRootAccountInfoWhenSeedPhraseSent() {

@@ -55,7 +55,7 @@ class BlockCreationProcessor(
         val previousBlock = service.getLastMain()
         val genesisBlock = service.getLastGenesis()
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
-        if (properties.host == nextProducer.host && properties.port == nextProducer.port) {
+        if (HashUtils.toHexString(keyHolder.getPublicKey()) == nextProducer.publicKey) {
             create(event.pendingTransactions, previousBlock, genesisBlock)
         }
     }
