@@ -88,8 +88,6 @@ interface BaseTransactionService<Entity : BaseTransaction, Data: BaseTransaction
 
     fun add(request: BaseTransactionRequest<Data>): Entity
 
-    fun add(data: Data): Entity
-
 }
 
 interface TransferTransactionService : BaseTransactionService<TransferTransaction, TransferTransactionData>
