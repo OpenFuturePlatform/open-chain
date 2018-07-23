@@ -25,8 +25,11 @@ class DefaultWalletService(
         ?: throw NotFoundException("Wallet with address: $address not exist!")
 
     @Transactional(readOnly = true)
-    override fun getBalance(address: String): Long =
+    override fun getBalanceByAddress(address: String): Long =
         repository.findOneByAddress(address)?.balance ?: DEFAULT_WALLET_BALANCE
+
+    @Transactional(readOnly = true)
+    override fun getVotesByAddress(address: String): MutableSet<Delegate> = this.getByAddress(address).votes
 
     @Transactional
     override fun save(wallet: Wallet) {

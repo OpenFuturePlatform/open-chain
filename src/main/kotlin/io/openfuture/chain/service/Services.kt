@@ -122,7 +122,9 @@ interface WalletService {
 
     fun getByAddress(address: String): Wallet
 
-    fun getBalance(address: String): Long
+    fun getBalanceByAddress(address: String): Long
+
+    fun getVotesByAddress(address: String): MutableSet<Delegate>
 
     fun save(wallet: Wallet)
 

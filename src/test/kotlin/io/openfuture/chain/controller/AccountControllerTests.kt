@@ -108,20 +108,20 @@ class AccountControllerTests : ControllerTests() {
     @Test
     fun getBalanceShouldReturnWalletBalanceTest() {
         val address = "address"
-        val expectedBalance = 1.0
+        val expectedBalance = 1L
         val expectedResponse = RestResponse(ResponseHeader(0, "1"), expectedBalance)
 
-        given(walletService.getBalance(address)).willReturn(expectedBalance)
+        given(walletService.getBalanceByAddress(address)).willReturn(expectedBalance)
         given(nodeClock.networkTime()).willReturn(0)
         given(nodeProperty.version).willReturn("1")
 
         val actualResult = webClient.get().uri("${PathConstant.RPC}/accounts/wallets/$address/balance")
             .exchange()
             .expectStatus().isOk
-            .expectBody(RestResponse::class.java)
+            .expectBody(expectedResponse::class.java)
             .returnResult().responseBody!!
 
-        Assertions.assertThat(actualResult).isEqualTo(expectedResponse)
+        Assertions.assertThat(actualResult.body!!.toInt()).isEqualTo(expectedResponse.body!!.toInt())
     }
 
     private fun createAccountDto(): WalletDto =

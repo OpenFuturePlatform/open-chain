@@ -32,7 +32,6 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Mock private lateinit var consensusService: ConsensusService
     @Mock private lateinit var clock: NodeClock
     @Mock private lateinit var delegateService: DelegateService
-    @Mock private lateinit var properties: NodeProperty
 
     private lateinit var processor: BlockCreationProcessor
 
@@ -41,7 +40,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         val block = createMainBlock()
         given(blockService.getLastMain()).willReturn(block)
         processor = BlockCreationProcessor(blockService, signatureCollector, keyHolder, blockValidationService,
-            consensusService, clock, delegateService, properties)
+            consensusService, clock, delegateService)
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -122,7 +121,7 @@ class BlockCreationProcessorTests: ServiceTests() {
     private fun createTransactions(): MutableList<BaseTransaction> = mutableListOf(
         VoteTransaction(
             1500000000L,
-            1000.0,
+            1000,
             "recipient_address",
             "sender_key",
             "sender_address",
@@ -133,7 +132,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         ),
         VoteTransaction(
             1500000001L,
-            1002.0,
+            1002,
             "recipient_address2",
             "sender_key2",
             "sender_address2",

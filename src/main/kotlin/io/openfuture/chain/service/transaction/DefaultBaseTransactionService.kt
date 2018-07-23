@@ -91,13 +91,13 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
     }
 
     private fun isValidSenderBalance(senderAddress: String, amount: Long): Boolean {
-        val balance = walletService.getBalance(senderAddress)
-        val pendingTransactions= getAllPending()
-        val unconfirmedOutput = pendingTransactions
+        val balance = walletService.getBalanceByAddress(senderAddress)
+        val unconfirmedOutput = getAllPending()
             .filter { it.senderAddress == senderAddress }
-            .map { it.amount }.sum()
+            .map { it.amount }
+            .sum()
 
-        val unspentBalance = balance -  unconfirmedOutput
+        val unspentBalance = balance - unconfirmedOutput
         if (unspentBalance < amount) {
             return false
         }

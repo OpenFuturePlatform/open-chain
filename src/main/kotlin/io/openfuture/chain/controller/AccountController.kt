@@ -30,7 +30,7 @@ class AccountController(
 
     @GetMapping("/wallets/{address}/balance")
     fun getBalance(@PathVariable address: String): RestResponse<Long> {
-        val body = walletService.getBalance(address)
+        val body = walletService.getBalanceByAddress(address)
         return RestResponse(getResponseHeader(), body)
     }
 
