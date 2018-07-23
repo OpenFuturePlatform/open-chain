@@ -1,6 +1,6 @@
 package io.openfuture.chain.block.validation
 
-import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.block.Block
 
 interface BlockValidator {
 

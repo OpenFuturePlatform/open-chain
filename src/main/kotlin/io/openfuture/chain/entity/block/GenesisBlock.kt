@@ -1,5 +1,6 @@
-package io.openfuture.chain.entity
+package io.openfuture.chain.entity.block
 
+import io.openfuture.chain.entity.Delegate
 import org.apache.commons.lang3.StringUtils
 import javax.persistence.*
 

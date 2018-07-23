@@ -1,4 +1,4 @@
-package io.openfuture.chain.entity
+package io.openfuture.chain.entity.block
 
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils

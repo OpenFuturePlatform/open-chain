@@ -3,7 +3,7 @@ package io.openfuture.chain.service.transaction
 import io.openfuture.chain.component.converter.transaction.impl.VoteTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.repository.VoteTransactionRepository
 import io.openfuture.chain.service.DelegateService

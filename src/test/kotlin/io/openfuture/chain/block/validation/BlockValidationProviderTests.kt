@@ -3,6 +3,9 @@ package io.openfuture.chain.block.validation
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.entity.*
+import io.openfuture.chain.entity.block.Block
+import io.openfuture.chain.entity.block.BlockType
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService

@@ -8,10 +8,10 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
-import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.Delegate
-import io.openfuture.chain.entity.GenesisBlock
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.block.GenesisBlock
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.property.NodeProperty

@@ -1,6 +1,9 @@
 package io.openfuture.chain.repository
 
 import io.openfuture.chain.entity.*
+import io.openfuture.chain.entity.block.Block
+import io.openfuture.chain.entity.block.GenesisBlock
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.DelegateTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction

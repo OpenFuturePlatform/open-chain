@@ -1,6 +1,6 @@
 package io.openfuture.chain.block.validation
 
-import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.entity.block.GenesisBlock
 import org.assertj.core.api.Assertions
 import org.junit.Before
 import org.junit.Test

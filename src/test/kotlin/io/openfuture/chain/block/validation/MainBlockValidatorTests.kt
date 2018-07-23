@@ -1,7 +1,7 @@
 package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.config.ServiceTests
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import org.assertj.core.api.Assertions
 import org.junit.Before

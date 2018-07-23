@@ -1,6 +1,6 @@
 package io.openfuture.chain.entity.transaction
 
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.util.DictionaryUtils
 import javax.persistence.Column

@@ -1,6 +1,6 @@
 package io.openfuture.chain.domain.block
 
-import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.block.Block
 
 data class PendingBlock(
     val block: Block,

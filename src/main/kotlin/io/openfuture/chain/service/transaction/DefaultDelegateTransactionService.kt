@@ -4,7 +4,7 @@ import io.openfuture.chain.component.converter.transaction.impl.DelegateTransact
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
 import io.openfuture.chain.entity.Delegate
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.DelegateTransaction
 import io.openfuture.chain.repository.DelegateTransactionRepository
 import io.openfuture.chain.service.DelegateService

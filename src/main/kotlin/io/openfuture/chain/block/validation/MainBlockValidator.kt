@@ -1,8 +1,8 @@
 package io.openfuture.chain.block.validation
 
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.BlockType
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.block.Block
+import io.openfuture.chain.entity.block.BlockType
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.stereotype.Component
