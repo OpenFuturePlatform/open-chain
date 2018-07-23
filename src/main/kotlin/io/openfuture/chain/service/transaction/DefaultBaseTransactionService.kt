@@ -46,6 +46,11 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
         return saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), request))
     }
 
+    @Transactional
+    override fun add(data: Data): Entity {
+        return saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), data))
+    }
+
     protected fun commonAddToBlock(tx: Entity, block: MainBlock): Entity {
         val persistTx = this.get(tx.hash)
 

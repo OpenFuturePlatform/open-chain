@@ -11,4 +11,6 @@ interface TransactionEntityConverter<Entity : BaseTransaction, Data : BaseTransa
 
     fun toEntity(timestamp: Long, request: BaseTransactionRequest<Data>): Entity
 
+    fun toEntity(timestamp: Long, data: Data): Entity
+
 }
