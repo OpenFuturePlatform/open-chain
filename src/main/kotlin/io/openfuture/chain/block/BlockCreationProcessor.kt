@@ -119,9 +119,7 @@ class BlockCreationProcessor(
         val rewardTransactionData = RewardTransactionData((fees + consensusProperties.rewardBlock!!),
             consensusProperties.feeRewardTx!!, delegate.address, consensusProperties.genesisAddress!!, block.hash)
 
-//        Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(
-//            { rewardTransactionService.add(rewardTransactionData) }, consensusProperties.timeSlotDuration!!,
-//            1, TimeUnit.SECONDS)
+//        TODO("artificial delay before broadcast of reward transaction")
         TimeUnit.SECONDS.sleep(consensusProperties.timeSlotDuration!!)
         rewardTransactionService.add(rewardTransactionData)
     }
