@@ -8,6 +8,7 @@ import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -38,22 +39,26 @@ class SignatureCollectorTests : ServiceTests() {
     }
 
     @Test
-    fun addBlockSignatureShouldReturnWorkWithoutException() {
+    fun addBlockSignatureShouldReturnTrue() {
         val signatureBlock = createGenesisPendingBlock()
         signatureCollector.setPendingBlock(signatureBlock)
 
-        signatureCollector.addSignatureBlock(signatureBlock)
+        val result = signatureCollector.addSignatureBlock(signatureBlock)
+
+        assertThat(result).isTrue()
     }
 
-    @Test(expected = IllegalArgumentException::class)
-    fun addBlockSignatureShouldThrowIllegalArgumentException() {
+    @Test
+    fun addBlockSignatureShouldReturnFalse() {
         val signatureBlock = createGenesisPendingBlock()
-        signatureBlock.block.hash = "changed block hash"
+        signatureBlock.block.hash = "hash is changed"
         val anotherSignatureBlock = createGenesisPendingBlock()
 
         signatureCollector.setPendingBlock(anotherSignatureBlock)
 
-        signatureCollector.addSignatureBlock(signatureBlock)
+        val result = signatureCollector.addSignatureBlock(signatureBlock)
+
+        assertThat(result).isFalse()
     }
 
     @Test
