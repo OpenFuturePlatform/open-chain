@@ -38,13 +38,9 @@ class BlockCreationProcessor(
     fun approveBlock(pendingBlock: PendingBlock): PendingBlock {
         val block = pendingBlock.block
 
-        val blockCreateDuration = consensusProperties.timeSlotDuration!! / 2
-        if (timeSlot.getSlotTimestamp() + blockCreateDuration > block.timestamp) {
+        val currentTime = clock.networkTime()
+        if (timeSlot.verifyTimeSlot(currentTime, block)) {
             throw IllegalArgumentException("Block were created for over time")
-        }
-
-        if (timeSlot.getSlotTimestamp() + consensusProperties.timeSlotDuration!! > clock.networkTime()) {
-            throw IllegalArgumentException("Time to approve is over")
         }
 
         if (!validationService.isValid(block)) {

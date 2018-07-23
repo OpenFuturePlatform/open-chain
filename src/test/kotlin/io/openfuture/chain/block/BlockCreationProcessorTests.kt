@@ -43,7 +43,6 @@ class BlockCreationProcessorTests: ServiceTests() {
     fun init() {
         val block = createMainBlock()
         given(mainBlockService.getLast()).willReturn(block)
-        given(timeSlot.getSlotTimestamp()).willReturn(1L)
         processor = BlockCreationProcessor(mainBlockService, genesisBlockService, signatureCollector, keyHolder,
             blockValidationService, consensusService, clock, delegateService, properties, consensusProperties, timeSlot)
     }
