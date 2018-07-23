@@ -17,9 +17,9 @@ class TransferTransactionEntityConverter(
 
     override fun toEntity(dto: BaseTransactionDto<TransferTransactionData>): TransferTransaction = TransferTransaction(
         dto.timestamp,
-        dto.data.amount!!,
-        dto.data.recipientAddress!!,
-        dto.data.senderAddress!!,
+        dto.data.amount,
+        dto.data.recipientAddress,
+        dto.data.senderAddress,
         dto.senderPublicKey,
         dto.senderSignature,
         dto.hash
@@ -28,9 +28,9 @@ class TransferTransactionEntityConverter(
     override fun toEntity(timestamp: Long, request: BaseTransactionRequest<TransferTransactionData>): TransferTransaction =
         TransferTransaction(
             timestamp,
-            request.data!!.amount!!,
-            request.data!!.recipientAddress!!,
-            request.data!!.senderAddress!!,
+            request.data!!.amount,
+            request.data!!.recipientAddress,
+            request.data!!.senderAddress,
             request.senderPublicKey!!,
             request.senderSignature!!,
             request.data!!.getHash()
@@ -39,9 +39,9 @@ class TransferTransactionEntityConverter(
     override fun toEntity(timestamp: Long, data: TransferTransactionData): TransferTransaction =
         TransferTransaction(
             timestamp,
-            data.amount!!,
-            data.recipientAddress!!,
-            data.senderAddress!!,
+            data.amount,
+            data.recipientAddress,
+            data.senderAddress,
             HashUtils.toHexString(keyHolder.getPublicKey()),
             SignatureManager.sign(data.getBytes(), keyHolder.getPrivateKey()),
             data.getHash()
