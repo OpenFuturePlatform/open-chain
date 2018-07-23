@@ -1,8 +1,7 @@
 package io.openfuture.chain.component.converter.transaction.impl
 
-import io.openfuture.chain.component.converter.transaction.TransactionEntityConverter
+import io.openfuture.chain.component.converter.transaction.BaseTransactionEntityConverter
 import io.openfuture.chain.crypto.key.NodeKeyHolder
-import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Component
 @Component
 class VoteTransactionEntityConverter(
     private val keyHolder: NodeKeyHolder
-) : TransactionEntityConverter<VoteTransaction, VoteTransactionData> {
+) : BaseTransactionEntityConverter<VoteTransaction, VoteTransactionData>() {
 
     override fun toEntity(dto: BaseTransactionDto<VoteTransactionData>): VoteTransaction = VoteTransaction(
         dto.timestamp,
@@ -37,7 +36,7 @@ class VoteTransactionEntityConverter(
             request.data!!.senderAddress,
             request.senderPublicKey!!,
             request.senderSignature!!,
-            request.data!!.getHash(),
+            getHash(request),
             request.data!!.voteType.getId(),
             request.data!!.delegateKey
         )
@@ -50,8 +49,8 @@ class VoteTransactionEntityConverter(
             data.recipientAddress,
             data.senderAddress,
             HashUtils.toHexString(keyHolder.getPublicKey()),
-            SignatureManager.sign(data.getBytes(), keyHolder.getPrivateKey()),
-            data.getHash(),
+            getSignature(data, keyHolder.getPrivateKey()),
+            getHash(data, keyHolder.getPublicKey(), keyHolder.getPrivateKey()),
             data.voteType.getId(),
             data.delegateKey
         )

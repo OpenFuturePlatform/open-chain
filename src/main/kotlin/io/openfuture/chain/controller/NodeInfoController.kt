@@ -15,11 +15,9 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("${PathConstant.RPC}/info")
 class NodeInfoController(
-    nodeClock: NodeClock,
-    nodeProperty: NodeProperty,
     private val context: ApplicationContext,
     private val hardwareInfoService: HardwareInfoService
-) : BaseController(nodeClock, nodeProperty) {
+) : BaseController() {
 
     @GetMapping("/getVersion")
     fun getVersion(): RestResponse<String> {
