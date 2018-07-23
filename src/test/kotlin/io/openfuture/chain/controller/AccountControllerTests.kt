@@ -120,7 +120,8 @@ class AccountControllerTests : ControllerTests() {
             .expectBody(RestResponse::class.java)
             .returnResult().responseBody!!
 
-        assertThat(actualResult).isEqualTo(expectedResponse)
+        assertThat(ObjectMapper().writeValueAsString(actualResult.body))
+            .isEqualTo(ObjectMapper().writeValueAsString(expectedResponse.body))
     }
 
     private fun createAccountDto(): WalletDto =

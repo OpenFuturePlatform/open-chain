@@ -1,7 +1,7 @@
 package io.openfuture.chain.domain.transaction.data
 
 class DelegateTransactionData(
-    amount: Double,
+    amount: Long,
     recipientAddress: String,
     senderAddress: String,
     var delegateKey: String

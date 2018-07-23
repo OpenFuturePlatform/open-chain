@@ -9,7 +9,7 @@ import javax.persistence.Table
 @Table(name = "delegate_transactions")
 class DelegateTransaction(
     timestamp: Long,
-    amount: Double,
+    amount: Long,
     recipientAddress: String,
     senderAddress: String,
     senderPublicKey: String,

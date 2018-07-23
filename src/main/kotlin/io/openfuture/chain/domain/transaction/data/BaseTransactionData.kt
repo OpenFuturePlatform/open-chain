@@ -3,7 +3,7 @@ package io.openfuture.chain.domain.transaction.data
 import io.openfuture.chain.crypto.util.HashUtils
 
 abstract class BaseTransactionData(
-    var amount: Double,
+    var amount: Long,
     var recipientAddress: String,
     var senderAddress: String
 ) {
