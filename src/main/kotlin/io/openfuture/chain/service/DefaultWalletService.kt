@@ -16,7 +16,7 @@ class DefaultWalletService(
 ) : WalletService {
 
     companion object {
-        private const val DEFAULT_WALLET_BALANCE = 0.0
+        private const val DEFAULT_WALLET_BALANCE = 0L
     }
 
 
@@ -25,8 +25,14 @@ class DefaultWalletService(
         ?: throw NotFoundException("Wallet with address: $address not exist!")
 
     @Transactional(readOnly = true)
-    override fun getBalance(address: String): Double =
+    override fun getBalance(address: String): Long =
         repository.findOneByAddress(address)?.balance ?: DEFAULT_WALLET_BALANCE
+
+    @Transactional(readOnly = true)
+    override fun getUnspentBalance(address: String): Long {
+        val wallet = this.getByAddress(address)
+        return wallet.balance - wallet.unconfirmedOutput
+    }
 
     @Transactional
     override fun save(wallet: Wallet) {
@@ -34,7 +40,7 @@ class DefaultWalletService(
     }
 
     @Transactional
-    override fun updateBalance(from: String, to: String, amount: Double) {
+    override fun updateBalance(from: String, to: String, amount: Long) {
         updateByAddress(from, -amount)
         updateByAddress(to, amount)
     }
@@ -77,7 +83,7 @@ class DefaultWalletService(
         repository.save(wallet)
     }
 
-    private fun updateByAddress(address: String, amount: Double) {
+    private fun updateByAddress(address: String, amount: Long) {
         val wallet = repository.findOneByAddress(address) ?: Wallet(address)
         wallet.balance += amount
         repository.save(wallet)

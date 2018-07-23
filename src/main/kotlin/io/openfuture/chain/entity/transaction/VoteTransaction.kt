@@ -11,7 +11,7 @@ import javax.persistence.Table
 @Table(name = "vote_transactions")
 class VoteTransaction(
     timestamp: Long,
-    amount: Double,
+    amount: Long,
     recipientAddress: String,
     senderAddress: String,
     senderPublicKey: String,

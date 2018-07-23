@@ -29,7 +29,7 @@ class AccountController(
     fun generateNewAccount(): AccountDto = cryptoService.generateNewAccount()
 
     @GetMapping("/wallets/{address}/balance")
-    fun getBalance(@PathVariable address: String): RestResponse<Double> {
+    fun getBalance(@PathVariable address: String): RestResponse<Long> {
         val body = walletService.getBalance(address)
         return RestResponse(getResponseHeader(), body)
     }

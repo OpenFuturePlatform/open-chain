@@ -11,7 +11,13 @@ class Wallet(
     var address: String,
 
     @Column(name = "balance", nullable = false)
-    var balance: Double = 0.0,
+    var balance: Long = 0,
+
+    @Column(name = "unconfirmed_input", nullable = false)
+    var unconfirmedInput: Long = 0,
+
+    @Column(name = "unconfirmed_output", nullable = false)
+    var unconfirmedOutput: Long = 0,
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

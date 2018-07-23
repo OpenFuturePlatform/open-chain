@@ -2,6 +2,7 @@ package io.openfuture.chain.service.transaction
 
 import io.openfuture.chain.component.converter.transaction.TransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
+import io.openfuture.chain.component.validator.transaction.TransactionValidator
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
@@ -18,7 +19,8 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
     protected val repository: BaseTransactionRepository<Entity>,
     protected val walletService: WalletService,
     private val nodeClock: NodeClock,
-    private val entityConverter: TransactionEntityConverter<Entity, Data>
+    private val entityConverter: TransactionEntityConverter<Entity, Data>,
+    private val validator: TransactionValidator<Entity, Data>
 ) : BaseTransactionService<Entity, Data> {
 
     @Transactional(readOnly = true)
@@ -32,7 +34,8 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
 
     @Transactional
     override fun add(dto: BaseTransactionDto<Data>): Entity {
-        //todo need to add validation
+        validator.validate(dto)
+
         val transaction = repository.findOneByHash(dto.hash)
         if (null != transaction) {
             return transaction
@@ -43,6 +46,7 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
 
     @Transactional
     override fun add(request: BaseTransactionRequest<Data>): Entity {
+        validator.validate(request)
         return saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), request))
     }
 
