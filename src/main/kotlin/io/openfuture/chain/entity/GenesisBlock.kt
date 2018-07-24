@@ -19,4 +19,4 @@ class GenesisBlock(privateKey: ByteArray, height: Long,
     var activeDelegates: Set<Delegate>
 
 ) : Block(privateKey, height, previousHash, BlockUtils.calculateDelegatesHash(activeDelegates), timestamp,
-    BlockType.GENESIS.id, HashUtils.toHexString(publicKey))
+    HashUtils.toHexString(publicKey))

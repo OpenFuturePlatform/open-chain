@@ -14,4 +14,4 @@ class MainBlock(privateKey: ByteArray, height: Long, previousHash: String,
     @OneToMany(mappedBy = "block")
     var transactions: MutableSet<BaseTransaction>
 
-) : Block(privateKey, height, previousHash, merkleHash, timestamp, BlockType.MAIN.id, HashUtils.toHexString(publicKey))
+) : Block(privateKey, height, previousHash, merkleHash, timestamp, HashUtils.toHexString(publicKey))

@@ -26,6 +26,7 @@ class SignatureCollectorTests : ServiceTests() {
 
     @Before
     fun setUp() {
+        given(clock.networkTime()).willReturn(10000L)
         given(properties.timeSlotDuration).willReturn(6000L)
 
         signatureCollector = SignatureCollector(mainBlockService, genesisBlockService, properties, timeSlot, clock)
@@ -63,7 +64,7 @@ class SignatureCollectorTests : ServiceTests() {
 
     @Test
     fun applyBlockShouldReturnWithoutApply() {
-        given(timeSlot.getEpochTime()).willReturn(1L)
+        signatureCollector.setPendingBlock(createGenesisPendingBlock())
 
         signatureCollector.applyBlock()
     }
@@ -80,9 +81,6 @@ class SignatureCollectorTests : ServiceTests() {
             setOf()
         )
 
-        given(clock.networkTime()).willReturn(10000L)
-        given(timeSlot.getEpochTime()).willReturn(1L)
-        given(genesisBlockService.getLast()).willReturn(genesisBlock)
         val signatureBlock = createGenesisPendingBlock()
         signatureCollector.setPendingBlock(signatureBlock)
         signatureCollector.addSignatureBlock(signatureBlock)
@@ -92,19 +90,6 @@ class SignatureCollectorTests : ServiceTests() {
 
     @Test
     fun applyMainBlockShouldApplyBlock() {
-        val genesisBlock = GenesisBlock(
-            ByteArray(1),
-            123,
-            "prev_block_hash",
-            1512345678L,
-            ByteArray(1),
-            1,
-            setOf()
-        )
-
-        given(clock.networkTime()).willReturn(10000L)
-        given(timeSlot.getEpochTime()).willReturn(1L)
-        given(genesisBlockService.getLast()).willReturn(genesisBlock)
         val signatureBlock = createMainPendingBlock()
         signatureCollector.setPendingBlock(signatureBlock)
         signatureCollector.addSignatureBlock(signatureBlock)

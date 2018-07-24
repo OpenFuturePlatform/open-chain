@@ -25,9 +25,6 @@ abstract class Block(
     @Column(name = "timestamp", nullable = false)
     var timestamp: Long,
 
-    @Column(name = "typeId", nullable = false)
-    var typeId: Int,
-
     @Column(name = "public_key", nullable = false)
     val publicKey: String,
 
