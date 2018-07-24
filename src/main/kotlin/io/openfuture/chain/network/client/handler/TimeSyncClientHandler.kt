@@ -20,7 +20,7 @@ class TimeSyncClientHandler(
         ctx.fireChannelActive()
     }
 
-    override fun channelRead(ctx: ChannelHandlerContext, message: Time) {
+    override fun channelRead0(ctx: ChannelHandlerContext, message: Time) {
         val offset = calculateTimeOffset(message)
         clock.addTimeOffset(ctx.channel().remoteAddress().toString(), offset)
     }

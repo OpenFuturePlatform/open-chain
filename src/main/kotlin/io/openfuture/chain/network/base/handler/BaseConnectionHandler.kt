@@ -11,7 +11,7 @@ abstract class BaseConnectionHandler(
 ) : ChannelInboundHandlerAdapter() {
 
     companion object {
-        private val log = LoggerFactory.getLogger(this::class.java)
+        private val log = LoggerFactory.getLogger(BaseConnectionHandler::class.java)
     }
 
 

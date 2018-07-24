@@ -14,7 +14,7 @@ class TimeSyncServerHandler(
         private val clock: NodeClock
 ) : ServerHandler<AskTime>() {
 
-    override fun channelRead(ctx: ChannelHandlerContext, message: AskTime) {
+    override fun channelRead0(ctx: ChannelHandlerContext, message: AskTime) {
         ctx.channel().writeAndFlush(Time(clock.networkTime(), message.nodeTimestamp))
     }
 

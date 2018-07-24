@@ -13,7 +13,7 @@ class AddressHandler(
         private val networkService: NetworkService
 ) : CommonHandler<Addresses>() {
 
-    override fun channelRead(ctx: ChannelHandlerContext, message: Addresses) {
+    override fun channelRead0(ctx: ChannelHandlerContext, message: Addresses) {
         networkService.connect(message.values)
     }
 

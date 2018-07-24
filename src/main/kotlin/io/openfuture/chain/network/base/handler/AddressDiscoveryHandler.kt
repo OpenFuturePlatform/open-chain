@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component
 @Component
 @Scope(SCOPE_PROTOTYPE)
 class AddressDiscoveryHandler(
-        private val service: ConnectionService
+    private val service: ConnectionService
 ) : CommonHandler<FindAddresses>() {
 
-    override fun channelRead(ctx: ChannelHandlerContext, message: FindAddresses) {
+    override fun channelRead0(ctx: ChannelHandlerContext, message: FindAddresses) {
         ctx.writeAndFlush(Addresses(service.getConnectionAddresses().toList()))
     }
 

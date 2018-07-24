@@ -17,7 +17,7 @@ class HeartBeatClientHandler : ClientHandler<HeartBeat>() {
     private var heartBeatTask: ScheduledFuture<*>? = null
 
 
-    override fun channelRead(ctx: ChannelHandlerContext, message: HeartBeat) {
+    override fun channelRead0(ctx: ChannelHandlerContext, message: HeartBeat) {
         if (message.type == PONG) {
             return
         }

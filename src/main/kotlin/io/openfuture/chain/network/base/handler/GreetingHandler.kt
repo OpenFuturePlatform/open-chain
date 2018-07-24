@@ -21,7 +21,7 @@ class GreetingHandler(
         ctx.fireChannelActive()
     }
 
-    override fun channelRead(ctx: ChannelHandlerContext, message: Greeting) {
+    override fun channelRead0(ctx: ChannelHandlerContext, message: Greeting) {
         service.addConnection(ctx.channel(), message.address)
     }
 

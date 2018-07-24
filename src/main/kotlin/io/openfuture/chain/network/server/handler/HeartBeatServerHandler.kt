@@ -16,7 +16,7 @@ class HeartBeatServerHandler : ServerHandler<HeartBeat>() {
         ctx.writeAndFlush(HeartBeat(PING))
     }
 
-    override fun channelRead(ctx: ChannelHandlerContext, message: HeartBeat) {
+    override fun channelRead0(ctx: ChannelHandlerContext, message: HeartBeat) {
         if (message.type == PING) {
             ctx.writeAndFlush(HeartBeat(PONG))
         }

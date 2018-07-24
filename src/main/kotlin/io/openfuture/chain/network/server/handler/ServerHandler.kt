@@ -1,6 +1,6 @@
 package io.openfuture.chain.network.server.handler
 
-import io.openfuture.chain.network.base.handler.BaseHandler
+import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.network.domain.Packet
 
-abstract class ServerHandler<T : Packet> : BaseHandler<T>()
+abstract class ServerHandler<T : Packet> : SimpleChannelInboundHandler<T>()
