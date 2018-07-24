@@ -69,9 +69,20 @@ interface CryptoService {
 
 }
 
+/**
+ * The utility service that is not aware of transaction types, has default implementation
+ */
+interface BaseTransactionService {
+
+    fun getAllPending() : MutableSet<BaseTransaction>
+
+}
+
 interface CommonTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> {
 
     fun get(hash: String): Entity
+
+    fun getAllPending() : MutableSet<Entity>
 
     fun toBlock(tx: Entity, block: MainBlock): Entity
 

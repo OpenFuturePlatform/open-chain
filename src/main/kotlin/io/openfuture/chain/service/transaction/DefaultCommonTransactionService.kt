@@ -13,6 +13,7 @@ import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.BaseTransactionRepository
+import io.openfuture.chain.service.BaseTransactionService
 import io.openfuture.chain.service.CommonTransactionService
 import io.openfuture.chain.service.WalletService
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,17 +34,17 @@ abstract class DefaultCommonTransactionService<Entity : BaseTransaction, Data : 
     private lateinit var consensusProperties: ConsensusProperties
 
     @Autowired
-    private lateinit var commonRepository: BaseTransactionRepository<BaseTransaction>
+    private lateinit var baseService: BaseTransactionService
 
-
-//    @Transactional(readOnly = true)
-//    override fun getAllPending(): MutableSet<Entity> {
-//        return repository.findAllByBlockIsNull()
-//    }
 
     @Transactional(readOnly = true)
     override fun get(hash: String): Entity = repository.findOneByHash(hash)
         ?: throw NotFoundException("Transaction with hash: $hash not exist!")
+
+    @Transactional(readOnly = true)
+    override fun getAllPending(): MutableSet<Entity> {
+        return repository.findAllByBlockIsNull()
+    }
 
     @Transactional
     override fun add(dto: BaseTransactionDto<Data>): Entity {
@@ -106,7 +107,7 @@ abstract class DefaultCommonTransactionService<Entity : BaseTransaction, Data : 
         }
 
         val balance = walletService.getBalanceByAddress(senderAddress)
-        val unconfirmedOutput = commonRepository.findAllByBlockIsNull()
+        val unconfirmedOutput = baseService.getAllPending()
             .filter { it.senderAddress == senderAddress }
             .map { it.amount + it.fee}
             .sum()
