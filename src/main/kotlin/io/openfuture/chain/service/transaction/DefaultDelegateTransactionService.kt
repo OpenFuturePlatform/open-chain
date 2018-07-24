@@ -28,17 +28,17 @@ class DefaultDelegateTransactionService(
     @Transactional
     override fun toBlock(tx: DelegateTransaction, block: MainBlock): DelegateTransaction {
         delegateService.save(Delegate(tx.delegateKey, tx.senderAddress))
-        return super.commonToBlock(tx, block)
+        return super.baseToBlock(tx, block)
     }
 
     @Transactional
     override fun validate(dto: BaseTransactionDto<DelegateTransactionData>) {
-        this.defaultValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
+        this.baseValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
     }
 
     @Transactional
     override fun validate(request: BaseTransactionRequest<DelegateTransactionData>) {
-        this.defaultValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
+        this.baseValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
     }
 
 }

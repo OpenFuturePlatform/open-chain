@@ -15,6 +15,7 @@ import io.openfuture.chain.service.VoteTransactionService
 import io.openfuture.chain.service.WalletService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import javax.xml.bind.ValidationException
 
 @Service
 class DefaultVoteTransactionService(
@@ -31,25 +32,28 @@ class DefaultVoteTransactionService(
     override fun toBlock(tx: VoteTransaction, block: MainBlock): VoteTransaction {
         val delegate = delegateService.getByPublicKey(tx.delegateKey)
         walletService.changeWalletVote(tx.senderAddress, delegate, tx.getVoteType())
-        return super.commonToBlock(tx, block)
+        return super.baseToBlock(tx, block)
     }
 
     @Transactional
     override fun validate(dto: BaseTransactionDto<VoteTransactionData>) {
-        voteCountValidate(dto.data.senderAddress)
-        this.defaultValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
+        if (!isValidVoteCount(dto.data.senderAddress)) {
+            throw ValidationException("Wallet ${dto.data.senderAddress} already spent all votes!")
+        }
+        this.baseValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
     }
 
     @Transactional
     override fun validate(request: BaseTransactionRequest<VoteTransactionData>) {
-        voteCountValidate(request.data!!.senderAddress)
-        this.defaultValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
+        if (!isValidVoteCount(request.data!!.senderAddress)) {
+            throw ValidationException("Wallet ${request.data!!.senderAddress} already spent all votes!")
+        }
+        this.baseValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
     }
 
-    private fun voteCountValidate(senderAddress: String): Boolean {
+    private fun isValidVoteCount(senderAddress: String): Boolean {
         val confirmedVotes = walletService.getVotesByAddress(senderAddress).count()
-        val pendingTransactions = getAllPending()
-        val unconfirmedForVotes = pendingTransactions
+        val unconfirmedForVotes = getAllPending()
             .filter { it.senderAddress == senderAddress && it.getVoteType() == VoteType.FOR }
             .count()
 

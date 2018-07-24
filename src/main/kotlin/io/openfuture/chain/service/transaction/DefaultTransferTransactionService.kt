@@ -22,15 +22,15 @@ class DefaultTransferTransactionService(
     walletService, nodeClock, entityConverter), TransferTransactionService {
 
     override fun toBlock(tx: TransferTransaction, block: MainBlock): TransferTransaction {
-        return this.commonToBlock(tx, block)
+        return super.baseToBlock(tx, block)
     }
 
     override fun validate(dto: BaseTransactionDto<TransferTransactionData>) {
-        this.defaultValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
+        this.baseValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
     }
 
     override fun validate(request: BaseTransactionRequest<TransferTransactionData>) {
-        this.defaultValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
+        this.baseValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
     }
 
 }

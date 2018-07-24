@@ -14,7 +14,9 @@ import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.repository.BaseTransactionRepository
 import io.openfuture.chain.service.BaseTransactionService
+import io.openfuture.chain.service.CommonTransactionService
 import io.openfuture.chain.service.WalletService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
 abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : BaseTransactionData>(
@@ -22,7 +24,11 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
     protected val walletService: WalletService,
     private val nodeClock: NodeClock,
     private val entityConverter: TransactionEntityConverter<Entity, Data>
-) : BaseTransactionService<Entity, Data> {
+) : BaseTransactionService<Entity, Data>, CommonTransactionService {
+
+    @Autowired
+    private lateinit var commonService: CommonTransactionService
+
 
     @Transactional(readOnly = true)
     override fun getAllPending(): MutableSet<Entity> {
@@ -56,7 +62,7 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
         return saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), data))
     }
 
-    protected fun commonToBlock(tx: Entity, block: MainBlock): Entity {
+    protected fun baseToBlock(tx: Entity, block: MainBlock): Entity {
         val persistTx = this.get(tx.hash)
 
         if (null != persistTx.block) {
@@ -76,7 +82,9 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
         //todo: networkService.broadcast(transaction.toMessage)
     }
 
-    protected fun defaultValidate(data: Data, signature: String, publicKey: String) {
+    protected fun baseValidate(data: Data, signature: String, publicKey: String) {
+        if (!isValidHash())
+
         if (!isValidaSignature(data, signature, publicKey)) {
             throw ValidationException("Invalid transaction signature")
         }
@@ -92,7 +100,7 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
 
     private fun isValidSenderBalance(senderAddress: String, amount: Long): Boolean {
         val balance = walletService.getBalanceByAddress(senderAddress)
-        val unconfirmedOutput = getAllPending()
+        val unconfirmedOutput = commonService.getAllPending()
             .filter { it.senderAddress == senderAddress }
             .map { it.amount }
             .sum()
