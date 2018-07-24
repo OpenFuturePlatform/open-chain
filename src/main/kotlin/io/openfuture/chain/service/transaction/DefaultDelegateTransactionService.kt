@@ -1,7 +1,6 @@
 package io.openfuture.chain.service.transaction
 
 import io.openfuture.chain.component.converter.transaction.impl.DelegateTransactionEntityConverter
-import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
@@ -11,19 +10,16 @@ import io.openfuture.chain.entity.transaction.DelegateTransaction
 import io.openfuture.chain.repository.DelegateTransactionRepository
 import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.service.DelegateTransactionService
-import io.openfuture.chain.service.WalletService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultDelegateTransactionService(
     repository: DelegateTransactionRepository,
-    walletService: WalletService,
     entityConverter: DelegateTransactionEntityConverter,
-    nodeClock: NodeClock,
     private val delegateService: DelegateService
-) : DefaultManualTransactionService<DelegateTransaction, DelegateTransactionData>(repository, walletService,
-    entityConverter, nodeClock), DelegateTransactionService {
+) : DefaultManualTransactionService<DelegateTransaction, DelegateTransactionData>(repository, entityConverter),
+    DelegateTransactionService {
 
     @Transactional
     override fun toBlock(tx: DelegateTransaction, block: MainBlock): DelegateTransaction {

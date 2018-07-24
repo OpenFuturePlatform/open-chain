@@ -108,7 +108,7 @@ class BlockCreationProcessor(
     }
 
     private fun prepareTransactions(transactionsFromPool: MutableList<BaseTransaction>): MutableList<BaseTransaction> {
-        val fees = transactionsFromPool.sumByDouble { it.fee }
+        val fees = transactionsFromPool.map { it.fee }.sum()
         val delegate = delegateService.getByPublicKey(HashUtils.toHexString(keyHolder.getPublicKey()))
         val rewardTransactionData = RewardTransactionData((fees + consensusProperties.rewardBlock!!),
             consensusProperties.feeRewardTx!!, delegate.address, consensusProperties.genesisAddress!!)

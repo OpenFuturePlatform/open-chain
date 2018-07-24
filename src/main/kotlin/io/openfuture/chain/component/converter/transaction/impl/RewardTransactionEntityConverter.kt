@@ -1,10 +1,9 @@
 package io.openfuture.chain.component.converter.transaction.impl
 
-import io.openfuture.chain.component.converter.transaction.TransactionEntityConverter
+import io.openfuture.chain.component.converter.transaction.EmbeddedTransactionEntityConverter
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.RewardTransactionData
 import io.openfuture.chain.entity.transaction.RewardTransaction
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Component
 @Component
 class RewardTransactionEntityConverter(
     private val keyHolder: NodeKeyHolder
-) : TransactionEntityConverter<RewardTransaction, RewardTransactionData> {
+) : EmbeddedTransactionEntityConverter<RewardTransaction, RewardTransactionData> {
 
     override fun toEntity(dto: BaseTransactionDto<RewardTransactionData>): RewardTransaction = RewardTransaction(
         dto.timestamp,
@@ -25,18 +24,6 @@ class RewardTransactionEntityConverter(
         dto.senderSignature,
         dto.hash
     )
-
-    override fun toEntity(timestamp: Long, request: BaseTransactionRequest<RewardTransactionData>): RewardTransaction =
-        RewardTransaction(
-            timestamp,
-            request.data!!.amount,
-            request.data!!.fee,
-            request.data!!.recipientAddress,
-            request.data!!.senderAddress,
-            request.senderPublicKey!!,
-            request.senderSignature!!,
-            request.data!!.getHash()
-        )
 
     override fun toEntity(timestamp: Long, data: RewardTransactionData): RewardTransaction =
         RewardTransaction(

@@ -8,8 +8,8 @@ import javax.persistence.Table
 @Table(name = "reward_transactions")
 class RewardTransaction(
     timestamp: Long,
-    amount: Double,
-    fee: Double,
+    amount: Long,
+    fee: Long,
     recipientAddress: String,
     senderAddress: String,
     senderPublicKey: String,

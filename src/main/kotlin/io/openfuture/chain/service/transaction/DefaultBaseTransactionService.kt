@@ -14,20 +14,23 @@ import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.repository.BaseTransactionRepository
 import io.openfuture.chain.service.BaseTransactionService
-import io.openfuture.chain.service.CommonTransactionService
 import io.openfuture.chain.service.WalletService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
-abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : BaseTransactionData>(
+abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : BaseTransactionData, Converter : TransactionEntityConverter<Entity, Data>>(
     protected val repository: BaseTransactionRepository<Entity>,
-    protected val walletService: WalletService,
-    private val nodeClock: NodeClock,
-    private val entityConverter: TransactionEntityConverter<Entity, Data>
-) : BaseTransactionService<Entity, Data>, CommonTransactionService {
+    protected val entityConverter: Converter
+) : BaseTransactionService<Entity, Data> {
 
     @Autowired
-    private lateinit var commonService: CommonTransactionService
+    protected lateinit var nodeClock: NodeClock
+
+    @Autowired
+    protected lateinit var walletService: WalletService
+
+    @Autowired
+    private lateinit var commonRepository: BaseTransactionRepository<BaseTransaction>
 
 
     @Transactional(readOnly = true)
@@ -52,12 +55,6 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
     }
 
     @Transactional
-    override fun add(request: BaseTransactionRequest<Data>): Entity {
-        validate(request)
-        return saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), request))
-    }
-
-    @Transactional
     override fun add(data: Data): Entity {
         return saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), data))
     }
@@ -77,14 +74,14 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
 
     protected abstract fun validate(request: BaseTransactionRequest<Data>)
 
-    private fun saveAndBroadcast(tx: Entity): Entity {
+    protected fun saveAndBroadcast(tx: Entity): Entity {
         return repository.save(tx)
         //todo: networkService.broadcast(transaction.toMessage)
     }
 
     protected fun baseValidate(data: Data, signature: String, publicKey: String) {
-        if (!isValidHash())
-
+//        if (!isValidHash())
+//
         if (!isValidaSignature(data, signature, publicKey)) {
             throw ValidationException("Invalid transaction signature")
         }
@@ -100,7 +97,7 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
 
     private fun isValidSenderBalance(senderAddress: String, amount: Long): Boolean {
         val balance = walletService.getBalanceByAddress(senderAddress)
-        val unconfirmedOutput = commonService.getAllPending()
+        val unconfirmedOutput = commonRepository.findAllByBlockIsNull()
             .filter { it.senderAddress == senderAddress }
             .map { it.amount }
             .sum()

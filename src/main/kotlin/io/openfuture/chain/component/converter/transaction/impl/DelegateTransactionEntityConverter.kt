@@ -1,6 +1,6 @@
 package io.openfuture.chain.component.converter.transaction.impl
 
-import io.openfuture.chain.component.converter.transaction.BaseTransactionEntityConverter
+import io.openfuture.chain.component.converter.transaction.ManualTransactionEntityConverter
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
@@ -12,7 +12,8 @@ import org.springframework.stereotype.Component
 @Component
 class DelegateTransactionEntityConverter(
     private val keyHolder: NodeKeyHolder
-) : BaseTransactionEntityConverter<DelegateTransaction, DelegateTransactionData>() {
+) : BaseTransactionEntityConverter<DelegateTransactionData>(),
+    ManualTransactionEntityConverter<DelegateTransaction, DelegateTransactionData> {
 
     override fun toEntity(dto: BaseTransactionDto<DelegateTransactionData>): DelegateTransaction = DelegateTransaction(
         dto.timestamp,

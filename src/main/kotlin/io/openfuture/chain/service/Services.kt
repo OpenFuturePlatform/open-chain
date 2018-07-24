@@ -70,35 +70,35 @@ interface CryptoService {
 
 }
 
-/**
- * The utility service that is not aware of transaction types,
- * has default implementation
- */
-interface CommonTransactionService {
-
-    fun getAllPending(): MutableSet<out BaseTransaction>
-
-}
-
 interface BaseTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> {
 
     fun get(hash: String): Entity
+
+    fun getAllPending(): MutableSet<Entity>
 
     fun toBlock(tx: Entity, block: MainBlock): Entity
 
     fun add(dto: BaseTransactionDto<Data>): Entity
 
-    fun add(request: BaseTransactionRequest<Data>): Entity
-
     fun add(data: Data): Entity
 
 }
 
-interface TransferTransactionService : BaseTransactionService<TransferTransaction, TransferTransactionData>
+interface EmbeddedTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> : BaseTransactionService<Entity, Data>
 
-interface VoteTransactionService : BaseTransactionService<VoteTransaction, VoteTransactionData>
+interface ManualTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> : BaseTransactionService<Entity, Data> {
 
-interface DelegateTransactionService : BaseTransactionService<DelegateTransaction, DelegateTransactionData>
+    fun add(request: BaseTransactionRequest<Data>): Entity
+
+}
+
+interface RewardTransactionService : EmbeddedTransactionService<RewardTransaction, RewardTransactionData>
+
+interface TransferTransactionService : ManualTransactionService<TransferTransaction, TransferTransactionData>
+
+interface VoteTransactionService : ManualTransactionService<VoteTransaction, VoteTransactionData>
+
+interface DelegateTransactionService : ManualTransactionService<DelegateTransaction, DelegateTransactionData>
 
 interface DelegateService {
 

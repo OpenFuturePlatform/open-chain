@@ -1,14 +1,12 @@
-package io.openfuture.chain.component.converter.transaction
+package io.openfuture.chain.component.converter.transaction.impl
 
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
-import io.openfuture.chain.entity.transaction.BaseTransaction
 import java.nio.ByteBuffer
 
-abstract class BaseTransactionEntityConverter<Entity : BaseTransaction, Data : BaseTransactionData>(
-) : TransactionEntityConverter<Entity, Data> {
+abstract class BaseTransactionEntityConverter<Data : BaseTransactionData> {
 
     protected fun getHash(request: BaseTransactionRequest<Data>): String {
         val bytes = getBytes(request.senderPublicKey!!.toByteArray(),

@@ -1,7 +1,6 @@
 package io.openfuture.chain.service.transaction
 
 import io.openfuture.chain.component.converter.transaction.impl.VoteTransactionEntityConverter
-import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
@@ -12,7 +11,6 @@ import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.VoteTransactionRepository
 import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.service.VoteTransactionService
-import io.openfuture.chain.service.WalletService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.xml.bind.ValidationException
@@ -20,13 +18,11 @@ import javax.xml.bind.ValidationException
 @Service
 class DefaultVoteTransactionService(
     repository: VoteTransactionRepository,
-    walletService: WalletService,
-    nodeClock: NodeClock,
     entityConverter: VoteTransactionEntityConverter,
     private val consensusProperties: ConsensusProperties,
     private val delegateService: DelegateService
-) : DefaultBaseTransactionService<VoteTransaction, VoteTransactionData>(repository,
-    walletService, nodeClock, entityConverter), VoteTransactionService {
+) : DefaultManualTransactionService<VoteTransaction, VoteTransactionData>(repository, entityConverter),
+    VoteTransactionService {
 
     @Transactional
     override fun toBlock(tx: VoteTransaction, block: MainBlock): VoteTransaction {

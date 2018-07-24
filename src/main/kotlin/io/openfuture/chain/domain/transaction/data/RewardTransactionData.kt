@@ -1,8 +1,8 @@
 package io.openfuture.chain.domain.transaction.data
 
 class RewardTransactionData(
-    amount: Double,
-    fee: Double,
+    amount: Long,
+    fee: Long,
     recipientAddress: String,
     senderAddress: String
 ) : BaseTransactionData(amount, fee, recipientAddress, senderAddress) {
