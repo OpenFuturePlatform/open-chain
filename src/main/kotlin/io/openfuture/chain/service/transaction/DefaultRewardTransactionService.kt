@@ -1,7 +1,6 @@
 package io.openfuture.chain.service.transaction
 
 import io.openfuture.chain.component.converter.transaction.impl.RewardTransactionEntityConverter
-import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.RewardTransactionData
 import io.openfuture.chain.entity.MainBlock
@@ -26,11 +25,6 @@ class DefaultRewardTransactionService(
     @Transactional
     override fun validate(dto: BaseTransactionDto<RewardTransactionData>) {
         super.baseValidate(dto)
-    }
-
-    @Transactional
-    override fun validate(request: BaseTransactionRequest<RewardTransactionData>) {
-        super.baseValidate(request)
     }
 
 }

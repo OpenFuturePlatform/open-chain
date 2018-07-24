@@ -37,8 +37,10 @@ class DefaultWalletService(
     }
 
     @Transactional
-    override fun updateBalance(from: String, to: String, amount: Long) {
-        updateByAddress(from, -amount)
+    override fun updateBalance(from: String, to: String, amount: Long, fee: Long) {
+        if (consensusProperties.genesisAddress!! != from) {
+            updateByAddress(from, -(amount + fee))
+        }
         updateByAddress(to, amount)
     }
 

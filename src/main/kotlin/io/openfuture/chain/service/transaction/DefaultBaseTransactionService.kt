@@ -4,7 +4,6 @@ import io.openfuture.chain.component.converter.transaction.TransactionEntityConv
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
 import io.openfuture.chain.entity.MainBlock
@@ -12,6 +11,7 @@ import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.exception.ValidationException
+import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.BaseTransactionRepository
 import io.openfuture.chain.service.BaseTransactionService
 import io.openfuture.chain.service.WalletService
@@ -30,6 +30,9 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
     protected lateinit var walletService: WalletService
 
     @Autowired
+    private lateinit var consensusProperties: ConsensusProperties
+
+    @Autowired
     private lateinit var commonRepository: BaseTransactionRepository<BaseTransaction>
 
 
@@ -44,19 +47,17 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
 
     @Transactional
     override fun add(dto: BaseTransactionDto<Data>): Entity {
-        validate(dto)
-
         val transaction = repository.findOneByHash(dto.hash)
         if (null != transaction) {
             return transaction
         }
-
+        validate(dto)
         return saveAndBroadcast(entityConverter.toEntity(dto))
     }
 
-    @Transactional
-    override fun add(data: Data): Entity {
-        return saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), data))
+    protected fun saveAndBroadcast(tx: Entity): Entity {
+        return repository.save(tx)
+        //todo: networkService.broadcast(transaction.toMessage)
     }
 
     protected fun baseToBlock(tx: Entity, block: MainBlock): Entity {
@@ -66,18 +67,11 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
             throw LogicException("Transaction with hash: ${tx.hash} already belong to block!")
         }
         persistTx.block = block
-        walletService.updateBalance(persistTx.senderAddress, persistTx.recipientAddress, persistTx.amount)
+        walletService.updateBalance(persistTx.senderAddress, persistTx.recipientAddress, persistTx.amount, persistTx.fee)
         return repository.save(persistTx)
     }
 
     protected abstract fun validate(dto: BaseTransactionDto<Data>)
-
-    protected abstract fun validate(request: BaseTransactionRequest<Data>)
-
-    protected fun saveAndBroadcast(tx: Entity): Entity {
-        return repository.save(tx)
-        //todo: networkService.broadcast(transaction.toMessage)
-    }
 
     protected fun baseValidate(dto: BaseTransactionDto<Data>) {
         if (!isValidHash(dto.data, dto.hash)) {
@@ -86,17 +80,15 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
         commonValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
     }
 
-    protected fun baseValidate(request: BaseTransactionRequest<Data>) {
-        commonValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
-    }
-
-    private fun commonValidate(data : Data, signature: String, publicKey: String) {
-        if (!isValidaSignature(data, signature, publicKey)) {
-            throw ValidationException("Invalid transaction signature")
-        }
+    protected fun commonValidate(data : Data, signature: String, publicKey: String) {
+        //todo need to add address validation
 
         if (!isValidSenderBalance(data.senderAddress, data.amount)) {
-            throw ValidationException("Invalid sender balance")
+            throw ValidationException("Invalid wallet balance")
+        }
+
+        if (!isValidaSignature(data, signature, publicKey)) {
+            throw ValidationException("Invalid transaction signature")
         }
     }
 
@@ -109,10 +101,14 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
     }
 
     private fun isValidSenderBalance(senderAddress: String, amount: Long): Boolean {
+        if (consensusProperties.genesisAddress!! == senderAddress) {
+            return true
+        }
+
         val balance = walletService.getBalanceByAddress(senderAddress)
         val unconfirmedOutput = commonRepository.findAllByBlockIsNull()
             .filter { it.senderAddress == senderAddress }
-            .map { it.amount }
+            .map { it.amount + it.fee}
             .sum()
 
         val unspentBalance = balance - unconfirmedOutput

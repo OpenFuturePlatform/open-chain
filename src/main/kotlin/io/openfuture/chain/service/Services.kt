@@ -80,8 +80,6 @@ interface BaseTransactionService<Entity : BaseTransaction, Data : BaseTransactio
 
     fun add(dto: BaseTransactionDto<Data>): Entity
 
-    fun add(data: Data): Entity
-
 }
 
 interface EmbeddedTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> : BaseTransactionService<Entity, Data>
@@ -130,7 +128,7 @@ interface WalletService {
 
     fun save(wallet: Wallet)
 
-    fun updateBalance(from: String, to: String, amount: Long)
+    fun updateBalance(from: String, to: String, amount: Long, fee: Long)
 
     fun changeWalletVote(address: String, delegate: Delegate, type: VoteType)
 
