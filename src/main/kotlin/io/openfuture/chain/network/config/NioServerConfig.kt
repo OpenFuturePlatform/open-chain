@@ -6,13 +6,13 @@ import io.netty.channel.ChannelOption
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
-import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.property.NodeProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
 class NioServerConfig(
-    private val properties: NodeProperties,
+    private val property: NodeProperty,
     private val serverChannelInitializer: ChannelInitializer<SocketChannel>
 ) {
 
@@ -21,12 +21,12 @@ class NioServerConfig(
         .group(bossGroup(), workerGroup())
         .channel(NioServerSocketChannel::class.java)
         .childHandler(serverChannelInitializer)
-        .option(ChannelOption.SO_BACKLOG, properties.backlog)
-        .childOption(ChannelOption.SO_KEEPALIVE, properties.keepAlive)
-        .childOption(ChannelOption.CONNECT_TIMEOUT_MILLIS, properties.connectionTimeout)
+        .option(ChannelOption.SO_BACKLOG, property.backlog)
+        .childOption(ChannelOption.SO_KEEPALIVE, property.keepAlive)
+        .childOption(ChannelOption.CONNECT_TIMEOUT_MILLIS, property.connectionTimeout)
 
     @Bean(destroyMethod = "shutdownGracefully")
-    fun bossGroup(): NioEventLoopGroup = NioEventLoopGroup(properties.bossCount!!)
+    fun bossGroup(): NioEventLoopGroup = NioEventLoopGroup(property.bossCount!!)
 
     @Bean(destroyMethod = "shutdownGracefully")
     fun workerGroup(): NioEventLoopGroup = NioEventLoopGroup()

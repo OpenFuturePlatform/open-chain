@@ -9,7 +9,7 @@ import io.openfuture.chain.domain.rpc.HardwareInfo
 import io.openfuture.chain.domain.rpc.hardware.CpuInfo
 import io.openfuture.chain.domain.rpc.hardware.NetworkInfo
 import io.openfuture.chain.domain.rpc.hardware.RamInfo
-import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.property.NodeProperty
 import io.openfuture.chain.service.HardwareInfoService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -27,14 +27,14 @@ class NodeInfoControllerTests : ControllerTests() {
     private lateinit var nodeClock: NodeClock
 
     @MockBean
-    private lateinit var nodeProperties: NodeProperties
+    private lateinit var nodeProperty: NodeProperty
 
 
     @Test
     fun getVersionShouldReturnVersionFromProperties() {
         val expectedVersion = "0"
         val expectedBody = getRestResponse(expectedVersion)
-        given(nodeProperties.version).willReturn(expectedVersion)
+        given(nodeProperty.version).willReturn(expectedVersion)
 
         val result = webClient.get().uri("${PathConstant.RPC}/info/getVersion")
             .exchange()
@@ -101,7 +101,7 @@ class NodeInfoControllerTests : ControllerTests() {
 
     private fun <T> getRestResponse(body: T): RestResponse<T> {
         given(nodeClock.networkTime()).willReturn(0)
-        given(nodeProperties.version).willReturn("0")
+        given(nodeProperty.version).willReturn("0")
 
         return RestResponse(ResponseHeader(0, "0"), body)
     }

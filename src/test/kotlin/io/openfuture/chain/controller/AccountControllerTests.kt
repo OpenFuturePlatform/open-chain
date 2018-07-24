@@ -13,7 +13,7 @@ import io.openfuture.chain.domain.rpc.crypto.ValidateAddressRequest
 import io.openfuture.chain.domain.rpc.crypto.key.DerivationKeyRequest
 import io.openfuture.chain.domain.rpc.crypto.key.KeyDto
 import io.openfuture.chain.domain.rpc.crypto.key.RestoreRequest
-import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.property.NodeProperty
 import io.openfuture.chain.service.CryptoService
 import io.openfuture.chain.service.WalletService
 import org.assertj.core.api.Assertions
@@ -34,7 +34,7 @@ class AccountControllerTests : ControllerTests() {
     private lateinit var nodeClock: NodeClock
 
     @MockBean
-    private lateinit var nodeProperties: NodeProperties
+    private lateinit var nodeProperty: NodeProperty
 
     @MockBean
     private lateinit var walletService: WalletService
@@ -113,7 +113,7 @@ class AccountControllerTests : ControllerTests() {
 
         given(walletService.getBalance(address)).willReturn(expectedBalance)
         given(nodeClock.networkTime()).willReturn(0)
-        given(nodeProperties.version).willReturn("1")
+        given(nodeProperty.version).willReturn("1")
 
         val actualResult = webClient.get().uri("${PathConstant.RPC}/accounts/wallets/$address/balance")
             .exchange()
@@ -129,7 +129,7 @@ class AccountControllerTests : ControllerTests() {
 
     private fun <T> getRestResponse(body: T): RestResponse<T> {
         given(nodeClock.networkTime()).willReturn(0)
-        given(nodeProperties.version).willReturn("0")
+        given(nodeProperty.version).willReturn("0")
 
         return RestResponse(ResponseHeader(0, "0"), body)
     }
