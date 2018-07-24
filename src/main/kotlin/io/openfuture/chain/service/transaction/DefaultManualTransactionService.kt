@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional
 abstract class DefaultManualTransactionService<Entity : BaseTransaction, Data : BaseTransactionData>(
     repository: BaseTransactionRepository<Entity>,
     entityConverter: ManualTransactionEntityConverter<Entity, Data>
-) : DefaultBaseTransactionService<Entity, Data, ManualTransactionEntityConverter<Entity, Data>>(repository, entityConverter),
+) : DefaultCommonTransactionService<Entity, Data, ManualTransactionEntityConverter<Entity, Data>>(repository, entityConverter),
     ManualTransactionService<Entity, Data> {
 
     @Transactional

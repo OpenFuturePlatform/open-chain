@@ -14,7 +14,6 @@ import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.data.*
 import io.openfuture.chain.entity.*
-import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.protocol.CommunicationProtocol
@@ -70,11 +69,9 @@ interface CryptoService {
 
 }
 
-interface BaseTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> {
+interface CommonTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> {
 
     fun get(hash: String): Entity
-
-    fun getAllPending(): MutableSet<Entity>
 
     fun toBlock(tx: Entity, block: MainBlock): Entity
 
@@ -82,9 +79,9 @@ interface BaseTransactionService<Entity : BaseTransaction, Data : BaseTransactio
 
 }
 
-interface EmbeddedTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> : BaseTransactionService<Entity, Data>
+interface EmbeddedTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> : CommonTransactionService<Entity, Data>
 
-interface ManualTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> : BaseTransactionService<Entity, Data> {
+interface ManualTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> : CommonTransactionService<Entity, Data> {
 
     fun add(request: BaseTransactionRequest<Data>): Entity
 

@@ -13,15 +13,15 @@ import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.BaseTransactionRepository
-import io.openfuture.chain.service.BaseTransactionService
+import io.openfuture.chain.service.CommonTransactionService
 import io.openfuture.chain.service.WalletService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
-abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : BaseTransactionData, Converter : TransactionEntityConverter<Entity, Data>>(
+abstract class DefaultCommonTransactionService<Entity : BaseTransaction, Data : BaseTransactionData, Converter : TransactionEntityConverter<Entity, Data>>(
     protected val repository: BaseTransactionRepository<Entity>,
     protected val entityConverter: Converter
-) : BaseTransactionService<Entity, Data> {
+) : CommonTransactionService<Entity, Data> {
 
     @Autowired
     protected lateinit var nodeClock: NodeClock
@@ -36,10 +36,10 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
     private lateinit var commonRepository: BaseTransactionRepository<BaseTransaction>
 
 
-    @Transactional(readOnly = true)
-    override fun getAllPending(): MutableSet<Entity> {
-        return repository.findAllByBlockIsNull()
-    }
+//    @Transactional(readOnly = true)
+//    override fun getAllPending(): MutableSet<Entity> {
+//        return repository.findAllByBlockIsNull()
+//    }
 
     @Transactional(readOnly = true)
     override fun get(hash: String): Entity = repository.findOneByHash(hash)

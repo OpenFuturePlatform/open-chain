@@ -9,5 +9,5 @@ import io.openfuture.chain.service.EmbeddedTransactionService
 abstract class DefaultEmbeddedTransactionService<Entity : BaseTransaction, Data : BaseTransactionData>(
     repository: BaseTransactionRepository<Entity>,
     entityConverter: EmbeddedTransactionEntityConverter<Entity, Data>
-) : DefaultBaseTransactionService<Entity, Data, EmbeddedTransactionEntityConverter<Entity, Data>>(repository, entityConverter),
+) : DefaultCommonTransactionService<Entity, Data, EmbeddedTransactionEntityConverter<Entity, Data>>(repository, entityConverter),
     EmbeddedTransactionService<Entity, Data>
