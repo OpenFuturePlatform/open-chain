@@ -26,9 +26,23 @@ class DefaultVoteTransactionService(
 
     @Transactional
     override fun toBlock(tx: VoteTransaction, block: MainBlock): VoteTransaction {
+        updateWalletVotes(tx)
+        return baseToBlock(tx, block)
+    }
+
+    private fun updateWalletVotes(tx: VoteTransaction) {
         val delegate = delegateService.getByPublicKey(tx.delegateKey)
-        walletService.changeWalletVote(tx.senderAddress, delegate, tx.getVoteType())
-        return super.baseToBlock(tx, block)
+        val wallet = walletService.getByAddress(tx.senderAddress)
+
+        when (tx.getVoteType()) {
+            VoteType.FOR -> {
+                wallet.votes.add(delegate)
+            }
+            VoteType.AGAINST -> {
+                wallet.votes.remove(delegate)
+            }
+        }
+        walletService.save(wallet)
     }
 
     @Transactional
@@ -36,7 +50,7 @@ class DefaultVoteTransactionService(
         if (!isValidVoteCount(dto.data.senderAddress)) {
             throw ValidationException("Wallet ${dto.data.senderAddress} already spent all votes!")
         }
-        super.baseValidate(dto)
+        baseValidate(dto)
     }
 
     @Transactional
@@ -44,7 +58,7 @@ class DefaultVoteTransactionService(
         if (!isValidVoteCount(request.data!!.senderAddress)) {
             throw ValidationException("Wallet ${request.data!!.senderAddress} already spent all votes!")
         }
-        super.baseValidate(request)
+        baseValidate(request)
     }
 
     private fun isValidVoteCount(senderAddress: String): Boolean {

@@ -19,12 +19,12 @@ class DefaultRewardTransactionService(
 
     @Transactional
     override fun toBlock(tx: RewardTransaction, block: MainBlock): RewardTransaction {
-        return super.baseToBlock(tx, block)
+        return baseToBlock(tx, block)
     }
 
     @Transactional
     override fun validate(dto: BaseTransactionDto<RewardTransactionData>) {
-        super.baseValidate(dto)
+        baseValidate(dto)
     }
 
 }

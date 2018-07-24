@@ -18,15 +18,15 @@ class DefaultTransferTransactionService(
     TransferTransactionService {
 
     override fun toBlock(tx: TransferTransaction, block: MainBlock): TransferTransaction {
-        return super.baseToBlock(tx, block)
+        return baseToBlock(tx, block)
     }
 
     override fun validate(dto: BaseTransactionDto<TransferTransactionData>) {
-        this.baseValidate(dto)
+        baseValidate(dto)
     }
 
     override fun validate(request: BaseTransactionRequest<TransferTransactionData>) {
-        this.baseValidate(request)
+        baseValidate(request)
     }
 
 }

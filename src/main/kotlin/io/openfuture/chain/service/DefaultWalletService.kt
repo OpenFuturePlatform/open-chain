@@ -44,44 +44,6 @@ class DefaultWalletService(
         updateByAddress(to, amount)
     }
 
-    @Transactional
-    override fun changeWalletVote(address: String, delegate: Delegate, type: VoteType) {
-        when (type) {
-            VoteType.FOR -> {
-                addVote(address, delegate)
-            }
-            VoteType.AGAINST -> {
-                removeVote(address, delegate)
-            }
-        }
-    }
-
-    private fun addVote(address: String, delegate: Delegate) {
-        val wallet = getByAddress(address)
-
-        if (consensusProperties.delegatesCount!! <= wallet.votes.size) {
-            throw IllegalStateException("Wallet $address already spent all votes!")
-        }
-
-        if (wallet.votes.contains(delegate)) {
-            throw IllegalStateException("Wallet $address already voted for delegate with key ${delegate.publicKey}!")
-        }
-
-        wallet.votes.add(delegate)
-        repository.save(wallet)
-    }
-
-    private fun removeVote(address: String, delegate: Delegate) {
-        val wallet = getByAddress(address)
-
-        if (!wallet.votes.contains(delegate)) {
-            throw IllegalStateException("Wallet $address haven't vote for delegate with key ${delegate.publicKey}!")
-        }
-
-        wallet.votes.remove(delegate)
-        repository.save(wallet)
-    }
-
     private fun updateByAddress(address: String, amount: Long) {
         val wallet = repository.findOneByAddress(address) ?: Wallet(address)
         wallet.balance += amount

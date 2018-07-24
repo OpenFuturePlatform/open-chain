@@ -130,8 +130,6 @@ interface WalletService {
 
     fun updateBalance(from: String, to: String, amount: Long, fee: Long)
 
-    fun changeWalletVote(address: String, delegate: Delegate, type: VoteType)
-
 }
 
 interface NetworkService {

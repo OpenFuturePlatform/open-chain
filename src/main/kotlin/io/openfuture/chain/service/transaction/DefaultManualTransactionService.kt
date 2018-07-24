@@ -23,7 +23,7 @@ abstract class DefaultManualTransactionService<Entity : BaseTransaction, Data : 
     protected abstract fun validate(request: BaseTransactionRequest<Data>)
 
     protected fun baseValidate(request: BaseTransactionRequest<Data>) {
-        super.commonValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
+        commonValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
     }
 
 }
