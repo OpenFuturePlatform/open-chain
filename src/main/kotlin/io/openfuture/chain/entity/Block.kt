@@ -34,4 +34,11 @@ abstract class Block(
     @Column(name = "signature", nullable = false)
     var signature: String = SignatureManager.sign(hash.toByteArray(), privateKey)
 
-) : BaseModel()
+) : BaseModel() {
+
+    fun getPublicKey(): String{
+//        TODO("Need to add public key")
+        return "publicKey"
+    }
+
+}

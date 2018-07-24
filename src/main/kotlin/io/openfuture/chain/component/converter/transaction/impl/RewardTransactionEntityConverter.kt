@@ -1,20 +1,21 @@
 package io.openfuture.chain.component.converter.transaction.impl
 
-import io.openfuture.chain.component.converter.transaction.BaseTransactionEntityConverter
+import io.openfuture.chain.component.converter.transaction.TransactionEntityConverter
 import io.openfuture.chain.crypto.key.NodeKeyHolder
+import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
-import io.openfuture.chain.domain.transaction.data.TransferTransactionData
-import io.openfuture.chain.entity.transaction.TransferTransaction
+import io.openfuture.chain.domain.transaction.data.RewardTransactionData
+import io.openfuture.chain.entity.transaction.RewardTransaction
 import org.springframework.stereotype.Component
 
 @Component
-class TransferTransactionEntityConverter(
+class RewardTransactionEntityConverter(
     private val keyHolder: NodeKeyHolder
-) : BaseTransactionEntityConverter<TransferTransaction, TransferTransactionData>() {
+) : TransactionEntityConverter<RewardTransaction, RewardTransactionData> {
 
-    override fun toEntity(dto: BaseTransactionDto<TransferTransactionData>): TransferTransaction = TransferTransaction(
+    override fun toEntity(dto: BaseTransactionDto<RewardTransactionData>): RewardTransaction = RewardTransaction(
         dto.timestamp,
         dto.data.amount,
         dto.data.fee,
@@ -25,8 +26,8 @@ class TransferTransactionEntityConverter(
         dto.hash
     )
 
-    override fun toEntity(timestamp: Long, request: BaseTransactionRequest<TransferTransactionData>): TransferTransaction =
-        TransferTransaction(
+    override fun toEntity(timestamp: Long, request: BaseTransactionRequest<RewardTransactionData>): RewardTransaction =
+        RewardTransaction(
             timestamp,
             request.data!!.amount,
             request.data!!.fee,
@@ -34,19 +35,19 @@ class TransferTransactionEntityConverter(
             request.data!!.senderAddress,
             request.senderPublicKey!!,
             request.senderSignature!!,
-            getHash(request)
+            request.data!!.getHash()
         )
 
-    override fun toEntity(timestamp: Long, data: TransferTransactionData): TransferTransaction =
-        TransferTransaction(
+    override fun toEntity(timestamp: Long, data: RewardTransactionData): RewardTransaction =
+        RewardTransaction(
             timestamp,
             data.amount,
             data.fee,
             data.recipientAddress,
             data.senderAddress,
             HashUtils.toHexString(keyHolder.getPublicKey()),
-            getSignature(data, keyHolder.getPrivateKey()),
-            getHash(data, keyHolder.getPublicKey(), keyHolder.getPrivateKey())
+            SignatureManager.sign(data.getBytes(), keyHolder.getPrivateKey()),
+            data.getHash()
         )
 
 }

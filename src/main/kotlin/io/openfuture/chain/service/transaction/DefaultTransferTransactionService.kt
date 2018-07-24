@@ -11,6 +11,7 @@ import io.openfuture.chain.repository.TransferTransactionRepository
 import io.openfuture.chain.service.TransferTransactionService
 import io.openfuture.chain.service.WalletService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultTransferTransactionService(

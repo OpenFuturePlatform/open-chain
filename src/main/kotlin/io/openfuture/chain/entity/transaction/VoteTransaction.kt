@@ -12,6 +12,7 @@ import javax.persistence.Table
 class VoteTransaction(
     timestamp: Long,
     amount: Long,
+    fee: Long,
     recipientAddress: String,
     senderAddress: String,
     senderPublicKey: String,
@@ -26,7 +27,7 @@ class VoteTransaction(
 
     block: MainBlock? = null
 
-) : BaseTransaction(timestamp, amount, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash, block) {
+) : BaseTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash, block) {
 
     fun getVoteType() = DictionaryUtils.valueOf(VoteType::class.java, voteTypeId)
 

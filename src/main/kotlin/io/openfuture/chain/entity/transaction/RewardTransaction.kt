@@ -5,11 +5,11 @@ import javax.persistence.Entity
 import javax.persistence.Table
 
 @Entity
-@Table(name = "transfer_transactions")
-class TransferTransaction(
+@Table(name = "reward_transactions")
+class RewardTransaction(
     timestamp: Long,
-    amount: Long,
-    fee: Long,
+    amount: Double,
+    fee: Double,
     recipientAddress: String,
     senderAddress: String,
     senderPublicKey: String,

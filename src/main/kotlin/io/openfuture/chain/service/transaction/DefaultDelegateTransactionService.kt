@@ -19,11 +19,11 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultDelegateTransactionService(
     repository: DelegateTransactionRepository,
     walletService: WalletService,
-    nodeClock: NodeClock,
     entityConverter: DelegateTransactionEntityConverter,
+    nodeClock: NodeClock,
     private val delegateService: DelegateService
-) : DefaultBaseTransactionService<DelegateTransaction, DelegateTransactionData>(repository, walletService, nodeClock,
-    entityConverter), DelegateTransactionService {
+) : DefaultManualTransactionService<DelegateTransaction, DelegateTransactionData>(repository, walletService,
+    entityConverter, nodeClock), DelegateTransactionService {
 
     @Transactional
     override fun toBlock(tx: DelegateTransaction, block: MainBlock): DelegateTransaction {

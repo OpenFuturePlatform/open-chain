@@ -1,6 +1,7 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.block.validation.BlockValidationProvider
+import io.openfuture.chain.component.converter.transaction.impl.RewardTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
@@ -8,12 +9,16 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
+import io.openfuture.chain.domain.transaction.data.RewardTransactionData
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
-import io.openfuture.chain.service.*
+import io.openfuture.chain.property.ConsensusProperties
+import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.ConsensusService
+import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
@@ -26,7 +31,9 @@ class BlockCreationProcessor(
     private val validationService: BlockValidationProvider,
     private val consensusService: ConsensusService,
     private val clock: NodeClock,
-    private val delegateService: DelegateService
+    private val delegateService: DelegateService,
+    private val rewardTransactionEntityConverter: RewardTransactionEntityConverter,
+    private val consensusProperties: ConsensusProperties
 ) {
 
     fun approveBlock(pendingBlock: PendingBlock): PendingBlock {
@@ -42,7 +49,7 @@ class BlockCreationProcessor(
             throw IllegalArgumentException("Inbound block's signature is invalid")
         }
 
-        if(!signatureCollector.addBlockSignature(pendingBlock)) {
+        if (!signatureCollector.addBlockSignature(pendingBlock)) {
             throw IllegalArgumentException("Either signature is already exists, or not related to pending block")
         }
         return signCreatedBlock(block)
@@ -67,13 +74,15 @@ class BlockCreationProcessor(
         return pendingBlock
     }
 
-    private fun create(transactions: MutableList<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
+    private fun create(transactionsFromPool: MutableList<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
         val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
 
         val time = clock.networkTime()
         val privateKey = keyHolder.getPrivateKey()
-        val block = when(blockType) {
+        val block = when (blockType) {
             BlockType.MAIN -> {
+                val transactions = prepareTransactions(transactionsFromPool)
+
                 MainBlock(
                     privateKey,
                     previousBlock.height + 1,
@@ -96,6 +105,17 @@ class BlockCreationProcessor(
         }
 
         signCreatedBlock(block)
+    }
+
+    private fun prepareTransactions(transactionsFromPool: MutableList<BaseTransaction>): MutableList<BaseTransaction> {
+        val fees = transactionsFromPool.sumByDouble { it.fee }
+        val delegate = delegateService.getByPublicKey(HashUtils.toHexString(keyHolder.getPublicKey()))
+        val rewardTransactionData = RewardTransactionData((fees + consensusProperties.rewardBlock!!),
+            consensusProperties.feeRewardTx!!, delegate.address, consensusProperties.genesisAddress!!)
+
+        val rewardTransaction = rewardTransactionEntityConverter.toEntity(clock.networkTime(), rewardTransactionData)
+
+        return mutableListOf(rewardTransaction, *transactionsFromPool.toTypedArray())
     }
 
 }

@@ -16,7 +16,8 @@ class VoteTransactionEntityConverter(
 
     override fun toEntity(dto: BaseTransactionDto<VoteTransactionData>): VoteTransaction = VoteTransaction(
         dto.timestamp,
-        dto.data.amount ,
+        dto.data.amount,
+        dto.data.fee,
         dto.data.recipientAddress,
         dto.data.senderAddress,
         dto.senderPublicKey,
@@ -30,6 +31,7 @@ class VoteTransactionEntityConverter(
         VoteTransaction(
             timestamp,
             request.data!!.amount,
+            request.data!!.fee,
             request.data!!.recipientAddress,
             request.data!!.senderAddress,
             request.senderPublicKey!!,
@@ -43,6 +45,7 @@ class VoteTransactionEntityConverter(
         VoteTransaction(
             timestamp,
             data.amount,
+            data.fee,
             data.recipientAddress,
             data.senderAddress,
             HashUtils.toHexString(keyHolder.getPublicKey()),

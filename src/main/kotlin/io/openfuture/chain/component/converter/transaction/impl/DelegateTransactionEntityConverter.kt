@@ -17,6 +17,7 @@ class DelegateTransactionEntityConverter(
     override fun toEntity(dto: BaseTransactionDto<DelegateTransactionData>): DelegateTransaction = DelegateTransaction(
         dto.timestamp,
         dto.data.amount,
+        dto.data.fee,
         dto.data.recipientAddress,
         dto.data.senderAddress,
         dto.senderPublicKey,
@@ -29,6 +30,7 @@ class DelegateTransactionEntityConverter(
         DelegateTransaction(
             timestamp,
             request.data!!.amount,
+            request.data!!.fee,
             request.data!!.recipientAddress,
             request.data!!.senderAddress,
             request.senderPublicKey!!,
@@ -41,6 +43,7 @@ class DelegateTransactionEntityConverter(
         DelegateTransaction(
             timestamp,
             data.amount,
+            data.fee,
             data.recipientAddress,
             data.senderAddress,
             HashUtils.toHexString(keyHolder.getPublicKey()),
