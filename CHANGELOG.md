@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Delegate transaction type
+- Add delegate based on Delegate transaction
+- RPC: Response header info for all responses
+- RPC: Add transactions
+- RPC: Delegate info
+- RPC: Page request filter
+- Add / remove vote for delegate from wallet based on Vote transaction
+- Calculate delegate rating based on wallet balance
 
 ## [0.3.0] - 2018-07-13
 ### Added
