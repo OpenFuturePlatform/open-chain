@@ -21,6 +21,8 @@ enum class PacketType(
 
         fun get(clazz: KClass<out Packet>) = values().single { clazz == it.clazz }
 
+        fun get(packet: Packet) = get(packet::class)
+
     }
 
 }

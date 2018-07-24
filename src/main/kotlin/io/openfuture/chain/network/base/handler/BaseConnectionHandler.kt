@@ -3,11 +3,11 @@ package io.openfuture.chain.network.base.handler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
 import io.openfuture.chain.network.domain.Packet
+import io.openfuture.chain.network.domain.PacketType
 import org.slf4j.LoggerFactory
-import kotlin.reflect.KClass
 
 abstract class BaseConnectionHandler(
-        private val allowablePacketTypes: Set<KClass<out Packet>>
+        private val allowableTypes: Set<PacketType>
 ) : ChannelInboundHandlerAdapter() {
 
     companion object {
@@ -21,7 +21,7 @@ abstract class BaseConnectionHandler(
     }
 
     override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {
-        if (!allowablePacketTypes.contains(packet::class)) {
+        if (!allowableTypes.contains(PacketType.get(packet as Packet))) {
             log.error("Illegal packet type: ${packet::class}")
             ctx.close()
             return
