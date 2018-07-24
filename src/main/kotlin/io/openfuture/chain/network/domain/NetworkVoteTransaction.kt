@@ -4,42 +4,31 @@ import io.netty.buffer.ByteBuf
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import java.nio.charset.StandardCharsets.UTF_8
 
-class NetworkVoteTransaction(
-    timestamp: Long,
-    amount: Double,
-    fee: Double,
-    recipientAddress: String,
-    senderKey: String,
-    senderAddress: String,
-    senderSignature: String,
-    hash: String,
+class NetworkVoteTransaction() : NetworkTransaction() {
 
-    var voteTypeId: Int,
-    var delegateHost: String,
-    var delegatePort: Int
+    var voteTypeId: Int = 0
+    lateinit var delegateHost: String
+    var delegatePort: Int = 0
 
-) : NetworkTransaction(timestamp, amount, fee, recipientAddress, senderKey, senderAddress, senderSignature, hash) {
-
-    constructor(transaction: VoteTransaction) : this(
-        transaction.timestamp,
-        transaction.amount,
-        transaction.fee,
-        transaction.recipientAddress,
-        transaction.senderKey,
-        transaction.senderAddress,
-        transaction.senderSignature!!,
-        transaction.hash,
-        transaction.getVoteType().getId(),
-        transaction.delegateHost,
-        transaction.delegatePort
-    )
+    constructor(transaction: VoteTransaction) : this() {
+        timestamp = transaction.timestamp
+        amount = transaction.amount
+        fee = transaction.fee
+        recipientAddress = transaction.recipientAddress
+        senderKey = transaction.senderKey
+        senderAddress = transaction.senderAddress
+        senderSignature = transaction.senderSignature!!
+        hash = transaction.hash
+        voteTypeId = transaction.getVoteType().getId()
+        delegateHost = transaction.delegateHost
+        delegatePort = transaction.delegatePort
+    }
 
     override fun get(buffer: ByteBuf) {
         super.get(buffer)
 
         voteTypeId = buffer.readInt()
-        var length = buffer.readInt()
-        delegateHost = buffer.readCharSequence(length, UTF_8).toString()
+        delegateHost = buffer.readCharSequence(buffer.readInt(), UTF_8).toString()
         delegatePort = buffer.readInt()
     }
 
@@ -47,6 +36,7 @@ class NetworkVoteTransaction(
         super.send(buffer)
 
         buffer.writeInt(voteTypeId)
+        buffer.writeInt(delegateHost.length)
         buffer.writeCharSequence(delegateHost, UTF_8)
         buffer.writeInt(delegatePort)
     }

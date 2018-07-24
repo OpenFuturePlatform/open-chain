@@ -8,10 +8,7 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.BlockType
-import io.openfuture.chain.entity.GenesisBlock
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.service.BlockService
@@ -98,7 +95,7 @@ class BlockCreationProcessor(
                     previousBlock.hash,
                     time,
                     genesisBlock.epochIndex + 1,
-                    delegateService.getActiveDelegates()
+                    delegateService.getActiveDelegates() as MutableSet<Delegate>
                 ).sign(privateKey)
             }
         }

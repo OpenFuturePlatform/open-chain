@@ -2,32 +2,24 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.entity.GenesisBlock
-import java.util.*
 
-class NetworkGenesisBlock(height: Long = 0,
-                          previousHash: String,
-                          merkleHash: String,
-                          timestamp: Long = 0,
-                          typeId: Int = 0,
-                          hash: String,
-                          signature: String,
-                          transactions: MutableList<NetworkTransaction>,
-                          var epochIndex: Long,
-                          var activeDelegates: MutableSet<NetworkDelegate>) :
-    NetworkBlock(height, previousHash, merkleHash, timestamp, typeId, hash, signature, transactions) {
+class NetworkGenesisBlock() : NetworkBlock() {
 
-    constructor(block: GenesisBlock) : this(
-        block.height,
-        block.previousHash,
-        block.merkleHash,
-        block.timestamp,
-        block.typeId,
-        block.hash,
-        block.signature!!,
-        Collections.emptyList(),
-        block.epochIndex,
-        block.activeDelegates.map { NetworkDelegate(it) }.toMutableSet()
-    )
+    var epochIndex: Long = 0
+    lateinit var activeDelegates: MutableSet<NetworkDelegate>
+
+
+    constructor(block: GenesisBlock) : this() {
+        this.height = block.height
+        this.previousHash = block.previousHash
+        this.merkleHash = block.merkleHash
+        this.timestamp = block.timestamp
+        this.typeId = block.typeId
+        this.hash = block.hash
+        this.signature = block.signature!!
+        this.epochIndex = block.epochIndex
+        this.activeDelegates = block.activeDelegates.map { NetworkDelegate(it) }.toMutableSet()
+    }
 
     override fun get(buffer: ByteBuf) {
         super.get(buffer)

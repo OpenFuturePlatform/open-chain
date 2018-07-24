@@ -99,7 +99,7 @@ class DefaultNetworkService(
         if (channel == null) {
             channel = clientBootstrap.connect(networkAddress.host, networkAddress.port).channel()
         }
-        channel!!.writeAndFlush(message)
+         channel!!.writeAndFlush(message)
     }
 
 }

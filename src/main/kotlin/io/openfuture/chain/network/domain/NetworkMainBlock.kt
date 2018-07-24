@@ -1,10 +1,14 @@
 package io.openfuture.chain.network.domain
 
+import io.netty.buffer.ByteBuf
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 
 class NetworkMainBlock() : NetworkBlock() {
+
+    lateinit var transferTransactions : MutableList<NetworkTransferTransaction>
+    lateinit var voteTransactions : MutableList<NetworkVoteTransaction>
 
     constructor(block: MainBlock) : this() {
         this.height = block.height
@@ -14,9 +18,44 @@ class NetworkMainBlock() : NetworkBlock() {
         this.typeId = block.typeId
         this.hash = block.hash
         this.signature = block.signature!!
-        this.transactions = block.transactions.map {
-            if (it is TransferTransaction) NetworkTransferTransaction(it)
-            else NetworkVoteTransaction(it as VoteTransaction)
-        }.toMutableList()
+        this.transferTransactions = block.transactions.filterIsInstance(TransferTransaction::class.java)
+            .map { NetworkTransferTransaction(it) }.toMutableList()
+        this.voteTransactions = block.transactions.filterIsInstance(VoteTransaction::class.java).map{ NetworkVoteTransaction(it) }.toMutableList()
     }
+
+
+    override fun get(buffer: ByteBuf) {
+        super.get(buffer)
+
+        var size = buffer.readInt()
+        transferTransactions = mutableListOf()
+        for (index in 1..size) {
+            val transaction = NetworkTransferTransaction()
+            transaction.get(buffer)
+            transferTransactions.add(transaction)
+        }
+
+        size = buffer.readInt()
+        voteTransactions = mutableListOf()
+        for (index in 1..size) {
+            val transaction = NetworkVoteTransaction()
+            transaction.get(buffer)
+            voteTransactions.add(transaction)
+        }
+    }
+
+    override fun send(buffer: ByteBuf) {
+        super.send(buffer)
+
+        buffer.writeInt(transferTransactions.size)
+        for (transaction in transferTransactions) {
+            transaction.send(buffer)
+        }
+
+        buffer.writeInt(voteTransactions.size)
+        for (transaction in voteTransactions) {
+            transaction.send(buffer)
+        }
+    }
+
 }

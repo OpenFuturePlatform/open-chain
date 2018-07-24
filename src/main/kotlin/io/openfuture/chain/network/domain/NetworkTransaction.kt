@@ -3,7 +3,7 @@ package io.openfuture.chain.network.domain
 import io.netty.buffer.ByteBuf
 import java.nio.charset.StandardCharsets
 
-open class NetworkTransaction() : Packet() {
+open class NetworkTransaction : Packet() {
 
     var timestamp: Long = 0
     var amount: Double = 0.0
@@ -14,32 +14,15 @@ open class NetworkTransaction() : Packet() {
     lateinit var senderSignature: String
     lateinit var hash: String
 
-    constructor(timestamp: Long, amount: Double, fee: Double, recipientAddress: String, senderKey: String, senderAddress: String,
-                senderSignature: String, hash: String) : this() {
-        this.timestamp = timestamp
-        this.amount = amount
-        this.fee = fee
-        this.recipientAddress = recipientAddress
-        this.senderKey = senderKey
-        this.senderAddress = senderAddress
-        this.senderSignature = senderSignature
-        this.hash = hash
-    }
-
     override fun get(buffer: ByteBuf) {
         timestamp = buffer.readLong()
         amount = buffer.readDouble()
         fee = buffer.readDouble()
-        var length = buffer.readInt()
-        recipientAddress = buffer.readCharSequence(length, StandardCharsets.UTF_8).toString()
-        length = buffer.readInt()
-        senderKey = buffer.readCharSequence(length, StandardCharsets.UTF_8).toString()
-        length = buffer.readInt()
-        senderAddress = buffer.readCharSequence(length, StandardCharsets.UTF_8).toString()
-        length = buffer.readInt()
-        senderSignature = buffer.readCharSequence(length, StandardCharsets.UTF_8).toString()
-        length = buffer.readInt()
-        hash = buffer.readCharSequence(length, StandardCharsets.UTF_8).toString()
+        recipientAddress = buffer.readCharSequence(buffer.readInt(), StandardCharsets.UTF_8).toString()
+        senderKey = buffer.readCharSequence(buffer.readInt(), StandardCharsets.UTF_8).toString()
+        senderAddress = buffer.readCharSequence(buffer.readInt(), StandardCharsets.UTF_8).toString()
+        senderSignature = buffer.readCharSequence(buffer.readInt(), StandardCharsets.UTF_8).toString()
+        hash = buffer.readCharSequence(buffer.readInt(), StandardCharsets.UTF_8).toString()
     }
 
     override fun send(buffer: ByteBuf) {
@@ -58,6 +41,6 @@ open class NetworkTransaction() : Packet() {
         buffer.writeCharSequence(hash, StandardCharsets.UTF_8)
     }
 
-    override fun toString() = "Networktransaction(hash=$hash)"
+    override fun toString() = "NetworkTransaction(hash=$hash)"
 
 }

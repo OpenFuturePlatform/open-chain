@@ -80,7 +80,7 @@ class BlockCreationProcessorTests : ServiceTests() {
         val transactions = createTransactions()
         val genesisBlock = createGenesisBlock()
         val delegate = Delegate("host", 1234)
-        genesisBlock.activeDelegates = setOf(delegate)
+        genesisBlock.activeDelegates = mutableSetOf(delegate)
         val event = BlockCreationEvent(transactions)
 
         given(blockService.getLastGenesis()).willReturn(genesisBlock)
@@ -108,7 +108,7 @@ class BlockCreationProcessorTests : ServiceTests() {
         "prev_block_hash",
         1512345678L,
         1,
-        setOf(Delegate("host1", 1234), Delegate("host2", 1234), Delegate("host3", 1234))).sign<GenesisBlock>(ByteArray(1))
+        mutableSetOf(Delegate("host1", 1234), Delegate("host2", 1234), Delegate("host3", 1234))).sign<GenesisBlock>(ByteArray(1))
 
     private fun createTransactions(): MutableList<BaseTransaction> = mutableListOf(
         VoteTransaction(

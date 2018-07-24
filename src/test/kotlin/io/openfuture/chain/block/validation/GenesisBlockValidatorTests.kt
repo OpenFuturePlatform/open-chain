@@ -22,7 +22,7 @@ class GenesisBlockValidatorTests {
             "1",
             1L,
             1L,
-            emptySet()
+            mutableSetOf()
         ).sign<GenesisBlock>(ByteArray(1))
 
         val isBlockValid = genesisBlockValidator.isValid(block)

@@ -2,26 +2,17 @@ package io.openfuture.chain.network.domain
 
 import io.openfuture.chain.entity.transaction.TransferTransaction
 
-class NetworkTransferTransaction(
-    timestamp: Long,
-    amount: Double,
-    fee: Double,
-    recipientAddress: String,
-    senderKey: String,
-    senderAddress: String,
-    senderSignature: String,
-    hash: String
-) : NetworkTransaction(timestamp, amount, fee, recipientAddress, senderKey, senderAddress, senderSignature, hash) {
+class NetworkTransferTransaction() : NetworkTransaction() {
 
-    constructor(transaction: TransferTransaction) : this(
-        transaction.timestamp,
-        transaction.amount,
-        transaction.fee,
-        transaction.recipientAddress,
-        transaction.senderKey,
-        transaction.senderAddress,
-        transaction.senderSignature!!,
-        transaction.hash
-    )
+    constructor(transaction: TransferTransaction) : this() {
+        timestamp = transaction.timestamp
+        amount = transaction.amount
+        fee = transaction.fee
+        recipientAddress = transaction.recipientAddress
+        senderKey = transaction.senderKey
+        senderAddress = transaction.senderAddress
+        senderSignature = transaction.senderSignature!!
+        hash = transaction.hash
+    }
 
 }

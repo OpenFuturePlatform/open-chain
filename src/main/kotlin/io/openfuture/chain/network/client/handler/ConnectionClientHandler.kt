@@ -21,7 +21,8 @@ class ConnectionClientHandler : ChannelInboundHandlerAdapter() {
         Greeting::class,
         HeartBeat::class,
         TimeSyncResponse::class,
-        NetworkBlock::class)
+        NetworkMainBlock::class,
+        NetworkGenesisBlock::class)
 
 
     override fun channelActive(ctx: ChannelHandlerContext) {

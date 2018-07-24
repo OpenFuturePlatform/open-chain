@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf
 import java.nio.charset.StandardCharsets
 import java.nio.charset.StandardCharsets.UTF_8
 
-open class NetworkBlock() : Packet() {
+open class NetworkBlock : Packet() {
     var height: Long = 0
     lateinit var previousHash: String
     lateinit var merkleHash: String
@@ -13,41 +13,14 @@ open class NetworkBlock() : Packet() {
     lateinit var hash: String
     lateinit var signature: String
 
-    lateinit var transactions : MutableList<NetworkTransaction>
-
-
-    constructor(height: Long, previousHash: String, merkleHash: String, timestamp: Long, typeId: Int, hash: String,
-                signature: String, transactions: MutableList<NetworkTransaction>) : this() {
-        this.height = height
-        this.previousHash = previousHash
-        this.merkleHash = merkleHash
-        this.timestamp = timestamp
-        this.typeId = typeId
-        this.hash = hash
-        this.signature = signature
-        this.transactions = transactions
-    }
-
     override fun get(buffer: ByteBuf) {
         height = buffer.readLong()
-        var length = buffer.readInt()
-        previousHash = buffer.readCharSequence(length, UTF_8).toString()
-        length = buffer.readInt()
-        merkleHash = buffer.readCharSequence(length, UTF_8).toString()
+        previousHash = buffer.readCharSequence(buffer.readInt(), UTF_8).toString()
+        merkleHash = buffer.readCharSequence(buffer.readInt(), UTF_8).toString()
         timestamp = buffer.readLong()
         typeId = buffer.readInt()
-        length = buffer.readInt()
-        hash = buffer.readCharSequence(length, UTF_8).toString()
-        length = buffer.readInt()
-        signature = buffer.readCharSequence(length, UTF_8).toString()
-
-        val size = buffer.readInt()
-        transactions = mutableListOf()
-        for (index in 1..size) {
-            val transaction = NetworkTransaction()
-            transaction.get(buffer)
-            transactions.add(transaction)
-        }
+        hash = buffer.readCharSequence(buffer.readInt(), UTF_8).toString()
+        signature = buffer.readCharSequence(buffer.readInt(), UTF_8).toString()
     }
 
     override fun send(buffer: ByteBuf) {
@@ -62,11 +35,6 @@ open class NetworkBlock() : Packet() {
         buffer.writeCharSequence(hash, StandardCharsets.UTF_8)
         buffer.writeInt(signature.length)
         buffer.writeCharSequence(signature, StandardCharsets.UTF_8)
-
-        buffer.writeInt(transactions.size)
-        for (transaction in transactions) {
-            transaction.send(buffer)
-        }
     }
 
     override fun toString() = "NetworkBlock(height=$height)"
