@@ -11,7 +11,7 @@ abstract class BaseHandler<T>(private val autoRelease: Boolean = true) : Channel
     override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
         var release = true
         try {
-            if (msg::class == genericClass) {
+            if (msg::class == genericClass || msg::class.supertypes[0].classifier == genericClass) {
                 @Suppress("UNCHECKED_CAST")
                 packetReceived(ctx, msg as T)
             } else {

@@ -14,6 +14,6 @@ class GenesisBlock(height: Long, previousHash: String, timestamp: Long,
                    @JoinTable(name = "delegate2genesis",
                        joinColumns = [JoinColumn(name = "genesis_id")],
                        inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
-                   var activeDelegates: Set<Delegate>
+                   var activeDelegates: MutableSet<Delegate>
 
 ) : Block(height, previousHash, StringUtils.EMPTY, timestamp, BlockType.GENESIS.id)

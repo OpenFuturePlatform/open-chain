@@ -25,8 +25,8 @@ class ServerChannelInitializer(
         pipeline.addLast(context.getBean(TimeSyncServerHandler::class.java))
         pipeline.addLast(context.getBean(AddressDiscoveryHandler::class.java))
         pipeline.addLast(context.getBean(AddressHandler::class.java))
+        pipeline.addLast(context.getBean(HeartBeatServerHandler::class.java))
         pipeline.addLast(context.getBean(BlockServerHandler::class.java))
-        pipeline.addLast(context.getBean(HeartBeatServerHandler::class.java)) // prototype
     }
 
 }

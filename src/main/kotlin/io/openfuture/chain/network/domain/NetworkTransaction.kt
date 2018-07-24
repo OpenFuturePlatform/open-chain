@@ -3,7 +3,7 @@ package io.openfuture.chain.network.domain
 import io.netty.buffer.ByteBuf
 import java.nio.charset.StandardCharsets
 
-class NetworkTransaction() : Packet() {
+open class NetworkTransaction() : Packet() {
 
     var timestamp: Long = 0
     var amount: Double = 0.0

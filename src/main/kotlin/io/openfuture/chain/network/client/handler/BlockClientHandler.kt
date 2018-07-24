@@ -1,24 +1,24 @@
 package io.openfuture.chain.network.client.handler
 
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.entity.BlockType
+import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
+import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.network.base.BaseHandler
-import io.openfuture.chain.network.domain.NetworkBlock
-import io.openfuture.chain.service.BaseTransactionService
+import io.openfuture.chain.network.domain.*
 import io.openfuture.chain.service.BlockService
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
-import java.util.*
 
 
 @Component
 @Scope("prototype")
 class BlockClientHandler(
-    private val blockService: BlockService,
-    private val transactionService: BaseTransactionService<TransferTransaction>
+    private val blockService: BlockService
 ) : BaseHandler<NetworkBlock>() {
 
     override fun packetReceived(ctx: ChannelHandlerContext, message: NetworkBlock) {
@@ -26,35 +26,39 @@ class BlockClientHandler(
             return
         }
 
-        if (message.typeId == BlockType.MAIN.id) {
-            val block = MainBlock(message.height, message.previousHash,
-                message.merkleHash, message.timestamp, Collections.emptyList()).apply { signature = message.signature }
+        when (message) {
+            is NetworkMainBlock -> {
+                val transactions = message.transactions.map { getTransaction(it) }.toMutableList()
 
-            checkHash(message.hash, block.hash)
-            val savedBlock = blockService.save(block)
+                val block = MainBlock(message.height, message.previousHash,
+                    message.merkleHash, message.timestamp, transactions).apply { signature = message.signature }
 
-            message.transactions!!.forEach {
-                val transaction = TransferTransaction(it.timestamp, it.amount, it.fee, it.recipientAddress, it.senderKey,
-                    it.senderAddress, null, it.senderSignature, savedBlock)
-
-                checkHash(message.hash, transaction.hash)
-
-                transactionService.save(transaction)
+                blockService.save(block)
             }
-        } else {
-            val block = GenesisBlock(message.height, message.previousHash, message.timestamp, 1, Collections.emptySet())
-                .apply { signature = message.signature }
 
-            checkHash(message.hash, block.hash)
+            is NetworkGenesisBlock -> {
+                val delegates = message.activeDelegates.map { Delegate(it.host, it.port, it.rating) }.toMutableSet()
 
-            blockService.save(block)
+                val block = GenesisBlock(message.height, message.previousHash, message.timestamp, message.epochIndex,
+                    delegates).apply { signature = message.signature }
+
+                blockService.save(block)
+            }
+
         }
     }
 
-    private fun checkHash(hash: String, calculatedHash: String) {
-//        if(hash != calculatedHash) {
-//            throw LogicException("Block synchronization error, incorrect hash")
-//        }
+    private fun getTransaction(tr: NetworkTransaction): BaseTransaction {
+        return when (tr) {
+            is NetworkTransferTransaction -> TransferTransaction(tr.timestamp, tr.amount,
+                tr.fee, tr.recipientAddress, tr.senderKey, tr.senderAddress, null, tr.senderSignature)
+
+            is NetworkVoteTransaction -> VoteTransaction(tr.timestamp, tr.amount, tr.fee, tr.recipientAddress,
+                tr.senderKey, tr.senderAddress, tr.voteTypeId, tr.delegateHost, tr.delegatePort)
+                .apply { senderSignature = tr.senderSignature }
+
+            else -> throw LogicException("Incorrect transaction type")
+        }
     }
 
     override fun channelActive(ctx: ChannelHandlerContext) {
@@ -66,3 +70,4 @@ class BlockClientHandler(
     }
 
 }
+

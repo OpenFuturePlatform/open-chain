@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf
 import java.nio.charset.StandardCharsets
 import java.nio.charset.StandardCharsets.UTF_8
 
-class NetworkBlock() : Packet() {
+open class NetworkBlock() : Packet() {
     var height: Long = 0
     lateinit var previousHash: String
     lateinit var merkleHash: String
