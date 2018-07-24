@@ -99,26 +99,27 @@ class BlockCreationProcessor(
         return pendingBlock
     }
 
-    private fun create(transactions: MutableList<BaseTransaction>, previousBlock: Block?, genesisBlock: GenesisBlock) {
+    private fun create(transactions: MutableList<BaseTransaction>, mainBlock: Block?, genesisBlock: GenesisBlock) {
         if (transactions.size != consensusProperties.blockCapacity) {
             return
         }
 
         val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
 
+        val previousBlock: Block
+        if (null == mainBlock || mainBlock.height < genesisBlock.height) {
+            previousBlock = genesisBlock
+        } else if (mainBlock.height > genesisBlock.height) {
+            previousBlock = mainBlock
+        } else {
+            throw IllegalArgumentException("$mainBlock or $genesisBlock has wrong height")
+        }
+
+        val height = previousBlock.height + 1
+        val hash = previousBlock.hash
         val time = clock.networkTime()
         val privateKey = keyHolder.getPrivateKey()
         val publicKey = keyHolder.getPublicKey()
-
-        val height: Long
-        val hash: String
-        if (previousBlock != null) {
-            height = previousBlock.height + 1
-            hash = previousBlock.hash
-        } else {
-            height = 1
-            hash = ""
-        }
 
         val block = when(blockType) {
             BlockType.MAIN -> {
