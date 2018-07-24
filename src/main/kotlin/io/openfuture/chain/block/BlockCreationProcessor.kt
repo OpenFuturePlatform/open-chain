@@ -13,7 +13,6 @@ import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
-import io.openfuture.chain.property.NodeProperty
 import io.openfuture.chain.service.*
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.context.event.EventListener

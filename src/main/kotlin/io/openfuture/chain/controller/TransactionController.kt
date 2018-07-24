@@ -1,6 +1,5 @@
 package io.openfuture.chain.controller
 
-import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.controller.common.BaseController
 import io.openfuture.chain.controller.common.RestResponse
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
@@ -10,7 +9,6 @@ import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
 import io.openfuture.chain.domain.transaction.data.TransferTransactionData
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
-import io.openfuture.chain.property.NodeProperty
 import io.openfuture.chain.service.DelegateTransactionService
 import io.openfuture.chain.service.TransferTransactionService
 import io.openfuture.chain.service.VoteTransactionService
@@ -23,12 +21,10 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("${PathConstant.RPC}/transactions")
 class TransactionController(
-    nodeClock: NodeClock,
-    nodeProperty: NodeProperty,
     private val voteTransactionService: VoteTransactionService,
     private val transferTransactionService: TransferTransactionService,
     private val delegateTransactionService: DelegateTransactionService
-) : BaseController(nodeClock, nodeProperty) {
+) : BaseController() {
 
     @PostMapping("/votes/doGenerateHash")
     fun getVoteDataHash(@Valid @RequestBody data: VoteTransactionData): RestResponse<String> {

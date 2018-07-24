@@ -12,7 +12,7 @@ import javax.annotation.PostConstruct
 
 @Component
 class NodeKeyHolder(
-    private val properties: NodeProperty,
+    private val property: NodeProperty,
     private val cryptoService: CryptoService,
     private val seedCalculator: SeedCalculator
 ) {
@@ -25,8 +25,8 @@ class NodeKeyHolder(
     private fun init() {
         generatePrivatePublicKeysIfNotExist()
 
-        val privateKeyValue = File(properties.privateKeyPath).readText(Charset.forName("UTF-8"))
-        val publicKeyValue = File(properties.publicKeyPath).readText(Charset.forName("UTF-8"))
+        val privateKeyValue = File(property.privateKeyPath).readText(Charset.forName("UTF-8"))
+        val publicKeyValue = File(property.publicKeyPath).readText(Charset.forName("UTF-8"))
 
         privateKey = ByteUtils.fromHexString(privateKeyValue)
         publicKey = ByteUtils.fromHexString(publicKeyValue)
@@ -41,8 +41,8 @@ class NodeKeyHolder(
     }
 
     private fun generatePrivatePublicKeysIfNotExist() {
-        val privateKeyFile = File(properties.privateKeyPath)
-        val publicKeyFile = File(properties.publicKeyPath)
+        val privateKeyFile = File(property.privateKeyPath)
+        val publicKeyFile = File(property.publicKeyPath)
 
         if (!privateKeyFile.exists() || !publicKeyFile.exists()) {
             val seedPhrase = cryptoService.generateSeedPhrase()

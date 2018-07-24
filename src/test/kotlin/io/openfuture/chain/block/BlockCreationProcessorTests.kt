@@ -14,7 +14,6 @@ import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import io.openfuture.chain.property.NodeProperty
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.ConsensusService
 import io.openfuture.chain.service.DelegateService
