@@ -25,12 +25,12 @@ class DefaultRewardTransactionService(
 
     @Transactional
     override fun validate(dto: BaseTransactionDto<RewardTransactionData>) {
-        super.baseValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
+        super.baseValidate(dto)
     }
 
     @Transactional
     override fun validate(request: BaseTransactionRequest<RewardTransactionData>) {
-        super.baseValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
+        super.baseValidate(request)
     }
 
 }

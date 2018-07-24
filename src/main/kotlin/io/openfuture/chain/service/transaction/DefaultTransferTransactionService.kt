@@ -22,11 +22,11 @@ class DefaultTransferTransactionService(
     }
 
     override fun validate(dto: BaseTransactionDto<TransferTransactionData>) {
-        this.baseValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
+        this.baseValidate(dto)
     }
 
     override fun validate(request: BaseTransactionRequest<TransferTransactionData>) {
-        this.baseValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
+        this.baseValidate(request)
     }
 
 }

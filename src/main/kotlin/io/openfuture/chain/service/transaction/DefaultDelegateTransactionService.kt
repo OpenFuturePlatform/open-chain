@@ -29,12 +29,12 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun validate(dto: BaseTransactionDto<DelegateTransactionData>) {
-        this.baseValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
+        this.baseValidate(dto)
     }
 
     @Transactional
     override fun validate(request: BaseTransactionRequest<DelegateTransactionData>) {
-        this.baseValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
+        this.baseValidate(request)
     }
 
 }

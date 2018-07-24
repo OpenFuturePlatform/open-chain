@@ -79,9 +79,18 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
         //todo: networkService.broadcast(transaction.toMessage)
     }
 
-    protected fun baseValidate(data: Data, signature: String, publicKey: String) {
-//        if (!isValidHash())
-//
+    protected fun baseValidate(dto: BaseTransactionDto<Data>) {
+        if (!isValidHash(dto.data, dto.hash)) {
+            throw ValidationException("Invalid transaction hash")
+        }
+        commonValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
+    }
+
+    protected fun baseValidate(request: BaseTransactionRequest<Data>) {
+        commonValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
+    }
+
+    private fun commonValidate(data : Data, signature: String, publicKey: String) {
         if (!isValidaSignature(data, signature, publicKey)) {
             throw ValidationException("Invalid transaction signature")
         }
@@ -89,6 +98,10 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction, Data : Ba
         if (!isValidSenderBalance(data.senderAddress, data.amount)) {
             throw ValidationException("Invalid sender balance")
         }
+    }
+
+    private fun isValidHash(data: Data, hash: String): Boolean {
+        return data.getHash() == hash
     }
 
     private fun isValidaSignature(data: Data, signature: String, publicKey: String): Boolean {
