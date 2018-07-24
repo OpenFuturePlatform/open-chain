@@ -11,16 +11,12 @@ class DefaultBlockService(
     val blockRepository: BlockRepository<Block>
 ) : BlockService<Block> {
 
-    override fun get(hash: String): Block {
-        return blockRepository.findByHash(hash)!!
-    }
+    override fun get(hash: String): Block = blockRepository.findByHash(hash)!!
 
     override fun getLast(): Block = blockRepository.findFirstByOrderByHeightDesc()
         ?: throw NotFoundException("Last block not exist!")
 
-    override fun save(block: Block): Block {
-       return blockRepository.save(block)
-    }
+    override fun save(block: Block): Block = blockRepository.save(block)
 
     override fun isValid(block: Block): Boolean = throw NotImplementedException("Method is not implemented")
 

@@ -49,7 +49,7 @@ object BlockUtils {
     }
 
     fun getBlockProducer(delegates: Set<Delegate>, previousBlock: Block?): Delegate {
-        val blockTimestamp = if (previousBlock != null) previousBlock.timestamp else 0
+        val blockTimestamp = previousBlock?.timestamp ?: 0
         val random = Random(blockTimestamp)
         return delegates.shuffled(random).first()
     }

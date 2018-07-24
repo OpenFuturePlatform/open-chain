@@ -81,7 +81,7 @@ class BlockCreationProcessor(
 
     fun fireBlockCreation() {
         val previousBlock = blockService.getLast()
-        val genesisBlock = genesisBlockService.getLast()!!
+        val genesisBlock = genesisBlockService.getLast()
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
         if (properties.host == nextProducer.host && properties.port == nextProducer.port) {
             val pendingTransactions

@@ -29,7 +29,6 @@ class DefaultGenesisBlockService(
         return (isValidEpochIndex(lastBlock, block) && blockFound != null)
     }
 
-    private fun isValidEpochIndex(lastBlock: GenesisBlock, block: GenesisBlock): Boolean {
-        return (lastBlock.epochIndex + 1 == block.epochIndex)
-    }
+    private fun isValidEpochIndex(lastBlock: GenesisBlock, block: GenesisBlock): Boolean
+        = (lastBlock.epochIndex + 1 == block.epochIndex)
 }

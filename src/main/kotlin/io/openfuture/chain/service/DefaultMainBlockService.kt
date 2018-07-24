@@ -32,7 +32,6 @@ class DefaultMainBlockService(
         val currentTime = clock.networkTime()
         val lastBlock = getLast()
 
-
         return verifyPreviousHash(block, lastBlock)
             && verifyHeight(block, lastBlock)
             && verifyTimestamp(block, lastBlock)
