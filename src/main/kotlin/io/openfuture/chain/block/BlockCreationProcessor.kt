@@ -26,7 +26,7 @@ import javax.annotation.PostConstruct
 
 @Component
 class BlockCreationProcessor(
-    private val mainBlockService: BlockService<MainBlock>,
+    private val blockService: BlockService<Block>,
     private val genesisBlockService: BlockService<GenesisBlock>,
     private val baseTransactionService: BaseTransactionService<BaseTransaction>,
     private val signatureCollector: SignatureCollector,
@@ -80,13 +80,13 @@ class BlockCreationProcessor(
     }
 
     fun fireBlockCreation() {
-        val previousBlock = mainBlockService.findLast()
-        val genesisBlock = genesisBlockService.findLast()!!
+        val previousBlock = blockService.getLast()
+        val genesisBlock = genesisBlockService.getLast()!!
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
         if (properties.host == nextProducer.host && properties.port == nextProducer.port) {
             val pendingTransactions
                 = baseTransactionService.getPendingFirstWithLimit(consensusProperties.blockCapacity!!)
-            create(ArrayList(pendingTransactions), previousBlock, genesisBlock)
+            create(pendingTransactions, previousBlock, genesisBlock)
         }
     }
 
@@ -99,21 +99,12 @@ class BlockCreationProcessor(
         return pendingBlock
     }
 
-    private fun create(transactions: MutableList<BaseTransaction>, mainBlock: Block?, genesisBlock: GenesisBlock) {
+    private fun create(transactions: MutableSet<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
         if (transactions.size != consensusProperties.blockCapacity) {
             return
         }
 
         val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
-
-        val previousBlock: Block
-        if (null == mainBlock || mainBlock.height < genesisBlock.height) {
-            previousBlock = genesisBlock
-        } else if (mainBlock.height > genesisBlock.height) {
-            previousBlock = mainBlock
-        } else {
-            throw IllegalArgumentException("$mainBlock or $genesisBlock has wrong height")
-        }
 
         val height = previousBlock.height + 1
         val hash = previousBlock.hash

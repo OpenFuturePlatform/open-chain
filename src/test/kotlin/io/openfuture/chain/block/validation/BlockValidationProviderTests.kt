@@ -50,7 +50,7 @@ class BlockValidationProviderTests : ServiceTests() {
             "merkle_hash",
             1510000000L,
             ByteArray(1),
-            mutableListOf(
+            mutableSetOf(
                 VoteTransaction(
                     1500000000L,
                     1000.0,
@@ -84,7 +84,7 @@ class BlockValidationProviderTests : ServiceTests() {
             merkleHash,
             currentTime,
             ByteArray(1),
-            mutableListOf(
+            mutableSetOf(
                 VoteTransaction(
                     1500000000L,
                     1000.0,
@@ -113,7 +113,7 @@ class BlockValidationProviderTests : ServiceTests() {
         )
 
         given(mainBlockService.isValid(block)).willReturn(true)
-        given(blockService.findLast()).willReturn(previousBlock)
+        given(blockService.getLast()).willReturn(previousBlock)
 
         val isValid = blockValidationService.isValid(block)
 
@@ -129,7 +129,7 @@ class BlockValidationProviderTests : ServiceTests() {
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             1512345678L,
             ByteArray(1),
-            mutableListOf()
+            mutableSetOf()
         )
         val block = MainBlock(
             ByteArray(1),
@@ -138,7 +138,7 @@ class BlockValidationProviderTests : ServiceTests() {
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             1512345678L,
             ByteArray(1),
-            mutableListOf(
+            mutableSetOf(
                 VoteTransaction(
                     1500000000L,
                     1000.0,
@@ -166,7 +166,7 @@ class BlockValidationProviderTests : ServiceTests() {
             )
         )
 
-        given(blockService.findLast()).willReturn(lastBlock)
+        given(blockService.getLast()).willReturn(lastBlock)
 
         val isValid = blockValidationService.isValid(block)
 
@@ -195,7 +195,7 @@ class BlockValidationProviderTests : ServiceTests() {
         )
 
         given(genesisBlockService.isValid(block)).willReturn(true)
-        given(blockService.findLast()).willReturn(previousBlock)
+        given(blockService.getLast()).willReturn(previousBlock)
 
         val isValid = blockValidationService.isValid(block)
 
@@ -211,7 +211,7 @@ class BlockValidationProviderTests : ServiceTests() {
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             1512345678L,
             ByteArray(1),
-            mutableListOf()
+            mutableSetOf()
         )
         val block = GenesisBlock(
             ByteArray(1),
@@ -223,7 +223,7 @@ class BlockValidationProviderTests : ServiceTests() {
             setOf()
         )
 
-        given(blockService.findLast()).willReturn(lastBlock)
+        given(blockService.getLast()).willReturn(lastBlock)
 
         val isValid = blockValidationService.isValid(block)
 

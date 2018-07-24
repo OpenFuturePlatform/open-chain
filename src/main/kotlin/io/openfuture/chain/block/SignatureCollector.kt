@@ -56,7 +56,7 @@ class SignatureCollector(
             if (timeSlot.getEpochTime() + properties.timeSlotDuration!! > clock.networkTime()) {
                 return
             }
-            val genesisBlock = genesisBlockService.findLast()!!
+            val genesisBlock = genesisBlockService.getLast()!!
             if (signatures.size.toDouble() / genesisBlock.activeDelegates.size > APPROVAL_THRESHOLD) {
                 if (pendingBlock is MainBlock) {
                     mainBlockService.save(pendingBlock as MainBlock)

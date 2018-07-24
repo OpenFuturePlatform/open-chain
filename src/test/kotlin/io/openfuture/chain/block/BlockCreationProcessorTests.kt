@@ -25,7 +25,7 @@ import org.mockito.Mock
 
 class BlockCreationProcessorTests: ServiceTests() {
 
-    @Mock private lateinit var mainBlockService: BlockService<MainBlock>
+    @Mock private lateinit var blockService: BlockService<Block>
     @Mock private lateinit var genesisBlockService: BlockService<GenesisBlock>
     @Mock private lateinit var baseTransactionService: BaseTransactionService<BaseTransaction>
     @Mock private lateinit var signatureCollector: SignatureCollector
@@ -43,8 +43,8 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Before
     fun init() {
         val block = createMainBlock()
-        given(mainBlockService.findLast()).willReturn(block)
-        processor = BlockCreationProcessor(mainBlockService, genesisBlockService, baseTransactionService,
+        given(blockService .getLast()).willReturn(block)
+        processor = BlockCreationProcessor(blockService, genesisBlockService, baseTransactionService,
             signatureCollector, keyHolder, blockValidationService, consensusService, clock, delegateService, properties,
             consensusProperties, timeSlot)
     }
@@ -79,7 +79,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         val delegate = Delegate("public_key", "host", 1234)
         genesisBlock.activeDelegates = setOf(delegate)
 
-        given(genesisBlockService.findLast()).willReturn(genesisBlock)
+        given(genesisBlockService.getLast()).willReturn(genesisBlock)
 
         processor.fireBlockCreation()
     }
@@ -111,7 +111,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         setOf(Delegate("public_key", "host1", 1234), Delegate("public_key2", "host2", 1234), Delegate("public_key3", "host3", 1234))
     )
 
-    private fun createTransactions(): MutableList<BaseTransaction> = mutableListOf(
+    private fun createTransactions(): MutableSet<BaseTransaction> = mutableSetOf(
         VoteTransaction(
             1500000000L,
             1000.0,

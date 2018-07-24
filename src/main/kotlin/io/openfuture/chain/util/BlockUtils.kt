@@ -9,7 +9,7 @@ import java.util.*
 
 object BlockUtils {
 
-    fun calculateMerkleRoot(transactions: List<BaseTransaction>): String {
+    fun calculateMerkleRoot(transactions: Set<BaseTransaction>): String {
         if (transactions.size == 1) {
             return transactions.single().hash
         }

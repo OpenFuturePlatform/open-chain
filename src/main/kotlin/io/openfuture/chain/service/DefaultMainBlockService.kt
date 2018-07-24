@@ -20,7 +20,8 @@ class DefaultMainBlockService(
 ) : BlockService<MainBlock> {
 
     @Transactional(readOnly = true)
-    override fun findLast(): MainBlock? = blockRepository.findFirstByOrderByHeightDesc()
+    override fun getLast(): MainBlock = blockRepository.findFirstByOrderByHeightDesc()
+        ?: throw NotFoundException("Last MainBlock block not exist!")
 
     override fun get(hash: String): MainBlock = blockRepository.findByHash(hash)
         ?: throw NotFoundException("Block with hash:$hash not found ")
@@ -29,17 +30,12 @@ class DefaultMainBlockService(
 
     override fun isValid(block: MainBlock): Boolean {
         val currentTime = clock.networkTime()
-        val lastBlock = findLast()
+        val lastBlock = getLast()
 
-        val lastBlockIsValid = if (lastBlock != null) {
-            verifyPreviousHash(block, lastBlock)
-                && verifyHeight(block, lastBlock)
-                && verifyTimestamp(block, lastBlock)
-        } else {
-            true
-        }
 
-        return lastBlockIsValid
+        return verifyPreviousHash(block, lastBlock)
+            && verifyHeight(block, lastBlock)
+            && verifyTimestamp(block, lastBlock)
             && timeSlot.verifyTimeSlot(currentTime, block)
             && isMainBlockValid(block)
             && verifyHash(block)
@@ -61,18 +57,9 @@ class DefaultMainBlockService(
         return block.merkleHash == transactionsMerkleHash
     }
 
-    private fun transactionsIsWellFormed(transactions: List<BaseTransaction>): Boolean {
-        val transactionHashes = HashSet<String>()
-        for (transaction in transactions) {
-            val transactionHash = transaction.hash
-            if (transactionHashes.contains(transactionHash)) {
-                return false
-            }
-
-            transactionHashes.add(transactionHash)
-        }
-
-        return true
+    private fun transactionsIsWellFormed(transactions: Set<BaseTransaction>): Boolean {
+        val transactionHashes = transactions.map { it.hash }.toSet()
+        return transactionHashes.size == transactions.size
     }
 
     private fun verifyHash(block: Block): Boolean {

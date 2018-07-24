@@ -45,7 +45,7 @@ interface BlockService<T: Block> {
 
     fun get(hash: String): T
 
-    fun findLast(): T?
+    fun getLast(): T
 
     fun save(block: T): T
 
