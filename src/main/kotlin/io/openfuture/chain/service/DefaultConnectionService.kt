@@ -10,7 +10,6 @@ class DefaultConnectionService : ConnectionService {
 
     private val connections: MutableMap<Channel, NetworkAddress> = ConcurrentHashMap()
 
-
     override fun addConnection(channel: Channel, networkAddress: NetworkAddress) {
         connections[channel] = networkAddress
     }

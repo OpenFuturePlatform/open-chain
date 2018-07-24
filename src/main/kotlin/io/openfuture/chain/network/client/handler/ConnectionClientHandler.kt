@@ -8,10 +8,5 @@ import org.springframework.stereotype.Component
 
 @Component
 @Scope(SCOPE_PROTOTYPE)
-class ConnectionClientHandler : BaseConnectionHandler(setOf(
-        ADDRESSES,
-        FIND_ADDRESSES,
-        GREETING,
-        HEART_BEAT,
-        TIME
-))
+class ConnectionClientHandler : BaseConnectionHandler(
+    setOf(ADDRESSES, FIND_ADDRESSES, GREETING, HEART_BEAT, TIME))

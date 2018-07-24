@@ -5,7 +5,7 @@ import io.openfuture.chain.annotation.NoArgConstructor
 
 @NoArgConstructor
 data class Greeting(
-        var address: NetworkAddress
+    var address: NetworkAddress
 ) : Packet() {
 
     override fun readParams(buffer: ByteBuf) {

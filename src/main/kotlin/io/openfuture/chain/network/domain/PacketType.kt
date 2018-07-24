@@ -3,8 +3,8 @@ package io.openfuture.chain.network.domain
 import kotlin.reflect.KClass
 
 enum class PacketType(
-        val id: Short,
-        val clazz: KClass<out Packet>
+    val id: Short,
+    val clazz: KClass<out Packet>
 ) {
 
     ADDRESSES(1, Addresses::class),

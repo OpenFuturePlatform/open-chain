@@ -6,8 +6,8 @@ import java.nio.charset.StandardCharsets.UTF_8
 
 @NoArgConstructor
 data class NetworkAddress(
-        var host: String,
-        var port: Int
+    var host: String,
+    var port: Int
 ) {
 
     fun read(buffer: ByteBuf) {

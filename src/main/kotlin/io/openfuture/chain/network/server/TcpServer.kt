@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class TcpServer(
-        private val bootstrap: ServerBootstrap,
-        private val properties: NodeProperties
+    private val bootstrap: ServerBootstrap,
+    private val properties: NodeProperties
 ) : Runnable {
 
     companion object {

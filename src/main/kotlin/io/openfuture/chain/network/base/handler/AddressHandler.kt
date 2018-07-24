@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 @Component
 @Scope(SCOPE_PROTOTYPE)
 class AddressHandler(
-        private val networkService: NetworkService
+    private val networkService: NetworkService
 ) : CommonHandler<Addresses>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, message: Addresses) {

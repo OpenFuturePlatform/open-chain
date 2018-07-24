@@ -7,7 +7,7 @@ import io.openfuture.chain.network.domain.HeartBeat.Type.PONG
 
 @NoArgConstructor
 data class HeartBeat(
-        var type: Type
+    var type: Type
 ) : Packet() {
 
     override fun readParams(buffer: ByteBuf) {

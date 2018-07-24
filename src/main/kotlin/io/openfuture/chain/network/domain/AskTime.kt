@@ -5,7 +5,7 @@ import io.openfuture.chain.annotation.NoArgConstructor
 
 @NoArgConstructor
 data class AskTime(
-        var nodeTimestamp: Long
+    var nodeTimestamp: Long
 ) : Packet() {
 
     override fun readParams(buffer: ByteBuf) {

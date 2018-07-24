@@ -18,12 +18,12 @@ class NioServerConfig(
 
     @Bean
     fun serverBootstrap(): ServerBootstrap = ServerBootstrap()
-            .group(bossGroup(), workerGroup())
-            .channel(NioServerSocketChannel::class.java)
-            .childHandler(serverChannelInitializer)
-            .option(SO_BACKLOG, properties.backlog)
-            .childOption(SO_KEEPALIVE, properties.keepAlive)
-            .childOption(CONNECT_TIMEOUT_MILLIS, properties.connectionTimeout)
+        .group(bossGroup(), workerGroup())
+        .channel(NioServerSocketChannel::class.java)
+        .childHandler(serverChannelInitializer)
+        .option(SO_BACKLOG, properties.backlog)
+        .childOption(SO_KEEPALIVE, properties.keepAlive)
+        .childOption(CONNECT_TIMEOUT_MILLIS, properties.connectionTimeout)
 
     @Bean(destroyMethod = "shutdownGracefully")
     fun bossGroup(): NioEventLoopGroup = NioEventLoopGroup(properties.bossCount!!)

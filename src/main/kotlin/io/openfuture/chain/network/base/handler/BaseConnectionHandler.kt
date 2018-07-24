@@ -7,7 +7,7 @@ import io.openfuture.chain.network.domain.PacketType
 import org.slf4j.LoggerFactory
 
 abstract class BaseConnectionHandler(
-        private val allowableTypes: Set<PacketType>
+    private val allowableTypes: Set<PacketType>
 ) : ChannelInboundHandlerAdapter() {
 
     companion object {

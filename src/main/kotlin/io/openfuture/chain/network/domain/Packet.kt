@@ -6,8 +6,8 @@ import java.io.Serializable
 import java.nio.charset.StandardCharsets.UTF_8
 
 abstract class Packet(
-        var version: String? = null,
-        var timestamp: Long? = null
+    var version: String? = null,
+    var timestamp: Long? = null
 ) : Serializable {
 
     private fun read(buffer: ByteBuf) {
