@@ -13,6 +13,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 
 class SignatureCollectorTests : ServiceTests() {
 
@@ -21,6 +22,7 @@ class SignatureCollectorTests : ServiceTests() {
     @Mock private lateinit var properties: ConsensusProperties
     @Mock private lateinit var timeSlot: TimeSlot
     @Mock private lateinit var clock: NodeClock
+    @Mock private lateinit var scheduler: ThreadPoolTaskScheduler
 
     private lateinit var signatureCollector: SignatureCollector
 
@@ -29,7 +31,8 @@ class SignatureCollectorTests : ServiceTests() {
         given(clock.networkTime()).willReturn(10000L)
         given(properties.timeSlotDuration).willReturn(6000L)
 
-        signatureCollector = SignatureCollector(mainBlockService, genesisBlockService, properties, timeSlot, clock)
+        signatureCollector = SignatureCollector(mainBlockService, genesisBlockService, properties, timeSlot, clock,
+            scheduler)
     }
 
     @Test

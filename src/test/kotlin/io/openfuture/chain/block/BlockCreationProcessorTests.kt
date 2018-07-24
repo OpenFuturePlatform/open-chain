@@ -22,6 +22,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 
 class BlockCreationProcessorTests: ServiceTests() {
 
@@ -37,6 +38,7 @@ class BlockCreationProcessorTests: ServiceTests() {
     @Mock private lateinit var properties: NodeProperties
     @Mock private lateinit var consensusProperties: ConsensusProperties
     @Mock private lateinit var timeSlot: TimeSlot
+    @Mock private lateinit var scheduler: ThreadPoolTaskScheduler
 
     private lateinit var processor: BlockCreationProcessor
 
@@ -46,7 +48,7 @@ class BlockCreationProcessorTests: ServiceTests() {
         given(blockService .getLast()).willReturn(block)
         processor = BlockCreationProcessor(blockService, genesisBlockService, baseTransactionService,
             signatureCollector, keyHolder, blockValidationService, consensusService, clock, delegateService, properties,
-            consensusProperties, timeSlot)
+            consensusProperties, timeSlot, scheduler)
     }
 
     @Test(expected = IllegalArgumentException::class)

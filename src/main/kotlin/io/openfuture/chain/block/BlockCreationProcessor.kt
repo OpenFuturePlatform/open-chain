@@ -37,11 +37,9 @@ class BlockCreationProcessor(
     private val delegateService: DelegateService,
     private val properties: NodeProperties,
     private val consensusProperties: ConsensusProperties,
-    private val timeSlot: TimeSlot
+    private val timeSlot: TimeSlot,
+    private val scheduler: ThreadPoolTaskScheduler
 ) {
-
-    private val scheduler = ThreadPoolTaskScheduler()
-
 
     @PostConstruct
     private fun init() {

@@ -18,21 +18,17 @@ class SignatureCollector(
     private val genesisBlockService: BlockService<GenesisBlock>,
     private val properties: ConsensusProperties,
     private val timeSlot: TimeSlot,
-    private val clock: NodeClock
+    private val clock: NodeClock,
+    private val scheduler: ThreadPoolTaskScheduler
 ) {
 
     companion object {
         private const val APPROVAL_THRESHOLD = 0.67
     }
 
-    private val scheduler = ThreadPoolTaskScheduler()
     private val signatures = ConcurrentHashMap.newKeySet<Signature>()
     private lateinit var pendingBlock: Block
     private var active: Boolean = false
-
-    init {
-        scheduler.initialize()
-    }
 
 
     fun setPendingBlock(generatedBlock: PendingBlock) {
