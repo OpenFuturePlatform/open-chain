@@ -45,8 +45,8 @@ class BlockCreationProcessor(
 
     @PostConstruct
     private fun init() {
-        clock.networkTime()
-        val startBlockCreationDate = Date(clock.networkTime())
+        val startTime = timeSlot.getSlotTimestamp() + consensusProperties.timeSlotDuration!!
+        val startBlockCreationDate = Date(startTime)
         scheduler.initialize()
         scheduler.scheduleAtFixedRate(
             { fireBlockCreation() },
