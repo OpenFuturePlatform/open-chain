@@ -21,8 +21,9 @@ abstract class BaseConnectionHandler(
     }
 
     override fun channelRead(ctx: ChannelHandlerContext, packet: Any) {
-        if (!allowableTypes.contains(PacketType.get(packet as Packet))) {
-            log.error("Illegal packet type: ${packet::class}")
+        val type = PacketType.get(packet as Packet)
+        if (!allowableTypes.contains(type)) {
+            log.error("Illegal packet type: $type")
             ctx.close()
             return
         }
