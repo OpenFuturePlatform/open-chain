@@ -19,7 +19,7 @@ class MainBlockValidatorTests : ServiceTests() {
 
     companion object {
         private const val GENESIS_ADDRESS = "0x00000"
-        private const val REWARD_BLOCK = 10.0
+        private const val REWARD_BLOCK = 10L
     }
 
 

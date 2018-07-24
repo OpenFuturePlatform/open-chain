@@ -51,7 +51,9 @@ class DefaultWalletServiceTest : ServiceTests() {
 
     @Test
     fun updateBalanceShouldChangeWalletsBalanceValueTest() {
-        val amount = 1L
+        val amount = 2L
+        val fee = 1L
+        val genesisAddress = "genesisAddress"
         val senderAddress = "senderAddress"
         val recipientAddress = "recipientAddress"
 
@@ -60,11 +62,12 @@ class DefaultWalletServiceTest : ServiceTests() {
 
         given(repository.findOneByAddress(senderAddress)).willReturn(senderWallet)
         given(repository.findOneByAddress(recipientAddress)).willReturn(recipientWallet)
+        given(properties.genesisAddress).willReturn(genesisAddress)
 
-        service.updateBalance(senderAddress, recipientAddress, amount)
+        service.updateBalance(senderAddress, recipientAddress, amount, fee)
 
         verify(repository).save(senderWallet.apply { balance += amount })
-        verify(repository).save(recipientWallet.apply { balance -= amount })
+        verify(repository).save(recipientWallet.apply { balance -= (amount + fee) })
     }
 
 }
