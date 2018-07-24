@@ -40,7 +40,7 @@ class DefaultVoteTransactionService(
         if (!isValidVoteCount(dto.data.senderAddress)) {
             throw ValidationException("Wallet ${dto.data.senderAddress} already spent all votes!")
         }
-        this.baseValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
+        super.baseValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
     }
 
     @Transactional
@@ -48,7 +48,7 @@ class DefaultVoteTransactionService(
         if (!isValidVoteCount(request.data!!.senderAddress)) {
             throw ValidationException("Wallet ${request.data!!.senderAddress} already spent all votes!")
         }
-        this.baseValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
+        super.baseValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
     }
 
     private fun isValidVoteCount(senderAddress: String): Boolean {
