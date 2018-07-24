@@ -1,10 +1,8 @@
 package io.openfuture.chain.controller
 
-import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.controller.common.BaseController
 import io.openfuture.chain.controller.common.RestResponse
 import io.openfuture.chain.domain.rpc.HardwareInfo
-import io.openfuture.chain.property.NodeProperty
 import io.openfuture.chain.service.HardwareInfoService
 import org.springframework.context.ApplicationContext
 import org.springframework.web.bind.annotation.GetMapping
@@ -21,7 +19,7 @@ class NodeInfoController(
 
     @GetMapping("/getVersion")
     fun getVersion(): RestResponse<String> {
-        return RestResponse(getResponseHeader(), nodeProperty.version)
+        return RestResponse(getResponseHeader(), nodeProperties.version)
     }
 
     @GetMapping("/getTimestamp")

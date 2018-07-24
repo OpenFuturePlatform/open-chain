@@ -6,13 +6,13 @@ import io.netty.channel.ChannelOption
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
-import io.openfuture.chain.property.NodeProperty
+import io.openfuture.chain.property.NodeProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
 class NioServerConfig(
-    private val properties: NodeProperty,
+    private val properties: NodeProperties,
     private val serverChannelInitializer: ChannelInitializer<SocketChannel>
 ) {
 
