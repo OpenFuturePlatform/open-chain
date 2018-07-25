@@ -20,9 +20,7 @@ abstract class DefaultManualTransactionService<Entity : BaseTransaction, Data : 
         return saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), request))
     }
 
-    protected abstract fun validate(request: BaseTransactionRequest<Data>)
-
-    protected fun baseValidate(request: BaseTransactionRequest<Data>) {
+    open fun validate(request: BaseTransactionRequest<Data>) {
         commonValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
     }
 

@@ -56,12 +56,8 @@ abstract class DefaultCommonTransactionService<Entity : BaseTransaction, Data : 
         return saveAndBroadcast(entityConverter.toEntity(dto))
     }
 
-    protected fun saveAndBroadcast(tx: Entity): Entity {
-        return repository.save(tx)
-        //todo: networkService.broadcast(transaction.toMessage)
-    }
-
-    protected fun baseToBlock(tx: Entity, block: MainBlock): Entity {
+    @Transactional
+    override fun toBlock(tx: Entity, block: MainBlock): Entity {
         val persistTx = this.get(tx.hash)
 
         if (null != persistTx.block) {
@@ -72,13 +68,16 @@ abstract class DefaultCommonTransactionService<Entity : BaseTransaction, Data : 
         return repository.save(persistTx)
     }
 
-    protected abstract fun validate(dto: BaseTransactionDto<Data>)
-
-    protected fun baseValidate(dto: BaseTransactionDto<Data>) {
+    open fun validate(dto: BaseTransactionDto<Data>) {
         if (!isValidHash(dto.data, dto.hash)) {
             throw ValidationException("Invalid transaction hash")
         }
         commonValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
+    }
+
+    protected fun saveAndBroadcast(tx: Entity): Entity {
+        return repository.save(tx)
+        //todo: networkService.broadcast(transaction.toMessage)
     }
 
     protected fun commonValidate(data : Data, signature: String, publicKey: String) {

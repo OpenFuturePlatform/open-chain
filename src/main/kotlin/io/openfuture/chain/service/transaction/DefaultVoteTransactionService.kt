@@ -27,7 +27,7 @@ class DefaultVoteTransactionService(
     @Transactional
     override fun toBlock(tx: VoteTransaction, block: MainBlock): VoteTransaction {
         updateWalletVotes(tx)
-        return baseToBlock(tx, block)
+        return super.toBlock(tx, block)
     }
 
     private fun updateWalletVotes(tx: VoteTransaction) {
@@ -50,7 +50,7 @@ class DefaultVoteTransactionService(
         if (!isValidVoteCount(dto.data.senderAddress)) {
             throw ValidationException("Wallet ${dto.data.senderAddress} already spent all votes!")
         }
-        baseValidate(dto)
+        super.validate(dto)
     }
 
     @Transactional
@@ -58,7 +58,7 @@ class DefaultVoteTransactionService(
         if (!isValidVoteCount(request.data!!.senderAddress)) {
             throw ValidationException("Wallet ${request.data!!.senderAddress} already spent all votes!")
         }
-        baseValidate(request)
+        super.validate(request)
     }
 
     private fun isValidVoteCount(senderAddress: String): Boolean {
