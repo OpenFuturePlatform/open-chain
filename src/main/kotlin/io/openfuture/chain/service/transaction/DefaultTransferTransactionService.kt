@@ -1,32 +1,23 @@
 package io.openfuture.chain.service.transaction
 
-import io.openfuture.chain.component.converter.transaction.impl.TransferTransactionEntityConverter
-import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
-import io.openfuture.chain.domain.transaction.BaseTransactionDto
-import io.openfuture.chain.domain.transaction.data.TransferTransactionData
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.TransferTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.repository.TransferTransactionRepository
 import io.openfuture.chain.service.TransferTransactionService
 import org.springframework.stereotype.Service
 
 @Service
 class DefaultTransferTransactionService(
-    repository: TransferTransactionRepository,
-    entityConverter: TransferTransactionEntityConverter
-) : DefaultManualTransactionService<TransferTransaction, TransferTransactionData>(repository, entityConverter),
+    repository: TransferTransactionRepository
+) : DefaultTransactionService<TransferTransaction, UTransferTransaction>(repository),
     TransferTransactionService {
+    override fun add(uTx: UTransferTransaction): TransferTransaction {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     override fun toBlock(tx: TransferTransaction, block: MainBlock): TransferTransaction {
         return baseToBlock(tx, block)
-    }
-
-    override fun validate(dto: BaseTransactionDto<TransferTransactionData>) {
-        baseValidate(dto)
-    }
-
-    override fun validate(request: BaseTransactionRequest<TransferTransactionData>) {
-        baseValidate(request)
     }
 
 }

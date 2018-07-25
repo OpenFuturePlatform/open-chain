@@ -1,23 +1,34 @@
 package io.openfuture.chain.service.transaction.unconfirmed
 
-import io.openfuture.chain.component.converter.transaction.unconfirmed.impl.UTransferTransactionEntityConverter
-import io.openfuture.chain.component.node.NodeClock
+import io.openfuture.chain.component.converter.transaction.impl.UTransferTransactionEntityConverter
+import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
+import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.TransferTransactionData
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.repository.UTransferTransactionRepository
 import io.openfuture.chain.service.UTransferTransactionService
-import io.openfuture.chain.service.WalletService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultUTransferTransactionService(
     repository: UTransferTransactionRepository,
-    walletService: WalletService,
-    nodeClock: NodeClock,
     entityConverter: UTransferTransactionEntityConverter
-) : DefaultUTransactionService<UTransferTransaction, TransferTransactionData>(repository,
-    walletService, nodeClock, entityConverter), UTransferTransactionService {
+) : DefaultManualUTransactionService<UTransferTransaction, TransferTransactionData>(repository, entityConverter),
+    UTransferTransactionService {
 
-    override fun process(tx: UTransferTransaction) = Unit
+    @Transactional
+    override fun validate(request: BaseTransactionRequest<TransferTransactionData>) {
+        baseValidate(request)
+    }
+
+    @Transactional
+    override fun validate(dto: BaseTransactionDto<TransferTransactionData>) {
+        baseValidate(dto)
+    }
+
+    override fun process(tx: UTransferTransaction) {
+        walletService.updateBalance(tx.senderAddress, tx.recipientAddress, tx.amount, tx.fee)
+    }
 
 }

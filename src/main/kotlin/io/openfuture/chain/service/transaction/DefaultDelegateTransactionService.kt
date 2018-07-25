@@ -1,40 +1,27 @@
 package io.openfuture.chain.service.transaction
 
-import io.openfuture.chain.component.converter.transaction.impl.DelegateTransactionEntityConverter
-import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
-import io.openfuture.chain.domain.transaction.BaseTransactionDto
-import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
-import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.DelegateTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.repository.DelegateTransactionRepository
-import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.service.DelegateTransactionService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultDelegateTransactionService(
-    repository: DelegateTransactionRepository,
-    entityConverter: DelegateTransactionEntityConverter,
-    private val delegateService: DelegateService
-) : DefaultManualTransactionService<DelegateTransaction, DelegateTransactionData>(repository, entityConverter),
+    repository: DelegateTransactionRepository
+) : DefaultTransactionService<DelegateTransaction, UDelegateTransaction>(repository),
     DelegateTransactionService {
+
+    override fun add(uTx: UDelegateTransaction): DelegateTransaction {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     @Transactional
     override fun toBlock(tx: DelegateTransaction, block: MainBlock): DelegateTransaction {
-        delegateService.save(Delegate(tx.delegateKey, tx.senderAddress))
         return baseToBlock(tx, block)
     }
 
-    @Transactional
-    override fun validate(dto: BaseTransactionDto<DelegateTransactionData>) {
-        baseValidate(dto)
-    }
-
-    @Transactional
-    override fun validate(request: BaseTransactionRequest<DelegateTransactionData>) {
-        baseValidate(request)
-    }
 
 }

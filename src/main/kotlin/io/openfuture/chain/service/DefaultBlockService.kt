@@ -5,6 +5,7 @@ import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.*
+import io.openfuture.chain.entity.transaction.unconfirmed.*
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.repository.GenesisBlockRepository
@@ -45,7 +46,7 @@ class DefaultBlockService(
 
     @Transactional
     override fun save(block: MainBlock): MainBlock {
-        rewardTransactionService.add(RewardTransactionDto(block.transactions.first() as RewardTransaction))
+        rewardTransactionService.save(block.transactions.first() as RewardTransaction)
 
         val savedBlock = mainBlockRepository.save(block)
         val transactions = block.transactions

@@ -1,4 +1,4 @@
-package io.openfuture.chain.component.converter.transaction.unconfirmed.impl
+package io.openfuture.chain.component.converter.transaction.impl
 
 import io.openfuture.chain.component.converter.transaction.ManualTransactionEntityConverter
 import io.openfuture.chain.crypto.key.NodeKeyHolder
@@ -6,6 +6,7 @@ import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
+import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
 import io.openfuture.chain.domain.transaction.data.TransferTransactionData
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
 import org.springframework.stereotype.Component
@@ -13,7 +14,8 @@ import org.springframework.stereotype.Component
 @Component
 class UTransferTransactionEntityConverter(
     private val keyHolder: NodeKeyHolder
-) : ManualTransactionEntityConverter<UTransferTransaction, TransferTransactionData> {
+) : BaseTransactionEntityConverter<DelegateTransactionData>(),
+    ManualTransactionEntityConverter<UTransferTransaction, TransferTransactionData> {
 
     override fun toEntity(dto: BaseTransactionDto<TransferTransactionData>): UTransferTransaction = UTransferTransaction(
         dto.timestamp,

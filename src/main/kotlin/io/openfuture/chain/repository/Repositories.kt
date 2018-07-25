@@ -35,8 +35,6 @@ interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 
     fun findOneByHash(hash: String): Entity?
 
-    fun findAllByBlockIsNull(): MutableSet<Entity>
-
 }
 
 @Repository

@@ -19,7 +19,6 @@ import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.*
-import io.openfuture.chain.entity.transaction.base.BaseTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.*
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.protocol.CommunicationProtocol
@@ -75,77 +74,54 @@ interface CryptoService {
 
 }
 
-
-interface TransactionService<Entity : Transaction, Data : BaseTransactionData> {
+interface TransactionService<Entity : Transaction, UEntity : UTransaction> {
 
     fun get(hash: String): Entity
+
+    fun save(tx: Entity): Entity
 
     fun toBlock(tx: Entity, block: MainBlock): Entity
 
+    fun add(uTx: UEntity): Entity
+
 }
 
-interface UTransactionService<Entity : UTransaction, Data : BaseTransactionData> {
-
-    fun getAll(): MutableSet<Entity>
+interface CommonUTransactionService<Entity : UTransaction, Data : BaseTransactionData> {
 
     fun get(hash: String): Entity
 
+    fun getAll(): MutableSet<Entity>
+
     fun add(dto: BaseTransactionDto<Data>): Entity
-
-    fun add(request: BaseTransactionRequest<Data>): Entity
-
-    fun add(data: Data): Entity
 
     fun process(tx: Entity)
 
 }
 
-/**
- * The utility service that is not aware of transaction types, has default implementation
- */
-interface BaseTransactionService {
+interface EmbeddedUTransactionService<Entity : UTransaction, Data : BaseTransactionData> : CommonUTransactionService<Entity, Data>
 
-    fun getAllPending(): MutableSet<BaseTransaction>
-
-}
-
-interface CommonTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> {
-
-    fun get(hash: String): Entity
-
-    fun getAllPending(): MutableSet<Entity>
-
-    fun toBlock(tx: Entity, block: MainBlock): Entity
-
-    fun add(dto: BaseTransactionDto<Data>): Entity
-
-}
-
-interface EmbeddedTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> : CommonTransactionService<Entity, Data>
-
-interface ManualTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> : CommonTransactionService<Entity, Data> {
+interface ManualUTransactionService<Entity : UTransaction, Data : BaseTransactionData> : CommonUTransactionService<Entity, Data> {
 
     fun add(request: BaseTransactionRequest<Data>): Entity
 
 }
 
+interface RewardTransactionService : TransactionService<RewardTransaction, URewardTransaction>
 
-interface RewardTransactionService : EmbeddedTransactionService<RewardTransaction, RewardTransactionData>
+interface TransferTransactionService : TransactionService<TransferTransaction, UTransferTransaction>
 
-interface TransferTransactionService : ManualTransactionService<TransferTransaction, TransferTransactionData>
+interface VoteTransactionService : TransactionService<VoteTransaction, UVoteTransaction>
 
-interface VoteTransactionService : ManualTransactionService<VoteTransaction, VoteTransactionData>
-
-interface DelegateTransactionService : ManualTransactionService<DelegateTransaction, DelegateTransactionData>
+interface DelegateTransactionService : TransactionService<DelegateTransaction, UDelegateTransaction>
 
 
-interface URewardTransactionService : EmbeddedTransactionService<URewardTransaction, RewardTransactionData>
+interface URewardTransactionService : EmbeddedUTransactionService<URewardTransaction, RewardTransactionData>
 
-interface UTransferTransactionService : UTransactionService<UTransferTransaction, TransferTransactionData>
+interface UTransferTransactionService : ManualUTransactionService<UTransferTransaction, TransferTransactionData>
 
-interface UVoteTransactionService : UTransactionService<UVoteTransaction, VoteTransactionData>
+interface UVoteTransactionService : ManualUTransactionService<UVoteTransaction, VoteTransactionData>
 
-interface UDelegateTransactionService : UTransactionService<UDelegateTransaction, DelegateTransactionData>
+interface UDelegateTransactionService : ManualUTransactionService<UDelegateTransaction, DelegateTransactionData>
 
 
 interface DelegateService {

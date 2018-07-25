@@ -1,4 +1,4 @@
-package io.openfuture.chain.service.transaction
+package io.openfuture.chain.service.transaction.unconfirmed
 
 import io.openfuture.chain.component.converter.transaction.TransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
@@ -6,23 +6,19 @@ import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
-import io.openfuture.chain.entity.block.MainBlock
-import io.openfuture.chain.entity.transaction.Transaction
-import io.openfuture.chain.exception.LogicException
+import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.property.ConsensusProperties
-import io.openfuture.chain.repository.TransactionRepository
-import io.openfuture.chain.service.BaseTransactionService
-import io.openfuture.chain.service.CommonTransactionService
+import io.openfuture.chain.repository.UTransactionRepository
+import io.openfuture.chain.service.CommonUTransactionService
 import io.openfuture.chain.service.WalletService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.annotation.Transactional
 
-abstract class DefaultCommonTransactionService<Entity : Transaction, Data : BaseTransactionData, Converter : TransactionEntityConverter<Entity, Data>>(
-    protected val repository: TransactionRepository<Entity>,
+abstract class DefaultCommonUTransactionService<Entity : UTransaction, Data : BaseTransactionData, Converter : TransactionEntityConverter<Entity, Data>>(
+    protected val repository: UTransactionRepository<Entity>,
     protected val entityConverter: Converter
-) : CommonTransactionService<Entity, Data> {
+) : CommonUTransactionService<Entity, Data> {
 
     @Autowired
     protected lateinit var nodeClock: NodeClock
@@ -33,20 +29,11 @@ abstract class DefaultCommonTransactionService<Entity : Transaction, Data : Base
     @Autowired
     private lateinit var consensusProperties: ConsensusProperties
 
-    @Autowired
-    private lateinit var baseService: BaseTransactionService
-
-
-    @Transactional(readOnly = true)
     override fun get(hash: String): Entity = repository.findOneByHash(hash)
-        ?: throw NotFoundException("Transaction with hash: $hash not exist!")
+        ?: throw NotFoundException("Unconfirmed transaction with hash: $hash not exist!")
 
-    @Transactional(readOnly = true)
-    override fun getAllPending(): MutableSet<Entity> {
-        return repository.findAllByBlockIsNull()
-    }
+    override fun getAll(): MutableSet<Entity> = repository.findAll().toMutableSet() //todo pagerequest capacity -1
 
-    @Transactional
     override fun add(dto: BaseTransactionDto<Data>): Entity {
         val transaction = repository.findOneByHash(dto.hash)
         if (null != transaction) {
@@ -59,17 +46,6 @@ abstract class DefaultCommonTransactionService<Entity : Transaction, Data : Base
     protected fun saveAndBroadcast(tx: Entity): Entity {
         return repository.save(tx)
         //todo: networkService.broadcast(transaction.toMessage)
-    }
-
-    protected fun baseToBlock(tx: Entity, block: MainBlock): Entity {
-        val persistTx = this.get(tx.hash)
-
-        if (null != persistTx.block) {
-            throw LogicException("Transaction with hash: ${tx.hash} already belong to block!")
-        }
-        persistTx.block = block
-        walletService.updateBalance(persistTx.senderAddress, persistTx.recipientAddress, persistTx.amount, persistTx.fee)
-        return repository.save(persistTx)
     }
 
     protected abstract fun validate(dto: BaseTransactionDto<Data>)
@@ -107,7 +83,7 @@ abstract class DefaultCommonTransactionService<Entity : Transaction, Data : Base
         }
 
         val balance = walletService.getBalanceByAddress(senderAddress)
-        val unconfirmedOutput = baseService.getAllPending()
+        val unconfirmedOutput = getAll()
             .filter { it.senderAddress == senderAddress }
             .map { it.amount + it.fee }
             .sum()
@@ -118,5 +94,4 @@ abstract class DefaultCommonTransactionService<Entity : Transaction, Data : Base
         }
         return true
     }
-
 }

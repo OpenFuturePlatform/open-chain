@@ -40,7 +40,7 @@ class DefaultWalletServiceTest : ServiceTests() {
     @Test
     fun getBalanceWhenNotExistsWalletByAddressShouldReturnDefaultBalanceValueTest() {
         val address = "address"
-        val expectedBalance = 0.0
+        val expectedBalance = 0L
 
         given(repository.findOneByAddress(address)).willReturn(null)
 
