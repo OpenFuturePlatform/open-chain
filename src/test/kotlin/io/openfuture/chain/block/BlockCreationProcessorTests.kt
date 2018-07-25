@@ -21,8 +21,9 @@ import io.openfuture.chain.service.ConsensusService
 import io.openfuture.chain.service.DelegateService
 import org.junit.Before
 import org.junit.Test
-import org.mockito.BDDMockito.given
+import org.mockito.BDDMockito.*
 import org.mockito.Mock
+import org.mockito.Mockito.verify
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 
 class BlockCreationProcessorTests: ServiceTests() {
@@ -80,11 +81,21 @@ class BlockCreationProcessorTests: ServiceTests() {
     fun fireBlockCreationShouldCreateMainBlock() {
         val genesisBlock = createGenesisBlock()
         val delegate = Delegate("public_key", "host", 1234)
+        val transactions = createTransactions()
         genesisBlock.activeDelegates = setOf(delegate)
 
+        given(properties.host).willReturn("host")
+        given(properties.port).willReturn(1234)
         given(genesisBlockService.getLast()).willReturn(genesisBlock)
+        given(keyHolder.getPrivateKey()).willReturn("private_key".toByteArray())
+        given(keyHolder.getPublicKey()).willReturn("public_key".toByteArray())
+        given(baseTransactionService.getPendingFirstWithLimit(any(Int::class.java))).willReturn(transactions)
+        given(consensusProperties.blockCapacity).willReturn(transactions.size)
 
         processor.fireBlockCreation()
+
+        verify(keyHolder, times(2)).getPrivateKey()
+        verify(keyHolder, times(2)).getPublicKey()
     }
 
     private fun createPendingBlock(block: Block): PendingBlock {

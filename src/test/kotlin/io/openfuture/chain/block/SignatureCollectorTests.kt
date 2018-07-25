@@ -2,8 +2,10 @@ package io.openfuture.chain.block
 
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
+import io.openfuture.chain.config.any
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
+import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.property.ConsensusProperties
@@ -12,7 +14,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
+import org.mockito.BDDMockito.times
 import org.mockito.Mock
+import org.mockito.Mockito.verify
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 
 class SignatureCollectorTests : ServiceTests() {
@@ -70,34 +74,37 @@ class SignatureCollectorTests : ServiceTests() {
         signatureCollector.setPendingBlock(createGenesisPendingBlock())
 
         signatureCollector.applyBlock()
+
+        verify(genesisBlockService, times(0)).getLast()
     }
 
     @Test
     fun applyGenesisBlockShouldApplyBlock() {
-        val genesisBlock = GenesisBlock(
-            ByteArray(1),
-            123,
-            "prev_block_hash",
-            1512345678L,
-            ByteArray(1),
-            1,
-            setOf()
-        )
-
         val signatureBlock = createGenesisPendingBlock()
         signatureCollector.setPendingBlock(signatureBlock)
         signatureCollector.addSignatureBlock(signatureBlock)
 
+        given(genesisBlockService.getLast()).willReturn(signatureBlock.block as GenesisBlock)
+        given(timeSlot.verifyTimeSlot(any(Long::class.java), any(Block::class.java))).willReturn(true, false)
+
         signatureCollector.applyBlock()
+
+        verify(genesisBlockService, times(1)).save(signatureBlock.block as GenesisBlock)
     }
 
     @Test
-    fun applyMainBlockShouldApplyBlock() {
+    fun applyMainBlockShouldApplyMainBlock() {
+        val genesisBlock = createGenesisPendingBlock()
         val signatureBlock = createMainPendingBlock()
         signatureCollector.setPendingBlock(signatureBlock)
         signatureCollector.addSignatureBlock(signatureBlock)
 
+        given(genesisBlockService.getLast()).willReturn(genesisBlock.block as GenesisBlock)
+        given(timeSlot.verifyTimeSlot(any(Long::class.java), any(Block::class.java))).willReturn(true, false)
+
         signatureCollector.applyBlock()
+
+        verify(mainBlockService, times(1)).save(signatureBlock.block as MainBlock)
     }
 
     private fun createMainPendingBlock(): PendingBlock {
