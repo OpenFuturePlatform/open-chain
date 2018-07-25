@@ -17,7 +17,6 @@ class DefaultBlockService(
     private val mainBlockRepository: MainBlockRepository,
     private val genesisBlockRepository: GenesisBlockRepository,
     private val transactionService: BaseTransactionService<BaseTransaction>,
-    private val coinBaseTransactionService: CoinBaseTransactionService,
     private val walletService: WalletService
 ) : BlockService {
 
@@ -51,7 +50,6 @@ class DefaultBlockService(
 
     @Transactional
     override fun save(block: MainBlock): MainBlock {
-    //    coinBaseTransactionService.save(block.transactions.first() as CoinBaseTransaction)
         val savedBlock = mainBlockRepository.save(block)
         val transactions = block.transactions
         for (transaction in transactions) {

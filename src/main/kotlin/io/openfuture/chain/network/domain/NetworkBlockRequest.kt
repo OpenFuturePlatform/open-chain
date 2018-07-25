@@ -1,22 +1,19 @@
 package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
+import io.openfuture.chain.annotation.NoArgConstructor
 import java.nio.charset.StandardCharsets.UTF_8
 
-class NetworkBlockRequest() : Packet() {
-    lateinit var hash: String
+@NoArgConstructor
+data class NetworkBlockRequest(var hash: String) : Packet() {
 
-    constructor(hash: String) : this() {
-        this.hash = hash
+    override fun readParams(buffer: ByteBuf) {
+        hash = buffer.readCharSequence(buffer.readInt(), UTF_8).toString()
     }
 
-    override fun get(buffer: ByteBuf) {
-        hash =  buffer.readCharSequence(buffer.readInt(), UTF_8).toString()
-    }
-
-    override fun send(buffer: ByteBuf) {
+    override fun writeParams(buffer: ByteBuf) {
         buffer.writeInt(hash.length)
-        buffer.writeCharSequence(hash, UTF_8)    }
+        buffer.writeCharSequence(hash, UTF_8)
+    }
 
-    override fun toString() = "NetworkBlockRequest(hash=$hash)"
 }

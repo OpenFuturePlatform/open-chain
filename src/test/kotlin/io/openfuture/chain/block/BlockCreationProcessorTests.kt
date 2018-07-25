@@ -15,7 +15,6 @@ import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.service.CoinBaseTransactionService
 import io.openfuture.chain.service.ConsensusService
 import io.openfuture.chain.service.DelegateService
 import org.junit.Before
@@ -33,7 +32,6 @@ class BlockCreationProcessorTests : ServiceTests() {
     @Mock private lateinit var clock: NodeClock
     @Mock private lateinit var delegateService: DelegateService
     @Mock private lateinit var properties: NodeProperties
-    @Mock private lateinit var coinBaseTransactionService: CoinBaseTransactionService
 
     private lateinit var processor: BlockCreationProcessor
 
@@ -43,7 +41,7 @@ class BlockCreationProcessorTests : ServiceTests() {
         val block = createMainBlock()
         given(blockService.getLastMain()).willReturn(block)
         processor = BlockCreationProcessor(blockService, signatureCollector, keyHolder, blockValidationService,
-            consensusService, clock, delegateService, properties, coinBaseTransactionService)
+            consensusService, clock, delegateService, properties)
     }
 
     @Test(expected = IllegalArgumentException::class)

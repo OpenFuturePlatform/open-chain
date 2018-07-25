@@ -8,11 +8,11 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
-import io.openfuture.chain.entity.*
+import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.service.CoinBaseTransactionService
 import io.openfuture.chain.service.ConsensusService
 import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.util.BlockUtils
@@ -28,8 +28,7 @@ class BlockCreationProcessor(
     private val consensusService: ConsensusService,
     private val clock: NodeClock,
     private val delegateService: DelegateService,
-    private val properties: NodeProperties,
-    private val coinBaseTransactionService: CoinBaseTransactionService
+    private val properties: NodeProperties
 ) {
 
     fun approveBlock(pendingBlock: PendingBlock): PendingBlock {
@@ -71,36 +70,34 @@ class BlockCreationProcessor(
     }
 
     private fun create(transactionsFromPool: MutableList<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
-        val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
-
-        val time = clock.networkTime()
-        val privateKey = keyHolder.getPrivateKey()
-        val block = when (blockType) {
-            BlockType.MAIN -> {
-                val fees = transactionsFromPool.sumByDouble { it.fee }
-                val transactions = mutableListOf<BaseTransaction>(coinBaseTransactionService.create(fees))
-                transactions.addAll(transactionsFromPool)
-
-                MainBlock(
-                    previousBlock.height + 1,
-                    previousBlock.hash,
-                    BlockUtils.calculateMerkleRoot(transactions),
-                    time,
-                    transactions
-                ).sign<MainBlock>(privateKey)
-            }
-            BlockType.GENESIS -> {
-                GenesisBlock(
-                    previousBlock.height + 1,
-                    previousBlock.hash,
-                    time,
-                    genesisBlock.epochIndex + 1,
-                    delegateService.getActiveDelegates() as MutableSet<Delegate>
-                ).sign(privateKey)
-            }
-        }
-
-        signCreatedBlock(block)
+//        val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
+//
+//        val time = clock.networkTime()
+//        val privateKey = keyHolder.getPrivateKey()
+//        val block = when (blockType) {
+//            BlockType.MAIN -> {
+//                val fees = transactionsFromPool.sumByDouble { it.fee }
+//
+//                MainBlock(
+//                    previousBlock.height + 1,
+//                    previousBlock.hash,
+//                    BlockUtils.calculateMerkleRoot(transactions),
+//                    time,
+//                    transactions
+//                ).sign<MainBlock>(privateKey)
+//            }
+//            BlockType.GENESIS -> {
+//                GenesisBlock(
+//                    previousBlock.height + 1,
+//                    previousBlock.hash,
+//                    time,
+//                    genesisBlock.epochIndex + 1,
+//                    delegateService.getActiveDelegates() as MutableSet<Delegate>
+//                ).sign(privateKey)
+//            }
+//        }
+//
+//        signCreatedBlock(block)
     }
 
 }

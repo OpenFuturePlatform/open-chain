@@ -1,21 +1,20 @@
 package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
+import io.openfuture.chain.annotation.NoArgConstructor
 import java.nio.charset.StandardCharsets.UTF_8
 
-open class NetworkTransaction : Packet() {
+@NoArgConstructor
+abstract class NetworkTransaction(var timestamp: Long = 0,
+                              var amount: Double = 0.0,
+                              var fee: Double = 0.0,
+                              var recipientAddress: String,
+                              var senderKey: String,
+                              var senderAddress: String,
+                              var senderSignature: String,
+                              var hash: String) {
 
-    var timestamp: Long = 0
-    var amount: Double = 0.0
-    var fee: Double = 0.0
-    lateinit var recipientAddress: String
-    lateinit var senderKey: String
-    lateinit var senderAddress: String
-    lateinit var senderSignature: String
-    lateinit var hash: String
-
-
-    override fun get(buffer: ByteBuf) {
+    open fun read(buffer: ByteBuf) {
         timestamp = buffer.readLong()
         amount = buffer.readDouble()
         fee = buffer.readDouble()
@@ -26,7 +25,7 @@ open class NetworkTransaction : Packet() {
         hash = buffer.readCharSequence(buffer.readInt(), UTF_8).toString()
     }
 
-    override fun send(buffer: ByteBuf) {
+    open fun write(buffer: ByteBuf) {
         buffer.writeLong(timestamp)
         buffer.writeDouble(amount)
         buffer.writeDouble(fee)

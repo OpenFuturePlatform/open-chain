@@ -39,7 +39,9 @@ class DefaultNetworkService(
             if (future.isSuccess) {
                 future.channel().writeAndFlush(FindAddresses())
 
-                blocksSynchronization()
+                future.channel().writeAndFlush(getNetworkBlockRequest())
+
+               // getNetworkBlockRequest()
             } else {
                 log.warn("Can not connect to ${address.host}:${address.port}")
             }
@@ -68,22 +70,22 @@ class DefaultNetworkService(
 
     private fun isConnectionNeeded(): Boolean = properties.peersNumber!! > connectionService.getConnections().size
 
-    private fun blocksSynchronization() {
+    private fun getNetworkBlockRequest(): NetworkBlockRequest {
         val lastBlockHash = blockService.getLast().hash
 
-        send(NetworkBlockRequest(lastBlockHash))
+        return NetworkBlockRequest(lastBlockHash)
     }
 
     private fun requestAddresses() {
         send(FindAddresses())
     }
 
-    private fun send(networkAddress: NetworkAddress, message: Packet) {
+    private fun send(message: Packet) {
         val address = connectionService.getConnectionAddresses().shuffled(SecureRandom()).firstOrNull()
             ?: properties.getRootAddresses().shuffled().first()
 
-        val channel = connectionService.getConnections().filter { it.value == networkAddress }.map { it.key }.firstOrNull()
-            ?: bootstrap.connect(networkAddress.host, networkAddress.port).channel()
+        val channel = connectionService.getConnections().filter { it.value == address }.map { it.key }.firstOrNull()
+            ?: bootstrap.connect(address.host, address.port).channel()
         channel.writeAndFlush(message)
     }
 

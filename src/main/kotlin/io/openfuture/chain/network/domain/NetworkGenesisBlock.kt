@@ -1,47 +1,46 @@
 package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
+import io.openfuture.chain.annotation.NoArgConstructor
 import io.openfuture.chain.entity.GenesisBlock
 
-class NetworkGenesisBlock() : NetworkBlock() {
+@NoArgConstructor
+class NetworkGenesisBlock(height: Long = 0,
+                          previousHash: String,
+                          merkleHash: String,
+                          blockTimestamp: Long = 0,
+                          typeId: Int = 0,
+                          hash: String,
+                          signature: String,
+                          var epochIndex: Long = 0,
+                          var activeDelegates: MutableSet<NetworkDelegate>
+) : NetworkBlock(height, previousHash, merkleHash, blockTimestamp, typeId, hash, signature) {
 
-    var epochIndex: Long = 0
-    lateinit var activeDelegates: MutableSet<NetworkDelegate>
 
+    constructor(block: GenesisBlock) : this(block.height, block.previousHash, block.merkleHash, block.timestamp,
+        block.typeId, block.hash, block.signature!!, block.epochIndex, block.activeDelegates.map { NetworkDelegate(it) }.toMutableSet())
 
-    constructor(block: GenesisBlock) : this() {
-        this.height = block.height
-        this.previousHash = block.previousHash
-        this.merkleHash = block.merkleHash
-        this.timestamp = block.timestamp
-        this.typeId = block.typeId
-        this.hash = block.hash
-        this.signature = block.signature!!
-        this.epochIndex = block.epochIndex
-        this.activeDelegates = block.activeDelegates.map { NetworkDelegate(it) }.toMutableSet()
-    }
-
-    override fun get(buffer: ByteBuf) {
-        super.get(buffer)
+    override fun readParams(buffer: ByteBuf) {
+        super.readParams(buffer)
 
         epochIndex = buffer.readLong()
-
         val size = buffer.readInt()
         activeDelegates = mutableSetOf()
         for (index in 1..size) {
-            val activeDelegate = NetworkDelegate()
-            activeDelegate.get(buffer)
-            activeDelegates.add(activeDelegate)
+            val address = NetworkDelegate::class.java.newInstance()
+            address.read(buffer)
+            activeDelegates.add(address)
         }
     }
 
-    override fun send(buffer: ByteBuf) {
-        super.send(buffer)
+    override fun writeParams(buffer: ByteBuf) {
+        super.writeParams(buffer)
 
         buffer.writeLong(epochIndex)
+
         buffer.writeInt(activeDelegates.size)
-        for (activeDelegate in activeDelegates) {
-            activeDelegate.send(buffer)
+        for (delegate in activeDelegates) {
+            delegate.write(buffer)
         }
     }
 

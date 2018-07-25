@@ -10,7 +10,7 @@ class GenesisBlock(height: Long, previousHash: String, timestamp: Long,
                    @Column(name = "epoch_index", nullable = false)
                    var epochIndex: Long,
 
-                   @ManyToMany
+                   @ManyToMany(fetch = FetchType.EAGER, cascade = [(CascadeType.ALL)])
                    @JoinTable(name = "delegate2genesis",
                        joinColumns = [JoinColumn(name = "genesis_id")],
                        inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])

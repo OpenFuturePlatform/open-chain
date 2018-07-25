@@ -12,7 +12,10 @@ enum class PacketType(
     GREETING(3, Greeting::class),
     HEART_BEAT(4, HeartBeat::class),
     ASK_TIME(5, AskTime::class),
-    TIME(6, Time::class);
+    TIME(6, Time::class),
+    SYNCHRONIZATION(7, NetworkBlockRequest::class),
+    MAIN_BLOCK(8, NetworkMainBlock::class),
+    GENESIS_BLOCK(9, NetworkGenesisBlock::class);
 
 
     companion object {
