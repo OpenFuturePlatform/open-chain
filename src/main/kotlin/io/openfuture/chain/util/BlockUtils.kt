@@ -53,8 +53,8 @@ object BlockUtils {
         return HashUtils.doubleSha256(blockContent.toByteArray())
     }
 
-    fun getBlockProducer(delegates: Set<Delegate>, previousBlock: Block?): Delegate {
-        val blockTimestamp = previousBlock?.timestamp ?: 0
+    fun getBlockProducer(delegates: Set<Delegate>, previousBlock: Block): Delegate {
+        val blockTimestamp = previousBlock.timestamp
         val random = Random(blockTimestamp)
         return delegates.shuffled(random).first()
     }
