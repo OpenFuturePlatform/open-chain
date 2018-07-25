@@ -15,4 +15,4 @@ class TransferTransaction(
     senderSignature: String,
     hash: String,
     block: MainBlock? = null
-) : BaseTransaction(timestamp, amount, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash, block)
+) : Transaction(timestamp, amount, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash, block)

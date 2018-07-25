@@ -1,6 +1,6 @@
 package io.openfuture.chain.entity.block
 
-import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.Transaction
 import javax.persistence.Entity
 import javax.persistence.OneToMany
 import javax.persistence.Table
@@ -15,6 +15,6 @@ class MainBlock(
     timestamp: Long,
 
     @OneToMany(mappedBy = "block")
-    var transactions: MutableList<BaseTransaction>
+    var transactions: MutableList<Transaction>
 
 ) : Block(privateKey, height, previousHash, merkleHash, timestamp, BlockType.MAIN.id)

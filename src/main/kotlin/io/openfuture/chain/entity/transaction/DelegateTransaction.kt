@@ -21,4 +21,19 @@ class DelegateTransaction(
 
     block: MainBlock? = null
 
-) : BaseTransaction(timestamp, amount, recipientAddress, senderPublicKey, senderAddress, senderSignature, hash, block)
+) : Transaction(timestamp, amount, recipientAddress, senderPublicKey, senderAddress, senderSignature, hash, block) {
+
+//    companion object {
+//        fun of(uDelegateTransaction: DelegateTransaction): DelegateTransaction = DelegateTransaction(
+//            uDelegateTransaction.timestamp,
+//            uDelegateTransaction.amount,
+//            uDelegateTransaction.recipientAddress,
+//            uDelegateTransaction.senderAddress,
+//            uDelegateTransaction.senderPublicKey,
+//            uDelegateTransaction.senderSignature,
+//            uDelegateTransaction.hash,
+//            uDelegateTransaction.delegateKey
+//        )
+//    }
+
+}

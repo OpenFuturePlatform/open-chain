@@ -3,7 +3,7 @@ package io.openfuture.chain.block.validation
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.BlockType
 import io.openfuture.chain.entity.block.MainBlock
-import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.Transaction
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.stereotype.Component
 
@@ -28,7 +28,7 @@ class MainBlockValidator : BlockValidator {
 
     override fun getTypeId(): Int = BlockType.MAIN.id
 
-    private fun transactionsIsWellFormed(transactions: List<BaseTransaction>): Boolean {
+    private fun transactionsIsWellFormed(transactions: List<Transaction>): Boolean {
         val transactionHashes = HashSet<String>()
         for (transaction in transactions) {
             val transactionHash = transaction.hash

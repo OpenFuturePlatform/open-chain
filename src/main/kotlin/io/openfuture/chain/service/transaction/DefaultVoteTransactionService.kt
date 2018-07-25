@@ -19,7 +19,7 @@ class DefaultVoteTransactionService(
     nodeClock: NodeClock,
     entityConverter: VoteTransactionEntityConverter,
     private val delegateService: DelegateService
-) : DefaultBaseTransactionService<VoteTransaction, VoteTransactionData>(repository,
+) : DefaultTransactionService<VoteTransaction, VoteTransactionData>(repository,
     walletService, nodeClock, entityConverter), VoteTransactionService {
 
     @Transactional

@@ -20,7 +20,7 @@ class DefaultDelegateTransactionService(
     nodeClock: NodeClock,
     entityConverter: DelegateTransactionEntityConverter,
     private val delegateService: DelegateService
-) : DefaultBaseTransactionService<DelegateTransaction, DelegateTransactionData>(repository, walletService, nodeClock,
+) : DefaultTransactionService<DelegateTransaction, DelegateTransactionData>(repository, walletService, nodeClock,
     entityConverter), DelegateTransactionService {
 
     @Transactional

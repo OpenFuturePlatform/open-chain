@@ -7,7 +7,7 @@ CREATE TABLE transactions (
   sender_address    VARCHAR NOT NULL,
   sender_signature  VARCHAR NOT NULL,
   hash              VARCHAR UNIQUE NOT NULL,
-  block_id          INTEGER REFERENCES main_blocks
+  block_id          INTEGER NOT NULL REFERENCES main_blocks
 );
 --
 CREATE TABLE transfer_transactions (
@@ -31,4 +31,32 @@ CREATE TABLE vote_transactions (
   id           INTEGER PRIMARY KEY REFERENCES transactions,
   vote_type_id INTEGER NOT NULL REFERENCES vote_types,
   delegate_key VARCHAR NOT NULL
+);
+
+-- UNCONFIRMED TABLES
+
+CREATE TABLE u_transactions (
+ id                INTEGER PRIMARY KEY,
+ timestamp         BIGINT  NOT NULL,
+ amount            BIGINT  NOT NULL,
+ recipient_address VARCHAR NOT NULL,
+ sender_key        VARCHAR NOT NULL,
+ sender_address    VARCHAR NOT NULL,
+ sender_signature  VARCHAR NOT NULL,
+ hash              VARCHAR UNIQUE NOT NULL
+);
+--
+CREATE TABLE u_transfer_transactions (
+ id INTEGER PRIMARY KEY REFERENCES u_transactions
+);
+--
+CREATE TABLE u_delegate_transactions (
+ id               INTEGER PRIMARY KEY REFERENCES u_transactions,
+ delegate_key     VARCHAR NOT NULL UNIQUE
+);
+--
+CREATE TABLE u_vote_transactions (
+ id           INTEGER PRIMARY KEY REFERENCES u_transactions,
+ vote_type_id INTEGER NOT NULL REFERENCES vote_types,
+ delegate_key VARCHAR NOT NULL
 );

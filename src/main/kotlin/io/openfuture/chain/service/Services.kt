@@ -22,10 +22,11 @@ import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.dictionary.VoteType
-import io.openfuture.chain.entity.transaction.BaseTransaction
-import io.openfuture.chain.entity.transaction.DelegateTransaction
-import io.openfuture.chain.entity.transaction.TransferTransaction
-import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.entity.transaction.*
+import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.data.domain.Page
@@ -80,13 +81,19 @@ interface CryptoService {
 
 }
 
-interface BaseTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> {
-
-    fun getAllPending(): MutableSet<Entity>
+interface TransactionService<Entity : Transaction, Data : BaseTransactionData> {
 
     fun get(hash: String): Entity
 
     fun addToBlock(tx: Entity, block: MainBlock): Entity
+
+}
+
+interface UTransactionService<Entity : UTransaction, Data : BaseTransactionData> {
+
+    fun getAll(): MutableSet<Entity>
+
+    fun get(hash: String): Entity
 
     fun add(dto: BaseTransactionDto<Data>): Entity
 
@@ -94,13 +101,21 @@ interface BaseTransactionService<Entity : BaseTransaction, Data : BaseTransactio
 
     fun add(data: Data): Entity
 
+    fun process(tx: Entity)
+
 }
 
-interface TransferTransactionService : BaseTransactionService<TransferTransaction, TransferTransactionData>
+interface TransferTransactionService : TransactionService<TransferTransaction, TransferTransactionData>
 
-interface VoteTransactionService : BaseTransactionService<VoteTransaction, VoteTransactionData>
+interface VoteTransactionService : TransactionService<VoteTransaction, VoteTransactionData>
 
-interface DelegateTransactionService : BaseTransactionService<DelegateTransaction, DelegateTransactionData>
+interface DelegateTransactionService : TransactionService<DelegateTransaction, DelegateTransactionData>
+
+interface UTransferTransactionService : UTransactionService<UTransferTransaction, TransferTransactionData>
+
+interface UVoteTransactionService : UTransactionService<UVoteTransaction, VoteTransactionData>
+
+interface UDelegateTransactionService : UTransactionService<UDelegateTransaction, DelegateTransactionData>
 
 interface DelegateService {
 

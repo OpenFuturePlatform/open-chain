@@ -1,7 +1,8 @@
 package io.openfuture.chain.domain.block
 
-import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.Transaction
+
 
 class BlockCreationEvent(
-    val pendingTransactions: MutableList<BaseTransaction>
+    val pendingTransactions: MutableList<Transaction>
 )

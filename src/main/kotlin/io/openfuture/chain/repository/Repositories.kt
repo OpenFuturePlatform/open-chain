@@ -1,13 +1,19 @@
 package io.openfuture.chain.repository
 
-import io.openfuture.chain.entity.*
+import io.openfuture.chain.entity.Delegate
+import io.openfuture.chain.entity.SeedWord
+import io.openfuture.chain.entity.Wallet
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
-import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.DelegateTransaction
+import io.openfuture.chain.entity.transaction.Transaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.stereotype.Repository
@@ -31,22 +37,36 @@ interface MainBlockRepository : BlockRepository<MainBlock>
 interface GenesisBlockRepository : BlockRepository<GenesisBlock>
 
 @Repository
-interface BaseTransactionRepository<Entity : BaseTransaction> : BaseRepository<Entity> {
+interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 
     fun findOneByHash(hash: String): Entity?
-
-    fun findAllByBlockIsNull(): MutableSet<Entity>
 
 }
 
 @Repository
-interface TransferTransactionRepository : BaseTransactionRepository<TransferTransaction>
+interface UTransactionRepository<Entity : UTransaction> : BaseRepository<Entity> {
+
+    fun findOneByHash(hash: String): Entity?
+
+}
 
 @Repository
-interface VoteTransactionRepository : BaseTransactionRepository<VoteTransaction>
+interface TransferTransactionRepository : TransactionRepository<TransferTransaction>
 
 @Repository
-interface DelegateTransactionRepository : BaseTransactionRepository<DelegateTransaction>
+interface VoteTransactionRepository : TransactionRepository<VoteTransaction>
+
+@Repository
+interface DelegateTransactionRepository : TransactionRepository<DelegateTransaction>
+
+@Repository
+interface UTransferTransactionRepository : UTransactionRepository<UTransferTransaction>
+
+@Repository
+interface UVoteTransactionRepository : UTransactionRepository<UVoteTransaction>
+
+@Repository
+interface UDelegateTransactionRepository : UTransactionRepository<UDelegateTransaction>
 
 @Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {

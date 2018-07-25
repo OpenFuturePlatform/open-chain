@@ -16,7 +16,7 @@ class DefaultTransferTransactionService(
     walletService: WalletService,
     nodeClock: NodeClock,
     entityConverter: TransferTransactionEntityConverter
-) : DefaultBaseTransactionService<TransferTransaction, TransferTransactionData>(repository,
+) : DefaultTransactionService<TransferTransaction, TransferTransactionData>(repository,
     walletService, nodeClock, entityConverter), TransferTransactionService {
 
     override fun addToBlock(tx: TransferTransaction, block: MainBlock): TransferTransaction {

@@ -4,7 +4,8 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.HashUtils.doubleSha256
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.Delegate
-import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.Transaction
+import io.openfuture.chain.entity.transaction.base.BaseTransaction
 import java.util.*
 
 object BlockUtils {

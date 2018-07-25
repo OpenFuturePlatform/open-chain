@@ -3,7 +3,7 @@ package io.openfuture.chain.service
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
-import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.Transaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.exception.NotFoundException
@@ -57,7 +57,7 @@ class DefaultBlockService(
         return genesisBlockRepository.save(block)
     }
 
-    private fun addTransactionToBlock(tx: BaseTransaction, block: MainBlock) {
+    private fun addTransactionToBlock(tx: Transaction, block: MainBlock) {
         when (tx) {
             is VoteTransaction -> voteTransactionService.addToBlock(tx, block)
             is TransferTransaction -> transferTransactionService.addToBlock(tx, block)
