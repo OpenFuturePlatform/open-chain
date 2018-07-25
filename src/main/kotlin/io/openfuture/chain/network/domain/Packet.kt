@@ -1,51 +1,61 @@
 package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
-import java.io.IOException
+import org.springframework.stereotype.Component
 import java.io.Serializable
-import kotlin.reflect.full.createInstance
+import java.nio.charset.StandardCharsets.UTF_8
 
+abstract class Packet(
+    var version: String? = null,
+    var timestamp: Long? = null
+) : Serializable {
 
-abstract class Packet : Serializable{
+    private fun read(buffer: ByteBuf) {
+        version = readString(buffer)
+        timestamp = buffer.readLong()
+        readParams(buffer)
+    }
 
-    companion object {
-        private val idMapping = mapOf(
-            Pair(Addresses::class, 1),
-            Pair(FindAddresses::class, 2),
-            Pair(Greeting::class, 3),
-            Pair(HeartBeat::class, 4),
-            Pair(TimeSyncRequest::class, 5),
-            Pair(TimeSyncResponse::class, 6),
-            Pair(NetworkBlock::class, 7),
-            Pair(NetworkBlockRequest::class, 8),
-            Pair(NetworkTransaction::class, 9),
-            Pair(NetworkTransferTransaction::class, 10),
-            Pair(NetworkVoteTransaction::class, 11),
-            Pair(NetworkMainBlock::class, 12),
-            Pair(NetworkGenesisBlock::class, 13))
+    private fun write(buffer: ByteBuf) {
+        if (null == version || null == timestamp) {
+            throw IllegalStateException("Can't write packet without version or timestamp")
+        }
+        writeString(buffer, version!!)
+        buffer.writeLong(timestamp!!)
+        writeParams(buffer)
+    }
 
-        private val classMapping = idMapping.entries.associateBy({ it.value }) { it.key }
+    protected fun writeString(buffer: ByteBuf, string: String) {
+        buffer.writeInt(string.length)
+        buffer.writeCharSequence(string, UTF_8)
+    }
 
+    protected fun readString(buffer: ByteBuf): String {
+        val length = buffer.readInt()
+        return buffer.readCharSequence(length, UTF_8).toString()
+    }
 
-        fun read(buffer: ByteBuf) : Packet {
-            val id = buffer.readInt()
-            val kClass = classMapping[id]
-            kClass ?: throw IOException("Wrong packet type: $kClass")
-            val instance = kClass.createInstance()
-            instance.get(buffer)
+    protected open fun readParams(buffer: ByteBuf) {}
+
+    protected open fun writeParams(buffer: ByteBuf) {}
+
+    @Component
+    class Serializer {
+
+        fun read(buffer: ByteBuf): Packet {
+            val id = buffer.readShort()
+            val clazz = PacketType.get(id).clazz
+            val instance = clazz.java.newInstance()
+            instance.read(buffer)
             return instance
         }
 
         fun write(packet: Packet, buffer: ByteBuf) {
-            val id = idMapping[packet::class]
-            id ?: throw IOException("Wrong packet ID: $id")
-            buffer.writeInt(id)
-            packet.send(buffer)
+            val id = PacketType.get(packet::class).id
+            buffer.writeShort(id.toInt())
+            packet.write(buffer)
         }
+
     }
-
-    abstract fun get(buffer: ByteBuf)
-
-    abstract fun send(buffer: ByteBuf)
 
 }

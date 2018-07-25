@@ -4,17 +4,19 @@ import io.netty.buffer.ByteBuf
 import io.openfuture.chain.annotation.NoArgConstructor
 
 @NoArgConstructor
-data class Greeting(
-    var address: NetworkAddress
+data class Time(
+    var nodeTimestamp: Long,
+    var networkTimestamp: Long
 ) : Packet() {
 
     override fun readParams(buffer: ByteBuf) {
-        address = NetworkAddress::class.java.newInstance()
-        address.read(buffer)
+        nodeTimestamp = buffer.readLong()
+        networkTimestamp = buffer.readLong()
     }
 
     override fun writeParams(buffer: ByteBuf) {
-        address.write(buffer)
+        buffer.writeLong(nodeTimestamp)
+        buffer.writeLong(networkTimestamp)
     }
 
 }

@@ -1,35 +1,32 @@
 package io.openfuture.chain.network.client.handler
 
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.network.base.BaseHandler
 import io.openfuture.chain.network.domain.HeartBeat
 import io.openfuture.chain.network.domain.HeartBeat.Type.PING
 import io.openfuture.chain.network.domain.HeartBeat.Type.PONG
+import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import java.util.concurrent.ScheduledFuture
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.SECONDS
 
 @Component
-@Scope("prototype")
-class HeartBeatClientHandler : BaseHandler<HeartBeat>() {
+@Scope(SCOPE_PROTOTYPE)
+class HeartBeatClientHandler : ClientHandler<HeartBeat>() {
 
-    @Volatile
     private var heartBeatTask: ScheduledFuture<*>? = null
 
 
-    override fun packetReceived(ctx: ChannelHandlerContext, message: HeartBeat) {
+    override fun channelRead0(ctx: ChannelHandlerContext, message: HeartBeat) {
         if (message.type == PONG) {
             return
         }
 
-        // heartbeat
         heartBeatTask?.cancel(true)
         heartBeatTask = ctx.channel()
                 .eventLoop()
-                .scheduleAtFixedRate(HeartBeatTask(ctx), 20, 20, TimeUnit.SECONDS)
+                .scheduleAtFixedRate({ ctx.writeAndFlush(HeartBeat(PING)) }, 20, 20, SECONDS)
 
-        // response
         ctx.writeAndFlush(HeartBeat(PONG))
     }
 
@@ -37,11 +34,4 @@ class HeartBeatClientHandler : BaseHandler<HeartBeat>() {
         heartBeatTask?.cancel(true)
     }
 
-    class HeartBeatTask(private val ctx: ChannelHandlerContext) : Runnable {
-
-        override fun run() {
-            ctx.writeAndFlush(HeartBeat(PING))
-        }
-
-    }
 }

@@ -2,20 +2,20 @@ package io.openfuture.chain.network.server.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.component.node.NodeClock
-import io.openfuture.chain.network.base.BaseHandler
-import io.openfuture.chain.network.domain.TimeSyncRequest
-import io.openfuture.chain.network.domain.TimeSyncResponse
+import io.openfuture.chain.network.domain.AskTime
+import io.openfuture.chain.network.domain.Time
+import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 @Component
-@Scope("prototype")
+@Scope(SCOPE_PROTOTYPE)
 class TimeSyncServerHandler(
-        private val clock: NodeClock
-) : BaseHandler<TimeSyncRequest>() {
+    private val clock: NodeClock
+) : ServerHandler<AskTime>() {
 
-    override fun packetReceived(ctx: ChannelHandlerContext, message: TimeSyncRequest) {
-        ctx.channel().writeAndFlush(TimeSyncResponse(clock.networkTime(), message.nodeTimestamp))
+    override fun channelRead0(ctx: ChannelHandlerContext, message: AskTime) {
+        ctx.channel().writeAndFlush(Time(clock.networkTime(), message.nodeTimestamp))
     }
 
 }
