@@ -10,6 +10,7 @@ import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 import org.springframework.stereotype.Component
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
@@ -35,7 +36,8 @@ class SignatureCollector(
         if (!active) {
             this.active = true
             this.pendingBlock = generatedBlock.block
-            scheduler.scheduleWithFixedDelay({ applyBlock() }, properties.timeSlotDuration!! / 2)
+            val applyDate = Date(timeSlot.getSlotTimestamp() + properties.timeSlotDuration!! / 2)
+            scheduler.schedule({ applyBlock() }, applyDate)
         }
     }
 
