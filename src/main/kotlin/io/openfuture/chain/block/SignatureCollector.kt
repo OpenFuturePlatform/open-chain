@@ -61,7 +61,7 @@ class SignatureCollector(
                     }
                     break
                 } else {
-                    Thread.sleep(100)
+                    Thread.sleep(properties.timeSlotWaitDuration!!)
                 }
             }
         } finally {
