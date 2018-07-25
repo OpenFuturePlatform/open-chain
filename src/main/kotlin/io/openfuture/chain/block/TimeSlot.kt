@@ -19,17 +19,13 @@ class TimeSlot(
         return genesis.timestamp
     }
 
-    fun getSlotTimestamp(): Long {
-        return getEpochTime() + getSlotTime()
-    }
-
-    fun getSlotTime(): Long {
-        return getSlotNumber() * properties.timeSlotDuration!!
-    }
+    fun getSlotTimestamp(): Long = getEpochTime() + getSlotTime()
 
     fun getSlotNumber(time: Long = clock.networkTime()): Long
         = ((time - getEpochTime()) / properties.timeSlotDuration!!)
 
     fun verifyTimeSlot(currentTime: Long, block: Block) = (getSlotNumber(currentTime) == getSlotNumber(block.timestamp))
+
+    private fun getSlotTime(): Long = getSlotNumber() * properties.timeSlotDuration!!
 
 }

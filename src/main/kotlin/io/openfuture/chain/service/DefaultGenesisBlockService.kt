@@ -8,7 +8,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultGenesisBlockService(
-    val genesisBlockRepository: GenesisBlockRepository
+    val genesisBlockRepository: GenesisBlockRepository,
+    val delegateService: DefaultDelegateService
 ) : BlockService<GenesisBlock> {
 
     @Transactional(readOnly = true)
@@ -26,9 +27,14 @@ class DefaultGenesisBlockService(
         val lastBlock = getLast()
         val blockFound = genesisBlockRepository.findByHash(block.hash)
 
-        return (isValidEpochIndex(lastBlock, block) && blockFound != null)
+        return (isValidEpochIndex(lastBlock, block) && isValidateActiveDelegates(block) && blockFound != null)
     }
 
     private fun isValidEpochIndex(lastBlock: GenesisBlock, block: GenesisBlock): Boolean
         = (lastBlock.epochIndex + 1 == block.epochIndex)
+
+    private fun isValidateActiveDelegates(block: GenesisBlock): Boolean {
+        val activeDelegates = block.activeDelegates
+        return activeDelegates == delegateService.getActiveDelegates()
+    }
 }
