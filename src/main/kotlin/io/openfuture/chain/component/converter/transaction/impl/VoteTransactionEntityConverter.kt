@@ -1,8 +1,7 @@
 package io.openfuture.chain.component.converter.transaction.impl
 
-import io.openfuture.chain.component.converter.transaction.TransactionEntityConverter
+import io.openfuture.chain.component.converter.transaction.ManualTransactionEntityConverter
 import io.openfuture.chain.crypto.key.NodeKeyHolder
-import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
@@ -13,11 +12,13 @@ import org.springframework.stereotype.Component
 @Component
 class VoteTransactionEntityConverter(
     private val keyHolder: NodeKeyHolder
-) : TransactionEntityConverter<VoteTransaction, VoteTransactionData> {
+) : BaseTransactionEntityConverter<VoteTransactionData>(),
+    ManualTransactionEntityConverter<VoteTransaction, VoteTransactionData> {
 
     override fun toEntity(dto: BaseTransactionDto<VoteTransactionData>): VoteTransaction = VoteTransaction(
         dto.timestamp,
         dto.data.amount,
+        dto.data.fee,
         dto.data.recipientAddress,
         dto.data.senderAddress,
         dto.senderPublicKey,
@@ -31,11 +32,12 @@ class VoteTransactionEntityConverter(
         VoteTransaction(
             timestamp,
             request.data!!.amount,
+            request.data!!.fee,
             request.data!!.recipientAddress,
             request.data!!.senderAddress,
             request.senderPublicKey!!,
             request.senderSignature!!,
-            request.data!!.getHash(),
+            getHash(request),
             request.data!!.voteType.getId(),
             request.data!!.delegateKey
         )
@@ -44,11 +46,12 @@ class VoteTransactionEntityConverter(
         VoteTransaction(
             timestamp,
             data.amount,
+            data.fee,
             data.recipientAddress,
             data.senderAddress,
             HashUtils.toHexString(keyHolder.getPublicKey()),
-            SignatureManager.sign(data.getBytes(), keyHolder.getPrivateKey()),
-            data.getHash(),
+            getSignature(data, keyHolder.getPrivateKey()),
+            getHash(data, keyHolder.getPublicKey(), keyHolder.getPrivateKey()),
             data.voteType.getId(),
             data.delegateKey
         )

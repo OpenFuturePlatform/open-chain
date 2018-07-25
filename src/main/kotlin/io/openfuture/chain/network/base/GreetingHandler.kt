@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 @Scope("prototype")
 class GreetingHandler(
     private val networkService: NetworkService,
-    private val properties: NodeProperty
+    private val property: NodeProperty
 ) : BaseHandler(Type.GREETING) {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
@@ -21,8 +21,8 @@ class GreetingHandler(
             .setType(Type.GREETING)
             .setGreeting(Greeting.newBuilder()
                 .setAddress(CommunicationProtocol.NetworkAddress.newBuilder()
-                    .setHost(properties.host)
-                    .setPort(properties.port!!))
+                    .setHost(property.host)
+                    .setPort(property.port!!))
                 .build())
             .build()
         ctx.writeAndFlush(message)

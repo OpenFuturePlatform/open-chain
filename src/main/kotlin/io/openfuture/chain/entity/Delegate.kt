@@ -3,8 +3,6 @@ package io.openfuture.chain.entity
 import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.*
 
-@Embeddable
-
 @Entity
 @Table(name = "delegates")
 class Delegate(

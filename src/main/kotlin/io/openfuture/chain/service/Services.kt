@@ -21,10 +21,10 @@ import io.openfuture.chain.entity.Wallet
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
-import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.entity.transaction.*
-import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
+import io.openfuture.chain.entity.transaction.base.BaseTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.network.domain.NetworkAddress
@@ -81,11 +81,12 @@ interface CryptoService {
 
 }
 
+
 interface TransactionService<Entity : Transaction, Data : BaseTransactionData> {
 
     fun get(hash: String): Entity
 
-    fun addToBlock(tx: Entity, block: MainBlock): Entity
+    fun toBlock(tx: Entity, block: MainBlock): Entity
 
 }
 
@@ -101,21 +102,55 @@ interface UTransactionService<Entity : UTransaction, Data : BaseTransactionData>
 
     fun add(data: Data): Entity
 
-    fun process(tx: Entity)
+}
+
+/**
+ * The utility service that is not aware of transaction types, has default implementation
+ */
+interface BaseTransactionService {
+
+    fun getAllPending(): MutableSet<BaseTransaction>
 
 }
 
-interface TransferTransactionService : TransactionService<TransferTransaction, TransferTransactionData>
+interface CommonTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> {
 
-interface VoteTransactionService : TransactionService<VoteTransaction, VoteTransactionData>
+    fun get(hash: String): Entity
 
-interface DelegateTransactionService : TransactionService<DelegateTransaction, DelegateTransactionData>
+    fun getAllPending(): MutableSet<Entity>
+
+    fun toBlock(tx: Entity, block: MainBlock): Entity
+
+    fun add(dto: BaseTransactionDto<Data>): Entity
+
+}
+
+interface EmbeddedTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> : CommonTransactionService<Entity, Data>
+
+interface ManualTransactionService<Entity : BaseTransaction, Data : BaseTransactionData> : CommonTransactionService<Entity, Data> {
+
+    fun add(request: BaseTransactionRequest<Data>): Entity
+
+}
+
+
+interface RewardTransactionService : EmbeddedTransactionService<RewardTransaction, RewardTransactionData>
+
+interface TransferTransactionService : ManualTransactionService<TransferTransaction, TransferTransactionData>
+
+interface VoteTransactionService : ManualTransactionService<VoteTransaction, VoteTransactionData>
+
+interface DelegateTransactionService : ManualTransactionService<DelegateTransaction, DelegateTransactionData>
+
+
+interface URewardTransactionService : EmbeddedTransactionService<URewardTransaction, RewardTransactionData>
 
 interface UTransferTransactionService : UTransactionService<UTransferTransaction, TransferTransactionData>
 
 interface UVoteTransactionService : UTransactionService<UVoteTransaction, VoteTransactionData>
 
 interface UDelegateTransactionService : UTransactionService<UDelegateTransaction, DelegateTransactionData>
+
 
 interface DelegateService {
 
@@ -141,13 +176,13 @@ interface WalletService {
 
     fun getByAddress(address: String): Wallet
 
-    fun getBalance(address: String): Long
+    fun getBalanceByAddress(address: String): Long
+
+    fun getVotesByAddress(address: String): MutableSet<Delegate>
 
     fun save(wallet: Wallet)
 
-    fun updateBalance(from: String, to: String, amount: Long)
-
-    fun changeWalletVote(address: String, delegate: Delegate, type: VoteType)
+    fun updateBalance(from: String, to: String, amount: Long, fee: Long)
 
 }
 

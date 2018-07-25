@@ -12,6 +12,7 @@ import javax.persistence.Table
 class VoteTransaction(
     timestamp: Long,
     amount: Long,
+    fee: Long,
     recipientAddress: String,
     senderAddress: String,
     senderPublicKey: String,

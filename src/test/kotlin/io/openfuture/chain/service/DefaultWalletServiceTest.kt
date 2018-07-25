@@ -27,12 +27,12 @@ class DefaultWalletServiceTest : ServiceTests() {
     @Test
     fun getBalanceShouldReturnBalanceFromAllTransactionsByAddressTest() {
         val address = "address"
-        val expectedBalance = 10L
+        val expectedBalance = 10.0
         val wallet = Wallet(address, expectedBalance)
 
         given(repository.findOneByAddress(address)).willReturn(wallet)
 
-        val actualBalance = service.getBalance(address)
+        val actualBalance = service.getBalanceByAddress(address)
 
         assertThat(actualBalance).isEqualTo(expectedBalance)
     }
@@ -40,31 +40,34 @@ class DefaultWalletServiceTest : ServiceTests() {
     @Test
     fun getBalanceWhenNotExistsWalletByAddressShouldReturnDefaultBalanceValueTest() {
         val address = "address"
-        val expectedBalance = 0L
+        val expectedBalance = 0.0
 
         given(repository.findOneByAddress(address)).willReturn(null)
 
-        val actualBalance = service.getBalance(address)
+        val actualBalance = service.getBalanceByAddress(address)
 
         assertThat(actualBalance).isEqualTo(expectedBalance)
     }
 
     @Test
     fun updateBalanceShouldChangeWalletsBalanceValueTest() {
-        val amount = 1L
+        val amount = 2L
+        val fee = 1L
+        val genesisAddress = "genesisAddress"
         val senderAddress = "senderAddress"
         val recipientAddress = "recipientAddress"
 
-        val senderWallet = Wallet(senderAddress, 1L)
-        val recipientWallet = Wallet(recipientAddress, 5L)
+        val senderWallet = Wallet(senderAddress, 1)
+        val recipientWallet = Wallet(recipientAddress, 5)
 
         given(repository.findOneByAddress(senderAddress)).willReturn(senderWallet)
         given(repository.findOneByAddress(recipientAddress)).willReturn(recipientWallet)
+        given(properties.genesisAddress).willReturn(genesisAddress)
 
-        service.updateBalance(senderAddress, recipientAddress, amount)
+        service.updateBalance(senderAddress, recipientAddress, amount, fee)
 
         verify(repository).save(senderWallet.apply { balance += amount })
-        verify(repository).save(recipientWallet.apply { balance -= amount })
+        verify(repository).save(recipientWallet.apply { balance -= (amount + fee) })
     }
 
 }

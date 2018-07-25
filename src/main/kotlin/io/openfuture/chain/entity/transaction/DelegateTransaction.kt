@@ -10,6 +10,7 @@ import javax.persistence.Table
 class DelegateTransaction(
     timestamp: Long,
     amount: Long,
+    fee: Long,
     recipientAddress: String,
     senderAddress: String,
     senderPublicKey: String,
@@ -21,19 +22,4 @@ class DelegateTransaction(
 
     block: MainBlock? = null
 
-) : Transaction(timestamp, amount, recipientAddress, senderPublicKey, senderAddress, senderSignature, hash, block) {
-
-//    companion object {
-//        fun of(uDelegateTransaction: DelegateTransaction): DelegateTransaction = DelegateTransaction(
-//            uDelegateTransaction.timestamp,
-//            uDelegateTransaction.amount,
-//            uDelegateTransaction.recipientAddress,
-//            uDelegateTransaction.senderAddress,
-//            uDelegateTransaction.senderPublicKey,
-//            uDelegateTransaction.senderSignature,
-//            uDelegateTransaction.hash,
-//            uDelegateTransaction.delegateKey
-//        )
-//    }
-
-}
+) : Transaction(timestamp, amount, fee, recipientAddress, senderPublicKey, senderAddress, senderSignature, hash, block)

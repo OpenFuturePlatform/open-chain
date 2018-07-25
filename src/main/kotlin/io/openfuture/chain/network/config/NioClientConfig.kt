@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class NioClientConfig(
     private val clientChannelInitializer: ClientChannelInitializer,
-    private val properties: NodeProperty
+    private val property: NodeProperty
 ) {
 
     @Bean
@@ -20,7 +20,7 @@ class NioClientConfig(
         .group(clientGroup())
         .channel(NioSocketChannel::class.java)
         .handler(clientChannelInitializer)
-        .option(ChannelOption.SO_KEEPALIVE, properties.keepAlive)
+        .option(ChannelOption.SO_KEEPALIVE, property.keepAlive)
 
     @Bean(destroyMethod = "shutdownGracefully")
     fun clientGroup(): NioEventLoopGroup = NioEventLoopGroup()

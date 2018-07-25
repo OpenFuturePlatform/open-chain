@@ -1,14 +1,10 @@
 package io.openfuture.chain.domain.transaction.data
 
-import io.openfuture.chain.entity.dictionary.VoteType
-
-class VoteTransactionData(
+class RewardTransactionData(
     amount: Long,
     fee: Long,
     recipientAddress: String,
-    senderAddress: String,
-    var voteType: VoteType,
-    var delegateKey: String
+    senderAddress: String
 ) : BaseTransactionData(amount, fee, recipientAddress, senderAddress) {
 
     override fun getBytes(): ByteArray {
@@ -17,8 +13,6 @@ class VoteTransactionData(
         builder.append(fee)
         builder.append(recipientAddress)
         builder.append(senderAddress)
-        builder.append(voteType)
-        builder.append(delegateKey)
         return builder.toString().toByteArray()
     }
 

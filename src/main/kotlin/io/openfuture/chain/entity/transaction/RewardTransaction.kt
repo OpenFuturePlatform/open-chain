@@ -1,12 +1,12 @@
 package io.openfuture.chain.entity.transaction
 
-import io.openfuture.chain.entity.block.MainBlock
+import io.openfuture.chain.entity.MainBlock
 import javax.persistence.Entity
 import javax.persistence.Table
 
 @Entity
-@Table(name = "transfer_transactions")
-class TransferTransaction(
+@Table(name = "reward_transactions")
+class RewardTransaction(
     timestamp: Long,
     amount: Long,
     fee: Long,
@@ -16,4 +16,4 @@ class TransferTransaction(
     senderSignature: String,
     hash: String,
     block: MainBlock? = null
-) : Transaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash, block)
+) : BaseTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash, block)

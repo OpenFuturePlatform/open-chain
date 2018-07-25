@@ -25,8 +25,11 @@ class DefaultWalletService(
         ?: throw NotFoundException("Wallet with address: $address not exist!")
 
     @Transactional(readOnly = true)
-    override fun getBalance(address: String): Long =
+    override fun getBalanceByAddress(address: String): Long =
         repository.findOneByAddress(address)?.balance ?: DEFAULT_WALLET_BALANCE
+
+    @Transactional(readOnly = true)
+    override fun getVotesByAddress(address: String): MutableSet<Delegate> = this.getByAddress(address).votes
 
     @Transactional
     override fun save(wallet: Wallet) {
@@ -34,47 +37,11 @@ class DefaultWalletService(
     }
 
     @Transactional
-    override fun updateBalance(from: String, to: String, amount: Long) {
-        updateByAddress(from, -amount)
+    override fun updateBalance(from: String, to: String, amount: Long, fee: Long) {
+        if (consensusProperties.genesisAddress!! != from) {
+            updateByAddress(from, -(amount + fee))
+        }
         updateByAddress(to, amount)
-    }
-
-    @Transactional
-    override fun changeWalletVote(address: String, delegate: Delegate, type: VoteType) {
-        when (type) {
-            VoteType.FOR -> {
-                addVote(address, delegate)
-            }
-            VoteType.AGAINST -> {
-                removeVote(address, delegate)
-            }
-        }
-    }
-
-    private fun addVote(address: String, delegate: Delegate) {
-        val wallet = getByAddress(address)
-
-        if (consensusProperties.delegatesCount!! <= wallet.votes.size) {
-            throw IllegalStateException("Wallet $address already spent all votes!")
-        }
-
-        if (wallet.votes.contains(delegate)) {
-            throw IllegalStateException("Wallet $address already voted for delegate with key ${delegate.publicKey}!")
-        }
-
-        wallet.votes.add(delegate)
-        repository.save(wallet)
-    }
-
-    private fun removeVote(address: String, delegate: Delegate) {
-        val wallet = getByAddress(address)
-
-        if (!wallet.votes.contains(delegate)) {
-            throw IllegalStateException("Wallet $address haven't vote for delegate with key ${delegate.publicKey}!")
-        }
-
-        wallet.votes.remove(delegate)
-        repository.save(wallet)
     }
 
     private fun updateByAddress(address: String, amount: Long) {

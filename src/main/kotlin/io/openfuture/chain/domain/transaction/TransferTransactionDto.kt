@@ -13,7 +13,7 @@ class TransferTransactionDto(
 ) : BaseTransactionDto<TransferTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
 
     constructor(tx: TransferTransaction) : this(
-        TransferTransactionData(tx.amount, tx.recipientAddress, tx.senderAddress),
+        TransferTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress),
         tx.timestamp,
         tx.senderPublicKey,
         tx.senderSignature,

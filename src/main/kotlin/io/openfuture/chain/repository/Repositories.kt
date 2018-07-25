@@ -6,10 +6,7 @@ import io.openfuture.chain.entity.Wallet
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
-import io.openfuture.chain.entity.transaction.DelegateTransaction
-import io.openfuture.chain.entity.transaction.Transaction
-import io.openfuture.chain.entity.transaction.TransferTransaction
-import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
@@ -60,6 +57,10 @@ interface VoteTransactionRepository : TransactionRepository<VoteTransaction>
 interface DelegateTransactionRepository : TransactionRepository<DelegateTransaction>
 
 @Repository
+interface RewardTransactionRepository : TransactionRepository<RewardTransaction>
+
+
+@Repository
 interface UTransferTransactionRepository : UTransactionRepository<UTransferTransaction>
 
 @Repository
@@ -67,6 +68,10 @@ interface UVoteTransactionRepository : UTransactionRepository<UVoteTransaction>
 
 @Repository
 interface UDelegateTransactionRepository : UTransactionRepository<UDelegateTransaction>
+
+@Repository
+interface URewardTransactionRepository : UTransactionRepository<URewardTransaction>
+
 
 @Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {

@@ -2,18 +2,30 @@ package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.entity.block.MainBlock
+import io.openfuture.chain.entity.transaction.RewardTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.property.ConsensusProperties
 import org.assertj.core.api.Assertions
 import org.junit.Before
 import org.junit.Test
+import org.mockito.BDDMockito.given
+import org.mockito.Mock
 
 class MainBlockValidatorTests : ServiceTests() {
 
+    @Mock private lateinit var consensusProperties: ConsensusProperties
+
     private lateinit var mainBlockValidator: MainBlockValidator
+
+    companion object {
+        private const val GENESIS_ADDRESS = "0x00000"
+        private const val REWARD_BLOCK = 10L
+    }
+
 
     @Before
     fun setUp() {
-        mainBlockValidator = MainBlockValidator()
+        mainBlockValidator = MainBlockValidator(consensusProperties)
     }
 
     @Test
@@ -25,20 +37,20 @@ class MainBlockValidatorTests : ServiceTests() {
             "0e09773036394004cb8c340e639a89d7a18e924e8a3d048b49864aeb017e07a0",
             1512345678L,
             mutableListOf(
-                VoteTransaction(
+                RewardTransaction(
                     1500000000L,
-                    1000L,
+                    10 + REWARD_BLOCK,
+                    0,
                     "recipient_address",
-                    "sender_key",
-                    "sender_address",
+                    GENESIS_ADDRESS,
+                    "publicKey",
                     "sender_signature",
-                    "hash",
-                    1,
-                    "delegate_key"
+                    "hash"
                 ),
                 VoteTransaction(
                     1500000001L,
-                    1002L,
+                    1002,
+                    10,
                     "recipient_address2",
                     "sender_key2",
                     "sender_address2",
@@ -49,6 +61,9 @@ class MainBlockValidatorTests : ServiceTests() {
                 )
             )
         )
+
+        given(consensusProperties.genesisAddress).willReturn(GENESIS_ADDRESS)
+        given(consensusProperties.rewardBlock).willReturn(REWARD_BLOCK)
 
         val isBlockValid = mainBlockValidator.isValid(block)
 
@@ -66,7 +81,8 @@ class MainBlockValidatorTests : ServiceTests() {
             mutableListOf(
                 VoteTransaction(
                     1500000000L,
-                    1000L,
+                    1000,
+                    10,
                     "recipient_address",
                     "sender_key",
                     "sender_address",
@@ -77,7 +93,8 @@ class MainBlockValidatorTests : ServiceTests() {
                 ),
                 VoteTransaction(
                     1500000001L,
-                    1002L,
+                    1002,
+                    10,
                     "recipient_address2",
                     "sender_key2",
                     "sender_address2",

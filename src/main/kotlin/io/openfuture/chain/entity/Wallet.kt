@@ -11,7 +11,7 @@ class Wallet(
     var address: String,
 
     @Column(name = "balance", nullable = false)
-    var balance: Long = 0L,
+    var balance: Long = 0,
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

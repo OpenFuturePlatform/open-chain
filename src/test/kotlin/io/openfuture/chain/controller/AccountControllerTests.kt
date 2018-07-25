@@ -110,7 +110,7 @@ class AccountControllerTests : ControllerTests() {
         val expectedBalance = 1L
         val expectedResponse = RestResponse(ResponseHeader(0, "1"), expectedBalance)
 
-        given(walletService.getBalance(address)).willReturn(expectedBalance)
+        given(walletService.getBalanceByAddress(address)).willReturn(expectedBalance)
         given(nodeClock.networkTime()).willReturn(0)
         given(nodeProperty.version).willReturn("1")
 

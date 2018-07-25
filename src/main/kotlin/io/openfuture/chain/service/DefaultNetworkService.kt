@@ -20,7 +20,7 @@ import java.util.concurrent.Executors
 class DefaultNetworkService(
     private val clientBootstrap: Bootstrap,
     private val tcpServer: TcpServer,
-    private val properties: NodeProperty
+    private val property: NodeProperty
 ) : NetworkService, ApplicationListener<ApplicationReadyEvent> {
 
     private val connections: MutableMap<Channel, NetworkAddress> = ConcurrentHashMap()
@@ -35,7 +35,7 @@ class DefaultNetworkService(
         Executors.newSingleThreadExecutor().execute(tcpServer)
 
         // Start Clients
-        val address = properties.getRootAddresses().shuffled(SecureRandom()).first()
+        val address = property.getRootAddresses().shuffled(SecureRandom()).first()
         clientBootstrap.connect(address.host, address.port).addListener { future ->
             future as ChannelFuture
             if (future.isSuccess) {
@@ -69,7 +69,7 @@ class DefaultNetworkService(
 
     override fun connect(peers: List<CommunicationProtocol.NetworkAddress>) {
         peers.map { NetworkAddress(it.host, it.port) }
-            .filter { !connections.values.contains(it) && it != NetworkAddress(properties.host!!, properties.port!!) }
+            .filter { !connections.values.contains(it) && it != NetworkAddress(property.host!!, property.port!!) }
             .forEach { clientBootstrap.connect(it.host, it.port) }
     }
 
@@ -80,11 +80,11 @@ class DefaultNetworkService(
             .build()
     }
 
-    private fun isConnectionNeeded(): Boolean = properties.peersNumber!! > connections.size
+    private fun isConnectionNeeded(): Boolean = property.peersNumber!! > connections.size
 
     private fun requestAddresses() {
         val address = connections.values.shuffled(SecureRandom()).firstOrNull()
-            ?: properties.getRootAddresses().shuffled().first()
+            ?: property.getRootAddresses().shuffled().first()
 
         send(address, createFindAddressMessage())
     }

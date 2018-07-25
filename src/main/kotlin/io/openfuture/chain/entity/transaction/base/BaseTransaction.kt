@@ -13,6 +13,9 @@ abstract class BaseTransaction(
     @Column(name = "amount", nullable = false)
     var amount: Long,
 
+    @Column(name = "fee", nullable = false)
+    var fee: Long,
+
     @Column(name = "recipient_address", nullable = false)
     var recipientAddress: String,
 

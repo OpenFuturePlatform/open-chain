@@ -1,6 +1,5 @@
 package io.openfuture.chain.controller
 
-import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.controller.common.BaseController
 import io.openfuture.chain.controller.common.RestResponse
 import io.openfuture.chain.domain.rpc.crypto.AccountDto
@@ -10,7 +9,6 @@ import io.openfuture.chain.domain.rpc.crypto.key.DerivationKeyRequest
 import io.openfuture.chain.domain.rpc.crypto.key.ImportKeyRequest
 import io.openfuture.chain.domain.rpc.crypto.key.KeyDto
 import io.openfuture.chain.domain.rpc.crypto.key.RestoreRequest
-import io.openfuture.chain.property.NodeProperty
 import io.openfuture.chain.service.CryptoService
 import io.openfuture.chain.service.WalletService
 import org.springframework.web.bind.annotation.*
@@ -19,18 +17,16 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("${PathConstant.RPC}/accounts")
 class AccountController(
-    nodeClock: NodeClock,
-    nodeProperties: NodeProperty,
     private val cryptoService: CryptoService,
     private val walletService: WalletService
-) : BaseController(nodeClock, nodeProperties) {
+) : BaseController() {
 
     @GetMapping("/doGenerate")
     fun generateNewAccount(): AccountDto = cryptoService.generateNewAccount()
 
     @GetMapping("/wallets/{address}/balance")
     fun getBalance(@PathVariable address: String): RestResponse<Long> {
-        val body = walletService.getBalance(address)
+        val body = walletService.getBalanceByAddress(address)
         return RestResponse(getResponseHeader(), body)
     }
 
