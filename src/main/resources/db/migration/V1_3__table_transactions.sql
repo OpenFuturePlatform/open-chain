@@ -32,6 +32,10 @@ CREATE TABLE vote_transactions (
   vote_type_id INTEGER NOT NULL REFERENCES vote_types,
   delegate_key VARCHAR NOT NULL
 );
+--
+CREATE TABLE reward_transactions (
+  id INTEGER PRIMARY KEY REFERENCES transactions
+);
 
 -- UNCONFIRMED TABLES
 
@@ -59,4 +63,8 @@ CREATE TABLE u_vote_transactions (
  id           INTEGER PRIMARY KEY REFERENCES u_transactions,
  vote_type_id INTEGER NOT NULL REFERENCES vote_types,
  delegate_key VARCHAR NOT NULL
+);
+--
+CREATE TABLE u_reward_transactions (
+  id INTEGER PRIMARY KEY REFERENCES u_transactions
 );

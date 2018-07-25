@@ -1,6 +1,6 @@
 package io.openfuture.chain.component.converter.transaction.unconfirmed.impl
 
-import io.openfuture.chain.component.converter.transaction.TransactionEntityConverter
+import io.openfuture.chain.component.converter.transaction.ManualTransactionEntityConverter
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
@@ -13,11 +13,12 @@ import org.springframework.stereotype.Component
 @Component
 class UVoteTransactionEntityConverter(
     private val keyHolder: NodeKeyHolder
-) : TransactionEntityConverter<UVoteTransaction, VoteTransactionData> {
+) : ManualTransactionEntityConverter<UVoteTransaction, VoteTransactionData> {
 
     override fun toEntity(dto: BaseTransactionDto<VoteTransactionData>): UVoteTransaction = UVoteTransaction(
         dto.timestamp,
         dto.data.amount,
+        dto.data.fee,
         dto.data.recipientAddress,
         dto.data.senderAddress,
         dto.senderPublicKey,
@@ -31,6 +32,7 @@ class UVoteTransactionEntityConverter(
         UVoteTransaction(
             timestamp,
             request.data!!.amount,
+            request.data!!.fee,
             request.data!!.recipientAddress,
             request.data!!.senderAddress,
             request.senderPublicKey!!,
@@ -44,6 +46,7 @@ class UVoteTransactionEntityConverter(
         UVoteTransaction(
             timestamp,
             data.amount,
+            data.fee,
             data.recipientAddress,
             data.senderAddress,
             HashUtils.toHexString(keyHolder.getPublicKey()),

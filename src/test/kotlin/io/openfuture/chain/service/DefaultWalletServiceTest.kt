@@ -27,7 +27,7 @@ class DefaultWalletServiceTest : ServiceTests() {
     @Test
     fun getBalanceShouldReturnBalanceFromAllTransactionsByAddressTest() {
         val address = "address"
-        val expectedBalance = 10.0
+        val expectedBalance = 10L
         val wallet = Wallet(address, expectedBalance)
 
         given(repository.findOneByAddress(address)).willReturn(wallet)

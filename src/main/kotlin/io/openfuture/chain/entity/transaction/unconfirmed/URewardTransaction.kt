@@ -4,8 +4,8 @@ import javax.persistence.Entity
 import javax.persistence.Table
 
 @Entity
-@Table(name = "u_transfer_transactions")
-class UTransferTransaction(
+@Table(name = "u_reward_transactions")
+class URewardTransaction(
     timestamp: Long,
     amount: Long,
     fee: Long,

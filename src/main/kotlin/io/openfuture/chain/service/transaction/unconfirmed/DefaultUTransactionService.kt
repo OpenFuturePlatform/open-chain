@@ -1,6 +1,6 @@
 package io.openfuture.chain.service.transaction.unconfirmed
 
-import io.openfuture.chain.component.converter.transaction.TransactionEntityConverter
+import io.openfuture.chain.component.converter.transaction.ManualTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
@@ -16,7 +16,7 @@ abstract class DefaultUTransactionService<Entity : UTransaction, Data : BaseTran
     protected val repository: UTransactionRepository<Entity>,
     protected val walletService: WalletService,
     private val nodeClock: NodeClock,
-    private val entityConverter: TransactionEntityConverter<Entity, Data>
+    private val entityConverter: ManualTransactionEntityConverter<Entity, Data>
 ) : UTransactionService<Entity, Data> {
 
     @Transactional(readOnly = true)

@@ -24,7 +24,7 @@ class DefaultUVoteTransactionService(
     @Transactional
     override fun process(tx: UVoteTransaction) {
         val delegate = delegateService.getByPublicKey(tx.delegateKey)
-        walletService.changeWalletVote(tx.senderAddress, delegate, tx.getVoteType())
+//        walletService.changeWalletVote(tx.senderAddress, delegate, tx.getVoteType())
     }
 
 }

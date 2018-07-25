@@ -21,7 +21,7 @@ class DelegateTransactionDto(
     )
 
     constructor(tx: UDelegateTransaction) : this(
-        DelegateTransactionData(tx.amount, tx.recipientAddress, tx.senderAddress, tx.delegateKey),
+        DelegateTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress, tx.delegateKey),
         tx.timestamp,
         tx.senderPublicKey,
         tx.senderSignature,

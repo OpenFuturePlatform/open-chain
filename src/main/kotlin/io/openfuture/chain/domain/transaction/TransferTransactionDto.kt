@@ -21,7 +21,7 @@ class TransferTransactionDto(
     )
 
     constructor(tx: UTransferTransaction) : this(
-        TransferTransactionData(tx.amount, tx.recipientAddress, tx.senderAddress),
+        TransferTransactionData(tx.amount, tx.fee,tx.recipientAddress, tx.senderAddress),
         tx.timestamp,
         tx.senderPublicKey,
         tx.senderSignature,

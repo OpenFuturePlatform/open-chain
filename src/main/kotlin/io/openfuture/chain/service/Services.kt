@@ -12,10 +12,7 @@ import io.openfuture.chain.domain.rpc.hardware.RamInfo
 import io.openfuture.chain.domain.rpc.hardware.StorageInfo
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
-import io.openfuture.chain.domain.transaction.data.BaseTransactionData
-import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
-import io.openfuture.chain.domain.transaction.data.TransferTransactionData
-import io.openfuture.chain.domain.transaction.data.VoteTransactionData
+import io.openfuture.chain.domain.transaction.data.*
 import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.Wallet
 import io.openfuture.chain.entity.block.Block
@@ -23,10 +20,7 @@ import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.entity.transaction.base.BaseTransaction
-import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
-import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
-import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
-import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.*
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.protocol.CommunicationProtocol
 import org.springframework.data.domain.Page
@@ -101,6 +95,8 @@ interface UTransactionService<Entity : UTransaction, Data : BaseTransactionData>
     fun add(request: BaseTransactionRequest<Data>): Entity
 
     fun add(data: Data): Entity
+
+    fun process(tx: Entity)
 
 }
 

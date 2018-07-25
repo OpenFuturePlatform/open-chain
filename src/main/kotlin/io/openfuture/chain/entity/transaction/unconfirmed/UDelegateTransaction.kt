@@ -9,6 +9,7 @@ import javax.persistence.Table
 class UDelegateTransaction(
     timestamp: Long,
     amount: Long,
+    fee: Long,
     recipientAddress: String,
     senderAddress: String,
     senderPublicKey: String,
@@ -18,4 +19,4 @@ class UDelegateTransaction(
     @Column(name = "delegate_key", nullable = false, unique = true)
     var delegateKey: String
 
-) : UTransaction(timestamp, amount, recipientAddress, senderPublicKey, senderAddress, senderSignature, hash)
+) : UTransaction(timestamp, amount, fee, recipientAddress, senderPublicKey, senderAddress, senderSignature, hash)

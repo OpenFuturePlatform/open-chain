@@ -12,9 +12,10 @@ import javax.persistence.Table
 abstract class UTransaction(
     timestamp: Long,
     amount: Long,
+    fee: Long,
     recipientAddress: String,
     senderAddress: String,
     senderPublicKey: String,
     senderSignature: String,
     hash: String
-) : BaseTransaction(timestamp, amount, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash)
+) : BaseTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash)

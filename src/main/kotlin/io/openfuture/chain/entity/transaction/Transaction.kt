@@ -11,6 +11,7 @@ import javax.persistence.*
 abstract class Transaction(
     timestamp: Long,
     amount: Long,
+    fee: Long,
     recipientAddress: String,
     senderAddress: String,
     senderPublicKey: String,
@@ -22,4 +23,4 @@ abstract class Transaction(
     @JoinColumn(name = "block_id", nullable = true)
     var block: MainBlock? = null
 
-) : BaseTransaction(timestamp, amount, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash)
+) : BaseTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash)

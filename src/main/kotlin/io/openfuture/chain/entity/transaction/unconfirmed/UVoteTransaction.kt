@@ -11,6 +11,7 @@ import javax.persistence.Table
 class UVoteTransaction(
     timestamp: Long,
     amount: Long,
+    fee: Long,
     recipientAddress: String,
     senderAddress: String,
     senderPublicKey: String,
@@ -23,7 +24,7 @@ class UVoteTransaction(
     @Column(name = "delegate_key", nullable = false)
     var delegateKey: String
 
-) : UTransaction(timestamp, amount, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash) {
+) : UTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash) {
 
     fun getVoteType(): VoteType = DictionaryUtils.valueOf(VoteType::class.java, voteTypeId)
 

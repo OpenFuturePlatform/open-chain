@@ -4,9 +4,7 @@ import io.openfuture.chain.domain.transaction.RewardTransactionDto
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
-import io.openfuture.chain.entity.transaction.Transaction
-import io.openfuture.chain.entity.transaction.TransferTransaction
-import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.repository.GenesisBlockRepository

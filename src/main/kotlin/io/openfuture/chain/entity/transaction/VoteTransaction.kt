@@ -27,7 +27,7 @@ class VoteTransaction(
 
     block: MainBlock? = null
 
-) : Transaction(timestamp, amount, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash, block) {
+) : Transaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash, block) {
 
     fun getVoteType(): VoteType = DictionaryUtils.valueOf(VoteType::class.java, voteTypeId)
 

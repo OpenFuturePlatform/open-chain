@@ -1,5 +1,6 @@
 package io.openfuture.chain.component.converter.transaction.unconfirmed.impl
 
+import io.openfuture.chain.component.converter.transaction.ManualTransactionEntityConverter
 import io.openfuture.chain.component.converter.transaction.TransactionEntityConverter
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
@@ -13,11 +14,12 @@ import org.springframework.stereotype.Component
 @Component
 class UDelegateTransactionEntityConverter(
     private val keyHolder: NodeKeyHolder
-) : TransactionEntityConverter<UDelegateTransaction, DelegateTransactionData> {
+) : ManualTransactionEntityConverter<UDelegateTransaction, DelegateTransactionData> {
 
     override fun toEntity(dto: BaseTransactionDto<DelegateTransactionData>): UDelegateTransaction = UDelegateTransaction(
         dto.timestamp,
         dto.data.amount,
+        dto.data.fee,
         dto.data.recipientAddress,
         dto.data.senderAddress,
         dto.senderPublicKey,
@@ -30,6 +32,7 @@ class UDelegateTransactionEntityConverter(
         UDelegateTransaction(
             timestamp,
             request.data!!.amount,
+            request.data!!.fee,
             request.data!!.recipientAddress,
             request.data!!.senderAddress,
             request.senderPublicKey!!,
@@ -42,6 +45,7 @@ class UDelegateTransactionEntityConverter(
         UDelegateTransaction(
             timestamp,
             data.amount,
+            data.fee,
             data.recipientAddress,
             data.senderAddress,
             HashUtils.toHexString(keyHolder.getPublicKey()),

@@ -6,21 +6,21 @@ import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
-import io.openfuture.chain.entity.MainBlock
-import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.block.MainBlock
+import io.openfuture.chain.entity.transaction.Transaction
 import io.openfuture.chain.exception.LogicException
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.property.ConsensusProperties
-import io.openfuture.chain.repository.BaseTransactionRepository
+import io.openfuture.chain.repository.TransactionRepository
 import io.openfuture.chain.service.BaseTransactionService
 import io.openfuture.chain.service.CommonTransactionService
 import io.openfuture.chain.service.WalletService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
-abstract class DefaultCommonTransactionService<Entity : BaseTransaction, Data : BaseTransactionData, Converter : TransactionEntityConverter<Entity, Data>>(
-    protected val repository: BaseTransactionRepository<Entity>,
+abstract class DefaultCommonTransactionService<Entity : Transaction, Data : BaseTransactionData, Converter : TransactionEntityConverter<Entity, Data>>(
+    protected val repository: TransactionRepository<Entity>,
     protected val entityConverter: Converter
 ) : CommonTransactionService<Entity, Data> {
 
@@ -81,7 +81,7 @@ abstract class DefaultCommonTransactionService<Entity : BaseTransaction, Data : 
         commonValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
     }
 
-    protected fun commonValidate(data : Data, signature: String, publicKey: String) {
+    protected fun commonValidate(data: Data, signature: String, publicKey: String) {
         //todo need to add address validation
 
         if (!isValidSenderBalance(data.senderAddress, data.amount)) {
@@ -109,7 +109,7 @@ abstract class DefaultCommonTransactionService<Entity : BaseTransaction, Data : 
         val balance = walletService.getBalanceByAddress(senderAddress)
         val unconfirmedOutput = baseService.getAllPending()
             .filter { it.senderAddress == senderAddress }
-            .map { it.amount + it.fee}
+            .map { it.amount + it.fee }
             .sum()
 
         val unspentBalance = balance - unconfirmedOutput

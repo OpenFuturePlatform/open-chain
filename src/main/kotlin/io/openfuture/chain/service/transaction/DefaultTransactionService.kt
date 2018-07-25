@@ -1,7 +1,5 @@
 package io.openfuture.chain.service.transaction
 
-import io.openfuture.chain.component.converter.transaction.TransactionEntityConverter
-import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.Transaction
@@ -14,9 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 
 abstract class DefaultTransactionService<Entity : Transaction, Data : BaseTransactionData>(
     protected val repository: TransactionRepository<Entity>,
-    protected val walletService: WalletService,
-    private val nodeClock: NodeClock,
-    private val entityConverter: TransactionEntityConverter<Entity, Data>
+    private val walletService: WalletService
 ) : TransactionService<Entity, Data> {
 
     @Transactional(readOnly = true)
@@ -30,7 +26,7 @@ abstract class DefaultTransactionService<Entity : Transaction, Data : BaseTransa
             throw LogicException("Transaction with hash: ${tx.hash} already belong to block!")
         }
         persistTx.block = block
-        walletService.updateBalance(persistTx.senderAddress, persistTx.recipientAddress, persistTx.amount)
+        walletService.updateBalance(persistTx.senderAddress, persistTx.recipientAddress, persistTx.amount, persistTx.fee)
         return repository.save(persistTx)
     }
 

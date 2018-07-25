@@ -7,10 +7,7 @@ import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.*
-import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
-import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
-import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
-import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.*
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.stereotype.Repository
@@ -37,6 +34,8 @@ interface GenesisBlockRepository : BlockRepository<GenesisBlock>
 interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 
     fun findOneByHash(hash: String): Entity?
+
+    fun findAllByBlockIsNull(): MutableSet<Entity>
 
 }
 

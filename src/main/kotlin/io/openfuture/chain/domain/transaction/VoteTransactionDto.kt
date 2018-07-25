@@ -21,7 +21,7 @@ class VoteTransactionDto(
     )
 
     constructor(tx: UVoteTransaction) : this(
-        VoteTransactionData(tx.amount, tx.recipientAddress, tx.senderAddress, tx.getVoteType(), tx.delegateKey),
+        VoteTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress, tx.getVoteType(), tx.delegateKey),
         tx.timestamp,
         tx.senderPublicKey,
         tx.senderSignature,
