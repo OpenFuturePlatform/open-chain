@@ -1,8 +1,8 @@
 package io.openfuture.chain.entity
 
 import io.openfuture.chain.crypto.signature.SignatureManager
-import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.base.BaseModel
+import io.openfuture.chain.util.BlockUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import javax.persistence.*
 
@@ -28,12 +28,18 @@ abstract class Block(
     @Column(name = "public_key", nullable = false)
     val publicKey: String,
 
-    @Column(name = "hash", nullable = false)
-    var hash: String = ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height).toByteArray())),
-
     @Column(name = "signature", nullable = false)
-    var signature: String = SignatureManager.sign(hash.toByteArray(), privateKey)
+    var signature: String = SignatureManager.sign(
+        (previousHash + merkleHash + timestamp + height).toByteArray(), privateKey),
+
+    @Column(name = "hash", nullable = false)
+    var hash: String = ByteUtils.toHexString(
+        BlockUtils.calculateHash(
+            previousHash,
+            timestamp,
+            height,
+            merkleHash,
+            publicKey)
+    )
 
 ) : BaseModel()
-
-

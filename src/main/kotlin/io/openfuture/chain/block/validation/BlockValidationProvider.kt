@@ -2,6 +2,8 @@ package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.block.TimeSlot
 import io.openfuture.chain.component.node.NodeClock
+import io.openfuture.chain.crypto.signature.SignatureManager
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
@@ -32,6 +34,7 @@ class BlockValidationProvider(
         return blockIsValid
                 && timeSlot.verifyTimeSlot(currentTime, block)
                 && verifyHash(block)
+                && verifyBlockSignature(block)
                 && verifyPreviousHash(block, lastBlock)
                 && verifyHeight(block, lastBlock)
                 && verifyTimestamp(block, lastBlock)
@@ -42,8 +45,17 @@ class BlockValidationProvider(
             block.previousHash,
             block.timestamp,
             block.height,
-            block.merkleHash)
+            block.merkleHash,
+            block.publicKey)
         return (ByteUtils.toHexString(calculatedHashBytes) == block.hash)
+    }
+
+    private fun verifyBlockSignature(block: Block): Boolean {
+        return SignatureManager.verify(
+            (block.previousHash + block.merkleHash + block.timestamp + block.height).toByteArray(),
+            block.signature,
+            HashUtils.fromHexString(block.publicKey)
+        )
     }
 
     private fun verifyPreviousHash(block: Block, lastBlock: Block): Boolean = (block.previousHash == lastBlock.hash)

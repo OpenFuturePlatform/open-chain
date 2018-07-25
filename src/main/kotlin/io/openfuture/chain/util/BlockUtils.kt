@@ -43,9 +43,14 @@ object BlockUtils {
         return HashUtils.toHexString(hash)
     }
 
-    fun calculateHash(previousHash: String, timestamp: Long, height: Long, merkleRoot: String = ""): ByteArray {
-        val headers = previousHash + merkleRoot + timestamp + height
-        return HashUtils.doubleSha256(headers.toByteArray())
+    fun calculateHash(
+            previousHash: String,
+            timestamp: Long,
+            height: Long,
+            merkleHash: String,
+            publicKey: String): ByteArray {
+        val blockContent = previousHash + merkleHash + timestamp + height + publicKey
+        return HashUtils.doubleSha256(blockContent.toByteArray())
     }
 
     fun getBlockProducer(delegates: Set<Delegate>, previousBlock: Block?): Delegate {
