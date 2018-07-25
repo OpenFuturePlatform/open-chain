@@ -30,7 +30,13 @@ abstract class Block(
 
     @Column(name = "signature", nullable = false)
     var signature: String = SignatureManager.sign(
-        (previousHash + merkleHash + timestamp + height).toByteArray(), privateKey),
+        StringBuilder()
+            .append(previousHash)
+            .append(merkleHash)
+            .append(timestamp)
+            .append(height)
+            .toString()
+            .toByteArray(), privateKey),
 
     @Column(name = "hash", nullable = false)
     var hash: String = ByteUtils.toHexString(
