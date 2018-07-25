@@ -51,7 +51,7 @@ class SignatureCollector(
 
     fun applyBlock() {
         try {
-            while (!timeSlot.verifyTimeSlot(clock.networkTime(), pendingBlock)) {
+            while (timeSlot.verifyTimeSlot(clock.networkTime(), pendingBlock)) {
                 val genesisBlock = genesisBlockService.getLast()
                 if (signatures.size.toDouble() / genesisBlock.activeDelegates.size > APPROVAL_THRESHOLD) {
                     if (pendingBlock is MainBlock) {
