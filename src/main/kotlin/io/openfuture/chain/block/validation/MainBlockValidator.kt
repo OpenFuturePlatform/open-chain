@@ -8,7 +8,6 @@ import io.openfuture.chain.entity.transaction.RewardTransaction
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.stereotype.Component
-import java.util.stream.Collectors
 
 @Component
 class MainBlockValidator(
@@ -51,8 +50,8 @@ class MainBlockValidator(
             return false
         }
 
-        val fees = transactions.stream().skip(1).map { it.fee }.collect(Collectors.toList())
-        return rewardTransaction.amount == (fees.sumByDouble { it } + properties.rewardBlock!!)
+        val fees = transactions.stream().skip(1).mapToDouble { it.fee }.sum()
+        return rewardTransaction.amount == (fees + properties.rewardBlock!!)
     }
 
     private fun verifyDuplicatedTransactions(transactions: List<BaseTransaction>): Boolean {
