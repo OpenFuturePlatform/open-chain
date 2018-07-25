@@ -12,14 +12,6 @@ class DelegateTransactionDto(
     hash: String
 ) : BaseTransactionDto<DelegateTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
 
-    constructor(tx: DelegateTransaction) : this(
-        DelegateTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress, tx.delegateKey),
-        tx.timestamp,
-        tx.senderPublicKey,
-        tx.senderSignature,
-        tx.hash
-    )
-
     constructor(tx: UDelegateTransaction) : this(
         DelegateTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress, tx.delegateKey),
         tx.timestamp,

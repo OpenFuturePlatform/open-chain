@@ -1,7 +1,7 @@
 package io.openfuture.chain.domain.transaction
 
 import io.openfuture.chain.domain.transaction.data.RewardTransactionData
-import io.openfuture.chain.entity.transaction.RewardTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.URewardTransaction
 
 class RewardTransactionDto(
     data: RewardTransactionData,
@@ -11,7 +11,7 @@ class RewardTransactionDto(
     hash: String
 ) : BaseTransactionDto<RewardTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
 
-    constructor(tx: RewardTransaction) : this(
+    constructor(tx: URewardTransaction) : this(
         RewardTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress),
         tx.timestamp,
         tx.senderPublicKey,
