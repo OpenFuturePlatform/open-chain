@@ -51,16 +51,17 @@ class SignatureCollector(
 
     fun applyBlock() {
         try {
-            if (!timeSlot.verifyTimeSlot(clock.networkTime(), pendingBlock)) {
-                return
-            }
-
-            val genesisBlock = genesisBlockService.getLast()
-            if (signatures.size.toDouble() / genesisBlock.activeDelegates.size > APPROVAL_THRESHOLD) {
-                if (pendingBlock is MainBlock) {
-                    mainBlockService.save(pendingBlock as MainBlock)
-                } else if (pendingBlock is GenesisBlock) {
-                    genesisBlockService.save(pendingBlock as GenesisBlock)
+            while (!timeSlot.verifyTimeSlot(clock.networkTime(), pendingBlock)) {
+                val genesisBlock = genesisBlockService.getLast()
+                if (signatures.size.toDouble() / genesisBlock.activeDelegates.size > APPROVAL_THRESHOLD) {
+                    if (pendingBlock is MainBlock) {
+                        mainBlockService.save(pendingBlock as MainBlock)
+                    } else if (pendingBlock is GenesisBlock) {
+                        genesisBlockService.save(pendingBlock as GenesisBlock)
+                    }
+                    break
+                } else {
+                    Thread.sleep(100)
                 }
             }
         } finally {
