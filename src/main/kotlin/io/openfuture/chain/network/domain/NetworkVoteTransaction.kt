@@ -10,6 +10,7 @@ class NetworkVoteTransaction() : NetworkTransaction() {
     lateinit var delegateHost: String
     var delegatePort: Int = 0
 
+
     constructor(transaction: VoteTransaction) : this() {
         timestamp = transaction.timestamp
         amount = transaction.amount

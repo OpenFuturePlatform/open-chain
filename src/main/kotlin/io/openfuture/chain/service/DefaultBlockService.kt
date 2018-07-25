@@ -44,7 +44,7 @@ class DefaultBlockService(
     override fun getBlocksAfterCurrentHash(hash: String): List<Block>? {
         val block = repository.findByHash(hash)
 
-        block.let { return repository.findByHeightGreaterThan(block!!.height) }
+        return block?.let { repository.findByHeightGreaterThan(block.height) }
     }
 
     override fun isExists(hash: String): Boolean = repository.existsByHash(hash)

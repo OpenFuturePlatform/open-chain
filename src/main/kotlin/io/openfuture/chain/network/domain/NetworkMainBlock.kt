@@ -7,8 +7,8 @@ import io.openfuture.chain.entity.transaction.VoteTransaction
 
 class NetworkMainBlock() : NetworkBlock() {
 
-    lateinit var transferTransactions : MutableList<NetworkTransferTransaction>
-    lateinit var voteTransactions : MutableList<NetworkVoteTransaction>
+    lateinit var transferTransactions: MutableList<NetworkTransferTransaction>
+    lateinit var voteTransactions: MutableList<NetworkVoteTransaction>
 
     constructor(block: MainBlock) : this() {
         this.height = block.height
@@ -20,7 +20,7 @@ class NetworkMainBlock() : NetworkBlock() {
         this.signature = block.signature!!
         this.transferTransactions = block.transactions.filterIsInstance(TransferTransaction::class.java)
             .map { NetworkTransferTransaction(it) }.toMutableList()
-        this.voteTransactions = block.transactions.filterIsInstance(VoteTransaction::class.java).map{ NetworkVoteTransaction(it) }.toMutableList()
+        this.voteTransactions = block.transactions.filterIsInstance(VoteTransaction::class.java).map { NetworkVoteTransaction(it) }.toMutableList()
     }
 
 
@@ -47,13 +47,13 @@ class NetworkMainBlock() : NetworkBlock() {
     override fun send(buffer: ByteBuf) {
         super.send(buffer)
 
-        buffer.writeInt(transferTransactions.size)
-        for (transaction in transferTransactions) {
-            transaction.send(buffer)
-        }
+        sendTransactions(buffer, transferTransactions)
+        sendTransactions(buffer, voteTransactions)
+    }
 
-        buffer.writeInt(voteTransactions.size)
-        for (transaction in voteTransactions) {
+    private fun sendTransactions(buffer: ByteBuf, transactions: List<NetworkTransaction>) {
+        buffer.writeInt(transactions.size)
+        for (transaction in transactions) {
             transaction.send(buffer)
         }
     }

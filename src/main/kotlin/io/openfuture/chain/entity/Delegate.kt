@@ -2,7 +2,10 @@ package io.openfuture.chain.entity
 
 import io.openfuture.chain.domain.delegate.DelegateDto
 import io.openfuture.chain.entity.base.BaseModel
-import javax.persistence.*
+import io.openfuture.chain.network.domain.NetworkDelegate
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.Table
 
 @Entity
 @Table(name = "delegates")
@@ -25,6 +28,13 @@ class Delegate(
             delegateDto.info.networkAddress.port,
             delegateDto.rating
         )
+
+        fun of(delegateDto: NetworkDelegate): Delegate = Delegate(
+            delegateDto.host!!,
+            delegateDto.port!!,
+            delegateDto.rating!!
+        )
+
     }
 
     fun getAddress(): String {

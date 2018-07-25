@@ -5,6 +5,7 @@ import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.dictionary.VoteType
+import io.openfuture.chain.network.domain.NetworkVoteTransaction
 import io.openfuture.chain.util.DictionaryUtils
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -66,6 +67,21 @@ class VoteTransaction(
             request.getHash(),
             request.senderSignature!!
         )
+
+        fun of(dto: NetworkVoteTransaction): VoteTransaction = VoteTransaction(
+            dto.timestamp,
+            dto.amount,
+            dto.fee,
+            dto.recipientAddress,
+            dto.senderKey,
+            dto.senderAddress,
+            dto.voteTypeId,
+            dto.delegateHost,
+            dto.delegatePort,
+            null,
+            dto.senderSignature
+        )
+
     }
 
     fun getVoteType() = DictionaryUtils.valueOf(VoteType::class.java, voteTypeId)

@@ -28,11 +28,10 @@ class BlockClientHandler(
 
         when (message) {
             is NetworkMainBlock -> {
-                val transferTransactions = message.transferTransactions.map {  TransferTransaction(it.timestamp, it.amount,
-                    it.fee, it.recipientAddress, it.senderKey, it.senderAddress, null, it.senderSignature) }.toMutableList()
-                val voteTransactions = message.voteTransactions.map {  VoteTransaction(it.timestamp, it.amount, it.fee, it.recipientAddress,
-                    it.senderKey, it.senderAddress, it.voteTypeId, it.delegateHost, it.delegatePort, null, it.senderSignature) }.toMutableList()
+                val transferTransactions = message.transferTransactions.map { TransferTransaction.of(it) }
+                val voteTransactions = message.voteTransactions.map { VoteTransaction.of(it) }
                 val transactions = listOf(transferTransactions, voteTransactions).flatten().toMutableList()
+
                 val block = MainBlock(message.height, message.previousHash,
                     message.merkleHash, message.timestamp, transactions).apply { signature = message.signature }
 
@@ -40,7 +39,7 @@ class BlockClientHandler(
             }
 
             is NetworkGenesisBlock -> {
-                val delegates = message.activeDelegates.map { Delegate(it.host!!, it.port!!, it.rating!!) }.toMutableSet()
+                val delegates = message.activeDelegates.map { Delegate.of(it) }.toMutableSet()
 
                 val block = GenesisBlock(message.height, message.previousHash, message.timestamp, message.epochIndex,
                     delegates).apply { signature = message.signature }

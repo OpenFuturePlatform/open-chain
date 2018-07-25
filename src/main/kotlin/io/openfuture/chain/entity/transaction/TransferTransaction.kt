@@ -4,6 +4,7 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.rpc.transaction.TransferTransactionRequest
 import io.openfuture.chain.domain.transaction.TransferTransactionDto
 import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.network.domain.NetworkTransferTransaction
 import javax.persistence.Entity
 import javax.persistence.Table
 
@@ -46,6 +47,18 @@ class TransferTransaction(
             request.getHash(),
             request.senderSignature!!
         )
+
+        fun of(dto: NetworkTransferTransaction): TransferTransaction = TransferTransaction(
+            dto.timestamp,
+            dto.amount,
+            dto.fee,
+            dto.recipientAddress,
+            dto.senderKey,
+            dto.senderAddress,
+            null,
+            dto.senderSignature
+        )
+
     }
 
 }

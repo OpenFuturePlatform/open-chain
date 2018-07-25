@@ -2,7 +2,7 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.entity.Delegate
-import java.nio.charset.StandardCharsets
+import java.nio.charset.StandardCharsets.UTF_8
 
 class NetworkDelegate(
     var host: String? = null,
@@ -13,14 +13,14 @@ class NetworkDelegate(
     constructor(delegate: Delegate) : this(delegate.host, delegate.port, delegate.rating)
 
     override fun get(buffer: ByteBuf) {
-        host = buffer.readCharSequence(buffer.readInt(), StandardCharsets.UTF_8).toString()
+        host = buffer.readCharSequence(buffer.readInt(), UTF_8).toString()
         port = buffer.readInt()
         rating = buffer.readInt()
     }
 
     override fun send(buffer: ByteBuf) {
         buffer.writeInt(host!!.length)
-        buffer.writeCharSequence(host, StandardCharsets.UTF_8)
+        buffer.writeCharSequence(host, UTF_8)
         buffer.writeInt(port!!)
         buffer.writeInt(rating!!)
     }
