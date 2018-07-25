@@ -2,7 +2,6 @@ package io.openfuture.chain.service
 
 import io.openfuture.chain.block.TimeSlot
 import io.openfuture.chain.component.node.NodeClock
-import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.exception.NotFoundException
@@ -30,12 +29,11 @@ class DefaultMainBlockService(
     override fun isValid(block: MainBlock): Boolean {
         val currentTime = clock.networkTime()
 
-        return timeSlot.verifyTimeSlot(currentTime, block) && isMainBlockValid(block)
+        return timeSlot.verifyTimeSlot(currentTime, block) && isTransactionsValid(block)
     }
 
-    private fun isMainBlockValid(block: Block): Boolean {
-        val mainBlock = block as MainBlock
-        val transactions = mainBlock.transactions
+    private fun isTransactionsValid(block: MainBlock): Boolean {
+        val transactions = block.transactions
 
         if (transactions.isEmpty() || !transactionsIsWellFormed(transactions)) {
             return false

@@ -4,6 +4,7 @@ import io.openfuture.chain.block.validation.BlockValidationProvider
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.crypto.key.NodeKeyHolder
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
 import io.openfuture.chain.entity.Block
@@ -94,21 +95,21 @@ class BlockCreationProcessorTests: ServiceTests() {
     }
 
     private fun createMainBlock() = MainBlock(
-        ByteArray(32),
+        HashUtils.fromHexString("529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"),
         123,
         "prev_block_hash",
         "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
         1512345678L,
-        ByteArray(32),
+        HashUtils.fromHexString("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"),
         createTransactions()
     )
 
     private fun createGenesisBlock() = GenesisBlock(
-        ByteArray(32),
+        HashUtils.fromHexString("529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"),
         123,
         "prev_block_hash",
         1512345678L,
-        ByteArray(32),
+        HashUtils.fromHexString("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"),
         1,
         setOf(Delegate("public_key", "host1", 1234), Delegate("public_key2", "host2", 1234), Delegate("public_key3", "host3", 1234))
     )

@@ -8,7 +8,7 @@ import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
+import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Component
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -20,7 +20,7 @@ class SignatureCollector(
     private val properties: ConsensusProperties,
     private val timeSlot: TimeSlot,
     private val clock: NodeClock,
-    private val scheduler: ThreadPoolTaskScheduler
+    private val scheduler: TaskScheduler
 ) {
 
     companion object {

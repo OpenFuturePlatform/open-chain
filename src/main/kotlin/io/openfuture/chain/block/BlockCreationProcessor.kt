@@ -19,7 +19,7 @@ import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.ConsensusService
 import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.util.BlockUtils
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
+import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Component
 import java.util.*
 import javax.annotation.PostConstruct
@@ -38,14 +38,13 @@ class BlockCreationProcessor(
     private val properties: NodeProperties,
     private val consensusProperties: ConsensusProperties,
     private val timeSlot: TimeSlot,
-    private val scheduler: ThreadPoolTaskScheduler
+    private val scheduler: TaskScheduler
 ) {
 
     @PostConstruct
     private fun init() {
         val startTime = timeSlot.getSlotTimestamp() + consensusProperties.timeSlotDuration!!
         val startBlockCreationDate = Date(startTime)
-        scheduler.initialize()
         scheduler.scheduleAtFixedRate(
             { fireBlockCreation() },
             startBlockCreationDate,
