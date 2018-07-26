@@ -1,5 +1,6 @@
 package io.openfuture.chain.service.transaction.unconfirmed
 
+import io.openfuture.chain.component.converter.transaction.BaseTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
@@ -16,7 +17,7 @@ import io.openfuture.chain.service.WalletService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
-abstract class DefaultCommonUTransactionService<Entity : UTransaction, Data : BaseTransactionData, Converter : TransactionEntityConverter<Entity, Data>>(
+abstract class DefaultCommonUTransactionService<Entity : UTransaction, Data : BaseTransactionData, Converter : BaseTransactionEntityConverter<Entity, Data>>(
     protected val repository: UTransactionRepository<Entity>,
     protected val entityConverter: Converter
 ) : CommonUTransactionService<Entity, Data> {

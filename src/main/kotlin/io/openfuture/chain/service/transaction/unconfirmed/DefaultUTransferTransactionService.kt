@@ -17,16 +17,6 @@ class DefaultUTransferTransactionService(
 ) : DefaultManualUTransactionService<UTransferTransaction, TransferTransactionData>(repository, entityConverter),
     UTransferTransactionService {
 
-    @Transactional
-    override fun validate(request: BaseTransactionRequest<TransferTransactionData>) {
-        baseValidate(request)
-    }
-
-    @Transactional
-    override fun validate(dto: BaseTransactionDto<TransferTransactionData>) {
-        baseValidate(dto)
-    }
-
     override fun process(tx: UTransferTransaction) {
         walletService.updateBalance(tx.senderAddress, tx.recipientAddress, tx.amount, tx.fee)
     }

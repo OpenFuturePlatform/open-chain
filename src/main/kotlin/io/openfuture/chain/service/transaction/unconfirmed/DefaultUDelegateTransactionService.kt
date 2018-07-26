@@ -21,16 +21,6 @@ class DefaultUDelegateTransactionService(
     UDelegateTransactionService {
 
     @Transactional
-    override fun validate(request: BaseTransactionRequest<DelegateTransactionData>) {
-        baseValidate(request)
-    }
-
-    @Transactional
-    override fun validate(dto: BaseTransactionDto<DelegateTransactionData>) {
-        baseValidate(dto)
-    }
-
-    @Transactional
     override fun process(tx: UDelegateTransaction) {
         delegateService.save(Delegate(tx.delegateKey, tx.senderAddress))
     }

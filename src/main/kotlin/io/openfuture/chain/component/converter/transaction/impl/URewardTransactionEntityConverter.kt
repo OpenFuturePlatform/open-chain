@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 @Component
 class URewardTransactionEntityConverter(
     private val keyHolder: NodeKeyHolder
-) : EmbeddedTransactionEntityConverter<URewardTransaction, RewardTransactionData> {
+) : EmbeddedTransactionEntityConverter<URewardTransaction, RewardTransactionData>() {
 
     override fun toEntity(dto: BaseTransactionDto<RewardTransactionData>): URewardTransaction =
         URewardTransaction(

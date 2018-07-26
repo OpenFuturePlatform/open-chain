@@ -16,11 +16,6 @@ class DefaultURewardTransactionService(
 ) : DefaultEmbeddedUTransactionService<URewardTransaction, RewardTransactionData>(repository, entityConverter),
     URewardTransactionService {
 
-    @Transactional
-    override fun validate(dto: BaseTransactionDto<RewardTransactionData>) {
-        baseValidate(dto)
-    }
-
     override fun process(tx: URewardTransaction): Unit = Unit
 
 }

@@ -29,7 +29,7 @@ class DefaultUVoteTransactionService(
             throw ValidationException("Wallet ${request.data!!.senderAddress} already spent all votes!")
         }
 
-        baseValidate(request)
+        super.validate(request)
     }
 
     @Transactional
@@ -38,7 +38,7 @@ class DefaultUVoteTransactionService(
             throw ValidationException("Wallet ${dto.data.senderAddress} already spent all votes!")
         }
 
-        baseValidate(dto)
+        super.validate(dto)
     }
 
     @Transactional

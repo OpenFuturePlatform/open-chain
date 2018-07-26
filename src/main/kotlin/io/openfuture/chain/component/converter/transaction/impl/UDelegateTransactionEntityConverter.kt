@@ -8,7 +8,7 @@ import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
 import org.springframework.stereotype.Component
 
 @Component
-class DelegateTransactionEntityConverter : ManualTransactionEntityConverter<UDelegateTransaction, DelegateTransactionData>() {
+class UDelegateTransactionEntityConverter : ManualTransactionEntityConverter<UDelegateTransaction, DelegateTransactionData>() {
 
     override fun toEntity(dto: BaseTransactionDto<DelegateTransactionData>): UDelegateTransaction =
         UDelegateTransaction(

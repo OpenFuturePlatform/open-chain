@@ -4,7 +4,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToMessageEncoder
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.network.domain.Packet
-import io.openfuture.chain.property.NodeProperty
+import io.openfuture.chain.property.NodeProperties
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
 import org.springframework.context.annotation.Scope
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 @Scope(SCOPE_PROTOTYPE)
 class PacketEncoder(
     private val serializer: Packet.Serializer,
-    private val property: NodeProperty,
+    private val properties: NodeProperties,
     private val clock: NodeClock
 ) : MessageToMessageEncoder<Packet>() {
 
@@ -25,7 +25,7 @@ class PacketEncoder(
 
     override fun encode(ctx: ChannelHandlerContext, msg: Packet, out: MutableList<Any>) {
         msg.timestamp = clock.networkTime()
-        msg.version = property.version
+        msg.version = properties.version
 
         log.info("Encoding $msg to ${ctx.channel().remoteAddress()}")
 
