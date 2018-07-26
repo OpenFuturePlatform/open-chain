@@ -1,6 +1,7 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.block.validation.BlockValidationProvider
+import io.openfuture.chain.component.converter.transaction.impl.RewardTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
@@ -8,9 +9,13 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
-import io.openfuture.chain.entity.*
+import io.openfuture.chain.domain.transaction.data.RewardTransactionData
+import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.BlockType
+import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
-import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.ConsensusService
 import io.openfuture.chain.service.DelegateService
@@ -27,7 +32,8 @@ class BlockCreationProcessor(
     private val consensusService: ConsensusService,
     private val clock: NodeClock,
     private val delegateService: DelegateService,
-    private val properties: NodeProperties
+    private val rewardTransactionEntityConverter: RewardTransactionEntityConverter,
+    private val consensusProperties: ConsensusProperties
 ) {
 
     fun approveBlock(pendingBlock: PendingBlock): PendingBlock {
@@ -43,7 +49,7 @@ class BlockCreationProcessor(
             throw IllegalArgumentException("Inbound block's signature is invalid")
         }
 
-        if(!signatureCollector.addBlockSignature(pendingBlock)) {
+        if (!signatureCollector.addBlockSignature(pendingBlock)) {
             throw IllegalArgumentException("Either signature is already exists, or not related to pending block")
         }
         return signCreatedBlock(block)
@@ -54,7 +60,7 @@ class BlockCreationProcessor(
         val previousBlock = service.getLastMain()
         val genesisBlock = service.getLastGenesis()
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
-        if (properties.host == nextProducer.host && properties.port == nextProducer.port) {
+        if (HashUtils.toHexString(keyHolder.getPublicKey()) == nextProducer.publicKey) {
             create(event.pendingTransactions, previousBlock, genesisBlock)
         }
     }
@@ -68,33 +74,48 @@ class BlockCreationProcessor(
         return pendingBlock
     }
 
-    private fun create(transactions: MutableList<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
+    private fun create(pendingTransactions: MutableList<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
         val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
 
         val time = clock.networkTime()
         val privateKey = keyHolder.getPrivateKey()
-        val block = when(blockType) {
+        val block = when (blockType) {
             BlockType.MAIN -> {
+                val transactions = prepareTransactions(pendingTransactions)
+
                 MainBlock(
+                    privateKey,
                     previousBlock.height + 1,
                     previousBlock.hash,
                     BlockUtils.calculateMerkleRoot(transactions),
                     time,
                     transactions
-                ).sign(privateKey)
+                )
             }
             BlockType.GENESIS -> {
                 GenesisBlock(
+                    privateKey,
                     previousBlock.height + 1,
                     previousBlock.hash,
                     time,
                     genesisBlock.epochIndex + 1,
-                    delegateService.getActiveDelegates() as MutableSet<Delegate>
-                ).sign<GenesisBlock>(privateKey)
+                    delegateService.getActiveDelegates()
+                )
             }
         }
 
         signCreatedBlock(block)
+    }
+
+    private fun prepareTransactions(pendingTransactions: MutableList<BaseTransaction>): MutableList<BaseTransaction> {
+        val fees = pendingTransactions.map { it.fee }.sum()
+        val delegate = delegateService.getByPublicKey(HashUtils.toHexString(keyHolder.getPublicKey()))
+        val rewardTransactionData = RewardTransactionData((fees + consensusProperties.rewardBlock!!),
+            consensusProperties.feeRewardTx!!, delegate.address, consensusProperties.genesisAddress!!)
+
+        val rewardTransaction = rewardTransactionEntityConverter.toEntity(clock.networkTime(), rewardTransactionData)
+
+        return mutableListOf(rewardTransaction, *pendingTransactions.toTypedArray())
     }
 
 }

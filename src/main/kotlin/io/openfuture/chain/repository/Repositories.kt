@@ -5,6 +5,7 @@ import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import org.springframework.data.domain.Pageable
+import io.openfuture.chain.entity.transaction.*
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.stereotype.Repository
@@ -51,6 +52,12 @@ interface TransferTransactionRepository : BaseTransactionRepository<TransferTran
 interface VoteTransactionRepository : BaseTransactionRepository<VoteTransaction>
 
 @Repository
+interface DelegateTransactionRepository : BaseTransactionRepository<DelegateTransaction>
+
+@Repository
+interface RewardTransactionRepository : BaseTransactionRepository<RewardTransaction>
+
+@Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {
 
     fun findOneByIndex(index: Int): SeedWord
@@ -62,16 +69,7 @@ interface SeedWordRepository : BaseRepository<SeedWord> {
 @Repository
 interface DelegateRepository : BaseRepository<Delegate> {
 
-    fun findAllByOrderByRatingDesc(pageable: Pageable): List<Delegate>
-
-    fun findOneByHostAndPort(host: String, port: Int): Delegate?
-
-}
-
-@Repository
-interface StakeholderRepository : BaseRepository<Stakeholder> {
-
-    fun findOneByPublicKey(publicKey: String): Stakeholder?
+    fun findOneByPublicKey(key: String): Delegate?
 
 }
 

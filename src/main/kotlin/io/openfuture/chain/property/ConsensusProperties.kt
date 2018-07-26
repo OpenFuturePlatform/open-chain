@@ -40,24 +40,30 @@ class ConsensusProperties(
      * Reward for block
      */
     @field:NotNull
-    var rewardBlock: Double? = null,
-
-    /**
-     * Fee for coinbase transaction
-     */
-    @field:NotNull
-    var feeCoinBaseTx: Double? = null,
+    var rewardBlock: Long? = null,
 
     /**
      * Fee for transfer transaction
      */
     @field:NotNull
-    var feeTransferTx: Double? = null,
+    var feeTransferTx: Long? = null,
 
     /**
      * Fee for vote transaction
      */
     @field:NotNull
-    var feeVoteTx: Double? = null
+    var feeVoteTx: Long? = null,
+
+    /**
+     * Fee for delegate transaction
+     */
+    @field:NotNull
+    var feeDelegateTx: Long? = null,
+
+    /**
+     * Fee for reward transaction
+     */
+    @field:NotNull
+    var feeRewardTx: Long? = null
 
 )

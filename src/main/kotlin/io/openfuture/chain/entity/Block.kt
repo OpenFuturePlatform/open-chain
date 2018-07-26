@@ -26,11 +26,11 @@ abstract class Block(
     @Column(name = "typeId", nullable = false)
     var typeId: Int,
 
-    @Column(name = "signature", nullable = false)
-    var signature: String? = null,
-
     @Column(name = "hash", nullable = false)
-    var hash: String = ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height).toByteArray()))
+    var hash: String = ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height).toByteArray())),
+
+    @Column(name = "signature", nullable = false)
+    var signature: String = SignatureManager.sign(hash.toByteArray(), privateKey)
 
 ) : BaseModel() {
 
@@ -42,4 +42,9 @@ abstract class Block(
 
 }
 
+    fun getPublicKey(): String{
+//        TODO("Need to add public key")
+        return "publicKey"
+    }
 
+}

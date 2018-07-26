@@ -1,12 +1,11 @@
 package io.openfuture.chain.domain.transaction
 
-abstract class BaseTransactionDto(
+import io.openfuture.chain.domain.transaction.data.BaseTransactionData
+
+abstract class BaseTransactionDto<Data: BaseTransactionData>(
+    val data: Data,
     val timestamp: Long,
-    val amount: Double,
-    val fee: Double,
-    val recipientAddress: String,
-    val senderKey: String,
-    val senderAddress: String,
-    val hash: String,
-    val senderSignature: String
+    val senderPublicKey: String,
+    val senderSignature: String,
+    val hash: String
 )

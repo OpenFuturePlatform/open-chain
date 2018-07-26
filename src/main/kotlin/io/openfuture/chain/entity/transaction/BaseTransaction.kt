@@ -1,10 +1,8 @@
 package io.openfuture.chain.entity.transaction
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import io.openfuture.chain.crypto.signature.SignatureManager
-import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.base.BaseModel
+import io.openfuture.chain.entity.MainBlock
 import javax.persistence.*
 
 @Entity
@@ -16,37 +14,29 @@ abstract class BaseTransaction(
     var timestamp: Long,
 
     @Column(name = "amount", nullable = false)
-    var amount: Double,
+    var amount: Long,
 
     @Column(name = "fee", nullable = false)
-    var fee: Double,
+    var fee: Long,
 
     @Column(name = "recipient_address", nullable = false)
     var recipientAddress: String,
 
-    @Column(name = "sender_key", nullable = false)
-    var senderKey: String,
-
     @Column(name = "sender_address", nullable = false)
     var senderAddress: String,
 
-    @Column(name = "hash", nullable = false)
-    var hash: String,
+    @Column(name = "sender_key", nullable = false)
+    var senderPublicKey: String,
 
     @Column(name = "sender_signature", nullable = false)
-    var senderSignature: String? = null,
+    var senderSignature: String,
+
+    @Column(name = "hash", nullable = false)
+    var hash: String,
 
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "block_id", nullable = true)
     var block: MainBlock? = null
 
-) : BaseModel() {
-
-    @Suppress("UNCHECKED_CAST")
-    fun <T : BaseTransaction> sign(privateKey: ByteArray): T {
-        this.senderSignature = SignatureManager.sign(HashUtils.fromHexString(hash), privateKey)
-        return this as T
-    }
-
-}
+) : BaseModel()

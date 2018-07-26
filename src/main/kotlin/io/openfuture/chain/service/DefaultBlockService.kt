@@ -1,9 +1,10 @@
 package io.openfuture.chain.service
 
+import io.openfuture.chain.domain.transaction.RewardTransactionDto
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
-import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.repository.GenesisBlockRepository
@@ -16,8 +17,10 @@ class DefaultBlockService(
     private val repository: BlockRepository<Block>,
     private val mainBlockRepository: MainBlockRepository,
     private val genesisBlockRepository: GenesisBlockRepository,
-    private val transactionService: BaseTransactionService<BaseTransaction>,
-    private val walletService: WalletService
+    private val voteTransactionService: VoteTransactionService,
+    private val transferTransactionService: TransferTransactionService,
+    private val delegateTransactionService: DelegateTransactionService,
+    private val rewardTransactionService: RewardTransactionService
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -39,6 +42,24 @@ class DefaultBlockService(
         genesisBlockRepository.findFirstByOrderByHeightDesc()
             ?: throw NotFoundException("Last Genesis block not exist!")
 
+    @Transactional
+    override fun save(block: MainBlock): MainBlock {
+        rewardTransactionService.add(RewardTransactionDto(block.transactions.first() as RewardTransaction))
+
+        val savedBlock = mainBlockRepository.save(block)
+        val transactions = block.transactions
+        for (transaction in transactions) {
+            addTransactionToBlock(transaction, savedBlock)
+        }
+        return savedBlock
+    }
+
+    @Transactional
+    override fun save(block: GenesisBlock): GenesisBlock {
+        return genesisBlockRepository.save(block)
+    }
+
+
     @Transactional(readOnly = true)
     override fun getBlocksAfterCurrentHash(hash: String): List<Block>? {
         val block = repository.findByHash(hash)
@@ -49,20 +70,14 @@ class DefaultBlockService(
     @Transactional(readOnly = true)
     override fun isExists(hash: String): Boolean = repository.existsByHash(hash)
 
-    @Transactional
-    override fun save(block: MainBlock): MainBlock {
-        val savedBlock = mainBlockRepository.save(block)
-        val transactions = block.transactions
-        for (transaction in transactions) {
-            transactionService.save(transaction)
-            walletService.updateByTransaction(transaction)
+    private fun addTransactionToBlock(tx: BaseTransaction, block: MainBlock) {
+        when (tx) {
+            is VoteTransaction -> voteTransactionService.toBlock(tx, block)
+            is TransferTransaction -> transferTransactionService.toBlock(tx, block)
+            is DelegateTransaction -> delegateTransactionService.toBlock(tx, block)
+            is RewardTransaction -> rewardTransactionService.toBlock(tx, block)
+            else -> throw IllegalStateException("Unknown transaction type")
         }
-        return savedBlock
-    }
-
-    @Transactional
-    override fun save(block: GenesisBlock): GenesisBlock {
-        return genesisBlockRepository.save(block)
     }
 
 }

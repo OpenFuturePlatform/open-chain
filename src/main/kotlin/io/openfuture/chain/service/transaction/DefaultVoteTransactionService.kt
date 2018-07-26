@@ -1,81 +1,77 @@
 package io.openfuture.chain.service.transaction
 
-import io.openfuture.chain.component.node.NodeClock
-import io.openfuture.chain.domain.delegate.DelegateInfo
-import io.openfuture.chain.domain.transaction.VoteTransactionDto
-import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
-import io.openfuture.chain.entity.Delegate
-import io.openfuture.chain.entity.Stakeholder
+import io.openfuture.chain.component.converter.transaction.impl.VoteTransactionEntityConverter
+import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
+import io.openfuture.chain.domain.transaction.BaseTransactionDto
+import io.openfuture.chain.domain.transaction.data.VoteTransactionData
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.VoteTransactionRepository
-import io.openfuture.chain.service.*
+import io.openfuture.chain.service.DelegateService
+import io.openfuture.chain.service.VoteTransactionService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import javax.xml.bind.ValidationException
 
 @Service
 class DefaultVoteTransactionService(
     repository: VoteTransactionRepository,
-    private val nodeClock: NodeClock,
-    private val delegateService: DelegateService,
-    private val stakeholderService: StakeholderService,
-    private val consensusProperties: ConsensusProperties
-) : DefaultBaseTransactionService<VoteTransaction>(repository), VoteTransactionService {
+    entityConverter: VoteTransactionEntityConverter,
+    private val consensusProperties: ConsensusProperties,
+    private val delegateService: DelegateService
+) : DefaultManualTransactionService<VoteTransaction, VoteTransactionData>(repository, entityConverter),
+    VoteTransactionService {
 
     @Transactional
-    override fun add(dto: VoteTransactionDto) {
-        //todo need to add validation
-        //todo need to think about calculate the vote weight
-        val transaction = repository.findOneByHash(dto.hash)
-        if (null != transaction) {
-            return
-        }
+    override fun toBlock(tx: VoteTransaction, block: MainBlock): VoteTransaction {
+        updateWalletVotes(tx)
+        return super.toBlock(tx, block)
+    }
 
-        saveAndBroadcast(VoteTransaction.of(dto))
+    private fun updateWalletVotes(tx: VoteTransaction) {
+        val delegate = delegateService.getByPublicKey(tx.delegateKey)
+        val wallet = walletService.getByAddress(tx.senderAddress)
+
+        when (tx.getVoteType()) {
+            VoteType.FOR -> {
+                wallet.votes.add(delegate)
+            }
+            VoteType.AGAINST -> {
+                wallet.votes.remove(delegate)
+            }
+        }
+        walletService.save(wallet)
     }
 
     @Transactional
-    override fun add(request: VoteTransactionRequest) {
-        saveAndBroadcast(VoteTransaction.of(nodeClock.networkTime(), request))
+    override fun validate(dto: BaseTransactionDto<VoteTransactionData>) {
+        if (!isValidVoteCount(dto.data.senderAddress)) {
+            throw ValidationException("Wallet ${dto.data.senderAddress} already spent all votes!")
+        }
+        super.validate(dto)
     }
 
-    private fun saveAndBroadcast(tx: VoteTransaction) {
-        updateDelegateRatingByVote(tx.getVoteType(), tx.senderKey, DelegateInfo(tx.delegateHost, tx.delegatePort))
-        repository.save(tx)
-        //todo: networkService.broadcast(transaction.toMessage)
+    @Transactional
+    override fun validate(request: BaseTransactionRequest<VoteTransactionData>) {
+        if (!isValidVoteCount(request.data!!.senderAddress)) {
+            throw ValidationException("Wallet ${request.data!!.senderAddress} already spent all votes!")
+        }
+        super.validate(request)
     }
 
-    private fun updateDelegateRatingByVote(voteType: VoteType, stakeholderKey: String, delegateInfo: DelegateInfo) {
-        val stakeholder = stakeholderService.getByPublicKey(stakeholderKey)
-        val delegate = delegateService.getByHostAndPort(delegateInfo.networkAddress.host, delegateInfo.networkAddress.port)
+    private fun isValidVoteCount(senderAddress: String): Boolean {
+        val confirmedVotes = walletService.getVotesByAddress(senderAddress).count()
+        val unconfirmedForVotes = getAllPending()
+            .filter { it.senderAddress == senderAddress && it.getVoteType() == VoteType.FOR }
+            .count()
 
-        check(stakeholder, delegate, voteType)
-
-        if (voteType == VoteType.FOR) {
-            delegate.rating += 1
-            stakeholder.votes.add(delegate)
-        } else {
-            delegate.rating -= 1
-            stakeholder.votes.remove(delegate)
+        val unspentVotes = confirmedVotes + unconfirmedForVotes
+        if (consensusProperties.delegatesCount!! <= unspentVotes) {
+            return false
         }
-
-        stakeholderService.save(stakeholder)
-        delegateService.save(delegate)
-    }
-
-    private fun check(stakeholder: Stakeholder, delegate: Delegate, voteType: VoteType) {
-        if (consensusProperties.delegatesCount!! <= stakeholder.votes.size && voteType == VoteType.FOR) {
-            throw IllegalStateException("Bad vote transaction")
-        }
-
-        if (stakeholder.votes.contains(delegate) && voteType == VoteType.FOR) {
-            throw IllegalStateException("Bad vote transaction")
-        }
-
-        if (!stakeholder.votes.contains(delegate) && voteType == VoteType.AGAINST) {
-            throw IllegalStateException("Bad vote transaction")
-        }
+        return true
     }
 
 }

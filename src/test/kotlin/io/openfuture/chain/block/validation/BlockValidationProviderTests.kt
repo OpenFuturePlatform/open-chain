@@ -2,9 +2,7 @@ package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.BlockType
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
@@ -30,6 +28,7 @@ class BlockValidationProviderTests : ServiceTests() {
     @Before
     fun init() {
         val previousBlock = MainBlock(
+            ByteArray(1),
             122,
             "previous_hash",
             "merkle_hash",
@@ -37,32 +36,30 @@ class BlockValidationProviderTests : ServiceTests() {
             mutableListOf(
                 VoteTransaction(
                     1500000000L,
-                    1000.0,
-                    10.0,
+                    1000,
+                    10,
                     "recipient_address",
                     "sender_key",
                     "sender_address",
-                    1,
-                    "delegate_host",
-                    9999,
+                    "sender_signature",
                     "hash",
-                    "sender_signature"
+                    1,
+                    "delegate_key"
                 ),
                 VoteTransaction(
                     1500000001L,
-                    1002.0,
-                    10.0,
+                    1002,
+                    10,
                     "recipient_address2",
                     "sender_key2",
                     "sender_address2",
-                    2,
-                    "delegate_host2",
-                    11999,
+                    "sender_signature2",
                     "hash2",
-                    "sender_signature2"
+                    2,
+                    "delegate_key2"
                 )
             )
-        ).sign<MainBlock>(ByteArray(1))
+        )
 
         val validators = HashMap<String, BlockValidator>()
         validators[""] = blockValidator
@@ -82,6 +79,7 @@ class BlockValidationProviderTests : ServiceTests() {
         val merkleHash = "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"
 
         val block = MainBlock(
+            ByteArray(1),
             height,
             prevHash,
             merkleHash,
@@ -89,32 +87,30 @@ class BlockValidationProviderTests : ServiceTests() {
             mutableListOf(
                 VoteTransaction(
                     1500000000L,
-                    1000.0,
-                    10.0,
+                    1000,
+                    10,
                     "recipient_address",
                     "sender_key",
                     "sender_address",
-                    1,
-                    "delegate_host",
-                    9999,
+                    "sender_signature",
                     "hash",
-                    "sender_signature"
+                    1,
+                    "delegate_key"
                 ),
                 VoteTransaction(
                     1500000001L,
-                    1002.0,
-                    10.0,
+                    1002,
+                    10,
                     "recipient_address2",
                     "sender_key2",
                     "sender_address2",
-                    2,
-                    "delegate_host2",
-                    11999,
+                    "sender_signature2",
                     "hash2",
-                    "sender_signature2"
+                    2,
+                    "delegate_key2"
                 )
             )
-        ).sign<MainBlock>(ByteArray(1))
+        )
 
         given(blockValidator.isValid(any(Block::class.java))).willReturn(true)
 
@@ -126,6 +122,7 @@ class BlockValidationProviderTests : ServiceTests() {
     @Test
     fun isValidShouldReturnFalse() {
         val block = MainBlock(
+            ByteArray(1),
             123,
             "prev_block_hash",
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
@@ -133,32 +130,30 @@ class BlockValidationProviderTests : ServiceTests() {
             mutableListOf(
                 VoteTransaction(
                     1500000000L,
-                    1000.0,
-                    10.0,
+                    1000,
+                    10,
                     "recipient_address",
                     "sender_key",
                     "sender_address",
-                    1,
-                    "delegate_host",
-                    9999,
+                    "sender_signature",
                     "hash",
-                    "sender_signature"
+                    1,
+                    "delegate_key"
                 ),
                 VoteTransaction(
                     1500000001L,
-                    1002.0,
-                    10.0,
+                    1002,
+                    10,
                     "recipient_address2",
                     "sender_key2",
                     "sender_address2",
-                    2,
-                    "delegate_host2",
-                    11999,
+                    "sender_signature2",
                     "hash2",
-                    "sender_signature2"
+                    2,
+                    "delegate_key2"
                 )
             )
-        ).sign<MainBlock>(ByteArray(1))
+        )
 
         val isValid = blockValidationService.isValid(block)
 
