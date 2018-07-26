@@ -92,6 +92,8 @@ interface BaseTransactionService<Entity : BaseTransaction> {
 
     fun save(entity: List<Entity>): List<Entity>
 
+    fun isExists(hash: String): Boolean
+
 }
 
 interface TransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto, Req : TransactionRequest> : BaseTransactionService<Entity> {

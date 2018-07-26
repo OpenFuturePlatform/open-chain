@@ -41,4 +41,7 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction>(
     @Transactional
     override fun save(transactions: List<Entity>): List<Entity> = repository.saveAll(transactions)
 
+    @Transactional(readOnly = true)
+    override fun isExists(hash: String): Boolean = repository.existsByHash(hash)
+
 }
