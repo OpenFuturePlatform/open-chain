@@ -23,9 +23,6 @@ abstract class DefaultTransactionService<Entity : Transaction, UEntity : UTransa
     override fun get(hash: String): Entity = repository.findOneByHash(hash)
         ?: throw NotFoundException("Transaction with hash: $hash not exist!")
 
-
-    override fun save(tx: Entity): Entity = repository.save(tx)
-
     @Transactional
     override fun deleteUnconfirmedAndSave(tx: Entity): Entity {
         val uTx = getUnconfirmedTransaction(tx.hash)

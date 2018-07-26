@@ -88,8 +88,6 @@ interface TransactionService<Entity : Transaction, UEntity : UTransaction> {
 
     fun get(hash: String): Entity
 
-    fun save(tx: Entity): Entity
-
     fun deleteUnconfirmedAndSave(tx: Entity): Entity
 
     fun toBlock(tx: Entity, block: MainBlock): Entity
