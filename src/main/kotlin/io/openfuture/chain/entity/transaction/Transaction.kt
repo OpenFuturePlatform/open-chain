@@ -16,9 +16,9 @@ abstract class Transaction(
     senderPublicKey: String,
     senderSignature: String,
     hash: String,
-    
+
     @ManyToOne
-    @JoinColumn(name = "block_id", nullable = true)
+    @JoinColumn(name = "block_id", nullable = false)
     var block: MainBlock? = null
 
 ) : BaseTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash)
