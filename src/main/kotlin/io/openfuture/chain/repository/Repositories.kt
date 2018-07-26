@@ -2,7 +2,6 @@ package io.openfuture.chain.repository
 
 import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.transaction.BaseTransaction
-import io.openfuture.chain.entity.transaction.CoinBaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import org.springframework.data.domain.Pageable
@@ -47,9 +46,6 @@ interface BaseTransactionRepository<Entity : BaseTransaction> : BaseRepository<E
 
 @Repository
 interface TransferTransactionRepository : BaseTransactionRepository<TransferTransaction>
-
-@Repository
-interface CoinBaseTransactionRepository : BaseTransactionRepository<CoinBaseTransaction>
 
 @Repository
 interface VoteTransactionRepository : BaseTransactionRepository<VoteTransaction>

@@ -8,8 +8,7 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.BlockCreationEvent
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.service.BlockService
@@ -44,7 +43,7 @@ class BlockCreationProcessor(
             throw IllegalArgumentException("Inbound block's signature is invalid")
         }
 
-        if (!signatureCollector.addBlockSignature(pendingBlock)) {
+        if(!signatureCollector.addBlockSignature(pendingBlock)) {
             throw IllegalArgumentException("Either signature is already exists, or not related to pending block")
         }
         return signCreatedBlock(block)
@@ -69,35 +68,33 @@ class BlockCreationProcessor(
         return pendingBlock
     }
 
-    private fun create(transactionsFromPool: MutableList<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
-//        val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
-//
-//        val time = clock.networkTime()
-//        val privateKey = keyHolder.getPrivateKey()
-//        val block = when (blockType) {
-//            BlockType.MAIN -> {
-//                val fees = transactionsFromPool.sumByDouble { it.fee }
-//
-//                MainBlock(
-//                    previousBlock.height + 1,
-//                    previousBlock.hash,
-//                    BlockUtils.calculateMerkleRoot(transactions),
-//                    time,
-//                    transactions
-//                ).sign<MainBlock>(privateKey)
-//            }
-//            BlockType.GENESIS -> {
-//                GenesisBlock(
-//                    previousBlock.height + 1,
-//                    previousBlock.hash,
-//                    time,
-//                    genesisBlock.epochIndex + 1,
-//                    delegateService.getActiveDelegates() as MutableSet<Delegate>
-//                ).sign(privateKey)
-//            }
-//        }
-//
-//        signCreatedBlock(block)
+    private fun create(transactions: MutableList<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
+        val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
+
+        val time = clock.networkTime()
+        val privateKey = keyHolder.getPrivateKey()
+        val block = when(blockType) {
+            BlockType.MAIN -> {
+                MainBlock(
+                    previousBlock.height + 1,
+                    previousBlock.hash,
+                    BlockUtils.calculateMerkleRoot(transactions),
+                    time,
+                    transactions
+                ).sign(privateKey)
+            }
+            BlockType.GENESIS -> {
+                GenesisBlock(
+                    previousBlock.height + 1,
+                    previousBlock.hash,
+                    time,
+                    genesisBlock.epochIndex + 1,
+                    delegateService.getActiveDelegates() as MutableSet<Delegate>
+                ).sign<GenesisBlock>(privateKey)
+            }
+        }
+
+        signCreatedBlock(block)
     }
 
 }
