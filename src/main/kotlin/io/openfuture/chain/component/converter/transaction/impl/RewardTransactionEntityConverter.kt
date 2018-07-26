@@ -7,6 +7,7 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.RewardTransactionData
 import io.openfuture.chain.entity.transaction.RewardTransaction
+import io.openfuture.chain.util.TransactionUtils
 import org.springframework.stereotype.Component
 
 @Component
@@ -34,7 +35,7 @@ class RewardTransactionEntityConverter(
             data.senderAddress,
             HashUtils.toHexString(keyHolder.getPublicKey()),
             SignatureManager.sign(data.getBytes(), keyHolder.getPrivateKey()),
-            getHash(data, keyHolder.getPublicKey(), keyHolder.getPrivateKey())
+            TransactionUtils.createHash(data, keyHolder.getPublicKey(), keyHolder.getPrivateKey())
         )
 
 }
