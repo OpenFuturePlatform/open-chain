@@ -5,6 +5,7 @@ import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.TransferTransactionData
 import io.openfuture.chain.entity.transaction.TransferTransaction
+import io.openfuture.chain.util.TransactionUtils
 import org.springframework.stereotype.Component
 
 @Component
@@ -30,7 +31,7 @@ class TransferTransactionEntityConverter : ManualTransactionEntityConverter<Tran
             request.data!!.senderAddress,
             request.senderPublicKey!!,
             request.senderSignature!!,
-            getHash(request)
+            TransactionUtils.createHash(request.data!!, request.senderPublicKey!!, request.senderSignature!!)
         )
 
 }
