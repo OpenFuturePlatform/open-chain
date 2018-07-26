@@ -57,7 +57,7 @@ class DefaultNetworkService(
 
     override fun connect(peers: List<NetworkAddress>) {
         peers.map { NetworkAddress(it.host, it.port) }
-            .filter { !connectionService.getConnectionAddresses().contains(it) && it != NetworkAddress(properties.host!!,
+            .filter { !connectionService.getConnectionAddresses().contains(it) && it != NetworkAddress(property.host!!,
                 property.port!!) }
             .forEach { bootstrap.connect(it.host, it.port) }
     }
