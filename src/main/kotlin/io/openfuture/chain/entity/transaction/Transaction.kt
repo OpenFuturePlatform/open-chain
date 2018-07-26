@@ -1,6 +1,5 @@
 package io.openfuture.chain.entity.transaction
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.base.BaseTransaction
 import javax.persistence.*
@@ -18,9 +17,8 @@ abstract class Transaction(
     senderSignature: String,
     hash: String,
 
-    @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "block_id", nullable = true)
+    @JoinColumn(name = "block_id", nullable = false)
     var block: MainBlock? = null
 
 ) : BaseTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash)
