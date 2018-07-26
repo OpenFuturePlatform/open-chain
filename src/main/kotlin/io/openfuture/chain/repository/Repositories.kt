@@ -34,8 +34,6 @@ interface BaseTransactionRepository<Entity : BaseTransaction> : BaseRepository<E
 
     fun findAllByBlockIsNull(): MutableSet<Entity>
 
-    fun findAllByBlockIsNull(pageable: Pageable): MutableSet<Entity>
-
     fun existsByHash(hash: String): Boolean
 
 }
