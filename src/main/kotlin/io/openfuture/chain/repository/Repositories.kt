@@ -8,6 +8,7 @@ import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.entity.transaction.unconfirmed.*
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.stereotype.Repository
@@ -41,6 +42,8 @@ interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 interface UTransactionRepository<Entity : UTransaction> : BaseRepository<Entity> {
 
     fun findOneByHash(hash: String): Entity?
+
+    fun findAllByOrderByFeeDesc(pageable: Pageable): MutableList<Entity>
 
 }
 

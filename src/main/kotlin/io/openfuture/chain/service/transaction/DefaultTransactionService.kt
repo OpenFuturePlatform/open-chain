@@ -27,7 +27,6 @@ abstract class DefaultTransactionService<Entity : Transaction, UEntity : UTransa
     override fun save(tx: Entity): Entity = repository.save(tx)
 
     @Transactional
-    @Suppress("UNCHECKED_CAST")
     override fun deleteUnconfirmedAndSave(tx: Entity): Entity {
         val uTx = getUnconfirmedTransaction(tx.hash)
         uRepository.delete(uTx)

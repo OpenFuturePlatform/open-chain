@@ -11,6 +11,7 @@ import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.UTransactionRepository
+import io.openfuture.chain.service.BaseTransactionService
 import io.openfuture.chain.service.CommonUTransactionService
 import io.openfuture.chain.service.WalletService
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,10 +30,12 @@ abstract class DefaultCommonUTransactionService<Entity : UTransaction, Data : Ba
     @Autowired
     private lateinit var consensusProperties: ConsensusProperties
 
+    @Autowired
+    private lateinit var baseService: BaseTransactionService
+
+
     override fun get(hash: String): Entity = repository.findOneByHash(hash)
         ?: throw NotFoundException("Unconfirmed transaction with hash: $hash not exist!")
-
-    override fun getAll(): MutableSet<Entity> = repository.findAll().toMutableSet() //todo pagerequest capacity -1
 
     override fun add(dto: BaseTransactionDto<Data>): Entity {
         val transaction = repository.findOneByHash(dto.hash)
@@ -83,7 +86,7 @@ abstract class DefaultCommonUTransactionService<Entity : UTransaction, Data : Ba
         }
 
         val balance = walletService.getBalanceByAddress(senderAddress)
-        val unconfirmedOutput = getAll()
+        val unconfirmedOutput = baseService.getPending()
             .filter { it.senderAddress == senderAddress }
             .map { it.amount + it.fee }
             .sum()
