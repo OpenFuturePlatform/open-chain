@@ -104,8 +104,6 @@ class BlockCreationProcessorTests : ServiceTests() {
         val transactions = createTransactions()
         genesisBlock.activeDelegates = setOf(delegate)
 
-        given(properties.host).willReturn("host")
-        given(properties.port).willReturn(1234)
         given(genesisBlockService.getLast()).willReturn(genesisBlock)
         given(keyHolder.getPrivateKey()).willReturn("private_key".toByteArray())
         given(keyHolder.getPublicKey()).willReturn("public_key".toByteArray())
