@@ -34,15 +34,15 @@ class SignatureCollector(
 
     fun setPendingBlock(generatedBlock: PendingBlock) {
         if (!active) {
-            this.active = true
             this.pendingBlock = generatedBlock.block
+            this.active = true
             val applyDate = Date(timeSlot.getSlotTimestamp() + properties.timeSlotDuration!! / 2)
             scheduler.schedule({ applyBlock() }, applyDate)
         }
     }
 
     fun addSignatureBlock(signatureBlock: PendingBlock): Boolean {
-        if (signatureBlock.block.hash != pendingBlock.hash) {
+        if (!active || signatureBlock.block.hash != pendingBlock.hash) {
             return false
         }
 

@@ -65,7 +65,7 @@ class BlockCreationProcessor(
             throw IllegalArgumentException("Inbound block's signature is invalid")
         }
 
-        if(!signatureCollector.addSignatureBlock(pendingBlock)) {
+        if (!signatureCollector.addSignatureBlock(pendingBlock)) {
             throw IllegalArgumentException("Either signature is already exists, or not related to pending block")
         }
         return signCreatedBlock(block)
