@@ -1,19 +1,20 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.block.validation.BlockValidationProvider
+import io.openfuture.chain.component.converter.transaction.impl.RewardTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
+import io.openfuture.chain.domain.transaction.data.RewardTransactionData
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.property.ConsensusProperties
-import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.service.BaseTransactionService
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.ConsensusService
@@ -28,17 +29,17 @@ import javax.annotation.PostConstruct
 class BlockCreationProcessor(
     private val blockService: BlockService<Block>,
     private val genesisBlockService: BlockService<GenesisBlock>,
-    private val baseTransactionService: BaseTransactionService<BaseTransaction>,
+    private val baseTransactionService: BaseTransactionService,
     private val signatureCollector: SignatureCollector,
     private val keyHolder: NodeKeyHolder,
     private val validationService: BlockValidationProvider,
     private val consensusService: ConsensusService,
     private val clock: NodeClock,
     private val delegateService: DelegateService,
-    private val properties: NodeProperties,
     private val consensusProperties: ConsensusProperties,
     private val timeSlot: TimeSlot,
-    private val scheduler: TaskScheduler
+    private val scheduler: TaskScheduler,
+    private val rewardTransactionEntityConverter: RewardTransactionEntityConverter
 ) {
 
     @PostConstruct
@@ -75,9 +76,9 @@ class BlockCreationProcessor(
         val previousBlock = blockService.getLast()
         val genesisBlock = genesisBlockService.getLast()
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
-        if (properties.host == nextProducer.host && properties.port == nextProducer.port) {
+        if (HashUtils.toHexString(keyHolder.getPublicKey()) == nextProducer.publicKey) {
             val pendingTransactions
-                = baseTransactionService.getPendingFirstWithLimit(consensusProperties.blockCapacity!!)
+                = baseTransactionService.getAllPending(consensusProperties.blockCapacity!!)
             create(pendingTransactions, previousBlock, genesisBlock)
         }
     }
@@ -91,11 +92,7 @@ class BlockCreationProcessor(
         return pendingBlock
     }
 
-    private fun create(transactions: MutableSet<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
-        if (transactions.size != consensusProperties.blockCapacity) {
-            return
-        }
-
+    private fun create(pendingTransactions: MutableSet<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
         val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
 
         val height = previousBlock.height + 1
@@ -106,6 +103,8 @@ class BlockCreationProcessor(
 
         val block = when(blockType) {
             BlockType.MAIN -> {
+                val transactions = prepareTransactions(pendingTransactions)
+
                 MainBlock(
                     privateKey,
                     height,
@@ -130,6 +129,17 @@ class BlockCreationProcessor(
         }
 
         signCreatedBlock(block)
+    }
+
+    private fun prepareTransactions(pendingTransactions: MutableSet<BaseTransaction>): MutableSet<BaseTransaction> {
+        val fees = pendingTransactions.map { it.fee }.sum()
+        val delegate = delegateService.getByPublicKey(HashUtils.toHexString(keyHolder.getPublicKey()))
+        val rewardTransactionData = RewardTransactionData((fees + consensusProperties.rewardBlock!!),
+            consensusProperties.feeRewardTx!!, delegate.address, consensusProperties.genesisAddress!!)
+
+        val rewardTransaction = rewardTransactionEntityConverter.toEntity(clock.networkTime(), rewardTransactionData)
+
+        return mutableSetOf(rewardTransaction, *pendingTransactions.toTypedArray())
     }
 
 }

@@ -15,7 +15,7 @@ class WalletRepositoryTests : RepositoryTests() {
     @Test
     fun findOneByAddress() {
         val address = "address"
-        val wallet = Wallet(address, 1.0)
+        val wallet = Wallet(address, 1)
 
         entityManager.persist(wallet)
 

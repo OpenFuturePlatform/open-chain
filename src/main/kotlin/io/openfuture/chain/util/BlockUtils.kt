@@ -34,10 +34,8 @@ object BlockUtils {
     fun calculateDelegatesHash(activeDelegates: Set<Delegate>): String {
         val delegatesContent = StringBuilder()
         for (activeDelegate in activeDelegates) {
-            delegatesContent.append(activeDelegate.host)
-            delegatesContent.append(activeDelegate.port)
             delegatesContent.append(activeDelegate.publicKey)
-            delegatesContent.append(activeDelegate.rating)
+            delegatesContent.append(activeDelegate.address)
         }
         val hash = HashUtils.doubleSha256(delegatesContent.toString().toByteArray(Charsets.UTF_8))
         return HashUtils.toHexString(hash)

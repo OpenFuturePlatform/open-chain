@@ -1,11 +1,8 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.config.ServiceTests
-import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.Wallet
-import io.openfuture.chain.entity.dictionary.VoteType
-import io.openfuture.chain.entity.transaction.BaseTransaction
-import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.WalletRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -13,29 +10,29 @@ import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import java.util.*
 
 class DefaultWalletServiceTest : ServiceTests() {
 
     @Mock private lateinit var repository: WalletRepository
+    @Mock private lateinit var properties: ConsensusProperties
 
     private lateinit var service: WalletService
 
 
     @Before
     fun setUp() {
-        service = DefaultWalletService(repository)
+        service = DefaultWalletService(repository, properties)
     }
 
     @Test
     fun getBalanceShouldReturnBalanceFromAllTransactionsByAddressTest() {
         val address = "address"
-        val expectedBalance = 10.0
+        val expectedBalance = 10L
         val wallet = Wallet(address, expectedBalance)
 
         given(repository.findOneByAddress(address)).willReturn(wallet)
 
-        val actualBalance = service.getBalance(address)
+        val actualBalance = service.getBalanceByAddress(address)
 
         assertThat(actualBalance).isEqualTo(expectedBalance)
     }
@@ -43,41 +40,34 @@ class DefaultWalletServiceTest : ServiceTests() {
     @Test
     fun getBalanceWhenNotExistsWalletByAddressShouldReturnDefaultBalanceValueTest() {
         val address = "address"
-        val expectedBalance = 0.0
+        val expectedBalance = 0L
 
         given(repository.findOneByAddress(address)).willReturn(null)
 
-        val actualBalance = service.getBalance(address)
+        val actualBalance = service.getBalanceByAddress(address)
 
         assertThat(actualBalance).isEqualTo(expectedBalance)
     }
 
     @Test
-    fun updateByTransactionShouldChangeWalletsBalanceValueTest() {
-        val amount = 1.0
+    fun updateBalanceShouldChangeWalletsBalanceValueTest() {
+        val amount = 2L
+        val fee = 1L
+        val genesisAddress = "genesisAddress"
         val senderAddress = "senderAddress"
         val recipientAddress = "recipientAddress"
 
-        val transaction = createTransaction(amount, senderAddress, recipientAddress)
-        val senderWallet = Wallet(senderAddress, 1.0)
-        val recipientWallet = Wallet(recipientAddress, 5.0)
+        val senderWallet = Wallet(senderAddress, 1)
+        val recipientWallet = Wallet(recipientAddress, 5)
 
         given(repository.findOneByAddress(senderAddress)).willReturn(senderWallet)
         given(repository.findOneByAddress(recipientAddress)).willReturn(recipientWallet)
+        given(properties.genesisAddress).willReturn(genesisAddress)
 
-        service.updateByTransaction(transaction)
+        service.updateBalance(senderAddress, recipientAddress, amount, fee)
 
         verify(repository).save(senderWallet.apply { balance += amount })
-        verify(repository).save(recipientWallet.apply { balance -= amount })
-    }
-
-    private fun createTransaction(amount: Double, senderAddress: String, recipientAddress: String): BaseTransaction {
-        val block = MainBlock(ByteArray(1), 1L, "previousHash", "hash", 1L,
-            ByteArray(1), mutableSetOf())
-
-        return VoteTransaction(Date().time, amount, recipientAddress,
-            "senderKey", senderAddress, "value", "hash", VoteType.FOR.getId(),
-            "delegateKey", 1, block)
+        verify(repository).save(recipientWallet.apply { balance -= (amount + fee) })
     }
 
 }

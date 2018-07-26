@@ -34,6 +34,42 @@ class ConsensusProperties(
      * Time to wait between failure apply block method calling
      */
     @field:NotNull
-    var timeSlotWaitDuration: Long? = null
+    var timeSlotWaitDuration: Long? = null,
+
+    /**
+     * Genesis address
+     */
+    @field:NotNull
+    var genesisAddress: String? = null,
+
+    /**
+     * Reward for block
+     */
+    @field:NotNull
+    var rewardBlock: Long? = null,
+
+    /**
+     * Fee for transfer transaction
+     */
+    @field:NotNull
+    var feeTransferTx: Long? = null,
+
+    /**
+     * Fee for vote transaction
+     */
+    @field:NotNull
+    var feeVoteTx: Long? = null,
+
+    /**
+     * Fee for delegate transaction
+     */
+    @field:NotNull
+    var feeDelegateTx: Long? = null,
+
+    /**
+     * Fee for reward transaction
+     */
+    @field:NotNull
+    var feeRewardTx: Long? = null
 
 )

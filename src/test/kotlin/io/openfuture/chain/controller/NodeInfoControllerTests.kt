@@ -1,18 +1,19 @@
 package io.openfuture.chain.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ControllerTests
+import io.openfuture.chain.controller.common.ResponseHeader
+import io.openfuture.chain.controller.common.RestResponse
 import io.openfuture.chain.domain.rpc.HardwareInfo
-import io.openfuture.chain.domain.rpc.UptimeResponse
 import io.openfuture.chain.domain.rpc.hardware.CpuInfo
 import io.openfuture.chain.domain.rpc.hardware.NetworkInfo
 import io.openfuture.chain.domain.rpc.hardware.RamInfo
-import io.openfuture.chain.domain.rpc.node.NodeTimestampResponse
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.service.HardwareInfoService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.mockito.BDDMockito.given
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
 
@@ -22,40 +23,58 @@ class NodeInfoControllerTests : ControllerTests() {
     @MockBean
     private lateinit var hardwareInfoService: HardwareInfoService
 
-    @Autowired
+    @MockBean
+    private lateinit var nodeClock: NodeClock
+
+    @MockBean
     private lateinit var nodeProperties: NodeProperties
 
 
     @Test
     fun getVersionShouldReturnVersionFromProperties() {
-        webClient.get().uri("${PathConstant.RPC}/info/getVersion")
-                .exchange()
-                .expectStatus().isOk
-                .expectBody(String::class.java).isEqualTo<Nothing>("""{"version":"${nodeProperties.version}"}""")
+        val expectedVersion = "0"
+        val expectedBody = getRestResponse(expectedVersion)
+        given(nodeProperties.version).willReturn(expectedVersion)
+
+        val result = webClient.get().uri("${PathConstant.RPC}/info/getVersion")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(expectedBody::class.java)
+            .returnResult().responseBody!!
+
+        assertThat(expectedVersion).isEqualTo(result.body)
     }
 
     @Test
     fun getTimestampShouldReturnCurrentTimestamp() {
         val expectedTimestamp = System.currentTimeMillis()
+        val expectedBody = getRestResponse(expectedTimestamp)
+
+        given(nodeClock.nodeTime()).willReturn(expectedTimestamp)
 
         val result = webClient.get().uri("${PathConstant.RPC}/info/getTimestamp")
                 .exchange()
                 .expectStatus().isOk
-                .expectBody(NodeTimestampResponse::class.java)
+                .expectBody(expectedBody.javaClass)
                 .returnResult().responseBody!!
 
-        assertThat(result.timestamp).isGreaterThanOrEqualTo(expectedTimestamp)
+        assertThat(expectedTimestamp).isGreaterThanOrEqualTo(result.body)
     }
 
     @Test
     fun getUptimeShouldReturnApplicationUptime() {
+        val expectedTimestamp = System.currentTimeMillis()
+        val expectedBody = getRestResponse(expectedTimestamp)
+
+        given(nodeClock.nodeTime()).willReturn(expectedTimestamp)
+
         val result = webClient.get().uri("${PathConstant.RPC}/info/getUptime")
                 .exchange()
                 .expectStatus().isOk
-                .expectBody(UptimeResponse::class.java)
+                .expectBody(expectedBody::class.java)
                 .returnResult().responseBody!!
 
-        assertThat(result.uptime).isGreaterThan(1L)
+        assertThat(1L).isLessThan(result.body!!.toLong())
     }
 
     @Test
@@ -66,17 +85,25 @@ class NodeInfoControllerTests : ControllerTests() {
             1L,
             listOf(NetworkInfo("IN", listOf("192.168.1.1")))
         )
+        val expectedResponse = getRestResponse(expected)
 
         given(hardwareInfoService.getHardwareInfo()).willReturn(expected)
 
         val result = webClient.get().uri("${PathConstant.RPC}/info/getHardwareInfo")
                 .exchange()
                 .expectStatus().isOk
-                .expectBody(HardwareInfo::class.java)
+                .expectBody(expectedResponse::class.java)
                 .returnResult().responseBody!!
 
+        assertThat(ObjectMapper().writeValueAsString(result.body))
+            .isEqualTo(ObjectMapper().writeValueAsString(expectedResponse.body))
+    }
 
-        assertThat(result).isEqualTo(expected)
+    private fun <T> getRestResponse(body: T): RestResponse<T> {
+        given(nodeClock.networkTime()).willReturn(0)
+        given(nodeProperties.version).willReturn("0")
+
+        return RestResponse(ResponseHeader(0, "0"), body)
     }
 
 }
