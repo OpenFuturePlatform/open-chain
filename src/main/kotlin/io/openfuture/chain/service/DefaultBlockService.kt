@@ -44,8 +44,6 @@ class DefaultBlockService(
 
     @Transactional
     override fun save(block: MainBlock): MainBlock {
-        rewardTransactionService.deleteUnconfirmedAndSave(block.transactions.first() as RewardTransaction)
-
         val savedBlock = mainBlockRepository.save(block)
         val transactions = block.transactions
         for (transaction in transactions) {
