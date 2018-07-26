@@ -86,6 +86,15 @@ interface TransactionService<Entity : Transaction, UEntity : UTransaction> {
 
 }
 
+interface RewardTransactionService : TransactionService<RewardTransaction, URewardTransaction>
+
+interface TransferTransactionService : TransactionService<TransferTransaction, UTransferTransaction>
+
+interface VoteTransactionService : TransactionService<VoteTransaction, UVoteTransaction>
+
+interface DelegateTransactionService : TransactionService<DelegateTransaction, UDelegateTransaction>
+
+
 interface CommonUTransactionService<Entity : UTransaction, Data : BaseTransactionData> {
 
     fun get(hash: String): Entity
@@ -105,15 +114,6 @@ interface ManualUTransactionService<Entity : UTransaction, Data : BaseTransactio
     fun add(request: BaseTransactionRequest<Data>): Entity
 
 }
-
-interface RewardTransactionService : TransactionService<RewardTransaction, URewardTransaction>
-
-interface TransferTransactionService : TransactionService<TransferTransaction, UTransferTransaction>
-
-interface VoteTransactionService : TransactionService<VoteTransaction, UVoteTransaction>
-
-interface DelegateTransactionService : TransactionService<DelegateTransaction, UDelegateTransaction>
-
 
 interface URewardTransactionService : EmbeddedUTransactionService<URewardTransaction, RewardTransactionData>
 
