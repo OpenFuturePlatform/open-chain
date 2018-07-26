@@ -1,5 +1,9 @@
 package io.openfuture.chain.domain.transaction.data
 
+import io.netty.buffer.ByteBuf
+import io.openfuture.chain.network.extension.readString
+import io.openfuture.chain.network.extension.writeString
+
 class DelegateTransactionData(
     amount: Long,
     fee: Long,
@@ -16,6 +20,18 @@ class DelegateTransactionData(
         builder.append(senderAddress)
         builder.append(delegateKey)
         return builder.toString().toByteArray()
+    }
+
+    override fun read(buffer: ByteBuf) {
+        super.read(buffer)
+
+        delegateKey = buffer.readString()
+    }
+
+    override fun write(buffer: ByteBuf) {
+        super.write(buffer)
+
+        buffer.writeString(delegateKey)
     }
 
 }

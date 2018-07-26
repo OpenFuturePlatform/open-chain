@@ -11,6 +11,7 @@ import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.VoteTransactionRepository
 import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.service.VoteTransactionService
+import io.openfuture.chain.util.DictionaryUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.xml.bind.ValidationException
@@ -24,17 +25,25 @@ class DefaultVoteTransactionService(
 ) : DefaultManualTransactionService<VoteTransaction, VoteTransactionData>(repository, entityConverter),
     VoteTransactionService {
 
+
     @Transactional
-    override fun toBlock(tx: VoteTransaction, block: MainBlock): VoteTransaction {
-        updateWalletVotes(tx)
-        return super.toBlock(tx, block)
+    override fun toBlock(dto: BaseTransactionDto<VoteTransactionData>, block: MainBlock) {
+        val type = DictionaryUtils.valueOf(VoteType::class.java, dto.data.voteTypeId)
+        updateWalletVotes(dto.data.delegateKey, dto.data.senderAddress, type)
+        super.toBlock(dto, block)
     }
 
-    private fun updateWalletVotes(tx: VoteTransaction) {
-        val delegate = delegateService.getByPublicKey(tx.delegateKey)
-        val wallet = walletService.getByAddress(tx.senderAddress)
+    @Transactional
+    override fun toBlock(tx: VoteTransaction, block: MainBlock) {
+        updateWalletVotes(tx.delegateKey, tx.senderAddress, tx.getVoteType())
+        super.toBlock(tx, block)
+    }
 
-        when (tx.getVoteType()) {
+    private fun updateWalletVotes(delegateKey: String, senderAddress: String, type: VoteType) {
+        val delegate = delegateService.getByPublicKey(delegateKey)
+        val wallet = walletService.getByAddress(senderAddress)
+
+        when (type) {
             VoteType.FOR -> {
                 wallet.votes.add(delegate)
             }

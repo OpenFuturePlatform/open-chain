@@ -5,8 +5,8 @@ import io.openfuture.chain.entity.transaction.TransferTransaction
 
 @NoArgConstructor
 class NetworkTransferTransaction(timestamp: Long,
-                                 amount: Double,
-                                 fee: Double,
+                                 amount: Long,
+                                 fee: Long,
                                  recipientAddress: String,
                                  senderKey: String,
                                  senderAddress: String,
@@ -15,7 +15,7 @@ class NetworkTransferTransaction(timestamp: Long,
     senderKey, senderAddress, senderSignature, hash) {
 
     constructor(transaction: TransferTransaction) : this(transaction.timestamp, transaction.amount,
-        transaction.fee, transaction.recipientAddress, transaction.senderKey, transaction.senderAddress,
+        transaction.fee, transaction.recipientAddress, transaction.senderPublicKey, transaction.senderAddress,
         transaction.senderSignature!!, transaction.hash)
 
 }

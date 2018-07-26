@@ -14,4 +14,4 @@ class MainBlock(height: Long, previousHash: String,
                 @OneToMany(mappedBy = "block", fetch = FetchType.EAGER)
                 var transactions: MutableList<BaseTransaction>
 
-) : Block(height, previousHash, merkleHash, timestamp, BlockType.MAIN.id, merkleHash)
+) : Block(height, previousHash, merkleHash, timestamp, BlockType.MAIN.id)

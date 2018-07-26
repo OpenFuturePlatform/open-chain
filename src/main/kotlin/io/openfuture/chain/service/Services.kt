@@ -10,8 +10,8 @@ import io.openfuture.chain.domain.rpc.hardware.CpuInfo
 import io.openfuture.chain.domain.rpc.hardware.NetworkInfo
 import io.openfuture.chain.domain.rpc.hardware.RamInfo
 import io.openfuture.chain.domain.rpc.hardware.StorageInfo
-import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
+import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.*
 import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.transaction.*
@@ -78,7 +78,7 @@ interface CryptoService {
  */
 interface BaseTransactionService {
 
-    fun getAllPending() : MutableSet<BaseTransaction>
+    fun getAllPending(): MutableSet<BaseTransaction>
 
 }
 
@@ -86,21 +86,15 @@ interface CommonTransactionService<Entity : BaseTransaction, Data : BaseTransact
 
     fun get(hash: String): Entity
 
-    fun getAllPending() : MutableSet<Entity>
+    fun isExists(hash: String): Boolean
 
-    fun toBlock(tx: Entity, block: MainBlock): Entity
+    fun getAllPending(): MutableSet<Entity>
+
+    fun toBlock(tx: Entity, block: MainBlock)
+
+    fun toBlock(dto: BaseTransactionDto<Data>, block: MainBlock)
 
     fun add(dto: BaseTransactionDto<Data>): Entity
-
-    fun getByBlock(block: MainBlock): List<Entity>
-
-    fun addToBlock(hash: String, block: MainBlock): Entity
-
-    fun save(entity: Entity): Entity
-
-    fun save(entity: List<Entity>): List<Entity>
-
-    fun isExists(hash: String): Boolean
 
 }
 

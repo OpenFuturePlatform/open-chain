@@ -1,5 +1,6 @@
 package io.openfuture.chain.domain.transaction
 
+import io.openfuture.chain.annotation.NoArgConstructor
 import io.openfuture.chain.domain.transaction.data.TransferTransactionData
 import io.openfuture.chain.entity.transaction.TransferTransaction
 

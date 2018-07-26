@@ -16,13 +16,4 @@ class DefaultBaseTransactionService(
         return repository.findAllByBlockIsNull()
     }
 
-    @Transactional
-    override fun save(transaction: Entity): Entity = repository.save(transaction)
-
-    @Transactional
-    override fun save(transactions: List<Entity>): List<Entity> = repository.saveAll(transactions)
-
-    @Transactional(readOnly = true)
-    override fun isExists(hash: String): Boolean = repository.existsByHash(hash)
-
 }

@@ -2,11 +2,10 @@ package io.openfuture.chain.network.client.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.entity.MainBlock
-import io.openfuture.chain.entity.transaction.TransferTransaction
-import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.domain.NetworkMainBlock
-import io.openfuture.chain.service.BaseTransactionService
 import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.TransferTransactionService
+import io.openfuture.chain.service.VoteTransactionService
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import java.util.*
@@ -16,29 +15,23 @@ import java.util.*
 @Scope("prototype")
 class MainBlockClientHandler(
     private val blockService: BlockService,
-    private val transferTransactionService: BaseTransactionService<TransferTransaction>,
-    private val voteTransactionService: BaseTransactionService<VoteTransaction>
-) : ClientHandler<NetworkMainBlock>() {
+    private val transferTransactionService: TransferTransactionService,
+    private val voteTransactionService: VoteTransactionService
+    ) : ClientHandler<NetworkMainBlock>() {
 
-    override fun channelRead0(ctx: ChannelHandlerContext, message: NetworkMainBlock) {
-        if (blockService.isExists(message.hash)) {
+    override fun channelRead0(ctx: ChannelHandlerContext, dto: NetworkMainBlock) {
+        if (blockService.isExists(dto.hash)) {
             return
         }
 
-        val block = MainBlock(message.height, message.previousHash,
-            message.merkleHash, message.blockTimestamp, Collections.emptyList()).apply { signature = message.signature }
+        val entity = MainBlock(dto.height, dto.previousHash,
+            dto.merkleHash, dto.blockTimestamp, Collections.emptyList()).apply { signature = dto.signature }
 
-        val savedBlock = blockService.save(block)
+        val savedBlock = blockService.save(entity)
 
-        val transferTransactions = message.transferTransactions
-            .filter { !transferTransactionService.isExists(it.hash) }
-            .map { TransferTransaction.of(it).apply { this.block = savedBlock } }
-        transferTransactionService.save(transferTransactions)
+        dto.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
+        dto.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
 
-        val voteTransactions = message.voteTransactions
-            .filter { !voteTransactionService.isExists(it.hash) }
-            .map { VoteTransaction.of(it).apply { this.block = savedBlock } }
-        voteTransactionService.save(voteTransactions)
     }
 
 }

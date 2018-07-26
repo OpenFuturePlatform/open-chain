@@ -2,7 +2,9 @@ package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
-import io.openfuture.chain.entity.*
+import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.BlockType
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
@@ -28,7 +30,6 @@ class BlockValidationProviderTests : ServiceTests() {
     @Before
     fun init() {
         val previousBlock = MainBlock(
-            ByteArray(1),
             122,
             "previous_hash",
             "merkle_hash",
@@ -76,10 +77,9 @@ class BlockValidationProviderTests : ServiceTests() {
     fun isValidShouldReturnTrue() {
         val height = 123L
         val prevHash = "c78bac60ede7a9d10248ad4373d70b915a1c466e942aadce1f5703ebbb855aa4"
-        val merkleHash = "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"
+        val merkleHash = "01012795d06a629ee61c84fa6f26b79803b362044574cc6e2bd67316c722b940"
 
         val block = MainBlock(
-            ByteArray(1),
             height,
             prevHash,
             merkleHash,
@@ -122,7 +122,6 @@ class BlockValidationProviderTests : ServiceTests() {
     @Test
     fun isValidShouldReturnFalse() {
         val block = MainBlock(
-            ByteArray(1),
             123,
             "prev_block_hash",
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
@@ -153,7 +152,7 @@ class BlockValidationProviderTests : ServiceTests() {
                     "delegate_key2"
                 )
             )
-        )
+        ).sign<MainBlock>(ByteArray(1))
 
         val isValid = blockValidationService.isValid(block)
 

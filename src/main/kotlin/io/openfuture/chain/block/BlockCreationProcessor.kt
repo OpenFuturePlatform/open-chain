@@ -84,23 +84,21 @@ class BlockCreationProcessor(
                 val transactions = prepareTransactions(pendingTransactions)
 
                 MainBlock(
-                    privateKey,
                     previousBlock.height + 1,
                     previousBlock.hash,
                     BlockUtils.calculateMerkleRoot(transactions),
                     time,
                     transactions
-                )
+                ).sign(privateKey)
             }
             BlockType.GENESIS -> {
                 GenesisBlock(
-                    privateKey,
                     previousBlock.height + 1,
                     previousBlock.hash,
                     time,
                     genesisBlock.epochIndex + 1,
-                    delegateService.getActiveDelegates()
-                )
+                    delegateService.getActiveDelegates().toMutableSet()
+                ).sign<GenesisBlock>(privateKey)
             }
         }
 

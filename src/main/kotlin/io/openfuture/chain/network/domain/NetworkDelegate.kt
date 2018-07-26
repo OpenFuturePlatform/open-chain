@@ -8,23 +8,20 @@ import io.openfuture.chain.network.extension.writeString
 
 @NoArgConstructor
 data class NetworkDelegate(
-    var host: String,
-    var port: Int,
-    var rating: Int
+    var publicKey: String,
+    var address: String
 ) : NetworkEntity() {
 
-    constructor(delegate: Delegate) : this(delegate.host, delegate.port, delegate.rating)
+    constructor(delegate: Delegate) : this(delegate.publicKey, delegate.address)
 
     override fun read(buffer: ByteBuf) {
-        host = buffer.readString()
-        port = buffer.readInt()
-        rating = buffer.readInt()
+        publicKey = buffer.readString()
+        address = buffer.readString()
     }
 
     override fun write(buffer: ByteBuf) {
-        buffer.writeString(host)
-        buffer.writeInt(port)
-        buffer.writeInt(rating)
+        buffer.writeString(publicKey)
+        buffer.writeString(address)
     }
 
 }

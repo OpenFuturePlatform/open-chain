@@ -5,6 +5,7 @@ import io.openfuture.chain.crypto.util.HashUtils.doubleSha256
 import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.transaction.BaseTransaction
+import org.apache.commons.lang3.StringUtils
 import java.util.*
 
 object BlockUtils {
@@ -31,7 +32,7 @@ object BlockUtils {
         return HashUtils.toHexString(doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
     }
 
-    fun calculateHash(previousHash: String, timestamp: Long, height: Long, merkleRoot: String = ""): ByteArray {
+    fun calculateHash(previousHash: String, timestamp: Long, height: Long, merkleRoot: String = StringUtils.EMPTY): ByteArray {
         val headers = previousHash + merkleRoot + timestamp + height
         return HashUtils.doubleSha256(headers.toByteArray())
     }

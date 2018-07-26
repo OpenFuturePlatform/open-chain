@@ -2,6 +2,8 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.annotation.NoArgConstructor
+import io.openfuture.chain.domain.transaction.TransferTransactionDto
+import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
@@ -16,14 +18,14 @@ class NetworkMainBlock(height: Long,
                        typeId: Int,
                        hash: String,
                        signature: String,
-                       var transferTransactions: MutableList<NetworkTransferTransaction>,
-                       var voteTransactions: MutableList<NetworkVoteTransaction>) :
+                       var transferTransactions: MutableList<TransferTransactionDto>,
+                       var voteTransactions: MutableList<VoteTransactionDto>) :
     NetworkBlock(height, previousHash, merkleHash, blockTimestamp, typeId, hash, signature) {
 
     constructor(block: MainBlock) : this(block.height, block.previousHash, block.merkleHash, block.timestamp,
         block.typeId, block.hash, block.signature!!,
-        block.transactions.filterIsInstance(TransferTransaction::class.java).map { NetworkTransferTransaction(it) }.toMutableList(),
-        block.transactions.filterIsInstance(VoteTransaction::class.java).map { NetworkVoteTransaction(it) }.toMutableList())
+        block.transactions.filterIsInstance(TransferTransaction::class.java).map { TransferTransactionDto(it) }.toMutableList(),
+        block.transactions.filterIsInstance(VoteTransaction::class.java).map { VoteTransactionDto(it) }.toMutableList())
 
     override fun readParams(buffer: ByteBuf) {
         super.readParams(buffer)

@@ -43,6 +43,9 @@ abstract class DefaultCommonTransactionService<Entity : BaseTransaction, Data : 
         ?: throw NotFoundException("Transaction with hash: $hash not exist!")
 
     @Transactional(readOnly = true)
+    override fun isExists(hash: String) : Boolean = null != repository.findOneByHash(hash)
+
+    @Transactional(readOnly = true)
     override fun getAllPending(): MutableSet<Entity> {
         return repository.findAllByBlockIsNull()
     }
@@ -58,7 +61,19 @@ abstract class DefaultCommonTransactionService<Entity : BaseTransaction, Data : 
     }
 
     @Transactional
-    override fun toBlock(tx: Entity, block: MainBlock): Entity {
+    override fun toBlock(dto: BaseTransactionDto<Data>, block: MainBlock) {
+        if (!isExists(dto.hash)) {
+            return
+        }
+
+        val tx = entityConverter.toEntity(dto)
+        tx.block = block
+        walletService.updateBalance(tx.senderAddress, tx.recipientAddress, tx.amount, tx.fee)
+        repository.save(tx)
+    }
+
+    @Transactional
+    override fun toBlock(tx: Entity, block: MainBlock) {
         val persistTx = this.get(tx.hash)
 
         if (null != persistTx.block) {
@@ -66,7 +81,7 @@ abstract class DefaultCommonTransactionService<Entity : BaseTransaction, Data : 
         }
         persistTx.block = block
         walletService.updateBalance(persistTx.senderAddress, persistTx.recipientAddress, persistTx.amount, persistTx.fee)
-        return repository.save(persistTx)
+        repository.save(persistTx)
     }
 
     open fun validate(dto: BaseTransactionDto<Data>) {

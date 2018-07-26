@@ -7,8 +7,8 @@ import io.openfuture.chain.network.extension.writeString
 
 @NoArgConstructor
 abstract class NetworkTransaction(var timestamp: Long,
-                              var amount: Double,
-                              var fee: Double,
+                              var amount: Long,
+                              var fee: Long,
                               var recipientAddress: String,
                               var senderKey: String,
                               var senderAddress: String,
@@ -17,8 +17,8 @@ abstract class NetworkTransaction(var timestamp: Long,
 
     override fun read(buffer: ByteBuf) {
         timestamp = buffer.readLong()
-        amount = buffer.readDouble()
-        fee = buffer.readDouble()
+        amount = buffer.readLong()
+        fee = buffer.readLong()
         recipientAddress = buffer.readString()
         senderKey = buffer.readString()
         senderAddress = buffer.readString()
@@ -28,8 +28,8 @@ abstract class NetworkTransaction(var timestamp: Long,
 
     override fun write(buffer: ByteBuf) {
         buffer.writeLong(timestamp)
-        buffer.writeDouble(amount)
-        buffer.writeDouble(fee)
+        buffer.writeLong(amount)
+        buffer.writeLong(fee)
         buffer.writeString(recipientAddress)
         buffer.writeString(senderKey)
         buffer.writeString(senderAddress)

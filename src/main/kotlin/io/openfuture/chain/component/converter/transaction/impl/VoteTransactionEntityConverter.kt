@@ -20,7 +20,7 @@ class VoteTransactionEntityConverter : ManualTransactionEntityConverter<VoteTran
         dto.senderPublicKey,
         dto.senderSignature,
         dto.hash,
-        dto.data.voteType.getId(),
+        dto.data.voteTypeId,
         dto.data.delegateKey
     )
 
@@ -34,7 +34,7 @@ class VoteTransactionEntityConverter : ManualTransactionEntityConverter<VoteTran
             request.senderPublicKey!!,
             request.senderSignature!!,
             TransactionUtils.createHash(request.data!!, request.senderPublicKey!!, request.senderSignature!!),
-            request.data!!.voteType.getId(),
+            request.data!!.voteTypeId,
             request.data!!.delegateKey
         )
 

@@ -8,8 +8,8 @@ import org.junit.Test
 class NetworkDelegateTest {
 
     private val buffer = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump(
-        "000000093132372e302e302e31000023820000000a"))
-    private val entity = NetworkDelegate("127.0.0.1", 9090, 10)
+        "000000093132372e302e302e31000000036b6579"))
+    private val entity = NetworkDelegate("127.0.0.1", "key")
 
     @Test
     fun writeShouldWriteExactValuesInBuffer() {
