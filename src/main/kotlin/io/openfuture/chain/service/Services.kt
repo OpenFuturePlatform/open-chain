@@ -25,7 +25,7 @@ import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.domain.NetworkAddress
-import io.openfuture.chain.protocol.CommunicationProtocol
+import io.openfuture.chain.network.domain.Packet
 
 interface HardwareInfoService {
 
@@ -101,7 +101,7 @@ interface VoteTransactionService : TransactionService<VoteTransaction, VoteTrans
 
 interface DelegateService {
 
-    fun getByHostAndPort(host: String, port: Int) : Delegate
+    fun getByHostAndPort(host: String, port: Int): Delegate
 
     fun findByPublicKey(key: String): Delegate?
 
@@ -143,16 +143,22 @@ interface WalletService {
 
 interface NetworkService {
 
-    fun broadcast(packet: CommunicationProtocol.Packet)
+    fun broadcast(packet: Packet)
 
     fun maintainConnectionNumber()
 
+    fun connect(peers: List<NetworkAddress>)
+
+}
+
+interface ConnectionService {
+
     fun addConnection(channel: Channel, networkAddress: NetworkAddress)
 
-    fun removeConnection(channel: Channel) : NetworkAddress?
+    fun removeConnection(channel: Channel): NetworkAddress?
 
-    fun getConnections(): Set<NetworkAddress>
+    fun getConnectionAddresses(): Set<NetworkAddress>
 
-    fun connect(peers: List<CommunicationProtocol.NetworkAddress>)
+    fun getConnections(): MutableMap<Channel, NetworkAddress>
 
 }
