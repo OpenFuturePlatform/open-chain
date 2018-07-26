@@ -14,8 +14,7 @@ import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.BlockType
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
-import io.openfuture.chain.entity.transaction.Transaction
-import io.openfuture.chain.entity.transaction.base.BaseTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
 import io.openfuture.chain.service.ConsensusService
@@ -75,7 +74,7 @@ class BlockCreationProcessor(
         return pendingBlock
     }
 
-    private fun create(transactionsFromPool: MutableList<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
+    private fun create(transactionsFromPool: MutableList<UTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
         val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
 
         val time = clock.networkTime()
@@ -90,7 +89,7 @@ class BlockCreationProcessor(
                     previousBlock.hash,
                     BlockUtils.calculateMerkleRoot(transactions),
                     time,
-                    transactions as MutableList<Transaction> // TODO
+                    transactions.map { it.toConfirmed() }.toMutableList()
                 )
             }
             BlockType.GENESIS -> {
@@ -108,7 +107,7 @@ class BlockCreationProcessor(
         signCreatedBlock(block)
     }
 
-    private fun prepareTransactions(transactionsFromPool: MutableList<BaseTransaction>): MutableList<BaseTransaction> {
+    private fun prepareTransactions(transactionsFromPool: MutableList<UTransaction>): MutableList<UTransaction> {
         val fees = transactionsFromPool.map { it.fee }.sum()
         val delegate = delegateService.getByPublicKey(HashUtils.toHexString(keyHolder.getPublicKey()))
         val rewardTransactionData = RewardTransactionData((fees + consensusProperties.rewardBlock!!),

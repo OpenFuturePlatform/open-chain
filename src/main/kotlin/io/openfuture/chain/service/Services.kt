@@ -80,7 +80,9 @@ interface TransactionService<Entity : Transaction, UEntity : UTransaction> {
 
     fun save(tx: Entity): Entity
 
-    fun toBlock(tx: UEntity, block: MainBlock): Entity
+    fun deleteUnconfirmedAndSave(tx: Entity): Entity
+
+    fun toBlock(tx: Entity, block: MainBlock): Entity
 
 }
 

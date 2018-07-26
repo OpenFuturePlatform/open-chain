@@ -26,13 +26,18 @@ abstract class DefaultTransactionService<Entity : Transaction, UEntity : UTransa
 
     override fun save(tx: Entity): Entity = repository.save(tx)
 
-    @Suppress("UNCHECKED_CAST")
     @Transactional
-    override fun toBlock(tx: UEntity, block: MainBlock): Entity {
+    @Suppress("UNCHECKED_CAST")
+    override fun deleteUnconfirmedAndSave(tx: Entity): Entity {
         val uTx = getUnconfirmedTransaction(tx.hash)
-        val persistTx = uTx.toConfirmed() as Entity
-        persistTx.block = block
-        return save(persistTx)
+        uRepository.delete(uTx)
+        return repository.save(tx)
+    }
+
+    @Transactional
+    override fun toBlock(tx: Entity, block: MainBlock): Entity {
+        tx.block = block
+        return deleteUnconfirmedAndSave(tx)
     }
 
     private fun getUnconfirmedTransaction(hash: String): UEntity = uRepository.findOneByHash(hash)
