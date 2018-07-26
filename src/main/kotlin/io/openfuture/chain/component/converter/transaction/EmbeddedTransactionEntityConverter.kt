@@ -1,6 +1,5 @@
 package io.openfuture.chain.component.converter.transaction
 
-import io.openfuture.chain.component.converter.transaction.impl.BaseTransactionEntityConverter
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
 import io.openfuture.chain.entity.transaction.BaseTransaction

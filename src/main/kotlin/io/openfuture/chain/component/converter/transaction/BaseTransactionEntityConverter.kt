@@ -1,4 +1,4 @@
-package io.openfuture.chain.component.converter.transaction.impl
+package io.openfuture.chain.component.converter.transaction
 
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
