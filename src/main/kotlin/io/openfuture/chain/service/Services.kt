@@ -134,16 +134,22 @@ interface WalletService {
 
 interface NetworkService {
 
-    fun broadcast(packet: CommunicationProtocol.Packet)
+    fun broadcast(packet: Packet)
 
     fun maintainConnectionNumber()
+
+    fun connect(peers: List<NetworkAddress>)
+
+}
+
+interface ConnectionService {
 
     fun addConnection(channel: Channel, networkAddress: NetworkAddress)
 
     fun removeConnection(channel: Channel): NetworkAddress?
 
-    fun getConnections(): Set<NetworkAddress>
+    fun getConnectionAddresses(): Set<NetworkAddress>
 
-    fun connect(peers: List<CommunicationProtocol.NetworkAddress>)
+    fun getConnections(): MutableMap<Channel, NetworkAddress>
 
 }

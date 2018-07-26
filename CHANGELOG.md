@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC: Page request filter
 - Add / remove vote for delegate from wallet based on Vote transaction
 - Calculate delegate rating based on wallet balance
+- Version and timestamp fields to all packets
+
+### Changed
+- Serialization mechanism to support kotlin classes
 
 ## [0.3.0] - 2018-07-13
 ### Added
