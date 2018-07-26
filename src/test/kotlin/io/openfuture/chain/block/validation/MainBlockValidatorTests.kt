@@ -21,7 +21,7 @@ class MainBlockValidatorTests : ServiceTests() {
         val block = MainBlock(
             123,
             "prev_block_hash",
-            "0e09773036394004cb8c340e639a89d7a18e924e8a3d048b49864aeb017e07a0",
+            "04d44ab3ecdf48273794f2bd85f185480c68415ad9595c8da07aadeac55b0a7e",
             1512345678L,
             mutableListOf(
                 VoteTransaction(
