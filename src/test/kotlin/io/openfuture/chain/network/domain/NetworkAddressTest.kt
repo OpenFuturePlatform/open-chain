@@ -2,7 +2,7 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBufUtil
 import io.netty.buffer.Unpooled
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class NetworkAddressTest {
@@ -14,15 +14,19 @@ class NetworkAddressTest {
     @Test
     fun writeShouldWriteExactValuesInBuffer() {
         val actualBuffer = Unpooled.buffer()
+
         entity.write(actualBuffer)
-        Assertions.assertThat(actualBuffer).isEqualTo(buffer)
+
+        assertThat(actualBuffer).isEqualTo(buffer)
     }
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
         val actualEntity = NetworkAddress::class.java.newInstance()
+
         actualEntity.read(buffer)
-        Assertions.assertThat(actualEntity).isEqualTo(entity)
+
+        assertThat(actualEntity).isEqualTo(entity)
     }
 
 }
