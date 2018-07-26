@@ -14,6 +14,7 @@ import io.openfuture.chain.repository.UTransactionRepository
 import io.openfuture.chain.service.BaseTransactionService
 import io.openfuture.chain.service.CommonUTransactionService
 import io.openfuture.chain.service.WalletService
+import io.openfuture.chain.util.TransactionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
@@ -53,7 +54,7 @@ abstract class DefaultCommonUTransactionService<Entity : UTransaction, Data : Ba
     }
 
     open fun validate(dto: BaseTransactionDto<Data>) {
-        if (!isValidHash(dto.data, dto.hash)) {
+        if (!isValidHash(dto.data, dto.senderSignature, dto.senderPublicKey, dto.hash)) {
             throw ValidationException("Invalid transaction hash")
         }
         commonValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
@@ -76,11 +77,11 @@ abstract class DefaultCommonUTransactionService<Entity : UTransaction, Data : Ba
         }
     }
 
-    private fun isValidHash(data: Data, hash: String): Boolean {
-        return data.getHash() == hash
+    private fun isValidHash(data: Data, publicKey: String, signature: String, hash: String): Boolean {
+        return TransactionUtils.createHash(data, publicKey, signature) == hash
     }
 
-    private fun isValidaSignature(data: Data, signature: String, publicKey: String): Boolean {
+    private fun isValidaSignature(data: Data, publicKey: String, signature: String): Boolean {
         return SignatureManager.verify(data.getBytes(), signature, HashUtils.fromHexString(publicKey))
     }
 

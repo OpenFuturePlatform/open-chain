@@ -74,14 +74,14 @@ class BlockCreationProcessor(
         return pendingBlock
     }
 
-    private fun create(transactionsFromPool: MutableList<UTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
+    private fun create(pendingTransactions: MutableList<UTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
         val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
 
         val time = clock.networkTime()
         val privateKey = keyHolder.getPrivateKey()
         val block = when (blockType) {
             BlockType.MAIN -> {
-                val transactions = prepareTransactions(transactionsFromPool)
+                val transactions = prepareTransactions(pendingTransactions)
 
                 MainBlock(
                     privateKey,
@@ -107,15 +107,15 @@ class BlockCreationProcessor(
         signCreatedBlock(block)
     }
 
-    private fun prepareTransactions(transactionsFromPool: MutableList<UTransaction>): MutableList<UTransaction> {
-        val fees = transactionsFromPool.map { it.fee }.sum()
+    private fun prepareTransactions(pendingTransactions: MutableList<UTransaction>): MutableList<UTransaction> {
+        val fees = pendingTransactions.map { it.fee }.sum()
         val delegate = delegateService.getByPublicKey(HashUtils.toHexString(keyHolder.getPublicKey()))
         val rewardTransactionData = RewardTransactionData((fees + consensusProperties.rewardBlock!!),
             consensusProperties.feeRewardTx!!, delegate.address, consensusProperties.genesisAddress!!)
 
         val rewardTransaction = rewardTransactionEntityConverter.toEntity(clock.networkTime(), rewardTransactionData)
 
-        return mutableListOf(rewardTransaction, *transactionsFromPool.toTypedArray())
+        return mutableListOf(rewardTransaction, *pendingTransactions.toTypedArray())
     }
 
 }

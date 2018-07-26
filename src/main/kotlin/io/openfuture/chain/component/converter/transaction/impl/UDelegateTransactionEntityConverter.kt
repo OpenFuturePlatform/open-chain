@@ -5,6 +5,7 @@ import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
 import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
+import io.openfuture.chain.util.TransactionUtils
 import org.springframework.stereotype.Component
 
 @Component
@@ -32,7 +33,7 @@ class UDelegateTransactionEntityConverter : ManualTransactionEntityConverter<UDe
             request.data!!.senderAddress,
             request.senderPublicKey!!,
             request.senderSignature!!,
-            getHash(request),
+            TransactionUtils.createHash(request.data!!, request.senderPublicKey!!, request.senderSignature!!),
             request.data!!.delegateKey
         )
 
