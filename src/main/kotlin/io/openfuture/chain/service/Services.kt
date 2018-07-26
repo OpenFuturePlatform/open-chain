@@ -23,7 +23,7 @@ import io.openfuture.chain.entity.transaction.DelegateTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.domain.NetworkAddress
-import io.openfuture.chain.protocol.CommunicationProtocol
+import io.openfuture.chain.network.domain.Packet
 import org.springframework.data.domain.Page
 
 interface HardwareInfoService {
