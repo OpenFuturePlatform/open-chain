@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Constants fees and reward for transactions/block to properties
 - Verify the reward transaction
 - Version and timestamp fields to all packets
+- Database: unconfirmed transactions tables
 
 ### Changed
 - Serialization mechanism to support kotlin classes
