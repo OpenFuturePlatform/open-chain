@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 @Component
 class RewardTransactionEntityConverter(
     private val keyHolder: NodeKeyHolder
-) : EmbeddedTransactionEntityConverter<RewardTransaction, RewardTransactionData> {
+) : EmbeddedTransactionEntityConverter<RewardTransaction, RewardTransactionData>() {
 
     override fun toEntity(dto: BaseTransactionDto<RewardTransactionData>): RewardTransaction = RewardTransaction(
         dto.timestamp,
@@ -34,7 +34,7 @@ class RewardTransactionEntityConverter(
             data.senderAddress,
             HashUtils.toHexString(keyHolder.getPublicKey()),
             SignatureManager.sign(data.getBytes(), keyHolder.getPrivateKey()),
-            data.getHash()
+            getHash(data, keyHolder.getPublicKey(), keyHolder.getPrivateKey())
         )
 
 }

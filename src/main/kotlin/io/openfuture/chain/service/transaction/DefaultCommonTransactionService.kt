@@ -1,6 +1,6 @@
 package io.openfuture.chain.service.transaction
 
-import io.openfuture.chain.component.converter.transaction.TransactionEntityConverter
+import io.openfuture.chain.component.converter.transaction.impl.BaseTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
@@ -19,9 +19,9 @@ import io.openfuture.chain.service.WalletService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
-abstract class DefaultCommonTransactionService<Entity : BaseTransaction, Data : BaseTransactionData, Converter : TransactionEntityConverter<Entity, Data>>(
+abstract class DefaultCommonTransactionService<Entity : BaseTransaction, Data : BaseTransactionData>(
     protected val repository: BaseTransactionRepository<Entity>,
-    protected val entityConverter: Converter
+    protected open val entityConverter: BaseTransactionEntityConverter<Entity, Data>
 ) : CommonTransactionService<Entity, Data> {
 
     @Autowired
@@ -80,7 +80,7 @@ abstract class DefaultCommonTransactionService<Entity : BaseTransaction, Data : 
         //todo: networkService.broadcast(transaction.toMessage)
     }
 
-    protected fun commonValidate(data : Data, signature: String, publicKey: String) {
+    protected fun commonValidate(data: Data, signature: String, publicKey: String) {
         //todo need to add address validation
 
         if (!isValidSenderBalance(data.senderAddress, data.amount)) {
@@ -108,7 +108,7 @@ abstract class DefaultCommonTransactionService<Entity : BaseTransaction, Data : 
         val balance = walletService.getBalanceByAddress(senderAddress)
         val unconfirmedOutput = baseService.getAllPending()
             .filter { it.senderAddress == senderAddress }
-            .map { it.amount + it.fee}
+            .map { it.amount + it.fee }
             .sum()
 
         val unspentBalance = balance - unconfirmedOutput

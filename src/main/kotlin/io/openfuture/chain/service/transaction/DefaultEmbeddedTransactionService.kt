@@ -8,6 +8,6 @@ import io.openfuture.chain.service.EmbeddedTransactionService
 
 abstract class DefaultEmbeddedTransactionService<Entity : BaseTransaction, Data : BaseTransactionData>(
     repository: BaseTransactionRepository<Entity>,
-    entityConverter: EmbeddedTransactionEntityConverter<Entity, Data>
-) : DefaultCommonTransactionService<Entity, Data, EmbeddedTransactionEntityConverter<Entity, Data>>(repository, entityConverter),
+    override val entityConverter: EmbeddedTransactionEntityConverter<Entity, Data>
+) : DefaultCommonTransactionService<Entity, Data>(repository, entityConverter),
     EmbeddedTransactionService<Entity, Data>
