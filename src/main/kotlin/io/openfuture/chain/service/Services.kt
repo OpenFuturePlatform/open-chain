@@ -77,6 +77,8 @@ interface BaseTransactionService<Entity : BaseTransaction> {
 
     fun getAllPending(): MutableSet<Entity>
 
+    fun getAllPending(limit: Int): MutableSet<Entity>
+
     fun getPendingFirstWithLimit(limit: Int): MutableSet<Entity>
 
     fun get(hash: String): Entity

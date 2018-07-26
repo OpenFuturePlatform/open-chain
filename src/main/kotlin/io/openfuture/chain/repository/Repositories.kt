@@ -7,10 +7,11 @@ import io.openfuture.chain.entity.transaction.VoteTransaction
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
+import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.stereotype.Repository
 
 @NoRepositoryBean
-interface BaseRepository<T> : JpaRepository<T, Int>
+interface BaseRepository<T> : JpaRepository<T, Int>, PagingAndSortingRepository<T, Int>
 
 @Repository
 interface BlockRepository<T: Block> : BaseRepository<T> {
