@@ -17,8 +17,9 @@ abstract class DefaultManualUTransactionService<Entity : UTransaction, Data : Ba
     @Transactional
     override fun add(request: BaseTransactionRequest<Data>): Entity {
         validate(request)
-        //todo process
-        return saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), request))
+        val uTx = entityConverter.toEntity(nodeClock.networkTime(), request)
+        process(uTx)
+        return saveAndBroadcast(uTx)
     }
 
     protected abstract fun validate(request: BaseTransactionRequest<Data>)
