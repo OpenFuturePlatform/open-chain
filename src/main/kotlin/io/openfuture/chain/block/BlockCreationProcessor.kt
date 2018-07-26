@@ -55,11 +55,6 @@ class BlockCreationProcessor(
     fun approveBlock(pendingBlock: PendingBlock): PendingBlock {
         val block = pendingBlock.block
 
-        val currentTime = clock.networkTime()
-        if (timeSlot.verifyTimeSlot(currentTime, block)) {
-            throw IllegalArgumentException("Block were created for over time")
-        }
-
         if (!validationService.isValid(block)) {
             throw IllegalArgumentException("Inbound block is not valid")
         }

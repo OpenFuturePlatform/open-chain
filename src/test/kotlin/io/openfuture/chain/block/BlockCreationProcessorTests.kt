@@ -44,6 +44,7 @@ class BlockCreationProcessorTests: ServiceTests() {
 
     private lateinit var processor: BlockCreationProcessor
 
+
     @Before
     fun init() {
         val block = createMainBlock()

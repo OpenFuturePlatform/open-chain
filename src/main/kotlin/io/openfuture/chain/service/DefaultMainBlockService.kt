@@ -21,9 +21,11 @@ class DefaultMainBlockService(
     override fun getLast(): MainBlock = blockRepository.findFirstByOrderByHeightDesc()
         ?: throw NotFoundException("Last MainBlock block not exist!")
 
+    @Transactional(readOnly = true)
     override fun get(hash: String): MainBlock = blockRepository.findByHash(hash)
         ?: throw NotFoundException("Block with hash:$hash not found ")
 
+    @Transactional
     override fun save(block: MainBlock): MainBlock = blockRepository.save(block)
 
     override fun isValid(block: MainBlock): Boolean {

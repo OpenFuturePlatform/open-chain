@@ -18,6 +18,7 @@ import org.mockito.BDDMockito.times
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
+import java.util.*
 
 class SignatureCollectorTests : ServiceTests() {
 
@@ -29,6 +30,7 @@ class SignatureCollectorTests : ServiceTests() {
     @Mock private lateinit var scheduler: ThreadPoolTaskScheduler
 
     private lateinit var signatureCollector: SignatureCollector
+
 
     @Before
     fun setUp() {
@@ -44,6 +46,8 @@ class SignatureCollectorTests : ServiceTests() {
         val generatedBlock = createGenesisPendingBlock()
 
         signatureCollector.setPendingBlock(generatedBlock)
+
+        verify(scheduler, times(1)).schedule(any(Runnable::class.java), any(Date::class.java))
     }
 
     @Test
