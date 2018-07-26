@@ -1,5 +1,6 @@
 package io.openfuture.chain.entity.transaction.unconfirmed
 
+import io.openfuture.chain.entity.transaction.RewardTransaction
 import javax.persistence.Entity
 import javax.persistence.Table
 
@@ -14,4 +15,17 @@ class URewardTransaction(
     senderPublicKey: String,
     senderSignature: String,
     hash: String
-) : UTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash)
+) : UTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash) {
+
+    override fun toConfirmed(): RewardTransaction = RewardTransaction(
+        timestamp,
+        amount,
+        fee,
+        recipientAddress,
+        senderAddress,
+        senderPublicKey,
+        senderSignature,
+        hash
+    )
+
+}

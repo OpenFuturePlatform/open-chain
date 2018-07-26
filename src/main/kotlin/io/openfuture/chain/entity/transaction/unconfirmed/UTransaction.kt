@@ -1,5 +1,6 @@
 package io.openfuture.chain.entity.transaction.unconfirmed
 
+import io.openfuture.chain.entity.transaction.Transaction
 import io.openfuture.chain.entity.transaction.base.BaseTransaction
 import javax.persistence.Entity
 import javax.persistence.Inheritance
@@ -18,4 +19,8 @@ abstract class UTransaction(
     senderPublicKey: String,
     senderSignature: String,
     hash: String
-) : BaseTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash)
+) : BaseTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash) {
+
+    abstract fun toConfirmed(): Transaction
+
+}
