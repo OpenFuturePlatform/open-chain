@@ -15,10 +15,8 @@ import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.service.*
 import io.openfuture.chain.property.ConsensusProperties
-import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.service.ConsensusService
-import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component

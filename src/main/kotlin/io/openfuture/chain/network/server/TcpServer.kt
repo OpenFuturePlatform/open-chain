@@ -1,14 +1,14 @@
 package io.openfuture.chain.network.server
 
 import io.netty.bootstrap.ServerBootstrap
-import io.openfuture.chain.property.NodeProperty
+import io.openfuture.chain.property.NodeProperties
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class TcpServer(
-    private val serverBootstrap: ServerBootstrap,
-    private val properties: NodeProperty
+    private val bootstrap: ServerBootstrap,
+    private val properties: NodeProperties
 ) : Runnable {
 
     companion object {
@@ -18,7 +18,7 @@ class TcpServer(
 
     override fun run() {
         try {
-            val future = serverBootstrap.bind(properties.port!!)
+            val future = bootstrap.bind(properties.port!!)
             log.info("Netty started on port: ${properties.port}")
 
             future.sync()

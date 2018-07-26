@@ -19,7 +19,7 @@ class NodeInfoController(
 
     @GetMapping("/getVersion")
     fun getVersion(): RestResponse<String> {
-        return RestResponse(getResponseHeader(), nodeProperty.version!!)
+        return RestResponse(getResponseHeader(), nodeProperties.version!!)
     }
 
     @GetMapping("/getTimestamp")

@@ -70,6 +70,23 @@ class BlockCreationProcessorTests : ServiceTests() {
         processor.approveBlock(pendingBlock)
     }
 
+    @Test
+    fun fireBlockCreationShouldCreateMainBlock() {
+        val transactions = createTransactions()
+        val genesisBlock = createGenesisBlock()
+
+        given(keyHolder.getPublicKey()).willReturn(HashUtils.fromHexString("public_key"))
+        given(keyHolder.getPrivateKey()).willReturn(HashUtils.fromHexString("private_key"))
+
+        val delegate = Delegate(HashUtils.toHexString(keyHolder.getPublicKey()), "address", 1)
+        genesisBlock.activeDelegates = setOf(delegate)
+        val event = BlockCreationEvent(transactions)
+
+        given(blockService.getLastGenesis()).willReturn(genesisBlock)
+
+        processor.fireBlockCreation(event)
+    }
+
     private fun createPendingBlock(block: Block): PendingBlock {
         return PendingBlock(
             block,
@@ -84,6 +101,19 @@ class BlockCreationProcessorTests : ServiceTests() {
         "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
         1512345678L,
         createTransactions()
+    )
+
+    private fun createGenesisBlock() = GenesisBlock(
+        ByteArray(1),
+        123,
+        "prev_block_hash",
+        1512345678L,
+        1,
+        setOf(
+            Delegate("public_key1", "host1", 1),
+            Delegate("public_key2", "host2", 2),
+            Delegate("public_key3", "host3", 3)
+        )
     )
 
     private fun createTransactions(): MutableList<BaseTransaction> = mutableListOf(

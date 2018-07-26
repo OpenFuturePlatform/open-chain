@@ -9,7 +9,7 @@ import javax.validation.constraints.*
 @Component
 @Validated
 @ConfigurationProperties(value = "node")
-class NodeProperty(
+class NodeProperties(
 
     /** Node Server Host */
     @field:NotNull

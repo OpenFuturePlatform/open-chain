@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Delegate transaction type
+- Add delegate based on Delegate transaction
+- RPC: Response header info for all responses
+- RPC: Add transactions
+- RPC: Delegate info
+- RPC: Page request filter
+- Add / remove vote for delegate from wallet based on Vote transaction
+- Calculate delegate rating based on wallet balance
+- Version and timestamp fields to all packets
 - Fees to transactions
 - New type transaction: RewardTransaction. New entity, repository, service
 - Addition to block
@@ -14,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Verify the reward transaction
 
 ### Changed
+- Serialization mechanism to support kotlin classes
 - Structure of transactions
 
 ## [0.3.0] - 2018-07-13
