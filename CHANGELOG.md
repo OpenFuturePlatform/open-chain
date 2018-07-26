@@ -6,13 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
-- Fees to transactions
-- New type of transaction: CoinBaseTransaction
-- Genesis address to properties
-- Sign transactions
-- Create and save CoinBaseTransaction
-- Validation of CoinBaseTransaction
-- Constants fees and reward for transactions/block
+- Version and timestamp fields to all packets
+- Synchronizations data about blocks and transactions after node up
+
+### Changed
+- Serialization mechanism to support kotlin classes
 
 ## [0.3.0] - 2018-07-13
 ### Added
