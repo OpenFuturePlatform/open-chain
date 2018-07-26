@@ -14,14 +14,18 @@ class NetworkAddressTest {
     @Test
     fun writeShouldWriteExactValuesInBuffer() {
         val actualBuffer = Unpooled.buffer()
+
         entity.write(actualBuffer)
+
         assertThat(actualBuffer).isEqualTo(buffer)
     }
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
         val actualEntity = NetworkAddress::class.java.newInstance()
+
         actualEntity.read(buffer)
+
         assertThat(actualEntity).isEqualTo(entity)
     }
 
