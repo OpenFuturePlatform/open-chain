@@ -74,7 +74,7 @@ class NodeInfoControllerTests : ControllerTests() {
                 .expectBody(expectedBody::class.java)
                 .returnResult().responseBody!!
 
-        assertThat(1L).isLessThan(result.body!!.toLong())
+        assertThat(1L).isLessThan(result.body)
     }
 
     @Test

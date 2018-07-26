@@ -6,9 +6,8 @@ import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.RewardTransactionData
-import io.openfuture.chain.entity.transaction.RewardTransaction
-import io.openfuture.chain.util.TransactionUtils
 import io.openfuture.chain.entity.transaction.unconfirmed.URewardTransaction
+import io.openfuture.chain.util.TransactionUtils
 import org.springframework.stereotype.Component
 
 @Component
