@@ -1,7 +1,7 @@
 package io.openfuture.chain.network.config
 
 import io.netty.bootstrap.Bootstrap
-import io.netty.channel.ChannelOption
+import io.netty.channel.ChannelOption.SO_KEEPALIVE
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.openfuture.chain.network.client.handler.ClientChannelInitializer
@@ -20,7 +20,7 @@ class NioClientConfig(
         .group(clientGroup())
         .channel(NioSocketChannel::class.java)
         .handler(clientChannelInitializer)
-        .option(ChannelOption.SO_KEEPALIVE, property.keepAlive)
+        .option(SO_KEEPALIVE, property.keepAlive)
 
     @Bean(destroyMethod = "shutdownGracefully")
     fun clientGroup(): NioEventLoopGroup = NioEventLoopGroup()

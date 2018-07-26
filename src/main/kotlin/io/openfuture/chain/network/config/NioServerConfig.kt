@@ -2,7 +2,7 @@ package io.openfuture.chain.network.config
 
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelInitializer
-import io.netty.channel.ChannelOption
+import io.netty.channel.ChannelOption.*
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
@@ -21,9 +21,9 @@ class NioServerConfig(
         .group(bossGroup(), workerGroup())
         .channel(NioServerSocketChannel::class.java)
         .childHandler(serverChannelInitializer)
-        .option(ChannelOption.SO_BACKLOG, property.backlog)
-        .childOption(ChannelOption.SO_KEEPALIVE, property.keepAlive)
-        .childOption(ChannelOption.CONNECT_TIMEOUT_MILLIS, property.connectionTimeout)
+        .option(SO_BACKLOG, property.backlog)
+        .childOption(SO_KEEPALIVE, property.keepAlive)
+        .childOption(CONNECT_TIMEOUT_MILLIS, property.connectionTimeout)
 
     @Bean(destroyMethod = "shutdownGracefully")
     fun bossGroup(): NioEventLoopGroup = NioEventLoopGroup(property.bossCount!!)
