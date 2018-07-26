@@ -2,33 +2,18 @@ package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.entity.MainBlock
-import io.openfuture.chain.entity.transaction.CoinBaseTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import io.openfuture.chain.property.ConsensusProperties
-import org.assertj.core.api.Java6Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.Before
 import org.junit.Test
-import org.mockito.BDDMockito.given
-import org.mockito.Mock
 
 class MainBlockValidatorTests : ServiceTests() {
 
-    @Mock private lateinit var properties: ConsensusProperties
-
     private lateinit var mainBlockValidator: MainBlockValidator
-
-    companion object {
-        private const val GENESIS_ADDRESS = "0x00000"
-        private const val REWARD_BLOCK = 10.0
-    }
-
 
     @Before
     fun setUp() {
-        mainBlockValidator = MainBlockValidator(properties)
-
-        given(properties.genesisAddress).willReturn(GENESIS_ADDRESS)
-        given(properties.rewardBlock).willReturn(REWARD_BLOCK)
+        mainBlockValidator = MainBlockValidator()
     }
 
     @Test
@@ -39,16 +24,17 @@ class MainBlockValidatorTests : ServiceTests() {
             "0e09773036394004cb8c340e639a89d7a18e924e8a3d048b49864aeb017e07a0",
             1512345678L,
             mutableListOf(
-                CoinBaseTransaction(
+                VoteTransaction(
                     1500000000L,
-                    10.0 + REWARD_BLOCK,
-                    0.0,
+                    1000.0,
+                    10.0,
                     "recipient_address",
                     "sender_key",
-                    GENESIS_ADDRESS,
-                    "hash",
-                    "sender_signature"
-                ),
+                    "sender_address",
+                    1,
+                    "delegate_host",
+                    9999
+                ).sign(ByteArray(1)),
                 VoteTransaction(
                     1500000001L,
                     1002.0,
@@ -58,17 +44,14 @@ class MainBlockValidatorTests : ServiceTests() {
                     "sender_address2",
                     2,
                     "delegate_host2",
-                    11999,
-                    "hash2",
-                    "sender_signature2"
-                )
+                    11999
+                ).sign(ByteArray(1))
             )
-        ).sign<MainBlock>(ByteArray(1))
+        )
 
         val isBlockValid = mainBlockValidator.isValid(block)
 
-
-        assertThat(isBlockValid).isTrue()
+        Assertions.assertThat(isBlockValid).isTrue()
     }
 
     @Test
@@ -88,10 +71,8 @@ class MainBlockValidatorTests : ServiceTests() {
                     "sender_address",
                     1,
                     "delegate_host",
-                    9999,
-                    "hash",
-                    "sender_signature"
-                ),
+                    9999
+                ).sign(ByteArray(1)),
                 VoteTransaction(
                     1500000001L,
                     1002.0,
@@ -101,16 +82,13 @@ class MainBlockValidatorTests : ServiceTests() {
                     "sender_address2",
                     2,
                     "delegate_host2",
-                    11999,
-                    "hash2",
-                    "sender_signature2"
-                )
+                    11999
+                ).sign(ByteArray(1))
             )
-        ).sign<MainBlock>(ByteArray(1))
+        )
 
         val isBlockValid = mainBlockValidator.isValid(block)
 
-        assertThat(isBlockValid).isFalse()
+        Assertions.assertThat(isBlockValid).isFalse()
     }
-
 }

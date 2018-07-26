@@ -3,6 +3,8 @@ package io.openfuture.chain.network.domain
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.annotation.NoArgConstructor
 import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.network.extension.readList
+import io.openfuture.chain.network.extension.writeList
 
 @NoArgConstructor
 class NetworkGenesisBlock(height: Long,
@@ -24,14 +26,14 @@ class NetworkGenesisBlock(height: Long,
         super.readParams(buffer)
 
         epochIndex = buffer.readLong()
-        activeDelegates = readList<NetworkDelegate>(buffer).toMutableSet()
+        activeDelegates = buffer.readList<NetworkDelegate>().toMutableSet()
     }
 
     override fun writeParams(buffer: ByteBuf) {
         super.writeParams(buffer)
 
         buffer.writeLong(epochIndex)
-        writeList(buffer, activeDelegates.toList())
+        buffer.writeList(activeDelegates.toList())
     }
 
     override fun toString() = "NetworkGenesisBlock(hash=$hash)"

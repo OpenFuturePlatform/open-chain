@@ -2,6 +2,8 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.network.extension.readString
+import io.openfuture.chain.network.extension.writeString
 
 class NetworkVoteTransaction(timestamp: Long,
                              amount: Double,
@@ -25,7 +27,7 @@ class NetworkVoteTransaction(timestamp: Long,
         super.read(buffer)
 
         voteTypeId = buffer.readInt()
-        delegateHost = readString(buffer)
+        delegateHost = buffer.readString()
         delegatePort = buffer.readInt()
     }
 
@@ -33,7 +35,7 @@ class NetworkVoteTransaction(timestamp: Long,
         super.write(buffer)
 
         buffer.writeInt(voteTypeId)
-        writeString(buffer, delegateHost)
+        buffer.writeString(delegateHost)
         buffer.writeInt(delegatePort)
     }
 

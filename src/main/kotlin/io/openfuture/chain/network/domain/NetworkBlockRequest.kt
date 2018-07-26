@@ -2,16 +2,18 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.annotation.NoArgConstructor
+import io.openfuture.chain.network.extension.readString
+import io.openfuture.chain.network.extension.writeString
 
 @NoArgConstructor
 data class NetworkBlockRequest(var hash: String) : Packet() {
 
     override fun readParams(buffer: ByteBuf) {
-        hash = readString(buffer)
+        hash = buffer.readString()
     }
 
     override fun writeParams(buffer: ByteBuf) {
-        writeString(buffer, hash)
+        buffer.writeString(hash)
     }
 
 }

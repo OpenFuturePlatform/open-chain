@@ -2,6 +2,8 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.annotation.NoArgConstructor
+import io.openfuture.chain.network.extension.readString
+import io.openfuture.chain.network.extension.writeString
 
 @NoArgConstructor
 abstract class NetworkTransaction(var timestamp: Long,
@@ -17,22 +19,22 @@ abstract class NetworkTransaction(var timestamp: Long,
         timestamp = buffer.readLong()
         amount = buffer.readDouble()
         fee = buffer.readDouble()
-        recipientAddress = readString(buffer)
-        senderKey = readString(buffer)
-        senderAddress = readString(buffer)
-        senderSignature = readString(buffer)
-        hash = readString(buffer)
+        recipientAddress = buffer.readString()
+        senderKey = buffer.readString()
+        senderAddress = buffer.readString()
+        senderSignature = buffer.readString()
+        hash = buffer.readString()
     }
 
     override fun write(buffer: ByteBuf) {
         buffer.writeLong(timestamp)
         buffer.writeDouble(amount)
         buffer.writeDouble(fee)
-        writeString(buffer, recipientAddress)
-        writeString(buffer, senderKey)
-        writeString(buffer, senderAddress)
-        writeString(buffer, senderSignature)
-        writeString(buffer, hash)
+        buffer.writeString(recipientAddress)
+        buffer.writeString(senderKey)
+        buffer.writeString(senderAddress)
+        buffer.writeString(senderSignature)
+        buffer.writeString(hash)
     }
 
 }

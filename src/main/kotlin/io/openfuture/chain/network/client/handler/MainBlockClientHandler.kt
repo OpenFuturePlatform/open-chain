@@ -31,12 +31,12 @@ class MainBlockClientHandler(
         val savedBlock = blockService.save(block)
 
         val transferTransactions = message.transferTransactions
-            .filter { transferTransactionService.isExists(it.hash) }
+            .filter { !transferTransactionService.isExists(it.hash) }
             .map { TransferTransaction.of(it).apply { this.block = savedBlock } }
         transferTransactionService.save(transferTransactions)
 
         val voteTransactions = message.voteTransactions
-            .filter { voteTransactionService.isExists(it.hash) }
+            .filter { !voteTransactionService.isExists(it.hash) }
             .map { VoteTransaction.of(it).apply { this.block = savedBlock } }
         voteTransactionService.save(voteTransactions)
     }

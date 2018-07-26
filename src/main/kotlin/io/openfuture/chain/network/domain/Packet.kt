@@ -1,6 +1,8 @@
 package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
+import io.openfuture.chain.network.extension.readString
+import io.openfuture.chain.network.extension.writeString
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
 
@@ -10,7 +12,7 @@ abstract class Packet(
 ) : NetworkEntity() {
 
     override fun read(buffer: ByteBuf) {
-        version = readString(buffer)
+        version = buffer.readString()
         timestamp = buffer.readLong()
         readParams(buffer)
     }
@@ -19,7 +21,7 @@ abstract class Packet(
         if (StringUtils.isEmpty(version) || null == timestamp) {
             throw IllegalStateException("Can't write packet without version or timestamp")
         }
-        writeString(buffer, version!!)
+        buffer.writeString(version!!)
         buffer.writeLong(timestamp!!)
         writeParams(buffer)
     }

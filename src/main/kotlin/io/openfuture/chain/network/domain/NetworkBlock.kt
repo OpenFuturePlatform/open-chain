@@ -2,6 +2,8 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.annotation.NoArgConstructor
+import io.openfuture.chain.network.extension.readString
+import io.openfuture.chain.network.extension.writeString
 
 @NoArgConstructor
 abstract class NetworkBlock(var height: Long,
@@ -15,22 +17,22 @@ abstract class NetworkBlock(var height: Long,
 
     override fun readParams(buffer: ByteBuf) {
         height = buffer.readLong()
-        previousHash = readString(buffer)
-        merkleHash = readString(buffer)
+        previousHash = buffer.readString()
+        merkleHash = buffer.readString()
         blockTimestamp = buffer.readLong()
         typeId = buffer.readInt()
-        hash = readString(buffer)
-        signature = readString(buffer)
+        hash = buffer.readString()
+        signature = buffer.readString()
     }
 
     override fun writeParams(buffer: ByteBuf) {
         buffer.writeLong(height)
-        writeString(buffer, previousHash)
-        writeString(buffer, merkleHash)
+        buffer.writeString(previousHash)
+        buffer.writeString(merkleHash)
         buffer.writeLong(blockTimestamp)
         buffer.writeInt(typeId)
-        writeString(buffer, hash)
-        writeString(buffer, signature)
+        buffer.writeString(hash)
+        buffer.writeString(signature)
     }
 
 }

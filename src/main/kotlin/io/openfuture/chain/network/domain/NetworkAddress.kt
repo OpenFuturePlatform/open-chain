@@ -2,6 +2,8 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.annotation.NoArgConstructor
+import io.openfuture.chain.network.extension.readString
+import io.openfuture.chain.network.extension.writeString
 
 @NoArgConstructor
 data class NetworkAddress(
@@ -10,12 +12,12 @@ data class NetworkAddress(
 ) : NetworkEntity() {
 
     override fun read(buffer: ByteBuf) {
-        host = readString(buffer)
+        host = buffer.readString()
         port = buffer.readInt()
     }
 
     override fun write(buffer: ByteBuf) {
-        writeString(buffer, host)
+        buffer.writeString(host)
         buffer.writeInt(port)
     }
 

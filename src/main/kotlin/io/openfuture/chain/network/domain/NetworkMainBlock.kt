@@ -5,6 +5,8 @@ import io.openfuture.chain.annotation.NoArgConstructor
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.network.extension.readList
+import io.openfuture.chain.network.extension.writeList
 
 @NoArgConstructor
 class NetworkMainBlock(height: Long,
@@ -26,15 +28,15 @@ class NetworkMainBlock(height: Long,
     override fun readParams(buffer: ByteBuf) {
         super.readParams(buffer)
 
-        transferTransactions = readList(buffer)
-        voteTransactions = readList(buffer)
+        transferTransactions = buffer.readList()
+        voteTransactions = buffer.readList()
     }
 
     override fun writeParams(buffer: ByteBuf) {
         super.writeParams(buffer)
 
-        writeList(buffer, transferTransactions)
-        writeList(buffer, voteTransactions)
+        buffer.writeList(transferTransactions)
+        buffer.writeList(voteTransactions)
     }
 
     override fun toString() = "NetworkMainBlock(hash=$hash)"

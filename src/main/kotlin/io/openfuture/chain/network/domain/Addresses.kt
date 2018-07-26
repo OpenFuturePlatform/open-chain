@@ -2,6 +2,8 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.annotation.NoArgConstructor
+import io.openfuture.chain.network.extension.readList
+import io.openfuture.chain.network.extension.writeList
 
 @NoArgConstructor
 data class Addresses(
@@ -9,11 +11,11 @@ data class Addresses(
 ) : Packet() {
 
     override fun readParams(buffer: ByteBuf) {
-        values = readList(buffer)
+        values = buffer.readList()
     }
 
     override fun writeParams(buffer: ByteBuf) {
-        writeList(buffer, values)
+        buffer.writeList(values)
     }
 
 }
