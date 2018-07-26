@@ -6,7 +6,7 @@ import io.openfuture.chain.network.domain.FindAddresses
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.network.domain.Packet
 import io.openfuture.chain.network.server.TcpServer
-import io.openfuture.chain.property.NodeProperty
+import io.openfuture.chain.property.NodeProperties
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationListener
@@ -19,7 +19,7 @@ import java.util.concurrent.Executors
 class DefaultNetworkService(
     private val bootstrap: Bootstrap,
     private val tcpServer: TcpServer,
-    private val property: NodeProperty,
+    private val properties: NodeProperties,
     private val connectionService: ConnectionService
 ) : NetworkService, ApplicationListener<ApplicationReadyEvent> {
 
@@ -31,7 +31,7 @@ class DefaultNetworkService(
     override fun onApplicationEvent(event: ApplicationReadyEvent) {
         Executors.newSingleThreadExecutor().execute(tcpServer)
 
-        val address = property.getRootAddresses().shuffled(SecureRandom()).first()
+        val address = properties.getRootAddresses().shuffled(SecureRandom()).first()
         bootstrap.connect(address.host, address.port).addListener { future ->
             future as ChannelFuture
             if (future.isSuccess) {
@@ -57,16 +57,16 @@ class DefaultNetworkService(
 
     override fun connect(peers: List<NetworkAddress>) {
         peers.map { NetworkAddress(it.host, it.port) }
-            .filter { !connectionService.getConnectionAddresses().contains(it) && it != NetworkAddress(property.host!!,
-                property.port!!) }
+            .filter { !connectionService.getConnectionAddresses().contains(it) && it != NetworkAddress(properties.host!!,
+                properties.port!!) }
             .forEach { bootstrap.connect(it.host, it.port) }
     }
 
-    private fun isConnectionNeeded(): Boolean = property.peersNumber!! > connectionService.getConnections().size
+    private fun isConnectionNeeded(): Boolean = properties.peersNumber!! > connectionService.getConnections().size
 
     private fun requestAddresses() {
         val address = connectionService.getConnectionAddresses().shuffled(SecureRandom()).firstOrNull()
-            ?: property.getRootAddresses().shuffled().first()
+            ?: properties.getRootAddresses().shuffled().first()
 
         send(address, FindAddresses())
     }

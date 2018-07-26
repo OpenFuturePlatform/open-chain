@@ -22,9 +22,7 @@ abstract class DefaultManualUTransactionService<Entity : UTransaction, Data : Ba
         return saveAndBroadcast(uTx)
     }
 
-    protected abstract fun validate(request: BaseTransactionRequest<Data>)
-
-    protected fun baseValidate(request: BaseTransactionRequest<Data>) {
+    open fun validate(request: BaseTransactionRequest<Data>) {
         commonValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
     }
 

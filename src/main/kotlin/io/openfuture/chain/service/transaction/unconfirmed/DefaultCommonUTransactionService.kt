@@ -1,6 +1,5 @@
 package io.openfuture.chain.service.transaction.unconfirmed
 
-import io.openfuture.chain.component.converter.transaction.TransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
@@ -52,18 +51,16 @@ abstract class DefaultCommonUTransactionService<Entity : UTransaction, Data : Ba
         return saveAndBroadcast(entityConverter.toEntity(dto))
     }
 
-    protected fun saveAndBroadcast(tx: Entity): Entity {
-        return repository.save(tx)
-        //todo: networkService.broadcast(transaction.toMessage)
-    }
-
-    protected abstract fun validate(dto: BaseTransactionDto<Data>)
-
-    protected fun baseValidate(dto: BaseTransactionDto<Data>) {
+    open fun validate(dto: BaseTransactionDto<Data>) {
         if (!isValidHash(dto.data, dto.hash)) {
             throw ValidationException("Invalid transaction hash")
         }
         commonValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
+    }
+
+    protected fun saveAndBroadcast(tx: Entity): Entity {
+        return repository.save(tx)
+        //todo: networkService.broadcast(transaction.toMessage)
     }
 
     protected fun commonValidate(data: Data, signature: String, publicKey: String) {
@@ -103,4 +100,5 @@ abstract class DefaultCommonUTransactionService<Entity : UTransaction, Data : Ba
         }
         return true
     }
+
 }

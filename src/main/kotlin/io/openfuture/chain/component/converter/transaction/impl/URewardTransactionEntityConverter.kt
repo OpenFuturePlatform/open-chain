@@ -35,7 +35,7 @@ class URewardTransactionEntityConverter(
             data.senderAddress,
             HashUtils.toHexString(keyHolder.getPublicKey()),
             SignatureManager.sign(data.getBytes(), keyHolder.getPrivateKey()),
-            data.getHash()
+            getHash(data, keyHolder.getPublicKey(), keyHolder.getPrivateKey())
         )
 
 }

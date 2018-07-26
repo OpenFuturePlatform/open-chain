@@ -77,7 +77,6 @@ interface CryptoService {
 /**
  * The utility service that is not aware of transaction types, has default implementation
  */
-
 interface BaseTransactionService {
 
     fun getPending(): MutableSet<UTransaction>
