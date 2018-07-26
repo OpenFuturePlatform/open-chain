@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class TcpServer(
-    private val serverBootstrap: ServerBootstrap,
+    private val bootstrap: ServerBootstrap,
     private val properties: NodeProperties
 ) : Runnable {
 
@@ -18,7 +18,7 @@ class TcpServer(
 
     override fun run() {
         try {
-            val future = serverBootstrap.bind(properties.port!!)
+            val future = bootstrap.bind(properties.port!!)
             log.info("Netty started on port: ${properties.port}")
 
             future.sync()
