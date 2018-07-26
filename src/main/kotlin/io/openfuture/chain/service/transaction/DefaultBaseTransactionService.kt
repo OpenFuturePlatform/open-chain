@@ -22,9 +22,8 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction>(
         return HashSet(repository.findAll(pageable).content)
     }
 
-    override fun getPendingFirstWithLimit(limit: Int): MutableSet<Entity> {
-        return getAllPending(limit)
-    }
+    override fun getPendingFirstWithLimit(limit: Int): MutableSet<Entity>
+        = getAllPending(limit)
 
     @Transactional(readOnly = true)
     override fun get(hash: String): Entity = repository.findOneByHash(hash)
