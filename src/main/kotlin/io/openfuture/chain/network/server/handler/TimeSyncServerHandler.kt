@@ -2,29 +2,20 @@ package io.openfuture.chain.network.server.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.component.node.NodeClock
-import io.openfuture.chain.network.base.BaseHandler
-import io.openfuture.chain.protocol.CommunicationProtocol.Packet
-import io.openfuture.chain.protocol.CommunicationProtocol.TimeSyncResponse
-import io.openfuture.chain.protocol.CommunicationProtocol.Type.TIME_SYNC_REQUEST
-import io.openfuture.chain.protocol.CommunicationProtocol.Type.TIME_SYNC_RESPONSE
+import io.openfuture.chain.network.domain.AskTime
+import io.openfuture.chain.network.domain.Time
+import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 @Component
-@Scope("prototype")
+@Scope(SCOPE_PROTOTYPE)
 class TimeSyncServerHandler(
-        private val clock: NodeClock
-) : BaseHandler(TIME_SYNC_REQUEST) {
+    private val clock: NodeClock
+) : ServerHandler<AskTime>() {
 
-    override fun packetReceived(ctx: ChannelHandlerContext, message: Packet) {
-        val response = Packet.newBuilder()
-                .setType(TIME_SYNC_RESPONSE)
-                .setTimeSyncResponse(TimeSyncResponse.newBuilder()
-                        .setNetworkTimestamp(clock.networkTime())
-                        .setNodeTimestamp(message.timeSyncRequest.nodeTimestamp)
-                        .build())
-                .build()
-        ctx.channel().writeAndFlush(response)
+    override fun channelRead0(ctx: ChannelHandlerContext, message: AskTime) {
+        ctx.channel().writeAndFlush(Time(clock.networkTime(), message.nodeTimestamp))
     }
 
 }
