@@ -1,9 +1,7 @@
 package io.openfuture.chain.entity
 
 import io.openfuture.chain.entity.base.BaseModel
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Table
+import javax.persistence.*
 
 @Entity
 @Table(name = "wallets")
@@ -13,6 +11,14 @@ class Wallet(
     var address: String,
 
     @Column(name = "balance", nullable = false)
-    var balance: Double = 0.0
+    var balance: Long = 0,
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "wallets2delegates",
+        joinColumns = [(JoinColumn(name = "wallet_id", nullable = false))],
+        inverseJoinColumns = [(JoinColumn(name = "delegate_id", nullable = false))]
+    )
+    val votes: MutableSet<Delegate> = mutableSetOf()
 
 ) : BaseModel()

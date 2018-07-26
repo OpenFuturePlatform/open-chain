@@ -4,11 +4,15 @@ import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.BlockType
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.RewardTransaction
+import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.stereotype.Component
 
 @Component
-class MainBlockValidator : BlockValidator {
+class MainBlockValidator(
+    private val properties: ConsensusProperties
+) : BlockValidator {
 
     override fun isValid(block: Block): Boolean {
         val mainBlock = block as MainBlock
@@ -18,28 +22,41 @@ class MainBlockValidator : BlockValidator {
             return false
         }
 
-        if (!transactionsIsWellFormed(transactions)) {
+        if (!verifyRewardTransaction(transactions, mainBlock.getPublicKey())) {
             return false
         }
 
-        val transactionsMerkleHash = BlockUtils.calculateMerkleRoot(transactions)
-        return block.merkleHash == transactionsMerkleHash
+        if (!verifyDuplicatedTransactions(transactions)) {
+            return false
+        }
+
+        return block.merkleHash == BlockUtils.calculateMerkleRoot(transactions)
     }
 
     override fun getTypeId(): Int = BlockType.MAIN.id
 
-    private fun transactionsIsWellFormed(transactions: List<BaseTransaction>): Boolean {
-        val transactionHashes = HashSet<String>()
-        for (transaction in transactions) {
-            val transactionHash = transaction.hash
-            if (transactionHashes.contains(transactionHash)) {
-                return false
-            }
+    private fun verifyRewardTransaction(transactions: List<BaseTransaction>, senderPublicKey: String): Boolean {
+        val rewardTransaction = transactions.first() as? RewardTransaction ?: return false
 
-            transactionHashes.add(transactionHash)
+        if (rewardTransaction.senderPublicKey != senderPublicKey) {
+            return false
         }
 
-        return true
+        if (properties.genesisAddress!! != rewardTransaction.senderAddress) {
+            return false
+        }
+
+        if (transactions.stream().skip(1).anyMatch { it is RewardTransaction }) {
+            return false
+        }
+
+        val fees = transactions.stream().skip(1).mapToLong { it.fee }.sum()
+        return rewardTransaction.amount == (fees + properties.rewardBlock!!)
+    }
+
+    private fun verifyDuplicatedTransactions(transactions: List<BaseTransaction>): Boolean {
+        val transactionHashes = transactions.map { it.hash }.toSet()
+        return transactionHashes.size == transactions.size
     }
 
 }

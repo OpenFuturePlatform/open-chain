@@ -2,7 +2,6 @@ package io.openfuture.chain.crypto.signature
 
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.util.HashUtils
-import org.springframework.stereotype.Component
 import java.util.*
 
 object SignatureManager {

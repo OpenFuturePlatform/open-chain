@@ -1,27 +1,22 @@
 package io.openfuture.chain.domain.transaction
 
-import io.openfuture.chain.domain.delegate.DelegateInfo
-import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
-import io.openfuture.chain.entity.dictionary.VoteType
+import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.transaction.VoteTransaction
 
-class VoteTransactionDto(timestamp: Long, amount: Double, recipientAddress: String, senderKey: String,
-                         senderAddress: String, senderSignature: String, hash: String,
-    val voteType: VoteType,
-    val delegateInfo: DelegateInfo
-) : BaseTransactionDto(timestamp, amount, recipientAddress, senderKey, senderAddress, senderSignature,
-    hash) {
+class VoteTransactionDto(
+    data: VoteTransactionData,
+    timestamp: Long,
+    senderPublicKey: String,
+    senderSignature: String,
+    hash: String
+) : BaseTransactionDto<VoteTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
 
-    constructor(transaction: VoteTransaction) : this(
-        transaction.timestamp,
-        transaction.amount,
-        transaction.recipientAddress,
-        transaction.senderKey,
-        transaction.senderAddress,
-        transaction.senderSignature,
-        transaction.hash,
-        transaction.getVoteType(),
-        DelegateInfo(transaction.delegateHost, transaction.delegatePort)
+    constructor(tx: VoteTransaction) : this(
+        VoteTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress, tx.getVoteType(), tx.delegateKey),
+        tx.timestamp,
+        tx.senderPublicKey,
+        tx.senderSignature,
+        tx.hash
     )
 
 }
