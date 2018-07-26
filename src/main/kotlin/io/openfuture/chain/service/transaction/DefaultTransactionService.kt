@@ -26,6 +26,7 @@ abstract class DefaultTransactionService<Entity : Transaction, UEntity : UTransa
     @Transactional
     override fun deleteUnconfirmedAndSave(tx: Entity): Entity {
         val uTx = getUnconfirmedTransaction(tx.hash)
+        updateBalance(uTx)
         uRepository.delete(uTx)
         return repository.save(tx)
     }
@@ -34,6 +35,10 @@ abstract class DefaultTransactionService<Entity : Transaction, UEntity : UTransa
     override fun toBlock(tx: Entity, block: MainBlock): Entity {
         tx.block = block
         return deleteUnconfirmedAndSave(tx)
+    }
+
+    private fun updateBalance(tx: UEntity) {
+        walletService.updateBalance(tx.senderAddress, tx.recipientAddress, tx.amount, tx.fee)
     }
 
     private fun getUnconfirmedTransaction(hash: String): UEntity = uRepository.findOneByHash(hash)
