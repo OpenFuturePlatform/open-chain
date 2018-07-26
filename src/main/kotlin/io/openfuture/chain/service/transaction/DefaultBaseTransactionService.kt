@@ -38,4 +38,7 @@ abstract class DefaultBaseTransactionService<Entity : BaseTransaction>(
     @Transactional
     override fun save(transaction: Entity): Entity = repository.save(transaction)
 
+    @Transactional
+    override fun save(transactions: List<Entity>): List<Entity> = repository.saveAll(transactions)
+
 }

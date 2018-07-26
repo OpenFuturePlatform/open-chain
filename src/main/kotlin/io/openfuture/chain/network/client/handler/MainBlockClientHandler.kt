@@ -5,15 +5,19 @@ import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.domain.NetworkMainBlock
+import io.openfuture.chain.service.BaseTransactionService
 import io.openfuture.chain.service.BlockService
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
+import java.util.*
 
 
 @Component
 @Scope("prototype")
 class MainBlockClientHandler(
-    private val blockService: BlockService
+    private val blockService: BlockService,
+    private val transferTransactionService : BaseTransactionService<TransferTransaction>,
+    private val voteTransactionService : BaseTransactionService<VoteTransaction>
 ) : ClientHandler<NetworkMainBlock>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, message: NetworkMainBlock) {
@@ -21,14 +25,16 @@ class MainBlockClientHandler(
             return
         }
 
-        val transferTransactions = message.transferTransactions.map { TransferTransaction.of(it) }
-        val voteTransactions = message.voteTransactions.map { VoteTransaction.of(it) }
-        val transactions = listOf(transferTransactions, voteTransactions).flatten().toMutableList()
-
         val block = MainBlock(message.height, message.previousHash,
-            message.merkleHash, message.blockTimestamp, transactions).apply { signature = message.signature }
+            message.merkleHash, message.blockTimestamp, Collections.emptyList()).apply { signature = message.signature }
 
-        blockService.save(block)
+        val savedBlock = blockService.save(block)
+
+        val transferTransactions = message.transferTransactions.map { TransferTransaction.of(it).apply { this.block = savedBlock } }
+        transferTransactionService.save(transferTransactions)
+
+        val voteTransactions = message.voteTransactions.map { VoteTransaction.of(it).apply { this.block = savedBlock } }
+        voteTransactionService.save(voteTransactions)
     }
 
 }

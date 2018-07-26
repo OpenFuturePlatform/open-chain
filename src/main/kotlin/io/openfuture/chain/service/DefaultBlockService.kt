@@ -24,7 +24,6 @@ class DefaultBlockService(
     override fun get(hash: String): Block = repository.findByHash(hash)
         ?: throw NotFoundException("Block with hash:$hash not found ")
 
-
     @Transactional(readOnly = true)
     override fun getLast(): Block =
         repository.findFirstByOrderByHeightDesc()
@@ -40,12 +39,14 @@ class DefaultBlockService(
         genesisBlockRepository.findFirstByOrderByHeightDesc()
             ?: throw NotFoundException("Last Genesis block not exist!")
 
+    @Transactional(readOnly = true)
     override fun getBlocksAfterCurrentHash(hash: String): List<Block>? {
         val block = repository.findByHash(hash)
 
         return block?.let { repository.findByHeightGreaterThan(block.height) }
     }
 
+    @Transactional(readOnly = true)
     override fun isExists(hash: String): Boolean = repository.existsByHash(hash)
 
     @Transactional

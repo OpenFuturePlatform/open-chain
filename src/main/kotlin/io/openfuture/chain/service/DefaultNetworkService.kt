@@ -40,8 +40,6 @@ class DefaultNetworkService(
                 future.channel().writeAndFlush(FindAddresses())
 
                 future.channel().writeAndFlush(getNetworkBlockRequest())
-
-               // getNetworkBlockRequest()
             } else {
                 log.warn("Can not connect to ${address.host}:${address.port}")
             }

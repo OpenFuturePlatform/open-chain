@@ -15,7 +15,7 @@ data class NetworkAddress(
     }
 
     override fun write(buffer: ByteBuf) {
-        readString(buffer)
+        writeString(buffer, host)
         buffer.writeInt(port)
     }
 

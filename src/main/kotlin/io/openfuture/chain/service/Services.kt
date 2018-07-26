@@ -90,6 +90,8 @@ interface BaseTransactionService<Entity : BaseTransaction> {
 
     fun save(entity: Entity): Entity
 
+    fun save(entity: List<Entity>): List<Entity>
+
 }
 
 interface TransactionService<Entity : BaseTransaction, Dto : BaseTransactionDto, Req : TransactionRequest> : BaseTransactionService<Entity> {
