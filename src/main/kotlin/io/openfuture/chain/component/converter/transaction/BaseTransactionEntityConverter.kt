@@ -7,8 +7,8 @@ import io.openfuture.chain.domain.transaction.data.BaseTransactionData
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import java.nio.ByteBuffer
 
-abstract class BaseTransactionEntityConverter<Entity : BaseTransaction, Data : BaseTransactionData>(
-) : TransactionEntityConverter<Entity, Data> {
+abstract class BaseTransactionEntityConverter<Entity : BaseTransaction, Data : BaseTransactionData>
+    : TransactionEntityConverter<Entity, Data> {
 
     protected fun getHash(request: BaseTransactionRequest<Data>): String {
         val bytes = getBytes(request.senderPublicKey!!.toByteArray(),
