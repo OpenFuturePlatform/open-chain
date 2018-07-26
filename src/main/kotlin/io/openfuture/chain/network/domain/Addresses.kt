@@ -9,21 +9,11 @@ data class Addresses(
 ) : Packet() {
 
     override fun readParams(buffer: ByteBuf) {
-        val size = buffer.readInt()
-        val list = mutableListOf<NetworkAddress>()
-        for (index in 1..size) {
-            val address = NetworkAddress::class.java.newInstance()
-            address.read(buffer)
-            list.add(address)
-        }
-        values = list
+        values = readList(buffer)
     }
 
     override fun writeParams(buffer: ByteBuf) {
-        buffer.writeInt(values.size)
-        for (address in values) {
-            address.write(buffer)
-        }
+        writeList(buffer, values)
     }
 
 }

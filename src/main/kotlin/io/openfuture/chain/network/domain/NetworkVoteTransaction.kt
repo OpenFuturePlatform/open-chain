@@ -2,19 +2,18 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import java.nio.charset.StandardCharsets.UTF_8
 
-class NetworkVoteTransaction(timestamp: Long = 0,
-                             amount: Double = 0.0,
-                             fee: Double = 0.0,
+class NetworkVoteTransaction(timestamp: Long,
+                             amount: Double,
+                             fee: Double,
                              recipientAddress: String,
                              senderKey: String,
                              senderAddress: String,
                              senderSignature: String,
                              hash: String,
-                             var voteTypeId: Int = 0,
+                             var voteTypeId: Int,
                              var delegateHost: String,
-                             var delegatePort: Int = 0) : NetworkTransaction(timestamp, amount, fee, recipientAddress,
+                             var delegatePort: Int) : NetworkTransaction(timestamp, amount, fee, recipientAddress,
     senderKey, senderAddress, senderSignature, hash) {
 
     constructor(transaction: VoteTransaction) : this(transaction.timestamp, transaction.amount,
@@ -26,7 +25,7 @@ class NetworkVoteTransaction(timestamp: Long = 0,
         super.read(buffer)
 
         voteTypeId = buffer.readInt()
-        delegateHost = buffer.readCharSequence(buffer.readInt(), UTF_8).toString()
+        delegateHost = readString(buffer)
         delegatePort = buffer.readInt()
     }
 
@@ -34,8 +33,7 @@ class NetworkVoteTransaction(timestamp: Long = 0,
         super.write(buffer)
 
         buffer.writeInt(voteTypeId)
-        buffer.writeInt(delegateHost.length)
-        buffer.writeCharSequence(delegateHost, UTF_8)
+        writeString(buffer, delegateHost)
         buffer.writeInt(delegatePort)
     }
 

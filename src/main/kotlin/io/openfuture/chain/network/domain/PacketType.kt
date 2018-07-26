@@ -13,7 +13,7 @@ enum class PacketType(
     HEART_BEAT(4, HeartBeat::class),
     ASK_TIME(5, AskTime::class),
     TIME(6, Time::class),
-    SYNCHRONIZATION(7, NetworkBlockRequest::class),
+    SYNC_BLOCKS_REQUEST(7, NetworkBlockRequest::class),
     MAIN_BLOCK(8, NetworkMainBlock::class),
     GENESIS_BLOCK(9, NetworkGenesisBlock::class);
 

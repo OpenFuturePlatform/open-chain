@@ -5,14 +5,14 @@ import io.openfuture.chain.annotation.NoArgConstructor
 import io.openfuture.chain.entity.GenesisBlock
 
 @NoArgConstructor
-class NetworkGenesisBlock(height: Long = 0,
+class NetworkGenesisBlock(height: Long,
                           previousHash: String,
                           merkleHash: String,
-                          blockTimestamp: Long = 0,
-                          typeId: Int = 0,
+                          blockTimestamp: Long,
+                          typeId: Int,
                           hash: String,
                           signature: String,
-                          var epochIndex: Long = 0,
+                          var epochIndex: Long,
                           var activeDelegates: MutableSet<NetworkDelegate>
 ) : NetworkBlock(height, previousHash, merkleHash, blockTimestamp, typeId, hash, signature) {
 
@@ -24,24 +24,16 @@ class NetworkGenesisBlock(height: Long = 0,
         super.readParams(buffer)
 
         epochIndex = buffer.readLong()
-        val size = buffer.readInt()
-        activeDelegates = mutableSetOf()
-        for (index in 1..size) {
-            val address = NetworkDelegate::class.java.newInstance()
-            address.read(buffer)
-            activeDelegates.add(address)
-        }
+        activeDelegates = readList<NetworkDelegate>(buffer).toMutableSet()
     }
 
     override fun writeParams(buffer: ByteBuf) {
         super.writeParams(buffer)
 
         buffer.writeLong(epochIndex)
-
-        buffer.writeInt(activeDelegates.size)
-        for (delegate in activeDelegates) {
-            delegate.write(buffer)
-        }
+        writeList(buffer, activeDelegates.toList())
     }
+
+    override fun toString() = "NetworkGenesisBlock(hash=$hash)"
 
 }

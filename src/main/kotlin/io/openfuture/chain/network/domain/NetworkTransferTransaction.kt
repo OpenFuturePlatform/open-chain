@@ -4,9 +4,9 @@ import io.openfuture.chain.annotation.NoArgConstructor
 import io.openfuture.chain.entity.transaction.TransferTransaction
 
 @NoArgConstructor
-class NetworkTransferTransaction(timestamp: Long = 0,
-                                 amount: Double = 0.0,
-                                 fee: Double = 0.0,
+class NetworkTransferTransaction(timestamp: Long,
+                                 amount: Double,
+                                 fee: Double,
                                  recipientAddress: String,
                                  senderKey: String,
                                  senderAddress: String,
