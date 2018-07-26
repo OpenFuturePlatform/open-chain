@@ -107,6 +107,8 @@ interface CommonUTransactionService<Entity : UTransaction, Data : BaseTransactio
 
     fun get(hash: String): Entity
 
+    fun getAll(): MutableSet<Entity>
+
     fun add(dto: BaseTransactionDto<Data>): Entity
 
     fun process(tx: Entity)

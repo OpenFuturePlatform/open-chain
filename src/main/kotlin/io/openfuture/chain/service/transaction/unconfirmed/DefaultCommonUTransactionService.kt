@@ -15,6 +15,7 @@ import io.openfuture.chain.service.BaseTransactionService
 import io.openfuture.chain.service.CommonUTransactionService
 import io.openfuture.chain.service.WalletService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.annotation.Transactional
 
 abstract class DefaultCommonUTransactionService<Entity : UTransaction, Data : BaseTransactionData, Converter : TransactionEntityConverter<Entity, Data>>(
     protected val repository: UTransactionRepository<Entity>,
@@ -34,9 +35,14 @@ abstract class DefaultCommonUTransactionService<Entity : UTransaction, Data : Ba
     private lateinit var baseService: BaseTransactionService
 
 
+    @Transactional(readOnly = true)
     override fun get(hash: String): Entity = repository.findOneByHash(hash)
         ?: throw NotFoundException("Unconfirmed transaction with hash: $hash not exist!")
 
+    @Transactional(readOnly = true)
+    override fun getAll(): MutableSet<Entity> = repository.findAll().toMutableSet()
+
+    @Transactional
     override fun add(dto: BaseTransactionDto<Data>): Entity {
         val transaction = repository.findOneByHash(dto.hash)
         if (null != transaction) {

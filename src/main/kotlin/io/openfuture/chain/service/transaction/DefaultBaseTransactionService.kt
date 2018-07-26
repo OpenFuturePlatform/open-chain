@@ -16,5 +16,4 @@ class DefaultBaseTransactionService(
     override fun getPending(): MutableSet<UTransaction> =
         repository.findAllByOrderByFeeDesc(PageRequest.of(0, consensusProperties.blockCapacity!! - 1)).toMutableSet()
 
-
 }
