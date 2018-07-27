@@ -8,8 +8,6 @@ import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.util.BlockUtils
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 
 @Service
@@ -33,29 +31,23 @@ class BlockValidationProvider(
         val lastBlock = blockService.getLast()
         return blockIsValid
                 && timeSlot.verifyTimeSlot(currentTime, block)
-                && verifyHash(block)
                 && verifyBlockSignature(block)
                 && verifyPreviousHash(block, lastBlock)
                 && verifyHeight(block, lastBlock)
                 && verifyTimestamp(block, lastBlock)
     }
 
-    private fun verifyHash(block: Block): Boolean {
-        val calculatedHashBytes = BlockUtils.calculateHash(
-            block.previousHash,
-            block.timestamp,
-            block.height,
-            block.merkleHash,
-            block.publicKey)
-        return (ByteUtils.toHexString(calculatedHashBytes) == block.hash)
-    }
-
     private fun verifyBlockSignature(block: Block): Boolean {
+        if (block is MainBlock) {
+            return SignatureManager.verify(
+                (block.previousHash + block.merkleHash + block.timestamp + block.height).toByteArray(),
+                block.signature,
+                HashUtils.fromHexString(block.publicKey))
+        }
         return SignatureManager.verify(
-            (block.previousHash + block.merkleHash + block.timestamp + block.height).toByteArray(),
+            (block.previousHash + block.timestamp + block.height).toByteArray(),
             block.signature,
-            HashUtils.fromHexString(block.publicKey)
-        )
+            HashUtils.fromHexString(block.publicKey))
     }
 
     private fun verifyPreviousHash(block: Block, lastBlock: Block): Boolean = (block.previousHash == lastBlock.hash)

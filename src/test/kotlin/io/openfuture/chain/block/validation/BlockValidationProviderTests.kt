@@ -42,15 +42,14 @@ class BlockValidationProviderTests : ServiceTests() {
     @Test
     fun isValidShouldReturnTrueWhenItIsMainBlock() {
         val height = 123L
-        val prevHash = "aabf4eb7907b9a903ca57c345a7298e3604092be23c2ba0a8de04a99316dd52a"
         val merkleHash = "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"
         val previousBlock = MainBlock(
             ByteArray(1),
             122,
             "previous_hash",
-            "merkle_hash",
             1510000000L,
             ByteArray(1),
+            "merkle_hash",
             mutableSetOf(
                 VoteTransaction(
                     1500000000L,
@@ -81,10 +80,11 @@ class BlockValidationProviderTests : ServiceTests() {
         val block = MainBlock(
             HashUtils.fromHexString("529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"),
             height,
-            prevHash,
-            merkleHash,
+            previousBlock.hash,
+
             currentTime,
             HashUtils.fromHexString("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"),
+            merkleHash,
             mutableSetOf(
                 VoteTransaction(
                     1500000000L,
@@ -127,18 +127,18 @@ class BlockValidationProviderTests : ServiceTests() {
             ByteArray(1),
             123,
             "prev_block_hash",
-            "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             1512345678L,
             ByteArray(1),
+            "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf()
         )
         val block = MainBlock(
             ByteArray(1),
             123,
             "prev_block_hash",
-            "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             1512345678L,
             ByteArray(1),
+            "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf(
                 VoteTransaction(
                     1500000000L,
@@ -188,7 +188,7 @@ class BlockValidationProviderTests : ServiceTests() {
         val block = GenesisBlock(
             HashUtils.fromHexString("529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"),
             123L,
-            "ca9d1f7613c1977e109a8fe211d019e350c84a5ba6d63e3c9c24eb886f1e4181",
+            previousBlock.hash,
             currentTime,
             HashUtils.fromHexString("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"),
             2L,
@@ -209,9 +209,9 @@ class BlockValidationProviderTests : ServiceTests() {
             HashUtils.fromHexString("529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"),
             123,
             "prev_block_hash",
-            "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             1512345678L,
             HashUtils.fromHexString("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"),
+            "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf()
         )
         val block = GenesisBlock(

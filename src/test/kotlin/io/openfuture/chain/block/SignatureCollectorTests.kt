@@ -116,9 +116,9 @@ class SignatureCollectorTests : ServiceTests() {
             ByteArray(1),
             123,
             "prev_block_hash",
-            "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             1512345678L,
             ByteArray(1),
+            "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf()
         )
         val signature = Signature("value", "public_key")

@@ -109,9 +109,9 @@ class BlockCreationProcessor(
                     privateKey,
                     height,
                     hash,
-                    BlockUtils.calculateMerkleRoot(transactions),
                     time,
                     publicKey,
+                    HashUtils.calculateMerkleRoot(transactions),
                     transactions
                 )
             }

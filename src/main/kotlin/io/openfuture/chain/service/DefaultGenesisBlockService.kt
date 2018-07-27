@@ -3,7 +3,6 @@ package io.openfuture.chain.service
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.GenesisBlockRepository
-import io.openfuture.chain.util.BlockUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -30,8 +29,7 @@ class DefaultGenesisBlockService(
 
         return (blockFound != null
             && isValidEpochIndex(lastBlock, block)
-            && isValidateActiveDelegates(block)
-            && isValidDelegateHash(block))
+            && isValidateActiveDelegates(block))
     }
 
     private fun isValidEpochIndex(lastBlock: GenesisBlock, block: GenesisBlock): Boolean
@@ -41,8 +39,5 @@ class DefaultGenesisBlockService(
         val activeDelegates = block.activeDelegates
         return activeDelegates == delegateService.getActiveDelegates()
     }
-
-    private fun isValidDelegateHash(block: GenesisBlock): Boolean
-        = (block.merkleHash == BlockUtils.calculateDelegatesHash(block.activeDelegates))
 
 }

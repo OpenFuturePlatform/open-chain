@@ -1,9 +1,6 @@
 package io.openfuture.chain.entity
 
-import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.entity.base.BaseModel
-import io.openfuture.chain.util.BlockUtils
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import javax.persistence.*
 
 @Entity
@@ -11,16 +8,11 @@ import javax.persistence.*
 @Inheritance(strategy = InheritanceType.JOINED)
 abstract class Block(
 
-    privateKey: ByteArray,
-
     @Column(name = "height", nullable = false)
     var height: Long,
 
     @Column(name = "previous_hash", nullable = false)
     var previousHash: String,
-
-    @Column(name = "merkle_hash", nullable = false)
-    var merkleHash: String,
 
     @Column(name = "timestamp", nullable = false)
     var timestamp: Long,
@@ -29,23 +21,9 @@ abstract class Block(
     val publicKey: String,
 
     @Column(name = "signature", nullable = false)
-    var signature: String = SignatureManager.sign(
-        StringBuilder()
-            .append(previousHash)
-            .append(merkleHash)
-            .append(timestamp)
-            .append(height)
-            .toString()
-            .toByteArray(), privateKey),
+    var signature: String,
 
     @Column(name = "hash", nullable = false)
-    var hash: String = ByteUtils.toHexString(
-        BlockUtils.calculateHash(
-            previousHash,
-            timestamp,
-            height,
-            merkleHash,
-            publicKey)
-    )
+    var hash: String
 
 ) : BaseModel()
