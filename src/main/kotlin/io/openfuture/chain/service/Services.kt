@@ -13,7 +13,10 @@ import io.openfuture.chain.domain.rpc.hardware.StorageInfo
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.*
-import io.openfuture.chain.entity.*
+import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.Delegate
+import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.Wallet
 import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
@@ -35,27 +38,24 @@ interface HardwareInfoService {
 
 }
 
-interface BlockService {
+interface BlockService<T: Block> {
 
-    fun get(hash: String): Block
+    fun get(hash: String): T
 
-    fun getLast(): Block
+    fun getLast(): T
 
-    fun getLastMain(): MainBlock
+    fun save(block: T): T
 
-    fun getLastGenesis(): GenesisBlock
+    fun save(block: MainBlock): MainBlock
+
+    fun save(block: GenesisBlock): GenesisBlock
 
     fun getBlocksAfterCurrentHash(hash: String): List<Block>?
 
     fun isExists(hash: String): Boolean
 
-    fun add(dto: NetworkMainBlock)
+    fun isValid(block: T): Boolean
 
-    fun add(dto: NetworkGenesisBlock)
-
-    fun save(block: MainBlock): MainBlock
-
-    fun save(block: GenesisBlock): GenesisBlock
 
 }
 
@@ -85,6 +85,8 @@ interface CryptoService {
 interface BaseTransactionService {
 
     fun getAllPending(): MutableSet<BaseTransaction>
+
+    fun getFirstLimitPending(limit: Int) : MutableSet<BaseTransaction>
 
 }
 
@@ -125,6 +127,8 @@ interface DelegateService {
     fun getAll(request: PageRequest): Page<Delegate>
 
     fun getByPublicKey(key: String): Delegate
+
+    fun findByPublicKey(key: String): Delegate?
 
     fun getActiveDelegates(): Set<Delegate>
 

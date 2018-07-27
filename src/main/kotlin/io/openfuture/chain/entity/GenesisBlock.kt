@@ -1,19 +1,27 @@
 package io.openfuture.chain.entity
 
-import org.apache.commons.lang3.StringUtils
+import io.openfuture.chain.crypto.signature.SignatureManager
+import io.openfuture.chain.crypto.util.HashUtils
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import javax.persistence.*
 
 @Entity
 @Table(name = "genesis_blocks")
-class GenesisBlock(height: Long, previousHash: String, timestamp: Long,
+class GenesisBlock(privateKey: ByteArray, height: Long,
+        previousHash: String, timestamp: Long, publicKey: ByteArray,
 
-                   @Column(name = "epoch_index", nullable = false)
-                   var epochIndex: Long,
+    @Column(name = "epoch_index", nullable = false)
+    var epochIndex: Long,
 
-                   @ManyToMany(fetch = FetchType.EAGER, cascade = [(CascadeType.ALL)])
-                   @JoinTable(name = "delegate2genesis",
-                       joinColumns = [JoinColumn(name = "genesis_id")],
-                       inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
-                   var activeDelegates: MutableSet<Delegate>
+    @ManyToMany(fetch = FetchType.EAGER, cascade = [(CascadeType.ALL)])
+    @JoinTable(name = "delegate2genesis",
+        joinColumns = [JoinColumn(name = "genesis_id")],
+        inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
+    var activeDelegates: Set<Delegate>
 
-) : Block(height, previousHash, StringUtils.EMPTY, timestamp, BlockType.GENESIS.id)
+) : Block(height, previousHash, timestamp, HashUtils.toHexString(publicKey),
+    signature = SignatureManager.sign((previousHash + timestamp + height).toByteArray(), privateKey),
+
+    hash = ByteUtils.toHexString(
+        HashUtils.doubleSha256((previousHash + timestamp + height + publicKey).toByteArray()))
+)

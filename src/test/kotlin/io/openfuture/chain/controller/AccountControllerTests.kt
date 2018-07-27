@@ -7,9 +7,9 @@ import io.openfuture.chain.config.any
 import io.openfuture.chain.controller.common.ResponseHeader
 import io.openfuture.chain.controller.common.RestResponse
 import io.openfuture.chain.crypto.domain.ExtendedKey
-import io.openfuture.chain.domain.rpc.crypto.WalletDto
 import io.openfuture.chain.domain.rpc.crypto.AccountDto
 import io.openfuture.chain.domain.rpc.crypto.ValidateAddressRequest
+import io.openfuture.chain.domain.rpc.crypto.WalletDto
 import io.openfuture.chain.domain.rpc.crypto.key.DerivationKeyRequest
 import io.openfuture.chain.domain.rpc.crypto.key.KeyDto
 import io.openfuture.chain.domain.rpc.crypto.key.RestoreRequest
