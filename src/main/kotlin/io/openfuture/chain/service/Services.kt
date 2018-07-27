@@ -25,7 +25,6 @@ import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.Wallet
 import io.openfuture.chain.entity.block.Block
-import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
@@ -50,19 +49,15 @@ interface HardwareInfoService {
 
 }
 
-interface BlockService {
+interface BlockService<T : Block> {
 
-    fun get(hash: String): Block
+    fun get(hash: String): T
 
-    fun getLast(): Block
+    fun getLast(): T
 
-    fun getLastMain(): MainBlock
+    fun save(block: T): T
 
-    fun getLastGenesis(): GenesisBlock
-
-    fun save(block: MainBlock): MainBlock
-
-    fun save(block: GenesisBlock): GenesisBlock
+    fun isValid(block: T): Boolean
 
 }
 
@@ -113,8 +108,8 @@ interface VoteTransactionService : TransactionService<VoteTransaction, UVoteTran
 
 interface DelegateTransactionService : TransactionService<DelegateTransaction, UDelegateTransaction>
 
-interface UTransactionService<Entity : UTransaction, Data : BaseTransactionData, Dto: BaseTransactionDto<Entity, Data>,
-    Req: BaseTransactionRequest<Entity, Data>> {
+interface UTransactionService<Entity : UTransaction, Data : BaseTransactionData, Dto : BaseTransactionDto<Entity, Data>,
+    Req : BaseTransactionRequest<Entity, Data>> {
 
     fun get(hash: String): Entity
 

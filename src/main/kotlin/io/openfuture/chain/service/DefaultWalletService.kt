@@ -2,7 +2,6 @@ package io.openfuture.chain.service
 
 import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.Wallet
-import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.WalletRepository

@@ -1,65 +1,53 @@
 package io.openfuture.chain.block.validation
 
+import io.openfuture.chain.block.TimeSlot
+import io.openfuture.chain.component.node.NodeClock
+import io.openfuture.chain.crypto.signature.SignatureManager
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.block.Block
-import io.openfuture.chain.property.ConsensusProperties
+import io.openfuture.chain.entity.block.GenesisBlock
+import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.util.BlockUtils
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
-import javax.annotation.PostConstruct
 
 @Service
 class BlockValidationProvider(
-    private val applicationContext: ApplicationContext,
-    private val blockService: BlockService,
-    private val properties: ConsensusProperties
+    private val blockService: BlockService<Block>,
+    private val mainBlockService: BlockService<MainBlock>,
+    private val genesisBlockService: BlockService<GenesisBlock>,
+    private val timeSlot: TimeSlot,
+    private val clock: NodeClock
 ) {
 
-    private val validators = HashMap<Int, BlockValidator>()
-    private var epochTime: Long = 0L
-
-
-    @PostConstruct
-    fun init() {
-        val blockValidators = applicationContext.getBeansOfType(BlockValidator::class.java).values
-        blockValidators.forEach {
-            validators[it.getTypeId()] = it
-        }
-    }
-
     fun isValid(block: Block): Boolean {
-        val currentTime = System.currentTimeMillis()
-        val blockTypeId = block.typeId
-        val blockValidator = validators[blockTypeId] ?: throw IllegalArgumentException("Unknown block type")
-        val lastBlock = blockService.getLast()
+        val currentTime = clock.networkTime()
 
-        return verifyTimeSlot(currentTime, block)
-                && blockValidator.isValid(block)
-                && verifyHash(block)
+        val blockIsValid: Boolean = when (block) {
+            is MainBlock -> mainBlockService.isValid(block)
+            is GenesisBlock -> genesisBlockService.isValid(block)
+            else -> throw IllegalArgumentException("Wrong block type is found")
+        }
+
+        val lastBlock = blockService.getLast()
+        return blockIsValid
+                && timeSlot.verifyTimeSlot(currentTime, block)
+                && verifyBlockSignature(block)
                 && verifyPreviousHash(block, lastBlock)
                 && verifyHeight(block, lastBlock)
                 && verifyTimestamp(block, lastBlock)
     }
 
-    fun getSlotNumber(time: Long): Long {
-        return (time - epochTime) / properties.timeSlotDuration!! / 2
-    }
-
-    fun setEpochTime(value: Long) {
-        this.epochTime = value
-    }
-
-    private fun verifyTimeSlot(currentTime: Long, block: Block)
-        = (getSlotNumber(currentTime) == getSlotNumber(block.timestamp))
-
-    private fun verifyHash(block: Block): Boolean {
-        val calculatedHashBytes = BlockUtils.calculateHash(
-            block.previousHash,
-            block.timestamp,
-            block.height,
-            block.merkleHash)
-        return (ByteUtils.toHexString(calculatedHashBytes) == block.hash)
+    private fun verifyBlockSignature(block: Block): Boolean {
+        if (block is MainBlock) {
+            return SignatureManager.verify(
+                (block.previousHash + block.merkleHash + block.timestamp + block.height).toByteArray(),
+                block.signature,
+                HashUtils.fromHexString(block.publicKey))
+        }
+        return SignatureManager.verify(
+            (block.previousHash + block.timestamp + block.height).toByteArray(),
+            block.signature,
+            HashUtils.fromHexString(block.publicKey))
     }
 
     private fun verifyPreviousHash(block: Block, lastBlock: Block): Boolean = (block.previousHash == lastBlock.hash)

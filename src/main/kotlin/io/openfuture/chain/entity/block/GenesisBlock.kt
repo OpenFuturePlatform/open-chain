@@ -1,7 +1,8 @@
-package io.openfuture.chain.entity.block
+package io.openfuture.chain.entity
 
-import io.openfuture.chain.entity.Delegate
-import org.apache.commons.lang3.StringUtils
+import io.openfuture.chain.crypto.signature.SignatureManager
+import io.openfuture.chain.crypto.util.HashUtils
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import javax.persistence.*
 
 @Entity
@@ -11,14 +12,20 @@ class GenesisBlock(
     height: Long,
     previousHash: String,
     timestamp: Long,
+    publicKey: ByteArray,
 
     @Column(name = "epoch_index", nullable = false)
     var epochIndex: Long,
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "delegate2genesis",
         joinColumns = [JoinColumn(name = "genesis_id")],
         inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
     var activeDelegates: Set<Delegate>
 
-) : Block(privateKey, height, previousHash, StringUtils.EMPTY, timestamp, BlockType.GENESIS.id)
+) : Block(height, previousHash, timestamp, HashUtils.toHexString(publicKey),
+    signature = SignatureManager.sign((previousHash + timestamp + height).toByteArray(), privateKey),
+
+    hash = ByteUtils.toHexString(
+        HashUtils.doubleSha256((previousHash + timestamp + height + publicKey).toByteArray()))
+)
