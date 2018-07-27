@@ -21,7 +21,7 @@ abstract class Block(
     val publicKey: String,
 
     @Column(name = "hash", nullable = false, unique = true)
-    var hash: String
+    var hash: String,
 
     @Column(name = "signature", nullable = false)
     var signature: String? = null

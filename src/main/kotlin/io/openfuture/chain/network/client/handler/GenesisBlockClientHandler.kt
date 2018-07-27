@@ -1,8 +1,6 @@
 package io.openfuture.chain.network.client.handler
 
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.entity.Delegate
-import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.service.CommonBlockService
 import io.openfuture.chain.service.GenesisBlockService

@@ -25,8 +25,6 @@ import javax.annotation.PostConstruct
 
 @Component
 class BlockCreationProcessor(
-    private val blockService: BlockService<Block>,
-    private val genesisBlockService: BlockService<GenesisBlock>,
     private val transactionService: BaseUTransactionService,
     private val commonBlockService: CommonBlockService,
     private val genesisBlockService: GenesisBlockService,

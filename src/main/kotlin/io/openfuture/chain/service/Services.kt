@@ -14,10 +14,7 @@ import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.rpc.transaction.DelegateTransactionRequest
 import io.openfuture.chain.domain.rpc.transaction.TransferTransactionRequest
 import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
-import io.openfuture.chain.domain.transaction.BaseTransactionDto
-import io.openfuture.chain.domain.transaction.DelegateTransactionDto
-import io.openfuture.chain.domain.transaction.TransferTransactionDto
-import io.openfuture.chain.domain.transaction.VoteTransactionDto
+import io.openfuture.chain.domain.transaction.*
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
 import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
 import io.openfuture.chain.domain.transaction.data.TransferTransactionData
@@ -25,9 +22,8 @@ import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.Wallet
 import io.openfuture.chain.entity.block.Block
+import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
-import io.openfuture.chain.domain.transaction.data.*
-import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
@@ -116,48 +112,61 @@ interface BaseUTransactionService {
 
 }
 
-interface BaseTransactionService<Entity : Transaction> {
+interface BaseTransactionService {
 
-    fun get(hash: String): Entity
+    fun get(hash: String): Transaction
 
     fun isExists(hash: String): Boolean
 
-    fun toBlock(tx: Entity, block: MainBlock): Entity
+}
 
-    fun toBlock(dto: BaseTransactionDto<Data>, block: MainBlock)
+interface TransactionService<Entity : Transaction, UEntity : UTransaction, Data : BaseTransactionData,
+    Dto : BaseTransactionDto<Entity, UEntity, Data>> {
+
+    fun toBlock(tx: Entity, block: MainBlock)
+
+    fun toBlock(dto: Dto, block: MainBlock)
 
 }
 
-interface TransactionService<Entity : Transaction, UEntity : UTransaction> : BaseTransactionService<Entity>
+interface RewardTransactionService {
 
-interface RewardTransactionService : BaseTransactionService<RewardTransaction>
+    fun toBlock(tx: RewardTransaction, block: MainBlock)
 
-interface TransferTransactionService : TransactionService<TransferTransaction, UTransferTransaction>
-
-interface VoteTransactionService : TransactionService<VoteTransaction, UVoteTransaction>
-
-interface DelegateTransactionService : TransactionService<DelegateTransaction, UDelegateTransaction>
-
-interface UTransactionService<Entity : UTransaction, Data : BaseTransactionData, Dto : BaseTransactionDto<Entity, Data>,
-    Req : BaseTransactionRequest<Entity, Data>> {
-
-    fun get(hash: String): Entity
-
-    fun getAll(): MutableSet<Entity>
-
-    fun add(dto: Dto): Entity
-
-    fun add(request: Req): Entity
+    fun toBlock(dto: RewardTransactionDto, block: MainBlock)
 
 }
 
-interface UTransferTransactionService : UTransactionService<UTransferTransaction, TransferTransactionData,
+interface TransferTransactionService : TransactionService<TransferTransaction, UTransferTransaction,
+    TransferTransactionData, TransferTransactionDto>
+
+interface VoteTransactionService : TransactionService<VoteTransaction, UVoteTransaction,
+    VoteTransactionData, VoteTransactionDto>
+
+interface DelegateTransactionService : TransactionService<DelegateTransaction, UDelegateTransaction,
+    DelegateTransactionData, DelegateTransactionDto>
+
+
+interface UTransactionService<Entity : Transaction, UEntity : UTransaction, Data : BaseTransactionData,
+    Dto : BaseTransactionDto<Entity, UEntity, Data>, Req : BaseTransactionRequest<UEntity, Data>> {
+
+    fun get(hash: String): UEntity
+
+    fun getAll(): MutableSet<UEntity>
+
+    fun add(dto: Dto): UEntity
+
+    fun add(request: Req): UEntity
+
+}
+
+interface UTransferTransactionService : UTransactionService<TransferTransaction, UTransferTransaction, TransferTransactionData,
     TransferTransactionDto, TransferTransactionRequest>
 
-interface UVoteTransactionService : UTransactionService<UVoteTransaction, VoteTransactionData,
+interface UVoteTransactionService : UTransactionService<VoteTransaction, UVoteTransaction, VoteTransactionData,
     VoteTransactionDto, VoteTransactionRequest>
 
-interface UDelegateTransactionService : UTransactionService<UDelegateTransaction, DelegateTransactionData,
+interface UDelegateTransactionService : UTransactionService<DelegateTransaction, UDelegateTransaction, DelegateTransactionData,
     DelegateTransactionDto, DelegateTransactionRequest>
 
 interface DelegateService {

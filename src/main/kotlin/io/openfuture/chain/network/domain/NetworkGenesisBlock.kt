@@ -3,7 +3,7 @@ package io.openfuture.chain.network.domain
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.annotation.NoArgConstructor
 import io.openfuture.chain.entity.Delegate
-import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.writeList
 

@@ -1,6 +1,6 @@
 package io.openfuture.chain.service.block
 
-import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.service.CommonBlockService

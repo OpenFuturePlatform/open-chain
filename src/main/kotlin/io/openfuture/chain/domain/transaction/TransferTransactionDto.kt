@@ -12,17 +12,36 @@ class TransferTransactionDto(
     senderPublicKey: String,
     senderSignature: String,
     hash: String
-) : BaseTransactionDto<UTransferTransaction, TransferTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
+) : BaseTransactionDto<TransferTransaction, UTransferTransaction, TransferTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
 
-    constructor(tx: UTransferTransaction) : this(
-        TransferTransactionData(tx.amount, tx.fee,tx.recipientAddress, tx.senderAddress),
+    constructor(tx: TransferTransaction) : this(
+        TransferTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress),
         tx.timestamp,
         tx.senderPublicKey,
         tx.senderSignature,
         tx.hash
     )
 
-    override fun toEntity(): UTransferTransaction = UTransferTransaction(
+    constructor(tx: UTransferTransaction) : this(
+        TransferTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress),
+        tx.timestamp,
+        tx.senderPublicKey,
+        tx.senderSignature,
+        tx.hash
+    )
+
+    override fun toEntity(): TransferTransaction = TransferTransaction(
+        timestamp,
+        data.amount,
+        data.fee,
+        data.recipientAddress,
+        data.senderAddress,
+        senderPublicKey,
+        senderSignature,
+        hash
+    )
+
+    override fun toUEntity(): UTransferTransaction = UTransferTransaction(
         timestamp,
         data.amount,
         data.fee,

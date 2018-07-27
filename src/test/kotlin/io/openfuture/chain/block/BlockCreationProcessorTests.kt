@@ -45,7 +45,7 @@ class BlockCreationProcessorTests : ServiceTests() {
     fun init() {
         val block = createMainBlock()
         given(commonBlockService.getLast()).willReturn(block)
-        processor = BlockCreationProcessor(commonBlockService, genesisBlockService, baseTransactionService,
+        processor = BlockCreationProcessor(transactionService, commonBlockService, genesisBlockService,
             signatureCollector, keyHolder, blockValidationService, consensusService, clock, delegateService,
             consensusProperties, timeSlot, scheduler)
     }
@@ -105,12 +105,9 @@ class BlockCreationProcessorTests : ServiceTests() {
         123,
         "prev_block_hash",
         1512345678L,
-        HashUtils.fromHexString("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"),
+        "037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4",
         "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
         createTransactions().map { it.toConfirmed() }.toMutableSet()
-        "529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6",
-        "037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4",
-        createTransactions()
     )
 
     private fun createGenesisBlock() = GenesisBlock(

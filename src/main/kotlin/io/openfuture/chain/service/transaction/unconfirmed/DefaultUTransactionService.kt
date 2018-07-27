@@ -6,6 +6,7 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
+import io.openfuture.chain.entity.transaction.Transaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.exception.ValidationException
@@ -18,10 +19,10 @@ import io.openfuture.chain.util.TransactionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
-abstract class DefaultUTransactionService<Entity : UTransaction, Data : BaseTransactionData,
-    Dto: BaseTransactionDto<Entity, Data>, Req: BaseTransactionRequest<Entity, Data>>(
-    protected val repository: UTransactionRepository<Entity>
-) : UTransactionService<Entity, Data, Dto, Req> {
+abstract class DefaultUTransactionService<Entity : Transaction, UEntity : UTransaction, Data : BaseTransactionData,
+    Dto: BaseTransactionDto<Entity, UEntity, Data>, Req: BaseTransactionRequest<UEntity, Data>>(
+    protected val repository: UTransactionRepository<UEntity>
+) : UTransactionService<Entity, UEntity, Data, Dto, Req> {
 
     @Autowired
     protected lateinit var nodeClock: NodeClock
@@ -37,53 +38,26 @@ abstract class DefaultUTransactionService<Entity : UTransaction, Data : BaseTran
 
 
     @Transactional(readOnly = true)
-    override fun get(hash: String): Entity = repository.findOneByHash(hash)
+    override fun get(hash: String): UEntity = repository.findOneByHash(hash)
         ?: throw NotFoundException("Unconfirmed transaction with hash: $hash not exist!")
 
     @Transactional(readOnly = true)
-    override fun isExists(hash: String) : Boolean = null != repository.findOneByHash(hash)
-
-    @Transactional(readOnly = true)
-    override fun getAll(): MutableSet<Entity> = repository.findAll().toMutableSet()
+    override fun getAll(): MutableSet<UEntity> = repository.findAll().toMutableSet()
 
     @Transactional
-    override fun add(dto: Dto): Entity {
+    override fun add(dto: Dto): UEntity {
         val transaction = repository.findOneByHash(dto.hash)
         if (null != transaction) {
             return transaction
         }
         validate(dto)
-        return saveAndBroadcast(dto.toEntity())
+        return saveAndBroadcast(dto.toUEntity())
     }
 
     @Transactional
-    override fun add(request: Req): Entity {
+    override fun add(request: Req): UEntity {
         validate(request)
         return saveAndBroadcast(request.toEntity(nodeClock.networkTime()))
-    }
-
-    @Transactional
-    override fun toBlock(dto: BaseTransactionDto<Data>, block: MainBlock) {
-        if (isExists(dto.hash)) {
-            return
-        }
-
-        val tx = entityConverter.toEntity(dto)
-        tx.block = block
-        walletService.updateBalance(tx.senderAddress, tx.recipientAddress, tx.amount, tx.fee)
-        repository.save(tx)
-    }
-
-    @Transactional
-    override fun toBlock(tx: Entity, block: MainBlock): Entity {
-        val persistTx = this.get(tx.hash)
-
-        if (null != persistTx.block) {
-            throw LogicException("Transaction with hash: ${tx.hash} already belong to block!")
-        }
-        persistTx.block = block
-        walletService.updateBalance(persistTx.senderAddress, persistTx.recipientAddress, persistTx.amount, persistTx.fee)
-        return repository.save(persistTx)
     }
 
     open fun validate(dto: Dto) {
@@ -97,7 +71,7 @@ abstract class DefaultUTransactionService<Entity : UTransaction, Data : BaseTran
         commonValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
     }
 
-    protected fun saveAndBroadcast(tx: Entity): Entity {
+    protected fun saveAndBroadcast(tx: UEntity): UEntity {
         return repository.save(tx)
         //todo: networkService.broadcast(transaction.toMessage)
     }

@@ -1,6 +1,6 @@
 package io.openfuture.chain.service.block
 
-import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.repository.GenesisBlockRepository
 import io.openfuture.chain.service.CommonBlockService

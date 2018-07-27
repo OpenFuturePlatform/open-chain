@@ -4,6 +4,7 @@ import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.dictionary.VoteType
+import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.UVoteTransactionRepository
@@ -16,7 +17,7 @@ import javax.xml.bind.ValidationException
 class DefaultUVoteTransactionService(
     repository: UVoteTransactionRepository,
     private val consensusProperties: ConsensusProperties
-) : DefaultUTransactionService<UVoteTransaction, VoteTransactionData, VoteTransactionDto, VoteTransactionRequest>(repository),
+) : DefaultUTransactionService<VoteTransaction, UVoteTransaction, VoteTransactionData, VoteTransactionDto, VoteTransactionRequest>(repository),
     UVoteTransactionService {
 
     @Transactional

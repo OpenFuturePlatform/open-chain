@@ -134,7 +134,7 @@ class SignatureCollectorTests : ServiceTests() {
             HashUtils.toHexString(ByteArray(1)),
             1,
             setOf()
-        ).sign<MainBlock>(ByteArray(1))
+        ).sign<GenesisBlock>(ByteArray(1))
         val signature = Signature("value", "public_key")
         return PendingBlock(block, signature)
     }

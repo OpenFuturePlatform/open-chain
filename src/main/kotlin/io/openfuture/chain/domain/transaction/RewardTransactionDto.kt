@@ -2,24 +2,30 @@ package io.openfuture.chain.domain.transaction
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.annotation.NoArgConstructor
-import io.openfuture.chain.domain.transaction.data.BaseTransactionData
-import io.openfuture.chain.entity.transaction.Transaction
-import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
+import io.openfuture.chain.domain.transaction.data.RewardTransactionData
+import io.openfuture.chain.entity.transaction.RewardTransaction
 import io.openfuture.chain.network.domain.NetworkEntity
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 
 @NoArgConstructor
-abstract class BaseTransactionDto<Entity: Transaction, UEntity: UTransaction, Data : BaseTransactionData>(
-    var data: Data,
+class RewardTransactionDto(
+    var data: RewardTransactionData,
     var timestamp: Long,
     var senderPublicKey: String,
     var senderSignature: String,
     var hash: String
 ) : NetworkEntity() {
 
+    constructor(tx: RewardTransaction) : this(
+        RewardTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress),
+        tx.timestamp,
+        tx.senderPublicKey,
+        tx.senderSignature,
+        tx.hash
+    )
     override fun read(buffer: ByteBuf) {
-        data = getDataInstance()
+        data = RewardTransactionData::class.java.newInstance()
         data.read(buffer)
 
         timestamp = buffer.readLong()
@@ -37,10 +43,15 @@ abstract class BaseTransactionDto<Entity: Transaction, UEntity: UTransaction, Da
         buffer.writeString(hash)
     }
 
-    abstract fun getDataInstance() : Data
-
-    abstract fun toUEntity(): UEntity
-
-    abstract fun toEntity(): Entity
+    fun toEntity(): RewardTransaction = RewardTransaction (
+        timestamp,
+        data.amount,
+        data.fee,
+        data.recipientAddress,
+        data.senderAddress,
+        senderPublicKey,
+        senderSignature,
+        hash
+    )
 
 }

@@ -17,7 +17,7 @@ class VoteTransactionRequest(
         senderPublicKey!!,
         senderSignature!!,
         TransactionUtils.createHash(data!!, senderPublicKey!!, senderSignature!!),
-        data!!.voteType.getId(),
+        data!!.voteTypeId,
         data!!.delegateKey
     )
 

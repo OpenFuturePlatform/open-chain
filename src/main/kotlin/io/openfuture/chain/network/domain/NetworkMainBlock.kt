@@ -6,7 +6,7 @@ import io.openfuture.chain.domain.transaction.DelegateTransactionDto
 import io.openfuture.chain.domain.transaction.RewardTransactionDto
 import io.openfuture.chain.domain.transaction.TransferTransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.DelegateTransaction
 import io.openfuture.chain.entity.transaction.RewardTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
