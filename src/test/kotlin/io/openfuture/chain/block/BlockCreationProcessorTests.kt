@@ -18,11 +18,7 @@ import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.entity.transaction.RewardTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.property.ConsensusProperties
-import io.openfuture.chain.property.NodeProperties
-import io.openfuture.chain.service.BaseTransactionService
-import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.service.ConsensusService
-import io.openfuture.chain.service.DelegateService
+import io.openfuture.chain.service.*
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -33,8 +29,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 
 class BlockCreationProcessorTests : ServiceTests() {
 
-    @Mock private lateinit var blockService: BlockService<Block>
-    @Mock private lateinit var genesisBlockService: BlockService<GenesisBlock>
+    @Mock private lateinit var commonBlockService: CommonBlockService
+    @Mock private lateinit var genesisBlockService: GenesisBlockService
     @Mock private lateinit var baseTransactionService: BaseTransactionService
     @Mock private lateinit var signatureCollector: SignatureCollector
     @Mock private lateinit var keyHolder: NodeKeyHolder
@@ -42,7 +38,6 @@ class BlockCreationProcessorTests : ServiceTests() {
     @Mock private lateinit var consensusService: ConsensusService
     @Mock private lateinit var clock: NodeClock
     @Mock private lateinit var delegateService: DelegateService
-    @Mock private lateinit var properties: NodeProperties
     @Mock private lateinit var consensusProperties: ConsensusProperties
     @Mock private lateinit var timeSlot: TimeSlot
     @Mock private lateinit var scheduler: ThreadPoolTaskScheduler
@@ -54,8 +49,8 @@ class BlockCreationProcessorTests : ServiceTests() {
     @Before
     fun init() {
         val block = createMainBlock()
-        given(blockService.getLast()).willReturn(block)
-        processor = BlockCreationProcessor(blockService, genesisBlockService, baseTransactionService,
+        given(commonBlockService.getLast()).willReturn(block)
+        processor = BlockCreationProcessor(commonBlockService, genesisBlockService, baseTransactionService,
             signatureCollector, keyHolder, blockValidationService, consensusService, clock, delegateService,
             consensusProperties, timeSlot, scheduler, rewardTransactionEntityConverter)
     }
