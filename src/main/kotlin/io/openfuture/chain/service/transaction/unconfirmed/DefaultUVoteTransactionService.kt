@@ -1,8 +1,7 @@
 package io.openfuture.chain.service.transaction.unconfirmed
 
-import io.openfuture.chain.component.converter.transaction.impl.UVoteTransactionEntityConverter
-import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
-import io.openfuture.chain.domain.transaction.BaseTransactionDto
+import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
+import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
@@ -16,13 +15,12 @@ import javax.xml.bind.ValidationException
 @Service
 class DefaultUVoteTransactionService(
     repository: UVoteTransactionRepository,
-    entityConverter: UVoteTransactionEntityConverter,
     private val consensusProperties: ConsensusProperties
-) : DefaultUTransactionService<UVoteTransaction, VoteTransactionData, UVoteTransactionEntityConverter>(repository, entityConverter),
+) : DefaultUTransactionService<UVoteTransaction, VoteTransactionData, VoteTransactionDto, VoteTransactionRequest>(repository),
     UVoteTransactionService {
 
     @Transactional
-    override fun validate(request: BaseTransactionRequest<VoteTransactionData>) {
+    override fun validate(request: VoteTransactionRequest) {
         if (!isValidVoteCount(request.data!!.senderAddress)) {
             throw ValidationException("Wallet ${request.data!!.senderAddress} already spent all votes!")
         }
@@ -31,7 +29,7 @@ class DefaultUVoteTransactionService(
     }
 
     @Transactional
-    override fun validate(dto: BaseTransactionDto<VoteTransactionData>) {
+    override fun validate(dto: VoteTransactionDto) {
         if (!isValidVoteCount(dto.data.senderAddress)) {
             throw ValidationException("Wallet ${dto.data.senderAddress} already spent all votes!")
         }

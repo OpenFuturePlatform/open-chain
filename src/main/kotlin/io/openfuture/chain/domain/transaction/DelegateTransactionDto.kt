@@ -10,7 +10,7 @@ class DelegateTransactionDto(
     senderPublicKey: String,
     senderSignature: String,
     hash: String
-) : BaseTransactionDto<DelegateTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
+) : BaseTransactionDto<UDelegateTransaction, DelegateTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
 
     constructor(tx: UDelegateTransaction) : this(
         DelegateTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress, tx.delegateKey),
@@ -18,6 +18,18 @@ class DelegateTransactionDto(
         tx.senderPublicKey,
         tx.senderSignature,
         tx.hash
+    )
+
+    override fun toEntity(): UDelegateTransaction = UDelegateTransaction(
+        timestamp,
+        data.amount,
+        data.fee,
+        data.recipientAddress,
+        data.senderAddress,
+        senderPublicKey,
+        senderSignature,
+        hash,
+        data.delegateKey
     )
 
 }

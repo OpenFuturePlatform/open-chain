@@ -1,7 +1,6 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.block.validation.BlockValidationProvider
-import io.openfuture.chain.component.converter.transaction.impl.RewardTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
@@ -34,7 +33,6 @@ class BlockCreationProcessor(
     private val consensusService: ConsensusService,
     private val clock: NodeClock,
     private val delegateService: DelegateService,
-    private val rewardTransactionEntityConverter: RewardTransactionEntityConverter,
     private val consensusProperties: ConsensusProperties
 ) {
 
@@ -121,7 +119,8 @@ class BlockCreationProcessor(
         val rewardTransactionData = RewardTransactionData((fees + consensusProperties.rewardBlock!!),
             consensusProperties.feeRewardTx!!, delegate.address, consensusProperties.genesisAddress!!)
 
-        val rewardTransaction = rewardTransactionEntityConverter.toEntity(clock.networkTime(), rewardTransactionData)
+        val rewardTransaction = rewardTransactionData.toEntity(clock.networkTime(),
+            keyHolder.getPublicKey(), keyHolder.getPrivateKey())
 
         return mutableListOf(rewardTransaction, *pendingTransactions.toTypedArray())
     }

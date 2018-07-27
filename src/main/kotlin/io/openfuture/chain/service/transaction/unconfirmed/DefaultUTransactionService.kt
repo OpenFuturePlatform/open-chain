@@ -1,6 +1,5 @@
 package io.openfuture.chain.service.transaction.unconfirmed
 
-import io.openfuture.chain.component.converter.transaction.UTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
@@ -19,10 +18,10 @@ import io.openfuture.chain.util.TransactionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
-abstract class DefaultUTransactionService<Entity : UTransaction, Data : BaseTransactionData, Converter : UTransactionEntityConverter<Entity, Data>>(
-    protected val repository: UTransactionRepository<Entity>,
-    protected val entityConverter: Converter
-) : UTransactionService<Entity, Data> {
+abstract class DefaultUTransactionService<Entity : UTransaction, Data : BaseTransactionData,
+    Dto: BaseTransactionDto<Entity, Data>, Req: BaseTransactionRequest<Entity, Data>>(
+    protected val repository: UTransactionRepository<Entity>
+) : UTransactionService<Entity, Data, Dto, Req> {
 
     @Autowired
     protected lateinit var nodeClock: NodeClock
@@ -45,29 +44,29 @@ abstract class DefaultUTransactionService<Entity : UTransaction, Data : BaseTran
     override fun getAll(): MutableSet<Entity> = repository.findAll().toMutableSet()
 
     @Transactional
-    override fun add(dto: BaseTransactionDto<Data>): Entity {
+    override fun add(dto: Dto): Entity {
         val transaction = repository.findOneByHash(dto.hash)
         if (null != transaction) {
             return transaction
         }
         validate(dto)
-        return saveAndBroadcast(entityConverter.toEntity(dto))
+        return saveAndBroadcast(dto.toEntity())
     }
 
     @Transactional
-    override fun add(request: BaseTransactionRequest<Data>): Entity {
+    override fun add(request: Req): Entity {
         validate(request)
-        return saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), request))
+        return saveAndBroadcast(request.toEntity(nodeClock.networkTime()))
     }
 
-    open fun validate(dto: BaseTransactionDto<Data>) {
+    open fun validate(dto: Dto) {
         if (!isValidHash(dto.data, dto.senderSignature, dto.senderPublicKey, dto.hash)) {
             throw ValidationException("Invalid transaction hash")
         }
         commonValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
     }
 
-    open fun validate(request: BaseTransactionRequest<Data>) {
+    open fun validate(request: Req) {
         commonValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
     }
 
