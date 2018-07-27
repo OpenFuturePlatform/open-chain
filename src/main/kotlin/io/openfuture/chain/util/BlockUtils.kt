@@ -1,8 +1,8 @@
 package io.openfuture.chain.util
 
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.Delegate
+import io.openfuture.chain.entity.block.Block
 import java.util.*
 
 object BlockUtils {

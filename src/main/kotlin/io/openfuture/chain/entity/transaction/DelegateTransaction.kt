@@ -1,6 +1,6 @@
 package io.openfuture.chain.entity.transaction
 
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.block.MainBlock
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Table
@@ -22,4 +22,4 @@ class DelegateTransaction(
 
     block: MainBlock? = null
 
-) : BaseTransaction(timestamp, amount, fee, recipientAddress, senderPublicKey, senderAddress, senderSignature, hash, block)
+) : Transaction(timestamp, amount, fee, recipientAddress, senderPublicKey, senderAddress, senderSignature, hash, block)

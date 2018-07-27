@@ -3,9 +3,9 @@ package io.openfuture.chain.block
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.GenesisBlock
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.block.Block
+import io.openfuture.chain.entity.block.GenesisBlock
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.GenesisBlockService
 import io.openfuture.chain.service.MainBlockService
@@ -42,7 +42,7 @@ class SignatureCollector(
         }
     }
 
-    fun addSignatureBlock(signatureBlock: PendingBlock): Boolean {
+    fun addBlockSignature(signatureBlock: PendingBlock): Boolean {
         if (!active || signatureBlock.block.hash != pendingBlock.hash) {
             return false
         }

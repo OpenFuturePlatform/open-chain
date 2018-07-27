@@ -4,18 +4,6 @@
   serial: "{{ count }}"
   gather_facts: False
   tasks:
-    - name: Stop a container
-      docker_container:
-        name: openchain
-        state: stopped
-      register: container_info
-      ignore_errors: yes
-    - name: Delete old image
-      docker_image:
-        state: absent
-        name: "{{ container_info.ansible_facts.docker_container.Config.Image }}"
-        force: true
-      ignore_errors: yes
     - name: Re-create openchain container
       docker_container:
         name: openchain
@@ -25,3 +13,5 @@
           - 8080:8080
           - 9190:9190
         restart_policy: always
+    - name: Delete old images
+      shell: docker image prune -a --force --filter "until=24h"

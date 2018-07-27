@@ -1,4 +1,4 @@
-package io.openfuture.chain.entity
+package io.openfuture.chain.entity.block
 
 import io.openfuture.chain.entity.base.BaseModel
 import javax.persistence.*
@@ -20,8 +20,8 @@ abstract class Block(
     @Column(name = "public_key", nullable = false)
     val publicKey: String,
 
-    @Column(name = "hash", nullable = false)
-    var hash: String,
+    @Column(name = "hash", nullable = false, unique = true)
+    var hash: String
 
     @Column(name = "signature", nullable = false)
     var signature: String? = null

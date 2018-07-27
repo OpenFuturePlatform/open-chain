@@ -1,11 +1,17 @@
 package io.openfuture.chain.repository
 
-import io.openfuture.chain.entity.*
-import io.openfuture.chain.entity.transaction.BaseTransaction
-import io.openfuture.chain.entity.transaction.TransferTransaction
-import io.openfuture.chain.entity.transaction.VoteTransaction
-import org.springframework.data.domain.Pageable
+import io.openfuture.chain.entity.Delegate
+import io.openfuture.chain.entity.SeedWord
+import io.openfuture.chain.entity.Wallet
+import io.openfuture.chain.entity.block.Block
+import io.openfuture.chain.entity.block.GenesisBlock
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.*
+import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.data.repository.PagingAndSortingRepository
@@ -34,11 +40,9 @@ interface MainBlockRepository : BlockRepository<MainBlock>
 interface GenesisBlockRepository : BlockRepository<GenesisBlock>
 
 @Repository
-interface BaseTransactionRepository<Entity : BaseTransaction> : BaseRepository<Entity> {
+interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 
     fun findOneByHash(hash: String): Entity?
-
-    fun findAllByBlockIsNull(): MutableSet<Entity>
 
     fun findAllByBlock(block: Block): List<Entity>
 
@@ -47,16 +51,36 @@ interface BaseTransactionRepository<Entity : BaseTransaction> : BaseRepository<E
 }
 
 @Repository
-interface TransferTransactionRepository : BaseTransactionRepository<TransferTransaction>
+interface UTransactionRepository<Entity : UTransaction> : BaseRepository<Entity> {
+
+    fun findOneByHash(hash: String): Entity?
+
+    fun findAllByOrderByFeeDesc(pageable: Pageable): MutableList<Entity>
+
+}
 
 @Repository
-interface VoteTransactionRepository : BaseTransactionRepository<VoteTransaction>
+interface TransferTransactionRepository : TransactionRepository<TransferTransaction>
 
 @Repository
-interface DelegateTransactionRepository : BaseTransactionRepository<DelegateTransaction>
+interface VoteTransactionRepository : TransactionRepository<VoteTransaction>
 
 @Repository
-interface RewardTransactionRepository : BaseTransactionRepository<RewardTransaction>
+interface DelegateTransactionRepository : TransactionRepository<DelegateTransaction>
+
+@Repository
+interface RewardTransactionRepository : TransactionRepository<RewardTransaction>
+
+
+@Repository
+interface UTransferTransactionRepository : UTransactionRepository<UTransferTransaction>
+
+@Repository
+interface UVoteTransactionRepository : UTransactionRepository<UVoteTransaction>
+
+@Repository
+interface UDelegateTransactionRepository : UTransactionRepository<UDelegateTransaction>
+
 
 @Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {

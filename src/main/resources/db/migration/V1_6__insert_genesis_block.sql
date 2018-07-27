@@ -1,13 +1,3 @@
-CREATE TABLE blocks (
-  id            INTEGER PRIMARY KEY,
-  hash          VARCHAR NOT NULL,
-  height        BIGINT NOT NULL,
-  previous_hash VARCHAR NOT NULL,
-  timestamp     BIGINT  NOT NULL,
-  signature     VARCHAR NOT NULL,
-  public_key    VARCHAR NOT NULL
-);
-
 INSERT INTO blocks(
   id,
   hash,
@@ -25,3 +15,5 @@ INSERT INTO blocks(
   'MEUCIQCLeQuqCrDd8nmS037ZfmQNtpUf/AsfQilmK7CcNNIi7QIgKNdhszih/PezHW52v4/tdsZxaLovJzDnLvUy98tnsgg=',
   '038bbbeeb867b999991cd5b146b392ba2fe44ea69d1cc7208e32190184b13aaf1b'
 );
+
+INSERT INTO genesis_blocks (id, epoch_index) VALUES (1, 1);

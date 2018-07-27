@@ -1,15 +1,16 @@
-package io.openfuture.chain.entity.transaction
+package io.openfuture.chain.entity.transaction.unconfirmed
 
-import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.dictionary.VoteType
+import io.openfuture.chain.entity.transaction.Transaction
+import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.util.DictionaryUtils
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Table
 
 @Entity
-@Table(name = "vote_transactions")
-class VoteTransaction(
+@Table(name = "u_vote_transactions")
+class UVoteTransaction(
     timestamp: Long,
     amount: Long,
     fee: Long,
@@ -23,11 +24,22 @@ class VoteTransaction(
     private var voteTypeId: Int,
 
     @Column(name = "delegate_key", nullable = false)
-    var delegateKey: String,
+    var delegateKey: String
 
-    block: MainBlock? = null
+) : UTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash) {
 
-) : Transaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash, block) {
+    override fun toConfirmed(): VoteTransaction = VoteTransaction(
+        timestamp,
+        amount,
+        fee,
+        recipientAddress,
+        senderAddress,
+        senderPublicKey,
+        senderSignature,
+        hash,
+        voteTypeId,
+        delegateKey
+    )
 
     fun getVoteType(): VoteType = DictionaryUtils.valueOf(VoteType::class.java, voteTypeId)
 

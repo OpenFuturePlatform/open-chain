@@ -1,12 +1,11 @@
 package io.openfuture.chain.service.transaction
 
-import io.openfuture.chain.component.converter.transaction.impl.DelegateTransactionEntityConverter
-import io.openfuture.chain.domain.transaction.BaseTransactionDto
-import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
 import io.openfuture.chain.entity.Delegate
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.DelegateTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.repository.DelegateTransactionRepository
+import io.openfuture.chain.repository.UDelegateTransactionRepository
 import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.service.DelegateTransactionService
 import org.springframework.stereotype.Service
@@ -15,11 +14,10 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultDelegateTransactionService(
     repository: DelegateTransactionRepository,
-    entityConverter: DelegateTransactionEntityConverter,
+    uRepository: UDelegateTransactionRepository,
     private val delegateService: DelegateService
-) : DefaultManualTransactionService<DelegateTransaction, DelegateTransactionData>(repository, entityConverter),
+) : DefaultTransactionService<DelegateTransaction, UDelegateTransaction>(repository, uRepository),
     DelegateTransactionService {
-
 
     @Transactional
     override fun toBlock(dto: BaseTransactionDto<DelegateTransactionData>, block: MainBlock) {

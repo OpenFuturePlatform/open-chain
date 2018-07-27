@@ -1,13 +1,10 @@
-package io.openfuture.chain.entity.transaction
+package io.openfuture.chain.entity.transaction.base
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.base.BaseModel
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.MappedSuperclass
 
-@Entity
-@Table(name = "transactions")
-@Inheritance(strategy = InheritanceType.JOINED)
+@MappedSuperclass
 abstract class BaseTransaction(
 
     @Column(name = "timestamp", nullable = false)
@@ -31,12 +28,7 @@ abstract class BaseTransaction(
     @Column(name = "sender_signature", nullable = false)
     var senderSignature: String,
 
-    @Column(name = "hash", nullable = false)
-    var hash: String,
-
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "block_id", nullable = true)
-    var block: MainBlock? = null
+    @Column(name = "hash", nullable = false, unique = true)
+    var hash: String
 
 ) : BaseModel()

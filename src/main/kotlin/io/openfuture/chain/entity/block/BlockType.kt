@@ -1,4 +1,4 @@
-package io.openfuture.chain.entity
+package io.openfuture.chain.entity.block
 
 enum class BlockType(val id: Int) {
 

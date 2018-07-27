@@ -32,9 +32,6 @@ class DefaultDelegateService(
         ?: throw NotFoundException("Delegate with key: $key not exist!")
 
     @Transactional(readOnly = true)
-    override fun findByPublicKey(key: String): Delegate? = repository.findOneByPublicKey(key)
-
-    @Transactional(readOnly = true)
     override fun getActiveDelegates(): Set<Delegate> {
         val sql = "select sum(wll.balance) rating, dg.public_key $PUBLIC_KEY, dg.address $ADDRESS, dg.id $ID " +
             "from wallets2delegates as s2d\n" +
