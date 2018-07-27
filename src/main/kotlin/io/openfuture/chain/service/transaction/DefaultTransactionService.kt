@@ -21,17 +21,16 @@ abstract class DefaultTransactionService<Entity : Transaction, UEntity : UTransa
     protected lateinit var walletService: WalletService
 
     @Transactional
-    override fun deleteUnconfirmedAndSave(tx: Entity): Entity {
+    override fun toBlock(tx: Entity, block: MainBlock): Entity {
+        tx.block = block
+        return deleteUnconfirmedAndSave(tx)
+    }
+
+    private fun deleteUnconfirmedAndSave(tx: Entity): Entity {
         val uTx = getUnconfirmedTransaction(tx.hash)
         updateBalance(uTx)
         uRepository.delete(uTx)
         return repository.save(tx)
-    }
-
-    @Transactional
-    override fun toBlock(tx: Entity, block: MainBlock): Entity {
-        tx.block = block
-        return deleteUnconfirmedAndSave(tx)
     }
 
     private fun updateBalance(tx: UEntity) {

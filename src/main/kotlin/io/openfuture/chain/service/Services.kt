@@ -103,11 +103,7 @@ interface BaseTransactionService<Entity : Transaction> {
 
 }
 
-interface TransactionService<Entity : Transaction, UEntity : UTransaction> : BaseTransactionService<Entity> {
-
-    fun deleteUnconfirmedAndSave(tx: Entity): Entity
-
-}
+interface TransactionService<Entity : Transaction, UEntity : UTransaction> : BaseTransactionService<Entity>
 
 interface RewardTransactionService : BaseTransactionService<RewardTransaction>
 
