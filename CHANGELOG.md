@@ -19,8 +19,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Reward transaction verification
 - Transaction fee
 - Genesis address defined in properties
-- Transactions fees is defined in properties 
-- Reward for block creation are defined in properties
+- Transactions fees are defined in properties 
+- Reward for block creation is defined in properties
 - RPC: Add delegate transaction
 - RPC: Add vote/recall vote transaction
 - RPC: Add transfer transaction
