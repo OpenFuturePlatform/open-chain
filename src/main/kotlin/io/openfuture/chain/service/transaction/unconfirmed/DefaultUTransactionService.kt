@@ -1,6 +1,5 @@
 package io.openfuture.chain.service.transaction.unconfirmed
 
-import io.openfuture.chain.component.converter.transaction.BaseTransactionEntityConverter
 import io.openfuture.chain.component.converter.transaction.UTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.signature.SignatureManager
