@@ -1,9 +1,11 @@
 package io.openfuture.chain.domain.transaction.data
 
 import io.netty.buffer.ByteBuf
+import io.openfuture.chain.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 
+@NoArgConstructor
 class VoteTransactionData(
     amount: Long,
     fee: Long,

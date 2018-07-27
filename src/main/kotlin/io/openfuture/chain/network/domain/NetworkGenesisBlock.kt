@@ -2,6 +2,7 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.annotation.NoArgConstructor
+import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.writeList
@@ -35,6 +36,13 @@ class NetworkGenesisBlock(height: Long,
         buffer.writeLong(epochIndex)
         buffer.writeList(activeDelegates.toList())
     }
+
+    fun toEntity(): GenesisBlock = GenesisBlock( //todo wait to realize block dto entity converter ?
+        height,
+        previousHash,
+        blockTimestamp,
+        epochIndex,
+        activeDelegates.map { Delegate.of(it) }.toMutableSet()).apply { signature = super.signature }
 
     override fun toString() = "NetworkGenesisBlock(hash=$hash)"
 

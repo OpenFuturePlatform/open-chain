@@ -19,4 +19,6 @@ class VoteTransactionDto(
         tx.hash
     )
 
+    override fun getDataInstance(): VoteTransactionData = VoteTransactionData::class.java.newInstance()
+
 }

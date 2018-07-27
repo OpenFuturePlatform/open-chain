@@ -62,7 +62,7 @@ abstract class DefaultCommonTransactionService<Entity : BaseTransaction, Data : 
 
     @Transactional
     override fun toBlock(dto: BaseTransactionDto<Data>, block: MainBlock) {
-        if (!isExists(dto.hash)) {
+        if (isExists(dto.hash)) {
             return
         }
 

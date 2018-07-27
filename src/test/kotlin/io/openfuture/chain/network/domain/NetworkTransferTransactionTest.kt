@@ -24,13 +24,13 @@ class NetworkTransferTransactionTest {
         assertThat(actualBuffer).isEqualTo(buffer)
     }
 
-//    @Test
-//    fun readShouldFillEntityWithExactValuesFromBuffer() {
-//        val actualEntity = TransferTransactionDto::class.java.newInstance()
-//
-//        actualEntity.read(buffer)
-//
-//        assertThat(actualEntity.hash).isEqualTo(entity.hash)
-//    }
+    @Test
+    fun readShouldFillEntityWithExactValuesFromBuffer() {
+        val actualEntity = TransferTransactionDto::class.java.newInstance()
+
+        actualEntity.read(buffer)
+
+        assertThat(actualEntity.hash).isEqualTo(entity.hash)
+    }
 
 }

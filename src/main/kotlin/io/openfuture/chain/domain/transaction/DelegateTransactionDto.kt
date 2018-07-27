@@ -19,4 +19,6 @@ class DelegateTransactionDto(
         tx.hash
     )
 
+    override fun getDataInstance(): DelegateTransactionData = DelegateTransactionData::class.java.newInstance()
+
 }

@@ -1,5 +1,8 @@
 package io.openfuture.chain.domain.transaction.data
 
+import io.openfuture.chain.annotation.NoArgConstructor
+
+@NoArgConstructor
 class RewardTransactionData(
     amount: Long,
     fee: Long,

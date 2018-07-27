@@ -4,6 +4,7 @@ import io.openfuture.chain.annotation.NoArgConstructor
 import io.openfuture.chain.domain.transaction.data.TransferTransactionData
 import io.openfuture.chain.entity.transaction.TransferTransaction
 
+@NoArgConstructor
 class TransferTransactionDto(
     data: TransferTransactionData,
     timestamp: Long,
@@ -19,5 +20,7 @@ class TransferTransactionDto(
         tx.senderSignature,
         tx.hash
     )
+
+    override fun getDataInstance(): TransferTransactionData = TransferTransactionData::class.java.newInstance()
 
 }

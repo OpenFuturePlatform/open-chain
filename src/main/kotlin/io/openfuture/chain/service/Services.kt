@@ -16,6 +16,8 @@ import io.openfuture.chain.domain.transaction.data.*
 import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.network.domain.NetworkAddress
+import io.openfuture.chain.network.domain.NetworkGenesisBlock
+import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.network.domain.Packet
 import org.springframework.data.domain.Page
 
@@ -46,6 +48,10 @@ interface BlockService {
     fun getBlocksAfterCurrentHash(hash: String): List<Block>?
 
     fun isExists(hash: String): Boolean
+
+    fun add(dto: NetworkMainBlock)
+
+    fun add(dto: NetworkGenesisBlock)
 
     fun save(block: MainBlock): MainBlock
 

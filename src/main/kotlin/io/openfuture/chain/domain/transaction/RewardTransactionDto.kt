@@ -19,4 +19,6 @@ class RewardTransactionDto(
         tx.hash
     )
 
+    override fun getDataInstance(): RewardTransactionData = RewardTransactionData::class.java.newInstance()
+
 }

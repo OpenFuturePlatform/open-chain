@@ -1,13 +1,15 @@
 package io.openfuture.chain.domain.transaction
 
 import io.netty.buffer.ByteBuf
+import io.openfuture.chain.annotation.NoArgConstructor
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
 import io.openfuture.chain.network.domain.NetworkEntity
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 
+@NoArgConstructor
 abstract class BaseTransactionDto<Data : BaseTransactionData>(
-    val data: Data,
+    var data: Data,
     var timestamp: Long,
     var senderPublicKey: String,
     var senderSignature: String,
@@ -15,6 +17,7 @@ abstract class BaseTransactionDto<Data : BaseTransactionData>(
 ) : NetworkEntity() {
 
     override fun read(buffer: ByteBuf) {
+        data = getDataInstance()
         data.read(buffer)
 
         timestamp = buffer.readLong()
@@ -31,5 +34,7 @@ abstract class BaseTransactionDto<Data : BaseTransactionData>(
         buffer.writeString(senderSignature)
         buffer.writeString(hash)
     }
+
+    abstract fun getDataInstance() : Data
 
 }

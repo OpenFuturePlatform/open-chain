@@ -3,8 +3,12 @@ package io.openfuture.chain.network.domain
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufUtil
 import io.netty.buffer.Unpooled
+import io.openfuture.chain.domain.transaction.DelegateTransactionDto
+import io.openfuture.chain.domain.transaction.RewardTransactionDto
 import io.openfuture.chain.domain.transaction.TransferTransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
+import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
+import io.openfuture.chain.domain.transaction.data.RewardTransactionData
 import io.openfuture.chain.domain.transaction.data.TransferTransactionData
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.network.domain.HeartBeat.Type.PING
@@ -196,43 +200,59 @@ class PacketTest {
 
     @Test
     fun writeShouldWriteExactValuesInBufferMainBlock() {
-        val buf = createBuffer(
-            "000800000005312e302e30000000000756b5b300000000000000010000000c70726576696f757348617" +
-                "3680000000a6d65726b6c65486173680000000000000001000000010000000468617368000000097369676e6" +
-                "174757265000000010000000000000001000000000000000100000010726563697069656e7441646472657373000000097" +
-                "3656e6465724b657900000000000000010000000d73656e646572416464726573730000000f73656e6465725369676e61747572" +
-                "650000000468617368000000010000000000000001000000000000000100000010726563697069656e74416464726573730000000d" +
-                "73656e6465724164647265737300000001000000036b657900000000000000010000000973656e6465724b65790000000f73656e6465" +
-                "725369676e61747572650000000468617368")
-        val transafetTransaction = mutableListOf(TransferTransactionDto(TransferTransactionData(1, 1, "recipientAddress",
+        val buf = createBuffer("000800000005312e302e30000000000756b5b300000000000000010000000c70726576696f757348617368000000" +
+            "0a6d65726b6c65486173680000000000000001000000010000000468617368000000097369676e61747572650000000" +
+            "10000000000000001000000000000000100000010726563697069656e74416464726573730000000973656e646572" +
+            "4b657900000000000000010000000d73656e646572416464726573730000000f73656e6465725369676e617475726" +
+            "50000000468617368000000010000000000000001000000000000000100000010726563697069656e7441646472657" +
+            "3730000000d73656e6465724164647265737300000001000000036b657900000000000000010000000973656e646572" +
+            "4b65790000000f73656e6465725369676e61747572650000000468617368000000010000000000000001000000000000" +
+            "000100000010726563697069656e74416464726573730000000973656e6465724b65790000000b64656c65676174654" +
+            "b657900000000000000010000000d73656e646572416464726573730000000f73656e6465725369676e6174757265000000" +
+            "0468617368000000010000000000000001000000000000000100000010726563697069656e74416464726573730000000973" +
+            "656e6465724b657900000000000000010000000d73656e646572416464726573730000000f73656e6465725369676e61747572650000000468617368")
+        val transaferTransaction = mutableListOf(TransferTransactionDto(TransferTransactionData(1, 1, "recipientAddress",
             "senderKey"), 1, "senderAddress", "senderSignature", "hash"))
         val voteTransaction = mutableListOf(VoteTransactionDto(VoteTransactionData(1, 1, "recipientAddress", "senderAddress",
             1, "key"), 1, "senderKey", "senderSignature", "hash"))
-        val packet = NetworkMainBlock(1, "previousHash", "merkleHash", 1, 1, "hash", "signature", transafetTransaction, voteTransaction)
+        val delegateTransaction = mutableListOf(DelegateTransactionDto(DelegateTransactionData(1, 1, "recipientAddress",
+            "senderKey", "delegateKey"), 1, "senderAddress", "senderSignature", "hash"))
+        val rewardTransaction = mutableListOf(RewardTransactionDto(RewardTransactionData(1, 1, "recipientAddress",
+            "senderKey"), 1, "senderAddress", "senderSignature", "hash"))
+        val packet = NetworkMainBlock(1, "previousHash", "merkleHash", 1, 1, "hash", "signature", transaferTransaction,
+            voteTransaction, delegateTransaction, rewardTransaction)
 
         read(packet, buf)
     }
 
-//    @Test
-//    fun readShouldFillEntityWithExactValuesFromBufferMainBlock() {
-//        val buf = createBuffer(
-//            "000800000005312e302e30000000000756b5b300000000000000010000000c70726576696f757348617" +
-//                "3680000000a6d65726b6c65486173680000000000000001000000010000000468617368000000097369676e6" +
-//                "174757265000000010000000000000001000000000000000100000010726563697069656e7441646472657373000000097" +
-//                "3656e6465724b657900000000000000010000000d73656e646572416464726573730000000f73656e6465725369676e61747572" +
-//                "650000000468617368000000010000000000000001000000000000000100000010726563697069656e74416464726573730000000d" +
-//                "73656e6465724164647265737300000001000000036b657900000000000000010000000973656e6465724b65790000000f73656e6465" +
-//                "725369676e61747572650000000468617368")
-//        val transaferTransaction = mutableListOf(TransferTransactionDto(TransferTransactionData(1, 1, "recipientAddress",
-//            "senderKey"), 1, "senderAddress", "senderSignature", "hash"))
-//        val voteTransaction = mutableListOf(VoteTransactionDto(VoteTransactionData(1, 1, "recipientAddress", "senderAddress",
-//            1, "key"), 1, "senderKey", "senderSignature", "hash"))
-//        val packet = NetworkMainBlock(1, "previousHash", "merkleHash", 1, 1, "hash", "signature", transaferTransaction, voteTransaction)
-//
-//        val actualPacket = write(packet, buf)
-//
-//        assertThat((actualPacket as NetworkMainBlock).hash).isEqualTo(packet.hash)
-//    }
+    @Test
+    fun readShouldFillEntityWithExactValuesFromBufferMainBlock() {
+        val buf = createBuffer("000800000005312e302e30000000000756b5b300000000000000010000000c70726576696f757348617368000000" +
+            "0a6d65726b6c65486173680000000000000001000000010000000468617368000000097369676e61747572650000000" +
+            "10000000000000001000000000000000100000010726563697069656e74416464726573730000000973656e646572" +
+            "4b657900000000000000010000000d73656e646572416464726573730000000f73656e6465725369676e617475726" +
+            "50000000468617368000000010000000000000001000000000000000100000010726563697069656e7441646472657" +
+            "3730000000d73656e6465724164647265737300000001000000036b657900000000000000010000000973656e646572" +
+            "4b65790000000f73656e6465725369676e61747572650000000468617368000000010000000000000001000000000000" +
+            "000100000010726563697069656e74416464726573730000000973656e6465724b65790000000b64656c65676174654" +
+            "b657900000000000000010000000d73656e646572416464726573730000000f73656e6465725369676e6174757265000000" +
+            "0468617368000000010000000000000001000000000000000100000010726563697069656e74416464726573730000000973" +
+            "656e6465724b657900000000000000010000000d73656e646572416464726573730000000f73656e6465725369676e61747572650000000468617368")
+        val transaferTransaction = mutableListOf(TransferTransactionDto(TransferTransactionData(1, 1, "recipientAddress",
+            "senderKey"), 1, "senderAddress", "senderSignature", "hash"))
+        val voteTransaction = mutableListOf(VoteTransactionDto(VoteTransactionData(1, 1, "recipientAddress", "senderAddress",
+            1, "key"), 1, "senderKey", "senderSignature", "hash"))
+        val delegateTransaction = mutableListOf(DelegateTransactionDto(DelegateTransactionData(1, 1, "recipientAddress",
+            "senderKey", "delegateKey"), 1, "senderAddress", "senderSignature", "hash"))
+        val rewardTransaction = mutableListOf(RewardTransactionDto(RewardTransactionData(1, 1, "recipientAddress",
+            "senderKey"), 1, "senderAddress", "senderSignature", "hash"))
+        val packet = NetworkMainBlock(1, "previousHash", "merkleHash", 1, 1, "hash", "signature", transaferTransaction,
+            voteTransaction, delegateTransaction, rewardTransaction)
+
+        val actualPacket = write(packet, buf)
+
+        assertThat((actualPacket as NetworkMainBlock).hash).isEqualTo(packet.hash)
+    }
 
     private fun read(packet: Packet, buf: ByteBuf) {
         addFields(packet)

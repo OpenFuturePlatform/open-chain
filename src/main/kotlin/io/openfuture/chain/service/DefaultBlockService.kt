@@ -1,11 +1,13 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.domain.transaction.RewardTransactionDto
 import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.exception.NotFoundException
+import io.openfuture.chain.network.domain.NetworkGenesisBlock
+import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.repository.BlockRepository
 import io.openfuture.chain.repository.GenesisBlockRepository
 import io.openfuture.chain.repository.MainBlockRepository
@@ -43,8 +45,23 @@ class DefaultBlockService(
             ?: throw NotFoundException("Last Genesis block not exist!")
 
     @Transactional
+    override fun add(dto: NetworkMainBlock) {
+        val savedBlock = mainBlockRepository.save(dto.toEntity())
+
+        dto.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
+        dto.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
+        dto.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
+        dto.rewardTransactions.forEach { rewardTransactionService.toBlock(it, savedBlock) }
+    }
+
+    @Transactional
+    override fun add(dto: NetworkGenesisBlock) {
+        genesisBlockRepository.save(dto.toEntity())
+    }
+
+    @Transactional
     override fun save(block: MainBlock): MainBlock {
-        rewardTransactionService.add(RewardTransactionDto(block.transactions.first() as RewardTransaction))
+        //rewardTransactionService.add(RewardTransactionDto(block.transactions.first() as RewardTransaction))
 
         val savedBlock = mainBlockRepository.save(block)
         val transactions = block.transactions
