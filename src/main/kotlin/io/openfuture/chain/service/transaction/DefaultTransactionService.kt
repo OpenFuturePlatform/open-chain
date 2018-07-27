@@ -12,16 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
 abstract class DefaultTransactionService<Entity : Transaction, UEntity : UTransaction>(
-    protected val repository: TransactionRepository<Entity>,
+    repository: TransactionRepository<Entity>,
     protected val uRepository: UTransactionRepository<UEntity>
-) : TransactionService<Entity, UEntity> {
+) : DefaultBaseTransactionService<Entity>(repository),
+    TransactionService<Entity, UEntity> {
 
     @Autowired
     protected lateinit var walletService: WalletService
-
-    @Transactional(readOnly = true)
-    override fun get(hash: String): Entity = repository.findOneByHash(hash)
-        ?: throw NotFoundException("Transaction with hash: $hash not exist!")
 
     @Transactional
     override fun deleteUnconfirmedAndSave(tx: Entity): Entity {

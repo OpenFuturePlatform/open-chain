@@ -1,15 +1,13 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.block.validation.BlockValidationProvider
-import io.openfuture.chain.component.converter.transaction.impl.URewardTransactionEntityConverter
+import io.openfuture.chain.component.converter.transaction.impl.RewardTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
 import io.openfuture.chain.entity.block.Block
-import io.openfuture.chain.entity.Delegate
-import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.Transaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
@@ -31,7 +29,7 @@ class BlockCreationProcessorTests : ServiceTests() {
     @Mock private lateinit var consensusService: ConsensusService
     @Mock private lateinit var clock: NodeClock
     @Mock private lateinit var delegateService: DelegateService
-    @Mock private lateinit var rewardTransactionEntityConverter: URewardTransactionEntityConverter
+    @Mock private lateinit var rewardTransactionEntityConverter: RewardTransactionEntityConverter
     @Mock private lateinit var consensusProperties: ConsensusProperties
 
     private lateinit var processor: BlockCreationProcessor

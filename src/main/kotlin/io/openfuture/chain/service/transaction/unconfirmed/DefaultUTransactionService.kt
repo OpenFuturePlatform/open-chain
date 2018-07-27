@@ -1,9 +1,11 @@
 package io.openfuture.chain.service.transaction.unconfirmed
 
 import io.openfuture.chain.component.converter.transaction.BaseTransactionEntityConverter
+import io.openfuture.chain.component.converter.transaction.UTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
@@ -18,7 +20,7 @@ import io.openfuture.chain.util.TransactionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
-abstract class DefaultUTransactionService<Entity : UTransaction, Data : BaseTransactionData, Converter : BaseTransactionEntityConverter<Entity, Data>>(
+abstract class DefaultUTransactionService<Entity : UTransaction, Data : BaseTransactionData, Converter : UTransactionEntityConverter<Entity, Data>>(
     protected val repository: UTransactionRepository<Entity>,
     protected val entityConverter: Converter
 ) : UTransactionService<Entity, Data> {
@@ -53,11 +55,21 @@ abstract class DefaultUTransactionService<Entity : UTransaction, Data : BaseTran
         return saveAndBroadcast(entityConverter.toEntity(dto))
     }
 
+    @Transactional
+    override fun add(request: BaseTransactionRequest<Data>): Entity {
+        validate(request)
+        return saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), request))
+    }
+
     open fun validate(dto: BaseTransactionDto<Data>) {
         if (!isValidHash(dto.data, dto.senderSignature, dto.senderPublicKey, dto.hash)) {
             throw ValidationException("Invalid transaction hash")
         }
         commonValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
+    }
+
+    open fun validate(request: BaseTransactionRequest<Data>) {
+        commonValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
     }
 
     protected fun saveAndBroadcast(tx: Entity): Entity {

@@ -18,7 +18,7 @@ class DefaultUVoteTransactionService(
     repository: UVoteTransactionRepository,
     entityConverter: UVoteTransactionEntityConverter,
     private val consensusProperties: ConsensusProperties
-) : DefaultManualUTransactionService<UVoteTransaction, VoteTransactionData>(repository, entityConverter),
+) : DefaultUTransactionService<UVoteTransaction, VoteTransactionData, UVoteTransactionEntityConverter>(repository, entityConverter),
     UVoteTransactionService {
 
     @Transactional

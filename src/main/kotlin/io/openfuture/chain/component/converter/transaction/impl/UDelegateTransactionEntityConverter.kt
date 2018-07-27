@@ -1,6 +1,6 @@
 package io.openfuture.chain.component.converter.transaction.impl
 
-import io.openfuture.chain.component.converter.transaction.ManualTransactionEntityConverter
+import io.openfuture.chain.component.converter.transaction.UTransactionEntityConverter
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
@@ -9,7 +9,7 @@ import io.openfuture.chain.util.TransactionUtils
 import org.springframework.stereotype.Component
 
 @Component
-class UDelegateTransactionEntityConverter : ManualTransactionEntityConverter<UDelegateTransaction, DelegateTransactionData>() {
+class UDelegateTransactionEntityConverter : UTransactionEntityConverter<UDelegateTransaction, DelegateTransactionData>() {
 
     override fun toEntity(dto: BaseTransactionDto<DelegateTransactionData>): UDelegateTransaction =
         UDelegateTransaction(

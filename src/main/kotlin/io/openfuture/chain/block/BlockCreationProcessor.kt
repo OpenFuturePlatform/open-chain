@@ -1,7 +1,7 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.block.validation.BlockValidationProvider
-import io.openfuture.chain.component.converter.transaction.impl.URewardTransactionEntityConverter
+import io.openfuture.chain.component.converter.transaction.impl.RewardTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
@@ -14,6 +14,8 @@ import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.BlockType
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
+import io.openfuture.chain.entity.transaction.Transaction
+import io.openfuture.chain.entity.transaction.base.BaseTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
@@ -32,7 +34,7 @@ class BlockCreationProcessor(
     private val consensusService: ConsensusService,
     private val clock: NodeClock,
     private val delegateService: DelegateService,
-    private val rewardTransactionEntityConverter: URewardTransactionEntityConverter,
+    private val rewardTransactionEntityConverter: RewardTransactionEntityConverter,
     private val consensusProperties: ConsensusProperties
 ) {
 
@@ -81,7 +83,13 @@ class BlockCreationProcessor(
         val privateKey = keyHolder.getPrivateKey()
         val block = when (blockType) {
             BlockType.MAIN -> {
-                val transactions = prepareTransactions(pendingTransactions)
+                val transactions = prepareTransactions(pendingTransactions).map {
+                    when (it) {
+                        is UTransaction -> it.toConfirmed()
+                        is Transaction -> it
+                        else -> throw IllegalArgumentException("Unknown type of transaction")
+                    }
+                }.toMutableList()
 
                 MainBlock(
                     privateKey,
@@ -89,7 +97,7 @@ class BlockCreationProcessor(
                     previousBlock.hash,
                     BlockUtils.calculateMerkleRoot(transactions),
                     time,
-                    transactions.map { it.toConfirmed() }.toMutableList()
+                    transactions
                 )
             }
             BlockType.GENESIS -> {
@@ -107,7 +115,7 @@ class BlockCreationProcessor(
         signCreatedBlock(block)
     }
 
-    private fun prepareTransactions(pendingTransactions: MutableList<UTransaction>): MutableList<UTransaction> {
+    private fun prepareTransactions(pendingTransactions: MutableList<UTransaction>): MutableList<BaseTransaction> {
         val fees = pendingTransactions.map { it.fee }.sum()
         val delegate = delegateService.getByPublicKey(HashUtils.toHexString(keyHolder.getPublicKey()))
         val rewardTransactionData = RewardTransactionData((fees + consensusProperties.rewardBlock!!),

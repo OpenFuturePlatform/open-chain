@@ -1,6 +1,6 @@
 package io.openfuture.chain.component.converter.transaction.impl
 
-import io.openfuture.chain.component.converter.transaction.ManualTransactionEntityConverter
+import io.openfuture.chain.component.converter.transaction.UTransactionEntityConverter
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
@@ -9,7 +9,7 @@ import io.openfuture.chain.util.TransactionUtils
 import org.springframework.stereotype.Component
 
 @Component
-class UVoteTransactionEntityConverter : ManualTransactionEntityConverter<UVoteTransaction, VoteTransactionData>() {
+class UVoteTransactionEntityConverter : UTransactionEntityConverter<UVoteTransaction, VoteTransactionData>() {
 
     override fun toEntity(dto: BaseTransactionDto<VoteTransactionData>): UVoteTransaction =
         UVoteTransaction(

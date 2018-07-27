@@ -12,14 +12,20 @@ import io.openfuture.chain.domain.rpc.hardware.RamInfo
 import io.openfuture.chain.domain.rpc.hardware.StorageInfo
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
-import io.openfuture.chain.domain.transaction.data.*
+import io.openfuture.chain.domain.transaction.data.BaseTransactionData
+import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
+import io.openfuture.chain.domain.transaction.data.TransferTransactionData
+import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.Wallet
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.*
-import io.openfuture.chain.entity.transaction.unconfirmed.*
+import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.network.domain.Packet
 import org.springframework.data.domain.Page
@@ -83,17 +89,21 @@ interface BaseUTransactionService {
 
 }
 
-interface TransactionService<Entity : Transaction, UEntity : UTransaction> {
+interface BaseTransactionService<Entity : Transaction> {
 
     fun get(hash: String): Entity
-
-    fun deleteUnconfirmedAndSave(tx: Entity): Entity
 
     fun toBlock(tx: Entity, block: MainBlock): Entity
 
 }
 
-interface RewardTransactionService : TransactionService<RewardTransaction, URewardTransaction>
+interface TransactionService<Entity : Transaction, UEntity : UTransaction> : BaseTransactionService<Entity> {
+
+    fun deleteUnconfirmedAndSave(tx: Entity): Entity
+
+}
+
+interface RewardTransactionService : BaseTransactionService<RewardTransaction>
 
 interface TransferTransactionService : TransactionService<TransferTransaction, UTransferTransaction>
 
@@ -109,23 +119,15 @@ interface UTransactionService<Entity : UTransaction, Data : BaseTransactionData>
 
     fun add(dto: BaseTransactionDto<Data>): Entity
 
-}
-
-interface EmbeddedUTransactionService<Entity : UTransaction, Data : BaseTransactionData> : UTransactionService<Entity, Data>
-
-interface ManualUTransactionService<Entity : UTransaction, Data : BaseTransactionData> : UTransactionService<Entity, Data> {
-
     fun add(request: BaseTransactionRequest<Data>): Entity
 
 }
 
-interface URewardTransactionService : EmbeddedUTransactionService<URewardTransaction, RewardTransactionData>
+interface UTransferTransactionService : UTransactionService<UTransferTransaction, TransferTransactionData>
 
-interface UTransferTransactionService : ManualUTransactionService<UTransferTransaction, TransferTransactionData>
+interface UVoteTransactionService : UTransactionService<UVoteTransaction, VoteTransactionData>
 
-interface UVoteTransactionService : ManualUTransactionService<UVoteTransaction, VoteTransactionData>
-
-interface UDelegateTransactionService : ManualUTransactionService<UDelegateTransaction, DelegateTransactionData>
+interface UDelegateTransactionService : UTransactionService<UDelegateTransaction, DelegateTransactionData>
 
 interface DelegateService {
 

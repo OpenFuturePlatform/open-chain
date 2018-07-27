@@ -69,9 +69,6 @@ interface UVoteTransactionRepository : UTransactionRepository<UVoteTransaction>
 @Repository
 interface UDelegateTransactionRepository : UTransactionRepository<UDelegateTransaction>
 
-@Repository
-interface URewardTransactionRepository : UTransactionRepository<URewardTransaction>
-
 
 @Repository
 interface SeedWordRepository : BaseRepository<SeedWord> {

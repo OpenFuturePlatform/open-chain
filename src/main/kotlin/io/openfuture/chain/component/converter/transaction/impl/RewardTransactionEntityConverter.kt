@@ -1,22 +1,22 @@
 package io.openfuture.chain.component.converter.transaction.impl
 
-import io.openfuture.chain.component.converter.transaction.EmbeddedTransactionEntityConverter
+import io.openfuture.chain.component.converter.transaction.TransactionEntityConverter
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.RewardTransactionData
-import io.openfuture.chain.entity.transaction.unconfirmed.URewardTransaction
+import io.openfuture.chain.entity.transaction.RewardTransaction
 import io.openfuture.chain.util.TransactionUtils
 import org.springframework.stereotype.Component
 
 @Component
-class URewardTransactionEntityConverter(
+class RewardTransactionEntityConverter(
     private val keyHolder: NodeKeyHolder
-) : EmbeddedTransactionEntityConverter<URewardTransaction, RewardTransactionData>() {
+) : TransactionEntityConverter<RewardTransaction, RewardTransactionData>() {
 
-    override fun toEntity(dto: BaseTransactionDto<RewardTransactionData>): URewardTransaction =
-        URewardTransaction(
+    override fun toEntity(dto: BaseTransactionDto<RewardTransactionData>): RewardTransaction =
+        RewardTransaction(
             dto.timestamp,
             dto.data.amount,
             dto.data.fee,
@@ -27,8 +27,8 @@ class URewardTransactionEntityConverter(
             dto.hash
         )
 
-    override fun toEntity(timestamp: Long, data: RewardTransactionData): URewardTransaction =
-        URewardTransaction(
+    override fun toEntity(timestamp: Long, data: RewardTransactionData): RewardTransaction =
+        RewardTransaction(
             timestamp,
             data.amount,
             data.fee,

@@ -11,5 +11,5 @@ import org.springframework.stereotype.Service
 class DefaultUTransferTransactionService(
     repository: UTransferTransactionRepository,
     entityConverter: UTransferTransactionEntityConverter
-) : DefaultManualUTransactionService<UTransferTransaction, TransferTransactionData>(repository, entityConverter),
+) : DefaultUTransactionService<UTransferTransaction, TransferTransactionData, UTransferTransactionEntityConverter>(repository, entityConverter),
     UTransferTransactionService
