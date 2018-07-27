@@ -1,7 +1,6 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.block.validation.BlockValidationProvider
-import io.openfuture.chain.component.converter.transaction.impl.RewardTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.crypto.key.NodeKeyHolder
@@ -29,7 +28,6 @@ class BlockCreationProcessorTests : ServiceTests() {
     @Mock private lateinit var consensusService: ConsensusService
     @Mock private lateinit var clock: NodeClock
     @Mock private lateinit var delegateService: DelegateService
-    @Mock private lateinit var rewardTransactionEntityConverter: RewardTransactionEntityConverter
     @Mock private lateinit var consensusProperties: ConsensusProperties
 
     private lateinit var processor: BlockCreationProcessor
@@ -38,7 +36,7 @@ class BlockCreationProcessorTests : ServiceTests() {
     @Before
     fun init() {
         processor = BlockCreationProcessor(blockService, signatureCollector, keyHolder, blockValidationService,
-            consensusService, clock, delegateService, rewardTransactionEntityConverter, consensusProperties)
+            consensusService, clock, delegateService, consensusProperties)
     }
 
     @Test(expected = IllegalArgumentException::class)
