@@ -8,30 +8,31 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.4.0] - 2018-07-27
 ### Added
-- Time slots
+- Time slots mechanism
 - Delegate transaction
-- Add delegate based on Delegate transaction
 - Vote/Recall vote transaction
 - Vote weight based on wallet balance
 - Reward transaction
 - Transaction sign
-- New transactions types verification
+- Delegate transaction verification
+- Vote/Recall vote verification
+- Reward transaction verification
 - Transaction fee
-- Genesis address added to properties
-- Fees and reward for transactions and block creation added to properties
-- RPC: Response header info for all responses
+- Genesis address defined in properties
+- Transactions fees is defined in properties 
+- Reward for block creation is defined in properties
 - RPC: Add delegate transaction
 - RPC: Add vote/recall vote transaction
 - RPC: Add transfet transaction
-- RPC: Delegates info
+- RPC: Get delegates info
 - RPC: Page request filter
-- Application version and timestamp fields to all packets
+- RPC: Application version and timestamp fields to all responces
+- TCP: Application version and timestamp fields to all packets
 - Database: unconfirmed transactions tables
 
 ### Changed
 - Serialization mechanism to support kotlin classes
 - Transactions structure
-- Database optimization
 
 ## [0.3.0] - 2018-07-13
 ### Added
