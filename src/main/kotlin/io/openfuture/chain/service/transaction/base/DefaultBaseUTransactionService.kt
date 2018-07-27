@@ -1,4 +1,4 @@
-package io.openfuture.chain.service.transaction
+package io.openfuture.chain.service.transaction.base
 
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.property.ConsensusProperties
