@@ -5,27 +5,34 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.4.0] - 2018-07-27
 ### Added
-- Delegate transaction type
-- Add delegate based on Delegate transaction
-- RPC: Response header info for all responses
-- RPC: Add transactions
-- RPC: Delegate info
+- Time slots mechanism
+- Delegate transaction
+- Vote/Recall vote transaction
+- Vote weight based on wallet balance
+- Reward transaction
+- Transaction sign
+- Delegate transaction verification
+- Vote/Recall vote verification
+- Reward transaction verification
+- Transaction fee
+- Genesis address defined in properties
+- Transactions fees is defined in properties 
+- Reward for block creation is defined in properties
+- RPC: Add delegate transaction
+- RPC: Add vote/recall vote transaction
+- RPC: Add transfet transaction
+- RPC: Get delegates info
 - RPC: Page request filter
-- Add / remove vote for delegate from wallet based on Vote transaction
-- Calculate delegate rating based on wallet balance
-- Fees to transactions
-- New type transaction: RewardTransaction. New entity, repository, service
-- Addition to block
-- Genesis address to properties
-- Constants fees and reward for transactions/block to properties
-- Verify the reward transaction
-- Version and timestamp fields to all packets
+- RPC: Application version and timestamp fields to all responces
+- TCP: Application version and timestamp fields to all packets
 - Database: unconfirmed transactions tables
 
 ### Changed
 - Serialization mechanism to support kotlin classes
-- Structure of transactions
+- Transactions structure
 
 ## [0.3.0] - 2018-07-13
 ### Added
@@ -110,6 +117,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[0.4.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/OpenFuturePlatform/open-chain/compare/fea19b11de90c89689eff8d2187fd332ee566d19...v0.1.0
