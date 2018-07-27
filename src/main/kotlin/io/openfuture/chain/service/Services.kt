@@ -77,7 +77,7 @@ interface CryptoService {
 /**
  * The utility service that is not aware of transaction types, has default implementation
  */
-interface BaseTransactionService {
+interface BaseUTransactionService {
 
     fun getPending(): MutableSet<UTransaction>
 
@@ -101,8 +101,7 @@ interface VoteTransactionService : TransactionService<VoteTransaction, UVoteTran
 
 interface DelegateTransactionService : TransactionService<DelegateTransaction, UDelegateTransaction>
 
-
-interface CommonUTransactionService<Entity : UTransaction, Data : BaseTransactionData> {
+interface UTransactionService<Entity : UTransaction, Data : BaseTransactionData> {
 
     fun get(hash: String): Entity
 
@@ -110,13 +109,11 @@ interface CommonUTransactionService<Entity : UTransaction, Data : BaseTransactio
 
     fun add(dto: BaseTransactionDto<Data>): Entity
 
-    fun process(tx: Entity)
-
 }
 
-interface EmbeddedUTransactionService<Entity : UTransaction, Data : BaseTransactionData> : CommonUTransactionService<Entity, Data>
+interface EmbeddedUTransactionService<Entity : UTransaction, Data : BaseTransactionData> : UTransactionService<Entity, Data>
 
-interface ManualUTransactionService<Entity : UTransaction, Data : BaseTransactionData> : CommonUTransactionService<Entity, Data> {
+interface ManualUTransactionService<Entity : UTransaction, Data : BaseTransactionData> : UTransactionService<Entity, Data> {
 
     fun add(request: BaseTransactionRequest<Data>): Entity
 
@@ -129,7 +126,6 @@ interface UTransferTransactionService : ManualUTransactionService<UTransferTrans
 interface UVoteTransactionService : ManualUTransactionService<UVoteTransaction, VoteTransactionData>
 
 interface UDelegateTransactionService : ManualUTransactionService<UDelegateTransaction, DelegateTransactionData>
-
 
 interface DelegateService {
 

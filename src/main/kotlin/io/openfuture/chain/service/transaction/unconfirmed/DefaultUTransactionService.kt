@@ -11,17 +11,17 @@ import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.UTransactionRepository
-import io.openfuture.chain.service.BaseTransactionService
-import io.openfuture.chain.service.CommonUTransactionService
+import io.openfuture.chain.service.BaseUTransactionService
+import io.openfuture.chain.service.UTransactionService
 import io.openfuture.chain.service.WalletService
 import io.openfuture.chain.util.TransactionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
-abstract class DefaultCommonUTransactionService<Entity : UTransaction, Data : BaseTransactionData, Converter : BaseTransactionEntityConverter<Entity, Data>>(
+abstract class DefaultUTransactionService<Entity : UTransaction, Data : BaseTransactionData, Converter : BaseTransactionEntityConverter<Entity, Data>>(
     protected val repository: UTransactionRepository<Entity>,
     protected val entityConverter: Converter
-) : CommonUTransactionService<Entity, Data> {
+) : UTransactionService<Entity, Data> {
 
     @Autowired
     protected lateinit var nodeClock: NodeClock
@@ -33,7 +33,7 @@ abstract class DefaultCommonUTransactionService<Entity : UTransaction, Data : Ba
     private lateinit var consensusProperties: ConsensusProperties
 
     @Autowired
-    private lateinit var baseService: BaseTransactionService
+    private lateinit var baseService: BaseUTransactionService
 
 
     @Transactional(readOnly = true)

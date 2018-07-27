@@ -11,15 +11,13 @@ import org.springframework.transaction.annotation.Transactional
 abstract class DefaultManualUTransactionService<Entity : UTransaction, Data : BaseTransactionData>(
     repository: UTransactionRepository<Entity>,
     entityConverter: ManualTransactionEntityConverter<Entity, Data>
-) : DefaultCommonUTransactionService<Entity, Data, ManualTransactionEntityConverter<Entity, Data>>(repository, entityConverter),
+) : DefaultUTransactionService<Entity, Data, ManualTransactionEntityConverter<Entity, Data>>(repository, entityConverter),
     ManualUTransactionService<Entity, Data> {
 
     @Transactional
     override fun add(request: BaseTransactionRequest<Data>): Entity {
         validate(request)
-        val uTx = entityConverter.toEntity(nodeClock.networkTime(), request)
-        process(uTx)
-        return saveAndBroadcast(uTx)
+        return saveAndBroadcast(entityConverter.toEntity(nodeClock.networkTime(), request))
     }
 
     open fun validate(request: BaseTransactionRequest<Data>) {

@@ -8,7 +8,6 @@ import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.UVoteTransactionRepository
-import io.openfuture.chain.service.DelegateService
 import io.openfuture.chain.service.UVoteTransactionService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,7 +17,6 @@ import javax.xml.bind.ValidationException
 class DefaultUVoteTransactionService(
     repository: UVoteTransactionRepository,
     entityConverter: UVoteTransactionEntityConverter,
-    private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties
 ) : DefaultManualUTransactionService<UVoteTransaction, VoteTransactionData>(repository, entityConverter),
     UVoteTransactionService {
@@ -39,23 +37,6 @@ class DefaultUVoteTransactionService(
         }
 
         super.validate(dto)
-    }
-
-    @Transactional
-    override fun process(tx: UVoteTransaction) {
-        updateWalletVotes(tx)
-    }
-
-    private fun updateWalletVotes(tx: UVoteTransaction) {
-        val delegate = delegateService.getByPublicKey(tx.delegateKey)
-        val wallet = walletService.getByAddress(tx.senderAddress)
-
-        when (tx.getVoteType()) {
-            VoteType.FOR -> wallet.votes.add(delegate)
-            VoteType.AGAINST -> wallet.votes.remove(delegate)
-        }
-
-        walletService.save(wallet)
     }
 
     private fun isValidVoteCount(senderAddress: String): Boolean {
