@@ -189,7 +189,7 @@ class PacketTest {
             "000900000005312e302e30000000000756b5b300000000000000010000000c70726576696f757348617368000000000000000" +
                 "1000000097369676e6174757265000000036b6579000000000000000100000001000000096c6f63616c686f7374000000036b6579")
         val delegates = mutableSetOf(NetworkDelegate("localhost", "key"))
-        val packet = NetworkGenesisBlock(1, "previousHash", 1, "merkleHash", "hash", "signature", 1, delegates)
+        val packet = NetworkGenesisBlock(1, "previousHash", 1, "hash", "signature", "key", 1, delegates)
 
         val actualPacket = write(packet, buf)
 
