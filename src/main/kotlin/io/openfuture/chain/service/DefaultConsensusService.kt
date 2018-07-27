@@ -1,6 +1,6 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.entity.Block
+import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.property.ConsensusProperties
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

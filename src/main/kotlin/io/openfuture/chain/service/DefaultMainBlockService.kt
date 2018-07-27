@@ -3,8 +3,7 @@ package io.openfuture.chain.service
 import io.openfuture.chain.block.TimeSlot
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.domain.transaction.RewardTransactionDto
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.MainBlockRepository
@@ -32,8 +31,6 @@ class DefaultMainBlockService(
 
     @Transactional
     override fun save(block: MainBlock): MainBlock {
-        rewardTransactionService.add(RewardTransactionDto(block.transactions.first() as RewardTransaction))
-
         val savedBlock = blockRepository.save(block)
         val transactions = block.transactions
         for (transaction in transactions) {
@@ -59,12 +56,12 @@ class DefaultMainBlockService(
         return block.merkleHash == transactionsMerkleHash
     }
 
-    private fun transactionsIsWellFormed(transactions: Set<BaseTransaction>): Boolean {
+    private fun transactionsIsWellFormed(transactions: Set<Transaction>): Boolean {
         val transactionHashes = transactions.map { it.hash }.toSet()
         return transactionHashes.size == transactions.size
     }
 
-    private fun addTransactionToBlock(tx: BaseTransaction, block: MainBlock) {
+    private fun addTransactionToBlock(tx: Transaction, block: MainBlock) {
         when (tx) {
             is VoteTransaction -> voteTransactionService.toBlock(tx, block)
             is TransferTransaction -> transferTransactionService.toBlock(tx, block)

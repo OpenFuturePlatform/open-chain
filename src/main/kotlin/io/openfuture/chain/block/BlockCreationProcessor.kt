@@ -16,10 +16,7 @@ import io.openfuture.chain.entity.transaction.Transaction
 import io.openfuture.chain.entity.transaction.base.BaseTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.property.ConsensusProperties
-import io.openfuture.chain.service.BaseTransactionService
-import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.service.ConsensusService
-import io.openfuture.chain.service.DelegateService
+import io.openfuture.chain.service.*
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Component
@@ -30,7 +27,7 @@ import javax.annotation.PostConstruct
 class BlockCreationProcessor(
     private val blockService: BlockService<Block>,
     private val genesisBlockService: BlockService<GenesisBlock>,
-    private val baseTransactionService: BaseTransactionService,
+    private val transactionService: BaseUTransactionService,
     private val signatureCollector: SignatureCollector,
     private val keyHolder: NodeKeyHolder,
     private val validationService: BlockValidationProvider,
@@ -77,7 +74,7 @@ class BlockCreationProcessor(
         val genesisBlock = genesisBlockService.getLast()
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
         if (HashUtils.toHexString(keyHolder.getPublicKey()) == nextProducer.publicKey) {
-            val pendingTransactions = baseTransactionService.getFirstLimitPending(consensusProperties.blockCapacity!!)
+            val pendingTransactions = transactionService.getPending()
             create(pendingTransactions, previousBlock, genesisBlock)
         }
     }
@@ -108,7 +105,7 @@ class BlockCreationProcessor(
                         is Transaction -> it
                         else -> throw IllegalArgumentException("Unknown type of transaction")
                     }
-                }.toMutableList()
+                }.toMutableSet()
 
                 MainBlock(
                     privateKey,

@@ -1,6 +1,10 @@
 package io.openfuture.chain.entity.block
 
+import io.openfuture.chain.crypto.signature.SignatureManager
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.transaction.Transaction
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.OneToMany
 import javax.persistence.Table
@@ -11,10 +15,32 @@ class MainBlock(
     privateKey: ByteArray,
     height: Long,
     previousHash: String,
-    merkleHash: String,
     timestamp: Long,
+    publicKey: ByteArray,
+
+    @Column(name = "merkle_hash", nullable = false)
+    var merkleHash: String,
 
     @OneToMany(mappedBy = "block")
-    var transactions: MutableList<Transaction>
+    var transactions: MutableSet<Transaction>
 
-) : Block(privateKey, height, previousHash, merkleHash, timestamp, BlockType.MAIN.id)
+) : Block(
+    height,
+    previousHash,
+    timestamp,
+    HashUtils.toHexString(publicKey),
+    signature = SignatureManager.sign(
+        StringBuilder()
+            .append(previousHash)
+            .append(merkleHash)
+            .append(timestamp)
+            .append(height)
+            .toString()
+            .toByteArray(),
+        privateKey
+    ),
+
+    hash = ByteUtils.toHexString(
+        HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height + publicKey).toByteArray())
+    )
+)
