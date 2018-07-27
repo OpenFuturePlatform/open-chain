@@ -3,6 +3,9 @@ package io.openfuture.chain.controller
 import io.openfuture.chain.controller.common.BaseController
 import io.openfuture.chain.controller.common.RestResponse
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
+import io.openfuture.chain.domain.rpc.transaction.DelegateTransactionRequest
+import io.openfuture.chain.domain.rpc.transaction.TransferTransactionRequest
+import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
 import io.openfuture.chain.domain.transaction.DelegateTransactionDto
 import io.openfuture.chain.domain.transaction.TransferTransactionDto
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
@@ -32,7 +35,7 @@ class TransactionController(
     }
 
     @PostMapping("/votes")
-    fun addVote(@Valid @RequestBody request: BaseTransactionRequest<VoteTransactionData>): RestResponse<VoteTransactionDto> {
+    fun addVote(@Valid @RequestBody request: VoteTransactionRequest): RestResponse<VoteTransactionDto> {
         val tx = uVoteTransactionService.add(request)
         return RestResponse(getResponseHeader(), VoteTransactionDto(tx))
     }
@@ -43,7 +46,7 @@ class TransactionController(
     }
 
     @PostMapping("/transfers")
-    fun addTransfer(@Valid @RequestBody request: BaseTransactionRequest<TransferTransactionData>): RestResponse<TransferTransactionDto> {
+    fun addTransfer(@Valid @RequestBody request:TransferTransactionRequest): RestResponse<TransferTransactionDto> {
         val tx = uTransferTransactionService.add(request)
         return RestResponse(getResponseHeader(), TransferTransactionDto(tx))
     }
@@ -54,7 +57,7 @@ class TransactionController(
     }
 
     @PostMapping("/delegates")
-    fun addDelegates(@Valid @RequestBody request: BaseTransactionRequest<DelegateTransactionData>): RestResponse<DelegateTransactionDto> {
+    fun addDelegates(@Valid @RequestBody request: DelegateTransactionRequest): RestResponse<DelegateTransactionDto> {
         val tx = uDelegateTransactionService.add(request)
         return RestResponse(getResponseHeader(), DelegateTransactionDto(tx))
     }

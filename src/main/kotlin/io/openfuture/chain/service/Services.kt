@@ -11,7 +11,13 @@ import io.openfuture.chain.domain.rpc.hardware.NetworkInfo
 import io.openfuture.chain.domain.rpc.hardware.RamInfo
 import io.openfuture.chain.domain.rpc.hardware.StorageInfo
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
+import io.openfuture.chain.domain.rpc.transaction.DelegateTransactionRequest
+import io.openfuture.chain.domain.rpc.transaction.TransferTransactionRequest
+import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
+import io.openfuture.chain.domain.transaction.DelegateTransactionDto
+import io.openfuture.chain.domain.transaction.TransferTransactionDto
+import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
 import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
 import io.openfuture.chain.domain.transaction.data.TransferTransactionData
@@ -111,23 +117,27 @@ interface VoteTransactionService : TransactionService<VoteTransaction, UVoteTran
 
 interface DelegateTransactionService : TransactionService<DelegateTransaction, UDelegateTransaction>
 
-interface UTransactionService<Entity : UTransaction, Data : BaseTransactionData> {
+interface UTransactionService<Entity : UTransaction, Data : BaseTransactionData, Dto: BaseTransactionDto<Entity, Data>,
+    Req: BaseTransactionRequest<Entity, Data>> {
 
     fun get(hash: String): Entity
 
     fun getAll(): MutableSet<Entity>
 
-    fun add(dto: BaseTransactionDto<Data>): Entity
+    fun add(dto: Dto): Entity
 
-    fun add(request: BaseTransactionRequest<Data>): Entity
+    fun add(request: Req): Entity
 
 }
 
-interface UTransferTransactionService : UTransactionService<UTransferTransaction, TransferTransactionData>
+interface UTransferTransactionService : UTransactionService<UTransferTransaction, TransferTransactionData,
+    TransferTransactionDto, TransferTransactionRequest>
 
-interface UVoteTransactionService : UTransactionService<UVoteTransaction, VoteTransactionData>
+interface UVoteTransactionService : UTransactionService<UVoteTransaction, VoteTransactionData,
+    VoteTransactionDto, VoteTransactionRequest>
 
-interface UDelegateTransactionService : UTransactionService<UDelegateTransaction, DelegateTransactionData>
+interface UDelegateTransactionService : UTransactionService<UDelegateTransaction, DelegateTransactionData,
+    DelegateTransactionDto, DelegateTransactionRequest>
 
 interface DelegateService {
 

@@ -1,6 +1,7 @@
 package io.openfuture.chain.service.transaction.unconfirmed
 
-import io.openfuture.chain.component.converter.transaction.impl.UTransferTransactionEntityConverter
+import io.openfuture.chain.domain.rpc.transaction.TransferTransactionRequest
+import io.openfuture.chain.domain.transaction.TransferTransactionDto
 import io.openfuture.chain.domain.transaction.data.TransferTransactionData
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.repository.UTransferTransactionRepository
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class DefaultUTransferTransactionService(
-    repository: UTransferTransactionRepository,
-    entityConverter: UTransferTransactionEntityConverter
-) : DefaultUTransactionService<UTransferTransaction, TransferTransactionData, UTransferTransactionEntityConverter>(repository, entityConverter),
+    repository: UTransferTransactionRepository
+) : DefaultUTransactionService<UTransferTransaction, TransferTransactionData, TransferTransactionDto, TransferTransactionRequest>(repository),
     UTransferTransactionService
