@@ -82,7 +82,7 @@ package-native:
     - mv build/libs/open-chain-*.jar build/libs/open-chain.jar
     - |
       docker run --rm -v "$(pwd):/packages" openplatform/install4j:full \
-            /JRE/install4j7.0.6/bin/install4jc -L=${INSTALL4J_KEY} \
+            /JRE/install4j7.0.6/bin/install4jc --license=${INSTALL4J_KEY} \
             /packages/install4j/multi.install4j
   artifacts:
     paths:
