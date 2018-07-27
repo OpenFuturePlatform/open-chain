@@ -15,10 +15,7 @@ import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import io.openfuture.chain.property.ConsensusProperties
-import io.openfuture.chain.service.BaseTransactionService
-import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.service.ConsensusService
-import io.openfuture.chain.service.DelegateService
+import io.openfuture.chain.service.*
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Component
@@ -27,8 +24,8 @@ import javax.annotation.PostConstruct
 
 @Component
 class BlockCreationProcessor(
-    private val blockService: BlockService<Block>,
-    private val genesisBlockService: BlockService<GenesisBlock>,
+    private val commonBlockService: CommonBlockService,
+    private val genesisBlockService: GenesisBlockService,
     private val baseTransactionService: BaseTransactionService,
     private val signatureCollector: SignatureCollector,
     private val keyHolder: NodeKeyHolder,
@@ -73,7 +70,7 @@ class BlockCreationProcessor(
     }
 
     fun fireBlockCreation() {
-        val previousBlock = blockService.getLast()
+        val previousBlock = commonBlockService.getLast()
         val genesisBlock = genesisBlockService.getLast()
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
         if (HashUtils.toHexString(keyHolder.getPublicKey()) == nextProducer.publicKey) {

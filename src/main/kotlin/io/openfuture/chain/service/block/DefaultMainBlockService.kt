@@ -1,4 +1,4 @@
-package io.openfuture.chain.service
+package io.openfuture.chain.service.block
 
 import io.openfuture.chain.block.TimeSlot
 import io.openfuture.chain.component.node.NodeClock
@@ -6,35 +6,27 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.transaction.RewardTransactionDto
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.*
-import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.MainBlockRepository
+import io.openfuture.chain.service.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultMainBlockService(
-    val blockRepository: MainBlockRepository,
+    repository: MainBlockRepository,
     private val clock: NodeClock,
     private val timeSlot: TimeSlot,
     private val voteTransactionService: VoteTransactionService,
     private val transferTransactionService: TransferTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val rewardTransactionService: RewardTransactionService
-) : BlockService<MainBlock> {
-
-    @Transactional(readOnly = true)
-    override fun getLast(): MainBlock = blockRepository.findFirstByOrderByHeightDesc()
-        ?: throw NotFoundException("Last MainBlock block not exist!")
-
-    @Transactional(readOnly = true)
-    override fun get(hash: String): MainBlock = blockRepository.findByHash(hash)
-        ?: throw NotFoundException("Block with hash:$hash not found ")
+) : DefaultBlockService<MainBlock>(repository), MainBlockService {
 
     @Transactional
     override fun save(block: MainBlock): MainBlock {
         rewardTransactionService.add(RewardTransactionDto(block.transactions.first() as RewardTransaction))
 
-        val savedBlock = blockRepository.save(block)
+        val savedBlock = super.save(block)
         val transactions = block.transactions
         for (transaction in transactions) {
             addTransactionToBlock(transaction, savedBlock)

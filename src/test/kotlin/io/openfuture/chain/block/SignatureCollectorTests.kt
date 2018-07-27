@@ -9,7 +9,8 @@ import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.property.ConsensusProperties
-import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.GenesisBlockService
+import io.openfuture.chain.service.MainBlockService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -22,8 +23,8 @@ import java.util.*
 
 class SignatureCollectorTests : ServiceTests() {
 
-    @Mock private lateinit var mainBlockService: BlockService<MainBlock>
-    @Mock private lateinit var genesisBlockService: BlockService<GenesisBlock>
+    @Mock private lateinit var mainBlockService: MainBlockService
+    @Mock private lateinit var genesisBlockService: GenesisBlockService
     @Mock private lateinit var properties: ConsensusProperties
     @Mock private lateinit var timeSlot: TimeSlot
     @Mock private lateinit var clock: NodeClock

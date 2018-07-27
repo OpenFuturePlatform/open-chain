@@ -13,10 +13,7 @@ import io.openfuture.chain.domain.rpc.hardware.StorageInfo
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.*
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.Delegate
-import io.openfuture.chain.entity.MainBlock
-import io.openfuture.chain.entity.Wallet
+import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.network.domain.Packet
@@ -36,9 +33,15 @@ interface HardwareInfoService {
 
 }
 
-interface BlockService<T: Block> {
+interface CommonBlockService {
 
-    fun get(hash: String): T
+    fun get(hash: String): Block
+
+    fun getLast(): Block
+
+}
+
+interface BlockService<T : Block> {
 
     fun getLast(): T
 
@@ -47,6 +50,10 @@ interface BlockService<T: Block> {
     fun isValid(block: T): Boolean
 
 }
+
+interface GenesisBlockService : BlockService<GenesisBlock>
+
+interface MainBlockService : BlockService<MainBlock>
 
 interface CryptoService {
 
@@ -73,9 +80,9 @@ interface CryptoService {
  */
 interface BaseTransactionService {
 
-    fun getAllPending() : MutableSet<BaseTransaction>
+    fun getAllPending(): MutableSet<BaseTransaction>
 
-    fun getFirstLimitPending(limit: Int) : MutableSet<BaseTransaction>
+    fun getFirstLimitPending(limit: Int): MutableSet<BaseTransaction>
 
 }
 
@@ -83,7 +90,7 @@ interface CommonTransactionService<Entity : BaseTransaction, Data : BaseTransact
 
     fun get(hash: String): Entity
 
-    fun getAllPending() : MutableSet<Entity>
+    fun getAllPending(): MutableSet<Entity>
 
     fun toBlock(tx: Entity, block: MainBlock): Entity
 

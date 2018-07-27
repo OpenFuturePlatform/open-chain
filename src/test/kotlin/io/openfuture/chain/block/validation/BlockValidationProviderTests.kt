@@ -9,7 +9,9 @@ import io.openfuture.chain.entity.Block
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.CommonBlockService
+import io.openfuture.chain.service.GenesisBlockService
+import io.openfuture.chain.service.MainBlockService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -20,9 +22,9 @@ import java.lang.IllegalArgumentException
 
 class BlockValidationProviderTests : ServiceTests() {
 
-    @Mock private lateinit var blockService: BlockService<Block>
-    @Mock private lateinit var mainBlockService: BlockService<MainBlock>
-    @Mock private lateinit var genesisBlockService: BlockService<GenesisBlock>
+    @Mock private lateinit var commonBlockService: CommonBlockService
+    @Mock private lateinit var mainBlockService: MainBlockService
+    @Mock private lateinit var genesisBlockService: GenesisBlockService
     @Mock private lateinit var timeSlot: TimeSlot
     @Mock private lateinit var clock: NodeClock
 
@@ -36,7 +38,7 @@ class BlockValidationProviderTests : ServiceTests() {
         given(timeSlot.verifyTimeSlot(any(Long::class.java), any(MainBlock::class.java))).willReturn(true)
         given(timeSlot.verifyTimeSlot(any(Long::class.java), any(GenesisBlock::class.java))).willReturn(true)
         blockValidationService = BlockValidationProvider(
-            blockService, mainBlockService, genesisBlockService, timeSlot, clock)
+            commonBlockService, mainBlockService, genesisBlockService, timeSlot, clock)
     }
 
     @Test
@@ -114,7 +116,7 @@ class BlockValidationProviderTests : ServiceTests() {
         )
 
         given(mainBlockService.isValid(block)).willReturn(true)
-        given(blockService.getLast()).willReturn(previousBlock)
+        given(commonBlockService.getLast()).willReturn(previousBlock)
 
         val isValid = blockValidationService.isValid(block)
 
@@ -167,7 +169,7 @@ class BlockValidationProviderTests : ServiceTests() {
             )
         )
 
-        given(blockService.getLast()).willReturn(lastBlock)
+        given(commonBlockService.getLast()).willReturn(lastBlock)
 
         val isValid = blockValidationService.isValid(block)
 
@@ -196,7 +198,7 @@ class BlockValidationProviderTests : ServiceTests() {
         )
 
         given(genesisBlockService.isValid(block)).willReturn(true)
-        given(blockService.getLast()).willReturn(previousBlock)
+        given(commonBlockService.getLast()).willReturn(previousBlock)
 
         val isValid = blockValidationService.isValid(block)
 
@@ -224,7 +226,7 @@ class BlockValidationProviderTests : ServiceTests() {
             setOf()
         )
 
-        given(blockService.getLast()).willReturn(lastBlock)
+        given(commonBlockService.getLast()).willReturn(lastBlock)
 
         val isValid = blockValidationService.isValid(block)
 
