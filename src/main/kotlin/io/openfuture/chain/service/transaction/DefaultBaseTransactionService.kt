@@ -18,7 +18,7 @@ class DefaultBaseTransactionService(
     }
 
     @Transactional(readOnly = true)
-    override fun getAllPending(limit: Int) : MutableSet<BaseTransaction> {
+    override fun getFirstLimitPending(limit: Int) : MutableSet<BaseTransaction> {
         val pageable = QPageRequest(0, limit)
         return HashSet(repository.findAll(pageable).content)
     }

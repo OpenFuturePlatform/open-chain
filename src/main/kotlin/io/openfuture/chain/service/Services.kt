@@ -75,7 +75,7 @@ interface BaseTransactionService {
 
     fun getAllPending() : MutableSet<BaseTransaction>
 
-    fun getAllPending(limit: Int) : MutableSet<BaseTransaction>
+    fun getFirstLimitPending(limit: Int) : MutableSet<BaseTransaction>
 
 }
 

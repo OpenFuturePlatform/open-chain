@@ -78,7 +78,7 @@ class BlockCreationProcessor(
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
         if (HashUtils.toHexString(keyHolder.getPublicKey()) == nextProducer.publicKey) {
             val pendingTransactions
-                = baseTransactionService.getAllPending(consensusProperties.blockCapacity!!)
+                = baseTransactionService.getFirstLimitPending(consensusProperties.blockCapacity!!)
             create(pendingTransactions, previousBlock, genesisBlock)
         }
     }

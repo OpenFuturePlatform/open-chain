@@ -107,7 +107,7 @@ class BlockCreationProcessorTests : ServiceTests() {
         given(genesisBlockService.getLast()).willReturn(genesisBlock)
         given(keyHolder.getPrivateKey()).willReturn("private_key".toByteArray())
         given(keyHolder.getPublicKey()).willReturn("public_key".toByteArray())
-        given(baseTransactionService.getAllPending(any(Int::class.java))).willReturn(transactions)
+        given(baseTransactionService.getFirstLimitPending(any(Int::class.java))).willReturn(transactions)
         given(consensusProperties.blockCapacity).willReturn(transactions.size)
         given(consensusProperties.genesisAddress).willReturn("host2")
         given(delegateService.getByPublicKey(any(String::class.java))).willReturn(delegate)
