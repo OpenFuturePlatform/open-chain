@@ -10,18 +10,17 @@ import io.openfuture.chain.network.extension.writeList
 @NoArgConstructor
 class NetworkGenesisBlock(height: Long,
                           previousHash: String,
-                          merkleHash: String,
                           blockTimestamp: Long,
-                          typeId: Int,
+                          publicKey: String,
                           hash: String,
                           signature: String,
                           var epochIndex: Long,
                           var activeDelegates: MutableSet<NetworkDelegate>
-) : NetworkBlock(height, previousHash, merkleHash, blockTimestamp, typeId, hash, signature) {
+) : NetworkBlock(height, previousHash, blockTimestamp, publicKey, hash, signature) {
 
 
-    constructor(block: GenesisBlock) : this(block.height, block.previousHash, block.merkleHash, block.timestamp,
-        block.typeId, block.hash, block.signature!!, block.epochIndex, block.activeDelegates.map { NetworkDelegate(it) }.toMutableSet())
+    constructor(block: GenesisBlock) : this(block.height, block.previousHash, block.timestamp, block.publicKey,
+        block.hash, block.signature!!, block.epochIndex, block.activeDelegates.map { NetworkDelegate(it) }.toMutableSet())
 
     override fun readParams(buffer: ByteBuf) {
         super.readParams(buffer)
@@ -41,6 +40,7 @@ class NetworkGenesisBlock(height: Long,
         height,
         previousHash,
         blockTimestamp,
+        publicKey,
         epochIndex,
         activeDelegates.map { Delegate.of(it) }.toMutableSet()).apply { signature = super.signature }
 

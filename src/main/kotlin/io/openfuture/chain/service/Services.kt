@@ -16,6 +16,8 @@ import io.openfuture.chain.domain.transaction.data.*
 import io.openfuture.chain.entity.*
 import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.network.domain.NetworkAddress
+import io.openfuture.chain.network.domain.NetworkGenesisBlock
+import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.network.domain.Packet
 import org.springframework.data.domain.Page
 
@@ -39,6 +41,10 @@ interface CommonBlockService {
 
     fun getLast(): Block
 
+    fun getBlocksAfterCurrentHash(hash: String): List<Block>?
+
+    fun isExists(hash: String): Boolean
+
 }
 
 interface BlockService<T : Block> {
@@ -47,21 +53,21 @@ interface BlockService<T : Block> {
 
     fun save(block: T): T
 
-    fun save(block: MainBlock): MainBlock
-
-    fun save(block: GenesisBlock): GenesisBlock
-
-    fun getBlocksAfterCurrentHash(hash: String): List<Block>?
-
-    fun isExists(hash: String): Boolean
-
     fun isValid(block: T): Boolean
 
 }
 
-interface GenesisBlockService : BlockService<GenesisBlock>
+interface GenesisBlockService : BlockService<GenesisBlock> {
 
-interface MainBlockService : BlockService<MainBlock>
+    fun add(dto: NetworkGenesisBlock)
+
+}
+
+interface MainBlockService : BlockService<MainBlock> {
+
+    fun add(dto: NetworkMainBlock)
+
+}
 
 interface CryptoService {
 

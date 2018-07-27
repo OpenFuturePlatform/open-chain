@@ -4,33 +4,27 @@ import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.transaction.BaseTransaction
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.FetchType
-import javax.persistence.OneToMany
-import javax.persistence.Table
+import javax.persistence.*
 
 @Entity
 @Table(name = "main_blocks")
-class MainBlock(privateKey: ByteArray, height: Long, previousHash: String,
-        timestamp: Long, publicKey: ByteArray,
+class MainBlock(height: Long, previousHash: String, timestamp: Long, publicKey: String,
 
-    @Column(name = "merkle_hash", nullable = false)
-    var merkleHash: String,
+                @Column(name = "merkle_hash", nullable = false)
+                var merkleHash: String,
 
-    @OneToMany(mappedBy = "block", fetch = FetchType.EAGER))
-    var transactions: MutableSet<BaseTransaction>
+                @OneToMany(mappedBy = "block", fetch = FetchType.EAGER)
+                var transactions: MutableSet<BaseTransaction>
 
-) : Block(height, previousHash, timestamp, HashUtils.toHexString(publicKey),
-    signature = SignatureManager.sign(
-        StringBuilder()
-            .append(previousHash)
-            .append(merkleHash)
-            .append(timestamp)
-            .append(height)
-            .toString()
-            .toByteArray(), privateKey),
+) : Block(height, previousHash, timestamp, publicKey,
+    ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height + publicKey).toByteArray()))) {
 
-    hash = ByteUtils.toHexString(
-        HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height + publicKey).toByteArray()))
-)
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Block> sign(privateKey: ByteArray): T {
+        this.signature = SignatureManager.sign(
+            StringBuilder().append(previousHash).append(merkleHash).append(timestamp).append(height).toString()
+                .toByteArray(), privateKey)
+        return this as T
+    }
+
+}

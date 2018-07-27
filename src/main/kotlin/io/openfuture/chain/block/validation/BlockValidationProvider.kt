@@ -43,12 +43,12 @@ class BlockValidationProvider(
         if (block is MainBlock) {
             return SignatureManager.verify(
                 (block.previousHash + block.merkleHash + block.timestamp + block.height).toByteArray(),
-                block.signature,
+                block.signature!!,
                 HashUtils.fromHexString(block.publicKey))
         }
         return SignatureManager.verify(
             (block.previousHash + block.timestamp + block.height).toByteArray(),
-            block.signature,
+            block.signature!!,
             HashUtils.fromHexString(block.publicKey))
     }
 

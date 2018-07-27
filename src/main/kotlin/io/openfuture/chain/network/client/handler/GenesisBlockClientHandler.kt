@@ -4,14 +4,16 @@ import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.GenesisBlock
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
-import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.CommonBlockService
+import io.openfuture.chain.service.GenesisBlockService
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 @Component
 @Scope("prototype")
 class GenesisBlockClientHandler(
-    private val blockService: BlockService
+    private val blockService: CommonBlockService,
+    private val genesisBlockService: GenesisBlockService
 ) : ClientHandler<NetworkGenesisBlock>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, message: NetworkGenesisBlock) {
@@ -19,11 +21,7 @@ class GenesisBlockClientHandler(
             return
         }
 
-        val delegates = message.activeDelegates.map { Delegate.of(it) }.toMutableSet()
-        val block = GenesisBlock(message.height, message.previousHash, message.blockTimestamp, message.epochIndex,
-            delegates).apply { signature = message.signature }
-
-        blockService.save(block)
+        genesisBlockService.add(message)
     }
 
 }

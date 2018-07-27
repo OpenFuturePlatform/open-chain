@@ -1,6 +1,7 @@
 package io.openfuture.chain.service.block
 
 import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.repository.GenesisBlockRepository
 import io.openfuture.chain.service.CommonBlockService
 import io.openfuture.chain.service.DefaultDelegateService
@@ -14,6 +15,10 @@ class DefaultGenesisBlockService(
     val commonBlockService: CommonBlockService,
     val delegateService: DefaultDelegateService
 ) : DefaultBlockService<GenesisBlock>(repository), GenesisBlockService {
+
+    override fun add(dto: NetworkGenesisBlock) {
+        repository.save(dto.toEntity())
+    }
 
     @Transactional(readOnly = true)
     override fun isValid(block: GenesisBlock): Boolean {

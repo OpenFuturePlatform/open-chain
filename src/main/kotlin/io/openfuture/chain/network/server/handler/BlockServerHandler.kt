@@ -6,14 +6,14 @@ import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.network.domain.NetworkBlockRequest
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.network.domain.NetworkMainBlock
-import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.CommonBlockService
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 @Component
 @Scope("prototype")
 class BlockServerHandler(
-    private val blockService: BlockService
+    private val blockService: CommonBlockService
 ) : ServerHandler<NetworkBlockRequest>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, message: NetworkBlockRequest) {

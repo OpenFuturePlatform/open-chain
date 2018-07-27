@@ -6,6 +6,7 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.transaction.RewardTransactionDto
 import io.openfuture.chain.entity.MainBlock
 import io.openfuture.chain.entity.transaction.*
+import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.repository.MainBlockRepository
 import io.openfuture.chain.service.*
 import org.springframework.stereotype.Service
@@ -21,6 +22,17 @@ class DefaultMainBlockService(
     private val delegateTransactionService: DelegateTransactionService,
     private val rewardTransactionService: RewardTransactionService
 ) : DefaultBlockService<MainBlock>(repository), MainBlockService {
+
+
+    @Transactional
+    override fun add(dto: NetworkMainBlock) {
+        val savedBlock = repository.save(dto.toEntity())
+
+        dto.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
+        dto.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
+        dto.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
+        dto.rewardTransactions.forEach { rewardTransactionService.toBlock(it, savedBlock) }
+    }
 
     @Transactional
     override fun save(block: MainBlock): MainBlock {

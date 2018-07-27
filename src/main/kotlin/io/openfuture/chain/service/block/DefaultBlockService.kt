@@ -7,7 +7,7 @@ import io.openfuture.chain.service.BlockService
 import org.springframework.transaction.annotation.Transactional
 
 abstract class DefaultBlockService<T : Block>(
-    private val repository: BlockRepository<T>
+    protected val repository: BlockRepository<T>
 ) : BlockService<T> {
 
     @Transactional(readOnly = true)

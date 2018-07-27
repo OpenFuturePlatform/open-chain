@@ -7,8 +7,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "genesis_blocks")
-class GenesisBlock(privateKey: ByteArray, height: Long,
-        previousHash: String, timestamp: Long, publicKey: ByteArray,
+class GenesisBlock(height: Long, previousHash: String, timestamp: Long, publicKey: String,
 
     @Column(name = "epoch_index", nullable = false)
     var epochIndex: Long,
@@ -19,9 +18,14 @@ class GenesisBlock(privateKey: ByteArray, height: Long,
         inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
     var activeDelegates: Set<Delegate>
 
-) : Block(height, previousHash, timestamp, HashUtils.toHexString(publicKey),
-    signature = SignatureManager.sign((previousHash + timestamp + height).toByteArray(), privateKey),
+) : Block(height, previousHash, timestamp, publicKey,
+    ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + timestamp + height + publicKey).toByteArray()))
+) {
 
-    hash = ByteUtils.toHexString(
-        HashUtils.doubleSha256((previousHash + timestamp + height + publicKey).toByteArray()))
-)
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Block> sign(privateKey: ByteArray): T {
+        this.signature = SignatureManager.sign((previousHash + timestamp + height).toByteArray(), privateKey)
+        return this as T
+    }
+
+}

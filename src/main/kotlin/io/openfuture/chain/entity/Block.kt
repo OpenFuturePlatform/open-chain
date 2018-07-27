@@ -20,18 +20,10 @@ abstract class Block(
     @Column(name = "public_key", nullable = false)
     val publicKey: String,
 
-    @Column(name = "signature", nullable = false)
-    var signature: String,
-
     @Column(name = "hash", nullable = false)
-    var hash: String
+    var hash: String,
 
-) : BaseModel() {
+    @Column(name = "signature", nullable = false)
+    var signature: String? = null
 
-    @Suppress("UNCHECKED_CAST")
-    fun <T : Block> sign(privateKey: ByteArray): T {
-        this.signature = SignatureManager.sign(HashUtils.fromHexString(hash), privateKey)
-        return this as T
-    }
-
-}
+) : BaseModel()

@@ -19,7 +19,7 @@ import java.util.concurrent.Executors
 @Service
 class DefaultNetworkService(
     private val bootstrap: Bootstrap,
-    private val blockService: BlockService,
+    private val blockService: CommonBlockService,
     private val tcpServer: TcpServer,
     private val properties: NodeProperties,
     private val connectionService: ConnectionService

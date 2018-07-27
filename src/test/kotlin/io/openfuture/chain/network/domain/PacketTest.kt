@@ -179,7 +179,7 @@ class PacketTest {
                 "00000000000100000001000000096c6f63616c686f7374000000036b6579")
         val delegates = mutableSetOf(NetworkDelegate("localhost", "key"))
 
-        val packet = NetworkGenesisBlock(1, "previousHash", "merkleHash", 1, 1, "hash", "signature", 1, delegates)
+        val packet = NetworkGenesisBlock(1, "previousHash", 1, "hash", "signature", "key", 1, delegates)
 
         read(packet, buf)
     }
@@ -191,7 +191,7 @@ class PacketTest {
                 "00000a6d65726b6c65486173680000000000000001000000010000000468617368000000097369676e61747572650000" +
                 "00000000000100000001000000096c6f63616c686f7374000000036b6579")
         val delegates = mutableSetOf(NetworkDelegate("localhost", "key"))
-        val packet = NetworkGenesisBlock(1, "previousHash", "merkleHash", 1, 1, "hash", "signature", 1, delegates)
+        val packet = NetworkGenesisBlock(1, "previousHash", 1, "merkleHash", "hash", "signature", 1, delegates)
 
         val actualPacket = write(packet, buf)
 
@@ -219,7 +219,7 @@ class PacketTest {
             "senderKey", "delegateKey"), 1, "senderAddress", "senderSignature", "hash"))
         val rewardTransaction = mutableListOf(RewardTransactionDto(RewardTransactionData(1, 1, "recipientAddress",
             "senderKey"), 1, "senderAddress", "senderSignature", "hash"))
-        val packet = NetworkMainBlock(1, "previousHash", "merkleHash", 1, 1, "hash", "signature", transaferTransaction,
+        val packet = NetworkMainBlock(1, "previousHash", 1, "merkleHash", "hash", "signature", "key", transaferTransaction,
             voteTransaction, delegateTransaction, rewardTransaction)
 
         read(packet, buf)
@@ -246,7 +246,7 @@ class PacketTest {
             "senderKey", "delegateKey"), 1, "senderAddress", "senderSignature", "hash"))
         val rewardTransaction = mutableListOf(RewardTransactionDto(RewardTransactionData(1, 1, "recipientAddress",
             "senderKey"), 1, "senderAddress", "senderSignature", "hash"))
-        val packet = NetworkMainBlock(1, "previousHash", "merkleHash", 1, 1, "hash", "signature", transaferTransaction,
+        val packet = NetworkMainBlock(1, "previousHash", 1, "merkleHash", "hash", "signature", "key", transaferTransaction,
             voteTransaction, delegateTransaction, rewardTransaction)
 
         val actualPacket = write(packet, buf)

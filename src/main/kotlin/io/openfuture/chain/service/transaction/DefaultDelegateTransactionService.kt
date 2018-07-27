@@ -1,6 +1,7 @@
 package io.openfuture.chain.service.transaction
 
 import io.openfuture.chain.component.converter.transaction.impl.DelegateTransactionEntityConverter
+import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
 import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.MainBlock
