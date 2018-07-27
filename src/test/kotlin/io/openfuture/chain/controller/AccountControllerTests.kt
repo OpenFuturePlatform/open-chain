@@ -16,7 +16,6 @@ import io.openfuture.chain.domain.rpc.crypto.key.RestoreRequest
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.service.CryptoService
 import io.openfuture.chain.service.WalletService
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -118,10 +117,11 @@ class AccountControllerTests : ControllerTests() {
         val actualResult = webClient.get().uri("${PathConstant.RPC}/accounts/wallets/$address/balance")
             .exchange()
             .expectStatus().isOk
-            .expectBody(expectedResponse::class.java)
+            .expectBody(RestResponse::class.java)
             .returnResult().responseBody!!
 
-        Assertions.assertThat(actualResult.body!!.toInt()).isEqualTo(expectedResponse.body!!.toInt())
+        assertThat(ObjectMapper().writeValueAsString(actualResult.body))
+            .isEqualTo(ObjectMapper().writeValueAsString(expectedResponse.body))
     }
 
     private fun createAccountDto(): WalletDto =

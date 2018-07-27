@@ -1,7 +1,6 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.block.validation.BlockValidationProvider
-import io.openfuture.chain.component.converter.transaction.impl.RewardTransactionEntityConverter
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.key.NodeKeyHolder
 import io.openfuture.chain.crypto.signature.SignatureManager
@@ -9,16 +8,15 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
 import io.openfuture.chain.domain.transaction.data.RewardTransactionData
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.BlockType
-import io.openfuture.chain.entity.GenesisBlock
-import io.openfuture.chain.entity.MainBlock
-import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.block.Block
+import io.openfuture.chain.entity.block.BlockType
+import io.openfuture.chain.entity.block.GenesisBlock
+import io.openfuture.chain.entity.block.MainBlock
+import io.openfuture.chain.entity.transaction.Transaction
+import io.openfuture.chain.entity.transaction.base.BaseTransaction
+import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.property.ConsensusProperties
-import io.openfuture.chain.service.BaseTransactionService
-import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.service.ConsensusService
-import io.openfuture.chain.service.DelegateService
+import io.openfuture.chain.service.*
 import io.openfuture.chain.util.BlockUtils
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Component
@@ -29,7 +27,7 @@ import javax.annotation.PostConstruct
 class BlockCreationProcessor(
     private val blockService: BlockService<Block>,
     private val genesisBlockService: BlockService<GenesisBlock>,
-    private val baseTransactionService: BaseTransactionService,
+    private val transactionService: BaseUTransactionService,
     private val signatureCollector: SignatureCollector,
     private val keyHolder: NodeKeyHolder,
     private val validationService: BlockValidationProvider,
@@ -38,8 +36,7 @@ class BlockCreationProcessor(
     private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties,
     private val timeSlot: TimeSlot,
-    private val scheduler: TaskScheduler,
-    private val rewardTransactionEntityConverter: RewardTransactionEntityConverter
+    private val scheduler: TaskScheduler
 ) {
 
     @PostConstruct
@@ -66,7 +63,7 @@ class BlockCreationProcessor(
             throw IllegalArgumentException("Inbound block's signature is invalid")
         }
 
-        if (!signatureCollector.addSignatureBlock(pendingBlock)) {
+        if (!signatureCollector.addBlockSignature(pendingBlock)) {
             throw IllegalArgumentException("Either signature is already exists, or not related to pending block")
         }
         return signCreatedBlock(block)
@@ -77,8 +74,7 @@ class BlockCreationProcessor(
         val genesisBlock = genesisBlockService.getLast()
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
         if (HashUtils.toHexString(keyHolder.getPublicKey()) == nextProducer.publicKey) {
-            val pendingTransactions
-                = baseTransactionService.getFirstLimitPending(consensusProperties.blockCapacity!!)
+            val pendingTransactions = transactionService.getPending()
             create(pendingTransactions, previousBlock, genesisBlock)
         }
     }
@@ -92,7 +88,7 @@ class BlockCreationProcessor(
         return pendingBlock
     }
 
-    private fun create(pendingTransactions: MutableSet<BaseTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
+    private fun create(pendingTransactions: MutableSet<UTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
         val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
 
         val height = previousBlock.height + 1
@@ -101,9 +97,15 @@ class BlockCreationProcessor(
         val privateKey = keyHolder.getPrivateKey()
         val publicKey = keyHolder.getPublicKey()
 
-        val block = when(blockType) {
+        val block = when (blockType) {
             BlockType.MAIN -> {
-                val transactions = prepareTransactions(pendingTransactions)
+                val transactions = prepareTransactions(pendingTransactions).map {
+                    when (it) {
+                        is UTransaction -> it.toConfirmed()
+                        is Transaction -> it
+                        else -> throw IllegalArgumentException("Unknown type of transaction")
+                    }
+                }.toMutableSet()
 
                 MainBlock(
                     privateKey,
@@ -131,13 +133,14 @@ class BlockCreationProcessor(
         signCreatedBlock(block)
     }
 
-    private fun prepareTransactions(pendingTransactions: MutableSet<BaseTransaction>): MutableSet<BaseTransaction> {
+    private fun prepareTransactions(pendingTransactions: MutableSet<UTransaction>): MutableSet<BaseTransaction> {
         val fees = pendingTransactions.map { it.fee }.sum()
         val delegate = delegateService.getByPublicKey(HashUtils.toHexString(keyHolder.getPublicKey()))
         val rewardTransactionData = RewardTransactionData((fees + consensusProperties.rewardBlock!!),
             consensusProperties.feeRewardTx!!, delegate.address, consensusProperties.genesisAddress!!)
 
-        val rewardTransaction = rewardTransactionEntityConverter.toEntity(clock.networkTime(), rewardTransactionData)
+        val rewardTransaction = rewardTransactionData.toEntity(clock.networkTime(),
+            keyHolder.getPublicKey(), keyHolder.getPrivateKey())
 
         return mutableSetOf(rewardTransaction, *pendingTransactions.toTypedArray())
     }

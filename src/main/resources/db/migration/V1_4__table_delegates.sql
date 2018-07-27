@@ -1,7 +1,7 @@
 CREATE TABLE delegates (
   id         INTEGER PRIMARY KEY,
-  public_key VARCHAR NULL UNIQUE,
-  address    VARCHAR NULL
+  public_key VARCHAR UNIQUE NOT NULL,
+  address    VARCHAR NOT NULL
 );
 
 CREATE TABLE delegate2genesis (

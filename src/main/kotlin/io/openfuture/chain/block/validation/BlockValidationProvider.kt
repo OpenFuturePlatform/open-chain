@@ -4,9 +4,9 @@ import io.openfuture.chain.block.TimeSlot
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.GenesisBlock
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.block.Block
+import io.openfuture.chain.entity.block.GenesisBlock
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.service.BlockService
 import org.springframework.stereotype.Service
 

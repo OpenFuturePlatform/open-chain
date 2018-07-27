@@ -1,14 +1,19 @@
-package io.openfuture.chain.entity
+package io.openfuture.chain.entity.block
 
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.entity.Delegate
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import javax.persistence.*
 
 @Entity
 @Table(name = "genesis_blocks")
-class GenesisBlock(privateKey: ByteArray, height: Long,
-        previousHash: String, timestamp: Long, publicKey: ByteArray,
+class GenesisBlock(
+    privateKey: ByteArray,
+    height: Long,
+    previousHash: String,
+    timestamp: Long,
+    publicKey: ByteArray,
 
     @Column(name = "epoch_index", nullable = false)
     var epochIndex: Long,

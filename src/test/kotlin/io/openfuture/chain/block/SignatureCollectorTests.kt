@@ -5,9 +5,9 @@ import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
-import io.openfuture.chain.entity.Block
-import io.openfuture.chain.entity.GenesisBlock
-import io.openfuture.chain.entity.MainBlock
+import io.openfuture.chain.entity.block.Block
+import io.openfuture.chain.entity.block.GenesisBlock
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.BlockService
 import org.assertj.core.api.Assertions.assertThat
@@ -55,7 +55,7 @@ class SignatureCollectorTests : ServiceTests() {
         val signatureBlock = createGenesisPendingBlock()
         signatureCollector.setPendingBlock(signatureBlock)
 
-        val result = signatureCollector.addSignatureBlock(signatureBlock)
+        val result = signatureCollector.addBlockSignature(signatureBlock)
 
         assertThat(result).isTrue()
     }
@@ -68,7 +68,7 @@ class SignatureCollectorTests : ServiceTests() {
 
         signatureCollector.setPendingBlock(anotherSignatureBlock)
 
-        val result = signatureCollector.addSignatureBlock(signatureBlock)
+        val result = signatureCollector.addBlockSignature(signatureBlock)
 
         assertThat(result).isFalse()
     }
@@ -86,7 +86,7 @@ class SignatureCollectorTests : ServiceTests() {
     fun applyGenesisBlockShouldApplyBlock() {
         val signatureBlock = createGenesisPendingBlock()
         signatureCollector.setPendingBlock(signatureBlock)
-        signatureCollector.addSignatureBlock(signatureBlock)
+        signatureCollector.addBlockSignature(signatureBlock)
 
         given(genesisBlockService.getLast()).willReturn(signatureBlock.block as GenesisBlock)
         given(timeSlot.verifyTimeSlot(any(Long::class.java), any(Block::class.java))).willReturn(true, false)
@@ -101,7 +101,7 @@ class SignatureCollectorTests : ServiceTests() {
         val genesisBlock = createGenesisPendingBlock()
         val signatureBlock = createMainPendingBlock()
         signatureCollector.setPendingBlock(signatureBlock)
-        signatureCollector.addSignatureBlock(signatureBlock)
+        signatureCollector.addBlockSignature(signatureBlock)
 
         given(genesisBlockService.getLast()).willReturn(genesisBlock.block as GenesisBlock)
         given(timeSlot.verifyTimeSlot(any(Long::class.java), any(Block::class.java))).willReturn(true, false)

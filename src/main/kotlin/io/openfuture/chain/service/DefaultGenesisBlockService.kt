@@ -1,6 +1,6 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.entity.GenesisBlock
+import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.GenesisBlockRepository
 import org.springframework.stereotype.Service
@@ -13,7 +13,7 @@ class DefaultGenesisBlockService(
 ) : BlockService<GenesisBlock> {
 
     @Transactional(readOnly = true)
-    override fun get(hash: String): GenesisBlock  = genesisBlockRepository.findByHash(hash)
+    override fun get(hash: String): GenesisBlock = genesisBlockRepository.findByHash(hash)
         ?: throw NotFoundException("Block with hash:$hash not found ")
 
     @Transactional(readOnly = true)
@@ -32,8 +32,7 @@ class DefaultGenesisBlockService(
             && isValidateActiveDelegates(block))
     }
 
-    private fun isValidEpochIndex(lastBlock: GenesisBlock, block: GenesisBlock): Boolean
-        = (lastBlock.epochIndex + 1 == block.epochIndex)
+    private fun isValidEpochIndex(lastBlock: GenesisBlock, block: GenesisBlock): Boolean = (lastBlock.epochIndex + 1 == block.epochIndex)
 
     private fun isValidateActiveDelegates(block: GenesisBlock): Boolean {
         val activeDelegates = block.activeDelegates

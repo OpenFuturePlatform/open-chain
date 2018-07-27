@@ -1,6 +1,6 @@
 package io.openfuture.chain.crypto.util
 
-import io.openfuture.chain.entity.transaction.BaseTransaction
+import io.openfuture.chain.entity.transaction.base.BaseTransaction
 import org.bouncycastle.crypto.PBEParametersGenerator
 import org.bouncycastle.crypto.digests.RIPEMD160Digest
 import org.bouncycastle.crypto.digests.SHA512Digest
