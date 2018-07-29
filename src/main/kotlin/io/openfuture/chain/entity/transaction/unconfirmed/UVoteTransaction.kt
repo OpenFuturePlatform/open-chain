@@ -28,6 +28,12 @@ class UVoteTransaction(
 
 ) : UTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash) {
 
+    fun getVoteType(): VoteType = DictionaryUtils.valueOf(VoteType::class.java, voteTypeId)
+
+    fun setVoteType(voteType: VoteType) {
+        voteTypeId = voteType.getId()
+    }
+
     override fun toConfirmed(): VoteTransaction = VoteTransaction(
         timestamp,
         amount,
@@ -40,11 +46,5 @@ class UVoteTransaction(
         voteTypeId,
         delegateKey
     )
-
-    fun getVoteType(): VoteType = DictionaryUtils.valueOf(VoteType::class.java, voteTypeId)
-
-    fun setVoteType(voteType: VoteType) {
-        voteTypeId = voteType.getId()
-    }
 
 }

@@ -3,14 +3,12 @@ package io.openfuture.chain.domain.transaction
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.annotation.NoArgConstructor
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
-import io.openfuture.chain.entity.transaction.Transaction
-import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.network.domain.NetworkEntity
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 
 @NoArgConstructor
-abstract class BaseTransactionDto<Entity: Transaction, UEntity: UTransaction, Data : BaseTransactionData>(
+abstract class BaseTransactionDto<Data : BaseTransactionData>(
     var data: Data,
     var timestamp: Long,
     var senderPublicKey: String,
@@ -38,9 +36,5 @@ abstract class BaseTransactionDto<Entity: Transaction, UEntity: UTransaction, Da
     }
 
     abstract fun getDataInstance() : Data
-
-    abstract fun toUEntity(): UEntity
-
-    abstract fun toEntity(): Entity
 
 }

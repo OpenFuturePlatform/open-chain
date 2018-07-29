@@ -10,7 +10,7 @@ class VoteTransactionDto(
     senderPublicKey: String,
     senderSignature: String,
     hash: String
-) : BaseTransactionDto<VoteTransaction, UVoteTransaction, VoteTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
+) : BaseTransactionDto<VoteTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
 
     constructor(tx: VoteTransaction) : this(
         VoteTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress, tx.getVoteType().getId(), tx.delegateKey),
@@ -28,7 +28,7 @@ class VoteTransactionDto(
         tx.hash
     )
 
-    override fun toEntity(): VoteTransaction = VoteTransaction(
+    fun toEntity(): VoteTransaction = VoteTransaction(
         timestamp,
         data.amount,
         data.fee,
@@ -41,7 +41,7 @@ class VoteTransactionDto(
         data.delegateKey
     )
 
-    override fun toUEntity(): UVoteTransaction = UVoteTransaction(
+    fun toUEntity(): UVoteTransaction = UVoteTransaction(
         timestamp,
         data.amount,
         data.fee,

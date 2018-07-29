@@ -106,13 +106,7 @@ interface CryptoService {
 /**
  * The utility service that is not aware of transaction types, has default implementation
  */
-interface BaseUTransactionService {
-
-    fun getPending(): MutableSet<UTransaction>
-
-}
-
-interface BaseTransactionService {
+interface CommonTransactionService {
 
     fun get(hash: String): Transaction
 
@@ -120,12 +114,11 @@ interface BaseTransactionService {
 
 }
 
-interface TransactionService<Entity : Transaction, UEntity : UTransaction, Data : BaseTransactionData,
-    Dto : BaseTransactionDto<Entity, UEntity, Data>> {
+interface TransactionService<Entity : Transaction, UEntity : UTransaction> {
 
-    fun toBlock(tx: Entity, block: MainBlock)
+    fun get(hash: String): UEntity
 
-    fun toBlock(dto: Dto, block: MainBlock)
+    fun toBlock(hash: String, block: MainBlock)
 
 }
 
@@ -137,18 +130,35 @@ interface RewardTransactionService {
 
 }
 
-interface TransferTransactionService : TransactionService<TransferTransaction, UTransferTransaction,
-    TransferTransactionData, TransferTransactionDto>
+interface TransferTransactionService : TransactionService<TransferTransaction, UTransferTransaction> {
 
-interface VoteTransactionService : TransactionService<VoteTransaction, UVoteTransaction,
-    VoteTransactionData, VoteTransactionDto>
+    fun toBlock(dto: TransferTransactionDto, block: MainBlock)
 
-interface DelegateTransactionService : TransactionService<DelegateTransaction, UDelegateTransaction,
-    DelegateTransactionData, DelegateTransactionDto>
+}
 
+interface VoteTransactionService : TransactionService<VoteTransaction, UVoteTransaction> {
 
-interface UTransactionService<Entity : Transaction, UEntity : UTransaction, Data : BaseTransactionData,
-    Dto : BaseTransactionDto<Entity, UEntity, Data>, Req : BaseTransactionRequest<UEntity, Data>> {
+    fun toBlock(dto: VoteTransactionDto, block: MainBlock)
+
+}
+
+interface DelegateTransactionService : TransactionService<DelegateTransaction, UDelegateTransaction> {
+
+    fun toBlock(dto: DelegateTransactionDto, block: MainBlock)
+
+}
+
+/**
+ * The utility service that is not aware of transaction types, has default implementation
+ */
+interface UCommonTransactionService {
+
+    fun getPending(): MutableSet<UTransaction>
+
+}
+
+interface UTransactionService<UEntity : UTransaction, Data : BaseTransactionData, Dto : BaseTransactionDto<Data>,
+    Req : BaseTransactionRequest<UEntity, Data>> {
 
     fun get(hash: String): UEntity
 
@@ -160,13 +170,13 @@ interface UTransactionService<Entity : Transaction, UEntity : UTransaction, Data
 
 }
 
-interface UTransferTransactionService : UTransactionService<TransferTransaction, UTransferTransaction, TransferTransactionData,
+interface UTransferTransactionService : UTransactionService<UTransferTransaction, TransferTransactionData,
     TransferTransactionDto, TransferTransactionRequest>
 
-interface UVoteTransactionService : UTransactionService<VoteTransaction, UVoteTransaction, VoteTransactionData,
+interface UVoteTransactionService : UTransactionService<UVoteTransaction, VoteTransactionData,
     VoteTransactionDto, VoteTransactionRequest>
 
-interface UDelegateTransactionService : UTransactionService<DelegateTransaction, UDelegateTransaction, DelegateTransactionData,
+interface UDelegateTransactionService : UTransactionService<UDelegateTransaction, DelegateTransactionData,
     DelegateTransactionDto, DelegateTransactionRequest>
 
 interface DelegateService {

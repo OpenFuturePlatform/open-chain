@@ -1,12 +1,10 @@
 package io.openfuture.chain.domain.transaction.data
 
+import io.openfuture.chain.annotation.NoArgConstructor
 import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.transaction.RewardTransaction
 import io.openfuture.chain.util.TransactionUtils
-import java.security.PrivateKey
-import java.security.PublicKey
-import io.openfuture.chain.annotation.NoArgConstructor
 
 @NoArgConstructor
 class RewardTransactionData(

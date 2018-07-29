@@ -4,8 +4,8 @@ import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.dictionary.VoteType
-import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.UVoteTransactionRepository
 import io.openfuture.chain.service.UVoteTransactionService
@@ -17,8 +17,31 @@ import javax.xml.bind.ValidationException
 class DefaultUVoteTransactionService(
     repository: UVoteTransactionRepository,
     private val consensusProperties: ConsensusProperties
-) : DefaultUTransactionService<VoteTransaction, UVoteTransaction, VoteTransactionData, VoteTransactionDto, VoteTransactionRequest>(repository),
+) : DefaultUTransactionService<UVoteTransaction, VoteTransactionData, VoteTransactionDto, VoteTransactionRequest>(repository),
     UVoteTransactionService {
+
+    @Transactional(readOnly = true)
+    override fun get(hash: String): UVoteTransaction = repository.findOneByHash(hash)
+        ?: throw NotFoundException("Unconfirmed transaction with hash: $hash not exist!")
+
+    @Transactional(readOnly = true)
+    override fun getAll(): MutableSet<UVoteTransaction> = repository.findAll().toMutableSet()
+
+    @Transactional
+    override fun add(dto: VoteTransactionDto): UVoteTransaction {
+        val transaction = repository.findOneByHash(dto.hash)
+        if (null != transaction) {
+            return transaction
+        }
+        validate(dto)
+        return saveAndBroadcast(dto.toUEntity())
+    }
+
+    @Transactional
+    override fun add(request: VoteTransactionRequest): UVoteTransaction {
+        validate(request)
+        return saveAndBroadcast(request.toEntity(nodeClock.networkTime()))
+    }
 
     @Transactional
     override fun validate(request: VoteTransactionRequest) {
