@@ -2,7 +2,6 @@ package io.openfuture.chain.controller
 
 import io.openfuture.chain.controller.common.BaseController
 import io.openfuture.chain.controller.common.RestResponse
-import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.rpc.transaction.DelegateTransactionRequest
 import io.openfuture.chain.domain.rpc.transaction.TransferTransactionRequest
 import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
@@ -30,8 +29,8 @@ class TransactionController(
 ) : BaseController() {
 
     @PostMapping("/votes/doGenerateHash")
-    fun getVoteDataHash(@Valid @RequestBody data: VoteTransactionData): RestResponse<String> {
-        return RestResponse(getResponseHeader(), data.getHash())
+    fun getVoteBytes(@Valid @RequestBody data: VoteTransactionData): RestResponse<ByteArray> {
+        return RestResponse(getResponseHeader(), data.getBytes())
     }
 
     @PostMapping("/votes")
@@ -41,8 +40,8 @@ class TransactionController(
     }
 
     @PostMapping("/transfers/doGenerateHash")
-    fun getTransferDataHash(@Valid @RequestBody data: TransferTransactionData): RestResponse<String> {
-        return RestResponse(getResponseHeader(), data.getHash())
+    fun getTransferBytes(@Valid @RequestBody data: TransferTransactionData): RestResponse<ByteArray> {
+        return RestResponse(getResponseHeader(), data.getBytes())
     }
 
     @PostMapping("/transfers")
@@ -52,8 +51,8 @@ class TransactionController(
     }
 
     @PostMapping("/delegates/doGenerateHash")
-    fun getDelegateDataHash(@Valid @RequestBody data: DelegateTransactionData): RestResponse<String> {
-        return RestResponse(getResponseHeader(), data.getHash())
+    fun getDelegateBytes(@Valid @RequestBody data: DelegateTransactionData): RestResponse<ByteArray> {
+        return RestResponse(getResponseHeader(), data.getBytes())
     }
 
     @PostMapping("/delegates")

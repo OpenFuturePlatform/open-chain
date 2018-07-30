@@ -2,7 +2,6 @@ package io.openfuture.chain.domain.transaction.data
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.annotation.NoArgConstructor
-import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.domain.NetworkEntity
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
@@ -16,8 +15,6 @@ abstract class BaseTransactionData(
 ) : NetworkEntity() {
 
     abstract fun getBytes(): ByteArray
-
-    fun getHash(): String = HashUtils.toHexString(HashUtils.sha256(getBytes()))
 
     override fun read(buffer: ByteBuf) {
         amount = buffer.readLong()
