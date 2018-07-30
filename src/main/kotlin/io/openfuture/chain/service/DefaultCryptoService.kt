@@ -10,9 +10,9 @@ import io.openfuture.chain.crypto.seed.PhraseLength
 import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
 import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
 import io.openfuture.chain.crypto.seed.validator.SeedPhraseValidator
-import io.openfuture.chain.domain.rpc.crypto.WalletDto
-import io.openfuture.chain.domain.rpc.crypto.AccountDto
-import io.openfuture.chain.domain.rpc.crypto.key.KeyDto
+import io.openfuture.chain.rpc.domain.crypto.AccountDto
+import io.openfuture.chain.rpc.domain.crypto.WalletDto
+import io.openfuture.chain.rpc.domain.crypto.key.KeyDto
 import org.springframework.stereotype.Service
 
 @Service

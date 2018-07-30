@@ -1,6 +1,5 @@
 package io.openfuture.chain.service.transaction.unconfirmed
 
-import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
 import io.openfuture.chain.domain.transaction.VoteTransactionDto
 import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.dictionary.VoteType
@@ -8,6 +7,7 @@ import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.UVoteTransactionRepository
+import io.openfuture.chain.rpc.domain.transaction.VoteTransactionRequest
 import io.openfuture.chain.service.UVoteTransactionService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

@@ -1,10 +1,6 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.domain.rpc.HardwareInfo
-import io.openfuture.chain.domain.rpc.hardware.CpuInfo
-import io.openfuture.chain.domain.rpc.hardware.NetworkInfo
-import io.openfuture.chain.domain.rpc.hardware.RamInfo
-import io.openfuture.chain.domain.rpc.hardware.StorageInfo
+import io.openfuture.chain.rpc.domain.node.*
 import org.springframework.stereotype.Service
 import oshi.SystemInfo
 import java.net.NetworkInterface

@@ -4,16 +4,6 @@ import io.netty.channel.Channel
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.base.PageRequest
-import io.openfuture.chain.domain.rpc.HardwareInfo
-import io.openfuture.chain.domain.rpc.crypto.AccountDto
-import io.openfuture.chain.domain.rpc.hardware.CpuInfo
-import io.openfuture.chain.domain.rpc.hardware.NetworkInfo
-import io.openfuture.chain.domain.rpc.hardware.RamInfo
-import io.openfuture.chain.domain.rpc.hardware.StorageInfo
-import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
-import io.openfuture.chain.domain.rpc.transaction.DelegateTransactionRequest
-import io.openfuture.chain.domain.rpc.transaction.TransferTransactionRequest
-import io.openfuture.chain.domain.rpc.transaction.VoteTransactionRequest
 import io.openfuture.chain.domain.transaction.*
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
 import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
@@ -33,6 +23,12 @@ import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.network.domain.Packet
+import io.openfuture.chain.rpc.domain.crypto.AccountDto
+import io.openfuture.chain.rpc.domain.node.*
+import io.openfuture.chain.rpc.domain.transaction.BaseTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.TransferTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.VoteTransactionRequest
 import org.springframework.data.domain.Page
 
 interface HardwareInfoService {
