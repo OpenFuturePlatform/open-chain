@@ -42,7 +42,6 @@ class NetworkMainBlock(
         super.readParams(buffer)
 
         merkleHash = buffer.readString()
-
         transferTransactions = buffer.readList()
         voteTransactions = buffer.readList()
         delegateTransactions = buffer.readList()
@@ -53,14 +52,13 @@ class NetworkMainBlock(
         super.writeParams(buffer)
 
         buffer.writeString(merkleHash)
-
         buffer.writeList(transferTransactions)
         buffer.writeList(voteTransactions)
         buffer.writeList(delegateTransactions)
         buffer.writeList(rewardTransactions)
     }
 
-    fun toEntity(): MainBlock = MainBlock( //todo wait to realize block dto entity converter ?
+    fun toEntity(): MainBlock = MainBlock(
         height,
         previousHash,
         blockTimestamp,
