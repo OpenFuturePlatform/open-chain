@@ -1,7 +1,7 @@
 package io.openfuture.chain.crypto.service
 
-import io.openfuture.chain.crypto.domain.ECKey
-import io.openfuture.chain.crypto.domain.ExtendedKey
+import io.openfuture.chain.crypto.model.dto.ECKey
+import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import io.openfuture.chain.rpc.domain.crypto.AccountDto
 
 interface CryptoService {

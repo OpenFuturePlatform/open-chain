@@ -4,7 +4,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.domain.Greeting
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.network.service.ConnectionService
-import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.network.property.NodeProperties
 import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component

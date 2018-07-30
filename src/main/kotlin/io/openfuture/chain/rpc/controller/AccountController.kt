@@ -1,5 +1,6 @@
 package io.openfuture.chain.rpc.controller
 
+import io.openfuture.chain.consensus.service.WalletService
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.rpc.controller.base.BaseController
 import io.openfuture.chain.rpc.domain.RestResponse
@@ -10,7 +11,6 @@ import io.openfuture.chain.rpc.domain.crypto.key.DerivationKeyRequest
 import io.openfuture.chain.rpc.domain.crypto.key.ImportKeyRequest
 import io.openfuture.chain.rpc.domain.crypto.key.KeyDto
 import io.openfuture.chain.rpc.domain.crypto.key.RestoreRequest
-import io.openfuture.chain.service.WalletService
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
