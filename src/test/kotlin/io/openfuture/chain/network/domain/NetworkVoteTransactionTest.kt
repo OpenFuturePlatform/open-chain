@@ -15,6 +15,7 @@ class NetworkVoteTransactionTest {
     private val entity = VoteTransactionDto(VoteTransactionData(1, 1, "recipientAddress", "senderKey", 1, "delegateKey"),
         1, "senderPublicKey", "senderSignature", "hash")
 
+
     @Test
     fun writeShouldWriteExactValuesInBuffer() {
         val actualBuffer = Unpooled.buffer()

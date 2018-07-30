@@ -11,6 +11,7 @@ class NetworkAddressTest {
         "000000093132372e302e302e3100002382"))
     private val entity = NetworkAddress("127.0.0.1", 9090)
 
+
     @Test
     fun writeShouldWriteExactValuesInBuffer() {
         val actualBuffer = Unpooled.buffer()

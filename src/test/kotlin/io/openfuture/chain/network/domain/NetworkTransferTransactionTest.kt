@@ -15,6 +15,7 @@ class NetworkTransferTransactionTest {
     private val entity = TransferTransactionDto(TransferTransactionData(1, 1, "recipientAddress", "senderKey"), 1,
         "senderAddress", "senderSignature", "hash")
 
+
     @Test
     fun writeShouldWriteExactValuesInBuffer() {
         val actualBuffer = Unpooled.buffer()

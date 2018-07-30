@@ -11,6 +11,7 @@ class NetworkDelegateTest {
         "000000093132372e302e302e31000000036b6579"))
     private val entity = NetworkDelegate("127.0.0.1", "key")
 
+
     @Test
     fun writeShouldWriteExactValuesInBuffer() {
         val actualBuffer = Unpooled.buffer()
