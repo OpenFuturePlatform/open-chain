@@ -8,13 +8,13 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultConsensusService(
     private val consensusProperties: ConsensusProperties,
-    private val blockService: BlockService<Block>,
-    private val genesisBlockService: DefaultGenesisBlockService
+    private val commonBlockService: CommonBlockService,
+    private val genesisBlockService: GenesisBlockService
 ) : ConsensusService {
 
     @Transactional(readOnly = true)
     override fun getCurrentEpochHeight(): Long {
-        val lastBlock = blockService.getLast()
+        val lastBlock = commonBlockService.getLast()
         val lastGenesisBlockHeight = genesisBlockService.getLast().height
 
         return lastBlock.height - lastGenesisBlockHeight

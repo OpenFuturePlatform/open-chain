@@ -1,5 +1,7 @@
 package io.openfuture.chain.service.transaction
 
+import io.openfuture.chain.domain.transaction.TransferTransactionDto
+import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.repository.TransferTransactionRepository
@@ -12,4 +14,16 @@ class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
     uRepository: UTransferTransactionRepository
 ) : DefaultTransactionService<TransferTransaction, UTransferTransaction>(repository, uRepository),
-    TransferTransactionService
+    TransferTransactionService {
+
+    override fun toBlock(dto: TransferTransactionDto, block: MainBlock) {
+        processAndSave(dto.toEntity(), block)
+    }
+
+    override fun toBlock(hash: String, block: MainBlock) {
+        val tx = get(hash)
+        val newTx = tx.toConfirmed()
+        super.processAndSave(newTx, block)
+    }
+
+}

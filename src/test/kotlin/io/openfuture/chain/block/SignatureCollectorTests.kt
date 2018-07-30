@@ -3,13 +3,15 @@ package io.openfuture.chain.block
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.property.ConsensusProperties
-import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.GenesisBlockService
+import io.openfuture.chain.service.MainBlockService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -22,8 +24,8 @@ import java.util.*
 
 class SignatureCollectorTests : ServiceTests() {
 
-    @Mock private lateinit var mainBlockService: BlockService<MainBlock>
-    @Mock private lateinit var genesisBlockService: BlockService<GenesisBlock>
+    @Mock private lateinit var mainBlockService: MainBlockService
+    @Mock private lateinit var genesisBlockService: GenesisBlockService
     @Mock private lateinit var properties: ConsensusProperties
     @Mock private lateinit var timeSlot: TimeSlot
     @Mock private lateinit var clock: NodeClock
@@ -113,28 +115,26 @@ class SignatureCollectorTests : ServiceTests() {
 
     private fun createMainPendingBlock(): PendingBlock {
         val block = MainBlock(
-            ByteArray(1),
             123,
             "prev_block_hash",
             1512345678L,
-            ByteArray(1),
+            HashUtils.toHexString(ByteArray(1)),
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf()
-        )
+        ).sign(ByteArray(1))
         val signature = Signature("value", "public_key")
         return PendingBlock(block, signature)
     }
 
     private fun createGenesisPendingBlock(): PendingBlock {
         val block = GenesisBlock(
-            ByteArray(1),
             123,
             "prev_block_hash",
             1512345678L,
-            ByteArray(1),
+            HashUtils.toHexString(ByteArray(1)),
             1,
             setOf()
-        )
+        ).sign(ByteArray(1))
         val signature = Signature("value", "public_key")
         return PendingBlock(block, signature)
     }

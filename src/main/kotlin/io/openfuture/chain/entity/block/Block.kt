@@ -20,10 +20,14 @@ abstract class Block(
     @Column(name = "public_key", nullable = false)
     val publicKey: String,
 
-    @Column(name = "signature", nullable = false)
-    var signature: String,
-
     @Column(name = "hash", nullable = false, unique = true)
-    var hash: String
+    var hash: String,
 
-) : BaseModel()
+    @Column(name = "signature", nullable = false)
+    var signature: String? = null
+
+) : BaseModel() {
+
+    abstract fun sign(privateKey: ByteArray): Block
+
+}

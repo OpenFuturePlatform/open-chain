@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC: Application version and timestamp fields to all responses
 - TCP: Application version and timestamp fields to all packets
 - Database: unconfirmed transactions tables
+- Synchronization of blocks and transactions after node up
 
 ### Changed
 - Serialization mechanism to support kotlin classes

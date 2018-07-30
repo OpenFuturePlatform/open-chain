@@ -4,43 +4,28 @@ import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.transaction.Transaction
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.OneToMany
-import javax.persistence.Table
+import javax.persistence.*
 
 @Entity
 @Table(name = "main_blocks")
 class MainBlock(
-    privateKey: ByteArray,
     height: Long,
     previousHash: String,
     timestamp: Long,
-    publicKey: ByteArray,
+    publicKey: String,
 
     @Column(name = "merkle_hash", nullable = false)
     var merkleHash: String,
 
-    @OneToMany(mappedBy = "block")
+    @OneToMany(mappedBy = "block", fetch = FetchType.EAGER)
     var transactions: MutableSet<Transaction>
 
-) : Block(
-    height,
-    previousHash,
-    timestamp,
-    HashUtils.toHexString(publicKey),
-    signature = SignatureManager.sign(
-        StringBuilder()
-            .append(previousHash)
-            .append(merkleHash)
-            .append(timestamp)
-            .append(height)
-            .toString()
-            .toByteArray(),
-        privateKey
-    ),
+) : Block(height, previousHash, timestamp, publicKey,
+    ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height + publicKey).toByteArray()))) {
 
-    hash = ByteUtils.toHexString(
-        HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height + publicKey).toByteArray())
-    )
-)
+    override fun sign(privateKey: ByteArray): MainBlock {
+        this.signature = SignatureManager.sign((previousHash + merkleHash + timestamp + height).toByteArray(), privateKey)
+        return this
+    }
+
+}

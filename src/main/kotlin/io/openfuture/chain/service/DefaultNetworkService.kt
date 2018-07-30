@@ -4,6 +4,7 @@ import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelFuture
 import io.openfuture.chain.network.domain.FindAddresses
 import io.openfuture.chain.network.domain.NetworkAddress
+import io.openfuture.chain.network.domain.NetworkBlockRequest
 import io.openfuture.chain.network.domain.Packet
 import io.openfuture.chain.network.server.TcpServer
 import io.openfuture.chain.property.NodeProperties
@@ -18,6 +19,7 @@ import java.util.concurrent.Executors
 @Service
 class DefaultNetworkService(
     private val bootstrap: Bootstrap,
+    private val blockService: CommonBlockService,
     private val tcpServer: TcpServer,
     private val properties: NodeProperties,
     private val connectionService: ConnectionService
@@ -36,6 +38,8 @@ class DefaultNetworkService(
             future as ChannelFuture
             if (future.isSuccess) {
                 future.channel().writeAndFlush(FindAddresses())
+
+                future.channel().writeAndFlush(getNetworkBlockRequest())
             } else {
                 log.warn("Can not connect to ${address.host}:${address.port}")
             }
@@ -64,16 +68,22 @@ class DefaultNetworkService(
 
     private fun isConnectionNeeded(): Boolean = properties.peersNumber!! > connectionService.getConnections().size
 
+    private fun getNetworkBlockRequest(): NetworkBlockRequest {
+        val lastBlockHash = blockService.getLast().hash
+
+        return NetworkBlockRequest(lastBlockHash)
+    }
+
     private fun requestAddresses() {
+        send(FindAddresses())
+    }
+
+    private fun send(message: Packet) {
         val address = connectionService.getConnectionAddresses().shuffled(SecureRandom()).firstOrNull()
             ?: properties.getRootAddresses().shuffled().first()
 
-        send(address, FindAddresses())
-    }
-
-    private fun send(networkAddress: NetworkAddress, message: Packet) {
-        val channel = connectionService.getConnections().filter { it.value == networkAddress }.map { it.key }.firstOrNull()
-            ?: bootstrap.connect(networkAddress.host, networkAddress.port).channel()
+        val channel = connectionService.getConnections().filter { it.value == address }.map { it.key }.firstOrNull()
+            ?: bootstrap.connect(address.host, address.port).channel()
         channel.writeAndFlush(message)
     }
 

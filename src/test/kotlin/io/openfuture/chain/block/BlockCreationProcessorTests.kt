@@ -5,7 +5,6 @@ import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.crypto.key.NodeKeyHolder
-import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
 import io.openfuture.chain.entity.Delegate
@@ -15,10 +14,7 @@ import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.property.ConsensusProperties
-import io.openfuture.chain.service.BaseUTransactionService
-import io.openfuture.chain.service.BlockService
-import io.openfuture.chain.service.ConsensusService
-import io.openfuture.chain.service.DelegateService
+import io.openfuture.chain.service.*
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -29,9 +25,9 @@ import org.springframework.scheduling.TaskScheduler
 
 class BlockCreationProcessorTests : ServiceTests() {
 
-    @Mock private lateinit var blockService: BlockService<Block>
-    @Mock private lateinit var genesisBlockService: BlockService<GenesisBlock>
-    @Mock private lateinit var transactionService: BaseUTransactionService
+    @Mock private lateinit var commonTransactionService: UCommonTransactionService
+    @Mock private lateinit var commonBlockService: CommonBlockService
+    @Mock private lateinit var genesisBlockService: GenesisBlockService
     @Mock private lateinit var signatureCollector: SignatureCollector
     @Mock private lateinit var keyHolder: NodeKeyHolder
     @Mock private lateinit var blockValidationService: BlockValidationProvider
@@ -48,8 +44,8 @@ class BlockCreationProcessorTests : ServiceTests() {
     @Before
     fun init() {
         val block = createMainBlock()
-        given(blockService.getLast()).willReturn(block)
-        processor = BlockCreationProcessor(blockService, genesisBlockService, transactionService,
+        given(commonBlockService.getLast()).willReturn(block)
+        processor = BlockCreationProcessor(commonTransactionService, commonBlockService, genesisBlockService,
             signatureCollector, keyHolder, blockValidationService, consensusService, clock, delegateService,
             consensusProperties, timeSlot, scheduler)
     }
@@ -88,7 +84,7 @@ class BlockCreationProcessorTests : ServiceTests() {
         given(genesisBlockService.getLast()).willReturn(genesisBlock)
         given(keyHolder.getPrivateKey()).willReturn("private_key".toByteArray())
         given(keyHolder.getPublicKey()).willReturn("public_key".toByteArray())
-        given(transactionService.getPending()).willReturn(transactions)
+        given(commonTransactionService.getAll()).willReturn(transactions)
         given(consensusProperties.genesisAddress).willReturn("host2")
         given(delegateService.getByPublicKey(any(String::class.java))).willReturn(delegate)
 
@@ -106,21 +102,19 @@ class BlockCreationProcessorTests : ServiceTests() {
     }
 
     private fun createMainBlock() = MainBlock(
-        HashUtils.fromHexString("529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"),
         123,
         "prev_block_hash",
         1512345678L,
-        HashUtils.fromHexString("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"),
+        "037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4",
         "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
         createTransactions().map { it.toConfirmed() }.toMutableSet()
     )
 
     private fun createGenesisBlock() = GenesisBlock(
-        HashUtils.fromHexString("529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"),
         123,
         "prev_block_hash",
         1512345678L,
-        HashUtils.fromHexString("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"),
+        "529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6",
         1,
         setOf(Delegate("public_key", "host1", 1234), Delegate("public_key2", "host2", 1234), Delegate("public_key3", "host3", 1234))
     )

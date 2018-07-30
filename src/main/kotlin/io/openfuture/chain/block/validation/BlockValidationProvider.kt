@@ -7,14 +7,16 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
-import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.CommonBlockService
+import io.openfuture.chain.service.GenesisBlockService
+import io.openfuture.chain.service.MainBlockService
 import org.springframework.stereotype.Service
 
 @Service
 class BlockValidationProvider(
-    private val blockService: BlockService<Block>,
-    private val mainBlockService: BlockService<MainBlock>,
-    private val genesisBlockService: BlockService<GenesisBlock>,
+    private val commonBlockService: CommonBlockService,
+    private val mainBlockService: MainBlockService,
+    private val genesisBlockService: GenesisBlockService,
     private val timeSlot: TimeSlot,
     private val clock: NodeClock
 ) {
@@ -28,7 +30,7 @@ class BlockValidationProvider(
             else -> throw IllegalArgumentException("Wrong block type is found")
         }
 
-        val lastBlock = blockService.getLast()
+        val lastBlock = commonBlockService.getLast()
         return blockIsValid
                 && timeSlot.verifyTimeSlot(currentTime, block)
                 && verifyBlockSignature(block)
@@ -41,12 +43,12 @@ class BlockValidationProvider(
         if (block is MainBlock) {
             return SignatureManager.verify(
                 (block.previousHash + block.merkleHash + block.timestamp + block.height).toByteArray(),
-                block.signature,
+                block.signature!!,
                 HashUtils.fromHexString(block.publicKey))
         }
         return SignatureManager.verify(
             (block.previousHash + block.timestamp + block.height).toByteArray(),
-            block.signature,
+            block.signature!!,
             HashUtils.fromHexString(block.publicKey))
     }
 

@@ -25,9 +25,9 @@ import javax.annotation.PostConstruct
 
 @Component
 class BlockCreationProcessor(
-    private val blockService: BlockService<Block>,
-    private val genesisBlockService: BlockService<GenesisBlock>,
-    private val transactionService: BaseUTransactionService,
+    private val commonTransactionService: UCommonTransactionService,
+    private val commonBlockService: CommonBlockService,
+    private val genesisBlockService: GenesisBlockService,
     private val signatureCollector: SignatureCollector,
     private val keyHolder: NodeKeyHolder,
     private val validationService: BlockValidationProvider,
@@ -70,11 +70,11 @@ class BlockCreationProcessor(
     }
 
     fun fireBlockCreation() {
-        val previousBlock = blockService.getLast()
+        val previousBlock = commonBlockService.getLast()
         val genesisBlock = genesisBlockService.getLast()
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
         if (HashUtils.toHexString(keyHolder.getPublicKey()) == nextProducer.publicKey) {
-            val pendingTransactions = transactionService.getPending()
+            val pendingTransactions = commonTransactionService.getAll()
             create(pendingTransactions, previousBlock, genesisBlock)
         }
     }
@@ -108,25 +108,23 @@ class BlockCreationProcessor(
                 }.toMutableSet()
 
                 MainBlock(
-                    privateKey,
                     height,
                     hash,
                     time,
-                    publicKey,
+                    HashUtils.toHexString(publicKey),
                     HashUtils.calculateMerkleRoot(transactions),
                     transactions
-                )
+                ).sign(privateKey)
             }
             BlockType.GENESIS -> {
                 GenesisBlock(
-                    privateKey,
                     height,
                     hash,
                     time,
-                    publicKey,
+                    HashUtils.toHexString(publicKey),
                     genesisBlock.epochIndex + 1,
                     delegateService.getActiveDelegates()
-                )
+                ).sign(privateKey)
             }
         }
 

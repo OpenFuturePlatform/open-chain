@@ -1,31 +1,29 @@
-package io.openfuture.chain.service
+package io.openfuture.chain.service.block
 
 import io.openfuture.chain.entity.block.GenesisBlock
-import io.openfuture.chain.exception.NotFoundException
+import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.repository.GenesisBlockRepository
+import io.openfuture.chain.service.CommonBlockService
+import io.openfuture.chain.service.DefaultDelegateService
+import io.openfuture.chain.service.GenesisBlockService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultGenesisBlockService(
-    val genesisBlockRepository: GenesisBlockRepository,
+    repository: GenesisBlockRepository,
+    val commonBlockService: CommonBlockService,
     val delegateService: DefaultDelegateService
-) : BlockService<GenesisBlock> {
+) : DefaultBlockService<GenesisBlock>(repository), GenesisBlockService {
+
+    override fun add(dto: NetworkGenesisBlock) {
+        repository.save(dto.toEntity())
+    }
 
     @Transactional(readOnly = true)
-    override fun get(hash: String): GenesisBlock = genesisBlockRepository.findByHash(hash)
-        ?: throw NotFoundException("Block with hash:$hash not found ")
-
-    @Transactional(readOnly = true)
-    override fun getLast(): GenesisBlock = genesisBlockRepository.findFirstByOrderByHeightDesc()
-        ?: throw NotFoundException("Last Genesis block not exist!")
-
-    @Transactional
-    override fun save(block: GenesisBlock): GenesisBlock = genesisBlockRepository.save(block)
-
     override fun isValid(block: GenesisBlock): Boolean {
         val lastBlock = getLast()
-        val blockFound = genesisBlockRepository.findByHash(block.hash)
+        val blockFound = commonBlockService.get(block.hash) as? GenesisBlock
 
         return (blockFound != null
             && isValidEpochIndex(lastBlock, block)

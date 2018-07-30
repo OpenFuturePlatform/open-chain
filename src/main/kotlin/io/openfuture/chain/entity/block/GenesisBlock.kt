@@ -9,24 +9,27 @@ import javax.persistence.*
 @Entity
 @Table(name = "genesis_blocks")
 class GenesisBlock(
-    privateKey: ByteArray,
     height: Long,
     previousHash: String,
     timestamp: Long,
-    publicKey: ByteArray,
+    publicKey: String,
 
     @Column(name = "epoch_index", nullable = false)
     var epochIndex: Long,
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = [(CascadeType.ALL)])
     @JoinTable(name = "delegate2genesis",
         joinColumns = [JoinColumn(name = "genesis_id")],
         inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
     var activeDelegates: Set<Delegate>
 
-) : Block(height, previousHash, timestamp, HashUtils.toHexString(publicKey),
-    signature = SignatureManager.sign((previousHash + timestamp + height).toByteArray(), privateKey),
+) : Block(height, previousHash, timestamp, publicKey,
+    ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + timestamp + height + publicKey).toByteArray()))
+) {
 
-    hash = ByteUtils.toHexString(
-        HashUtils.doubleSha256((previousHash + timestamp + height + publicKey).toByteArray()))
-)
+    override fun sign(privateKey: ByteArray): GenesisBlock {
+        this.signature = SignatureManager.sign((previousHash + timestamp + height).toByteArray(), privateKey)
+        return this
+    }
+
+}

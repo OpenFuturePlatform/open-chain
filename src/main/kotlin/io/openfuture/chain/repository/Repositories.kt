@@ -25,7 +25,11 @@ interface BlockRepository<T : Block> : BaseRepository<T> {
 
     fun findByHash(hash: String): T?
 
+    fun findByHeightGreaterThan(height: Long): List<T>?
+
     fun findFirstByOrderByHeightDesc(): T?
+
+    fun existsByHash(hash: String): Boolean
 
 }
 
@@ -39,6 +43,10 @@ interface GenesisBlockRepository : BlockRepository<GenesisBlock>
 interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 
     fun findOneByHash(hash: String): Entity?
+
+    fun findAllByBlock(block: Block): List<Entity>
+
+    fun existsByHash(hash: String): Boolean
 
 }
 

@@ -12,6 +12,7 @@ class ServerChannelInitializer(
 
     override fun initChannel(pipeline: ChannelPipeline) {
         pipeline.addLast(context.getBean(TimeSyncServerHandler::class.java))
+        pipeline.addLast(context.getBean(BlockServerHandler::class.java))
         pipeline.addLast(context.getBean(HeartBeatServerHandler::class.java))
     }
 

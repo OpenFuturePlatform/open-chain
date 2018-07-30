@@ -1,37 +1,41 @@
-package io.openfuture.chain.service
+package io.openfuture.chain.service.block
 
 import io.openfuture.chain.block.TimeSlot
 import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.*
-import io.openfuture.chain.exception.NotFoundException
+import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.repository.MainBlockRepository
+import io.openfuture.chain.service.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultMainBlockService(
-    val blockRepository: MainBlockRepository,
+    repository: MainBlockRepository,
     private val clock: NodeClock,
     private val timeSlot: TimeSlot,
     private val voteTransactionService: VoteTransactionService,
     private val transferTransactionService: TransferTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val rewardTransactionService: RewardTransactionService
-) : BlockService<MainBlock> {
+) : DefaultBlockService<MainBlock>(repository), MainBlockService {
 
-    @Transactional(readOnly = true)
-    override fun getLast(): MainBlock = blockRepository.findFirstByOrderByHeightDesc()
-        ?: throw NotFoundException("Last MainBlock block not exist!")
 
-    @Transactional(readOnly = true)
-    override fun get(hash: String): MainBlock = blockRepository.findByHash(hash)
-        ?: throw NotFoundException("Block with hash:$hash not found ")
+    @Transactional
+    override fun add(dto: NetworkMainBlock) {
+        val savedBlock = repository.save(dto.toEntity())
+
+        dto.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
+        dto.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
+        dto.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
+        dto.rewardTransactions.forEach { rewardTransactionService.toBlock(it, savedBlock) }
+    }
 
     @Transactional
     override fun save(block: MainBlock): MainBlock {
-        val savedBlock = blockRepository.save(block)
+        val savedBlock = super.save(block)
         val transactions = block.transactions
         for (transaction in transactions) {
             addTransactionToBlock(transaction, savedBlock)
@@ -63,9 +67,9 @@ class DefaultMainBlockService(
 
     private fun addTransactionToBlock(tx: Transaction, block: MainBlock) {
         when (tx) {
-            is VoteTransaction -> voteTransactionService.toBlock(tx, block)
-            is TransferTransaction -> transferTransactionService.toBlock(tx, block)
-            is DelegateTransaction -> delegateTransactionService.toBlock(tx, block)
+            is VoteTransaction -> voteTransactionService.toBlock(tx.hash, block)
+            is TransferTransaction -> transferTransactionService.toBlock(tx.hash, block)
+            is DelegateTransaction -> delegateTransactionService.toBlock(tx.hash, block)
             is RewardTransaction -> rewardTransactionService.toBlock(tx, block)
             else -> throw IllegalStateException("Unknown transaction type")
         }

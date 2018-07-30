@@ -7,7 +7,8 @@ import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.property.ConsensusProperties
-import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.GenesisBlockService
+import io.openfuture.chain.service.MainBlockService
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Component
 import java.util.*
@@ -15,8 +16,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class SignatureCollector(
-    private val mainBlockService: BlockService<MainBlock>,
-    private val genesisBlockService: BlockService<GenesisBlock>,
+    private val mainBlockService: MainBlockService,
+    private val genesisBlockService: GenesisBlockService,
     private val properties: ConsensusProperties,
     private val timeSlot: TimeSlot,
     private val clock: NodeClock,

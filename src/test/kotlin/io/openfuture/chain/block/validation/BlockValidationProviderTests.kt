@@ -9,7 +9,9 @@ import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import io.openfuture.chain.service.BlockService
+import io.openfuture.chain.service.CommonBlockService
+import io.openfuture.chain.service.GenesisBlockService
+import io.openfuture.chain.service.MainBlockService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -20,9 +22,9 @@ import java.lang.IllegalArgumentException
 
 class BlockValidationProviderTests : ServiceTests() {
 
-    @Mock private lateinit var blockService: BlockService<Block>
-    @Mock private lateinit var mainBlockService: BlockService<MainBlock>
-    @Mock private lateinit var genesisBlockService: BlockService<GenesisBlock>
+    @Mock private lateinit var commonBlockService: CommonBlockService
+    @Mock private lateinit var mainBlockService: MainBlockService
+    @Mock private lateinit var genesisBlockService: GenesisBlockService
     @Mock private lateinit var timeSlot: TimeSlot
     @Mock private lateinit var clock: NodeClock
 
@@ -36,7 +38,7 @@ class BlockValidationProviderTests : ServiceTests() {
         given(timeSlot.verifyTimeSlot(any(Long::class.java), any(MainBlock::class.java))).willReturn(true)
         given(timeSlot.verifyTimeSlot(any(Long::class.java), any(GenesisBlock::class.java))).willReturn(true)
         blockValidationService = BlockValidationProvider(
-            blockService, mainBlockService, genesisBlockService, timeSlot, clock)
+            commonBlockService, mainBlockService, genesisBlockService, timeSlot, clock)
     }
 
     @Test
@@ -44,11 +46,10 @@ class BlockValidationProviderTests : ServiceTests() {
         val height = 123L
         val merkleHash = "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"
         val previousBlock = MainBlock(
-            ByteArray(1),
             122,
             "previous_hash",
             1510000000L,
-            ByteArray(1),
+            "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             "merkle_hash",
             mutableSetOf(
                 VoteTransaction(
@@ -74,16 +75,13 @@ class BlockValidationProviderTests : ServiceTests() {
                     "hash2",
                     2,
                     "delegate_key2"
-                )
-            )
-        )
+                ))
+        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
         val block = MainBlock(
-            HashUtils.fromHexString("529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"),
             height,
             previousBlock.hash,
-
             currentTime,
-            HashUtils.fromHexString("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"),
+            "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             merkleHash,
             mutableSetOf(
                 VoteTransaction(
@@ -111,10 +109,11 @@ class BlockValidationProviderTests : ServiceTests() {
                     "delegate_key2"
                 )
             )
-        )
+        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
+
 
         given(mainBlockService.isValid(block)).willReturn(true)
-        given(blockService.getLast()).willReturn(previousBlock)
+        given(commonBlockService.getLast()).willReturn(previousBlock)
 
         val isValid = blockValidationService.isValid(block)
 
@@ -124,20 +123,18 @@ class BlockValidationProviderTests : ServiceTests() {
     @Test
     fun isValidShouldReturnFalseWhenItIsMainBlock() {
         val lastBlock = MainBlock(
-            ByteArray(1),
             123,
             "prev_block_hash",
             1512345678L,
-            ByteArray(1),
+            "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf()
-        )
+        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
         val block = MainBlock(
-            ByteArray(1),
             123,
             "prev_block_hash",
             1512345678L,
-            ByteArray(1),
+            "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf(
                 VoteTransaction(
@@ -165,9 +162,10 @@ class BlockValidationProviderTests : ServiceTests() {
                     "delegate_key2"
                 )
             )
-        )
+        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
 
-        given(blockService.getLast()).willReturn(lastBlock)
+
+        given(commonBlockService.getLast()).willReturn(lastBlock)
 
         val isValid = blockValidationService.isValid(block)
 
@@ -177,26 +175,25 @@ class BlockValidationProviderTests : ServiceTests() {
     @Test
     fun isValidShouldReturnTrueWhenItIsGenesisBlock() {
         val previousBlock = GenesisBlock(
-            ByteArray(1),
             122,
             "previous_hash",
             1510000000L,
-            ByteArray(1),
+            "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             1L,
             setOf()
-        )
+        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
+
         val block = GenesisBlock(
-            HashUtils.fromHexString("529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"),
             123L,
             previousBlock.hash,
             currentTime,
-            HashUtils.fromHexString("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"),
+            "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             2L,
             setOf()
-        )
+        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
 
         given(genesisBlockService.isValid(block)).willReturn(true)
-        given(blockService.getLast()).willReturn(previousBlock)
+        given(commonBlockService.getLast()).willReturn(previousBlock)
 
         val isValid = blockValidationService.isValid(block)
 
@@ -206,25 +203,24 @@ class BlockValidationProviderTests : ServiceTests() {
     @Test
     fun isValidShouldReturnFalseWhenItIsGenesisBlock() {
         val lastBlock = MainBlock(
-            HashUtils.fromHexString("529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"),
             123,
             "prev_block_hash",
             1512345678L,
-            HashUtils.fromHexString("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"),
+            "037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4",
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf()
-        )
+        ).sign(ByteArray(1))
+
         val block = GenesisBlock(
-            ByteArray(1),
             123,
             "prev_block_hash",
             1512345678L,
-            ByteArray(1),
+            HashUtils.toHexString(ByteArray(1)),
             1L,
             setOf()
-        )
+        ).sign(ByteArray(1))
 
-        given(blockService.getLast()).willReturn(lastBlock)
+        given(commonBlockService.getLast()).willReturn(lastBlock)
 
         val isValid = blockValidationService.isValid(block)
 

@@ -1,5 +1,6 @@
 package io.openfuture.chain.service.transaction
 
+import io.openfuture.chain.domain.transaction.DelegateTransactionDto
 import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.DelegateTransaction
@@ -20,9 +21,17 @@ class DefaultDelegateTransactionService(
     DelegateTransactionService {
 
     @Transactional
-    override fun toBlock(tx: DelegateTransaction, block: MainBlock): DelegateTransaction {
+    override fun toBlock(dto: DelegateTransactionDto, block: MainBlock) {
+        delegateService.save(Delegate(dto.data.delegateKey, dto.data.senderAddress))
+        super.processAndSave(dto.toEntity(), block)
+    }
+
+    @Transactional
+    override fun toBlock(hash: String, block: MainBlock) {
+        val tx = get(hash)
+        val newTx = tx.toConfirmed()
         delegateService.save(Delegate(tx.delegateKey, tx.senderAddress))
-        return super.toBlock(tx, block)
+        super.processAndSave(newTx, block)
     }
 
 }
