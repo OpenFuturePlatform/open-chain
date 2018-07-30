@@ -76,7 +76,7 @@ class BlockValidationProviderTests : ServiceTests() {
                     2,
                     "delegate_key2"
                 ))
-        ).sign<MainBlock>(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
+        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
         val block = MainBlock(
             height,
             previousBlock.hash,
@@ -109,7 +109,7 @@ class BlockValidationProviderTests : ServiceTests() {
                     "delegate_key2"
                 )
             )
-        ).sign<MainBlock>(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
+        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
 
 
         given(mainBlockService.isValid(block)).willReturn(true)
@@ -129,7 +129,7 @@ class BlockValidationProviderTests : ServiceTests() {
             "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf()
-        ).sign<MainBlock>(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
+        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
         val block = MainBlock(
             123,
             "prev_block_hash",
@@ -162,7 +162,7 @@ class BlockValidationProviderTests : ServiceTests() {
                     "delegate_key2"
                 )
             )
-        ).sign<MainBlock>(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
+        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
 
 
         given(commonBlockService.getLast()).willReturn(lastBlock)
@@ -181,7 +181,7 @@ class BlockValidationProviderTests : ServiceTests() {
             "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             1L,
             setOf()
-        ).sign<GenesisBlock>(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
+        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
 
         val block = GenesisBlock(
             123L,
@@ -190,7 +190,7 @@ class BlockValidationProviderTests : ServiceTests() {
             "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             2L,
             setOf()
-        ).sign<GenesisBlock>(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
+        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
 
         given(genesisBlockService.isValid(block)).willReturn(true)
         given(commonBlockService.getLast()).willReturn(previousBlock)
@@ -209,7 +209,7 @@ class BlockValidationProviderTests : ServiceTests() {
             "037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4",
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf()
-        ).sign<MainBlock>(ByteArray(1))
+        ).sign(ByteArray(1))
 
         val block = GenesisBlock(
             123,
@@ -218,7 +218,7 @@ class BlockValidationProviderTests : ServiceTests() {
             HashUtils.toHexString(ByteArray(1)),
             1L,
             setOf()
-        ).sign<GenesisBlock>(ByteArray(1))
+        ).sign(ByteArray(1))
 
         given(commonBlockService.getLast()).willReturn(lastBlock)
 

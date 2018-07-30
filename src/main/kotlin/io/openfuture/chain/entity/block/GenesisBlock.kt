@@ -27,10 +27,9 @@ class GenesisBlock(
     ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + timestamp + height + publicKey).toByteArray()))
 ) {
 
-    @Suppress("UNCHECKED_CAST")
-    fun <T : Block> sign(privateKey: ByteArray): T {
+    override fun sign(privateKey: ByteArray): GenesisBlock {
         this.signature = SignatureManager.sign((previousHash + timestamp + height).toByteArray(), privateKey)
-        return this as T
+        return this
     }
 
 }

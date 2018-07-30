@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Verify the reward transaction
 - Version and timestamp fields to all packets
 - Database: unconfirmed transactions tables
-- Synchronizations data about blocks and transactions after node up
+- Synchronization of blocks and transactions after node up
 
 ### Changed
 - Serialization mechanism to support kotlin classes

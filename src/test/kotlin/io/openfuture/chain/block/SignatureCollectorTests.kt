@@ -121,7 +121,7 @@ class SignatureCollectorTests : ServiceTests() {
             HashUtils.toHexString(ByteArray(1)),
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf()
-        ).sign<MainBlock>(ByteArray(1))
+        ).sign(ByteArray(1))
         val signature = Signature("value", "public_key")
         return PendingBlock(block, signature)
     }
@@ -134,7 +134,7 @@ class SignatureCollectorTests : ServiceTests() {
             HashUtils.toHexString(ByteArray(1)),
             1,
             setOf()
-        ).sign<GenesisBlock>(ByteArray(1))
+        ).sign(ByteArray(1))
         val signature = Signature("value", "public_key")
         return PendingBlock(block, signature)
     }

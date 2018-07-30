@@ -23,12 +23,9 @@ class MainBlock(
 ) : Block(height, previousHash, timestamp, publicKey,
     ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height + publicKey).toByteArray()))) {
 
-    @Suppress("UNCHECKED_CAST")
-    fun <T : Block> sign(privateKey: ByteArray): T {
-        this.signature = SignatureManager.sign(
-            StringBuilder().append(previousHash).append(merkleHash).append(timestamp).append(height).toString()
-                .toByteArray(), privateKey)
-        return this as T
+    override fun sign(privateKey: ByteArray): MainBlock {
+        this.signature = SignatureManager.sign((previousHash + merkleHash + timestamp + height).toByteArray(), privateKey)
+        return this
     }
 
 }

@@ -26,4 +26,8 @@ abstract class Block(
     @Column(name = "signature", nullable = false)
     var signature: String? = null
 
-) : BaseModel()
+) : BaseModel() {
+
+    abstract fun sign(privateKey: ByteArray): Block
+
+}

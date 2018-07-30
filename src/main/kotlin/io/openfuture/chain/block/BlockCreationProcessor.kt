@@ -114,7 +114,7 @@ class BlockCreationProcessor(
                     HashUtils.toHexString(publicKey),
                     HashUtils.calculateMerkleRoot(transactions),
                     transactions
-                ).sign<MainBlock>(privateKey)
+                ).sign(privateKey)
             }
             BlockType.GENESIS -> {
                 GenesisBlock(
@@ -124,7 +124,7 @@ class BlockCreationProcessor(
                     HashUtils.toHexString(publicKey),
                     genesisBlock.epochIndex + 1,
                     delegateService.getActiveDelegates()
-                ).sign<GenesisBlock>(privateKey)
+                ).sign(privateKey)
             }
         }
 
