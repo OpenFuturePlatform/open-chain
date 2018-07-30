@@ -1,10 +1,10 @@
 package io.openfuture.chain.service.block
 
 import io.openfuture.chain.block.TimeSlot
-import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.*
+import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.repository.MainBlockRepository
 import io.openfuture.chain.service.*

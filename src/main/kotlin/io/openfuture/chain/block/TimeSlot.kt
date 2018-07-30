@@ -1,7 +1,7 @@
 package io.openfuture.chain.block
 
-import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.entity.block.Block
+import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.GenesisBlockService
 import org.springframework.stereotype.Component

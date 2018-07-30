@@ -1,6 +1,6 @@
 package io.openfuture.chain.rpc.controller.base
 
-import io.openfuture.chain.component.node.NodeClock
+import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.rpc.domain.ResponseHeader
 import org.springframework.beans.factory.annotation.Autowired

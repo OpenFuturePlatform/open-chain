@@ -1,10 +1,10 @@
 package io.openfuture.chain.rpc.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.crypto.domain.ExtendedKey
+import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.rpc.domain.ResponseHeader
 import io.openfuture.chain.rpc.domain.RestResponse

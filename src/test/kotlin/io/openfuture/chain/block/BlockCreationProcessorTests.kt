@@ -1,7 +1,6 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.block.validation.BlockValidationProvider
-import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.crypto.key.NodeKeyHolder
@@ -13,6 +12,7 @@ import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.*
 import org.junit.Before

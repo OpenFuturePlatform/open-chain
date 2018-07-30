@@ -1,4 +1,4 @@
-package io.openfuture.chain.service
+package io.openfuture.chain.network.service
 
 import io.netty.channel.Channel
 import io.openfuture.chain.network.domain.NetworkAddress

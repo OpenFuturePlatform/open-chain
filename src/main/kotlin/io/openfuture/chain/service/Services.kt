@@ -1,6 +1,5 @@
 package io.openfuture.chain.service
 
-import io.netty.channel.Channel
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.base.PageRequest
@@ -19,10 +18,8 @@ import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
-import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.network.domain.NetworkMainBlock
-import io.openfuture.chain.network.domain.Packet
 import io.openfuture.chain.rpc.domain.crypto.AccountDto
 import io.openfuture.chain.rpc.domain.node.*
 import io.openfuture.chain.rpc.domain.transaction.BaseTransactionRequest
@@ -206,27 +203,5 @@ interface WalletService {
     fun save(wallet: Wallet)
 
     fun updateBalance(from: String, to: String, amount: Long, fee: Long)
-
-}
-
-interface NetworkService {
-
-    fun broadcast(packet: Packet)
-
-    fun maintainConnectionNumber()
-
-    fun connect(peers: List<NetworkAddress>)
-
-}
-
-interface ConnectionService {
-
-    fun addConnection(channel: Channel, networkAddress: NetworkAddress)
-
-    fun removeConnection(channel: Channel): NetworkAddress?
-
-    fun getConnectionAddresses(): Set<NetworkAddress>
-
-    fun getConnections(): MutableMap<Channel, NetworkAddress>
 
 }

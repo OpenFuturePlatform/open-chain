@@ -1,7 +1,6 @@
 package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.block.TimeSlot
-import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.crypto.util.HashUtils
@@ -9,6 +8,7 @@ import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.service.CommonBlockService
 import io.openfuture.chain.service.GenesisBlockService
 import io.openfuture.chain.service.MainBlockService

@@ -1,11 +1,11 @@
 package io.openfuture.chain.block
 
-import io.openfuture.chain.component.node.NodeClock
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
+import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.GenesisBlockService
 import io.openfuture.chain.service.MainBlockService

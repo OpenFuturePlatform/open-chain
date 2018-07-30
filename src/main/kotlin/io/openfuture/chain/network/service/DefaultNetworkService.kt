@@ -1,4 +1,4 @@
-package io.openfuture.chain.service
+package io.openfuture.chain.network.service
 
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelFuture
@@ -8,6 +8,7 @@ import io.openfuture.chain.network.domain.NetworkBlockRequest
 import io.openfuture.chain.network.domain.Packet
 import io.openfuture.chain.network.server.TcpServer
 import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.service.CommonBlockService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationListener
