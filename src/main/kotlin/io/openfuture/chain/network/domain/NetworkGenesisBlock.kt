@@ -37,7 +37,7 @@ class NetworkGenesisBlock(
         buffer.writeList(activeDelegates.toList())
     }
 
-    fun toEntity(): GenesisBlock = GenesisBlock( //todo wait to realize block dto entity converter ?
+    fun toEntity(): GenesisBlock = GenesisBlock(
         height,
         previousHash,
         blockTimestamp,
