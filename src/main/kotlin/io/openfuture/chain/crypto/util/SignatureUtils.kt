@@ -1,10 +1,9 @@
-package io.openfuture.chain.crypto.signature
+package io.openfuture.chain.crypto.util
 
 import io.openfuture.chain.crypto.domain.ECKey
-import io.openfuture.chain.crypto.util.HashUtils
 import java.util.*
 
-object SignatureManager {
+object SignatureUtils {
 
     /**
      * Sign data with ECDSA

@@ -1,8 +1,8 @@
 package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.block.TimeSlot
-import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.GenesisBlock
 import io.openfuture.chain.entity.block.MainBlock
@@ -41,12 +41,12 @@ class BlockValidationProvider(
 
     private fun verifyBlockSignature(block: Block): Boolean {
         if (block is MainBlock) {
-            return SignatureManager.verify(
+            return SignatureUtils.verify(
                 (block.previousHash + block.merkleHash + block.timestamp + block.height).toByteArray(),
                 block.signature!!,
                 HashUtils.fromHexString(block.publicKey))
         }
-        return SignatureManager.verify(
+        return SignatureUtils.verify(
             (block.previousHash + block.timestamp + block.height).toByteArray(),
             block.signature!!,
             HashUtils.fromHexString(block.publicKey))

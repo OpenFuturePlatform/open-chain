@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils
 import java.util.*
 
 
-object Base58CoderUtils {
+object Base58 {
 
     private val ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray()
     private val ENCODED_ZERO = ALPHABET[0]

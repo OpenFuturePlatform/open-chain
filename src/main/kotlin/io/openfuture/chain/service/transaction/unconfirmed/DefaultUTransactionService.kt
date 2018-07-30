@@ -1,7 +1,7 @@
 package io.openfuture.chain.service.transaction.unconfirmed
 
-import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
@@ -69,7 +69,7 @@ abstract class DefaultUTransactionService<UEntity : UTransaction, Data : BaseTra
     }
 
     private fun isValidaSignature(data: Data, publicKey: String, signature: String): Boolean {
-        return SignatureManager.verify(data.getBytes(), signature, HashUtils.fromHexString(publicKey))
+        return SignatureUtils.verify(data.getBytes(), signature, HashUtils.fromHexString(publicKey))
     }
 
     private fun isValidSenderBalance(senderAddress: String, amount: Long): Boolean {

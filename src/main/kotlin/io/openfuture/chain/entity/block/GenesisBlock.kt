@@ -1,7 +1,7 @@
 package io.openfuture.chain.entity.block
 
-import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.entity.Delegate
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import javax.persistence.*
@@ -28,7 +28,7 @@ class GenesisBlock(
 ) {
 
     override fun sign(privateKey: ByteArray): GenesisBlock {
-        this.signature = SignatureManager.sign((previousHash + timestamp + height).toByteArray(), privateKey)
+        this.signature = SignatureUtils.sign((previousHash + timestamp + height).toByteArray(), privateKey)
         return this
     }
 

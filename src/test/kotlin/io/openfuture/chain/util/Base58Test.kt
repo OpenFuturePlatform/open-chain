@@ -1,25 +1,25 @@
 package io.openfuture.chain.util
 
-import io.openfuture.chain.crypto.util.Base58CoderUtils
+import io.openfuture.chain.crypto.util.Base58
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.util.*
 
-class Base58CoderUtilsTest {
+class Base58Test {
 
     @Test
     fun encodeShouldReturnCorrectlyEncodedBytes() {
         val value = "Hello, world!"
         val expectedValue = "72k1xXWG59wUsYv7h2"
 
-        val encoded = Base58CoderUtils.encode(value.toByteArray())
+        val encoded = Base58.encode(value.toByteArray())
 
         assertThat(encoded).isEqualTo(expectedValue)
     }
 
     @Test
     fun encodeShouldReturnEmptyStringWhenBytesToEncodeAreEmpty() {
-        val encoded = Base58CoderUtils.encode(ByteArray(0))
+        val encoded = Base58.encode(ByteArray(0))
 
         assertThat(encoded).isEmpty()
     }
@@ -29,7 +29,7 @@ class Base58CoderUtilsTest {
         val value = "Hello, world!"
         val expectedValue = "gTazoqFvngVDSCkJGJQuokb"
 
-        val encoded = Base58CoderUtils.encodeWithChecksum(value.toByteArray())
+        val encoded = Base58.encodeWithChecksum(value.toByteArray())
 
         assertThat(encoded).isEqualTo(expectedValue)
     }
@@ -39,7 +39,7 @@ class Base58CoderUtilsTest {
         val value = "72k1xXWG59wUsYv7h2"
         val expectedValue = "Hello, world!".toByteArray()
 
-        val decoded = Base58CoderUtils.decode(value)
+        val decoded = Base58.decode(value)
 
         assertThat(Arrays.equals(decoded, expectedValue)).isTrue()
     }
@@ -49,19 +49,19 @@ class Base58CoderUtilsTest {
         val value = "gTazoqFvngVDSCkJGJQuokb"
         val expectedValue = "Hello, world!".toByteArray()
 
-        val decoded = Base58CoderUtils.decodeWithChecksum(value)
+        val decoded = Base58.decodeWithChecksum(value)
 
         assertThat(Arrays.equals(decoded, expectedValue)).isTrue()
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun decodeWithChecksumShouldThrowExceptionWhenInvalidChecksum() {
-        Base58CoderUtils.decodeWithChecksum("gTazoqFvngVDSCkJGJQuoka")
+        Base58.decodeWithChecksum("gTazoqFvngVDSCkJGJQuoka")
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun decodeWithChecksumShouldThrowExceptionWhenInvalidInputLength() {
-        Base58CoderUtils.decodeWithChecksum("gTa")
+        Base58.decodeWithChecksum("gTa")
     }
 
 }

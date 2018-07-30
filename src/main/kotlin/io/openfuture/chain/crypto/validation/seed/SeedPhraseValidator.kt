@@ -1,13 +1,13 @@
-package io.openfuture.chain.crypto.seed.validator
+package io.openfuture.chain.crypto.validation.seed
 
-import io.openfuture.chain.crypto.seed.PhraseLength
-import io.openfuture.chain.crypto.seed.SeedConstant
-import io.openfuture.chain.crypto.seed.SeedConstant.BYTE_SIZE
-import io.openfuture.chain.crypto.seed.SeedConstant.DOUBLE_BYTE_SIZE
-import io.openfuture.chain.crypto.seed.SeedConstant.SECOND_BYTE_OFFSET
-import io.openfuture.chain.crypto.seed.SeedConstant.SECOND_BYTE_SKIP_BIT_SIZE
-import io.openfuture.chain.crypto.seed.SeedConstant.THIRD_BYTE_OFFSET
-import io.openfuture.chain.crypto.seed.SeedConstant.WORD_INDEX_SIZE
+import io.openfuture.chain.crypto.constants.SeedConstant
+import io.openfuture.chain.crypto.constants.SeedConstant.BYTE_SIZE
+import io.openfuture.chain.crypto.constants.SeedConstant.DOUBLE_BYTE_SIZE
+import io.openfuture.chain.crypto.constants.SeedConstant.SECOND_BYTE_OFFSET
+import io.openfuture.chain.crypto.constants.SeedConstant.SECOND_BYTE_SKIP_BIT_SIZE
+import io.openfuture.chain.crypto.constants.SeedConstant.THIRD_BYTE_OFFSET
+import io.openfuture.chain.crypto.constants.SeedConstant.WORD_INDEX_SIZE
+import io.openfuture.chain.crypto.dictionary.PhraseLength
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.SeedWord
 import io.openfuture.chain.repository.SeedWordRepository

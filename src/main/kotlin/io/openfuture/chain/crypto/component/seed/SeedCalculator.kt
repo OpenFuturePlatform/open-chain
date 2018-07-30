@@ -1,4 +1,4 @@
-package io.openfuture.chain.crypto.seed.calculator
+package io.openfuture.chain.crypto.component.seed
 
 import io.openfuture.chain.crypto.util.HashUtils
 import org.springframework.stereotype.Component

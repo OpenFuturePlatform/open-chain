@@ -1,7 +1,7 @@
-package io.openfuture.chain.crypto.key
+package io.openfuture.chain.crypto.component.key
 
 import io.openfuture.chain.crypto.domain.ECKey
-import io.openfuture.chain.crypto.util.Base58CoderUtils
+import io.openfuture.chain.crypto.util.Base58
 import io.openfuture.chain.crypto.util.HashUtils
 import org.springframework.stereotype.Component
 import java.util.*
@@ -21,9 +21,9 @@ class PrivateKeyManager {
     }
 
 
-    fun exportPrivateKey(key: ECKey): String = Base58CoderUtils.encode(getWifBytes(key))
+    fun exportPrivateKey(key: ECKey): String = Base58.encode(getWifBytes(key))
 
-    fun importPrivateKey(serializedKey: String): ECKey = parseWifBytes(Base58CoderUtils.decode(serializedKey))
+    fun importPrivateKey(serializedKey: String): ECKey = parseWifBytes(Base58.decode(serializedKey))
 
     private fun getWifBytes(key: ECKey): ByteArray {
         return key.private?.let {

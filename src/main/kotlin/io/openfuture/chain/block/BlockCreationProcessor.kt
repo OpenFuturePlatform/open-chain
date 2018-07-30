@@ -1,9 +1,9 @@
 package io.openfuture.chain.block
 
 import io.openfuture.chain.block.validation.BlockValidationProvider
-import io.openfuture.chain.crypto.key.NodeKeyHolder
-import io.openfuture.chain.crypto.signature.SignatureManager
+import io.openfuture.chain.crypto.component.key.NodeKeyHolder
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
 import io.openfuture.chain.domain.transaction.data.RewardTransactionData
@@ -59,7 +59,7 @@ class BlockCreationProcessor(
 
         val hash = HashUtils.fromHexString(block.hash)
         val key = HashUtils.fromHexString(pendingBlock.signature.publicKey)
-        if (!SignatureManager.verify(hash, pendingBlock.signature.value, key)) {
+        if (!SignatureUtils.verify(hash, pendingBlock.signature.value, key)) {
             throw IllegalArgumentException("Inbound block's signature is invalid")
         }
 
@@ -81,7 +81,7 @@ class BlockCreationProcessor(
 
     private fun signCreatedBlock(block: Block): PendingBlock {
         val publicKey = HashUtils.toHexString(keyHolder.getPublicKey())
-        val value = SignatureManager.sign(HashUtils.fromHexString(block.hash), keyHolder.getPrivateKey())
+        val value = SignatureUtils.sign(HashUtils.fromHexString(block.hash), keyHolder.getPrivateKey())
         val signature = Signature(value, publicKey)
         val pendingBlock = PendingBlock(block, signature)
         signatureCollector.setPendingBlock(pendingBlock)
@@ -112,7 +112,7 @@ class BlockCreationProcessor(
                     hash,
                     time,
                     HashUtils.toHexString(publicKey),
-                    HashUtils.calculateMerkleRoot(transactions),
+                    BlockUtils.calculateMerkleRoot(transactions),
                     transactions
                 ).sign(privateKey)
             }

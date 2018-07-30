@@ -1,7 +1,7 @@
 package io.openfuture.chain.entity.block
 
-import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.entity.transaction.Transaction
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import javax.persistence.*
@@ -24,7 +24,7 @@ class MainBlock(
     ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height + publicKey).toByteArray()))) {
 
     override fun sign(privateKey: ByteArray): MainBlock {
-        this.signature = SignatureManager.sign((previousHash + merkleHash + timestamp + height).toByteArray(), privateKey)
+        this.signature = SignatureUtils.sign((previousHash + merkleHash + timestamp + height).toByteArray(), privateKey)
         return this
     }
 

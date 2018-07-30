@@ -1,15 +1,15 @@
-package io.openfuture.chain.service
+package io.openfuture.chain.crypto.service
 
+import io.openfuture.chain.crypto.component.key.DerivationKeysHelper
+import io.openfuture.chain.crypto.component.key.ExtendedKeyDeserializer
+import io.openfuture.chain.crypto.component.key.ExtendedKeySerializer
+import io.openfuture.chain.crypto.component.key.PrivateKeyManager
+import io.openfuture.chain.crypto.component.seed.SeedCalculator
+import io.openfuture.chain.crypto.component.seed.SeedPhraseGenerator
+import io.openfuture.chain.crypto.dictionary.PhraseLength
 import io.openfuture.chain.crypto.domain.ECKey
 import io.openfuture.chain.crypto.domain.ExtendedKey
-import io.openfuture.chain.crypto.key.DerivationKeysHelper
-import io.openfuture.chain.crypto.key.ExtendedKeyDeserializer
-import io.openfuture.chain.crypto.key.ExtendedKeySerializer
-import io.openfuture.chain.crypto.key.PrivateKeyManager
-import io.openfuture.chain.crypto.seed.PhraseLength
-import io.openfuture.chain.crypto.seed.calculator.SeedCalculator
-import io.openfuture.chain.crypto.seed.generator.SeedPhraseGenerator
-import io.openfuture.chain.crypto.seed.validator.SeedPhraseValidator
+import io.openfuture.chain.crypto.validation.seed.SeedPhraseValidator
 import io.openfuture.chain.rpc.domain.crypto.AccountDto
 import io.openfuture.chain.rpc.domain.crypto.WalletDto
 import io.openfuture.chain.rpc.domain.crypto.key.KeyDto

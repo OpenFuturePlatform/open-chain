@@ -1,7 +1,5 @@
 package io.openfuture.chain.service
 
-import io.openfuture.chain.crypto.domain.ECKey
-import io.openfuture.chain.crypto.domain.ExtendedKey
 import io.openfuture.chain.domain.base.PageRequest
 import io.openfuture.chain.domain.transaction.*
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
@@ -20,7 +18,6 @@ import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.network.domain.NetworkMainBlock
-import io.openfuture.chain.rpc.domain.crypto.AccountDto
 import io.openfuture.chain.rpc.domain.node.*
 import io.openfuture.chain.rpc.domain.transaction.BaseTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
@@ -73,26 +70,6 @@ interface GenesisBlockService : BlockService<GenesisBlock> {
 interface MainBlockService : BlockService<MainBlock> {
 
     fun add(dto: NetworkMainBlock)
-
-}
-
-interface CryptoService {
-
-    fun generateSeedPhrase(): String
-
-    fun generateNewAccount(): AccountDto
-
-    fun getRootAccount(seedPhrase: String): AccountDto
-
-    fun getDerivationKey(seedPhrase: String, derivationPath: String): ExtendedKey
-
-    fun importKey(key: String): ExtendedKey
-
-    fun importWifKey(wifKey: String): ECKey
-
-    fun serializePublicKey(key: ExtendedKey): String
-
-    fun serializePrivateKey(key: ExtendedKey): String
 
 }
 

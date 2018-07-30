@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.crypto.domain.ExtendedKey
+import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.property.NodeProperties
 import io.openfuture.chain.rpc.domain.ResponseHeader
@@ -14,7 +15,6 @@ import io.openfuture.chain.rpc.domain.crypto.WalletDto
 import io.openfuture.chain.rpc.domain.crypto.key.DerivationKeyRequest
 import io.openfuture.chain.rpc.domain.crypto.key.KeyDto
 import io.openfuture.chain.rpc.domain.crypto.key.RestoreRequest
-import io.openfuture.chain.service.CryptoService
 import io.openfuture.chain.service.WalletService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

@@ -1,6 +1,5 @@
 package io.openfuture.chain.crypto.util
 
-import io.openfuture.chain.entity.transaction.base.BaseTransaction
 import org.bouncycastle.crypto.PBEParametersGenerator
 import org.bouncycastle.crypto.digests.RIPEMD160Digest
 import org.bouncycastle.crypto.digests.SHA512Digest
@@ -43,12 +42,12 @@ object HashUtils {
         return keccak.digest()
     }
 
-	fun hmacSha512(key: ByteArray, message: ByteArray): ByteArray {
-		val keySpec = SecretKeySpec(key, HMACSHA512)
-		val mac = Mac.getInstance(HMACSHA512)
-		mac.init(keySpec)
-		return mac.doFinal(message)
-	}
+    fun hmacSha512(key: ByteArray, message: ByteArray): ByteArray {
+        val keySpec = SecretKeySpec(key, HMACSHA512)
+        val mac = Mac.getInstance(HMACSHA512)
+        mac.init(keySpec)
+        return mac.doFinal(message)
+    }
 
     fun hashPBKDF2(chars: CharArray, salt: ByteArray): ByteArray {
         val generator = PKCS5S2ParametersGenerator(SHA512Digest())
@@ -60,27 +59,5 @@ object HashUtils {
     fun toHexString(bytes: ByteArray): String = ByteUtils.toHexString(bytes)
 
     fun fromHexString(input: String): ByteArray = ByteUtils.fromHexString(input)
-
-    fun calculateMerkleRoot(transactions: Set<BaseTransaction>): String {
-        if (transactions.size == 1) {
-            return transactions.single().hash
-        }
-        var previousTreeLayout = transactions.map { it.hash.toByteArray() }
-        var treeLayout = mutableListOf<ByteArray>()
-        while(previousTreeLayout.size != 2) {
-            for (i in 0 until previousTreeLayout.size step 2) {
-                val leftHash = previousTreeLayout[i]
-                val rightHash = if (i + 1 == previousTreeLayout.size) {
-                    previousTreeLayout[i]
-                } else {
-                    previousTreeLayout[i + 1]
-                }
-                treeLayout.add(HashUtils.sha256(leftHash + rightHash))
-            }
-            previousTreeLayout = treeLayout
-            treeLayout = mutableListOf()
-        }
-        return HashUtils.toHexString(doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
-    }
 
 }

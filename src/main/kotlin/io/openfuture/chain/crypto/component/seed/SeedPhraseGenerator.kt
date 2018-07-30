@@ -1,12 +1,12 @@
-package io.openfuture.chain.crypto.seed.generator
+package io.openfuture.chain.crypto.component.seed
 
-import io.openfuture.chain.crypto.seed.PhraseLength
-import io.openfuture.chain.crypto.seed.SeedConstant.BYTE_SIZE
-import io.openfuture.chain.crypto.seed.SeedConstant.DOUBLE_BYTE_SIZE
-import io.openfuture.chain.crypto.seed.SeedConstant.MULTIPLICITY_VALUE
-import io.openfuture.chain.crypto.seed.SeedConstant.SECOND_BYTE_OFFSET
-import io.openfuture.chain.crypto.seed.SeedConstant.THIRD_BYTE_OFFSET
-import io.openfuture.chain.crypto.seed.SeedConstant.WORD_INDEX_SIZE
+import io.openfuture.chain.crypto.constants.SeedConstant.BYTE_SIZE
+import io.openfuture.chain.crypto.constants.SeedConstant.DOUBLE_BYTE_SIZE
+import io.openfuture.chain.crypto.constants.SeedConstant.MULTIPLICITY_VALUE
+import io.openfuture.chain.crypto.constants.SeedConstant.SECOND_BYTE_OFFSET
+import io.openfuture.chain.crypto.constants.SeedConstant.THIRD_BYTE_OFFSET
+import io.openfuture.chain.crypto.constants.SeedConstant.WORD_INDEX_SIZE
+import io.openfuture.chain.crypto.dictionary.PhraseLength
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.repository.SeedWordRepository
 import org.apache.commons.lang3.StringUtils

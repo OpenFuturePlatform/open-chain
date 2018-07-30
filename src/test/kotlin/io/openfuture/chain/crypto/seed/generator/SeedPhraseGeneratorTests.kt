@@ -2,7 +2,8 @@ package io.openfuture.chain.crypto.seed.generator
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
-import io.openfuture.chain.crypto.seed.PhraseLength
+import io.openfuture.chain.crypto.component.seed.SeedPhraseGenerator
+import io.openfuture.chain.crypto.dictionary.PhraseLength
 import io.openfuture.chain.entity.SeedWord
 import io.openfuture.chain.repository.SeedWordRepository
 import org.assertj.core.api.Assertions.assertThat

@@ -1,13 +1,13 @@
 package io.openfuture.chain.service.block
 
 import io.openfuture.chain.block.TimeSlot
-import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.repository.MainBlockRepository
 import io.openfuture.chain.service.*
+import io.openfuture.chain.util.BlockUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -56,7 +56,7 @@ class DefaultMainBlockService(
             return false
         }
 
-        val transactionsMerkleHash = HashUtils.calculateMerkleRoot(transactions)
+        val transactionsMerkleHash = BlockUtils.calculateMerkleRoot(transactions)
         return block.merkleHash == transactionsMerkleHash
     }
 

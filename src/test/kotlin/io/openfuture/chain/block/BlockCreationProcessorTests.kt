@@ -3,7 +3,7 @@ package io.openfuture.chain.block
 import io.openfuture.chain.block.validation.BlockValidationProvider
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
-import io.openfuture.chain.crypto.key.NodeKeyHolder
+import io.openfuture.chain.crypto.component.key.NodeKeyHolder
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
 import io.openfuture.chain.entity.Delegate

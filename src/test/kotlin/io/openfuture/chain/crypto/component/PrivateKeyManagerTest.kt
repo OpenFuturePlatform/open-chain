@@ -1,5 +1,7 @@
-package io.openfuture.chain.crypto.key
+package io.openfuture.chain.crypto.component
 
+import io.openfuture.chain.crypto.component.key.ExtendedKeyDeserializer
+import io.openfuture.chain.crypto.component.key.PrivateKeyManager
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.util.*

@@ -1,7 +1,7 @@
-package io.openfuture.chain.crypto.key
+package io.openfuture.chain.crypto.component.key
 
 import io.openfuture.chain.crypto.domain.ExtendedKey
-import io.openfuture.chain.crypto.util.Base58CoderUtils
+import io.openfuture.chain.crypto.util.Base58
 import org.springframework.stereotype.Component
 import java.io.ByteArrayOutputStream
 
@@ -48,7 +48,7 @@ class ExtendedKeySerializer {
         }
 
         out.write(keyBytes)
-        return Base58CoderUtils.encodeWithChecksum(out.toByteArray())
+        return Base58.encodeWithChecksum(out.toByteArray())
     }
 
 }

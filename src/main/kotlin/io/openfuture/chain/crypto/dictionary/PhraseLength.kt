@@ -1,4 +1,4 @@
-package io.openfuture.chain.crypto.seed
+package io.openfuture.chain.crypto.dictionary
 
 enum class PhraseLength(val value: Int, val entropyLength: Int, val checkSumLength: Int) {
 

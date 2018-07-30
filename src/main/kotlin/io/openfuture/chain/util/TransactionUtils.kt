@@ -1,7 +1,7 @@
 package io.openfuture.chain.util
 
-import io.openfuture.chain.crypto.signature.SignatureManager
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
 import java.nio.ByteBuffer
 
@@ -19,7 +19,7 @@ object TransactionUtils {
     }
 
     private fun getSignature(data: BaseTransactionData, privateKey: ByteArray): String {
-        return SignatureManager.sign(data.getBytes(), privateKey)
+        return SignatureUtils.sign(data.getBytes(), privateKey)
     }
 
     private fun getBytes(publicKey: ByteArray, signature: ByteArray, data: ByteArray): ByteArray {
