@@ -21,6 +21,6 @@ abstract class UTransaction(
     hash: String
 ) : BaseTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash) {
 
-    abstract fun toConfirmed(): Transaction
+    abstract fun toConfirmed() : Transaction
 
 }

@@ -67,9 +67,9 @@ class DefaultMainBlockService(
 
     private fun addTransactionToBlock(tx: Transaction, block: MainBlock) {
         when (tx) {
-            is VoteTransaction -> voteTransactionService.toBlock(tx, block)
-            is TransferTransaction -> transferTransactionService.toBlock(tx, block)
-            is DelegateTransaction -> delegateTransactionService.toBlock(tx, block)
+            is VoteTransaction -> voteTransactionService.toBlock(tx.hash, block)
+            is TransferTransaction -> transferTransactionService.toBlock(tx.hash, block)
+            is DelegateTransaction -> delegateTransactionService.toBlock(tx.hash, block)
             is RewardTransaction -> rewardTransactionService.toBlock(tx, block)
             else -> throw IllegalStateException("Unknown transaction type")
         }

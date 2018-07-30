@@ -25,7 +25,7 @@ import javax.annotation.PostConstruct
 
 @Component
 class BlockCreationProcessor(
-    private val transactionService: BaseUTransactionService,
+    private val commonTransactionService: UCommonTransactionService,
     private val commonBlockService: CommonBlockService,
     private val genesisBlockService: GenesisBlockService,
     private val signatureCollector: SignatureCollector,
@@ -74,7 +74,7 @@ class BlockCreationProcessor(
         val genesisBlock = genesisBlockService.getLast()
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
         if (HashUtils.toHexString(keyHolder.getPublicKey()) == nextProducer.publicKey) {
-            val pendingTransactions = transactionService.getPending()
+            val pendingTransactions = commonTransactionService.getPending()
             create(pendingTransactions, previousBlock, genesisBlock)
         }
     }

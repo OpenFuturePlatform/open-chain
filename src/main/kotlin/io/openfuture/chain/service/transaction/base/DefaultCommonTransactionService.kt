@@ -1,16 +1,16 @@
-package io.openfuture.chain.service.transaction
+package io.openfuture.chain.service.transaction.base
 
 import io.openfuture.chain.entity.transaction.Transaction
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.TransactionRepository
-import io.openfuture.chain.service.BaseTransactionService
+import io.openfuture.chain.service.CommonTransactionService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class DefaultBaseTransactionService(
+class DefaultCommonTransactionService(
     private val repository: TransactionRepository<Transaction>
-) : BaseTransactionService {
+) : CommonTransactionService {
 
     @Transactional(readOnly = true)
     override fun get(hash: String): Transaction = repository.findOneByHash(hash)

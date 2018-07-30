@@ -1,16 +1,18 @@
 package io.openfuture.chain.domain.transaction
 
+import io.openfuture.chain.annotation.NoArgConstructor
 import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
 import io.openfuture.chain.entity.transaction.DelegateTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
 
+@NoArgConstructor
 class DelegateTransactionDto(
     data: DelegateTransactionData,
     timestamp: Long,
     senderPublicKey: String,
     senderSignature: String,
     hash: String
-) : BaseTransactionDto<DelegateTransaction, UDelegateTransaction, DelegateTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
+) : BaseTransactionDto<DelegateTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
 
     constructor(tx: DelegateTransaction) : this(
         DelegateTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress, tx.delegateKey),
@@ -28,8 +30,7 @@ class DelegateTransactionDto(
         tx.hash
     )
 
-
-    override fun toEntity(): DelegateTransaction = DelegateTransaction(
+    fun toEntity(): DelegateTransaction = DelegateTransaction(
         timestamp,
         data.amount,
         data.fee,
@@ -41,8 +42,7 @@ class DelegateTransactionDto(
         data.delegateKey
     )
 
-
-    override fun toUEntity(): UDelegateTransaction = UDelegateTransaction(
+    fun toUEntity(): UDelegateTransaction = UDelegateTransaction(
         timestamp,
         data.amount,
         data.fee,

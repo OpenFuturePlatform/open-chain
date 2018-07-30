@@ -4,7 +4,7 @@ import io.openfuture.chain.domain.transaction.RewardTransactionDto
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.RewardTransaction
 import io.openfuture.chain.repository.RewardTransactionRepository
-import io.openfuture.chain.service.BaseTransactionService
+import io.openfuture.chain.service.CommonTransactionService
 import io.openfuture.chain.service.RewardTransactionService
 import io.openfuture.chain.service.WalletService
 import org.springframework.stereotype.Service
@@ -14,13 +14,13 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultRewardTransactionService(
     private val repository: RewardTransactionRepository,
-    private val baseService: BaseTransactionService,
+    private val commonService: CommonTransactionService,
     private val walletService: WalletService
 ) : RewardTransactionService {
 
     @Transactional
     override fun toBlock(dto: RewardTransactionDto, block: MainBlock) {
-        if (baseService.isExists(dto.hash)) {
+        if (commonService.isExists(dto.hash)) {
             return
         }
 
@@ -32,7 +32,7 @@ class DefaultRewardTransactionService(
 
     @Transactional
     override fun toBlock(tx: RewardTransaction, block: MainBlock) {
-        if (baseService.isExists(tx.hash)) {
+        if (commonService.isExists(tx.hash)) {
             return
         }
 

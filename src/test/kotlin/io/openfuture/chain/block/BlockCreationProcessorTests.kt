@@ -25,7 +25,7 @@ import org.springframework.scheduling.TaskScheduler
 
 class BlockCreationProcessorTests : ServiceTests() {
 
-    @Mock private lateinit var transactionService: BaseUTransactionService
+    @Mock private lateinit var commonTransactionService: UCommonTransactionService
     @Mock private lateinit var commonBlockService: CommonBlockService
     @Mock private lateinit var genesisBlockService: GenesisBlockService
     @Mock private lateinit var signatureCollector: SignatureCollector
@@ -45,7 +45,7 @@ class BlockCreationProcessorTests : ServiceTests() {
     fun init() {
         val block = createMainBlock()
         given(commonBlockService.getLast()).willReturn(block)
-        processor = BlockCreationProcessor(transactionService, commonBlockService, genesisBlockService,
+        processor = BlockCreationProcessor(commonTransactionService, commonBlockService, genesisBlockService,
             signatureCollector, keyHolder, blockValidationService, consensusService, clock, delegateService,
             consensusProperties, timeSlot, scheduler)
     }
@@ -84,7 +84,7 @@ class BlockCreationProcessorTests : ServiceTests() {
         given(genesisBlockService.getLast()).willReturn(genesisBlock)
         given(keyHolder.getPrivateKey()).willReturn("private_key".toByteArray())
         given(keyHolder.getPublicKey()).willReturn("public_key".toByteArray())
-        given(transactionService.getPending()).willReturn(transactions)
+        given(commonTransactionService.getPending()).willReturn(transactions)
         given(consensusProperties.genesisAddress).willReturn("host2")
         given(delegateService.getByPublicKey(any(String::class.java))).willReturn(delegate)
 

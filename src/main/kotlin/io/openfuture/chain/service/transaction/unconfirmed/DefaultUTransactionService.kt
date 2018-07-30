@@ -6,23 +6,21 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.domain.rpc.transaction.BaseTransactionRequest
 import io.openfuture.chain.domain.transaction.BaseTransactionDto
 import io.openfuture.chain.domain.transaction.data.BaseTransactionData
-import io.openfuture.chain.entity.transaction.Transaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
-import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.repository.UTransactionRepository
-import io.openfuture.chain.service.BaseUTransactionService
+import io.openfuture.chain.service.UCommonTransactionService
 import io.openfuture.chain.service.UTransactionService
 import io.openfuture.chain.service.WalletService
 import io.openfuture.chain.util.TransactionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
-abstract class DefaultUTransactionService<Entity : Transaction, UEntity : UTransaction, Data : BaseTransactionData,
-    Dto: BaseTransactionDto<Entity, UEntity, Data>, Req: BaseTransactionRequest<UEntity, Data>>(
+abstract class DefaultUTransactionService<UEntity : UTransaction, Data : BaseTransactionData,
+    Dto: BaseTransactionDto<Data>, Req: BaseTransactionRequest<UEntity, Data>>(
     protected val repository: UTransactionRepository<UEntity>
-) : UTransactionService<Entity, UEntity, Data, Dto, Req> {
+) : UTransactionService<UEntity, Data, Dto, Req> {
 
     @Autowired
     protected lateinit var nodeClock: NodeClock
@@ -34,32 +32,9 @@ abstract class DefaultUTransactionService<Entity : Transaction, UEntity : UTrans
     private lateinit var consensusProperties: ConsensusProperties
 
     @Autowired
-    private lateinit var baseService: BaseUTransactionService
-
-
-    @Transactional(readOnly = true)
-    override fun get(hash: String): UEntity = repository.findOneByHash(hash)
-        ?: throw NotFoundException("Unconfirmed transaction with hash: $hash not exist!")
-
-    @Transactional(readOnly = true)
-    override fun getAll(): MutableSet<UEntity> = repository.findAll().toMutableSet()
+    private lateinit var serviceCommon: UCommonTransactionService
 
     @Transactional
-    override fun add(dto: Dto): UEntity {
-        val transaction = repository.findOneByHash(dto.hash)
-        if (null != transaction) {
-            return transaction
-        }
-        validate(dto)
-        return saveAndBroadcast(dto.toUEntity())
-    }
-
-    @Transactional
-    override fun add(request: Req): UEntity {
-        validate(request)
-        return saveAndBroadcast(request.toEntity(nodeClock.networkTime()))
-    }
-
     open fun validate(dto: Dto) {
         if (!isValidHash(dto.data, dto.senderSignature, dto.senderPublicKey, dto.hash)) {
             throw ValidationException("Invalid transaction hash")
@@ -67,6 +42,7 @@ abstract class DefaultUTransactionService<Entity : Transaction, UEntity : UTrans
         commonValidate(dto.data, dto.senderSignature, dto.senderPublicKey)
     }
 
+    @Transactional
     open fun validate(request: Req) {
         commonValidate(request.data!!, request.senderSignature!!, request.senderPublicKey!!)
     }
@@ -102,7 +78,7 @@ abstract class DefaultUTransactionService<Entity : Transaction, UEntity : UTrans
         }
 
         val balance = walletService.getBalanceByAddress(senderAddress)
-        val unconfirmedOutput = baseService.getPending()
+        val unconfirmedOutput = serviceCommon.getPending()
             .filter { it.senderAddress == senderAddress }
             .map { it.amount + it.fee }
             .sum()
