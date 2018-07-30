@@ -17,18 +17,19 @@ import io.openfuture.chain.network.extension.writeList
 import io.openfuture.chain.network.extension.writeString
 
 @NoArgConstructor
-class NetworkMainBlock(height: Long,
-                       previousHash: String,
-                       blockTimestamp: Long,
-                       hash: String,
-                       signature: String,
-                       publicKey: String,
-                       var merkleHash: String,
-                       var transferTransactions: MutableList<TransferTransactionDto>,
-                       var voteTransactions: MutableList<VoteTransactionDto>,
-                       var delegateTransactions: MutableList<DelegateTransactionDto>,
-                       var rewardTransactions: MutableList<RewardTransactionDto>) :
-    NetworkBlock(height, previousHash, blockTimestamp, publicKey, hash, signature) {
+class NetworkMainBlock(
+    height: Long,
+    previousHash: String,
+    blockTimestamp: Long,
+    hash: String,
+    signature: String,
+    publicKey: String,
+    var merkleHash: String,
+    var transferTransactions: MutableList<TransferTransactionDto>,
+    var voteTransactions: MutableList<VoteTransactionDto>,
+    var delegateTransactions: MutableList<DelegateTransactionDto>,
+    var rewardTransactions: MutableList<RewardTransactionDto>
+) : NetworkBlock(height, previousHash, blockTimestamp, publicKey, hash, signature) {
 
     constructor(block: MainBlock) : this(block.height, block.previousHash, block.timestamp, block.hash,
         block.signature!!, block.publicKey, block.merkleHash,

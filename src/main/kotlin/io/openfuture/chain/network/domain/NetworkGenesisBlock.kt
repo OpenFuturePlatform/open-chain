@@ -8,14 +8,15 @@ import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.writeList
 
 @NoArgConstructor
-class NetworkGenesisBlock(height: Long,
-                          previousHash: String,
-                          blockTimestamp: Long,
-                          publicKey: String,
-                          hash: String,
-                          signature: String,
-                          var epochIndex: Long,
-                          var activeDelegates: MutableSet<NetworkDelegate>
+class NetworkGenesisBlock(
+    height: Long,
+    previousHash: String,
+    blockTimestamp: Long,
+    publicKey: String,
+    hash: String,
+    signature: String,
+    var epochIndex: Long,
+    var activeDelegates: MutableSet<NetworkDelegate>
 ) : NetworkBlock(height, previousHash, blockTimestamp, publicKey, hash, signature) {
 
 

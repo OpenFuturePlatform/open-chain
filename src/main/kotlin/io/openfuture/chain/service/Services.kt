@@ -153,7 +153,7 @@ interface DelegateTransactionService : TransactionService<DelegateTransaction, U
  */
 interface UCommonTransactionService {
 
-    fun getPending(): MutableSet<UTransaction>
+    fun getAll(): MutableSet<UTransaction>
 
 }
 

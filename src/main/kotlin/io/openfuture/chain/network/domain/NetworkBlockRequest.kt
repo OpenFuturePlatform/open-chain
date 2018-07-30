@@ -6,7 +6,9 @@ import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 
 @NoArgConstructor
-data class NetworkBlockRequest(var hash: String) : Packet() {
+data class NetworkBlockRequest(
+    var hash: String
+) : Packet() {
 
     override fun readParams(buffer: ByteBuf) {
         hash = buffer.readString()

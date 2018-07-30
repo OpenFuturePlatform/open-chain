@@ -84,7 +84,7 @@ class BlockCreationProcessorTests : ServiceTests() {
         given(genesisBlockService.getLast()).willReturn(genesisBlock)
         given(keyHolder.getPrivateKey()).willReturn("private_key".toByteArray())
         given(keyHolder.getPublicKey()).willReturn("public_key".toByteArray())
-        given(commonTransactionService.getPending()).willReturn(transactions)
+        given(commonTransactionService.getAll()).willReturn(transactions)
         given(consensusProperties.genesisAddress).willReturn("host2")
         given(delegateService.getByPublicKey(any(String::class.java))).willReturn(delegate)
 

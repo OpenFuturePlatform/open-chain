@@ -74,7 +74,7 @@ class BlockCreationProcessor(
         val genesisBlock = genesisBlockService.getLast()
         val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
         if (HashUtils.toHexString(keyHolder.getPublicKey()) == nextProducer.publicKey) {
-            val pendingTransactions = commonTransactionService.getPending()
+            val pendingTransactions = commonTransactionService.getAll()
             create(pendingTransactions, previousBlock, genesisBlock)
         }
     }

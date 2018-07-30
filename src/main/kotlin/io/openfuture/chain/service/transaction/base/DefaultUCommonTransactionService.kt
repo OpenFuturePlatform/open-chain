@@ -13,7 +13,7 @@ class DefaultUCommonTransactionService(
     private val consensusProperties: ConsensusProperties
 ) : UCommonTransactionService {
 
-    override fun getPending(): MutableSet<UTransaction> =
+    override fun getAll(): MutableSet<UTransaction> =
         repository.findAllByOrderByFeeDesc(PageRequest.of(0, consensusProperties.blockCapacity!! - 1)).toMutableSet()
 
 }

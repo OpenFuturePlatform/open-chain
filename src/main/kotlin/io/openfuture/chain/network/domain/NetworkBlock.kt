@@ -6,12 +6,14 @@ import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 
 @NoArgConstructor
-abstract class NetworkBlock(var height: Long,
-                            var previousHash: String,
-                            var blockTimestamp: Long,
-                            var publicKey: String,
-                            var hash: String,
-                            var signature: String) : Packet() {
+abstract class NetworkBlock(
+    var height: Long,
+    var previousHash: String,
+    var blockTimestamp: Long,
+    var publicKey: String,
+    var hash: String,
+    var signature: String
+) : Packet() {
 
 
     override fun readParams(buffer: ByteBuf) {

@@ -78,7 +78,7 @@ abstract class DefaultUTransactionService<UEntity : UTransaction, Data : BaseTra
         }
 
         val balance = walletService.getBalanceByAddress(senderAddress)
-        val unconfirmedOutput = serviceCommon.getPending()
+        val unconfirmedOutput = serviceCommon.getAll()
             .filter { it.senderAddress == senderAddress }
             .map { it.amount + it.fee }
             .sum()
