@@ -12,7 +12,9 @@ import io.openfuture.chain.entity.transaction.RewardTransaction
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.extension.readList
+import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeList
+import io.openfuture.chain.network.extension.writeString
 
 @NoArgConstructor
 class NetworkMainBlock(height: Long,
@@ -38,6 +40,8 @@ class NetworkMainBlock(height: Long,
     override fun readParams(buffer: ByteBuf) {
         super.readParams(buffer)
 
+        merkleHash = buffer.readString()
+
         transferTransactions = buffer.readList()
         voteTransactions = buffer.readList()
         delegateTransactions = buffer.readList()
@@ -46,6 +50,8 @@ class NetworkMainBlock(height: Long,
 
     override fun writeParams(buffer: ByteBuf) {
         super.writeParams(buffer)
+
+        buffer.writeString(merkleHash)
 
         buffer.writeList(transferTransactions)
         buffer.writeList(voteTransactions)

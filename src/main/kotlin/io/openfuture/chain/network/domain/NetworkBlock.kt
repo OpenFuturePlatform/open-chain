@@ -18,6 +18,7 @@ abstract class NetworkBlock(var height: Long,
         height = buffer.readLong()
         previousHash = buffer.readString()
         blockTimestamp = buffer.readLong()
+        publicKey = buffer.readString()
         hash = buffer.readString()
         signature = buffer.readString()
     }
@@ -26,6 +27,7 @@ abstract class NetworkBlock(var height: Long,
         buffer.writeLong(height)
         buffer.writeString(previousHash)
         buffer.writeLong(blockTimestamp)
+        buffer.writeString(publicKey)
         buffer.writeString(hash)
         buffer.writeString(signature)
     }
