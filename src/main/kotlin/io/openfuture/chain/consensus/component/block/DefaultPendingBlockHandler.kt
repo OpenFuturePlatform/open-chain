@@ -83,13 +83,13 @@ class DefaultPendingBlockHandler(
         }
         if (!prepareVotes.containsKey(message.publicKey)) {
             prepareVotes[message.publicKey] = delegate
-            //broadcast message
+            networkService.broadcast(message)
         }
         if (prepareVotes.size > (delegates.size - 1) / 3) {
             this.stage = ObserverStage.COMMIT
             val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
             val commitMessage = NetworkBlockApprovalMessage(ObserverStage.COMMIT.getId(), message.height, message.hash, publicKey)
-            // broadcast commitMessage
+            networkService.broadcast(commitMessage)
         }
     }
 
@@ -100,7 +100,7 @@ class DefaultPendingBlockHandler(
         val blockCommits = commitVotes[message.hash]
         if (null != blockCommits && !blockCommits.contains(delegate)) {
             blockCommits.add(delegate)
-            //broadcast message
+            networkService.broadcast(message)
             if (blockCommits.size> (delegates.size - 1) / 3 * 2) {
                 val block = pendingBlocks.find { it.hash == message.hash }
                 when (block) {
