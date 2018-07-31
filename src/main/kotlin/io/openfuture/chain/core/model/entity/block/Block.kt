@@ -17,6 +17,9 @@ abstract class Block(
     @Column(name = "timestamp", nullable = false)
     var timestamp: Long,
 
+    @Column(name = "reward", nullable = false)
+    var reward: Long,
+
     @Column(name = "public_key", nullable = false)
     val publicKey: String,
 

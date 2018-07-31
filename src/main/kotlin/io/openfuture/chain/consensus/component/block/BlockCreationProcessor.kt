@@ -2,7 +2,6 @@ package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.consensus.model.dto.block.BlockSignature
 import io.openfuture.chain.consensus.model.dto.block.PendingBlock
-import io.openfuture.chain.consensus.model.dto.transaction.data.RewardTransactionData
 import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.property.ConsensusProperties
@@ -13,9 +12,7 @@ import io.openfuture.chain.consensus.util.TransactionUtils
 import io.openfuture.chain.consensus.validation.BlockValidationProvider
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.dictionary.BlockType
-import io.openfuture.chain.core.model.entity.transaction.Transaction
 import io.openfuture.chain.core.model.entity.transaction.UTransaction
-import io.openfuture.chain.core.model.entity.transaction.base.BaseTransaction
 import io.openfuture.chain.core.service.CommonBlockService
 import io.openfuture.chain.core.service.UCommonTransactionService
 import io.openfuture.chain.crypto.component.key.NodeKeyHolder
@@ -105,18 +102,12 @@ class BlockCreationProcessor(
 
         val block = when (blockType) {
             BlockType.MAIN -> {
-                val transactions = prepareTransactions(pendingTransactions).map {
-                    when (it) {
-                        is UTransaction -> it.toConfirmed()
-                        is Transaction -> it
-                        else -> throw IllegalArgumentException("Unknown type of transaction")
-                    }
-                }.toMutableSet()
-
+                val transactions = pendingTransactions.map { it.toConfirmed() }.toMutableSet()
                 MainBlock(
                     height,
                     hash,
                     time,
+                    pendingTransactions.map { it.fee }.sum() + consensusProperties.rewardBlock!!,
                     ByteUtils.toHexString(publicKey),
                     TransactionUtils.calculateMerkleRoot(transactions),
                     transactions
@@ -127,6 +118,7 @@ class BlockCreationProcessor(
                     height,
                     hash,
                     time,
+                    consensusProperties.rewardBlock!!,
                     ByteUtils.toHexString(publicKey),
                     genesisBlock.epochIndex + 1,
                     delegateService.getActiveDelegates()
@@ -135,18 +127,6 @@ class BlockCreationProcessor(
         }
 
         signCreatedBlock(block)
-    }
-
-    private fun prepareTransactions(pendingTransactions: MutableSet<UTransaction>): MutableSet<BaseTransaction> {
-        val fees = pendingTransactions.map { it.fee }.sum()
-        val delegate = delegateService.getByPublicKey(ByteUtils.toHexString(keyHolder.getPublicKey()))
-        val rewardTransactionData = RewardTransactionData((fees + consensusProperties.rewardBlock!!),
-            consensusProperties.feeRewardTx!!, delegate.address, consensusProperties.genesisAddress!!)
-
-        val rewardTransaction = rewardTransactionData.toEntity(clock.networkTime(),
-            keyHolder.getPublicKey(), keyHolder.getPrivateKey())
-
-        return mutableSetOf(rewardTransaction, *pendingTransactions.toTypedArray())
     }
 
 }

@@ -89,13 +89,11 @@ class BlockCreationProcessorTests : ServiceTests() {
         given(keyHolder.getPrivateKey()).willReturn("private_key".toByteArray())
         given(keyHolder.getPublicKey()).willReturn("public_key".toByteArray())
         given(commonTransactionService.getAll()).willReturn(transactions)
-        given(consensusProperties.genesisAddress).willReturn("host2")
-        given(delegateService.getByPublicKey(any(String::class.java))).willReturn(delegate)
 
         processor.fireBlockCreation()
 
-        verify(keyHolder, times(3)).getPrivateKey()
-        verify(keyHolder, times(5)).getPublicKey()
+        verify(keyHolder, times(2)).getPrivateKey()
+        verify(keyHolder, times(3)).getPublicKey()
     }
 
     private fun createPendingBlock(block: Block): PendingBlock {
@@ -109,6 +107,7 @@ class BlockCreationProcessorTests : ServiceTests() {
         123,
         "prev_block_hash",
         1512345678L,
+        10,
         "037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4",
         "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
         createTransactions().map { it.toConfirmed() }.toMutableSet()
@@ -118,6 +117,7 @@ class BlockCreationProcessorTests : ServiceTests() {
         123,
         "prev_block_hash",
         1512345678L,
+        10,
         "529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6",
         1,
         setOf(Delegate("public_key", "host1", 1234), Delegate("public_key2", "host2", 1234), Delegate("public_key3", "host3", 1234))

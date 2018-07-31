@@ -50,6 +50,7 @@ class BlockValidationProviderTests : ServiceTests() {
             122,
             "previous_hash",
             1510000000L,
+            10,
             "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             "merkle_hash",
             mutableSetOf(
@@ -82,6 +83,7 @@ class BlockValidationProviderTests : ServiceTests() {
             height,
             previousBlock.hash,
             currentTime,
+            10,
             "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             merkleHash,
             mutableSetOf(
@@ -127,6 +129,7 @@ class BlockValidationProviderTests : ServiceTests() {
             123,
             "prev_block_hash",
             1512345678L,
+            10,
             "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf()
@@ -135,6 +138,7 @@ class BlockValidationProviderTests : ServiceTests() {
             123,
             "prev_block_hash",
             1512345678L,
+            10,
             "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf(
@@ -179,6 +183,7 @@ class BlockValidationProviderTests : ServiceTests() {
             122,
             "previous_hash",
             1510000000L,
+            10,
             "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             1L,
             setOf()
@@ -188,6 +193,7 @@ class BlockValidationProviderTests : ServiceTests() {
             123L,
             previousBlock.hash,
             currentTime,
+            10,
             "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             2L,
             setOf()
@@ -207,6 +213,7 @@ class BlockValidationProviderTests : ServiceTests() {
             123,
             "prev_block_hash",
             1512345678L,
+            10,
             "037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4",
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf()
@@ -216,6 +223,7 @@ class BlockValidationProviderTests : ServiceTests() {
             123,
             "prev_block_hash",
             1512345678L,
+            10,
             ByteUtils.toHexString(ByteArray(1)),
             1L,
             setOf()

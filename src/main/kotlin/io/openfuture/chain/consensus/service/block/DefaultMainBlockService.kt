@@ -23,8 +23,7 @@ class DefaultMainBlockService(
     private val timeSlot: TimeSlot,
     private val voteTransactionService: VoteTransactionService,
     private val transferTransactionService: TransferTransactionService,
-    private val delegateTransactionService: DelegateTransactionService,
-    private val rewardTransactionService: RewardTransactionService
+    private val delegateTransactionService: DelegateTransactionService
 ) : MainBlockService {
 
     @Transactional(readOnly = true)
@@ -38,7 +37,6 @@ class DefaultMainBlockService(
         dto.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
         dto.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
         dto.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
-        dto.rewardTransactions.forEach { rewardTransactionService.toBlock(it, savedBlock) }
     }
 
     @Transactional
@@ -78,7 +76,6 @@ class DefaultMainBlockService(
             is VoteTransaction -> voteTransactionService.toBlock(tx.hash, block)
             is TransferTransaction -> transferTransactionService.toBlock(tx.hash, block)
             is DelegateTransaction -> delegateTransactionService.toBlock(tx.hash, block)
-            is RewardTransaction -> rewardTransactionService.toBlock(tx, block)
             else -> throw IllegalStateException("Unknown transaction type")
         }
     }

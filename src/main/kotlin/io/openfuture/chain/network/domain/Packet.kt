@@ -1,11 +1,13 @@
 package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
+import io.openfuture.chain.consensus.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
 
+@NoArgConstructor
 abstract class Packet(
     var version: String? = null,
     var timestamp: Long? = null

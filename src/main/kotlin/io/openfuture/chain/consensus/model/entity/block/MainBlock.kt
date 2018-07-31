@@ -13,6 +13,7 @@ class MainBlock(
     height: Long,
     previousHash: String,
     timestamp: Long,
+    reward: Long,
     publicKey: String,
 
     @Column(name = "merkle_hash", nullable = false)
@@ -21,7 +22,7 @@ class MainBlock(
     @OneToMany(mappedBy = "block", fetch = FetchType.EAGER)
     var transactions: MutableSet<Transaction>
 
-) : Block(height, previousHash, timestamp, publicKey,
+) : Block(height, previousHash, timestamp, reward, publicKey,
     ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height + publicKey).toByteArray()))) {
 
     override fun sign(privateKey: ByteArray): MainBlock {

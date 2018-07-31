@@ -72,14 +72,6 @@ interface TransactionService<Entity : Transaction, UEntity : UTransaction> {
 
 }
 
-interface RewardTransactionService {
-
-    fun toBlock(tx: RewardTransaction, block: MainBlock)
-
-    fun toBlock(dto: RewardTransactionDto, block: MainBlock)
-
-}
-
 interface TransferTransactionService : TransactionService<TransferTransaction, UTransferTransaction> {
 
     fun toBlock(dto: TransferTransactionDto, block: MainBlock)
