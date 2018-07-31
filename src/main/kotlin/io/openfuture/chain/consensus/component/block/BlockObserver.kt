@@ -6,8 +6,13 @@ import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.service.GenesisBlockService
 import io.openfuture.chain.consensus.service.MainBlockService
+import io.openfuture.chain.core.model.entity.base.Dictionary
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.crypto.component.key.NodeKeyHolder
+import io.openfuture.chain.network.domain.NetworkBlockApprovalMessage
+import io.openfuture.chain.network.domain.NetworkGenesisBlock
+import io.openfuture.chain.network.domain.NetworkMainBlock
+import io.openfuture.chain.network.service.NetworkService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Component
 
@@ -16,7 +21,8 @@ class BlockObserver(
     private val timeSlotHelper: TimeSlotHelper,
     private val genesisBlockService: GenesisBlockService,
     private val mainBlockService: MainBlockService,
-    private val keyHolder: NodeKeyHolder
+    private val keyHolder: NodeKeyHolder,
+    private val networkService: NetworkService
 ) {
 
     private var observable: Block? = null
@@ -41,7 +47,12 @@ class BlockObserver(
             }
             if (isValid) {
                 pendingBlocks.add(block)
-                // broadcast block further
+                val networkBlock = when (block) {
+                    is MainBlock -> NetworkMainBlock(block)
+                    is GenesisBlock -> NetworkGenesisBlock(block)
+                    else -> throw IllegalArgumentException("Unsupported block type")
+                }
+                networkService.broadcast(networkBlock)
             }
         } else {
             return
@@ -51,8 +62,9 @@ class BlockObserver(
             stage = ObserverStage.PREPARE
             timeSlotNumber = blockSlotNumber
             val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
-            val prepareMessage = BlockApprovalMessage(ObserverStage.PREPARE, block.height, block.hash!!, publicKey)
-            // broadcast prepareMessage
+            val prepareMessage = BlockApprovalMessage(ObserverStage.PREPARE, block.height, block.hash, publicKey)
+            val message = NetworkBlockApprovalMessage(prepareMessage)
+            networkService.broadcast(message)
         }
     }
 
@@ -67,20 +79,23 @@ class BlockObserver(
                 }
                 if (!prepareVotes.containsKey(message.publicKey)) {
                     prepareVotes[message.publicKey] = delegate
-                    //broadcast message
+                    val networkMessage = NetworkBlockApprovalMessage(message)
+                    networkService.broadcast(networkMessage)
                 }
                 if (prepareVotes.size + 1 > (delegates.size - 1) / 3) {
                     this.stage = ObserverStage.COMMIT
                     val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
                     val commitMessage = BlockApprovalMessage(ObserverStage.COMMIT, message.height, message.hash, publicKey)
-                    // broadcast commitMessage
+                    val networkMessage = NetworkBlockApprovalMessage(commitMessage)
+                    networkService.broadcast(networkMessage)
                 }
             }
             ObserverStage.COMMIT -> {
                 val blockCommits = commitVotes[message.hash]
                 if (null != blockCommits && !blockCommits.contains(delegate)) {
                     blockCommits.add(delegate)
-                    //broadcast message
+                    val networkMessage = NetworkBlockApprovalMessage(message)
+                    networkService.broadcast(networkMessage)
                     if (blockCommits.size + 1 > (delegates.size - 1) / 3 * 2) {
                         val block = pendingBlocks.find { it.hash == message.hash }
                         when (block) {
@@ -105,8 +120,10 @@ class BlockObserver(
 
 }
 
-enum class ObserverStage {
-    IDLE,
-    PREPARE,
-    COMMIT
+enum class ObserverStage(val value: Int) : Dictionary {
+    IDLE(1),
+    PREPARE(2),
+    COMMIT(3);
+
+    override fun getId(): Int = value
 }
