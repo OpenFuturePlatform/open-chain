@@ -1,5 +1,6 @@
 package io.openfuture.chain.consensus.model.entity.block
 
+import io.openfuture.chain.consensus.util.TransactionUtils
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.transaction.Transaction
 import io.openfuture.chain.crypto.util.HashUtils
@@ -15,11 +16,11 @@ class MainBlock(
     timestamp: Long,
     publicKey: String,
 
-    @Column(name = "merkle_hash", nullable = false)
-    var merkleHash: String,
-
     @OneToMany(mappedBy = "block", fetch = FetchType.EAGER)
-    var transactions: MutableSet<Transaction>
+    var transactions: MutableSet<Transaction>,
+
+    @Column(name = "merkle_hash", nullable = false)
+    var merkleHash: String = TransactionUtils.calculateMerkleRoot(transactions)
 
 ) : Block(height, previousHash, timestamp, publicKey,
     ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height + publicKey).toByteArray()))) {
