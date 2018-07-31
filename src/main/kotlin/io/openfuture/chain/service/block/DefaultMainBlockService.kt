@@ -7,7 +7,7 @@ import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.repository.MainBlockRepository
 import io.openfuture.chain.service.*
-import io.openfuture.chain.util.BlockUtils
+import io.openfuture.chain.util.TransactionUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -56,7 +56,7 @@ class DefaultMainBlockService(
             return false
         }
 
-        val transactionsMerkleHash = BlockUtils.calculateMerkleRoot(transactions)
+        val transactionsMerkleHash = TransactionUtils.calculateMerkleRoot(transactions)
         return block.merkleHash == transactionsMerkleHash
     }
 

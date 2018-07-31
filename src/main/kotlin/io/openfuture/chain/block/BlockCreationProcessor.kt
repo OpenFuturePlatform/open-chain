@@ -17,7 +17,7 @@ import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.property.ConsensusProperties
 import io.openfuture.chain.service.*
-import io.openfuture.chain.util.BlockUtils
+import io.openfuture.chain.util.TransactionUtils
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Component
 import java.util.*
@@ -72,7 +72,9 @@ class BlockCreationProcessor(
     fun fireBlockCreation() {
         val previousBlock = commonBlockService.getLast()
         val genesisBlock = genesisBlockService.getLast()
-        val nextProducer = BlockUtils.getBlockProducer(genesisBlock.activeDelegates, previousBlock)
+        val blockTimestamp = previousBlock.timestamp
+        val random = Random(blockTimestamp)
+        val nextProducer = genesisBlock.activeDelegates.shuffled(random).first()
         if (HashUtils.toHexString(keyHolder.getPublicKey()) == nextProducer.publicKey) {
             val pendingTransactions = commonTransactionService.getAll()
             create(pendingTransactions, previousBlock, genesisBlock)
@@ -112,7 +114,7 @@ class BlockCreationProcessor(
                     hash,
                     time,
                     HashUtils.toHexString(publicKey),
-                    BlockUtils.calculateMerkleRoot(transactions),
+                    TransactionUtils.calculateMerkleRoot(transactions),
                     transactions
                 ).sign(privateKey)
             }
