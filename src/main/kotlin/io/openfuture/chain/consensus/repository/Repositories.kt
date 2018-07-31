@@ -10,17 +10,11 @@ import io.openfuture.chain.consensus.model.entity.transaction.TransferTransactio
 import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.core.repository.BaseRepository
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
-import io.openfuture.chain.crypto.model.entity.SeedWord
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.repository.NoRepositoryBean
-import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.stereotype.Repository
-
-@NoRepositoryBean
-interface BaseRepository<T> : JpaRepository<T, Int>, PagingAndSortingRepository<T, Int>
 
 @Repository
 interface MainBlockRepository : BaseRepository<MainBlock> {
@@ -58,15 +52,6 @@ interface UVoteTransactionRepository : UTransactionRepository<UVoteTransaction>
 @Repository
 interface UDelegateTransactionRepository : UTransactionRepository<UDelegateTransaction>
 
-
-@Repository
-interface SeedWordRepository : BaseRepository<SeedWord> {
-
-    fun findOneByIndex(index: Int): SeedWord
-
-    fun findOneByValue(value: String): SeedWord?
-
-}
 
 @Repository
 interface DelegateRepository : BaseRepository<Delegate> {
