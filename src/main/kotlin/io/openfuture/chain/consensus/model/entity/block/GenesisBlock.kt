@@ -13,6 +13,7 @@ class GenesisBlock(
     height: Long,
     previousHash: String,
     timestamp: Long,
+    reward: Long,
     publicKey: String,
 
     @Column(name = "epoch_index", nullable = false)
@@ -24,7 +25,7 @@ class GenesisBlock(
         inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
     var activeDelegates: Set<Delegate>
 
-) : Block(height, previousHash, timestamp, publicKey,
+) : Block(height, previousHash, timestamp, reward, publicKey,
     ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + timestamp + height + publicKey).toByteArray()))
 ) {
 

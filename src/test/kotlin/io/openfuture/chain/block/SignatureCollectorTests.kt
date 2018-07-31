@@ -120,6 +120,7 @@ class SignatureCollectorTests : ServiceTests() {
             123,
             "prev_block_hash",
             1512345678L,
+            10,
             ByteUtils.toHexString(ByteArray(1)),
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf()
@@ -133,6 +134,7 @@ class SignatureCollectorTests : ServiceTests() {
             123,
             "prev_block_hash",
             1512345678L,
+            10,
             ByteUtils.toHexString(ByteArray(1)),
             1,
             setOf()
