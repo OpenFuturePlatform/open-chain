@@ -1,6 +1,6 @@
 package io.openfuture.chain.consensus.service.block
 
-import io.openfuture.chain.consensus.component.block.TimeSlot
+import io.openfuture.chain.consensus.component.block.TimeSlotHelper
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.model.entity.transaction.DelegateTransaction
 import io.openfuture.chain.consensus.model.entity.transaction.RewardTransaction
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultMainBlockService(
     private val repository: MainBlockRepository,
     private val clock: NodeClock,
-    private val timeSlot: TimeSlot,
+    private val timeSlot: TimeSlotHelper,
     private val voteTransactionService: VoteTransactionService,
     private val transferTransactionService: TransferTransactionService,
     private val delegateTransactionService: DelegateTransactionService,

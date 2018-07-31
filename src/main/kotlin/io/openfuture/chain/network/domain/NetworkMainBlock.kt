@@ -63,7 +63,6 @@ class NetworkMainBlock(
         previousHash,
         blockTimestamp,
         publicKey,
-        merkleHash,
         mutableSetOf()).apply { signature = super.signature }
 
 

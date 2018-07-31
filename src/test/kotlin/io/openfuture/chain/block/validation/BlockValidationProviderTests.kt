@@ -2,9 +2,10 @@ package io.openfuture.chain.block.validation
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
-import io.openfuture.chain.consensus.component.block.TimeSlot
+import io.openfuture.chain.consensus.component.block.TimeSlotHelper
 import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
+import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
 import io.openfuture.chain.consensus.service.GenesisBlockService
 import io.openfuture.chain.consensus.service.MainBlockService
 import io.openfuture.chain.consensus.validation.BlockValidationProvider
@@ -26,7 +27,7 @@ class BlockValidationProviderTests : ServiceTests() {
     @Mock private lateinit var commonBlockService: CommonBlockService
     @Mock private lateinit var mainBlockService: MainBlockService
     @Mock private lateinit var genesisBlockService: GenesisBlockService
-    @Mock private lateinit var timeSlot: TimeSlot
+    @Mock private lateinit var timeSlot: TimeSlotHelper
     @Mock private lateinit var clock: NodeClock
 
     private lateinit var blockValidationProvider: BlockValidationProvider
@@ -45,13 +46,11 @@ class BlockValidationProviderTests : ServiceTests() {
     @Test
     fun isValidShouldReturnTrueWhenItIsMainBlock() {
         val height = 123L
-        val merkleHash = "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719"
         val previousBlock = MainBlock(
             122,
             "previous_hash",
             1510000000L,
             "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
-            "merkle_hash",
             mutableSetOf(
                 VoteTransaction(
                     1500000000L,
@@ -83,7 +82,6 @@ class BlockValidationProviderTests : ServiceTests() {
             previousBlock.hash,
             currentTime,
             "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
-            merkleHash,
             mutableSetOf(
                 VoteTransaction(
                     1500000000L,
@@ -128,15 +126,15 @@ class BlockValidationProviderTests : ServiceTests() {
             "prev_block_hash",
             1512345678L,
             "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
-            "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
-            mutableSetOf()
+            mutableSetOf(
+                createTransferTransaction()
+            )
         ).sign(ByteUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
         val block = MainBlock(
             123,
             "prev_block_hash",
             1512345678L,
             "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
-            "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf(
                 VoteTransaction(
                     1500000000L,
@@ -208,8 +206,9 @@ class BlockValidationProviderTests : ServiceTests() {
             "prev_block_hash",
             1512345678L,
             "037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4",
-            "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
-            mutableSetOf()
+            mutableSetOf(
+                createTransferTransaction()
+            )
         ).sign(ByteArray(1))
 
         val block = GenesisBlock(
@@ -233,6 +232,20 @@ class BlockValidationProviderTests : ServiceTests() {
         val block = Mockito.mock(Block::class.java)
 
         blockValidationProvider.isValid(block)
+    }
+
+    private fun createTransferTransaction(): TransferTransaction {
+        return TransferTransaction(
+            1L,
+            1L,
+            1L,
+            "recipientAddress",
+            "senderAddress",
+            "senderPublicKey",
+            "senderSignature",
+            "hash",
+            null
+        )
     }
 
 }

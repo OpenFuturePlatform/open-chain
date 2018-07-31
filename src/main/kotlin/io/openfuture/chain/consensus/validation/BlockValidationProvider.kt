@@ -1,6 +1,6 @@
 package io.openfuture.chain.consensus.validation
 
-import io.openfuture.chain.consensus.component.block.TimeSlot
+import io.openfuture.chain.consensus.component.block.TimeSlotHelper
 import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.service.GenesisBlockService
@@ -17,7 +17,7 @@ class BlockValidationProvider(
     private val commonBlockService: CommonBlockService,
     private val mainBlockService: MainBlockService,
     private val genesisBlockService: GenesisBlockService,
-    private val timeSlot: TimeSlot,
+    private val timeSlot: TimeSlotHelper,
     private val clock: NodeClock
 ) {
 
