@@ -10,9 +10,9 @@ import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.service.CommonBlockService
 import io.openfuture.chain.service.GenesisBlockService
 import io.openfuture.chain.service.MainBlockService
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
+@Component
 class BlockValidationProvider(
     private val commonBlockService: CommonBlockService,
     private val mainBlockService: MainBlockService,

@@ -30,7 +30,7 @@ class BlockCreationProcessorTests : ServiceTests() {
     @Mock private lateinit var genesisBlockService: GenesisBlockService
     @Mock private lateinit var signatureCollector: SignatureCollector
     @Mock private lateinit var keyHolder: NodeKeyHolder
-    @Mock private lateinit var blockValidationService: BlockValidationProvider
+    @Mock private lateinit var blockValidationProvider: BlockValidationProvider
     @Mock private lateinit var consensusService: ConsensusService
     @Mock private lateinit var clock: NodeClock
     @Mock private lateinit var delegateService: DelegateService
@@ -46,7 +46,7 @@ class BlockCreationProcessorTests : ServiceTests() {
         val block = createMainBlock()
         given(commonBlockService.getLast()).willReturn(block)
         processor = BlockCreationProcessor(commonTransactionService, commonBlockService, genesisBlockService,
-            signatureCollector, keyHolder, blockValidationService, consensusService, clock, delegateService,
+            signatureCollector, keyHolder, blockValidationProvider, consensusService, clock, delegateService,
             consensusProperties, timeSlot, scheduler)
     }
 

@@ -28,7 +28,7 @@ class BlockValidationProviderTests : ServiceTests() {
     @Mock private lateinit var timeSlot: TimeSlot
     @Mock private lateinit var clock: NodeClock
 
-    private lateinit var blockValidationService: BlockValidationProvider
+    private lateinit var blockValidationProvider: BlockValidationProvider
 
     private val currentTime = System.currentTimeMillis()
 
@@ -37,7 +37,7 @@ class BlockValidationProviderTests : ServiceTests() {
     fun init() {
         given(timeSlot.verifyTimeSlot(any(Long::class.java), any(MainBlock::class.java))).willReturn(true)
         given(timeSlot.verifyTimeSlot(any(Long::class.java), any(GenesisBlock::class.java))).willReturn(true)
-        blockValidationService = BlockValidationProvider(
+        blockValidationProvider = BlockValidationProvider(
             commonBlockService, mainBlockService, genesisBlockService, timeSlot, clock)
     }
 
@@ -115,7 +115,7 @@ class BlockValidationProviderTests : ServiceTests() {
         given(mainBlockService.isValid(block)).willReturn(true)
         given(commonBlockService.getLast()).willReturn(previousBlock)
 
-        val isValid = blockValidationService.isValid(block)
+        val isValid = blockValidationProvider.isValid(block)
 
         assertThat(isValid).isTrue()
     }
@@ -167,7 +167,7 @@ class BlockValidationProviderTests : ServiceTests() {
 
         given(commonBlockService.getLast()).willReturn(lastBlock)
 
-        val isValid = blockValidationService.isValid(block)
+        val isValid = blockValidationProvider.isValid(block)
 
         assertThat(isValid).isFalse()
     }
@@ -195,7 +195,7 @@ class BlockValidationProviderTests : ServiceTests() {
         given(genesisBlockService.isValid(block)).willReturn(true)
         given(commonBlockService.getLast()).willReturn(previousBlock)
 
-        val isValid = blockValidationService.isValid(block)
+        val isValid = blockValidationProvider.isValid(block)
 
         assertThat(isValid).isTrue()
     }
@@ -222,7 +222,7 @@ class BlockValidationProviderTests : ServiceTests() {
 
         given(commonBlockService.getLast()).willReturn(lastBlock)
 
-        val isValid = blockValidationService.isValid(block)
+        val isValid = blockValidationProvider.isValid(block)
 
         assertThat(isValid).isFalse()
     }
@@ -231,7 +231,7 @@ class BlockValidationProviderTests : ServiceTests() {
     fun isValidShouldThrowIllegalArgumentException() {
         val block = Mockito.mock(Block::class.java)
 
-        blockValidationService.isValid(block)
+        blockValidationProvider.isValid(block)
     }
 
 }
