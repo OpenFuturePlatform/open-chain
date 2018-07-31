@@ -38,6 +38,7 @@ class DefaultPendingBlockHandler(
             this.reset()
         }
         val slotOwner = timeSlotHelper.getCurrentSlotOwner()
+        pendingBlocks.add(block)
         if (slotOwner.publicKey == block.publicKey) {
             val isValid = when (block) {
                 is MainBlock -> mainBlockService.isValid(block)
@@ -45,7 +46,6 @@ class DefaultPendingBlockHandler(
                 else -> throw IllegalArgumentException("Unsupported block type")
             }
             if (isValid) {
-                pendingBlocks.add(block)
                 val networkBlock = when (block) {
                     is MainBlock -> NetworkMainBlock(block)
                     is GenesisBlock -> NetworkGenesisBlock(block)
@@ -53,16 +53,14 @@ class DefaultPendingBlockHandler(
                 }
                 networkService.broadcast(networkBlock)
             }
-        } else {
-            return
-        }
-        if (ObserverStage.IDLE == stage) {
-            observable = block
-            stage = ObserverStage.PREPARE
-            timeSlotNumber = blockSlotNumber
-            val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
-            val message = NetworkBlockApprovalMessage(ObserverStage.PREPARE.getId(), block.height, block.hash, publicKey)
-            networkService.broadcast(message)
+            if (ObserverStage.IDLE == stage) {
+                observable = block
+                stage = ObserverStage.PREPARE
+                timeSlotNumber = blockSlotNumber
+                val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
+                val message = NetworkBlockApprovalMessage(ObserverStage.PREPARE.getId(), block.height, block.hash, publicKey)
+                networkService.broadcast(message)
+            }
         }
     }
 
@@ -101,7 +99,7 @@ class DefaultPendingBlockHandler(
         if (null != blockCommits && !blockCommits.contains(delegate)) {
             blockCommits.add(delegate)
             networkService.broadcast(message)
-            if (blockCommits.size> (delegates.size - 1) / 3 * 2) {
+            if (blockCommits.size > (delegates.size - 1) / 3 * 2) {
                 val block = pendingBlocks.find { it.hash == message.hash }
                 when (block) {
                     is MainBlock -> mainBlockService.save(block)
