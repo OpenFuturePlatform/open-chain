@@ -1,10 +1,10 @@
 package io.openfuture.chain.consensus.service
 
-import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.consensus.model.entity.Delegate
-import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.repository.DelegateRepository
+import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.springframework.data.domain.Page
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service

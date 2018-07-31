@@ -1,12 +1,12 @@
 package io.openfuture.chain.consensus.service.transaction
 
+import io.openfuture.chain.consensus.model.dto.transaction.RewardTransactionDto
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.model.entity.transaction.RewardTransaction
 import io.openfuture.chain.consensus.repository.RewardTransactionRepository
 import io.openfuture.chain.consensus.service.RewardTransactionService
 import io.openfuture.chain.consensus.service.WalletService
 import io.openfuture.chain.core.service.CommonTransactionService
-import io.openfuture.chain.consensus.model.dto.transaction.RewardTransactionDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

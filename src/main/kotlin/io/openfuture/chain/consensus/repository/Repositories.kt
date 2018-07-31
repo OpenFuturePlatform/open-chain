@@ -10,7 +10,6 @@ import io.openfuture.chain.consensus.model.entity.transaction.TransferTransactio
 import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UVoteTransaction
-import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.crypto.model.entity.SeedWord

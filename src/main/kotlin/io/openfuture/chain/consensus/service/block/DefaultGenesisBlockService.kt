@@ -1,12 +1,12 @@
 package io.openfuture.chain.consensus.service.block
 
 import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
-import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.consensus.repository.GenesisBlockRepository
 import io.openfuture.chain.consensus.service.DefaultDelegateService
 import io.openfuture.chain.consensus.service.GenesisBlockService
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.service.CommonBlockService
+import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

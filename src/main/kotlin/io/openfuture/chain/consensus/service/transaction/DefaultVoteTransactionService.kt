@@ -1,14 +1,14 @@
 package io.openfuture.chain.consensus.service.transaction
 
-import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.model.dictionary.VoteType
+import io.openfuture.chain.consensus.model.dto.transaction.VoteTransactionDto
+import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.consensus.repository.UVoteTransactionRepository
 import io.openfuture.chain.consensus.repository.VoteTransactionRepository
 import io.openfuture.chain.consensus.service.DelegateService
 import io.openfuture.chain.consensus.service.VoteTransactionService
 import io.openfuture.chain.core.util.DictionaryUtil
-import io.openfuture.chain.consensus.model.dto.transaction.VoteTransactionDto
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

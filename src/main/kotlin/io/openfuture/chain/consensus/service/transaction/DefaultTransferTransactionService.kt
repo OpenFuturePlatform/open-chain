@@ -1,12 +1,12 @@
 package io.openfuture.chain.consensus.service.transaction
 
+import io.openfuture.chain.consensus.model.dto.transaction.TransferTransactionDto
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
 import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.consensus.repository.TransferTransactionRepository
 import io.openfuture.chain.consensus.repository.UTransferTransactionRepository
 import io.openfuture.chain.consensus.service.TransferTransactionService
-import io.openfuture.chain.consensus.model.dto.transaction.TransferTransactionDto
 import org.springframework.stereotype.Service
 
 @Service

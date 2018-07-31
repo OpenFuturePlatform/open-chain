@@ -1,5 +1,6 @@
 package io.openfuture.chain.consensus.service.transaction
 
+import io.openfuture.chain.consensus.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.consensus.model.entity.Delegate
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.model.entity.transaction.DelegateTransaction
@@ -8,7 +9,6 @@ import io.openfuture.chain.consensus.repository.DelegateTransactionRepository
 import io.openfuture.chain.consensus.repository.UDelegateTransactionRepository
 import io.openfuture.chain.consensus.service.DelegateService
 import io.openfuture.chain.consensus.service.DelegateTransactionService
-import io.openfuture.chain.consensus.model.dto.transaction.DelegateTransactionDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

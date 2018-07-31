@@ -1,13 +1,13 @@
 package io.openfuture.chain.consensus.service.transaction.unconfirmed
 
 import io.openfuture.chain.consensus.model.dictionary.VoteType
+import io.openfuture.chain.consensus.model.dto.transaction.VoteTransactionDto
+import io.openfuture.chain.consensus.model.dto.transaction.data.VoteTransactionData
 import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UVoteTransaction
-import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.repository.UVoteTransactionRepository
 import io.openfuture.chain.consensus.service.UVoteTransactionService
-import io.openfuture.chain.consensus.model.dto.transaction.VoteTransactionDto
-import io.openfuture.chain.consensus.model.dto.transaction.data.VoteTransactionData
+import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.rpc.domain.transaction.VoteTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

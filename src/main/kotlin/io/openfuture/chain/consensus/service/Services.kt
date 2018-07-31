@@ -1,6 +1,10 @@
 package io.openfuture.chain.consensus.service
 
 import io.openfuture.chain.consensus.model.dto.transaction.*
+import io.openfuture.chain.consensus.model.dto.transaction.data.BaseTransactionData
+import io.openfuture.chain.consensus.model.dto.transaction.data.DelegateTransactionData
+import io.openfuture.chain.consensus.model.dto.transaction.data.TransferTransactionData
+import io.openfuture.chain.consensus.model.dto.transaction.data.VoteTransactionData
 import io.openfuture.chain.consensus.model.entity.Delegate
 import io.openfuture.chain.consensus.model.entity.Wallet
 import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
@@ -13,10 +17,6 @@ import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UTrans
 import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.Transaction
 import io.openfuture.chain.core.model.entity.transaction.UTransaction
-import io.openfuture.chain.consensus.model.dto.transaction.data.BaseTransactionData
-import io.openfuture.chain.consensus.model.dto.transaction.data.DelegateTransactionData
-import io.openfuture.chain.consensus.model.dto.transaction.data.TransferTransactionData
-import io.openfuture.chain.consensus.model.dto.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.network.domain.NetworkMainBlock

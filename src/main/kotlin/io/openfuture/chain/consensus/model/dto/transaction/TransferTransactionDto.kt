@@ -1,9 +1,9 @@
 package io.openfuture.chain.consensus.model.dto.transaction
 
 import io.openfuture.chain.consensus.annotation.NoArgConstructor
+import io.openfuture.chain.consensus.model.dto.transaction.data.TransferTransactionData
 import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
 import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UTransferTransaction
-import io.openfuture.chain.consensus.model.dto.transaction.data.TransferTransactionData
 
 @NoArgConstructor
 class TransferTransactionDto(

@@ -1,9 +1,9 @@
 package io.openfuture.chain.consensus.model.entity.block
 
-import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.consensus.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import javax.persistence.*
 

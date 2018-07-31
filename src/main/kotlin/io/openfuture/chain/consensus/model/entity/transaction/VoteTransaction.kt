@@ -1,7 +1,7 @@
 package io.openfuture.chain.entity.transaction
 
-import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.model.dictionary.VoteType
+import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.Transaction
 import io.openfuture.chain.core.util.DictionaryUtil
 import javax.persistence.Column

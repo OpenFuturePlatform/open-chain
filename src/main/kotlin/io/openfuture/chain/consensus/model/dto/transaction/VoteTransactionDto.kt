@@ -2,8 +2,8 @@ package io.openfuture.chain.consensus.model.dto.transaction
 
 import io.openfuture.chain.consensus.annotation.NoArgConstructor
 import io.openfuture.chain.consensus.model.dto.transaction.data.VoteTransactionData
-import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.entity.transaction.VoteTransaction
 
 @NoArgConstructor
 class VoteTransactionDto(

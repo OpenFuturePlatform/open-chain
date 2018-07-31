@@ -7,8 +7,8 @@ import io.openfuture.chain.network.domain.FindAddresses
 import io.openfuture.chain.network.domain.NetworkAddress
 import io.openfuture.chain.network.domain.NetworkBlockRequest
 import io.openfuture.chain.network.domain.Packet
-import io.openfuture.chain.network.server.TcpServer
 import io.openfuture.chain.network.property.NodeProperties
+import io.openfuture.chain.network.server.TcpServer
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationListener

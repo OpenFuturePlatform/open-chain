@@ -1,8 +1,8 @@
 package io.openfuture.chain.rpc.domain.transaction
 
+import io.openfuture.chain.consensus.model.dto.transaction.data.VoteTransactionData
 import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.consensus.util.TransactionUtils
-import io.openfuture.chain.consensus.model.dto.transaction.data.VoteTransactionData
 
 class VoteTransactionRequest(
     data: VoteTransactionData

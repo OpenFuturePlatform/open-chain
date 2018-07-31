@@ -2,8 +2,8 @@ package io.openfuture.chain.consensus.model.dto.transaction
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.consensus.annotation.NoArgConstructor
-import io.openfuture.chain.consensus.model.entity.transaction.RewardTransaction
 import io.openfuture.chain.consensus.model.dto.transaction.data.RewardTransactionData
+import io.openfuture.chain.consensus.model.entity.transaction.RewardTransaction
 import io.openfuture.chain.network.domain.NetworkEntity
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString

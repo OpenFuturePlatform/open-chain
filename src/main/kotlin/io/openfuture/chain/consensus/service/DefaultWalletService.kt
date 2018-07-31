@@ -2,9 +2,9 @@ package io.openfuture.chain.consensus.service
 
 import io.openfuture.chain.consensus.model.entity.Delegate
 import io.openfuture.chain.consensus.model.entity.Wallet
-import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.repository.WalletRepository
+import io.openfuture.chain.core.exception.NotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

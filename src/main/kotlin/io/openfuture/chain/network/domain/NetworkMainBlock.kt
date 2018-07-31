@@ -2,14 +2,14 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.consensus.annotation.NoArgConstructor
-import io.openfuture.chain.consensus.model.entity.block.MainBlock
-import io.openfuture.chain.consensus.model.entity.transaction.DelegateTransaction
-import io.openfuture.chain.consensus.model.entity.transaction.RewardTransaction
-import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
 import io.openfuture.chain.consensus.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.consensus.model.dto.transaction.RewardTransactionDto
 import io.openfuture.chain.consensus.model.dto.transaction.TransferTransactionDto
 import io.openfuture.chain.consensus.model.dto.transaction.VoteTransactionDto
+import io.openfuture.chain.consensus.model.entity.block.MainBlock
+import io.openfuture.chain.consensus.model.entity.transaction.DelegateTransaction
+import io.openfuture.chain.consensus.model.entity.transaction.RewardTransaction
+import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.readString

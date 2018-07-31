@@ -1,8 +1,8 @@
 package io.openfuture.chain.repository
 
 import io.openfuture.chain.config.RepositoryTests
-import io.openfuture.chain.consensus.repository.WalletRepository
 import io.openfuture.chain.consensus.model.entity.Wallet
+import io.openfuture.chain.consensus.repository.WalletRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
