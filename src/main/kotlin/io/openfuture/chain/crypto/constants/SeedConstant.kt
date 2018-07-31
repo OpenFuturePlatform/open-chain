@@ -2,6 +2,8 @@ package io.openfuture.chain.crypto.constants
 
 object SeedConstant {
 
+    const val SALT = "Openfuture"
+
     const val MULTIPLICITY_VALUE = 32
     const val WORD_INDEX_SIZE = 11
     const val BYTE_SIZE = 8
