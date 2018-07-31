@@ -1,11 +1,9 @@
-package io.openfuture.chain.service
+package io.openfuture.chain.consensus.service
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.consensus.model.entity.Wallet
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.repository.WalletRepository
-import io.openfuture.chain.consensus.service.DefaultWalletService
-import io.openfuture.chain.consensus.service.WalletService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test

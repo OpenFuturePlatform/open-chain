@@ -1,6 +1,5 @@
-package io.openfuture.chain.validation
+package io.openfuture.chain.crypto.annotation.validation
 
-import io.openfuture.chain.crypto.annotation.validation.AddressChecksumValidator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 

@@ -1,6 +1,5 @@
-package io.openfuture.chain.util
+package io.openfuture.chain.crypto.util
 
-import io.openfuture.chain.crypto.util.Base58
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.util.*

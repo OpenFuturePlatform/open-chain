@@ -1,4 +1,4 @@
-package io.openfuture.chain.block.validation
+package io.openfuture.chain.consensus.component.block.validation
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any

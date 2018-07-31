@@ -1,7 +1,6 @@
-package io.openfuture.chain.crypto.component
+package io.openfuture.chain.crypto.component.key
 
 import io.openfuture.chain.config.ServiceTests
-import io.openfuture.chain.crypto.component.key.ExtendedKeySerializer
 import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import org.assertj.core.api.Assertions.assertThat

@@ -1,7 +1,6 @@
-package io.openfuture.chain.service
+package io.openfuture.chain.consensus.service
 
 import io.openfuture.chain.config.ServiceTests
-import io.openfuture.chain.consensus.service.DefaultHardwareInfoService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -15,7 +14,7 @@ class DefaultHardwareInfoServiceTests : ServiceTests() {
         val hardwareInfo = service.getHardwareInfo()
 
         assertThat(hardwareInfo).isNotNull
-        with (hardwareInfo) {
+        with(hardwareInfo) {
             assertThat(cpu).isEqualTo(service.getCpuInfo())
             assertThat(ram).isNotNull
             assertThat(networks).isEqualTo(service.getNetworksInfo())
