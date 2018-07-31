@@ -1,4 +1,4 @@
-package io.openfuture.chain.crypto.component.key
+package io.openfuture.chain.core.component
 
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.network.property.NodeProperties
