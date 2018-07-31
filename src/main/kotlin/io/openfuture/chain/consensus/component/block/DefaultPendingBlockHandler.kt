@@ -1,6 +1,6 @@
 package io.openfuture.chain.consensus.component.block
 
-import io.openfuture.chain.block.BlockApprovalMessage
+import io.openfuture.chain.consensus.model.dto.block.BlockApprovalMessage
 import io.openfuture.chain.consensus.model.entity.Delegate
 import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
