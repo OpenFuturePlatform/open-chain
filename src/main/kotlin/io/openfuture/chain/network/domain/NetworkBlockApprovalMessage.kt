@@ -2,7 +2,9 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.block.BlockApprovalMessage
+import io.openfuture.chain.consensus.annotation.NoArgConstructor
 
+@NoArgConstructor
 data class NetworkBlockApprovalMessage(
     var stage: NetworkObserverStage,
     var height: Long,
@@ -18,6 +20,7 @@ data class NetworkBlockApprovalMessage(
     )
 
     override fun readParams(buffer: ByteBuf) {
+        stage = NetworkObserverStage::class.java.newInstance()
         stage.readParams(buffer)
         height = buffer.readLong()
         val hashLength = buffer.readInt()

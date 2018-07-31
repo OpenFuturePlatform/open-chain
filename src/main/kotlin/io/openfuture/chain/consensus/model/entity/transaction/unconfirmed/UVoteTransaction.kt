@@ -2,7 +2,7 @@ package io.openfuture.chain.consensus.model.entity.transaction.unconfirmed
 
 import io.openfuture.chain.consensus.model.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.UTransaction
-import io.openfuture.chain.core.util.DictionaryUtil
+import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -28,7 +28,7 @@ class UVoteTransaction(
 
 ) : UTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash) {
 
-    fun getVoteType(): VoteType = DictionaryUtil.valueOf(VoteType::class.java, voteTypeId)
+    fun getVoteType(): VoteType = DictionaryUtils.valueOf(VoteType::class.java, voteTypeId)
 
     override fun toConfirmed(): VoteTransaction = VoteTransaction(
         timestamp,
