@@ -39,7 +39,7 @@ class NodeKeyHolder(
 
         if (!privateKeyFile.exists() || !publicKeyFile.exists()) {
             val seedPhrase = cryptoService.generateSeedPhrase()
-            val masterKey = cryptoService.getMasterKeys(seedPhrase).ecKey
+            val masterKey = cryptoService.getMasterKey(seedPhrase).ecKey
 
             privateKeyFile.writeText(ByteUtils.toHexString(masterKey.getPrivate()), Charsets.UTF_8)
             publicKeyFile.writeText(ByteUtils.toHexString(masterKey.public), Charsets.UTF_8)

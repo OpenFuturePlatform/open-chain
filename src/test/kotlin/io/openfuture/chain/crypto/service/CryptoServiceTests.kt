@@ -101,7 +101,7 @@ class CryptoServiceTests : ServiceTests() {
         given(seedPhraseValidator.isValid(seedPhrase)).willReturn(true)
         given(seedCalculator.calculateSeed(seedPhrase)).willReturn(seed)
 
-        val key = cryptoService.getMasterKeys(seedPhrase)
+        val key = cryptoService.getMasterKey(seedPhrase)
 
         assertExtendedKey(key)
     }

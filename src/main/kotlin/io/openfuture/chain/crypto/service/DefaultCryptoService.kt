@@ -25,7 +25,7 @@ class DefaultCryptoService(
 
     override fun generateSeedPhrase(): String = seedPhraseGenerator.createSeedPhrase(PhraseLength.TWELVE)
 
-    override fun getMasterKeys(seedPhrase: String): ExtendedKey {
+    override fun getMasterKey(seedPhrase: String): ExtendedKey {
         if (!seedPhraseValidator.isValid(seedPhrase))
             throw IllegalArgumentException("Invalid seed phrase")
 

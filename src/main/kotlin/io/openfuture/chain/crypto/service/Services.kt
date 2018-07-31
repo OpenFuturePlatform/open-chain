@@ -7,7 +7,7 @@ interface CryptoService {
 
     fun generateSeedPhrase(): String
 
-    fun getMasterKeys(seedPhrase: String): ExtendedKey
+    fun getMasterKey(seedPhrase: String): ExtendedKey
 
     fun getDerivationKey(masterKeys: ExtendedKey, derivationPath: String): ExtendedKey
 

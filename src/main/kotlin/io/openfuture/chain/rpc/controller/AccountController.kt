@@ -24,7 +24,7 @@ class AccountController(
     @GetMapping("/doGenerate")
     fun generateNewAccount(): RestResponse<AccountDto> {
         val seedPhrase = cryptoService.generateSeedPhrase()
-        val masterKeys = cryptoService.getMasterKeys(seedPhrase)
+        val masterKeys = cryptoService.getMasterKey(seedPhrase)
         val defaultDerivationKey = cryptoService.getDefaultDerivationKey(masterKeys)
 
         val accountDto = AccountDto(seedPhrase, KeyDto(masterKeys.ecKey), WalletDto(defaultDerivationKey.ecKey))
@@ -42,7 +42,7 @@ class AccountController(
 
     @PostMapping("/doRestore")
     fun restore(@RequestBody @Valid keyRequest: RestoreRequest): RestResponse<AccountDto> {
-        val masterKeys = cryptoService.getMasterKeys(keyRequest.seedPhrase!!)
+        val masterKeys = cryptoService.getMasterKey(keyRequest.seedPhrase!!)
         val defaultDerivationKey = cryptoService.getDefaultDerivationKey(masterKeys)
 
         val accountDto = AccountDto(keyRequest.seedPhrase!!, KeyDto(masterKeys.ecKey), WalletDto(defaultDerivationKey.ecKey))
@@ -51,7 +51,7 @@ class AccountController(
 
     @PostMapping("/doDerive")
     fun getDerivationAccount(@RequestBody @Valid keyRequest: DerivationKeyRequest): RestResponse<WalletDto> {
-        val masterKeys = cryptoService.getMasterKeys(keyRequest.seedPhrase!!)
+        val masterKeys = cryptoService.getMasterKey(keyRequest.seedPhrase!!)
         val derivationKey = cryptoService.getDerivationKey(masterKeys, keyRequest.derivationPath!!)
         val walletDto = WalletDto(derivationKey.ecKey)
 

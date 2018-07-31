@@ -69,7 +69,7 @@ class AccountControllerTests : ControllerTests() {
         val expectedAccount = AccountDto(seedPhrase, KeyDto(masterKeys.ecKey), WalletDto(defaultWalletKeys.ecKey))
         val expectedBody = getRestResponse(expectedAccount)
 
-        given(cryptoService.getMasterKeys(expectedAccount.seedPhrase)).willReturn(masterKeys)
+        given(cryptoService.getMasterKey(expectedAccount.seedPhrase)).willReturn(masterKeys)
         given(cryptoService.getDefaultDerivationKey(masterKeys)).willReturn(defaultWalletKeys)
 
         val result = webClient.post().uri("/rpc/accounts/doRestore")
@@ -93,7 +93,7 @@ class AccountControllerTests : ControllerTests() {
         val expectedWallet = WalletDto(defaultWalletKeys.ecKey)
         val expectedBody = getRestResponse(expectedWallet)
 
-        given(cryptoService.getMasterKeys(seedPhrase)).willReturn(masterKeys)
+        given(cryptoService.getMasterKey(seedPhrase)).willReturn(masterKeys)
         given(cryptoService.getDerivationKey(masterKeys, derivationPath)).willReturn(defaultWalletKeys)
 
         val result = webClient.post().uri("/rpc/accounts/doDerive")
