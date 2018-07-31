@@ -8,10 +8,10 @@ import io.openfuture.chain.crypto.component.key.ExtendedKeySerializer
 import io.openfuture.chain.crypto.component.key.PrivateKeyManager
 import io.openfuture.chain.crypto.component.seed.SeedCalculator
 import io.openfuture.chain.crypto.component.seed.SeedPhraseGenerator
-import io.openfuture.chain.crypto.dictionary.PhraseLength.TWELVE
-import io.openfuture.chain.crypto.domain.ECKey
-import io.openfuture.chain.crypto.domain.ExtendedKey
-import io.openfuture.chain.crypto.validation.seed.SeedPhraseValidator
+import io.openfuture.chain.crypto.model.dictionary.PhraseLength.TWELVE
+import io.openfuture.chain.crypto.model.dto.ECKey
+import io.openfuture.chain.crypto.model.dto.ExtendedKey
+import io.openfuture.chain.crypto.validation.SeedPhraseValidator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test

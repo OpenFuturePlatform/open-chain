@@ -1,6 +1,6 @@
 package io.openfuture.chain.crypto.component.key
 
-import io.openfuture.chain.crypto.domain.ExtendedKey
+import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import org.springframework.stereotype.Component
 
 /**

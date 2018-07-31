@@ -1,6 +1,6 @@
 package io.openfuture.chain.rpc.domain.crypto
 
-import io.openfuture.chain.crypto.domain.ECKey
+import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.rpc.domain.crypto.key.KeyDto
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 

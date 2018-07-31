@@ -6,7 +6,6 @@ import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
 import org.bouncycastle.crypto.params.KeyParameter
 import org.bouncycastle.jcajce.provider.digest.Keccak
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.security.MessageDigest
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -27,7 +26,7 @@ object HashUtils {
         return digest.digest()
     }
 
-    fun keyHash(bytes: ByteArray): ByteArray {
+    fun ripemd160Sha256(bytes: ByteArray): ByteArray {
         val result = ByteArray(20)
         val sha256 = MessageDigest.getInstance(SHA256).digest(bytes)
         val digest = RIPEMD160Digest()
@@ -55,9 +54,5 @@ object HashUtils {
         val key = generator.generateDerivedMacParameters(KEY_SIZE) as KeyParameter
         return key.key
     }
-
-    fun toHexString(bytes: ByteArray): String = ByteUtils.toHexString(bytes)
-
-    fun fromHexString(input: String): ByteArray = ByteUtils.fromHexString(input)
 
 }

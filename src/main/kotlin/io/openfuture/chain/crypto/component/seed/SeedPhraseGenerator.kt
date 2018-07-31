@@ -6,9 +6,9 @@ import io.openfuture.chain.crypto.constants.SeedConstant.MULTIPLICITY_VALUE
 import io.openfuture.chain.crypto.constants.SeedConstant.SECOND_BYTE_OFFSET
 import io.openfuture.chain.crypto.constants.SeedConstant.THIRD_BYTE_OFFSET
 import io.openfuture.chain.crypto.constants.SeedConstant.WORD_INDEX_SIZE
-import io.openfuture.chain.crypto.dictionary.PhraseLength
+import io.openfuture.chain.crypto.model.dictionary.PhraseLength
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.repository.SeedWordRepository
+import io.openfuture.chain.consensus.repository.SeedWordRepository
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
 import java.security.SecureRandom

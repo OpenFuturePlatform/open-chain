@@ -1,20 +1,27 @@
 package io.openfuture.chain.block
 
-import io.openfuture.chain.block.validation.BlockValidationProvider
+import io.openfuture.chain.consensus.validation.BlockValidationProvider
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
+import io.openfuture.chain.consensus.component.block.BlockCreationProcessor
+import io.openfuture.chain.consensus.component.block.SignatureCollector
+import io.openfuture.chain.consensus.component.block.TimeSlot
 import io.openfuture.chain.crypto.component.key.NodeKeyHolder
-import io.openfuture.chain.domain.block.PendingBlock
-import io.openfuture.chain.domain.block.Signature
-import io.openfuture.chain.entity.Delegate
-import io.openfuture.chain.entity.block.Block
-import io.openfuture.chain.entity.block.GenesisBlock
-import io.openfuture.chain.entity.block.MainBlock
-import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
-import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.consensus.model.dto.block.PendingBlock
+import io.openfuture.chain.consensus.model.dto.block.BlockSignature
+import io.openfuture.chain.consensus.model.entity.Delegate
+import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
+import io.openfuture.chain.consensus.model.entity.block.MainBlock
+import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.property.ConsensusProperties
-import io.openfuture.chain.service.*
+import io.openfuture.chain.consensus.property.ConsensusProperties
+import io.openfuture.chain.consensus.service.ConsensusService
+import io.openfuture.chain.consensus.service.DelegateService
+import io.openfuture.chain.consensus.service.GenesisBlockService
+import io.openfuture.chain.core.model.entity.transaction.UTransaction
+import io.openfuture.chain.core.service.CommonBlockService
+import io.openfuture.chain.core.service.UCommonTransactionService
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -97,7 +104,7 @@ class BlockCreationProcessorTests : ServiceTests() {
     private fun createPendingBlock(block: Block): PendingBlock {
         return PendingBlock(
             block,
-            Signature("sign", "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719")
+            BlockSignature("sign", "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719")
         )
     }
 

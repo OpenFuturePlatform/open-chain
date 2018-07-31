@@ -2,15 +2,15 @@ package io.openfuture.chain.rpc.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.openfuture.chain.config.ControllerTests
+import io.openfuture.chain.consensus.service.HardwareInfoService
 import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.rpc.domain.ResponseHeader
 import io.openfuture.chain.rpc.domain.RestResponse
 import io.openfuture.chain.rpc.domain.node.CpuInfo
 import io.openfuture.chain.rpc.domain.node.HardwareInfo
 import io.openfuture.chain.rpc.domain.node.NetworkInfo
 import io.openfuture.chain.rpc.domain.node.RamInfo
-import io.openfuture.chain.service.HardwareInfoService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.mockito.BDDMockito.given
