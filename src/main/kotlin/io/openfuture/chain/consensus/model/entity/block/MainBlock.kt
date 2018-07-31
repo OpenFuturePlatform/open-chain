@@ -26,8 +26,10 @@ class MainBlock(
     ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height + publicKey).toByteArray()))) {
 
     override fun sign(privateKey: ByteArray): MainBlock {
-        this.signature = SignatureUtils.sign((previousHash + merkleHash + timestamp + height).toByteArray(), privateKey)
+        this.signature = SignatureUtils.sign(getBytes(), privateKey)
         return this
     }
+
+    override fun getBytes(): ByteArray = (previousHash + merkleHash + timestamp + height).toByteArray()
 
 }

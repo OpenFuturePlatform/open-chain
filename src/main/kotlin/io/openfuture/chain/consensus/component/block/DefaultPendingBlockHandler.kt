@@ -6,7 +6,6 @@ import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.service.GenesisBlockService
 import io.openfuture.chain.consensus.service.MainBlockService
-import io.openfuture.chain.core.model.entity.base.Dictionary
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.crypto.component.key.NodeKeyHolder
 import io.openfuture.chain.network.domain.NetworkBlockApprovalMessage
@@ -17,13 +16,13 @@ import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Component
 
 @Component
-class BlockObserver(
+class DefaultPendingBlockHandler(
     private val timeSlotHelper: TimeSlotHelper,
     private val genesisBlockService: GenesisBlockService,
     private val mainBlockService: MainBlockService,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkService
-) {
+) : PendingBlockHandler {
 
     private var observable: Block? = null
     private var timeSlotNumber: Long = 0
@@ -33,7 +32,7 @@ class BlockObserver(
     private val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
     private val commitVotes: MutableMap<String, MutableList<Delegate>> = mutableMapOf()
 
-    fun addBlock(block: Block) {
+    override fun addBlock(block: Block) {
         val blockSlotNumber = timeSlotHelper.getSlotNumber(block.timestamp)
         if (blockSlotNumber > timeSlotNumber) {
             this.reset()
@@ -68,7 +67,7 @@ class BlockObserver(
         }
     }
 
-    fun handleApproveMessage(message: BlockApprovalMessage) {
+    override fun handleApproveMessage(message: BlockApprovalMessage) {
         val delegates = genesisBlockService.getLast().activeDelegates
         val delegate = delegates.find { message.publicKey == it.publicKey } ?: return
 
@@ -82,7 +81,7 @@ class BlockObserver(
                     val networkMessage = NetworkBlockApprovalMessage(message)
                     networkService.broadcast(networkMessage)
                 }
-                if (prepareVotes.size + 1 > (delegates.size - 1) / 3) {
+                if (prepareVotes.size > (delegates.size - 1) / 3) {
                     this.stage = ObserverStage.COMMIT
                     val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
                     val commitMessage = BlockApprovalMessage(ObserverStage.COMMIT, message.height, message.hash, publicKey)
@@ -118,12 +117,4 @@ class BlockObserver(
         pendingBlocks.clear()
     }
 
-}
-
-enum class ObserverStage(val value: Int) : Dictionary {
-    IDLE(1),
-    PREPARE(2),
-    COMMIT(3);
-
-    override fun getId(): Int = value
 }

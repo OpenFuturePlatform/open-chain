@@ -1,6 +1,5 @@
 package io.openfuture.chain.consensus.service.block
 
-import io.openfuture.chain.consensus.component.block.TimeSlotHelper
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.model.entity.transaction.DelegateTransaction
 import io.openfuture.chain.consensus.model.entity.transaction.RewardTransaction
@@ -10,8 +9,9 @@ import io.openfuture.chain.consensus.service.*
 import io.openfuture.chain.consensus.util.TransactionUtils
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.transaction.Transaction
+import io.openfuture.chain.core.service.CommonBlockService
+import io.openfuture.chain.core.service.CommonTransactionService
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,8 +19,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultMainBlockService(
     private val repository: MainBlockRepository,
-    private val clock: NodeClock,
-    private val timeSlot: TimeSlotHelper,
+    private val commonBlockService: CommonBlockService,
+    private val commonTransactionService: CommonTransactionService,
     private val voteTransactionService: VoteTransactionService,
     private val transferTransactionService: TransferTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
@@ -52,25 +52,18 @@ class DefaultMainBlockService(
     }
 
     override fun isValid(block: MainBlock): Boolean {
-        val currentTime = clock.networkTime()
-
-        return timeSlot.verifyTimeSlot(currentTime, block) && isTransactionsValid(block)
+        return (commonBlockService.isValid(block) && isTransactionsValid(block))
     }
 
     private fun isTransactionsValid(block: MainBlock): Boolean {
-        val transactions = block.transactions
+        val transactions = block.transactions.map { commonTransactionService.get(it.hash) }.toSet()
 
-        if (transactions.isEmpty() || !transactionsIsWellFormed(transactions)) {
+        if (transactions.isEmpty() || block.transactions.size != transactions.size) {
             return false
         }
 
         val transactionsMerkleHash = TransactionUtils.calculateMerkleRoot(transactions)
         return block.merkleHash == transactionsMerkleHash
-    }
-
-    private fun transactionsIsWellFormed(transactions: Set<Transaction>): Boolean {
-        val transactionHashes = transactions.map { it.hash }.toSet()
-        return transactionHashes.size == transactions.size
     }
 
     private fun addTransactionToBlock(tx: Transaction, block: MainBlock) {
