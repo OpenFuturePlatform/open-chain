@@ -3,6 +3,7 @@ package io.openfuture.chain.consensus.util
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.consensus.model.dto.transaction.data.BaseTransactionData
+import io.openfuture.chain.core.model.entity.transaction.base.BaseTransaction
 import java.nio.ByteBuffer
 
 object TransactionUtils {
