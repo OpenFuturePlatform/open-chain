@@ -1,8 +1,8 @@
 package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
-import io.openfuture.chain.block.BlockApprovalMessage
 import io.openfuture.chain.consensus.annotation.NoArgConstructor
+import io.openfuture.chain.consensus.model.dto.block.BlockApprovalMessage
 
 @NoArgConstructor
 data class NetworkBlockApprovalMessage(

@@ -1,6 +1,6 @@
 package io.openfuture.chain.consensus.component.block
 
-import io.openfuture.chain.block.BlockApprovalMessage
+import io.openfuture.chain.consensus.model.dto.block.BlockApprovalMessage
 import io.openfuture.chain.consensus.model.entity.Delegate
 import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
@@ -68,45 +68,49 @@ class DefaultPendingBlockHandler(
     }
 
     override fun handleApproveMessage(message: BlockApprovalMessage) {
+        when (message.stage) {
+            ObserverStage.PREPARE -> handlePrevote(message)
+            ObserverStage.COMMIT -> handleCommit(message)
+            ObserverStage.IDLE -> throw IllegalArgumentException("Unacceptable message type")
+        }
+    }
+
+    private fun handlePrevote(message: BlockApprovalMessage) {
         val delegates = genesisBlockService.getLast().activeDelegates
         val delegate = delegates.find { message.publicKey == it.publicKey } ?: return
 
-        when (message.stage) {
-            ObserverStage.PREPARE -> {
-                if (message.hash != observable!!.hash) {
-                    return
-                }
-                if (!prepareVotes.containsKey(message.publicKey)) {
-                    prepareVotes[message.publicKey] = delegate
-                    val networkMessage = NetworkBlockApprovalMessage(message)
-                    networkService.broadcast(networkMessage)
-                }
-                if (prepareVotes.size > (delegates.size - 1) / 3) {
-                    this.stage = ObserverStage.COMMIT
-                    val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
-                    val commitMessage = BlockApprovalMessage(ObserverStage.COMMIT, message.height, message.hash, publicKey)
-                    val networkMessage = NetworkBlockApprovalMessage(commitMessage)
-                    networkService.broadcast(networkMessage)
-                }
-            }
-            ObserverStage.COMMIT -> {
-                val blockCommits = commitVotes[message.hash]
-                if (null != blockCommits && !blockCommits.contains(delegate)) {
-                    blockCommits.add(delegate)
-                    val networkMessage = NetworkBlockApprovalMessage(message)
-                    networkService.broadcast(networkMessage)
-                    if (blockCommits.size + 1 > (delegates.size - 1) / 3 * 2) {
-                        val block = pendingBlocks.find { it.hash == message.hash }
-                        when (block) {
-                            is MainBlock -> mainBlockService.save(block)
-                            is GenesisBlock -> genesisBlockService.save(block)
-                        }
-                    }
-                } else {
-                    commitVotes[message.hash] = mutableListOf(delegate)
+        if (message.hash != observable!!.hash) {
+            return
+        }
+        if (!prepareVotes.containsKey(message.publicKey)) {
+            prepareVotes[message.publicKey] = delegate
+            //broadcast message
+        }
+        if (prepareVotes.size > (delegates.size - 1) / 3) {
+            this.stage = ObserverStage.COMMIT
+            val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
+            val commitMessage = BlockApprovalMessage(ObserverStage.COMMIT, message.height, message.hash, publicKey)
+            // broadcast commitMessage
+        }
+    }
+
+    private fun handleCommit(message: BlockApprovalMessage) {
+        val delegates = genesisBlockService.getLast().activeDelegates
+        val delegate = delegates.find { message.publicKey == it.publicKey } ?: return
+
+        val blockCommits = commitVotes[message.hash]
+        if (null != blockCommits && !blockCommits.contains(delegate)) {
+            blockCommits.add(delegate)
+            //broadcast message
+            if (blockCommits.size> (delegates.size - 1) / 3 * 2) {
+                val block = pendingBlocks.find { it.hash == message.hash }
+                when (block) {
+                    is MainBlock -> mainBlockService.save(block)
+                    is GenesisBlock -> genesisBlockService.save(block)
                 }
             }
-            ObserverStage.IDLE -> throw IllegalArgumentException("Unacceptable message type")
+        } else {
+            commitVotes[message.hash] = mutableListOf(delegate)
         }
     }
 

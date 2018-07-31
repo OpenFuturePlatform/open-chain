@@ -1,9 +1,9 @@
 package io.openfuture.chain.network.client.handler
 
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.block.BlockApprovalMessage
 import io.openfuture.chain.consensus.component.block.ObserverStage
 import io.openfuture.chain.consensus.component.block.PendingBlockHandler
+import io.openfuture.chain.consensus.model.dto.block.BlockApprovalMessage
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.network.domain.NetworkBlockApprovalMessage
 import org.springframework.stereotype.Component

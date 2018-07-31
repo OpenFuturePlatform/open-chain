@@ -3,8 +3,8 @@ package io.openfuture.chain.network.domain
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufUtil
 import io.netty.buffer.Unpooled
-import io.openfuture.chain.block.BlockApprovalMessage
 import io.openfuture.chain.consensus.component.block.ObserverStage
+import io.openfuture.chain.consensus.model.dto.block.BlockApprovalMessage
 import io.openfuture.chain.consensus.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.consensus.model.dto.transaction.RewardTransactionDto
 import io.openfuture.chain.consensus.model.dto.transaction.TransferTransactionDto

@@ -1,4 +1,4 @@
-package io.openfuture.chain.block
+package io.openfuture.chain.consensus.model.dto.block
 
 import io.openfuture.chain.consensus.component.block.ObserverStage
 
