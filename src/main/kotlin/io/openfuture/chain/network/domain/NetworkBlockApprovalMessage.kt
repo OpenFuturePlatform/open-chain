@@ -2,26 +2,17 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.consensus.annotation.NoArgConstructor
-import io.openfuture.chain.consensus.model.dto.block.BlockApprovalMessage
 
 @NoArgConstructor
 data class NetworkBlockApprovalMessage(
-    var stage: NetworkObserverStage,
+    var stageId: Int,
     var height: Long,
     var hash: String,
     var publicKey: String
 ) : Packet() {
 
-    constructor(message: BlockApprovalMessage) : this(
-        NetworkObserverStage(message.stage),
-        message.height,
-        message.hash,
-        message.publicKey
-    )
-
     override fun readParams(buffer: ByteBuf) {
-        stage = NetworkObserverStage::class.java.newInstance()
-        stage.readParams(buffer)
+        stageId = buffer.readInt()
         height = buffer.readLong()
         val hashLength = buffer.readInt()
         hash = buffer.readCharSequence(hashLength, Charsets.UTF_8).toString()
@@ -30,7 +21,7 @@ data class NetworkBlockApprovalMessage(
     }
 
     override fun writeParams(buffer: ByteBuf) {
-        stage.writeParams(buffer)
+        buffer.writeInt(stageId)
         buffer.writeLong(height)
         buffer.writeInt(hash.length)
         buffer.writeCharSequence(hash, Charsets.UTF_8)

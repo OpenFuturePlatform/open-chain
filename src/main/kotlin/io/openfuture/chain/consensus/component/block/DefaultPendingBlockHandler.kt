@@ -1,12 +1,12 @@
 package io.openfuture.chain.consensus.component.block
 
-import io.openfuture.chain.consensus.model.dto.block.BlockApprovalMessage
 import io.openfuture.chain.consensus.model.entity.Delegate
 import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.service.GenesisBlockService
 import io.openfuture.chain.consensus.service.MainBlockService
 import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.component.key.NodeKeyHolder
 import io.openfuture.chain.network.domain.NetworkBlockApprovalMessage
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
@@ -61,21 +61,20 @@ class DefaultPendingBlockHandler(
             stage = ObserverStage.PREPARE
             timeSlotNumber = blockSlotNumber
             val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
-            val prepareMessage = BlockApprovalMessage(ObserverStage.PREPARE, block.height, block.hash, publicKey)
-            val message = NetworkBlockApprovalMessage(prepareMessage)
+            val message = NetworkBlockApprovalMessage(ObserverStage.PREPARE.getId(), block.height, block.hash, publicKey)
             networkService.broadcast(message)
         }
     }
 
-    override fun handleApproveMessage(message: BlockApprovalMessage) {
-        when (message.stage) {
+    override fun handleApproveMessage(message: NetworkBlockApprovalMessage) {
+        when (DictionaryUtils.valueOf(ObserverStage::class.java, message.stageId)) {
             ObserverStage.PREPARE -> handlePrevote(message)
             ObserverStage.COMMIT -> handleCommit(message)
             ObserverStage.IDLE -> throw IllegalArgumentException("Unacceptable message type")
         }
     }
 
-    private fun handlePrevote(message: BlockApprovalMessage) {
+    private fun handlePrevote(message: NetworkBlockApprovalMessage) {
         val delegates = genesisBlockService.getLast().activeDelegates
         val delegate = delegates.find { message.publicKey == it.publicKey } ?: return
 
@@ -89,12 +88,12 @@ class DefaultPendingBlockHandler(
         if (prepareVotes.size > (delegates.size - 1) / 3) {
             this.stage = ObserverStage.COMMIT
             val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
-            val commitMessage = BlockApprovalMessage(ObserverStage.COMMIT, message.height, message.hash, publicKey)
+            val commitMessage = NetworkBlockApprovalMessage(ObserverStage.COMMIT.getId(), message.height, message.hash, publicKey)
             // broadcast commitMessage
         }
     }
 
-    private fun handleCommit(message: BlockApprovalMessage) {
+    private fun handleCommit(message: NetworkBlockApprovalMessage) {
         val delegates = genesisBlockService.getLast().activeDelegates
         val delegate = delegates.find { message.publicKey == it.publicKey } ?: return
 
