@@ -14,6 +14,8 @@ interface CommonBlockService {
 
     fun isExists(hash: String): Boolean
 
+    fun isValid(block: Block): Boolean
+
 }
 
 interface CommonTransactionService {

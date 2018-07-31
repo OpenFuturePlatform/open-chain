@@ -30,4 +30,6 @@ abstract class Block(
 
     abstract fun sign(privateKey: ByteArray): Block
 
+    abstract fun getBytes(): ByteArray
+
 }

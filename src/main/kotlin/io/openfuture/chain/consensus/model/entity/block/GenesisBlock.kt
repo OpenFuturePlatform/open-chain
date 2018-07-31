@@ -29,8 +29,10 @@ class GenesisBlock(
 ) {
 
     override fun sign(privateKey: ByteArray): GenesisBlock {
-        this.signature = SignatureUtils.sign((previousHash + timestamp + height).toByteArray(), privateKey)
+        this.signature = SignatureUtils.sign(getBytes(), privateKey)
         return this
     }
+
+    override fun getBytes(): ByteArray = (previousHash + timestamp + height).toByteArray()
 
 }

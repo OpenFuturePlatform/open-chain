@@ -1,5 +1,7 @@
-package io.openfuture.chain.consensus.component.block
+package io.openfuture.chain.core.component.block
 
+import io.openfuture.chain.consensus.component.block.PendingBlockHandler
+import io.openfuture.chain.consensus.component.block.TimeSlotHelper
 import io.openfuture.chain.consensus.model.dto.transaction.data.RewardTransactionData
 import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
@@ -21,7 +23,7 @@ import java.util.concurrent.Executors
 import javax.annotation.PostConstruct
 
 @Component
-class BlockCreationProcessor(
+class BlockProducer(
     private val genesisBlockService: GenesisBlockService,
     private val blockService: CommonBlockService,
     private val transactionService: UCommonTransactionService,
@@ -31,7 +33,7 @@ class BlockCreationProcessor(
     private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties,
     private val timeSlotHelper: TimeSlotHelper,
-    private val defaultPendingBlockHandler: DefaultPendingBlockHandler
+    private val defaultPendingBlockHandler: PendingBlockHandler
 ) {
 
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
@@ -41,13 +43,15 @@ class BlockCreationProcessor(
 
     @PostConstruct
     fun init() {
-        while (true) {
-            val timeSlot = timeSlotHelper.getSlotNumber()
-            if (timeSlot > currentTimeSlot) {
-                currentTimeSlot = timeSlot
-                executor.submit { fireBlockCreation() }
+        executor.submit {
+            while (true) {
+                val timeSlot = timeSlotHelper.getSlotNumber()
+                if (timeSlot > currentTimeSlot) {
+                    currentTimeSlot = timeSlot
+                    fireBlockCreation()
+                }
+                Thread.sleep(100)
             }
-            Thread.sleep(100)
         }
     }
 

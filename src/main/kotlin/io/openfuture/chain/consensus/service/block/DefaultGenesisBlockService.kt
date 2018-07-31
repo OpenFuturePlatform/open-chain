@@ -32,9 +32,7 @@ class DefaultGenesisBlockService(
     @Transactional(readOnly = true)
     override fun isValid(block: GenesisBlock): Boolean {
         val lastBlock = getLast()
-        val blockFound = commonBlockService.get(block.hash) as? GenesisBlock
-
-        return (blockFound != null
+        return (commonBlockService.isValid(block)
             && isValidEpochIndex(lastBlock, block)
             && isValidateActiveDelegates(block))
     }
