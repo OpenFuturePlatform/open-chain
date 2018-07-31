@@ -1,19 +1,19 @@
 package io.openfuture.chain.block.validation
 
-import io.openfuture.chain.consensus.component.block.TimeSlot
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
-import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.consensus.component.block.TimeSlot
 import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.service.GenesisBlockService
 import io.openfuture.chain.consensus.service.MainBlockService
 import io.openfuture.chain.consensus.validation.BlockValidationProvider
+import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.service.CommonBlockService
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.component.node.NodeClock
 import org.assertj.core.api.Assertions.assertThat
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -77,7 +77,7 @@ class BlockValidationProviderTests : ServiceTests() {
                     2,
                     "delegate_key2"
                 ))
-        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
+        ).sign(ByteUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
         val block = MainBlock(
             height,
             previousBlock.hash,
@@ -110,7 +110,7 @@ class BlockValidationProviderTests : ServiceTests() {
                     "delegate_key2"
                 )
             )
-        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
+        ).sign(ByteUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
 
 
         given(mainBlockService.isValid(block)).willReturn(true)
@@ -130,7 +130,7 @@ class BlockValidationProviderTests : ServiceTests() {
             "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf()
-        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
+        ).sign(ByteUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
         val block = MainBlock(
             123,
             "prev_block_hash",
@@ -163,7 +163,7 @@ class BlockValidationProviderTests : ServiceTests() {
                     "delegate_key2"
                 )
             )
-        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
+        ).sign(ByteUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
 
 
         given(commonBlockService.getLast()).willReturn(lastBlock)
@@ -182,7 +182,7 @@ class BlockValidationProviderTests : ServiceTests() {
             "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             1L,
             setOf()
-        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
+        ).sign(ByteUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
 
         val block = GenesisBlock(
             123L,
@@ -191,7 +191,7 @@ class BlockValidationProviderTests : ServiceTests() {
             "02f11f42bc8fa42d6ebb457d8f90a0d57194a941df68b132458a24018bc099713b",
             2L,
             setOf()
-        ).sign(HashUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
+        ).sign(ByteUtils.fromHexString("991f15345c6e6ff8dbb5e5dae1f1764ed59e8c98e63b824e2ba20614e0ab2e43"))
 
         given(genesisBlockService.isValid(block)).willReturn(true)
         given(commonBlockService.getLast()).willReturn(previousBlock)
@@ -216,7 +216,7 @@ class BlockValidationProviderTests : ServiceTests() {
             123,
             "prev_block_hash",
             1512345678L,
-            HashUtils.toHexString(ByteArray(1)),
+            ByteUtils.toHexString(ByteArray(1)),
             1L,
             setOf()
         ).sign(ByteArray(1))

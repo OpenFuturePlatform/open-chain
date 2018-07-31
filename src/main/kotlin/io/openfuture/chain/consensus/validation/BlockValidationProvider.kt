@@ -1,15 +1,15 @@
 package io.openfuture.chain.consensus.validation
 
 import io.openfuture.chain.consensus.component.block.TimeSlot
-import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.service.GenesisBlockService
 import io.openfuture.chain.consensus.service.MainBlockService
+import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.service.CommonBlockService
+import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 
 @Service
@@ -44,12 +44,12 @@ class BlockValidationProvider(
             return SignatureUtils.verify(
                 (block.previousHash + block.merkleHash + block.timestamp + block.height).toByteArray(),
                 block.signature!!,
-                HashUtils.fromHexString(block.publicKey))
+                ByteUtils.fromHexString(block.publicKey))
         }
         return SignatureUtils.verify(
             (block.previousHash + block.timestamp + block.height).toByteArray(),
             block.signature!!,
-            HashUtils.fromHexString(block.publicKey))
+            ByteUtils.fromHexString(block.publicKey))
     }
 
     private fun verifyPreviousHash(block: Block, lastBlock: Block): Boolean = (block.previousHash == lastBlock.hash)

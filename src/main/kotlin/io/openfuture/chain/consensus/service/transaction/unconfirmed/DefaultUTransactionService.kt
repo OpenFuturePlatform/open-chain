@@ -1,19 +1,19 @@
 package io.openfuture.chain.consensus.service.transaction.unconfirmed
 
-import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.network.component.node.NodeClock
+import io.openfuture.chain.consensus.model.dto.transaction.BaseTransactionDto
+import io.openfuture.chain.consensus.model.dto.transaction.data.BaseTransactionData
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.UTransactionService
 import io.openfuture.chain.consensus.service.WalletService
-import io.openfuture.chain.rpc.domain.transaction.BaseTransactionRequest
 import io.openfuture.chain.consensus.util.TransactionUtils
+import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.transaction.UTransaction
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.UCommonTransactionService
-import io.openfuture.chain.consensus.model.dto.transaction.BaseTransactionDto
-import io.openfuture.chain.consensus.model.dto.transaction.data.BaseTransactionData
+import io.openfuture.chain.crypto.util.SignatureUtils
+import io.openfuture.chain.network.component.node.NodeClock
+import io.openfuture.chain.rpc.domain.transaction.BaseTransactionRequest
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
@@ -69,7 +69,7 @@ abstract class DefaultUTransactionService<UEntity : UTransaction, Data : BaseTra
     }
 
     private fun isValidaSignature(data: Data, publicKey: String, signature: String): Boolean {
-        return SignatureUtils.verify(data.getBytes(), signature, HashUtils.fromHexString(publicKey))
+        return SignatureUtils.verify(data.getBytes(), signature, ByteUtils.fromHexString(publicKey))
     }
 
     private fun isValidSenderBalance(senderAddress: String, amount: Long): Boolean {

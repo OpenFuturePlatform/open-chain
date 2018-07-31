@@ -4,17 +4,17 @@ import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.consensus.component.block.SignatureCollector
 import io.openfuture.chain.consensus.component.block.TimeSlot
-import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.consensus.model.dto.block.PendingBlock
 import io.openfuture.chain.consensus.model.dto.block.BlockSignature
-import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.consensus.model.dto.block.PendingBlock
 import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
-import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.GenesisBlockService
 import io.openfuture.chain.consensus.service.MainBlockService
+import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.network.component.node.NodeClock
 import org.assertj.core.api.Assertions.assertThat
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -120,7 +120,7 @@ class SignatureCollectorTests : ServiceTests() {
             123,
             "prev_block_hash",
             1512345678L,
-            HashUtils.toHexString(ByteArray(1)),
+            ByteUtils.toHexString(ByteArray(1)),
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf()
         ).sign(ByteArray(1))
@@ -133,7 +133,7 @@ class SignatureCollectorTests : ServiceTests() {
             123,
             "prev_block_hash",
             1512345678L,
-            HashUtils.toHexString(ByteArray(1)),
+            ByteUtils.toHexString(ByteArray(1)),
             1,
             setOf()
         ).sign(ByteArray(1))

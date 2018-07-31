@@ -1,22 +1,23 @@
 package io.openfuture.chain.consensus.util
 
-import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.consensus.model.dto.transaction.data.BaseTransactionData
 import io.openfuture.chain.core.model.entity.transaction.base.BaseTransaction
+import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.crypto.util.SignatureUtils
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.nio.ByteBuffer
 
 object TransactionUtils {
 
     fun createHash(data: BaseTransactionData, publicKey: String, signature: String): String {
         val bytes = getBytes(publicKey.toByteArray(), signature.toByteArray(), data.getBytes())
-        return HashUtils.toHexString(HashUtils.doubleSha256(bytes))
+        return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
     }
 
     fun createHash(data: BaseTransactionData, publicKey: ByteArray, privateKey: ByteArray): String {
         val signature = getSignature(data, privateKey)
         val bytes = getBytes(publicKey, signature.toByteArray(), data.getBytes())
-        return HashUtils.toHexString(HashUtils.doubleSha256(bytes))
+        return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
     }
 
     fun calculateMerkleRoot(transactions: Set<BaseTransaction>): String {
@@ -38,7 +39,7 @@ object TransactionUtils {
             previousTreeLayout = treeLayout
             treeLayout = mutableListOf()
         }
-        return HashUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
+        return ByteUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
     }
 
     private fun getSignature(data: BaseTransactionData, privateKey: ByteArray): String {

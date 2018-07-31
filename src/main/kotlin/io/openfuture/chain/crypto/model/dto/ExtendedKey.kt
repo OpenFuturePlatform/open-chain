@@ -12,7 +12,8 @@ class ExtendedKey(
     val depth: Int = 0,
     val parentFingerprint: Int = 0,
     val chainCode: ByteArray = rightBytes,
-    val ecKey: ECKey = parentKey?.let { ECKey(leftBytes, it) } ?: ECKey(leftBytes)) {
+    val ecKey: ECKey = parentKey?.let { ECKey(leftBytes, it) } ?: ECKey(leftBytes)
+) {
 
     companion object {
 
@@ -56,7 +57,7 @@ class ExtendedKey(
     }
 
     private fun getFingerprint(): Int {
-        val keyHash = HashUtils.keyHash(ecKey.public)
+        val keyHash = HashUtils.ripemd160Sha256(ecKey.public)
         var fingerprint = 0
         for (i in 0..3) {
             fingerprint = fingerprint shl 8

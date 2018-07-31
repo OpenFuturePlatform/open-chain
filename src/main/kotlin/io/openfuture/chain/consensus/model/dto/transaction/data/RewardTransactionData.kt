@@ -3,8 +3,8 @@ package io.openfuture.chain.consensus.model.dto.transaction.data
 import io.openfuture.chain.consensus.annotation.NoArgConstructor
 import io.openfuture.chain.consensus.model.entity.transaction.RewardTransaction
 import io.openfuture.chain.consensus.util.TransactionUtils
-import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 
 @NoArgConstructor
 class RewardTransactionData(
@@ -29,7 +29,7 @@ class RewardTransactionData(
         fee,
         recipientAddress,
         senderAddress,
-        HashUtils.toHexString(publicKey),
+        ByteUtils.toHexString(publicKey),
         SignatureUtils.sign(getBytes(), privateKey),
         TransactionUtils.createHash(this, publicKey, privateKey)
     )

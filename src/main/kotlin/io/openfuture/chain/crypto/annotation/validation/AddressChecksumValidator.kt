@@ -1,6 +1,6 @@
-package io.openfuture.chain.crypto.validation
+package io.openfuture.chain.crypto.annotation.validation
 
-import io.openfuture.chain.rpc.annotation.AddressChecksum
+import io.openfuture.chain.crypto.annotation.AddressChecksum
 import io.openfuture.chain.crypto.util.AddressUtils
 import javax.validation.ConstraintValidator
 import javax.validation.ConstraintValidatorContext
@@ -16,12 +16,12 @@ class AddressChecksumValidator : ConstraintValidator<AddressChecksum, String> {
 
 
     override fun isValid(value: String, context: ConstraintValidatorContext?): Boolean {
-        if (ADDRESS_PATTERN.toRegex().matches(value)) {
-            val addressWithoutPrefix = AddressUtils.removePrefix(value)
-            return addressWithoutPrefix == AddressUtils.addChecksum(addressWithoutPrefix.toLowerCase())
+        if (!ADDRESS_PATTERN.toRegex().matches(value)) {
+            return false
         }
 
-        return false
+        val addressWithoutPrefix = AddressUtils.removePrefix(value)
+        return addressWithoutPrefix == AddressUtils.addChecksum(addressWithoutPrefix.toLowerCase())
     }
 
 }

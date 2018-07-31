@@ -1,6 +1,6 @@
-package io.openfuture.chain.rpc.annotation
+package io.openfuture.chain.crypto.annotation
 
-import io.openfuture.chain.crypto.validation.AddressChecksumValidator
+import io.openfuture.chain.crypto.annotation.validation.AddressChecksumValidator
 import javax.validation.Constraint
 import javax.validation.Payload
 import kotlin.reflect.KClass

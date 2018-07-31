@@ -19,9 +19,9 @@ import io.openfuture.chain.core.model.entity.transaction.base.BaseTransaction
 import io.openfuture.chain.core.service.CommonBlockService
 import io.openfuture.chain.core.service.UCommonTransactionService
 import io.openfuture.chain.crypto.component.key.NodeKeyHolder
-import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Component
 import java.util.*
@@ -61,8 +61,8 @@ class BlockCreationProcessor(
             throw IllegalArgumentException("Inbound block is not valid")
         }
 
-        val hash = HashUtils.fromHexString(block.hash)
-        val key = HashUtils.fromHexString(pendingBlock.signature.publicKey)
+        val hash = ByteUtils.fromHexString(block.hash)
+        val key = ByteUtils.fromHexString(pendingBlock.signature.publicKey)
         if (!SignatureUtils.verify(hash, pendingBlock.signature.value, key)) {
             throw IllegalArgumentException("Inbound block's signature is invalid")
         }
@@ -79,15 +79,15 @@ class BlockCreationProcessor(
         val blockTimestamp = previousBlock.timestamp
         val random = Random(blockTimestamp)
         val nextProducer = genesisBlock.activeDelegates.shuffled(random).first()
-        if (HashUtils.toHexString(keyHolder.getPublicKey()) == nextProducer.publicKey) {
+        if (ByteUtils.toHexString(keyHolder.getPublicKey()) == nextProducer.publicKey) {
             val pendingTransactions = commonTransactionService.getAll()
             create(pendingTransactions, previousBlock, genesisBlock)
         }
     }
 
     private fun signCreatedBlock(block: Block): PendingBlock {
-        val publicKey = HashUtils.toHexString(keyHolder.getPublicKey())
-        val value = SignatureUtils.sign(HashUtils.fromHexString(block.hash), keyHolder.getPrivateKey())
+        val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
+        val value = SignatureUtils.sign(ByteUtils.fromHexString(block.hash), keyHolder.getPrivateKey())
         val signature = BlockSignature(value, publicKey)
         val pendingBlock = PendingBlock(block, signature)
         signatureCollector.setPendingBlock(pendingBlock)
@@ -117,7 +117,7 @@ class BlockCreationProcessor(
                     height,
                     hash,
                     time,
-                    HashUtils.toHexString(publicKey),
+                    ByteUtils.toHexString(publicKey),
                     TransactionUtils.calculateMerkleRoot(transactions),
                     transactions
                 ).sign(privateKey)
@@ -127,7 +127,7 @@ class BlockCreationProcessor(
                     height,
                     hash,
                     time,
-                    HashUtils.toHexString(publicKey),
+                    ByteUtils.toHexString(publicKey),
                     genesisBlock.epochIndex + 1,
                     delegateService.getActiveDelegates()
                 ).sign(privateKey)
@@ -139,7 +139,7 @@ class BlockCreationProcessor(
 
     private fun prepareTransactions(pendingTransactions: MutableSet<UTransaction>): MutableSet<BaseTransaction> {
         val fees = pendingTransactions.map { it.fee }.sum()
-        val delegate = delegateService.getByPublicKey(HashUtils.toHexString(keyHolder.getPublicKey()))
+        val delegate = delegateService.getByPublicKey(ByteUtils.toHexString(keyHolder.getPublicKey()))
         val rewardTransactionData = RewardTransactionData((fees + consensusProperties.rewardBlock!!),
             consensusProperties.feeRewardTx!!, delegate.address, consensusProperties.genesisAddress!!)
 
