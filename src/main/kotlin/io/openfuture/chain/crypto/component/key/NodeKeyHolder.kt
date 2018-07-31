@@ -7,7 +7,6 @@ import io.openfuture.chain.network.property.NodeProperties
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Component
 import java.io.File
-import java.nio.charset.Charset
 import javax.annotation.PostConstruct
 
 @Component
@@ -25,8 +24,8 @@ class NodeKeyHolder(
     private fun init() {
         generatePrivatePublicKeysIfNotExist()
 
-        val privateKeyValue = File(properties.privateKeyPath).readText(Charset.forName("UTF-8"))
-        val publicKeyValue = File(properties.publicKeyPath).readText(Charset.forName("UTF-8"))
+        val privateKeyValue = File(properties.privateKeyPath).readText(Charsets.UTF_8)
+        val publicKeyValue = File(properties.publicKeyPath).readText(Charsets.UTF_8)
 
         privateKey = ByteUtils.fromHexString(privateKeyValue)
         publicKey = ByteUtils.fromHexString(publicKeyValue)
