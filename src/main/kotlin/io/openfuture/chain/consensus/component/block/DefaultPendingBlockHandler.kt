@@ -8,6 +8,7 @@ import io.openfuture.chain.consensus.service.MainBlockService
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.component.key.NodeKeyHolder
+import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.domain.NetworkBlockApprovalMessage
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.network.domain.NetworkMainBlock
@@ -57,8 +58,12 @@ class DefaultPendingBlockHandler(
                 observable = block
                 stage = ObserverStage.PREPARE
                 timeSlotNumber = blockSlotNumber
-                val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
-                val message = NetworkBlockApprovalMessage(ObserverStage.PREPARE.getId(), block.height, block.hash, publicKey)
+                val message = NetworkBlockApprovalMessage(
+                    ObserverStage.PREPARE.getId(),
+                    block.height,
+                    block.hash,
+                    ByteUtils.toHexString(keyHolder.getPublicKey()),
+                    SignatureUtils.sign(block.getBytes(), keyHolder.getPrivateKey()))
                 networkService.broadcast(message)
             }
         }
@@ -79,14 +84,22 @@ class DefaultPendingBlockHandler(
         if (message.hash != observable!!.hash) {
             return
         }
-        if (!prepareVotes.containsKey(message.publicKey)) {
+        val signatureValid = SignatureUtils
+            .verify(observable!!.getBytes(), message.signature, ByteUtils.fromHexString(message.publicKey))
+        if (!prepareVotes.containsKey(message.publicKey) && signatureValid) {
             prepareVotes[message.publicKey] = delegate
             networkService.broadcast(message)
         }
         if (prepareVotes.size > (delegates.size - 1) / 3) {
             this.stage = ObserverStage.COMMIT
             val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
-            val commitMessage = NetworkBlockApprovalMessage(ObserverStage.COMMIT.getId(), message.height, message.hash, publicKey)
+            val commitMessage = NetworkBlockApprovalMessage(
+                ObserverStage.COMMIT.getId(),
+                message.height,
+                message.hash,
+                publicKey,
+                SignatureUtils.sign(observable!!.getBytes(), keyHolder.getPrivateKey())
+            )
             networkService.broadcast(commitMessage)
         }
     }
@@ -96,11 +109,13 @@ class DefaultPendingBlockHandler(
         val delegate = delegates.find { message.publicKey == it.publicKey } ?: return
 
         val blockCommits = commitVotes[message.hash]
-        if (null != blockCommits && !blockCommits.contains(delegate)) {
+        val block = pendingBlocks.find { it.hash == message.hash } ?: return
+        val signatureValid = SignatureUtils
+            .verify(block.getBytes(), message.signature, ByteUtils.fromHexString(message.publicKey))
+        if (null != blockCommits && !blockCommits.contains(delegate) && signatureValid) {
             blockCommits.add(delegate)
             networkService.broadcast(message)
             if (blockCommits.size > (delegates.size - 1) / 3 * 2) {
-                val block = pendingBlocks.find { it.hash == message.hash }
                 when (block) {
                     is MainBlock -> mainBlockService.save(block)
                     is GenesisBlock -> genesisBlockService.save(block)
