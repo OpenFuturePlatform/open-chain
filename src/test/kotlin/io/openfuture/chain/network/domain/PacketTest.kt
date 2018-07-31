@@ -256,28 +256,22 @@ class PacketTest {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBlockApprovalMessage() {
+        val buf = createBuffer("000a00000005312e302e30000000000756b5b30000000300000000000000010000000468617368000000097075626c69634b6579")
         val message = BlockApprovalMessage(
             ObserverStage.COMMIT,
             1L,
             "hash",
             "publicKey"
         )
-
         val result = NetworkBlockApprovalMessage(message)
+        result.version = "1.0.0"
+        result.timestamp = 123123123
 
         assertThat(result.hash).isEqualTo(message.hash)
         assertThat(result.height).isEqualTo(message.height)
         assertThat(result.publicKey).isEqualTo(message.publicKey)
         assertThat(result.stage.value).isEqualTo(message.stage.value)
-    }
-
-    @Test
-    fun readShouldFillEntityWithExactValuesFromObserverStage() {
-        val stage = ObserverStage.COMMIT
-
-        val result = NetworkObserverStage(stage)
-
-        assertThat(result.value).isEqualTo(stage.value)
+        read(result, buf)
     }
 
     private fun read(packet: Packet, buf: ByteBuf) {
