@@ -12,8 +12,8 @@ class ExtendedKeyTest {
     fun rootExtendedKeyShouldBeGeneratedAccordingToBip32Specification() {
         val serializer = ExtendedKeySerializer()
         val seed = ByteUtils.fromHexString("000102030405060708090a0b0c0d0e0f")
-        val expectedPrivate = "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
-        val expectedPublic = "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8"
+        val expectedPrivate = "xprv9s21ZrQH143K3e56yqTX9wsqYLqfHnc2j1hR846DGgk1g4jzVUEgoq37n5Hp45CLSr5hNZaYYeMZSCVFpdVmGJYEYiL13QMzoy4igY7zKCE"
+        val expectedPublic = "xpub661MyMwAqRbcG89a5rzXX5pa6Ng9hFKt6Ed1vSVpq2GzYs5931YwMdMbdMREX9TSZupu8DPotD3JF6EXFGpsUYGbN2saY3ZzE76FHBS7ajD"
 
         val key = ExtendedKey.root(seed)
         val serializedPrivateKey = serializer.serializePrivate(key)
