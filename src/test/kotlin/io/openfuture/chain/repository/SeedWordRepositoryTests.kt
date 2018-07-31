@@ -1,7 +1,8 @@
 package io.openfuture.chain.repository
 
 import io.openfuture.chain.config.RepositoryTests
-import io.openfuture.chain.entity.SeedWord
+import io.openfuture.chain.consensus.repository.SeedWordRepository
+import io.openfuture.chain.crypto.model.entity.SeedWord
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired

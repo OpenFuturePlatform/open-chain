@@ -1,6 +1,6 @@
 package io.openfuture.chain.rpc.domain.crypto
 
-import io.openfuture.chain.annotation.AddressChecksum
+import io.openfuture.chain.rpc.annotation.AddressChecksum
 import javax.validation.constraints.NotBlank
 
 data class ValidateAddressRequest(

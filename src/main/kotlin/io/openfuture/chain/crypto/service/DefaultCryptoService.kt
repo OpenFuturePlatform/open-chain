@@ -6,10 +6,10 @@ import io.openfuture.chain.crypto.component.key.ExtendedKeySerializer
 import io.openfuture.chain.crypto.component.key.PrivateKeyManager
 import io.openfuture.chain.crypto.component.seed.SeedCalculator
 import io.openfuture.chain.crypto.component.seed.SeedPhraseGenerator
-import io.openfuture.chain.crypto.dictionary.PhraseLength
-import io.openfuture.chain.crypto.domain.ECKey
-import io.openfuture.chain.crypto.domain.ExtendedKey
-import io.openfuture.chain.crypto.validation.seed.SeedPhraseValidator
+import io.openfuture.chain.crypto.model.dictionary.PhraseLength
+import io.openfuture.chain.crypto.model.dto.ECKey
+import io.openfuture.chain.crypto.model.dto.ExtendedKey
+import io.openfuture.chain.crypto.validation.SeedPhraseValidator
 import io.openfuture.chain.rpc.domain.crypto.AccountDto
 import io.openfuture.chain.rpc.domain.crypto.WalletDto
 import io.openfuture.chain.rpc.domain.crypto.key.KeyDto

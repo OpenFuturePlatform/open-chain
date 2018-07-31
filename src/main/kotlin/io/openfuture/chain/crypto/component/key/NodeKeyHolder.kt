@@ -1,9 +1,9 @@
 package io.openfuture.chain.crypto.component.key
 
 import io.openfuture.chain.crypto.component.seed.SeedCalculator
-import io.openfuture.chain.crypto.domain.ExtendedKey
+import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import io.openfuture.chain.crypto.service.CryptoService
-import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.network.property.NodeProperties
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Component
 import java.io.File

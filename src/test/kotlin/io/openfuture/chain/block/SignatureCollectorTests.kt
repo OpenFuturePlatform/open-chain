@@ -2,16 +2,18 @@ package io.openfuture.chain.block
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
+import io.openfuture.chain.consensus.component.block.SignatureCollector
+import io.openfuture.chain.consensus.component.block.TimeSlot
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.domain.block.PendingBlock
-import io.openfuture.chain.domain.block.Signature
-import io.openfuture.chain.entity.block.Block
-import io.openfuture.chain.entity.block.GenesisBlock
-import io.openfuture.chain.entity.block.MainBlock
+import io.openfuture.chain.consensus.model.dto.block.PendingBlock
+import io.openfuture.chain.consensus.model.dto.block.BlockSignature
+import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
+import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.property.ConsensusProperties
-import io.openfuture.chain.service.GenesisBlockService
-import io.openfuture.chain.service.MainBlockService
+import io.openfuture.chain.consensus.property.ConsensusProperties
+import io.openfuture.chain.consensus.service.GenesisBlockService
+import io.openfuture.chain.consensus.service.MainBlockService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -122,7 +124,7 @@ class SignatureCollectorTests : ServiceTests() {
             "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719",
             mutableSetOf()
         ).sign(ByteArray(1))
-        val signature = Signature("value", "public_key")
+        val signature = BlockSignature("value", "public_key")
         return PendingBlock(block, signature)
     }
 
@@ -135,7 +137,7 @@ class SignatureCollectorTests : ServiceTests() {
             1,
             setOf()
         ).sign(ByteArray(1))
-        val signature = Signature("value", "public_key")
+        val signature = BlockSignature("value", "public_key")
         return PendingBlock(block, signature)
     }
 

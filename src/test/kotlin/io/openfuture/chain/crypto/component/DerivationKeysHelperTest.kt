@@ -2,7 +2,7 @@ package io.openfuture.chain.crypto.component
 
 import io.openfuture.chain.crypto.component.key.DerivationKeysHelper
 import io.openfuture.chain.crypto.component.key.ExtendedKeySerializer
-import io.openfuture.chain.crypto.domain.ExtendedKey
+import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import org.assertj.core.api.Assertions.assertThat
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.junit.Test

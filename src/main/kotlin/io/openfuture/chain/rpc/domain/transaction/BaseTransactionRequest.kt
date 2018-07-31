@@ -1,7 +1,7 @@
 package io.openfuture.chain.rpc.domain.transaction
 
-import io.openfuture.chain.domain.transaction.data.BaseTransactionData
-import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
+import io.openfuture.chain.core.model.entity.transaction.UTransaction
+import io.openfuture.chain.consensus.model.dto.transaction.data.BaseTransactionData
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
 
