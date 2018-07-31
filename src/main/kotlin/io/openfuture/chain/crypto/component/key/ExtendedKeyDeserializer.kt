@@ -66,7 +66,7 @@ class ExtendedKeyDeserializer {
         return when {
             areEqual(keyType, ExtendedKeySerializer.xprv) -> true
             areEqual(keyType, ExtendedKeySerializer.xpub) -> false
-            else -> throw Exception("Invalid or unsupported key type")
+            else -> throw Exception("Invalid key type")
         }
     }
 

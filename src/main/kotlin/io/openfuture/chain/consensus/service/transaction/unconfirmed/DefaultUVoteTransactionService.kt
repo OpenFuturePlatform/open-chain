@@ -22,7 +22,7 @@ class DefaultUVoteTransactionService(
 
     @Transactional(readOnly = true)
     override fun get(hash: String): UVoteTransaction = repository.findOneByHash(hash)
-        ?: throw NotFoundException("Unconfirmed transaction with hash: $hash not exist!")
+        ?: throw NotFoundException("Unconfirmed transaction with hash: $hash not found")
 
     @Transactional(readOnly = true)
     override fun getAll(): MutableSet<UVoteTransaction> = repository.findAll().toMutableSet()

@@ -13,11 +13,11 @@ class DefaultCommonBlockService(
 
     @Transactional(readOnly = true)
     override fun getLast(): Block = repository.findFirstByOrderByHeightDesc()
-        ?: throw NotFoundException("Not found last block")
+        ?: throw NotFoundException("Last block not found")
 
     @Transactional(readOnly = true)
     override fun get(hash: String): Block = repository.findByHash(hash)
-        ?: throw NotFoundException("Not found block with such hash: $hash")
+        ?: throw NotFoundException("Block with hash: $hash not found")
 
     @Transactional(readOnly = true)
     override fun getBlocksAfterCurrentHash(hash: String): List<Block>? {

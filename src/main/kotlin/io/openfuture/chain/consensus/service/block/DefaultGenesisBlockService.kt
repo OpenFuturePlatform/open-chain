@@ -20,7 +20,7 @@ class DefaultGenesisBlockService(
 
     @Transactional(readOnly = true)
     override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()
-        ?: throw NotFoundException("Not found last block")
+        ?: throw NotFoundException("Last block not found")
 
     @Transactional
     override fun save(block: GenesisBlock): GenesisBlock = repository.save(block)
@@ -39,7 +39,8 @@ class DefaultGenesisBlockService(
             && isValidateActiveDelegates(block))
     }
 
-    private fun isValidEpochIndex(lastBlock: GenesisBlock, block: GenesisBlock): Boolean = (lastBlock.epochIndex + 1 == block.epochIndex)
+    private fun isValidEpochIndex(lastBlock: GenesisBlock, block: GenesisBlock): Boolean =
+        (lastBlock.epochIndex + 1 == block.epochIndex)
 
     private fun isValidateActiveDelegates(block: GenesisBlock): Boolean {
         val activeDelegates = block.activeDelegates

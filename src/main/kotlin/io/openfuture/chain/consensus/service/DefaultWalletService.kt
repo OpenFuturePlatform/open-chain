@@ -21,7 +21,7 @@ class DefaultWalletService(
 
     @Transactional(readOnly = true)
     override fun getByAddress(address: String): Wallet = repository.findOneByAddress(address)
-        ?: throw NotFoundException("Wallet with address: $address not exist!")
+        ?: throw NotFoundException("Wallet with address: $address not found")
 
     @Transactional(readOnly = true)
     override fun getBalanceByAddress(address: String): Long =

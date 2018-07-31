@@ -23,7 +23,7 @@ abstract class DefaultTransactionService<Entity : Transaction, UEntity : UTransa
     private lateinit var commonService: CommonTransactionService
 
     protected fun getUnconfirmed(hash: String): UEntity = uRepository.findOneByHash(hash)
-        ?: throw NotFoundException("Unconfirmed transaction with hash: $hash not exist!")
+        ?: throw NotFoundException("Unconfirmed transaction with hash: $hash not found")
 
     protected fun processAndSave(tx: Entity, block: MainBlock) {
         if (commonService.isExists(tx.hash)) {

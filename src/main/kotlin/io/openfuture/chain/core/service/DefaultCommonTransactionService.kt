@@ -13,7 +13,7 @@ class DefaultCommonTransactionService(
 
     @Transactional(readOnly = true)
     override fun get(hash: String): Transaction = repository.findOneByHash(hash)
-        ?: throw NotFoundException("Transaction with hash: $hash not exist!")
+        ?: throw NotFoundException("Transaction with hash: $hash not found")
 
     @Transactional(readOnly = true)
     override fun isExists(hash: String) : Boolean = null != repository.findOneByHash(hash)

@@ -29,7 +29,7 @@ class DefaultMainBlockService(
 
     @Transactional(readOnly = true)
     override fun getLast(): MainBlock = repository.findFirstByOrderByHeightDesc()
-        ?: throw NotFoundException("Not found last block")
+        ?: throw NotFoundException("Last block not found")
 
     @Transactional
     override fun add(dto: NetworkMainBlock) {

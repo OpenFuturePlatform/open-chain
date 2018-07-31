@@ -18,7 +18,7 @@ class DefaultUDelegateTransactionService(
 
     @Transactional(readOnly = true)
     override fun get(hash: String): UDelegateTransaction = repository.findOneByHash(hash)
-        ?: throw NotFoundException("Unconfirmed transaction with hash: $hash not exist!")
+        ?: throw NotFoundException("Unconfirmed transaction with hash: $hash not found")
 
     @Transactional(readOnly = true)
     override fun getAll(): MutableSet<UDelegateTransaction> = repository.findAll().toMutableSet()

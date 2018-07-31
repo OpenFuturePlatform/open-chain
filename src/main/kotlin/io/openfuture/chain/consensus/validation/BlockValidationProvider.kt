@@ -27,7 +27,7 @@ class BlockValidationProvider(
         val blockIsValid: Boolean = when (block) {
             is MainBlock -> mainBlockService.isValid(block)
             is GenesisBlock -> genesisBlockService.isValid(block)
-            else -> throw IllegalArgumentException("Wrong block type is found")
+            else -> throw IllegalArgumentException("Unknown block type")
         }
 
         val lastBlock = commonBlockService.getLast()
