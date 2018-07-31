@@ -1,7 +1,7 @@
 package io.openfuture.chain.network.client.handler
 
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.consensus.component.block.BlockObserver
+import io.openfuture.chain.consensus.component.block.PendingBlockHandler
 import io.openfuture.chain.consensus.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.consensus.model.dto.transaction.RewardTransactionDto
 import io.openfuture.chain.consensus.model.dto.transaction.TransferTransactionDto
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
 @Component
 @Scope("prototype")
 class MainBlockClientHandler(
-    private val blockObserver: BlockObserver
+    private val pendingBlockHandler: PendingBlockHandler
 ) : ClientHandler<NetworkMainBlock>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, networkBlock: NetworkMainBlock) {
@@ -32,7 +32,7 @@ class MainBlockClientHandler(
                 networkBlock.rewardTransactions),
             networkBlock.merkleHash
         )
-        blockObserver.addBlock(block)
+        pendingBlockHandler.addBlock(block)
     }
 
     private fun toTransactions(
