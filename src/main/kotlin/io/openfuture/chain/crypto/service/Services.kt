@@ -2,17 +2,16 @@ package io.openfuture.chain.crypto.service
 
 import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
-import io.openfuture.chain.rpc.domain.crypto.AccountDto
 
 interface CryptoService {
 
     fun generateSeedPhrase(): String
 
-    fun generateNewAccount(): AccountDto
+    fun getMasterKeys(seedPhrase: String): ExtendedKey
 
-    fun getRootAccount(seedPhrase: String): AccountDto
+    fun getDerivationKey(masterKeys: ExtendedKey, derivationPath: String): ExtendedKey
 
-    fun getDerivationKey(seedPhrase: String, derivationPath: String): ExtendedKey
+    fun getDefaultDerivationKey(masterKeys: ExtendedKey): ExtendedKey
 
     fun importKey(key: String): ExtendedKey
 
