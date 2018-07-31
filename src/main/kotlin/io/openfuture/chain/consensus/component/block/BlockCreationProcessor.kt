@@ -1,7 +1,6 @@
 package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.consensus.model.dto.transaction.data.RewardTransactionData
-import io.openfuture.chain.consensus.model.entity.Delegate
 import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.property.ConsensusProperties
@@ -17,7 +16,6 @@ import io.openfuture.chain.crypto.component.key.NodeKeyHolder
 import io.openfuture.chain.network.component.node.NodeClock
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Component
-import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.annotation.PostConstruct
@@ -32,7 +30,8 @@ class BlockCreationProcessor(
     private val clock: NodeClock,
     private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties,
-    private val timeSlotHelper: TimeSlotHelper
+    private val timeSlotHelper: TimeSlotHelper,
+    private val defaultPendingBlockHandler: DefaultPendingBlockHandler
 ) {
 
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
@@ -41,21 +40,21 @@ class BlockCreationProcessor(
     private var currentTimeSlot: Long = 0
 
     @PostConstruct
-    fun `a chto esly`() {
+    fun init() {
         while (true) {
             val timeSlot = timeSlotHelper.getSlotNumber()
             if (timeSlot > currentTimeSlot) {
                 currentTimeSlot = timeSlot
-                executor.submit { fireBlockCreation(timeSlot) }
+                executor.submit { fireBlockCreation() }
             }
             Thread.sleep(100)
         }
     }
 
-    private fun fireBlockCreation(timeSlot: Long) {
+    private fun fireBlockCreation() {
         val previousBlock = blockService.getLast()
         val genesisBlock = genesisBlockService.getLast()
-        val nextProducer = getBlockProducer(genesisBlock.activeDelegates, previousBlock.height, timeSlot)
+        val nextProducer = timeSlotHelper.getCurrentSlotOwner()
         if (nodePublicKey == nextProducer.publicKey) {
             create(previousBlock, genesisBlock)
         }
@@ -76,11 +75,7 @@ class BlockCreationProcessor(
                 delegateService.getActiveDelegates())
         }
         block.sign(privateKey)
-    }
-
-    private fun getBlockProducer(delegates: Set<Delegate>, previousBlockHeight: Long, slotNumber: Long): Delegate {
-        val random = Random(previousBlockHeight + slotNumber)
-        return delegates.shuffled(random).first()
+        defaultPendingBlockHandler.addBlock(block)
     }
 
     private fun prepareTransactions(pendingTransactions: MutableSet<UTransaction>): MutableSet<Transaction> {

@@ -12,12 +12,12 @@ import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Component
 
 @Component
-class BlockObserver(
+class DefaultPendingBlockHandler(
     private val timeSlotHelper: TimeSlotHelper,
     private val genesisBlockService: GenesisBlockService,
     private val mainBlockService: MainBlockService,
     private val keyHolder: NodeKeyHolder
-) {
+): PendingBlockHandler {
 
     private var observable: Block? = null
     private var timeSlotNumber: Long = 0
@@ -27,7 +27,7 @@ class BlockObserver(
     private val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
     private val commitVotes: MutableMap<String, MutableList<Delegate>> = mutableMapOf()
 
-    fun addBlock(block: Block) {
+    override fun addBlock(block: Block) {
         val blockSlotNumber = timeSlotHelper.getSlotNumber(block.timestamp)
         if (blockSlotNumber > timeSlotNumber) {
             this.reset()
@@ -51,12 +51,12 @@ class BlockObserver(
             stage = ObserverStage.PREPARE
             timeSlotNumber = blockSlotNumber
             val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
-            val prepareMessage = BlockApprovalMessage(ObserverStage.PREPARE, block.height, block.hash!!, publicKey)
+            val prepareMessage = BlockApprovalMessage(ObserverStage.PREPARE, block.height, block.hash, publicKey)
             // broadcast prepareMessage
         }
     }
 
-    fun handleApproveMessage(message: BlockApprovalMessage) {
+    override fun handleApproveMessage(message: BlockApprovalMessage) {
         val delegates = genesisBlockService.getLast().activeDelegates
         val delegate = delegates.find { message.publicKey == it.publicKey } ?: return
 
@@ -69,7 +69,7 @@ class BlockObserver(
                     prepareVotes[message.publicKey] = delegate
                     //broadcast message
                 }
-                if (prepareVotes.size + 1 > (delegates.size - 1) / 3) {
+                if (prepareVotes.size > (delegates.size - 1) / 3) {
                     this.stage = ObserverStage.COMMIT
                     val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
                     val commitMessage = BlockApprovalMessage(ObserverStage.COMMIT, message.height, message.hash, publicKey)
@@ -81,7 +81,7 @@ class BlockObserver(
                 if (null != blockCommits && !blockCommits.contains(delegate)) {
                     blockCommits.add(delegate)
                     //broadcast message
-                    if (blockCommits.size + 1 > (delegates.size - 1) / 3 * 2) {
+                    if (blockCommits.size> (delegates.size - 1) / 3 * 2) {
                         val block = pendingBlocks.find { it.hash == message.hash }
                         when (block) {
                             is MainBlock -> mainBlockService.save(block)
@@ -103,10 +103,4 @@ class BlockObserver(
         pendingBlocks.clear()
     }
 
-}
-
-enum class ObserverStage {
-    IDLE,
-    PREPARE,
-    COMMIT
 }

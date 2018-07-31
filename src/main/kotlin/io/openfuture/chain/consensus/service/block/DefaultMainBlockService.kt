@@ -1,6 +1,5 @@
 package io.openfuture.chain.consensus.service.block
 
-import io.openfuture.chain.consensus.component.block.TimeSlotHelper
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.model.entity.transaction.DelegateTransaction
 import io.openfuture.chain.consensus.model.entity.transaction.RewardTransaction
@@ -11,7 +10,6 @@ import io.openfuture.chain.consensus.util.TransactionUtils
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.transaction.Transaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,8 +17,6 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultMainBlockService(
     private val repository: MainBlockRepository,
-    private val clock: NodeClock,
-    private val timeSlot: TimeSlotHelper,
     private val voteTransactionService: VoteTransactionService,
     private val transferTransactionService: TransferTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
@@ -52,9 +48,7 @@ class DefaultMainBlockService(
     }
 
     override fun isValid(block: MainBlock): Boolean {
-        val currentTime = clock.networkTime()
-
-        return timeSlot.verifyTimeSlot(currentTime, block) && isTransactionsValid(block)
+        return isTransactionsValid(block)
     }
 
     private fun isTransactionsValid(block: MainBlock): Boolean {

@@ -17,7 +17,6 @@ class BlockValidationProvider(
     private val commonBlockService: CommonBlockService,
     private val mainBlockService: MainBlockService,
     private val genesisBlockService: GenesisBlockService,
-    private val timeSlot: TimeSlotHelper,
     private val clock: NodeClock
 ) {
 
@@ -32,7 +31,6 @@ class BlockValidationProvider(
 
         val lastBlock = commonBlockService.getLast()
         return blockIsValid
-                && timeSlot.verifyTimeSlot(currentTime, block)
                 && verifyBlockSignature(block)
                 && verifyPreviousHash(block, lastBlock)
                 && verifyHeight(block, lastBlock)

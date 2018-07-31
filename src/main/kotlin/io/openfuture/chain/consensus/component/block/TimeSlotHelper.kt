@@ -3,7 +3,6 @@ package io.openfuture.chain.consensus.component.block
 import io.openfuture.chain.consensus.model.entity.Delegate
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.GenesisBlockService
-import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.network.component.node.NodeClock
 import org.springframework.stereotype.Component
 import java.util.*
@@ -20,8 +19,6 @@ class TimeSlotHelper(
         return genesis.timestamp
     }
 
-    fun getSlotTimestamp(): Long = getEpochTime() + getSlotTime()
-
     fun getCurrentSlotOwner(): Delegate {
         val genesisBlock = genesisBlockService.getLast()
         val delegates = genesisBlock.activeDelegates
@@ -31,10 +28,5 @@ class TimeSlotHelper(
 
     fun getSlotNumber(time: Long = clock.networkTime()): Long
         = ((time - getEpochTime()) / properties.timeSlotDuration!!)
-
-    fun verifyTimeSlot(currentTime: Long, block: Block): Boolean
-        = (getSlotNumber(currentTime) == getSlotNumber(block.timestamp))
-
-    private fun getSlotTime(): Long = getSlotNumber() * properties.timeSlotDuration!!
 
 }
