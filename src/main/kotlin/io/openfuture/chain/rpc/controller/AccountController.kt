@@ -22,7 +22,14 @@ class AccountController(
 ) : BaseController() {
 
     @GetMapping("/doGenerate")
-    fun generateNewAccount(): AccountDto = cryptoService.generateNewAccount()
+    fun generateNewAccount(): RestResponse<AccountDto> {
+        val seedPhrase = cryptoService.generateSeedPhrase()
+        val masterKeys = cryptoService.getMasterKeys(seedPhrase)
+        val defaultDerivationKey = cryptoService.getDefaultDerivationKey(masterKeys)
+
+        val accountDto = AccountDto(seedPhrase, KeyDto(masterKeys.ecKey), WalletDto(defaultDerivationKey.ecKey))
+        return RestResponse(getResponseHeader(), accountDto)
+    }
 
     @GetMapping("/wallets/{address}/balance")
     fun getBalance(@PathVariable address: String): RestResponse<Long> {
@@ -35,17 +42,20 @@ class AccountController(
 
     @PostMapping("/doRestore")
     fun restore(@RequestBody @Valid keyRequest: RestoreRequest): RestResponse<AccountDto> {
-        val body = cryptoService.getRootAccount(keyRequest.seedPhrase!!)
-        return RestResponse(getResponseHeader(), body)
+        val masterKeys = cryptoService.getMasterKeys(keyRequest.seedPhrase!!)
+        val defaultDerivationKey = cryptoService.getDefaultDerivationKey(masterKeys)
+
+        val accountDto = AccountDto(keyRequest.seedPhrase!!, KeyDto(masterKeys.ecKey), WalletDto(defaultDerivationKey.ecKey))
+        return RestResponse(getResponseHeader(), accountDto)
     }
 
     @PostMapping("/doDerive")
     fun getDerivationAccount(@RequestBody @Valid keyRequest: DerivationKeyRequest): RestResponse<WalletDto> {
-        val key = cryptoService.getDerivationKey(keyRequest.seedPhrase!!, keyRequest.derivationPath!!)
-        val publicKey = cryptoService.serializePublicKey(key)
-        val privateKey = cryptoService.serializePrivateKey(key)
-        val body = WalletDto(KeyDto(publicKey, privateKey), key.ecKey.getAddress())
-        return RestResponse(getResponseHeader(), body)
+        val masterKeys = cryptoService.getMasterKeys(keyRequest.seedPhrase!!)
+        val derivationKey = cryptoService.getDerivationKey(masterKeys, keyRequest.derivationPath!!)
+        val walletDto = WalletDto(derivationKey.ecKey)
+
+        return RestResponse(getResponseHeader(), walletDto)
     }
 
     @PostMapping("/keys/doImport")

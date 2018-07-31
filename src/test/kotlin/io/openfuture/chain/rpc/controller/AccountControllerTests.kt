@@ -2,7 +2,6 @@ package io.openfuture.chain.rpc.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.openfuture.chain.config.ControllerTests
-import io.openfuture.chain.config.any
 import io.openfuture.chain.consensus.service.WalletService
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import io.openfuture.chain.crypto.service.CryptoService
@@ -64,11 +63,14 @@ class AccountControllerTests : ControllerTests() {
 
     @Test
     fun doRestoreShouldReturnRootAccountInfoWhenSeedPhraseSent() {
-        val accountDto = createAccountDto()
-        val expectedAccount = AccountDto("1 2 3 4 5 6 7 8 9 10 11 12", accountDto.keys, accountDto)
+        val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
+        val masterKeys = ExtendedKey.root(ByteArray(0))
+        val defaultWalletKeys = ExtendedKey.root(ByteArray(1))
+        val expectedAccount = AccountDto(seedPhrase, KeyDto(masterKeys.ecKey), WalletDto(defaultWalletKeys.ecKey))
         val expectedBody = getRestResponse(expectedAccount)
 
-        given(cryptoService.getRootAccount(expectedAccount.seedPhrase)).willReturn(expectedAccount)
+        given(cryptoService.getMasterKeys(expectedAccount.seedPhrase)).willReturn(masterKeys)
+        given(cryptoService.getDefaultDerivationKey(masterKeys)).willReturn(defaultWalletKeys)
 
         val result = webClient.post().uri("/rpc/accounts/doRestore")
             .body(Mono.just(RestoreRequest(expectedAccount.seedPhrase)), RestoreRequest::class.java)
@@ -85,13 +87,14 @@ class AccountControllerTests : ControllerTests() {
     fun doDeriveReturnDerivationKeyWhenSeedPhraseDerivationPathAndSent() {
         val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
         val derivationPath = "m/0"
-        val masterKey = ExtendedKey.root(ByteArray(32))
         val derivationKeyRequest = DerivationKeyRequest(seedPhrase, derivationPath)
-        val expectedBody = getRestResponse(createAccountDto())
+        val masterKeys = ExtendedKey.root(ByteArray(0))
+        val defaultWalletKeys = ExtendedKey.root(ByteArray(1))
+        val expectedWallet = WalletDto(defaultWalletKeys.ecKey)
+        val expectedBody = getRestResponse(expectedWallet)
 
-        given(cryptoService.serializePublicKey(any(ExtendedKey::class.java))).willReturn("1")
-        given(cryptoService.serializePrivateKey(any(ExtendedKey::class.java))).willReturn("2")
-        given(cryptoService.getDerivationKey(seedPhrase, derivationPath)).willReturn(masterKey)
+        given(cryptoService.getMasterKeys(seedPhrase)).willReturn(masterKeys)
+        given(cryptoService.getDerivationKey(masterKeys, derivationPath)).willReturn(defaultWalletKeys)
 
         val result = webClient.post().uri("/rpc/accounts/doDerive")
             .body(Mono.just(derivationKeyRequest), DerivationKeyRequest::class.java)
@@ -124,7 +127,7 @@ class AccountControllerTests : ControllerTests() {
             .isEqualTo(ObjectMapper().writeValueAsString(expectedResponse.body))
     }
 
-    private fun createAccountDto(): WalletDto =
+    private fun createWalletDto(): WalletDto =
         WalletDto(KeyDto("1", "2"), "0x83a1e77Bd25daADd7A889BC36AC207A7D39CFD02")
 
     private fun <T> getRestResponse(body: T): RestResponse<T> {
