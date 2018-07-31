@@ -19,7 +19,7 @@ import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.times
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
+import org.springframework.scheduling.TaskScheduler
 import java.util.*
 
 class SignatureCollectorTests : ServiceTests() {
@@ -29,7 +29,7 @@ class SignatureCollectorTests : ServiceTests() {
     @Mock private lateinit var properties: ConsensusProperties
     @Mock private lateinit var timeSlot: TimeSlot
     @Mock private lateinit var clock: NodeClock
-    @Mock private lateinit var scheduler: ThreadPoolTaskScheduler
+    @Mock private lateinit var scheduler: TaskScheduler
 
     private lateinit var signatureCollector: SignatureCollector
 

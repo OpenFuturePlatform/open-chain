@@ -1,7 +1,6 @@
 package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.config.ServiceTests
-import io.openfuture.chain.config.any
 import io.openfuture.chain.consensus.model.dto.block.BlockSignature
 import io.openfuture.chain.consensus.model.dto.block.PendingBlock
 import io.openfuture.chain.consensus.model.entity.Delegate
