@@ -6,11 +6,12 @@ import io.openfuture.chain.consensus.model.entity.Delegate
 import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
 import io.openfuture.chain.network.domain.NetworkDelegate
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
+import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 @Component
-@Scope("prototype")
+@Scope(SCOPE_PROTOTYPE)
 class GenesisBlockClientHandler(
     private val pendingBlockHandler: PendingBlockHandler
 ) : ClientHandler<NetworkGenesisBlock>() {

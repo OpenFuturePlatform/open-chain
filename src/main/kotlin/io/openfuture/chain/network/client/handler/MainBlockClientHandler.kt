@@ -9,12 +9,13 @@ import io.openfuture.chain.consensus.model.dto.transaction.VoteTransactionDto
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.Transaction
 import io.openfuture.chain.network.domain.NetworkMainBlock
+import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 
 @Component
-@Scope("prototype")
+@Scope(SCOPE_PROTOTYPE)
 class MainBlockClientHandler(
     private val pendingBlockHandler: PendingBlockHandler
 ) : ClientHandler<NetworkMainBlock>() {
