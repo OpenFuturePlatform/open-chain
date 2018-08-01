@@ -9,8 +9,6 @@ import io.openfuture.chain.consensus.model.dto.transaction.data.VoteTransactionD
 import io.openfuture.chain.consensus.service.UDelegateTransactionService
 import io.openfuture.chain.consensus.service.UTransferTransactionService
 import io.openfuture.chain.consensus.service.UVoteTransactionService
-import io.openfuture.chain.rpc.controller.base.BaseController
-import io.openfuture.chain.rpc.domain.RestResponse
 import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.VoteTransactionRequest
@@ -25,40 +23,39 @@ import javax.validation.Valid
 class TransactionController(
     private val uVoteTransactionService: UVoteTransactionService,
     private val uTransferTransactionService: UTransferTransactionService,
-    private val uDelegateTransactionService: UDelegateTransactionService
-) : BaseController() {
+    private val uDelegateTransactionService: UDelegateTransactionService) {
 
     @PostMapping("/votes/doGenerateHash")
-    fun getVoteBytes(@Valid @RequestBody data: VoteTransactionData): RestResponse<ByteArray> {
-        return RestResponse(getResponseHeader(), data.getBytes())
+    fun getVoteBytes(@Valid @RequestBody data: VoteTransactionData): ByteArray {
+        return data.getBytes()
     }
 
     @PostMapping("/votes")
-    fun addVote(@Valid @RequestBody request: VoteTransactionRequest): RestResponse<VoteTransactionDto> {
+    fun addVote(@Valid @RequestBody request: VoteTransactionRequest): VoteTransactionDto {
         val tx = uVoteTransactionService.add(request)
-        return RestResponse(getResponseHeader(), VoteTransactionDto(tx))
+        return VoteTransactionDto(tx)
     }
 
     @PostMapping("/transfers/doGenerateHash")
-    fun getTransferBytes(@Valid @RequestBody data: TransferTransactionData): RestResponse<ByteArray> {
-        return RestResponse(getResponseHeader(), data.getBytes())
+    fun getTransferBytes(@Valid @RequestBody data: TransferTransactionData): ByteArray {
+        return data.getBytes()
     }
 
     @PostMapping("/transfers")
-    fun addTransfer(@Valid @RequestBody request: TransferTransactionRequest): RestResponse<TransferTransactionDto> {
+    fun addTransfer(@Valid @RequestBody request: TransferTransactionRequest): TransferTransactionDto {
         val tx = uTransferTransactionService.add(request)
-        return RestResponse(getResponseHeader(), TransferTransactionDto(tx))
+        return TransferTransactionDto(tx)
     }
 
     @PostMapping("/delegates/doGenerateHash")
-    fun getDelegateBytes(@Valid @RequestBody data: DelegateTransactionData): RestResponse<ByteArray> {
-        return RestResponse(getResponseHeader(), data.getBytes())
+    fun getDelegateBytes(@Valid @RequestBody data: DelegateTransactionData): ByteArray {
+        return data.getBytes()
     }
 
     @PostMapping("/delegates")
-    fun addDelegates(@Valid @RequestBody request: DelegateTransactionRequest): RestResponse<DelegateTransactionDto> {
+    fun addDelegates(@Valid @RequestBody request: DelegateTransactionRequest): DelegateTransactionDto {
         val tx = uDelegateTransactionService.add(request)
-        return RestResponse(getResponseHeader(), DelegateTransactionDto(tx))
+        return DelegateTransactionDto(tx)
     }
 
 }

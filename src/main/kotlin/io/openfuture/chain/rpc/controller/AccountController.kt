@@ -2,8 +2,6 @@ package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.consensus.service.WalletService
 import io.openfuture.chain.crypto.service.CryptoService
-import io.openfuture.chain.rpc.controller.base.BaseController
-import io.openfuture.chain.rpc.domain.RestResponse
 import io.openfuture.chain.rpc.domain.crypto.AccountDto
 import io.openfuture.chain.rpc.domain.crypto.ValidateAddressRequest
 import io.openfuture.chain.rpc.domain.crypto.WalletDto
@@ -18,59 +16,52 @@ import javax.validation.Valid
 @RequestMapping("/rpc/accounts")
 class AccountController(
     private val cryptoService: CryptoService,
-    private val walletService: WalletService
-) : BaseController() {
+    private val walletService: WalletService) {
 
     @GetMapping("/doGenerate")
-    fun generateNewAccount(): RestResponse<AccountDto> {
+    fun generateNewAccount(): AccountDto {
         val seedPhrase = cryptoService.generateSeedPhrase()
         val masterKeys = cryptoService.getMasterKey(seedPhrase)
         val defaultDerivationKey = cryptoService.getDefaultDerivationKey(masterKeys)
 
-        val accountDto = AccountDto(seedPhrase, KeyDto(masterKeys.ecKey), WalletDto(defaultDerivationKey.ecKey))
-        return RestResponse(getResponseHeader(), accountDto)
+        return AccountDto(seedPhrase, KeyDto(masterKeys.ecKey), WalletDto(defaultDerivationKey.ecKey))
     }
 
     @GetMapping("/wallets/{address}/balance")
-    fun getBalance(@PathVariable address: String): RestResponse<Long> {
-        val body = walletService.getBalanceByAddress(address)
-        return RestResponse(getResponseHeader(), body)
+    fun getBalance(@PathVariable address: String): Long {
+        return walletService.getBalanceByAddress(address)
     }
 
     @PostMapping("/wallets/validateAddress")
     fun validateAddress(@RequestBody @Valid request: ValidateAddressRequest): ValidateAddressRequest = request
 
     @PostMapping("/doRestore")
-    fun restore(@RequestBody @Valid keyRequest: RestoreRequest): RestResponse<AccountDto> {
+    fun restore(@RequestBody @Valid keyRequest: RestoreRequest): AccountDto {
         val masterKeys = cryptoService.getMasterKey(keyRequest.seedPhrase!!)
         val defaultDerivationKey = cryptoService.getDefaultDerivationKey(masterKeys)
 
-        val accountDto = AccountDto(keyRequest.seedPhrase!!, KeyDto(masterKeys.ecKey), WalletDto(defaultDerivationKey.ecKey))
-        return RestResponse(getResponseHeader(), accountDto)
+        return AccountDto(keyRequest.seedPhrase!!, KeyDto(masterKeys.ecKey), WalletDto(defaultDerivationKey.ecKey))
     }
 
     @PostMapping("/doDerive")
-    fun getDerivationAccount(@RequestBody @Valid keyRequest: DerivationKeyRequest): RestResponse<WalletDto> {
+    fun getDerivationAccount(@RequestBody @Valid keyRequest: DerivationKeyRequest): WalletDto {
         val masterKeys = cryptoService.getMasterKey(keyRequest.seedPhrase!!)
         val derivationKey = cryptoService.getDerivationKey(masterKeys, keyRequest.derivationPath!!)
-        val walletDto = WalletDto(derivationKey.ecKey)
 
-        return RestResponse(getResponseHeader(), walletDto)
+        return WalletDto(derivationKey.ecKey)
     }
 
     @PostMapping("/keys/doImport")
-    fun importKey(@RequestBody @Valid request: ImportKeyRequest): RestResponse<WalletDto> {
+    fun importKey(@RequestBody @Valid request: ImportKeyRequest): WalletDto {
         val key = cryptoService.importKey(request.decodedKey!!)
         val publicKey = cryptoService.serializePublicKey(key)
         val privateKey = if (!key.ecKey.isPrivateEmpty()) cryptoService.serializePrivateKey(key) else null
-        val body = WalletDto(KeyDto(publicKey, privateKey), key.ecKey.getAddress())
-        return RestResponse(getResponseHeader(), body)
+        return WalletDto(KeyDto(publicKey, privateKey), key.ecKey.getAddress())
     }
 
     @PostMapping("/keys/doImportWif")
-    fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): RestResponse<WalletDto> {
-        val body = WalletDto(cryptoService.importWifKey(request.decodedKey!!))
-        return RestResponse(getResponseHeader(), body)
+    fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): WalletDto {
+        return WalletDto(cryptoService.importWifKey(request.decodedKey!!))
     }
 
 }
