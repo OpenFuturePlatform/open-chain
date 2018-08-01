@@ -2,6 +2,7 @@ package io.openfuture.chain.consensus.service
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.service.CommonBlockService
+import io.openfuture.chain.core.service.GenesisBlockService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

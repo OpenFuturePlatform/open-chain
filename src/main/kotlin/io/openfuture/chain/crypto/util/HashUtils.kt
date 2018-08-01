@@ -14,8 +14,8 @@ object HashUtils {
 
     private const val SHA256 = "SHA-256"
     private const val HMACSHA512 = "HmacSHA512"
-    private const val KEY_SIZE = 512
-    private const val ITERATION_COUNT = 2048
+    private const val PBKDF2_KEY_SIZE = 512
+    private const val PBKDF2_ITERATION_COUNT = 2048
 
 
     fun doubleSha256(bytes: ByteArray): ByteArray = sha256(sha256(bytes))
@@ -48,10 +48,10 @@ object HashUtils {
         return mac.doFinal(message)
     }
 
-    fun hashPBKDF2(chars: CharArray, salt: ByteArray): ByteArray {
+    fun pbkdf2(chars: CharArray, salt: ByteArray): ByteArray {
         val generator = PKCS5S2ParametersGenerator(SHA512Digest())
-        generator.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(chars), salt, ITERATION_COUNT)
-        val key = generator.generateDerivedMacParameters(KEY_SIZE) as KeyParameter
+        generator.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(chars), salt, PBKDF2_ITERATION_COUNT)
+        val key = generator.generateDerivedMacParameters(PBKDF2_KEY_SIZE) as KeyParameter
         return key.key
     }
 

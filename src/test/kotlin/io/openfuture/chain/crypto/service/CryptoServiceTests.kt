@@ -94,6 +94,7 @@ class CryptoServiceTests : ServiceTests() {
         assertThat(privateKey).isEqualTo(expectedPrivateKey)
     }
 
+    @Test
     fun getMasterKeysShouldReturnMasterKeysPair() {
         val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
         val seed = ByteArray(32)
@@ -101,11 +102,30 @@ class CryptoServiceTests : ServiceTests() {
         given(seedPhraseValidator.isValid(seedPhrase)).willReturn(true)
         given(seedCalculator.calculateSeed(seedPhrase)).willReturn(seed)
 
-        val key = cryptoService.getMasterKeys(seedPhrase)
+        val key = cryptoService.getMasterKey(seedPhrase)
 
         assertExtendedKey(key)
     }
 
+    @Test
+    fun isValidAddressShouldReturnTrue() {
+        val address = "0x290DEcD9548b62A8D60345A988386Fc84Ba6BC95"
+
+        val result = cryptoService.isValidAddress(address, ByteArray(32))
+
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun isValidAddressShouldReturnFalse() {
+        val address = "0x290DEcD9548b62A8D60345A988386Fc84Ba6BC956"
+
+        val result = cryptoService.isValidAddress(address, ByteArray(32))
+
+        assertThat(result).isFalse()
+    }
+
+    @Test
     fun importKeyShouldReturnKeysValuesAndAddressWhenPrivateKeyImporting() {
         val decodedKey = "xpub661MyMwAqRbcF1xAwgn4pRrb25d3iSwvBC4DaTsNSUcoLZ6y4jgG2gtTGNjSVSvLzLMEawq1ghm1XkJ2QEzU3"
         val extendedKey = ExtendedKey(ByteArray(64))

@@ -1,5 +1,6 @@
 package io.openfuture.chain.crypto.component.seed
 
+import io.openfuture.chain.crypto.constants.SeedConstant
 import io.openfuture.chain.crypto.util.HashUtils
 import org.springframework.stereotype.Component
 import java.text.Normalizer
@@ -7,15 +8,12 @@ import java.text.Normalizer
 @Component
 class SeedCalculator {
 
-    private val fixedSalt = getUtf8Bytes("Openfuture")
-
-
     fun calculateSeed(seedPhrase: String, passwordPhrase: String = ""): ByteArray {
         val mnemonicChars = Normalizer.normalize(seedPhrase, Normalizer.Form.NFKD).toCharArray()
         val normalizedPassphrase = Normalizer.normalize(passwordPhrase, Normalizer.Form.NFKD)
         val passphraseSalt = getUtf8Bytes(normalizedPassphrase)
-        val salt = combine(fixedSalt, passphraseSalt)
-        return HashUtils.hashPBKDF2(mnemonicChars, salt)
+        val salt = combine(getUtf8Bytes(SeedConstant.SALT), passphraseSalt)
+        return HashUtils.pbkdf2(mnemonicChars, salt)
     }
 
     private fun combine(array1: ByteArray, array2: ByteArray): ByteArray {
@@ -25,8 +23,6 @@ class SeedCalculator {
         return bytes
     }
 
-    private fun getUtf8Bytes(string: String): ByteArray {
-        return string.toByteArray(charset("UTF-8"))
-    }
+    private fun getUtf8Bytes(string: String): ByteArray = string.toByteArray(Charsets.UTF_8)
 
 }

@@ -1,15 +1,14 @@
 package io.openfuture.chain.crypto.validation
 
-import io.openfuture.chain.consensus.repository.SeedWordRepository
 import io.openfuture.chain.crypto.constants.SeedConstant
 import io.openfuture.chain.crypto.constants.SeedConstant.BYTE_SIZE
 import io.openfuture.chain.crypto.constants.SeedConstant.DOUBLE_BYTE_SIZE
 import io.openfuture.chain.crypto.constants.SeedConstant.SECOND_BYTE_OFFSET
-import io.openfuture.chain.crypto.constants.SeedConstant.SECOND_BYTE_SKIP_BIT_SIZE
 import io.openfuture.chain.crypto.constants.SeedConstant.THIRD_BYTE_OFFSET
 import io.openfuture.chain.crypto.constants.SeedConstant.WORD_INDEX_SIZE
 import io.openfuture.chain.crypto.model.dictionary.PhraseLength
 import io.openfuture.chain.crypto.model.entity.SeedWord
+import io.openfuture.chain.crypto.repository.SeedWordRepository
 import io.openfuture.chain.crypto.util.HashUtils
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
@@ -27,6 +26,7 @@ class SeedPhraseValidator(
         private const val MAX_BYTE_SIZE_MOD = 7
         private const val OUT_OF_BYTE_SIZE = WORD_INDEX_SIZE - BYTE_SIZE
         private const val MAX_FIRST_BIT_INDEX_IN_TWO_BYTE = DOUBLE_BYTE_SIZE - WORD_INDEX_SIZE
+        private const val SECOND_BYTE_SKIP_BIT_SIZE = DOUBLE_BYTE_SIZE - WORD_INDEX_SIZE
         private const val THIRD_BYTE_SKIP_BIT_SIZE = BYTE_SIZE + MAX_FIRST_BIT_INDEX_IN_TWO_BYTE
     }
 

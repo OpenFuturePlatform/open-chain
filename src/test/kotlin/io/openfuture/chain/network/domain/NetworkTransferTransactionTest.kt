@@ -2,8 +2,8 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBufUtil
 import io.netty.buffer.Unpooled
-import io.openfuture.chain.consensus.model.dto.transaction.TransferTransactionDto
-import io.openfuture.chain.consensus.model.dto.transaction.data.TransferTransactionData
+import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
+import io.openfuture.chain.core.model.dto.transaction.data.TransferTransactionData
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
