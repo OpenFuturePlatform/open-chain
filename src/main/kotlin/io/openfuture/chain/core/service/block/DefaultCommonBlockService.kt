@@ -1,4 +1,4 @@
-package io.openfuture.chain.core.service.block.common
+package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.BaseBlock

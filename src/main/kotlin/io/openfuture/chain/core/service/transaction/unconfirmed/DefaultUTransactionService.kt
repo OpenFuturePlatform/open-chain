@@ -1,4 +1,4 @@
-package io.openfuture.chain.core.service.transaction.main.unconfirmed
+package io.openfuture.chain.core.service.transaction.unconfirmed
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.ValidationException

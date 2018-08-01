@@ -1,4 +1,4 @@
-package io.openfuture.chain.core.service.transaction.main
+package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.exception.NotFoundException

@@ -1,4 +1,4 @@
-package io.openfuture.chain.core.service.transaction.main
+package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.core.model.entity.Delegate
