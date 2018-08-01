@@ -13,7 +13,7 @@ class SeedCalculator {
         val normalizedPassphrase = Normalizer.normalize(passwordPhrase, Normalizer.Form.NFKD)
         val passphraseSalt = getUtf8Bytes(normalizedPassphrase)
         val salt = combine(getUtf8Bytes(SeedConstant.SALT), passphraseSalt)
-        return HashUtils.hashPBKDF2(mnemonicChars, salt)
+        return HashUtils.pbkdf2(mnemonicChars, salt)
     }
 
     private fun combine(array1: ByteArray, array2: ByteArray): ByteArray {

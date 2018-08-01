@@ -15,7 +15,7 @@ import io.openfuture.chain.core.service.CommonBlockService
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.UCommonTransactionService
-import io.openfuture.chain.crypto.component.key.NodeKeyHolder
+import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils

@@ -1,7 +1,5 @@
-package io.openfuture.chain.crypto.component.key
+package io.openfuture.chain.core.component
 
-import io.openfuture.chain.crypto.component.seed.SeedCalculator
-import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.network.property.NodeProperties
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -12,8 +10,7 @@ import javax.annotation.PostConstruct
 @Component
 class NodeKeyHolder(
     private val properties: NodeProperties,
-    private val cryptoService: CryptoService,
-    private val seedCalculator: SeedCalculator
+    private val cryptoService: CryptoService
 ) {
 
     private var privateKey: ByteArray? = null
@@ -24,11 +21,8 @@ class NodeKeyHolder(
     private fun init() {
         generatePrivatePublicKeysIfNotExist()
 
-        val privateKeyValue = File(properties.privateKeyPath).readText(Charsets.UTF_8)
-        val publicKeyValue = File(properties.publicKeyPath).readText(Charsets.UTF_8)
-
-        privateKey = ByteUtils.fromHexString(privateKeyValue)
-        publicKey = ByteUtils.fromHexString(publicKeyValue)
+        privateKey = ByteUtils.fromHexString(File(properties.privateKeyPath).readText(Charsets.UTF_8))
+        publicKey = ByteUtils.fromHexString(File(properties.publicKeyPath).readText(Charsets.UTF_8))
     }
 
     fun getPrivateKey(): ByteArray {
@@ -45,12 +39,10 @@ class NodeKeyHolder(
 
         if (!privateKeyFile.exists() || !publicKeyFile.exists()) {
             val seedPhrase = cryptoService.generateSeedPhrase()
-            val masterKey = ExtendedKey.root(seedCalculator.calculateSeed(seedPhrase))
-            val privateKeyValue = ByteUtils.toHexString(masterKey.ecKey.getPrivate())
-            val publicKeyValue = ByteUtils.toHexString(masterKey.ecKey.public)
+            val masterKey = cryptoService.getMasterKey(seedPhrase).ecKey
 
-            privateKeyFile.writeText(privateKeyValue, Charsets.UTF_8)
-            publicKeyFile.writeText(publicKeyValue, Charsets.UTF_8)
+            privateKeyFile.writeText(ByteUtils.toHexString(masterKey.getPrivate()), Charsets.UTF_8)
+            publicKeyFile.writeText(ByteUtils.toHexString(masterKey.public), Charsets.UTF_8)
         }
     }
 
