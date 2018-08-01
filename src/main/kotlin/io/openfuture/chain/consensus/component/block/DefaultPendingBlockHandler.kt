@@ -29,7 +29,7 @@ class DefaultPendingBlockHandler(
     private var timeSlotNumber: Long = 0
     private var stage: ObserverStage = ObserverStage.IDLE
 
-    private val pendingBlocks: MutableSet<Block> = mutableSetOf()
+    val pendingBlocks: MutableSet<Block> = mutableSetOf()
     private val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
     private val commitVotes: MutableMap<String, MutableList<Delegate>> = mutableMapOf()
 
