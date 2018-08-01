@@ -2,7 +2,6 @@ package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.consensus.service.HardwareInfoService
 import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.rpc.domain.node.HardwareInfo
 import org.springframework.context.ApplicationContext
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,19 +13,11 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/rpc/info")
 class NodeInfoController(
     private val nodeClock: NodeClock,
-    private val nodeProperties: NodeProperties,
     private val context: ApplicationContext,
     private val hardwareInfoService: HardwareInfoService) {
 
     @GetMapping("/getVersion")
-    fun getVersion(): String {
-        return nodeProperties.version!!
-    }
-
-    @GetMapping("/getTimestamp")
-    fun getTimestamp(): Long {
-        return nodeClock.nodeTime()
-    }
+    fun getVersion() { }
 
     @GetMapping("/getUptime")
     fun getUptime(): Long {

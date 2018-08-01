@@ -7,8 +7,6 @@ import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.property.NodeProperties
-import io.openfuture.chain.rpc.domain.ResponseHeader
-import io.openfuture.chain.rpc.domain.RestResponse
 import io.openfuture.chain.rpc.domain.crypto.AccountDto
 import io.openfuture.chain.rpc.domain.crypto.ValidateAddressRequest
 import io.openfuture.chain.rpc.domain.crypto.WalletDto
@@ -67,7 +65,6 @@ class AccountControllerTests : ControllerTests() {
         val masterKeys = ExtendedKey.root(ByteArray(0))
         val defaultWalletKeys = ExtendedKey.root(ByteArray(1))
         val expectedAccount = AccountDto(seedPhrase, KeyDto(masterKeys.ecKey), WalletDto(defaultWalletKeys.ecKey))
-        val expectedBody = getRestResponse(expectedAccount)
 
         given(cryptoService.getMasterKey(expectedAccount.seedPhrase)).willReturn(masterKeys)
         given(cryptoService.getDefaultDerivationKey(masterKeys)).willReturn(defaultWalletKeys)
@@ -76,11 +73,10 @@ class AccountControllerTests : ControllerTests() {
             .body(Mono.just(RestoreRequest(expectedAccount.seedPhrase)), RestoreRequest::class.java)
             .exchange()
             .expectStatus().isOk
-            .expectBody(RestResponse::class.java)
+            .expectBody(String::class.java)
             .returnResult().responseBody!!
 
-        assertThat(ObjectMapper().writeValueAsString(result.body))
-            .isEqualTo(ObjectMapper().writeValueAsString(expectedBody.body))
+        assertThat(result).isEqualTo(ObjectMapper().writeValueAsString(expectedAccount))
     }
 
     @Test
@@ -91,7 +87,6 @@ class AccountControllerTests : ControllerTests() {
         val masterKeys = ExtendedKey.root(ByteArray(0))
         val defaultWalletKeys = ExtendedKey.root(ByteArray(1))
         val expectedWallet = WalletDto(defaultWalletKeys.ecKey)
-        val expectedBody = getRestResponse(expectedWallet)
 
         given(cryptoService.getMasterKey(seedPhrase)).willReturn(masterKeys)
         given(cryptoService.getDerivationKey(masterKeys, derivationPath)).willReturn(defaultWalletKeys)
@@ -100,18 +95,16 @@ class AccountControllerTests : ControllerTests() {
             .body(Mono.just(derivationKeyRequest), DerivationKeyRequest::class.java)
             .exchange()
             .expectStatus().isOk
-            .expectBody(RestResponse::class.java)
+            .expectBody(String::class.java)
             .returnResult().responseBody!!
 
-        assertThat(ObjectMapper().writeValueAsString(result.body))
-            .isEqualTo(ObjectMapper().writeValueAsString(expectedBody.body))
+        assertThat(result).isEqualTo(ObjectMapper().writeValueAsString(expectedWallet))
     }
 
     @Test
     fun getBalanceShouldReturnWalletBalanceTest() {
         val address = "address"
         val expectedBalance = 1L
-        val expectedResponse = RestResponse(ResponseHeader(0, "1"), expectedBalance)
 
         given(walletService.getBalanceByAddress(address)).willReturn(expectedBalance)
         given(nodeClock.networkTime()).willReturn(0)
@@ -120,21 +113,10 @@ class AccountControllerTests : ControllerTests() {
         val actualResult = webClient.get().uri("/rpc/accounts/wallets/$address/balance")
             .exchange()
             .expectStatus().isOk
-            .expectBody(RestResponse::class.java)
+            .expectBody(String::class.java)
             .returnResult().responseBody!!
 
-        assertThat(ObjectMapper().writeValueAsString(actualResult.body))
-            .isEqualTo(ObjectMapper().writeValueAsString(expectedResponse.body))
-    }
-
-    private fun createWalletDto(): WalletDto =
-        WalletDto(KeyDto("1", "2"), "0x83a1e77Bd25daADd7A889BC36AC207A7D39CFD02")
-
-    private fun <T> getRestResponse(body: T): RestResponse<T> {
-        given(nodeClock.networkTime()).willReturn(0)
-        given(nodeProperties.version).willReturn("0")
-
-        return RestResponse(ResponseHeader(0, "0"), body)
+        assertThat(actualResult).isEqualTo(ObjectMapper().writeValueAsString(expectedBalance))
     }
 
 }

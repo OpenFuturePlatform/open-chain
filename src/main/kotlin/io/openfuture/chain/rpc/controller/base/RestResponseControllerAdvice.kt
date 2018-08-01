@@ -2,7 +2,6 @@ package io.openfuture.chain.rpc.controller.base
 
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.property.NodeProperties
-import io.openfuture.chain.rpc.domain.ResponseHeader
 import io.openfuture.chain.rpc.domain.RestResponse
 import org.springframework.core.MethodParameter
 import org.springframework.http.MediaType
@@ -28,11 +27,7 @@ class RestResponseControllerAdvice(
     override fun beforeBodyWrite(body: Any?, returnType: MethodParameter, selectedContentType: MediaType,
                                  selectedConverterType: Class<out HttpMessageConverter<*>>,
                                  request: ServerHttpRequest, response: ServerHttpResponse): RestResponse<Any?> {
-        return RestResponse(getResponseHeader(), body)
-    }
-
-    private fun getResponseHeader(): ResponseHeader {
-        return ResponseHeader(nodeClock.networkTime(), nodeProperties.version!!)
+        return RestResponse(nodeClock.networkTime(), nodeProperties.version!!, body)
     }
 
 }
