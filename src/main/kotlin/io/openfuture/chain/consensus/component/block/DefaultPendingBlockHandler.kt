@@ -25,13 +25,14 @@ class DefaultPendingBlockHandler(
     private val networkService: NetworkService
 ) : PendingBlockHandler {
 
+    val pendingBlocks: MutableSet<Block> = mutableSetOf()
+    val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
+    val commitVotes: MutableMap<String, MutableList<Delegate>> = mutableMapOf()
+
     private var observable: Block? = null
     private var timeSlotNumber: Long = 0
     private var stage: ObserverStage = ObserverStage.IDLE
 
-    val pendingBlocks: MutableSet<Block> = mutableSetOf()
-    val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
-    private val commitVotes: MutableMap<String, MutableList<Delegate>> = mutableMapOf()
 
     override fun addBlock(block: Block) {
         val blockSlotNumber = timeSlotHelper.getSlotNumber(block.timestamp)
