@@ -4,13 +4,22 @@ import io.netty.buffer.ByteBuf
 import io.openfuture.chain.consensus.annotation.NoArgConstructor
 
 @NoArgConstructor
-data class NetworkBlockApprovalMessage(
+data class NetworkBlockApproval(
     var stageId: Int,
     var height: Long,
     var hash: String,
     var publicKey: String,
-    var signature: String
+    var signature: String? = null
 ) : Packet() {
+
+    fun getBytes(): ByteArray {
+        return StringBuilder()
+            .append(stageId)
+            .append(height)
+            .append(hash)
+            .append(publicKey)
+            .toString().toByteArray()
+    }
 
     override fun readParams(buffer: ByteBuf) {
         stageId = buffer.readInt()
@@ -30,7 +39,7 @@ data class NetworkBlockApprovalMessage(
         buffer.writeCharSequence(hash, Charsets.UTF_8)
         buffer.writeInt(publicKey.length)
         buffer.writeCharSequence(publicKey, Charsets.UTF_8)
-        buffer.writeInt(signature.length)
+        buffer.writeInt(signature!!.length)
         buffer.writeCharSequence(signature, Charsets.UTF_8)
     }
 

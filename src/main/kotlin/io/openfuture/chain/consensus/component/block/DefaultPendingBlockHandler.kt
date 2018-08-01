@@ -1,16 +1,15 @@
 package io.openfuture.chain.consensus.component.block
 
+import io.openfuture.chain.consensus.component.block.BlockApprovalStage.*
 import io.openfuture.chain.consensus.model.entity.Delegate
-import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
-import io.openfuture.chain.consensus.service.GenesisBlockService
+import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.consensus.service.MainBlockService
-import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.component.key.NodeKeyHolder
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.domain.NetworkBlockApprovalMessage
-import io.openfuture.chain.network.domain.NetworkGenesisBlock
+import io.openfuture.chain.network.domain.NetworkBlockApproval
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.network.service.NetworkService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -18,108 +17,79 @@ import org.springframework.stereotype.Component
 
 @Component
 class DefaultPendingBlockHandler(
-    private val timeSlotHelper: TimeSlotHelper,
-    private val genesisBlockService: GenesisBlockService,
+    private val epochService: EpochService,
     private val mainBlockService: MainBlockService,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkService
 ) : PendingBlockHandler {
 
-    private var observable: Block? = null
+    private var observable: MainBlock? = null
     private var timeSlotNumber: Long = 0
-    private var stage: ObserverStage = ObserverStage.IDLE
+    private var stage: BlockApprovalStage = IDLE
 
-    private val pendingBlocks: MutableSet<Block> = mutableSetOf()
+    private val pendingBlocks: MutableSet<MainBlock> = mutableSetOf()
     private val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
     private val commitVotes: MutableMap<String, MutableList<Delegate>> = mutableMapOf()
 
-    override fun addBlock(block: Block) {
-        val blockSlotNumber = timeSlotHelper.getSlotNumber(block.timestamp)
+    override fun addBlock(block: MainBlock) {
+        val blockSlotNumber = epochService.getSlotNumber(block.timestamp)
         if (blockSlotNumber > timeSlotNumber) {
             this.reset()
         }
-        val slotOwner = timeSlotHelper.getCurrentSlotOwner()
+
         pendingBlocks.add(block)
-        if (slotOwner.publicKey == block.publicKey) {
-            val isValid = when (block) {
-                is MainBlock -> mainBlockService.isValid(block)
-                is GenesisBlock -> genesisBlockService.isValid(block)
-                else -> throw IllegalArgumentException("Unsupported block type")
-            }
-            if (isValid) {
-                val networkBlock = when (block) {
-                    is MainBlock -> NetworkMainBlock(block)
-                    is GenesisBlock -> NetworkGenesisBlock(block)
-                    else -> throw IllegalArgumentException("Unsupported block type")
-                }
-                networkService.broadcast(networkBlock)
-            }
-            if (ObserverStage.IDLE == stage) {
-                observable = block
-                stage = ObserverStage.PREPARE
-                timeSlotNumber = blockSlotNumber
-                val message = NetworkBlockApprovalMessage(
-                    ObserverStage.PREPARE.getId(),
-                    block.height,
-                    block.hash,
-                    ByteUtils.toHexString(keyHolder.getPublicKey()),
-                    SignatureUtils.sign(block.getBytes(), keyHolder.getPrivateKey()))
-                networkService.broadcast(message)
+        val slotOwner = epochService.getCurrentSlotOwner()
+        if (slotOwner.publicKey == block.publicKey && mainBlockService.isValid(block)) {
+            val networkBlock = NetworkMainBlock(block)
+            networkService.broadcast(networkBlock)
+            if (IDLE == stage) {
+                this.observable = block
+                this.stage = PREPARE
+                this.timeSlotNumber = blockSlotNumber
+                val vote = NetworkBlockApproval(PREPARE.getId(), block.height, block.hash, keyHolder.getPublicKey())
+                vote.signature = SignatureUtils.sign(vote.getBytes(), keyHolder.getPrivateKey())
+                networkService.broadcast(vote)
             }
         }
     }
 
-    override fun handleApproveMessage(message: NetworkBlockApprovalMessage) {
-        when (DictionaryUtils.valueOf(ObserverStage::class.java, message.stageId)) {
-            ObserverStage.PREPARE -> handlePrevote(message)
-            ObserverStage.COMMIT -> handleCommit(message)
-            ObserverStage.IDLE -> throw IllegalArgumentException("Unacceptable message type")
+    override fun handleApproveMessage(message: NetworkBlockApproval) {
+        when (DictionaryUtils.valueOf(BlockApprovalStage::class.java, message.stageId)) {
+            PREPARE -> handlePrevote(message)
+            COMMIT -> handleCommit(message)
+            IDLE -> throw IllegalArgumentException("Unacceptable message type")
         }
     }
 
-    private fun handlePrevote(message: NetworkBlockApprovalMessage) {
-        val delegates = genesisBlockService.getLast().activeDelegates
+    private fun handlePrevote(message: NetworkBlockApproval) {
+        val delegates = epochService.getDelegates()
         val delegate = delegates.find { message.publicKey == it.publicKey } ?: return
 
         if (message.hash != observable!!.hash) {
             return
         }
-        val signatureValid = SignatureUtils
-            .verify(observable!!.getBytes(), message.signature, ByteUtils.fromHexString(message.publicKey))
-        if (!prepareVotes.containsKey(message.publicKey) && signatureValid) {
+        if (!prepareVotes.containsKey(message.publicKey) && isValidApprovalSignature(message)) {
             prepareVotes[message.publicKey] = delegate
             networkService.broadcast(message)
         }
         if (prepareVotes.size > (delegates.size - 1) / 3) {
-            this.stage = ObserverStage.COMMIT
-            val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
-            val commitMessage = NetworkBlockApprovalMessage(
-                ObserverStage.COMMIT.getId(),
-                message.height,
-                message.hash,
-                publicKey,
-                SignatureUtils.sign(observable!!.getBytes(), keyHolder.getPrivateKey())
-            )
-            networkService.broadcast(commitMessage)
+            this.stage = COMMIT
+            val commit = NetworkBlockApproval(COMMIT.getId(), message.height, message.hash, keyHolder.getPublicKey())
+            commit.signature = SignatureUtils.sign(message.getBytes(), keyHolder.getPrivateKey())
+            networkService.broadcast(commit)
         }
     }
 
-    private fun handleCommit(message: NetworkBlockApprovalMessage) {
-        val delegates = genesisBlockService.getLast().activeDelegates
+    private fun handleCommit(message: NetworkBlockApproval) {
+        val delegates = epochService.getDelegates()
         val delegate = delegates.find { message.publicKey == it.publicKey } ?: return
 
         val blockCommits = commitVotes[message.hash]
-        val block = pendingBlocks.find { it.hash == message.hash } ?: return
-        val signatureValid = SignatureUtils
-            .verify(block.getBytes(), message.signature, ByteUtils.fromHexString(message.publicKey))
-        if (null != blockCommits && !blockCommits.contains(delegate) && signatureValid) {
+        if (null != blockCommits && !blockCommits.contains(delegate) && isValidApprovalSignature(message)) {
             blockCommits.add(delegate)
             networkService.broadcast(message)
             if (blockCommits.size > (delegates.size - 1) / 3 * 2) {
-                when (block) {
-                    is MainBlock -> mainBlockService.save(block)
-                    is GenesisBlock -> genesisBlockService.save(block)
-                }
+                pendingBlocks.find { it.hash == message.hash }?.let { mainBlockService.save(it) }
             }
         } else {
             commitVotes[message.hash] = mutableListOf(delegate)
@@ -127,10 +97,14 @@ class DefaultPendingBlockHandler(
     }
 
     private fun reset() {
-        this.stage = ObserverStage.IDLE
+        this.stage = IDLE
         prepareVotes.clear()
         commitVotes.clear()
         pendingBlocks.clear()
+    }
+
+    private fun isValidApprovalSignature(message: NetworkBlockApproval): Boolean {
+        return SignatureUtils.verify(message.getBytes(), message.signature!!, ByteUtils.fromHexString(message.publicKey))
     }
 
 }

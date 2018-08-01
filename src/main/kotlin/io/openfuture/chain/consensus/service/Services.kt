@@ -153,3 +153,21 @@ interface WalletService {
     fun updateBalance(from: String, to: String, amount: Long, fee: Long)
 
 }
+
+interface EpochService {
+
+    fun getEpochStart(): Long
+
+    fun getDelegates(): Set<Delegate>
+
+    fun getGenesisBlockHeight(): Long
+
+    fun switchEpoch(genesisBlock: GenesisBlock)
+
+    fun getCurrentSlotOwner(): Delegate
+
+    fun getSlotNumber(): Long
+
+    fun getSlotNumber(time: Long): Long
+
+}

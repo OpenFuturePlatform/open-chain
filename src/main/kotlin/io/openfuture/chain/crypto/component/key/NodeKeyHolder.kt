@@ -18,7 +18,7 @@ class NodeKeyHolder(
 ) {
 
     private var privateKey: ByteArray? = null
-    private var publicKey: ByteArray? = null
+    private var publicKey: String? = null
 
 
     @PostConstruct
@@ -29,14 +29,14 @@ class NodeKeyHolder(
         val publicKeyValue = File(properties.publicKeyPath).readText(Charset.forName("UTF-8"))
 
         privateKey = ByteUtils.fromHexString(privateKeyValue)
-        publicKey = ByteUtils.fromHexString(publicKeyValue)
+        publicKey = publicKeyValue
     }
 
     fun getPrivateKey(): ByteArray {
         return privateKey!!
     }
 
-    fun getPublicKey(): ByteArray {
+    fun getPublicKey(): String {
         return publicKey!!
     }
 

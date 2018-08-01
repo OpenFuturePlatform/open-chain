@@ -2,7 +2,7 @@ package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.core.model.entity.base.Dictionary
 
-enum class ObserverStage(val value: Int) : Dictionary {
+enum class BlockApprovalStage(val value: Int) : Dictionary {
     IDLE(1),
     PREPARE(2),
     COMMIT(3);

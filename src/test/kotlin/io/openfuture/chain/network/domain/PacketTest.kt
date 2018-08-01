@@ -3,7 +3,7 @@ package io.openfuture.chain.network.domain
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufUtil
 import io.netty.buffer.Unpooled
-import io.openfuture.chain.consensus.component.block.ObserverStage
+import io.openfuture.chain.consensus.component.block.BlockApprovalStage
 import io.openfuture.chain.consensus.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.consensus.model.dto.transaction.RewardTransactionDto
 import io.openfuture.chain.consensus.model.dto.transaction.TransferTransactionDto
@@ -256,8 +256,8 @@ class PacketTest {
     @Test
     fun readShouldFillEntityWithExactValuesFromBlockApprovalMessage() {
         val buf = createBuffer("000a00000005312e302e30000000000756b5b30000000300000000000000010000000468617368000000097075626c69634b6579000000097369676e6174757265")
-        val message = NetworkBlockApprovalMessage(
-            ObserverStage.COMMIT.getId(),
+        val message = NetworkBlockApproval(
+            BlockApprovalStage.COMMIT.getId(),
             1L,
             "hash",
             "publicKey",
