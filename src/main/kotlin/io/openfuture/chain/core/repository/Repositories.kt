@@ -22,6 +22,18 @@ import org.springframework.stereotype.Repository
 @NoRepositoryBean
 interface BaseRepository<T> : JpaRepository<T, Int>, PagingAndSortingRepository<T, Int>
 
+@Repository
+interface BlockRepository : BaseRepository<BaseBlock>{
+
+    fun findByHash(hash: String): BaseBlock?
+
+    fun findByHeightGreaterThan(height: Long): List<BaseBlock>?
+
+    fun findFirstByOrderByHeightDesc(): BaseBlock?
+
+    fun existsByHash(hash: String): Boolean
+
+}
 
 @Repository
 interface MainBlockRepository : BaseRepository<MainBlock> {
@@ -38,6 +50,13 @@ interface GenesisBlockRepository : BaseRepository<GenesisBlock> {
 }
 
 @Repository
+interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
+
+    fun findOneByHash(hash: String): Entity?
+
+}
+
+@Repository
 interface TransferTransactionRepository : TransactionRepository<TransferTransaction>
 
 @Repository
@@ -45,6 +64,15 @@ interface VoteTransactionRepository : TransactionRepository<VoteTransaction>
 
 @Repository
 interface DelegateTransactionRepository : TransactionRepository<DelegateTransaction>
+
+@Repository
+interface UTransactionRepository<UEntity : UTransaction> : BaseRepository<UEntity> {
+
+    fun findOneByHash(hash: String): UEntity?
+
+    fun findAllByOrderByFeeDesc(pageable: Pageable): MutableList<UEntity>
+
+}
 
 @Repository
 interface UTransferTransactionRepository : UTransactionRepository<UTransferTransaction>
@@ -66,35 +94,5 @@ interface DelegateRepository : BaseRepository<Delegate> {
 interface WalletRepository : BaseRepository<Wallet> {
 
     fun findOneByAddress(address: String): Wallet?
-
-}
-
-
-@Repository
-interface BlockRepository : BaseRepository<BaseBlock>{
-
-    fun findByHash(hash: String): BaseBlock?
-
-    fun findByHeightGreaterThan(height: Long): List<BaseBlock>?
-
-    fun findFirstByOrderByHeightDesc(): BaseBlock?
-
-    fun existsByHash(hash: String): Boolean
-
-}
-
-@Repository
-interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
-
-    fun findOneByHash(hash: String): Entity?
-
-}
-
-@Repository
-interface UTransactionRepository<UEntity : UTransaction> : BaseRepository<UEntity> {
-
-    fun findOneByHash(hash: String): UEntity?
-
-    fun findAllByOrderByFeeDesc(pageable: Pageable): MutableList<UEntity>
 
 }
