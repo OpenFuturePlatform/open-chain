@@ -1,6 +1,6 @@
 package io.openfuture.chain.service.transaction
 
-import io.openfuture.chain.domain.transaction.TransferTransactionDto
+import io.openfuture.chain.network.domain.application.transaction.TransferTransactionMessage
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.TransferTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
@@ -16,7 +16,7 @@ class DefaultTransferTransactionService(
 ) : DefaultTransactionService<TransferTransaction, UTransferTransaction>(repository, uRepository),
     TransferTransactionService {
 
-    override fun toBlock(dto: TransferTransactionDto, block: MainBlock) {
+    override fun toBlock(dto: TransferTransactionMessage, block: MainBlock) {
         processAndSave(dto.toEntity(), block)
     }
 

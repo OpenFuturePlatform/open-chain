@@ -1,7 +1,7 @@
 package io.openfuture.chain.network.extension
 
 import io.netty.buffer.ByteBuf
-import io.openfuture.chain.network.domain.NetworkEntity
+import io.openfuture.chain.network.domain.base.BaseMessage
 import java.nio.charset.StandardCharsets.UTF_8
 
 fun ByteBuf.writeString(string: String) {
@@ -14,7 +14,7 @@ fun ByteBuf.readString(): String {
     return this.readCharSequence(length, UTF_8).toString()
 }
 
-inline fun <reified T : NetworkEntity> ByteBuf.readList(): MutableList<T> {
+inline fun <reified T : BaseMessage> ByteBuf.readList(): MutableList<T> {
     val size = this.readInt()
     val list = mutableListOf<T>()
     for (index in 1..size) {
@@ -25,7 +25,7 @@ inline fun <reified T : NetworkEntity> ByteBuf.readList(): MutableList<T> {
     return list
 }
 
-fun <T : NetworkEntity> ByteBuf.writeList(list: List<T>) {
+fun <T : BaseMessage> ByteBuf.writeList(list: List<T>) {
     this.writeInt(list.size)
     for (element in list) {
         element.write(this)

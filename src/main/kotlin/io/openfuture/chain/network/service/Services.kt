@@ -1,28 +1,30 @@
 package io.openfuture.chain.network.service
 
 import io.netty.channel.Channel
-import io.openfuture.chain.network.domain.NetworkAddress
-import io.openfuture.chain.network.domain.Packet
+import io.openfuture.chain.network.domain.base.BaseMessage
+import io.openfuture.chain.network.domain.network.address.NetworkAddressMessage
 
 
 interface NetworkService {
 
-    fun broadcast(packet: Packet)
+    fun broadcast(message: BaseMessage)
 
     fun maintainConnectionNumber()
 
-    fun connect(peers: List<NetworkAddress>)
+    fun connect(peers: List<NetworkAddressMessage>)
 
 }
 
 interface ConnectionService {
 
-    fun addConnection(channel: Channel, networkAddress: NetworkAddress)
+    fun addConnection(channel: Channel, networkAddress: NetworkAddressMessage)
 
-    fun removeConnection(channel: Channel): NetworkAddress?
+    fun removeConnection(channel: Channel): NetworkAddressMessage?
 
-    fun getConnectionAddresses(): Set<NetworkAddress>
+    fun getConnectionAddresses(): Set<NetworkAddressMessage>
 
-    fun getConnections(): MutableMap<Channel, NetworkAddress>
+    fun getConnections(): Map<Channel, NetworkAddressMessage>
+
+    fun getInboundConnections(): Map<Channel, NetworkAddressMessage>
 
 }

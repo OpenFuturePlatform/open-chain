@@ -6,7 +6,7 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.domain.block.PendingBlock
 import io.openfuture.chain.domain.block.Signature
-import io.openfuture.chain.domain.transaction.data.RewardTransactionData
+import io.openfuture.chain.network.domain.application.transaction.data.RewardTransactionData
 import io.openfuture.chain.entity.block.Block
 import io.openfuture.chain.entity.block.BlockType
 import io.openfuture.chain.entity.block.GenesisBlock

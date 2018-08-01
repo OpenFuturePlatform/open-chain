@@ -2,8 +2,8 @@ package io.openfuture.chain.service.transaction.unconfirmed
 
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.domain.transaction.BaseTransactionDto
-import io.openfuture.chain.domain.transaction.data.BaseTransactionData
+import io.openfuture.chain.network.domain.application.transaction.BaseTransactionMessage
+import io.openfuture.chain.network.domain.application.transaction.data.BaseTransactionData
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.exception.ValidationException
 import io.openfuture.chain.network.component.node.NodeClock
@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
 abstract class DefaultUTransactionService<UEntity : UTransaction, Data : BaseTransactionData,
-    Dto: BaseTransactionDto<Data>, Req: BaseTransactionRequest<UEntity, Data>>(
+    Dto: BaseTransactionMessage<Data>, Req: BaseTransactionRequest<UEntity, Data>>(
     protected val repository: UTransactionRepository<UEntity>
 ) : UTransactionService<UEntity, Data, Dto, Req> {
 

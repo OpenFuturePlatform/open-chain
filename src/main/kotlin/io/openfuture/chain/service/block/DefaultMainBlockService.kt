@@ -4,7 +4,7 @@ import io.openfuture.chain.block.TimeSlot
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.*
 import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.network.domain.NetworkMainBlock
+import io.openfuture.chain.network.domain.application.block.MainBlockMessage
 import io.openfuture.chain.repository.MainBlockRepository
 import io.openfuture.chain.service.*
 import io.openfuture.chain.util.BlockUtils
@@ -24,7 +24,7 @@ class DefaultMainBlockService(
 
 
     @Transactional
-    override fun add(dto: NetworkMainBlock) {
+    override fun add(dto: MainBlockMessage) {
         val savedBlock = repository.save(dto.toEntity())
 
         dto.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }

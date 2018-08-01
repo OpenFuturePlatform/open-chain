@@ -1,7 +1,7 @@
 package io.openfuture.chain.service.transaction.unconfirmed
 
-import io.openfuture.chain.domain.transaction.DelegateTransactionDto
-import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
+import io.openfuture.chain.network.domain.application.transaction.DelegateTransactionMessage
+import io.openfuture.chain.network.domain.application.transaction.data.DelegateTransactionData
 import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.UDelegateTransactionRepository
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultUDelegateTransactionService(
     repository: UDelegateTransactionRepository
-) : DefaultUTransactionService<UDelegateTransaction, DelegateTransactionData, DelegateTransactionDto, DelegateTransactionRequest>(repository),
+) : DefaultUTransactionService<UDelegateTransaction, DelegateTransactionData, DelegateTransactionMessage, DelegateTransactionRequest>(repository),
     UDelegateTransactionService {
 
     @Transactional(readOnly = true)
@@ -24,7 +24,7 @@ class DefaultUDelegateTransactionService(
     override fun getAll(): MutableSet<UDelegateTransaction> = repository.findAll().toMutableSet()
 
     @Transactional
-    override fun add(dto: DelegateTransactionDto): UDelegateTransaction {
+    override fun add(dto: DelegateTransactionMessage): UDelegateTransaction {
         val transaction = repository.findOneByHash(dto.hash)
         if (null != transaction) {
             return transaction

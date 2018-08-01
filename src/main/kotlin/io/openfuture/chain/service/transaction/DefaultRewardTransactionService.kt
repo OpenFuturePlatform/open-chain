@@ -1,6 +1,6 @@
 package io.openfuture.chain.service.transaction
 
-import io.openfuture.chain.domain.transaction.RewardTransactionDto
+import io.openfuture.chain.network.domain.application.transaction.RewardTransactionMessage
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.RewardTransaction
 import io.openfuture.chain.repository.RewardTransactionRepository
@@ -19,7 +19,7 @@ class DefaultRewardTransactionService(
 ) : RewardTransactionService {
 
     @Transactional
-    override fun toBlock(dto: RewardTransactionDto, block: MainBlock) {
+    override fun toBlock(dto: RewardTransactionMessage, block: MainBlock) {
         if (commonService.isExists(dto.hash)) {
             return
         }

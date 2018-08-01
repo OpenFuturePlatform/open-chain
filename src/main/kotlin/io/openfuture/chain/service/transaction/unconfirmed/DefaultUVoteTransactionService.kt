@@ -1,7 +1,7 @@
 package io.openfuture.chain.service.transaction.unconfirmed
 
-import io.openfuture.chain.domain.transaction.VoteTransactionDto
-import io.openfuture.chain.domain.transaction.data.VoteTransactionData
+import io.openfuture.chain.network.domain.application.transaction.VoteTransactionMessage
+import io.openfuture.chain.network.domain.application.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.dictionary.VoteType
 import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.exception.NotFoundException
@@ -17,7 +17,7 @@ import javax.xml.bind.ValidationException
 class DefaultUVoteTransactionService(
     repository: UVoteTransactionRepository,
     private val consensusProperties: ConsensusProperties
-) : DefaultUTransactionService<UVoteTransaction, VoteTransactionData, VoteTransactionDto, VoteTransactionRequest>(repository),
+) : DefaultUTransactionService<UVoteTransaction, VoteTransactionData, VoteTransactionMessage, VoteTransactionRequest>(repository),
     UVoteTransactionService {
 
     @Transactional(readOnly = true)
@@ -28,7 +28,7 @@ class DefaultUVoteTransactionService(
     override fun getAll(): MutableSet<UVoteTransaction> = repository.findAll().toMutableSet()
 
     @Transactional
-    override fun add(dto: VoteTransactionDto): UVoteTransaction {
+    override fun add(dto: VoteTransactionMessage): UVoteTransaction {
         val transaction = repository.findOneByHash(dto.hash)
         if (null != transaction) {
             return transaction
@@ -53,7 +53,7 @@ class DefaultUVoteTransactionService(
     }
 
     @Transactional
-    override fun validate(dto: VoteTransactionDto) {
+    override fun validate(dto: VoteTransactionMessage) {
         if (!isValidVoteCount(dto.data.senderAddress)) {
             throw ValidationException("Wallet ${dto.data.senderAddress} already spent all votes!")
         }

@@ -1,11 +1,6 @@
 package io.openfuture.chain.service
 
 import io.openfuture.chain.domain.base.PageRequest
-import io.openfuture.chain.domain.transaction.*
-import io.openfuture.chain.domain.transaction.data.BaseTransactionData
-import io.openfuture.chain.domain.transaction.data.DelegateTransactionData
-import io.openfuture.chain.domain.transaction.data.TransferTransactionData
-import io.openfuture.chain.domain.transaction.data.VoteTransactionData
 import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.Wallet
 import io.openfuture.chain.entity.block.Block
@@ -16,8 +11,13 @@ import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
-import io.openfuture.chain.network.domain.NetworkGenesisBlock
-import io.openfuture.chain.network.domain.NetworkMainBlock
+import io.openfuture.chain.network.domain.application.block.GenesisBlockMessage
+import io.openfuture.chain.network.domain.application.block.MainBlockMessage
+import io.openfuture.chain.network.domain.application.transaction.*
+import io.openfuture.chain.network.domain.application.transaction.data.BaseTransactionData
+import io.openfuture.chain.network.domain.application.transaction.data.DelegateTransactionData
+import io.openfuture.chain.network.domain.application.transaction.data.TransferTransactionData
+import io.openfuture.chain.network.domain.application.transaction.data.VoteTransactionData
 import io.openfuture.chain.rpc.domain.node.*
 import io.openfuture.chain.rpc.domain.transaction.BaseTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
@@ -63,13 +63,13 @@ interface CommonBlockService {
 
 interface GenesisBlockService : BlockService<GenesisBlock> {
 
-    fun add(dto: NetworkGenesisBlock)
+    fun add(dto: GenesisBlockMessage)
 
 }
 
 interface MainBlockService : BlockService<MainBlock> {
 
-    fun add(dto: NetworkMainBlock)
+    fun add(dto: MainBlockMessage)
 
 }
 
@@ -96,25 +96,25 @@ interface RewardTransactionService {
 
     fun toBlock(tx: RewardTransaction, block: MainBlock)
 
-    fun toBlock(dto: RewardTransactionDto, block: MainBlock)
+    fun toBlock(dto: RewardTransactionMessage, block: MainBlock)
 
 }
 
 interface TransferTransactionService : TransactionService<TransferTransaction, UTransferTransaction> {
 
-    fun toBlock(dto: TransferTransactionDto, block: MainBlock)
+    fun toBlock(dto: TransferTransactionMessage, block: MainBlock)
 
 }
 
 interface VoteTransactionService : TransactionService<VoteTransaction, UVoteTransaction> {
 
-    fun toBlock(dto: VoteTransactionDto, block: MainBlock)
+    fun toBlock(dto: VoteTransactionMessage, block: MainBlock)
 
 }
 
 interface DelegateTransactionService : TransactionService<DelegateTransaction, UDelegateTransaction> {
 
-    fun toBlock(dto: DelegateTransactionDto, block: MainBlock)
+    fun toBlock(dto: DelegateTransactionMessage, block: MainBlock)
 
 }
 
@@ -127,7 +127,7 @@ interface UCommonTransactionService {
 
 }
 
-interface UTransactionService<UEntity : UTransaction, Data : BaseTransactionData, Dto : BaseTransactionDto<Data>,
+interface UTransactionService<UEntity : UTransaction, Data : BaseTransactionData, Dto : BaseTransactionMessage<Data>,
     Req : BaseTransactionRequest<UEntity, Data>> {
 
     fun get(hash: String): UEntity
@@ -141,13 +141,13 @@ interface UTransactionService<UEntity : UTransaction, Data : BaseTransactionData
 }
 
 interface UTransferTransactionService : UTransactionService<UTransferTransaction, TransferTransactionData,
-    TransferTransactionDto, TransferTransactionRequest>
+    TransferTransactionMessage, TransferTransactionRequest>
 
 interface UVoteTransactionService : UTransactionService<UVoteTransaction, VoteTransactionData,
-    VoteTransactionDto, VoteTransactionRequest>
+    VoteTransactionMessage, VoteTransactionRequest>
 
 interface UDelegateTransactionService : UTransactionService<UDelegateTransaction, DelegateTransactionData,
-    DelegateTransactionDto, DelegateTransactionRequest>
+    DelegateTransactionMessage, DelegateTransactionRequest>
 
 interface DelegateService {
 

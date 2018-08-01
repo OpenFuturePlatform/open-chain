@@ -1,6 +1,6 @@
 package io.openfuture.chain.service.transaction
 
-import io.openfuture.chain.domain.transaction.DelegateTransactionDto
+import io.openfuture.chain.network.domain.application.transaction.DelegateTransactionMessage
 import io.openfuture.chain.entity.Delegate
 import io.openfuture.chain.entity.block.MainBlock
 import io.openfuture.chain.entity.transaction.DelegateTransaction
@@ -21,7 +21,7 @@ class DefaultDelegateTransactionService(
     DelegateTransactionService {
 
     @Transactional
-    override fun toBlock(dto: DelegateTransactionDto, block: MainBlock) {
+    override fun toBlock(dto: DelegateTransactionMessage, block: MainBlock) {
         delegateService.save(Delegate(dto.data.delegateKey, dto.data.senderAddress))
         super.processAndSave(dto.toEntity(), block)
     }

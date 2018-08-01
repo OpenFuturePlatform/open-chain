@@ -33,6 +33,12 @@ class NodeClock {
         }
     }
 
+    fun calculateTimeOffset(nodeTimestamp: Long, networkTimestamp: Long) : Long {
+        val networkLatency = (nodeTime() - nodeTimestamp) / 2
+        val expectedNetworkTimestamp = nodeTimestamp + networkLatency
+        return networkTimestamp - expectedNetworkTimestamp
+    }
+
     fun addTimeOffset(remoteAddress: String, offset: Long) {
         lock.writeLock().lock()
         try{

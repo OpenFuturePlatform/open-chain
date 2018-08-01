@@ -2,7 +2,7 @@ package io.openfuture.chain.util
 
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.domain.transaction.data.BaseTransactionData
+import io.openfuture.chain.network.domain.application.transaction.data.BaseTransactionData
 import java.nio.ByteBuffer
 
 object TransactionUtils {

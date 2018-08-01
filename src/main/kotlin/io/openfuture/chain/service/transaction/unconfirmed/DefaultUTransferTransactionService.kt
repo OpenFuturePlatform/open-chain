@@ -1,7 +1,7 @@
 package io.openfuture.chain.service.transaction.unconfirmed
 
-import io.openfuture.chain.domain.transaction.TransferTransactionDto
-import io.openfuture.chain.domain.transaction.data.TransferTransactionData
+import io.openfuture.chain.network.domain.application.transaction.TransferTransactionMessage
+import io.openfuture.chain.network.domain.application.transaction.data.TransferTransactionData
 import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.exception.NotFoundException
 import io.openfuture.chain.repository.UTransferTransactionRepository
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultUTransferTransactionService(
     repository: UTransferTransactionRepository
-) : DefaultUTransactionService<UTransferTransaction, TransferTransactionData, TransferTransactionDto, TransferTransactionRequest>(repository),
+) : DefaultUTransactionService<UTransferTransaction, TransferTransactionData, TransferTransactionMessage, TransferTransactionRequest>(repository),
     UTransferTransactionService {
 
     @Transactional(readOnly = true)
@@ -24,7 +24,7 @@ class DefaultUTransferTransactionService(
     override fun getAll(): MutableSet<UTransferTransaction> = repository.findAll().toMutableSet()
 
     @Transactional
-    override fun add(dto: TransferTransactionDto): UTransferTransaction {
+    override fun add(dto: TransferTransactionMessage): UTransferTransaction {
         val transaction = repository.findOneByHash(dto.hash)
         if (null != transaction) {
             return transaction
