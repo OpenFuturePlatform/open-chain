@@ -10,8 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultWalletService(
-    private val repository: WalletRepository,
-    private val consensusProperties: ConsensusProperties
+    private val repository: WalletRepository
 ) : WalletService {
 
     companion object {
@@ -27,6 +26,12 @@ class DefaultWalletService(
     override fun getBalanceByAddress(address: String): Long =
         repository.findOneByAddress(address)?.balance ?: DEFAULT_WALLET_BALANCE
 
+    override fun getUnspentBalanceByAddress(address: String): Long {
+        val wallet = getByAddress(address)
+        return wallet.balance - wallet.uncomfirmedOut
+
+    }
+
     @Transactional(readOnly = true)
     override fun getVotesByAddress(address: String): MutableSet<Delegate> = this.getByAddress(address).votes
 
@@ -35,12 +40,31 @@ class DefaultWalletService(
         repository.save(wallet)
     }
 
+    fun updateBalanceByInput(address: String, amount: Long) {
+        updateByAddress()
+    }
+
+    fun updateBalanceByOut() {
+
+    }
+
+    fun updateUnconfirmedByOut() {
+
+    }
+
+
+    override fun updateBalanceByFee(address: String, fee: Long) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     @Transactional
     override fun updateBalance(from: String, to: String, amount: Long, fee: Long) {
-        if (consensusProperties.genesisAddress!! != from) {
-            updateByAddress(from, -(amount + fee))
-        }
+        updateByAddress(from, -(amount + fee))
         updateByAddress(to, amount)
+    }
+
+    override fun updateUnconfirmedOut(address: String, fee: Long) {
+        updateByAddress(address, fee)
     }
 
     private fun updateByAddress(address: String, amount: Long) {

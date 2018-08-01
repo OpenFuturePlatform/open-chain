@@ -40,7 +40,7 @@ class DefaultUVoteTransactionService(
     @Transactional
     override fun add(request: VoteTransactionRequest): UVoteTransaction {
         validate(request)
-        return saveAndBroadcast(request.toEntity(nodeClock.networkTime()))
+        return saveAndBroadcast(request.toUEntity(nodeClock.networkTime()))
     }
 
     @Transactional

@@ -8,7 +8,7 @@ class VoteTransactionRequest(
     data: VoteTransactionData
 ) : BaseTransactionRequest<UVoteTransaction, VoteTransactionData>(data) {
 
-    override fun toEntity(timestamp: Long): UVoteTransaction = UVoteTransaction(
+    fun toUEntity(timestamp: Long): UVoteTransaction = UVoteTransaction(
         timestamp,
         data!!.amount,
         data!!.fee,

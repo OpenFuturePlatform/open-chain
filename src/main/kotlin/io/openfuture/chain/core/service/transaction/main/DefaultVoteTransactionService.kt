@@ -9,7 +9,7 @@ import io.openfuture.chain.core.repository.VoteTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.util.DictionaryUtil
-import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -18,7 +18,7 @@ class DefaultVoteTransactionService(
     repository: VoteTransactionRepository,
     uRepository: UVoteTransactionRepository,
     private val delegateService: DelegateService
-) : DefaultTransactionService<VoteTransaction, UVoteTransaction>(repository, uRepository),
+) : BaseTransactionService<VoteTransaction, UVoteTransaction>(repository, uRepository),
     VoteTransactionService {
 
     @Transactional

@@ -36,7 +36,7 @@ class DefaultUDelegateTransactionService(
     @Transactional
     override fun add(request: DelegateTransactionRequest): UDelegateTransaction {
         validate(request)
-        return saveAndBroadcast(request.toEntity(nodeClock.networkTime()))
+        return saveAndBroadcast(request.toUEntity(nodeClock.networkTime()))
     }
 
 }

@@ -1,7 +1,7 @@
 package io.openfuture.chain.core.service
 
-import io.openfuture.chain.consensus.model.entity.transaction.DelegateTransaction
-import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.dto.transaction.BaseTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
@@ -15,12 +15,12 @@ import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.Transaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
-import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -69,25 +69,31 @@ interface MainBlockService {
 
 }
 
-interface TransactionService<Entity : Transaction, UEntity : UTransaction> {
+//interface TransactionService<Entity : Transaction, UEntity : UTransaction> {
+//
+//    fun toBlock(hash: String, block: MainBlock)
+//
+//}
 
-    fun toBlock(hash: String, block: MainBlock)
-
-}
-
-interface TransferTransactionService : TransactionService<TransferTransaction, UTransferTransaction> {
+interface TransferTransactionService {
 
     fun toBlock(dto: TransferTransactionDto, block: MainBlock)
 
 }
 
-interface VoteTransactionService : TransactionService<VoteTransaction, UVoteTransaction> {
+interface VoteTransactionService {
 
     fun toBlock(dto: VoteTransactionDto, block: MainBlock)
 
 }
 
-interface DelegateTransactionService : TransactionService<DelegateTransaction, UDelegateTransaction> {
+interface DelegateTransactionService {
+
+    fun add(dto: DelegateTransactionDto)
+
+    fun add(request: DelegateTransactionRequest)
+
+    fun toBlock(hash: String, block: MainBlock)
 
     fun toBlock(dto: DelegateTransactionDto, block: MainBlock)
 
@@ -96,9 +102,9 @@ interface DelegateTransactionService : TransactionService<DelegateTransaction, U
 interface UTransactionService<UEntity : UTransaction, Data : BaseTransactionData, Dto : BaseTransactionDto<Data>,
     Req : BaseTransactionRequest<UEntity, Data>> {
 
-    fun get(hash: String): UEntity
+//    fun get(hash: String): UEntity
 
-    fun getAll(): MutableSet<UEntity>
+//    fun getAll(): MutableSet<UEntity>
 
     fun add(dto: Dto): UEntity
 
@@ -131,13 +137,17 @@ interface WalletService {
 
     fun getByAddress(address: String): Wallet
 
+    fun getUnspentBalanceByAddress(address: String): Long
+
     fun getBalanceByAddress(address: String): Long
 
     fun getVotesByAddress(address: String): MutableSet<Delegate>
 
     fun save(wallet: Wallet)
 
-    fun updateBalance(from: String, to: String, amount: Long, fee: Long)
+    fun updateBalanceByFee(address: String, fee: Long)
+
+    fun updateUnconfirmedOut(address: String, fee: Long)
 
 }
 
@@ -150,19 +160,5 @@ interface CommonBlockService {
     fun getBlocksAfterCurrentHash(hash: String): List<BaseBlock>?
 
     fun isExists(hash: String): Boolean
-
-}
-
-interface CommonTransactionService {
-
-    fun get(hash: String): Transaction
-
-    fun isExists(hash: String): Boolean
-
-}
-
-interface UCommonTransactionService {
-
-    fun getAll(): MutableSet<UTransaction>
 
 }

@@ -2,6 +2,7 @@ package io.openfuture.chain.core.util
 
 import io.openfuture.chain.core.model.dto.transaction.data.BaseTransactionData
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
+import io.openfuture.chain.core.model.entity.transaction.payload.BaseTransactionPayload
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -9,8 +10,8 @@ import java.nio.ByteBuffer
 
 object TransactionUtils {
 
-    fun createHash(data: BaseTransactionData, publicKey: String, signature: String): String {
-        val bytes = getBytes(publicKey.toByteArray(), signature.toByteArray(), data.getBytes())
+    fun createHash(payload: BaseTransactionPayload, publicKey: String, signature: String): String {
+        val bytes = getBytes(publicKey.toByteArray(), signature.toByteArray(), payload.getBytes())
         return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
     }
 

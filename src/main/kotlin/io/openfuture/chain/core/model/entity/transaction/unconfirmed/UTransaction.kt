@@ -1,7 +1,7 @@
 package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
-import io.openfuture.chain.core.model.entity.transaction.Transaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import javax.persistence.Entity
 import javax.persistence.Inheritance
 import javax.persistence.InheritanceType
@@ -12,14 +12,11 @@ import javax.persistence.Table
 @Inheritance(strategy = InheritanceType.JOINED)
 abstract class UTransaction(
     timestamp: Long,
-    amount: Long,
-    fee: Long,
-    recipientAddress: String,
     senderAddress: String,
     senderPublicKey: String,
     senderSignature: String,
     hash: String
-) : BaseTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash) {
+) : BaseTransaction(timestamp, senderAddress, senderPublicKey, senderSignature, hash) {
 
     abstract fun toConfirmed() : Transaction
 

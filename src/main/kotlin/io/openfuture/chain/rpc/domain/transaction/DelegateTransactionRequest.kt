@@ -1,23 +1,22 @@
 package io.openfuture.chain.rpc.domain.transaction
 
-import io.openfuture.chain.core.model.dto.transaction.data.DelegateTransactionData
+import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.core.util.TransactionUtils
+import javax.validation.constraints.NotBlank
 
 class DelegateTransactionRequest(
-    data: DelegateTransactionData
-) : BaseTransactionRequest<UDelegateTransaction, DelegateTransactionData>(data) {
+    @field:NotBlank var fee: Long? = null,
+    @field:NotBlank var delegateKey: String? = null
+) : BaseTransactionRequest() {
 
-    override fun toEntity(timestamp: Long): UDelegateTransaction = UDelegateTransaction(
+    override fun toUEntity(timestamp: Long): UDelegateTransaction = UDelegateTransaction(
         timestamp,
-        data!!.amount,
-        data!!.fee,
-        data!!.recipientAddress,
-        data!!.senderAddress,
+        senderAddress!!,
         senderPublicKey!!,
         senderSignature!!,
-        TransactionUtils.createHash(data!!, senderPublicKey!!, senderSignature!!),
-        data!!.delegateKey
+        TransactionUtils.createHash(DelegateTransactionPayload(fee!!, delegateKey!!), senderPublicKey!!, senderSignature!!),
+        DelegateTransactionPayload(fee!!, delegateKey!!)
     )
 
 }

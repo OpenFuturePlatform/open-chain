@@ -36,7 +36,7 @@ class DefaultUTransferTransactionService(
     @Transactional
     override fun add(request: TransferTransactionRequest): UTransferTransaction {
         validate(request)
-        return saveAndBroadcast(request.toEntity(nodeClock.networkTime()))
+        return saveAndBroadcast(request.toUEntity(nodeClock.networkTime()))
     }
 
 }

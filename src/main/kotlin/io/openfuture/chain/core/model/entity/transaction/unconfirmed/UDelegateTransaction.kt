@@ -1,8 +1,9 @@
 package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 
-import io.openfuture.chain.consensus.model.entity.transaction.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
-import javax.persistence.Column
+import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.payload.BaseTransactionPayload
+import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
+import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.Table
 
@@ -10,29 +11,27 @@ import javax.persistence.Table
 @Table(name = "u_delegate_transactions")
 class UDelegateTransaction(
     timestamp: Long,
-    amount: Long,
-    fee: Long,
-    recipientAddress: String,
     senderAddress: String,
     senderPublicKey: String,
     senderSignature: String,
     hash: String,
 
-    @Column(name = "delegate_key", nullable = false, unique = true)
-    var delegateKey: String
+    @Embedded
+    private var payload: DelegateTransactionPayload
 
-) : UTransaction(timestamp, amount, fee, recipientAddress, senderPublicKey, senderAddress, senderSignature, hash) {
+) : UTransaction(timestamp, senderPublicKey, senderAddress, senderSignature, hash) {
 
     override fun toConfirmed(): DelegateTransaction = DelegateTransaction(
         timestamp,
-        amount,
-        fee,
-        recipientAddress,
         senderAddress,
         senderPublicKey,
         senderSignature,
         hash,
-        delegateKey
+        payload
     )
+
+    override fun getPayload(): DelegateTransactionPayload {
+        return payload
+    }
 
 }
