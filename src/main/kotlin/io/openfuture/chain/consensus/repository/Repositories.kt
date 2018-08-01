@@ -5,7 +5,6 @@ import io.openfuture.chain.consensus.model.entity.Wallet
 import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.model.entity.transaction.DelegateTransaction
-import io.openfuture.chain.consensus.model.entity.transaction.RewardTransaction
 import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
 import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UTransferTransaction
@@ -38,10 +37,6 @@ interface VoteTransactionRepository : TransactionRepository<VoteTransaction>
 
 @Repository
 interface DelegateTransactionRepository : TransactionRepository<DelegateTransaction>
-
-@Repository
-interface RewardTransactionRepository : TransactionRepository<RewardTransaction>
-
 
 @Repository
 interface UTransferTransactionRepository : UTransactionRepository<UTransferTransaction>

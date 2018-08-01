@@ -3,10 +3,12 @@ package io.openfuture.chain.consensus.service.block
 import io.openfuture.chain.consensus.component.block.TimeSlot
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.model.entity.transaction.DelegateTransaction
-import io.openfuture.chain.consensus.model.entity.transaction.RewardTransaction
 import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
 import io.openfuture.chain.consensus.repository.MainBlockRepository
-import io.openfuture.chain.consensus.service.*
+import io.openfuture.chain.consensus.service.DelegateTransactionService
+import io.openfuture.chain.consensus.service.MainBlockService
+import io.openfuture.chain.consensus.service.TransferTransactionService
+import io.openfuture.chain.consensus.service.VoteTransactionService
 import io.openfuture.chain.consensus.util.TransactionUtils
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.transaction.Transaction
