@@ -1,12 +1,13 @@
 plugins {
     id 'jacoco'
     id 'idea'
-    id 'org.jetbrains.kotlin.jvm' version '1.2.50'
-    id 'org.jetbrains.kotlin.plugin.spring' version '1.2.50'
-    id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.50'
-    id 'org.springframework.boot' version '2.0.3.RELEASE'
-    id 'io.spring.dependency-management' version '1.0.5.RELEASE'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.51'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.2.51'
+    id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.51'
+    id 'org.springframework.boot' version '2.0.4.RELEASE'
 }
+
+apply plugin: "io.spring.dependency-management"
 
 group = 'io.openfuture.chain'
 version = '0.4.0'
@@ -17,7 +18,7 @@ repositories {
 }
 
 ext {
-    kotlinVersion = '1.2.50'
+    kotlinVersion = '1.2.51'
     queryDslVersion = '4.2.1'
     bouncycastleVersion = '1.59'
 }
