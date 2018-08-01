@@ -2,8 +2,8 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.consensus.annotation.NoArgConstructor
-import io.openfuture.chain.consensus.model.entity.Delegate
-import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
+import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.writeList
 

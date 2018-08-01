@@ -1,6 +1,7 @@
 package io.openfuture.chain.consensus.service
 
 import io.openfuture.chain.config.ServiceTests
+import io.openfuture.chain.core.service.DefaultHardwareInfoService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 

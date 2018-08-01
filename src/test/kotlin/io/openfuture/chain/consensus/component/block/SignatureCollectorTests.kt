@@ -4,12 +4,12 @@ import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.consensus.model.dto.block.BlockSignature
 import io.openfuture.chain.consensus.model.dto.block.PendingBlock
-import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
-import io.openfuture.chain.consensus.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.GenesisBlockService
 import io.openfuture.chain.consensus.service.MainBlockService
-import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.network.component.node.NodeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -91,7 +91,7 @@ class SignatureCollectorTests : ServiceTests() {
         signatureCollector.addBlockSignature(signatureBlock)
 
         given(genesisBlockService.getLast()).willReturn(signatureBlock.block as GenesisBlock)
-        given(timeSlot.verifyTimeSlot(any(Long::class.java), any(Block::class.java))).willReturn(true, false)
+        given(timeSlot.verifyTimeSlot(any(Long::class.java), any(BaseBlock::class.java))).willReturn(true, false)
 
         signatureCollector.applyBlock()
 
@@ -106,7 +106,7 @@ class SignatureCollectorTests : ServiceTests() {
         signatureCollector.addBlockSignature(signatureBlock)
 
         given(genesisBlockService.getLast()).willReturn(genesisBlock.block as GenesisBlock)
-        given(timeSlot.verifyTimeSlot(any(Long::class.java), any(Block::class.java))).willReturn(true, false)
+        given(timeSlot.verifyTimeSlot(any(Long::class.java), any(BaseBlock::class.java))).willReturn(true, false)
 
         signatureCollector.applyBlock()
 

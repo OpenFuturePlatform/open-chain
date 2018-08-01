@@ -3,17 +3,17 @@ package io.openfuture.chain.consensus.component.block
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.consensus.model.dto.block.BlockSignature
 import io.openfuture.chain.consensus.model.dto.block.PendingBlock
-import io.openfuture.chain.consensus.model.entity.Delegate
-import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
-import io.openfuture.chain.consensus.model.entity.block.MainBlock
-import io.openfuture.chain.consensus.model.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
+import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.ConsensusService
 import io.openfuture.chain.consensus.service.DelegateService
 import io.openfuture.chain.consensus.service.GenesisBlockService
 import io.openfuture.chain.consensus.validation.BlockValidationProvider
-import io.openfuture.chain.core.model.entity.block.Block
-import io.openfuture.chain.core.model.entity.transaction.UTransaction
+import io.openfuture.chain.core.model.entity.block.BaseBlock
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.service.CommonBlockService
 import io.openfuture.chain.core.service.UCommonTransactionService
 import io.openfuture.chain.crypto.component.key.NodeKeyHolder
@@ -95,7 +95,7 @@ class BlockCreationProcessorTests : ServiceTests() {
         verify(keyHolder, times(3)).getPublicKey()
     }
 
-    private fun createPendingBlock(block: Block): PendingBlock {
+    private fun createPendingBlock(block: BaseBlock): PendingBlock {
         return PendingBlock(
             block,
             BlockSignature("sign", "b7f6eb8b900a585a840bf7b44dea4b47f12e7be66e4c10f2305a0bf67ae91719")

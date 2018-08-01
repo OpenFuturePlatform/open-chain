@@ -2,18 +2,18 @@ package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.consensus.model.dto.block.BlockSignature
 import io.openfuture.chain.consensus.model.dto.block.PendingBlock
-import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
-import io.openfuture.chain.consensus.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.ConsensusService
-import io.openfuture.chain.consensus.service.DelegateService
-import io.openfuture.chain.consensus.service.GenesisBlockService
-import io.openfuture.chain.consensus.util.TransactionUtils
+import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.consensus.validation.BlockValidationProvider
-import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.dictionary.BlockType
-import io.openfuture.chain.core.model.entity.transaction.UTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.service.CommonBlockService
+import io.openfuture.chain.core.service.DelegateService
+import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.UCommonTransactionService
 import io.openfuture.chain.crypto.component.key.NodeKeyHolder
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -82,7 +82,7 @@ class BlockCreationProcessor(
         }
     }
 
-    private fun signCreatedBlock(block: Block): PendingBlock {
+    private fun signCreatedBlock(block: BaseBlock): PendingBlock {
         val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
         val value = SignatureUtils.sign(ByteUtils.fromHexString(block.hash), keyHolder.getPrivateKey())
         val signature = BlockSignature(value, publicKey)
@@ -91,7 +91,7 @@ class BlockCreationProcessor(
         return pendingBlock
     }
 
-    private fun create(pendingTransactions: MutableSet<UTransaction>, previousBlock: Block, genesisBlock: GenesisBlock) {
+    private fun create(pendingTransactions: MutableSet<UTransaction>, previousBlock: BaseBlock, genesisBlock: GenesisBlock) {
         val blockType = if (consensusService.isGenesisBlockNeeded()) BlockType.GENESIS else BlockType.MAIN
 
         val height = previousBlock.height + 1

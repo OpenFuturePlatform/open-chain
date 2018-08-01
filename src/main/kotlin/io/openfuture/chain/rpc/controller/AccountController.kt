@@ -1,6 +1,6 @@
 package io.openfuture.chain.rpc.controller
 
-import io.openfuture.chain.consensus.service.WalletService
+import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.rpc.controller.base.BaseController
 import io.openfuture.chain.rpc.domain.RestResponse

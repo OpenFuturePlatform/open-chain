@@ -1,7 +1,7 @@
 package io.openfuture.chain.rpc.controller
 
-import io.openfuture.chain.consensus.model.entity.Delegate
-import io.openfuture.chain.consensus.service.DelegateService
+import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.rpc.controller.base.BaseController
 import io.openfuture.chain.rpc.domain.RestResponse
 import io.openfuture.chain.rpc.domain.base.PageRequest

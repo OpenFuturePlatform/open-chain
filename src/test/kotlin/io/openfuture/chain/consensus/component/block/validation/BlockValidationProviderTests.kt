@@ -3,12 +3,12 @@ package io.openfuture.chain.consensus.component.block.validation
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.consensus.component.block.TimeSlot
-import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
-import io.openfuture.chain.consensus.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.service.GenesisBlockService
 import io.openfuture.chain.consensus.service.MainBlockService
 import io.openfuture.chain.consensus.validation.BlockValidationProvider
-import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.service.CommonBlockService
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.component.node.NodeClock
@@ -238,7 +238,7 @@ class BlockValidationProviderTests : ServiceTests() {
 
     @Test(expected = IllegalArgumentException::class)
     fun isValidShouldThrowIllegalArgumentException() {
-        val block = Mockito.mock(Block::class.java)
+        val block = Mockito.mock(BaseBlock::class.java)
 
         blockValidationProvider.isValid(block)
     }
