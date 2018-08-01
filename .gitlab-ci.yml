@@ -12,7 +12,7 @@ stages:
 variables:
   DOCKER_DRIVER: overlay2
   IMAGE_NAME: openplatform/chain
-
+  GIT_SUBMODULE_STRATEGY: recursive
 
 ###########################
 # Tests
@@ -60,6 +60,7 @@ build-jar:
     - sprint
     - master
     - tags
+    - add-frontend-submodule
 
 ###########################
 # Packaging
