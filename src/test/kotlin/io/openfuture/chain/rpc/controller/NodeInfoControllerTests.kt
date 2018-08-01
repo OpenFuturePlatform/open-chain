@@ -2,7 +2,7 @@ package io.openfuture.chain.rpc.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.openfuture.chain.config.ControllerTests
-import io.openfuture.chain.consensus.service.HardwareInfoService
+import io.openfuture.chain.core.service.HardwareInfoService
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.rpc.domain.node.CpuInfo
 import io.openfuture.chain.rpc.domain.node.HardwareInfo

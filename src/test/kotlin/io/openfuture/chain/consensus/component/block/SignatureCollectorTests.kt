@@ -7,9 +7,9 @@ import io.openfuture.chain.consensus.model.dto.block.PendingBlock
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.property.ConsensusProperties
-import io.openfuture.chain.consensus.service.GenesisBlockService
-import io.openfuture.chain.consensus.service.MainBlockService
 import io.openfuture.chain.core.model.entity.block.BaseBlock
+import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.network.component.node.NodeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils

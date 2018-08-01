@@ -9,14 +9,14 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.ConsensusService
-import io.openfuture.chain.consensus.service.DelegateService
-import io.openfuture.chain.consensus.service.GenesisBlockService
 import io.openfuture.chain.consensus.validation.BlockValidationProvider
 import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.service.CommonBlockService
 import io.openfuture.chain.core.service.UCommonTransactionService
 import io.openfuture.chain.core.component.NodeKeyHolder
+import io.openfuture.chain.core.service.DelegateService
+import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.network.component.node.NodeClock
 import org.junit.Before
 import org.junit.Test

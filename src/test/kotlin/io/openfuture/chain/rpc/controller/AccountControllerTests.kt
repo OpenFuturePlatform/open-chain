@@ -2,7 +2,7 @@ package io.openfuture.chain.rpc.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.openfuture.chain.config.ControllerTests
-import io.openfuture.chain.consensus.service.WalletService
+import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.network.component.node.NodeClock
