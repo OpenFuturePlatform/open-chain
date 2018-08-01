@@ -38,7 +38,8 @@ class DefaultCryptoService(
     override fun getDefaultDerivationKey(masterKeys: ExtendedKey): ExtendedKey =
         derivationKeysHelper.derive(masterKeys, DerivationKeysHelper.DEFAULT_DERIVATION_KEY)
 
-    override fun generateAddress(publicKey: ByteArray): String = ECKey(publicKey, false).getAddress()
+    override fun isValidAddress(address: String, publicKey: ByteArray): Boolean =
+        address == ECKey(publicKey, false).getAddress()
 
     override fun importKey(key: String): ExtendedKey = deserializer.deserialize(key)
 

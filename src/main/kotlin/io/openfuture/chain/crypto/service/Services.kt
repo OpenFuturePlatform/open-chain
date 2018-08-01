@@ -13,7 +13,7 @@ interface CryptoService {
 
     fun getDefaultDerivationKey(masterKeys: ExtendedKey): ExtendedKey
 
-    fun generateAddress(publicKey: ByteArray): String
+    fun isValidAddress(address: String, publicKey: ByteArray): Boolean
 
     fun importKey(key: String): ExtendedKey
 

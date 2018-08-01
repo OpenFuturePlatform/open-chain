@@ -10,6 +10,7 @@ import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.transaction.UTransaction
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.UCommonTransactionService
+import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.rpc.domain.transaction.BaseTransactionRequest
@@ -18,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
 abstract class DefaultUTransactionService<UEntity : UTransaction, Data : BaseTransactionData,
-    Dto: BaseTransactionDto<Data>, Req: BaseTransactionRequest<UEntity, Data>>(
+    Dto : BaseTransactionDto<Data>, Req : BaseTransactionRequest<UEntity, Data>>(
     protected open var repository: UTransactionRepository<UEntity>
 ) : UTransactionService<UEntity, Data, Dto, Req> {
 
@@ -33,6 +34,10 @@ abstract class DefaultUTransactionService<UEntity : UTransaction, Data : BaseTra
 
     @Autowired
     private lateinit var serviceCommon: UCommonTransactionService
+
+    @Autowired
+    private lateinit var cryptoService: CryptoService
+
 
     @Transactional
     open fun validate(dto: Dto) {
@@ -53,7 +58,9 @@ abstract class DefaultUTransactionService<UEntity : UTransaction, Data : BaseTra
     }
 
     protected fun commonValidate(data: Data, signature: String, publicKey: String) {
-        //todo need to add address validation
+        if (!cryptoService.isValidAddress(data.senderAddress, ByteUtils.fromHexString(publicKey))) {
+            throw ValidationException("Address and public key are incompatible")
+        }
 
         if (!isValidSenderBalance(data.senderAddress, data.amount)) {
             throw ValidationException("Invalid wallet balance")

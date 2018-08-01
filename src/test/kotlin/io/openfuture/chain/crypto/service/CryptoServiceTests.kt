@@ -108,12 +108,21 @@ class CryptoServiceTests : ServiceTests() {
     }
 
     @Test
-    fun generateAddressShouldReturnAddress() {
-        val expectedAddress = "0x290DEcD9548b62A8D60345A988386Fc84Ba6BC95"
+    fun isValidAddressShouldReturnTrue() {
+        val address = "0x290DEcD9548b62A8D60345A988386Fc84Ba6BC95"
 
-        val address = cryptoService.generateAddress(ByteArray(32))
+        val result = cryptoService.isValidAddress(address, ByteArray(32))
 
-        assertThat(address).isEqualTo(expectedAddress)
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun isValidAddressShouldReturnFalse() {
+        val address = "0x290DEcD9548b62A8D60345A988386Fc84Ba6BC956"
+
+        val result = cryptoService.isValidAddress(address, ByteArray(32))
+
+        assertThat(result).isFalse()
     }
 
     @Test
