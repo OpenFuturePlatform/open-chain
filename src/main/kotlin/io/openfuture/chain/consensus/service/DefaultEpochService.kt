@@ -1,7 +1,6 @@
-package io.openfuture.chain.consensus.component.block
+package io.openfuture.chain.consensus.service
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
-import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.service.GenesisBlockService

@@ -36,13 +36,11 @@ class BlockProductionScheduler(
                     currentTimeSlot = timeSlot
                     val slotOwner = epochService.getCurrentSlotOwner()
                     if (keyHolder.getPublicKey() == slotOwner.publicKey) {
-                        if (isGenesisBlockRequired()) {
-                            // create genesis block
-                            // epochService.switchEpoch()
-                        } else {
-                            // create main block
-                            // pendingBlockHandler.addBlock()
-                        }
+                        // create genesis block
+                        // epochService.switchEpoch()
+                    } else if (isGenesisBlockRequired()) {
+                        // create genesis block
+                        // epochService.switchEpoch()
                     }
                 }
                 Thread.sleep(100)

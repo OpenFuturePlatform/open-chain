@@ -1,6 +1,6 @@
 package io.openfuture.chain.core.model.dto.transaction
 
-import io.openfuture.chain.consensus.annotation.NoArgConstructor
+import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.core.model.dto.transaction.data.DelegateTransactionData
 import io.openfuture.chain.consensus.model.entity.transaction.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction

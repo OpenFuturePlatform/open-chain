@@ -1,7 +1,7 @@
 package io.openfuture.chain.core.model.dto.transaction
 
 import io.netty.buffer.ByteBuf
-import io.openfuture.chain.consensus.annotation.NoArgConstructor
+import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.core.model.dto.transaction.data.BaseTransactionData
 import io.openfuture.chain.network.domain.NetworkEntity
 import io.openfuture.chain.network.extension.readString
