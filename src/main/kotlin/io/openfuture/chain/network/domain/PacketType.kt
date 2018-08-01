@@ -15,7 +15,8 @@ enum class PacketType(
     TIME(6, Time::class),
     SYNC_BLOCKS_REQUEST(7, NetworkBlockRequest::class),
     MAIN_BLOCK(8, NetworkMainBlock::class),
-    GENESIS_BLOCK(9, NetworkGenesisBlock::class);
+    GENESIS_BLOCK(9, NetworkGenesisBlock::class),
+    BLOCK_APPROVAL_MESSAGE(10, NetworkBlockApprovalMessage::class);
 
 
     companion object {

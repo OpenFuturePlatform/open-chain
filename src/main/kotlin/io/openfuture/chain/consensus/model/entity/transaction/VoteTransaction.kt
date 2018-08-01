@@ -3,7 +3,7 @@ package io.openfuture.chain.entity.transaction
 import io.openfuture.chain.consensus.model.dictionary.VoteType
 import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.Transaction
-import io.openfuture.chain.core.util.DictionaryUtil
+import io.openfuture.chain.core.util.DictionaryUtils
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Table
@@ -30,7 +30,7 @@ class VoteTransaction(
 
 ) : Transaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash, block) {
 
-    fun getVoteType(): VoteType = DictionaryUtil.valueOf(VoteType::class.java, voteTypeId)
+    fun getVoteType(): VoteType = DictionaryUtils.valueOf(VoteType::class.java, voteTypeId)
 
     fun setVoteType(voteType: VoteType) {
         voteTypeId = voteType.getId()
