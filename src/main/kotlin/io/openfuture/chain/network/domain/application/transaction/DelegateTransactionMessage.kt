@@ -1,8 +1,8 @@
 package io.openfuture.chain.network.domain.application.transaction
 
-import io.openfuture.chain.annotation.NoArgConstructor
-import io.openfuture.chain.entity.transaction.DelegateTransaction
-import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
+import io.openfuture.chain.consensus.model.entity.transaction.DelegateTransaction
+import io.openfuture.chain.core.annotation.NoArgConstructor
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.network.domain.application.transaction.data.DelegateTransactionData
 
 @NoArgConstructor

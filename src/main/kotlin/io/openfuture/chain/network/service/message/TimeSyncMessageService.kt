@@ -2,8 +2,8 @@ package io.openfuture.chain.network.service.message
 
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.component.node.NodeClock
+import io.openfuture.chain.network.domain.TimeMessage
 import io.openfuture.chain.network.domain.network.time.AskTimeMessage
-import io.openfuture.chain.network.domain.network.time.TimeMessage
 import org.springframework.stereotype.Component
 
 @Component

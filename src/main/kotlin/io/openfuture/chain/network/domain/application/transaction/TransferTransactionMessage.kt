@@ -1,9 +1,9 @@
 package io.openfuture.chain.network.domain.application.transaction
 
-import io.openfuture.chain.annotation.NoArgConstructor
+import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
+import io.openfuture.chain.core.annotation.NoArgConstructor
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.network.domain.application.transaction.data.TransferTransactionData
-import io.openfuture.chain.entity.transaction.TransferTransaction
-import io.openfuture.chain.entity.transaction.unconfirmed.UTransferTransaction
 
 @NoArgConstructor
 class TransferTransactionMessage(

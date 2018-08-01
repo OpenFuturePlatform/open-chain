@@ -1,19 +1,19 @@
 package io.openfuture.chain.network.service.message
 
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.entity.block.GenesisBlock
-import io.openfuture.chain.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
+import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.service.CommonBlockService
+import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.network.domain.application.block.BlockRequestMessage
 import io.openfuture.chain.network.domain.application.block.GenesisBlockMessage
 import io.openfuture.chain.network.domain.application.block.MainBlockMessage
-import io.openfuture.chain.service.CommonBlockService
-import io.openfuture.chain.service.GenesisBlockService
-import io.openfuture.chain.service.MainBlockService
 import org.springframework.stereotype.Component
 
 @Component
 class BlockMessageService(
-    private val blockService: CommonBlockService,
+    private val blockService:CommonBlockService,
     private val genesisBlockService: GenesisBlockService,
     private val mainBlockService: MainBlockService
 ) {

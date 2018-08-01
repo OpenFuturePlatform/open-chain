@@ -1,6 +1,6 @@
 package io.openfuture.chain.crypto.component.key
 
-import io.openfuture.chain.crypto.domain.ECKey
+import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.crypto.util.Base58
 import io.openfuture.chain.crypto.util.HashUtils
 import org.springframework.stereotype.Component

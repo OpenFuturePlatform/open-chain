@@ -1,8 +1,8 @@
 package io.openfuture.chain.network.domain.application.transaction
 
-import io.openfuture.chain.network.domain.application.transaction.data.VoteTransactionData
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import io.openfuture.chain.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.network.domain.application.transaction.data.VoteTransactionData
 
 class VoteTransactionMessage(
     data: VoteTransactionData,

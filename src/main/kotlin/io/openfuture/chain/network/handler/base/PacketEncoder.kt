@@ -5,7 +5,7 @@ import io.netty.handler.codec.MessageToMessageEncoder
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.domain.base.BaseMessage
 import io.openfuture.chain.network.domain.network.Packet
-import io.openfuture.chain.property.NodeProperties
+import io.openfuture.chain.network.property.NodeProperties
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
 import org.springframework.context.annotation.Scope

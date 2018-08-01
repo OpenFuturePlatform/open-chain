@@ -1,6 +1,6 @@
 package io.openfuture.chain.network.domain.network.address
 
-import io.openfuture.chain.annotation.NoArgConstructor
+import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.network.domain.base.BaseMessage
 
 @NoArgConstructor

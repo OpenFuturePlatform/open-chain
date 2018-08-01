@@ -6,13 +6,10 @@ import io.openfuture.chain.crypto.component.key.ExtendedKeySerializer
 import io.openfuture.chain.crypto.component.key.PrivateKeyManager
 import io.openfuture.chain.crypto.component.seed.SeedCalculator
 import io.openfuture.chain.crypto.component.seed.SeedPhraseGenerator
-import io.openfuture.chain.crypto.dictionary.PhraseLength
-import io.openfuture.chain.crypto.domain.ECKey
-import io.openfuture.chain.crypto.domain.ExtendedKey
-import io.openfuture.chain.crypto.validation.seed.SeedPhraseValidator
-import io.openfuture.chain.rpc.domain.crypto.AccountDto
-import io.openfuture.chain.rpc.domain.crypto.WalletDto
-import io.openfuture.chain.rpc.domain.crypto.key.KeyDto
+import io.openfuture.chain.crypto.model.dictionary.PhraseLength
+import io.openfuture.chain.crypto.model.dto.ECKey
+import io.openfuture.chain.crypto.model.dto.ExtendedKey
+import io.openfuture.chain.crypto.validation.SeedPhraseValidator
 import org.springframework.stereotype.Service
 
 @Service
@@ -28,32 +25,21 @@ class DefaultCryptoService(
 
     override fun generateSeedPhrase(): String = seedPhraseGenerator.createSeedPhrase(PhraseLength.TWELVE)
 
-    override fun generateNewAccount(): AccountDto = getRootAccount(generateSeedPhrase())
-
-    override fun getRootAccount(seedPhrase: String): AccountDto {
+    override fun getMasterKey(seedPhrase: String): ExtendedKey {
         if (!seedPhraseValidator.isValid(seedPhrase))
             throw IllegalArgumentException("Invalid seed phrase")
 
-        val rootExtendedKey = ExtendedKey.root(seedCalculator.calculateSeed(seedPhrase))
-        val extendedKey = derivationKeysHelper.deriveDefaultAddress(rootExtendedKey)
-
-        return AccountDto(
-            seedPhrase,
-            KeyDto(serializer.serializePublic(rootExtendedKey), serializer.serializePrivate(rootExtendedKey)),
-            WalletDto(
-                KeyDto(serializer.serializePublic(extendedKey), serializer.serializePrivate(extendedKey)),
-                extendedKey.ecKey.getAddress()
-            )
-        )
+        return ExtendedKey.root(seedCalculator.calculateSeed(seedPhrase))
     }
 
-    override fun getDerivationKey(seedPhrase: String, derivationPath: String): ExtendedKey {
-        if (!seedPhraseValidator.isValid(seedPhrase))
-            throw IllegalArgumentException("Invalid seed phrase")
+    override fun getDerivationKey(masterKeys: ExtendedKey, derivationPath: String): ExtendedKey =
+        derivationKeysHelper.derive(masterKeys, derivationPath)
 
-        val masterKey = ExtendedKey.root(seedCalculator.calculateSeed(seedPhrase))
-        return derivationKeysHelper.derive(masterKey, derivationPath)
-    }
+    override fun getDefaultDerivationKey(masterKeys: ExtendedKey): ExtendedKey =
+        derivationKeysHelper.derive(masterKeys, DerivationKeysHelper.DEFAULT_DERIVATION_KEY)
+
+    override fun isValidAddress(address: String, publicKey: ByteArray): Boolean =
+        address == ECKey(publicKey, false).getAddress()
 
     override fun importKey(key: String): ExtendedKey = deserializer.deserialize(key)
 

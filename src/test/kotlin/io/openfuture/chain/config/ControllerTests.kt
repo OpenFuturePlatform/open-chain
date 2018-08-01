@@ -1,7 +1,7 @@
 package io.openfuture.chain.config
 
-import io.openfuture.chain.property.NodeProperties
-import io.openfuture.chain.util.AppContextUtils
+import io.openfuture.chain.core.util.AppContextUtils
+import io.openfuture.chain.network.property.NodeProperties
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import

@@ -1,6 +1,6 @@
 package io.openfuture.chain.network.domain.application.transaction.data
 
-import io.openfuture.chain.annotation.NoArgConstructor
+import io.openfuture.chain.core.annotation.NoArgConstructor
 
 @NoArgConstructor
 class TransferTransactionData(

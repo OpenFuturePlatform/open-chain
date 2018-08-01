@@ -2,13 +2,12 @@ package io.openfuture.chain.crypto.component.seed
 
 import io.openfuture.chain.crypto.constants.SeedConstant.BYTE_SIZE
 import io.openfuture.chain.crypto.constants.SeedConstant.DOUBLE_BYTE_SIZE
-import io.openfuture.chain.crypto.constants.SeedConstant.MULTIPLICITY_VALUE
 import io.openfuture.chain.crypto.constants.SeedConstant.SECOND_BYTE_OFFSET
 import io.openfuture.chain.crypto.constants.SeedConstant.THIRD_BYTE_OFFSET
 import io.openfuture.chain.crypto.constants.SeedConstant.WORD_INDEX_SIZE
-import io.openfuture.chain.crypto.dictionary.PhraseLength
+import io.openfuture.chain.crypto.model.dictionary.PhraseLength
+import io.openfuture.chain.crypto.repository.SeedWordRepository
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.repository.SeedWordRepository
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
 import java.security.SecureRandom
@@ -27,27 +26,22 @@ class SeedPhraseGenerator(
 
 
     fun createSeedPhrase(length: PhraseLength): String {
-        val entropy = ByteArray(length.entropyLength / BYTE_SIZE)
-        SecureRandom().nextBytes(entropy)
-
-        val wordIndexes = wordIndexes(entropy)
+        val wordIndexes = wordIndexes(length)
         val words = Array(wordIndexes.size) { seedWordRepository.findOneByIndex(wordIndexes[it]).value }
         return words.joinToString(StringUtils.SPACE)
     }
 
-    private fun wordIndexes(entropy: ByteArray): IntArray {
-        val entropySize = entropy.size * BYTE_SIZE
+    private fun wordIndexes(length: PhraseLength): IntArray {
+        val entropy = ByteArray(length.entropyLength / BYTE_SIZE)
+        SecureRandom().nextBytes(entropy)
 
         val entropyWithChecksum = Arrays.copyOf(entropy, entropy.size + 1)
         entropyWithChecksum[entropy.size] = HashUtils.sha256(entropy)[0]
 
-        val checksumLength = entropySize / MULTIPLICITY_VALUE
-        val mnemonicLength = (entropySize + checksumLength) / WORD_INDEX_SIZE
-
-        val wordIndexes = IntArray(mnemonicLength)
+        val wordIndexes = IntArray(length.value)
         var bitOffset = 0
         var wordIndex = 0
-        while (wordIndex < mnemonicLength) {
+        while (wordIndex < length.value) {
             wordIndexes[wordIndex] = nextWordsIndex(entropyWithChecksum, bitOffset)
             bitOffset += WORD_INDEX_SIZE
             wordIndex++

@@ -1,16 +1,17 @@
-package io.openfuture.chain.network.domain.application.block
+package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
-import io.openfuture.chain.annotation.NoArgConstructor
+import io.openfuture.chain.core.annotation.NoArgConstructor
+import io.openfuture.chain.network.domain.base.BaseMessage
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
-import io.openfuture.chain.network.domain.base.BaseMessage
 
 @NoArgConstructor
 abstract class BlockMessage(
     var height: Long,
     var previousHash: String,
     var blockTimestamp: Long,
+    var reward: Long,
     var publicKey: String,
     var hash: String,
     var signature: String
@@ -21,6 +22,7 @@ abstract class BlockMessage(
         height = buffer.readLong()
         previousHash = buffer.readString()
         blockTimestamp = buffer.readLong()
+        reward = buffer.readLong()
         publicKey = buffer.readString()
         hash = buffer.readString()
         signature = buffer.readString()
@@ -30,6 +32,7 @@ abstract class BlockMessage(
         buffer.writeLong(height)
         buffer.writeString(previousHash)
         buffer.writeLong(blockTimestamp)
+        buffer.writeLong(reward)
         buffer.writeString(publicKey)
         buffer.writeString(hash)
         buffer.writeString(signature)

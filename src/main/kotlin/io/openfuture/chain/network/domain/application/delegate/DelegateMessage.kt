@@ -1,8 +1,8 @@
 package io.openfuture.chain.network.domain.application.delegate
 
 import io.netty.buffer.ByteBuf
-import io.openfuture.chain.annotation.NoArgConstructor
-import io.openfuture.chain.entity.Delegate
+import io.openfuture.chain.core.annotation.NoArgConstructor
+import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 import io.openfuture.chain.network.domain.base.BaseMessage

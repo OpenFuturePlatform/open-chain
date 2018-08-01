@@ -1,8 +1,8 @@
 package io.openfuture.chain.rpc.domain.transaction
 
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
+import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.domain.application.transaction.data.DelegateTransactionData
-import io.openfuture.chain.entity.transaction.unconfirmed.UDelegateTransaction
-import io.openfuture.chain.util.TransactionUtils
 
 class DelegateTransactionRequest(
     data: DelegateTransactionData

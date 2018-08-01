@@ -8,10 +8,10 @@ import io.openfuture.chain.crypto.component.key.ExtendedKeySerializer
 import io.openfuture.chain.crypto.component.key.PrivateKeyManager
 import io.openfuture.chain.crypto.component.seed.SeedCalculator
 import io.openfuture.chain.crypto.component.seed.SeedPhraseGenerator
-import io.openfuture.chain.crypto.dictionary.PhraseLength.TWELVE
-import io.openfuture.chain.crypto.domain.ECKey
-import io.openfuture.chain.crypto.domain.ExtendedKey
-import io.openfuture.chain.crypto.validation.seed.SeedPhraseValidator
+import io.openfuture.chain.crypto.model.dictionary.PhraseLength.TWELVE
+import io.openfuture.chain.crypto.model.dto.ECKey
+import io.openfuture.chain.crypto.model.dto.ExtendedKey
+import io.openfuture.chain.crypto.validation.SeedPhraseValidator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -56,59 +56,16 @@ class CryptoServiceTests : ServiceTests() {
     }
 
     @Test
-    fun getRootAccountKeyShouldReturnRootInfoBySeedPhrase() {
-        val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
-        val seed = ByteArray(32)
-
-        given(seedPhraseValidator.isValid(seedPhrase)).willReturn(true)
-        given(seedCalculator.calculateSeed(seedPhrase)).willReturn(seed)
-        given(derivationKeysHelper.deriveDefaultAddress(any(ExtendedKey::class.java))).will { invocation -> invocation.arguments[0] }
-        given(serializer.serializePublic(any(ExtendedKey::class.java))).willReturn("1")
-        given(serializer.serializePrivate(any(ExtendedKey::class.java))).willReturn("2")
-
-        val actualRootAccount = cryptoService.getRootAccount(seedPhrase)
-
-        assertThat(actualRootAccount.seedPhrase).isEqualTo(seedPhrase)
-        assertThat(actualRootAccount.masterKeys.publicKey).isEqualTo("1")
-        assertThat(actualRootAccount.masterKeys.privateKey).isEqualTo("2")
-        assertThat(actualRootAccount.defaultWallet.keys.publicKey).isEqualTo("1")
-        assertThat(actualRootAccount.defaultWallet.keys.privateKey).isEqualTo("2")
-        assertThat(actualRootAccount.defaultWallet.address).isNotNull()
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun getRootAccountKeyShouldThrowIllegalArgumentExceptionWhenInvalidSeedPhrase() {
-        val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
-
-        given(seedPhraseValidator.isValid(seedPhrase)).willReturn(false)
-
-        cryptoService.getRootAccount(seedPhrase)
-    }
-
-    @Test
     fun getDerivationKeyShouldReturnDerivationKeyWhenSeedPhraseSent() {
-        val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
         val derivationPath = "m/0"
         val seed = ByteArray(32)
         val extendedKey = ExtendedKey.root(seed)
 
-        given(seedPhraseValidator.isValid(seedPhrase)).willReturn(true)
-        given(seedCalculator.calculateSeed(seedPhrase)).willReturn(seed)
         given(derivationKeysHelper.derive(any(ExtendedKey::class.java), any(String::class.java))).willReturn(extendedKey)
 
-        val key = cryptoService.getDerivationKey(seedPhrase, derivationPath)
+        val key = cryptoService.getDerivationKey(extendedKey, derivationPath)
 
         assertExtendedKey(key)
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun getDerivationKeyShouldThrowIllegalArgumentExceptionWhenInvalidSeedPhrase() {
-        val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
-        val derivationPath = "m/0"
-
-        given(seedPhraseValidator.isValid(seedPhrase)).willReturn(false)
-
-        cryptoService.getDerivationKey(seedPhrase, derivationPath)
     }
 
     @Test
@@ -137,26 +94,38 @@ class CryptoServiceTests : ServiceTests() {
         assertThat(privateKey).isEqualTo(expectedPrivateKey)
     }
 
-    fun generateNewAccountShouldReturnRootAccountInfo() {
-        val seedPhrase = "ability able about above absent absorb abstract absurd abuse accident access act"
-        val privateKey = "xprv9s21ZrQH143K4QKw9Cq9BUSUJGMSNMBt5mQVU8QD32NZpw4i6bnmiACNkqunc6P6B5tHXGw4oJMo2wXVwDgj2WDQFpTFufd4TdtKpZvpgEb"
-        val publicKey = "xpub661MyMwAqRbcGtQQFEN9YcPCrJBvmoujSzL6GWopbMuYhjPre972FxWrc6NHZiH87hAz3vg3o95GDTwncHF6dMkoJLQ897p4VssRDA4kJ7V"
+    @Test
+    fun getMasterKeysShouldReturnMasterKeysPair() {
+        val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
+        val seed = ByteArray(32)
 
-        given(seedPhraseGenerator.createSeedPhrase(TWELVE)).willReturn(seedPhrase)
-        given(derivationKeysHelper.deriveDefaultAddress(any(ExtendedKey::class.java))).will { invocation -> invocation.arguments[0] }
-        given(serializer.serializePublic(any(ExtendedKey::class.java))).willReturn(publicKey)
-        given(serializer.serializePrivate(any(ExtendedKey::class.java))).willReturn(privateKey)
+        given(seedPhraseValidator.isValid(seedPhrase)).willReturn(true)
+        given(seedCalculator.calculateSeed(seedPhrase)).willReturn(seed)
 
-        val actualRootAccount = cryptoService.generateNewAccount()
+        val key = cryptoService.getMasterKey(seedPhrase)
 
-        assertThat(actualRootAccount.seedPhrase).isEqualTo(seedPhrase)
-        assertThat(actualRootAccount.masterKeys.publicKey).isEqualTo(publicKey)
-        assertThat(actualRootAccount.masterKeys.privateKey).isEqualTo(privateKey)
-        assertThat(actualRootAccount.defaultWallet.keys.publicKey).isEqualTo(publicKey)
-        assertThat(actualRootAccount.defaultWallet.keys.privateKey).isEqualTo(privateKey)
-        assertThat(actualRootAccount.defaultWallet.address).isNotNull()
+        assertExtendedKey(key)
     }
 
+    @Test
+    fun isValidAddressShouldReturnTrue() {
+        val address = "0x290DEcD9548b62A8D60345A988386Fc84Ba6BC95"
+
+        val result = cryptoService.isValidAddress(address, ByteArray(32))
+
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun isValidAddressShouldReturnFalse() {
+        val address = "0x290DEcD9548b62A8D60345A988386Fc84Ba6BC956"
+
+        val result = cryptoService.isValidAddress(address, ByteArray(32))
+
+        assertThat(result).isFalse()
+    }
+
+    @Test
     fun importKeyShouldReturnKeysValuesAndAddressWhenPrivateKeyImporting() {
         val decodedKey = "xpub661MyMwAqRbcF1xAwgn4pRrb25d3iSwvBC4DaTsNSUcoLZ6y4jgG2gtTGNjSVSvLzLMEawq1ghm1XkJ2QEzU3"
         val extendedKey = ExtendedKey(ByteArray(64))

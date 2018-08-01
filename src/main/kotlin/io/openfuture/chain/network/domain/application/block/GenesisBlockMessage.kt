@@ -1,28 +1,37 @@
 package io.openfuture.chain.network.domain.application.block
 
 import io.netty.buffer.ByteBuf
-import io.openfuture.chain.annotation.NoArgConstructor
-import io.openfuture.chain.entity.Delegate
-import io.openfuture.chain.entity.block.GenesisBlock
+import io.openfuture.chain.core.annotation.NoArgConstructor
+import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
+import io.openfuture.chain.network.domain.BlockMessage
+import io.openfuture.chain.network.domain.application.delegate.DelegateMessage
 import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.writeList
-import io.openfuture.chain.network.domain.application.delegate.DelegateMessage
 
 @NoArgConstructor
 class GenesisBlockMessage(
     height: Long,
     previousHash: String,
     blockTimestamp: Long,
+    reward: Long,
     publicKey: String,
     hash: String,
     signature: String,
     var epochIndex: Long,
     var activeDelegates: MutableSet<DelegateMessage>
-) : BlockMessage(height, previousHash, blockTimestamp, publicKey, hash, signature) {
-
-
-    constructor(block: GenesisBlock) : this(block.height, block.previousHash, block.timestamp, block.publicKey,
-        block.hash, block.signature!!, block.epochIndex, block.activeDelegates.map { DelegateMessage(it) }.toMutableSet())
+) : BlockMessage(height, previousHash, blockTimestamp, reward, publicKey, hash, signature) {
+    
+    constructor(block: GenesisBlock) : this(
+        block.height,
+        block.previousHash,
+        block.timestamp,
+        block.reward,
+        block.publicKey,
+        block.hash,
+        block.signature!!,
+        block.epochIndex,
+        block.activeDelegates.map { DelegateMessage(it) }.toMutableSet())
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)
@@ -42,10 +51,12 @@ class GenesisBlockMessage(
         height,
         previousHash,
         blockTimestamp,
+        reward,
         publicKey,
         epochIndex,
-        activeDelegates.map { Delegate.of(it) }.toMutableSet()).apply { signature = super.signature }
+        activeDelegates.map { Delegate.of(it) }.toMutableSet()
+    ).apply { signature = super.signature }
 
-    override fun toString() = "GenesisBlockMessage(hash=$hash)"
+    override fun toString() = "NetworkGenesisBlock(hash=$hash)"
 
 }

@@ -1,7 +1,7 @@
 package io.openfuture.chain.crypto.component.key
 
-import io.openfuture.chain.crypto.domain.ECKey
-import io.openfuture.chain.crypto.domain.ExtendedKey
+import io.openfuture.chain.crypto.model.dto.ECKey
+import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import io.openfuture.chain.crypto.util.Base58
 import org.bouncycastle.util.Arrays
 import org.bouncycastle.util.Arrays.areEqual
@@ -66,7 +66,7 @@ class ExtendedKeyDeserializer {
         return when {
             areEqual(keyType, ExtendedKeySerializer.xprv) -> true
             areEqual(keyType, ExtendedKeySerializer.xpub) -> false
-            else -> throw Exception("Invalid or unsupported key type")
+            else -> throw Exception("Invalid key type")
         }
     }
 

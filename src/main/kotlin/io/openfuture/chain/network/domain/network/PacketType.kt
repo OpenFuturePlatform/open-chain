@@ -1,5 +1,6 @@
 package io.openfuture.chain.network.domain.network
 
+import io.openfuture.chain.network.domain.TimeMessage
 import io.openfuture.chain.network.domain.application.block.BlockRequestMessage
 import io.openfuture.chain.network.domain.application.block.GenesisBlockMessage
 import io.openfuture.chain.network.domain.application.block.MainBlockMessage
@@ -7,7 +8,6 @@ import io.openfuture.chain.network.domain.base.BaseMessage
 import io.openfuture.chain.network.domain.network.address.AddressesMessage
 import io.openfuture.chain.network.domain.network.address.FindAddressesMessage
 import io.openfuture.chain.network.domain.network.time.AskTimeMessage
-import io.openfuture.chain.network.domain.network.time.TimeMessage
 import kotlin.reflect.KClass
 
 enum class PacketType(

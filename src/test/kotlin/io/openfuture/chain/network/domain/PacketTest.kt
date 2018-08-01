@@ -2,9 +2,9 @@ package io.openfuture.chain.network.domain
 
 class PacketTest {
 
-    /*@Test(expected = IllegalStateException::class)
+   /* @Test(expected = IllegalStateException::class)
     fun writeShouldThrowExceptionIfCommonRequiredFieldsAreNull() {
-        val entity = FindAddressesMessage()
+        val entity = FindAddresses()
 
         val actualBuffer = Unpooled.buffer()
         Packet.Serializer().write(entity, actualBuffer)
@@ -14,7 +14,7 @@ class PacketTest {
     fun writeShouldWriteExactValuesInBufferAskTime() {
         val buf = createBuffer(
             "000500000005312e302e30000000000756b5b30000001caab5c3b3")
-        val packet = AskTimeMessage(123123123123)
+        val packet = AskTime(123123123123)
 
         read(packet, buf)
     }
@@ -23,7 +23,7 @@ class PacketTest {
     fun readShouldFillEntityWithExactValuesFromBufferAskTime() {
         val buf = createBuffer(
             "000500000005312e302e30000000000756b5b30000001caab5c3b3")
-        val packet = AskTimeMessage(123123123123)
+        val packet = AskTime(123123123123)
 
         val actualPacket = write(packet, buf)
 
@@ -34,7 +34,7 @@ class PacketTest {
     fun writeShouldWriteExactValuesInBufferTime() {
         val buf = createBuffer(
             "000600000005312e302e30000000000756b5b3000000000756b5b3000000001b34f908")
-        val packet = TimeMessage(123123123, 456456456)
+        val packet = Time(123123123, 456456456)
 
         read(packet, buf)
     }
@@ -43,7 +43,7 @@ class PacketTest {
     fun readShouldFillEntityWithExactValuesFromBufferTime() {
         val buf = createBuffer(
             "000600000005312e302e30000000000756b5b3000000000756b5b3000000001b34f908")
-        val packet = TimeMessage(123123123, 456456456)
+        val packet = Time(123123123, 456456456)
 
         val actualPacket = write(packet, buf)
 
@@ -55,9 +55,9 @@ class PacketTest {
         val buf = createBuffer(
             "000100000005312e302e30000000000756b5b3" +
                 "00000002000000093132372e302e302e3100002382000000093132372e302e302e3100002383")
-        val packet = AddressesMessage(listOf(
-            NetworkAddressMessage("127.0.0.1", 9090),
-            NetworkAddressMessage("127.0.0.1", 9091)))
+        val packet = Addresses(listOf(
+            NetworkAddress("127.0.0.1", 9090),
+            NetworkAddress("127.0.0.1", 9091)))
 
         read(packet, buf)
     }
@@ -67,9 +67,9 @@ class PacketTest {
         val buf = createBuffer(
             "000100000005312e302e30000000000756b5b3" +
                 "00000002000000093132372e302e302e3100002382000000093132372e302e302e3100002383")
-        val packet = AddressesMessage(listOf(
-            NetworkAddressMessage("127.0.0.1", 9090),
-            NetworkAddressMessage("127.0.0.1", 9091)))
+        val packet = Addresses(listOf(
+            NetworkAddress("127.0.0.1", 9090),
+            NetworkAddress("127.0.0.1", 9091)))
 
         val actualPacket = write(packet, buf)
 
@@ -80,7 +80,7 @@ class PacketTest {
     fun writeShouldWriteExactValuesInBufferFindAddress() {
         val buf = createBuffer(
             "000200000005312e302e30000000000756b5b3")
-        val packet = FindAddressesMessage()
+        val packet = FindAddresses()
 
         read(packet, buf)
     }
@@ -89,7 +89,7 @@ class PacketTest {
     fun readShouldFillEntityWithExactValuesFromBufferFindAddress() {
         val buf = createBuffer(
             "000200000005312e302e30000000000756b5b3")
-        val packet = FindAddressesMessage()
+        val packet = FindAddresses()
 
         val actualPacket = write(packet, buf)
 
@@ -100,7 +100,7 @@ class PacketTest {
     fun writeShouldWriteExactValuesInBufferGreeting() {
         val buf = createBuffer(
             "000300000005312e302e30000000000756b5b3000000093132372e302e302e3100002382")
-        val packet = GreetingMessage(NetworkAddressMessage("127.0.0.1", 9090))
+        val packet = Greeting(NetworkAddress("127.0.0.1", 9090))
 
         read(packet, buf)
     }
@@ -109,7 +109,7 @@ class PacketTest {
     fun readShouldFillEntityWithExactValuesFromBufferGreeting() {
         val buf = createBuffer(
             "000300000005312e302e30000000000756b5b3000000093132372e302e302e3100002382")
-        val packet = GreetingMessage(NetworkAddressMessage("127.0.0.1", 9090))
+        val packet = Greeting(NetworkAddress("127.0.0.1", 9090))
 
         val actualPacket = write(packet, buf)
 
@@ -120,7 +120,7 @@ class PacketTest {
     fun writeShouldWriteExactValuesInBufferHeartBeat() {
         val buf = createBuffer(
             "000400000005312e302e30000000000756b5b301")
-        val packet = HeartBeatMessage(PING)
+        val packet = HeartBeat(HeartBeatMessage.Type.PING)
 
         read(packet, buf)
     }
@@ -129,7 +129,7 @@ class PacketTest {
     fun readShouldFillEntityWithExactValuesFromBufferHeartBeat() {
         val buf = createBuffer(
             "000400000005312e302e30000000000756b5b301")
-        val packet = HeartBeatMessage(PING)
+        val packet = HeartBeat(HeartBeatMessage.Type.PING)
 
         val actualPacket = write(packet, buf)
 
@@ -140,7 +140,7 @@ class PacketTest {
     fun writeShouldWriteExactValuesInBufferBlockRequest() {
         val buf = createBuffer(
             "000700000005312e302e30000000000756b5b30000000468617368")
-        val packet = BlockRequestMessage("hash")
+        val packet = NetworkBlockRequest("hash")
 
         read(packet, buf)
     }
@@ -149,7 +149,7 @@ class PacketTest {
     fun readShouldFillEntityWithExactValuesFromBufferBlockRequest() {
         val buf = createBuffer(
             "000700000005312e302e30000000000756b5b30000000468617368")
-        val packet = BlockRequestMessage("hash")
+        val packet = NetworkBlockRequest("hash")
 
         val actualPacket = write(packet, buf)
 
@@ -158,83 +158,74 @@ class PacketTest {
 
     @Test
     fun writeShouldWriteExactValuesInBufferGenesisBlock() {
-        val buf = createBuffer("000900000005312e302e30000000000756b5b300000000000000010000000c70726576696f75734861736" +
-                "800000000000000010000000468617368000000097369676e6174757265000000036b6579000000000000000100000001000" +
-                "000096c6f63616c686f7374000000036b6579")
-        val delegates = mutableSetOf(DelegateMessage("localhost", "key"))
-
-        val packet = GenesisBlockMessage(1, "previousHash", 1, "hash", "signature", "key", 1, delegates)
+        val buf = createBuffer("000900000005312e302e30000000000756b5b300000000000000010000000c70726576696" +
+            "f7573486173680000000000000001000000000000000a0000000468617368000000097369676e6174757265000000036b657900000" +
+            "0000000000100000001000000096c6f63616c686f7374000000036b6579")
+        val delegates = mutableSetOf(NetworkDelegate("localhost", "key"))
+        val packet = NetworkGenesisBlock(1, "previousHash", 1, 10,"hash", "signature", "key", 1, delegates)
 
         read(packet, buf)
     }
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBufferGenesisBlock() {
-        val buf = createBuffer("000900000005312e302e30000000000756b5b300000000000000010000000c70726576696f75734861736" +
-                "800000000000000010000000468617368000000097369676e6174757265000000036b6579000000000000000100000001000" +
-                "000096c6f63616c686f7374000000036b6579")
-        val delegates = mutableSetOf(DelegateMessage("localhost", "key"))
-        val packet = GenesisBlockMessage(1, "previousHash", 1, "hash", "signature", "key", 1, delegates)
+        val buf = createBuffer("000900000005312e302e30000000000756b5b300000000000000010000000c70726576696" +
+            "f7573486173680000000000000001000000000000000a0000000468617368000000097369676e6174757265000000036b657900000" +
+            "0000000000100000001000000096c6f63616c686f7374000000036b6579")
+        val delegates = mutableSetOf(NetworkDelegate("localhost", "key"))
+        val packet = NetworkGenesisBlock(1, "previousHash", 1, 10,"hash", "signature", "key", 1, delegates)
 
         val actualPacket = write(packet, buf)
 
-        assertThat((actualPacket as GenesisBlockMessage).hash).isEqualTo(packet.hash)
+        assertThat((actualPacket as NetworkGenesisBlock).hash).isEqualTo(packet.hash)
     }
 
     @Test
     fun writeShouldWriteExactValuesInBufferMainBlock() {
-        val buf = createBuffer("000800000005312e302e30000000000756b5b300000000000000010000000c70726576696f75734861736800000" +
-                "00000000001000000097369676e61747572650000000a6d65726b6c65486173680000000468617368000000036b657" +
-                "9000000010000000000000001000000000000000100000010726563697069656e74416464726573730000000973656e64" +
-                "65724b657900000000000000010000000d73656e646572416464726573730000000f73656e6465725369676e6174757265" +
-                "0000000468617368000000010000000000000001000000000000000100000010726563697069656e7441646472657373000" +
-                "0000d73656e6465724164647265737300000001000000036b657900000000000000010000000973656e6465724b657900000" +
-                "00f73656e6465725369676e61747572650000000468617368000000010000000000000001000000000000000100000010726" +
-                "563697069656e74416464726573730000000973656e6465724b65790000000b64656c65676174654b6579000000000000000100" +
-                "00000d73656e646572416464726573730000000f73656e6465725369676e6174757265000000046861736800000001000000000" +
-                "0000001000000000000000100000010726563697069656e74416464726573730000000973656e6465724b657900000000000000" +
-                "010000000d73656e646572416464726573730000000f73656e6465725369676e61747572650000000468617368")
-        val transaferTransaction = mutableListOf(TransferTransactionMessage(TransferTransactionData(1, 1, "recipientAddress",
+        val buf = createBuffer("000800000005312e302e30000000000756b5b300000000000000010000000c70726576696" +
+            "f7573486173680000000000000001000000000000000a000000097369676e61747572650000000a6d65726b6c65486173680000000" +
+            "468617368000000036b6579000000010000000000000001000000000000000100000010726563697069656e7441646472657373000" +
+            "0000973656e6465724b657900000000000000010000000d73656e646572416464726573730000000f73656e6465725369676e61747" +
+            "572650000000468617368000000010000000000000001000000000000000100000010726563697069656e744164647265737300000" +
+            "00d73656e6465724164647265737300000001000000036b657900000000000000010000000973656e6465724b65790000000f73656" +
+            "e6465725369676e61747572650000000468617368000000010000000000000001000000000000000100000010726563697069656e7" +
+            "4416464726573730000000973656e6465724b65790000000b64656c65676174654b657900000000000000010000000d73656e64657" +
+            "2416464726573730000000f73656e6465725369676e61747572650000000468617368")
+        val transaferTransaction = mutableListOf(TransferTransactionDto(TransferTransactionData(1, 1, "recipientAddress",
             "senderKey"), 1, "senderAddress", "senderSignature", "hash"))
-        val voteTransaction = mutableListOf(VoteTransactionMessage(VoteTransactionData(1, 1, "recipientAddress", "senderAddress",
+        val voteTransaction = mutableListOf(VoteTransactionDto(VoteTransactionData(1, 1, "recipientAddress", "senderAddress",
             1, "key"), 1, "senderKey", "senderSignature", "hash"))
-        val delegateTransaction = mutableListOf(DelegateTransactionMessage(DelegateTransactionData(1, 1, "recipientAddress",
+        val delegateTransaction = mutableListOf(DelegateTransactionDto(DelegateTransactionData(1, 1, "recipientAddress",
             "senderKey", "delegateKey"), 1, "senderAddress", "senderSignature", "hash"))
-        val rewardTransaction = mutableListOf(RewardTransactionMessage(RewardTransactionData(1, 1, "recipientAddress",
-            "senderKey"), 1, "senderAddress", "senderSignature", "hash"))
-        val packet = MainBlockMessage(1, "previousHash", 1, "merkleHash", "hash", "signature", "key", transaferTransaction,
-            voteTransaction, delegateTransaction, rewardTransaction)
+        val packet = NetworkMainBlock(1, "previousHash", 1, 10, "merkleHash", "hash", "signature", "key", transaferTransaction,
+            voteTransaction, delegateTransaction)
 
         read(packet, buf)
     }
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBufferMainBlock() {
-        val buf = createBuffer("000800000005312e302e30000000000756b5b300000000000000010000000c70726576696f75734861736800000" +
-                "00000000001000000097369676e61747572650000000a6d65726b6c65486173680000000468617368000000036b657" +
-                "9000000010000000000000001000000000000000100000010726563697069656e74416464726573730000000973656e64" +
-                "65724b657900000000000000010000000d73656e646572416464726573730000000f73656e6465725369676e6174757265" +
-                "0000000468617368000000010000000000000001000000000000000100000010726563697069656e7441646472657373000" +
-                "0000d73656e6465724164647265737300000001000000036b657900000000000000010000000973656e6465724b657900000" +
-                "00f73656e6465725369676e61747572650000000468617368000000010000000000000001000000000000000100000010726" +
-                "563697069656e74416464726573730000000973656e6465724b65790000000b64656c65676174654b6579000000000000000100" +
-                "00000d73656e646572416464726573730000000f73656e6465725369676e6174757265000000046861736800000001000000000" +
-                "0000001000000000000000100000010726563697069656e74416464726573730000000973656e6465724b657900000000000000" +
-                "010000000d73656e646572416464726573730000000f73656e6465725369676e61747572650000000468617368")
-        val transaferTransaction = mutableListOf(TransferTransactionMessage(TransferTransactionData(1, 1, "recipientAddress",
+        val buf = createBuffer("000800000005312e302e30000000000756b5b300000000000000010000000c70726576696" +
+            "f7573486173680000000000000001000000000000000a000000097369676e61747572650000000a6d65726b6c65486173680000000" +
+            "468617368000000036b6579000000010000000000000001000000000000000100000010726563697069656e7441646472657373000" +
+            "0000973656e6465724b657900000000000000010000000d73656e646572416464726573730000000f73656e6465725369676e61747" +
+            "572650000000468617368000000010000000000000001000000000000000100000010726563697069656e744164647265737300000" +
+            "00d73656e6465724164647265737300000001000000036b657900000000000000010000000973656e6465724b65790000000f73656" +
+            "e6465725369676e61747572650000000468617368000000010000000000000001000000000000000100000010726563697069656e7" +
+            "4416464726573730000000973656e6465724b65790000000b64656c65676174654b657900000000000000010000000d73656e64657" +
+            "2416464726573730000000f73656e6465725369676e61747572650000000468617368")
+        val transaferTransaction = mutableListOf(TransferTransactionDto(TransferTransactionData(1, 1, "recipientAddress",
             "senderKey"), 1, "senderAddress", "senderSignature", "hash"))
-        val voteTransaction = mutableListOf(VoteTransactionMessage(VoteTransactionData(1, 1, "recipientAddress", "senderAddress",
+        val voteTransaction = mutableListOf(VoteTransactionDto(VoteTransactionData(1, 1, "recipientAddress", "senderAddress",
             1, "key"), 1, "senderKey", "senderSignature", "hash"))
-        val delegateTransaction = mutableListOf(DelegateTransactionMessage(DelegateTransactionData(1, 1, "recipientAddress",
+        val delegateTransaction = mutableListOf(DelegateTransactionDto(DelegateTransactionData(1, 1, "recipientAddress",
             "senderKey", "delegateKey"), 1, "senderAddress", "senderSignature", "hash"))
-        val rewardTransaction = mutableListOf(RewardTransactionMessage(RewardTransactionData(1, 1, "recipientAddress",
-            "senderKey"), 1, "senderAddress", "senderSignature", "hash"))
-        val packet = MainBlockMessage(1, "previousHash", 1, "merkleHash", "hash", "signature", "key", transaferTransaction,
-            voteTransaction, delegateTransaction, rewardTransaction)
+        val packet = NetworkMainBlock(1, "previousHash", 1, 10, "merkleHash", "hash", "signature", "key", transaferTransaction,
+            voteTransaction, delegateTransaction)
 
         val actualPacket = write(packet, buf)
 
-        assertThat((actualPacket as MainBlockMessage).hash).isEqualTo(packet.hash)
+        assertThat((actualPacket as NetworkMainBlock).hash).isEqualTo(packet.hash)
     }
 
     private fun read(packet: Packet, buf: ByteBuf) {
@@ -256,6 +247,6 @@ class PacketTest {
     private fun addFields(packet: Packet) {
         packet.timestamp = 123123123
         packet.version = "1.0.0"
-    }
-*/
+    }*/
+
 }
