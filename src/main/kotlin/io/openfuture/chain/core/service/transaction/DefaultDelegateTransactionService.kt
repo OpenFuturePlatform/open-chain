@@ -1,5 +1,6 @@
-package io.openfuture.chain.core.service.transaction.main
+package io.openfuture.chain.core.service.transaction
 
+import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -19,6 +20,10 @@ class DefaultDelegateTransactionService(
     private val delegateService: DelegateService
 ) : BaseTransactionService(), DelegateTransactionService {
 
+    @Transactional(readOnly = true)
+    override fun getUnconfirmedByHash(hash: String): UDelegateTransaction = uRepository.findOneByHash(hash)
+        ?: throw NotFoundException("Unconfirmed delegate transaction with hash: $hash not found")
+
     @Transactional
     override fun add(dto: DelegateTransactionDto) {
         val transaction = repository.findOneByHash(dto.hash)
@@ -28,7 +33,7 @@ class DefaultDelegateTransactionService(
 
         val tx = dto.toUEntity()
         validate(tx)
-        updateBalanceByFee(tx)
+        updateUnconfirmedBalanceByFee(tx)
         uRepository.save(tx)
         // todo broadcast
     }
@@ -37,26 +42,21 @@ class DefaultDelegateTransactionService(
     override fun add(request: DelegateTransactionRequest) {
         val tx = request.toUEntity(clock.networkTime())
         validate(tx)
+        updateUnconfirmedBalanceByFee(tx)
         uRepository.save(tx)
         // todo broadcast
     }
 
     @Transactional
-    override fun toBlock(dto: DelegateTransactionDto, block: MainBlock) {
-        delegateService.save(Delegate(dto.data.delegateKey, dto.data.senderAddress))
-        val tx = dto.toEntity()
+    override fun toBlock(hash: String, block: MainBlock) {
+        val unconfirmedTx = getUnconfirmedByHash(hash)
+        delegateService.save(Delegate(unconfirmedTx.getPayload().delegateKey, unconfirmedTx.senderAddress))
+
+        val tx = unconfirmedTx.toConfirmed()
         tx.block = block
         updateBalanceByFee(tx)
+        uRepository.delete(unconfirmedTx)
         repository.save(tx)
-
-    }
-
-    @Transactional
-    override fun toBlock(hash: String, block: MainBlock) {
-        val tx = getUnconfirmed(hash)
-        val newTx = tx.toConfirmed()
-        delegateService.save(Delegate(tx.delegateKey, tx.senderAddress))
-        super.processAndSave(newTx, block)
     }
 
 }

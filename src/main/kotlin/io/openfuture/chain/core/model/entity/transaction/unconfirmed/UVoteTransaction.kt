@@ -30,7 +30,7 @@ class UVoteTransaction(
         payload
     )
 
-    override fun getPayload(): BaseTransactionPayload {
+    override fun getPayload(): VoteTransactionPayload {
         return payload
     }
 

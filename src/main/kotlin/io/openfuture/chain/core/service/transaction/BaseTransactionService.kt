@@ -1,7 +1,6 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.payload.BaseTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
@@ -12,7 +11,6 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.annotation.Transactional
 
 abstract class BaseTransactionService {
 
@@ -23,35 +21,18 @@ abstract class BaseTransactionService {
     protected lateinit var walletService: WalletService
 
     @Autowired
-    protected lateinit var cryptoService: CryptoService
-//
-//    protected fun getUnconfirmed(hash: String): UEntity = uRepository.findOneByHash(hash)
-//        ?: throw NotFoundException("Unconfirmed transaction with hash: $hash not found")
-//
-//    protected fun processAndSave(tx: Entity, block: MainBlock) {
-//        if (commonService.isExists(tx.hash)) {
-//            return
-//        }
-//
-//        tx.block = block
-//        updateBalance(tx)
-//        repository.save(tx)
-//    }
-//
-//    private fun updateBalance(tx: Entity) {
-//        walletService.updateBalance(tx.senderAddress, tx.recipientAddress, tx.amount, tx.fee)
-//    }
+    private lateinit var cryptoService: CryptoService
+
 
     protected fun updateBalanceByFee(tx: Transaction) {
-        walletService.updateBalance(tx.senderAddress, tx.getPayload().fee)
+        walletService.decreaseBalance(tx.senderAddress, tx.getPayload().fee)
     }
 
-    protected fun updateBalanceByFee(tx: UTransaction) {
-        walletService.updateUnconfirmedOut(tx.senderAddress, tx.getPayload().fee)
+    protected fun updateUnconfirmedBalanceByFee(tx: UTransaction) {
+        walletService.decreaseUnconfirmedBalance(tx.senderAddress, tx.getPayload().fee)
     }
 
-    @Transactional
-    open fun validate(tx: BaseTransaction) {
+    protected fun validate(tx: UTransaction) {
         if (!isValidHash(tx.getPayload(), tx.senderPublicKey, tx.senderSignature, tx.hash)) {
             throw ValidationException("Invalid transaction hash")
         }

@@ -1,31 +1,20 @@
 package io.openfuture.chain.core.service
 
-import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.dto.transaction.BaseTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
-import io.openfuture.chain.core.model.dto.transaction.data.BaseTransactionData
-import io.openfuture.chain.core.model.dto.transaction.data.DelegateTransactionData
-import io.openfuture.chain.core.model.dto.transaction.data.TransferTransactionData
-import io.openfuture.chain.core.model.dto.transaction.data.VoteTransactionData
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.node.*
-import io.openfuture.chain.rpc.domain.transaction.BaseTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.VoteTransactionRequest
@@ -69,25 +58,35 @@ interface MainBlockService {
 
 }
 
-//interface TransactionService<Entity : Transaction, UEntity : UTransaction> {
-//
-//    fun toBlock(hash: String, block: MainBlock)
-//
-//}
-
 interface TransferTransactionService {
 
-    fun toBlock(dto: TransferTransactionDto, block: MainBlock)
+    fun getUnconfirmedByHash (hash: String): UTransferTransaction
+
+    fun add(dto: TransferTransactionDto)
+
+    fun add(request: TransferTransactionRequest)
+
+    fun toBlock(hash: String, block: MainBlock)
 
 }
 
 interface VoteTransactionService {
 
-    fun toBlock(dto: VoteTransactionDto, block: MainBlock)
+    fun getAllUnconfirmed(): List<UVoteTransaction>
+
+    fun getUnconfirmedByHash (hash: String): UVoteTransaction
+
+    fun add(dto: VoteTransactionDto)
+
+    fun add(request: VoteTransactionRequest)
+
+    fun toBlock(hash: String, block: MainBlock)
 
 }
 
 interface DelegateTransactionService {
+
+    fun getUnconfirmedByHash (hash: String): UDelegateTransaction
 
     fun add(dto: DelegateTransactionDto)
 
@@ -95,31 +94,7 @@ interface DelegateTransactionService {
 
     fun toBlock(hash: String, block: MainBlock)
 
-    fun toBlock(dto: DelegateTransactionDto, block: MainBlock)
-
 }
-
-interface UTransactionService<UEntity : UTransaction, Data : BaseTransactionData, Dto : BaseTransactionDto<Data>,
-    Req : BaseTransactionRequest<UEntity, Data>> {
-
-//    fun get(hash: String): UEntity
-
-//    fun getAll(): MutableSet<UEntity>
-
-    fun add(dto: Dto): UEntity
-
-    fun add(request: Req): UEntity
-
-}
-
-interface UTransferTransactionService : UTransactionService<UTransferTransaction, TransferTransactionData,
-    TransferTransactionDto, TransferTransactionRequest>
-
-interface UVoteTransactionService : UTransactionService<UVoteTransaction, VoteTransactionData,
-    VoteTransactionDto, VoteTransactionRequest>
-
-interface UDelegateTransactionService : UTransactionService<UDelegateTransaction, DelegateTransactionData,
-    DelegateTransactionDto, DelegateTransactionRequest>
 
 interface DelegateService {
 
@@ -145,9 +120,11 @@ interface WalletService {
 
     fun save(wallet: Wallet)
 
-    fun updateBalanceByFee(address: String, fee: Long)
+    fun increaseBalance(address: String, amount: Long)
 
-    fun updateUnconfirmedOut(address: String, fee: Long)
+    fun decreaseBalance(address: String, amount: Long)
+
+    fun decreaseUnconfirmedBalance(address: String, amount: Long)
 
 }
 

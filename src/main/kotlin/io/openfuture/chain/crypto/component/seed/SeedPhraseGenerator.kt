@@ -59,7 +59,7 @@ class SeedPhraseGenerator(
      * After getting these variables they are summarized and shift right for lacking bits of right edge of byte.
      * Then it gets mask with eleven the one digits
      *
-     * @param bytes byte array to get index from offset to offset + [WORD_INDEX_SIZE] bits in integer view
+     * @param bytes byte array to getUnconfirmedByHash index from offset to offset + [WORD_INDEX_SIZE] bits in integer view
      *
      * @return index from offset to offset + [WORD_INDEX_SIZE] bit in integer view
      */

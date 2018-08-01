@@ -40,31 +40,21 @@ class DefaultWalletService(
         repository.save(wallet)
     }
 
-    fun updateBalanceByInput(address: String, amount: Long) {
-        updateByAddress()
-    }
-
-    fun updateBalanceByOut() {
-
-    }
-
-    fun updateUnconfirmedByOut() {
-
-    }
-
-
-    override fun updateBalanceByFee(address: String, fee: Long) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    @Transactional
+    override fun increaseBalance(address: String, amount: Long) {
+        updateByAddress(address, amount)
     }
 
     @Transactional
-    override fun updateBalance(from: String, to: String, amount: Long, fee: Long) {
-        updateByAddress(from, -(amount + fee))
-        updateByAddress(to, amount)
+    override fun decreaseBalance(address: String, amount: Long) {
+        updateByAddress(address, -amount)
     }
 
-    override fun updateUnconfirmedOut(address: String, fee: Long) {
-        updateByAddress(address, fee)
+    @Transactional
+    override fun decreaseUnconfirmedBalance(address: String, amount: Long) {
+        val wallet = repository.findOneByAddress(address) ?: Wallet(address)
+        wallet.uncomfirmedOut += amount
+        repository.save(wallet)
     }
 
     private fun updateByAddress(address: String, amount: Long) {
