@@ -1,10 +1,10 @@
 package io.openfuture.chain.core.service.block
 
-import io.openfuture.chain.core.model.entity.block.GenesisBlock
-import io.openfuture.chain.core.service.DefaultDelegateService
 import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.service.CommonBlockService
+import io.openfuture.chain.core.service.DefaultDelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import org.springframework.stereotype.Service

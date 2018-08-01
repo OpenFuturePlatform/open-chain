@@ -1,7 +1,6 @@
 package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 
 import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import javax.persistence.Entity
 import javax.persistence.Table
 
