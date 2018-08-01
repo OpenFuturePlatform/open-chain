@@ -30,7 +30,7 @@ class DefaultPendingBlockHandler(
     private var stage: ObserverStage = ObserverStage.IDLE
 
     val pendingBlocks: MutableSet<Block> = mutableSetOf()
-    private val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
+    val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
     private val commitVotes: MutableMap<String, MutableList<Delegate>> = mutableMapOf()
 
     override fun addBlock(block: Block) {
