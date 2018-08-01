@@ -2,10 +2,10 @@ package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.EpochService
-import io.openfuture.chain.consensus.service.GenesisBlockService
-import io.openfuture.chain.consensus.service.MainBlockService
+import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.service.CommonBlockService
-import io.openfuture.chain.crypto.component.key.NodeKeyHolder
+import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.MainBlockService
 import org.springframework.stereotype.Component
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors

@@ -1,8 +1,8 @@
 package io.openfuture.chain.network.server.handler
 
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.consensus.model.entity.block.GenesisBlock
-import io.openfuture.chain.consensus.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.CommonBlockService
 import io.openfuture.chain.network.domain.NetworkBlockRequest
 import io.openfuture.chain.network.domain.NetworkGenesisBlock

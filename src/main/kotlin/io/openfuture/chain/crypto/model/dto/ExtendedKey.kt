@@ -1,5 +1,6 @@
 package io.openfuture.chain.crypto.model.dto
 
+import io.openfuture.chain.crypto.constants.SeedConstant
 import io.openfuture.chain.crypto.util.HashUtils
 import java.util.*
 
@@ -17,10 +18,8 @@ class ExtendedKey(
 
     companion object {
 
-        private const val ROOT_KEY_SEED = "Bitcoin seed"
-
         fun root(seed: ByteArray): ExtendedKey {
-            val hash = HashUtils.hmacSha512(ROOT_KEY_SEED.toByteArray(), seed)
+            val hash = HashUtils.hmacSha512(SeedConstant.SALT.toByteArray(), seed)
             return ExtendedKey(hash)
         }
     }

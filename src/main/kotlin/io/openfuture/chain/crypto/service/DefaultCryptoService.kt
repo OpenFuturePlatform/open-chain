@@ -25,7 +25,7 @@ class DefaultCryptoService(
 
     override fun generateSeedPhrase(): String = seedPhraseGenerator.createSeedPhrase(PhraseLength.TWELVE)
 
-    override fun getMasterKeys(seedPhrase: String): ExtendedKey {
+    override fun getMasterKey(seedPhrase: String): ExtendedKey {
         if (!seedPhraseValidator.isValid(seedPhrase))
             throw IllegalArgumentException("Invalid seed phrase")
 
@@ -37,6 +37,9 @@ class DefaultCryptoService(
 
     override fun getDefaultDerivationKey(masterKeys: ExtendedKey): ExtendedKey =
         derivationKeysHelper.derive(masterKeys, DerivationKeysHelper.DEFAULT_DERIVATION_KEY)
+
+    override fun isValidAddress(address: String, publicKey: ByteArray): Boolean =
+        address == ECKey(publicKey, false).getAddress()
 
     override fun importKey(key: String): ExtendedKey = deserializer.deserialize(key)
 

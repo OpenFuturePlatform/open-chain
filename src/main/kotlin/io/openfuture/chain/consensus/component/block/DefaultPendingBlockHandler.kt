@@ -1,13 +1,13 @@
 package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.consensus.component.block.BlockApprovalStage.*
-import io.openfuture.chain.consensus.model.entity.Delegate
-import io.openfuture.chain.consensus.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.service.EpochService
-import io.openfuture.chain.consensus.service.MainBlockService
+import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.util.DictionaryUtils
-import io.openfuture.chain.crypto.component.key.NodeKeyHolder
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.domain.NetworkBlockApproval
 import io.openfuture.chain.network.domain.NetworkMainBlock

@@ -13,7 +13,6 @@ class ClientChannelInitializer(
     override fun initChannel(pipeline: ChannelPipeline) {
         pipeline.addLast(context.getBean(TimeSyncClientHandler::class.java))
         pipeline.addLast(context.getBean(MainBlockClientHandler::class.java))
-        pipeline.addLast(context.getBean(GenesisBlockClientHandler::class.java))
         pipeline.addLast(context.getBean(HeartBeatClientHandler::class.java))
     }
 

@@ -10,16 +10,17 @@ abstract class NetworkBlock(
     var height: Long,
     var previousHash: String,
     var blockTimestamp: Long,
+    var reward: Long,
     var publicKey: String,
     var hash: String,
     var signature: String
 ) : Packet() {
 
-
     override fun readParams(buffer: ByteBuf) {
         height = buffer.readLong()
         previousHash = buffer.readString()
         blockTimestamp = buffer.readLong()
+        reward = buffer.readLong()
         publicKey = buffer.readString()
         hash = buffer.readString()
         signature = buffer.readString()
@@ -29,6 +30,7 @@ abstract class NetworkBlock(
         buffer.writeLong(height)
         buffer.writeString(previousHash)
         buffer.writeLong(blockTimestamp)
+        buffer.writeLong(reward)
         buffer.writeString(publicKey)
         buffer.writeString(hash)
         buffer.writeString(signature)
