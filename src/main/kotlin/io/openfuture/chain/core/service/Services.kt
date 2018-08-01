@@ -48,13 +48,11 @@ interface GenesisBlockService {
 
 interface MainBlockService {
 
+    fun create(): NetworkMainBlock
+
     fun add(dto: NetworkMainBlock)
 
-    fun getLast(): MainBlock
-
-    fun save(block: MainBlock): MainBlock
-
-    fun isValid(block: MainBlock): Boolean
+    fun isValid(block: NetworkMainBlock): Boolean
 
 }
 
