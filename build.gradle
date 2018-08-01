@@ -32,6 +32,7 @@ dependencies {
     // Spring
     compile('org.springframework.boot:spring-boot-starter-webflux')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile('org.springframework.boot:spring-boot-starter-web')
 
     // DB
     compile('org.flywaydb:flyway-core')
@@ -81,7 +82,7 @@ compileTestKotlin {
 noArg {
     annotations("javax.persistence.MappedSuperclass",
                 "javax.persistence.Entity",
-                "io.openfuture.chain.annotation.NoArgConstructor")
+                "io.openfuture.chain.consensus.annotation.NoArgConstructor")
 }
 
 // Jacoco
