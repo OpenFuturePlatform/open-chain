@@ -13,6 +13,8 @@ interface CryptoService {
 
     fun getDefaultDerivationKey(masterKeys: ExtendedKey): ExtendedKey
 
+    fun generateAddress(publicKey: ByteArray): String
+
     fun importKey(key: String): ExtendedKey
 
     fun importWifKey(wifKey: String): ECKey
