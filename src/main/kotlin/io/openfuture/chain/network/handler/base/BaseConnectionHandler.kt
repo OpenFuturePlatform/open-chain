@@ -13,15 +13,13 @@ import io.openfuture.chain.network.message.network.PacketType.*
 import io.openfuture.chain.network.message.network.address.AddressesMessage
 import io.openfuture.chain.network.message.network.address.FindAddressesMessage
 import io.openfuture.chain.network.message.network.time.AskTimeMessage
-import io.openfuture.chain.network.service.message.*
+import io.openfuture.chain.network.service.DefaultApplicationMessageService
+import io.openfuture.chain.network.service.NetworkMessageService
 import org.slf4j.LoggerFactory
 
 abstract class BaseConnectionHandler(
-    protected val greetingService: GreetingMessageService,
-    protected val addressService: AddressDiscoveryMessageService,
-    protected val heartBeatService: HeartBeatMessageService,
-    protected val timeSyncService: TimeSyncMessageService,
-    protected val blockService: BlockMessageService
+    protected val networkService: NetworkMessageService,
+    protected val applicationService: DefaultApplicationMessageService
 ) : SimpleChannelInboundHandler<Packet>() {
 
     companion object {
@@ -30,29 +28,31 @@ abstract class BaseConnectionHandler(
 
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        greetingService.onChannelActive(ctx)
+        log.info("Connection with ${ctx.channel().remoteAddress()} established")
+        networkService.onChannelActive(ctx)
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, packet: Packet) {
         when(packet.type) {
-            ADDRESSES -> addressService.onAddresses(ctx, packet.data as AddressesMessage)
-            FIND_ADDRESSES -> addressService.onFindAddresses(ctx, packet.data as FindAddressesMessage)
-            GREETING -> greetingService.onGreeting(ctx, packet.data as GreetingMessage)
-            HEART_BEAT -> heartBeatService.onHeartBeat(ctx, packet.data as HeartBeatMessage)
-            TIME -> timeSyncService.onTime(ctx, packet.data as TimeMessage)
-            MAIN_BLOCK -> blockService.onMainBlock(ctx, packet.data as MainBlockMessage)
-            GENESIS_BLOCK -> blockService.onGenesisBlock(ctx, packet.data as GenesisBlockMessage)
-            ASK_TIME -> timeSyncService.onAskTime(ctx, packet.data as AskTimeMessage)
-            SYNC_BLOCKS_REQUEST -> blockService.onNetworkBlockRequest(ctx, packet.data as BlockRequestMessage)
+            ADDRESSES -> networkService.onAddresses(ctx, packet.data as AddressesMessage)
+            FIND_ADDRESSES -> networkService.onFindAddresses(ctx, packet.data as FindAddressesMessage)
+            GREETING -> networkService.onGreeting(ctx, packet.data as GreetingMessage)
+            HEART_BEAT -> networkService.onHeartBeat(ctx, packet.data as HeartBeatMessage)
+            TIME -> networkService.onTime(ctx, packet.data as TimeMessage)
+            ASK_TIME -> networkService.onAskTime(ctx, packet.data as AskTimeMessage)
+            MAIN_BLOCK -> applicationService.onMainBlock(ctx, packet.data as MainBlockMessage)
+            GENESIS_BLOCK -> applicationService.onGenesisBlock(ctx, packet.data as GenesisBlockMessage)
+            SYNC_BLOCKS_REQUEST -> applicationService.onNetworkBlockRequest(ctx, packet.data as BlockRequestMessage)
         }
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        greetingService.onChannelInactive(ctx)
+        log.info("Connection with ${ctx.channel().remoteAddress()} closed")
+        networkService.onChannelInactive(ctx)
     }
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
-        log.error("Connection error $cause")
+        log.error("Connection error ${ctx.channel().remoteAddress()} with $cause")
         ctx.close()
     }
 

@@ -1,4 +1,4 @@
-package io.openfuture.chain.network.service.message
+package io.openfuture.chain.network.service
 
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
@@ -12,13 +12,13 @@ import io.openfuture.chain.network.message.application.block.MainBlockMessage
 import org.springframework.stereotype.Component
 
 @Component
-class BlockMessageService(
-    private val blockService:CommonBlockService, // TODO: ask for interface
+class DefaultApplicationMessageService(
+    private val blockService: CommonBlockService, // TODO: ask for interface
     private val genesisBlockService: GenesisBlockService, // TODO: ask for interface
     private val mainBlockService: MainBlockService // TODO: ask for interface
-) {
+) : ApplicationMessageService {
 
-    fun onNetworkBlockRequest(ctx: ChannelHandlerContext, request: BlockRequestMessage) {
+    override fun onNetworkBlockRequest(ctx: ChannelHandlerContext, request: BlockRequestMessage) {
 
         val blocks = blockService.getBlocksAfterCurrentHash(request.hash)
 
@@ -32,7 +32,7 @@ class BlockMessageService(
 
     }
 
-    fun onGenesisBlock(ctx: ChannelHandlerContext, block: GenesisBlockMessage) {
+    override fun onGenesisBlock(ctx: ChannelHandlerContext, block: GenesisBlockMessage) {
         if (blockService.isExists(block.hash)) {
             return
         }
@@ -40,7 +40,7 @@ class BlockMessageService(
         //genesisBlockService.add(block) TODO: ask for interface
     }
 
-    fun onMainBlock(ctx: ChannelHandlerContext, block: MainBlockMessage) {
+    override fun onMainBlock(ctx: ChannelHandlerContext, block: MainBlockMessage) {
         if (blockService.isExists(block.hash)) {
             return
         }
@@ -49,4 +49,3 @@ class BlockMessageService(
     }
 
 }
-

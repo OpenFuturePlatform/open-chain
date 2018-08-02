@@ -3,41 +3,25 @@ package io.openfuture.chain.network.handler.client
 import io.netty.channel.ChannelHandler
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.handler.base.BaseConnectionHandler
-import io.openfuture.chain.network.service.message.*
-import org.slf4j.LoggerFactory
+import io.openfuture.chain.network.service.DefaultApplicationMessageService
+import io.openfuture.chain.network.service.NetworkMessageService
 import org.springframework.stereotype.Component
 
 @Component
 @ChannelHandler.Sharable
 class ConnectionClientHandler(
-    addressHandler: AddressDiscoveryMessageService,
-    greetingHandler: GreetingMessageService,
-    heartBeatHandler: HeartBeatMessageService,
-    timeSyncHandler: TimeSyncMessageService,
-    blockHandler: BlockMessageService
-) : BaseConnectionHandler(greetingHandler, addressHandler, heartBeatHandler, timeSyncHandler, blockHandler) {
-
-    companion object {
-        private val log = LoggerFactory.getLogger(ConnectionClientHandler::class.java)
-    }
-
+    networkService: NetworkMessageService,
+    applicationService: DefaultApplicationMessageService
+) : BaseConnectionHandler(networkService, applicationService) {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        log.info("Connection with ${ctx.channel().remoteAddress()} established")
-
         super.channelActive(ctx)
-
-        timeSyncService.onChannelActive(ctx)
-        heartBeatService.onChannelActive(ctx)
+        networkService.onClientChannelActive(ctx)
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        log.info("Connection with ${ctx.channel().remoteAddress()} closed")
-
         super.channelInactive(ctx)
-
-        timeSyncService.onChannelInactive(ctx)
-        heartBeatService.onChannelInactive(ctx)
+        networkService.onClientChannelInactive(ctx)
     }
 
 }
