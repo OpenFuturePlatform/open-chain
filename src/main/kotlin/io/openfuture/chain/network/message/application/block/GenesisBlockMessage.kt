@@ -5,7 +5,6 @@ import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.network.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.writeList
-import io.openfuture.chain.network.message.BlockMessage
 import io.openfuture.chain.network.message.application.delegate.DelegateMessage
 
 @NoArgConstructor

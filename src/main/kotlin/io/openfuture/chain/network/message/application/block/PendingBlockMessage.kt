@@ -12,7 +12,7 @@ import io.openfuture.chain.network.message.application.transaction.TransferTrans
 import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
 
 @NoArgConstructor
-class MainBlockMessage(
+class PendingBlockMessage(
     height: Long,
     previousHash: String,
     blockTimestamp: Long,
@@ -65,9 +65,10 @@ class MainBlockMessage(
         reward,
         publicKey,
         merkleHash,
-        mutableSetOf()).apply { signature = super.signature }
+        mutableSetOf()
+    ).apply { signature = super.signature }
 
 
-    override fun toString() = "MainBlockMessage(hash=$hash)"
+    override fun toString() = "PendingBlockMessage(hash=$hash)"
 
 }
