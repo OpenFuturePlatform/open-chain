@@ -12,7 +12,6 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.Transaction
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.util.TransactionUtils
-import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.domain.NetworkBlockApproval
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.network.service.NetworkService
@@ -48,11 +47,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
     @Test
     fun addBlockShouldAddMainBlockAndBroadcast() {
-        val delegate = Delegate(
-            "publicKey",
-            "address",
-            1
-        )
+        val delegate = Delegate("publicKey", "address", 1)
         val transactions: MutableSet<Transaction> = mutableSetOf(
             TransferTransaction(
                 1L,
