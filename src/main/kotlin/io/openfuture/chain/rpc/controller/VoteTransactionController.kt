@@ -12,9 +12,8 @@ import javax.validation.Valid
 
 @RestController
 @RequestMapping("/rpc/transactions/votes")
-class TransferTransactionController(
-    private val voteService: VoteTransactionService
-) {
+class VoteTransactionController(
+    private val voteService: VoteTransactionService) {
 
     @PostMapping("/doGenerateHash")
     fun getBytes(@Valid @RequestBody payload: VoteTransactionPayload): ByteArray = voteService.getBytes(payload)

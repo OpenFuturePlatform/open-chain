@@ -12,9 +12,8 @@ import javax.validation.Valid
 
 @RestController
 @RequestMapping("/rpc/transactions/delegates")
-class TransferTransactionController(
-    private val transactionService: DelegateTransactionService
-) {
+class DelegateTransactionController(
+    private val transactionService: DelegateTransactionService) {
 
     @PostMapping("/doGenerateHash")
     fun getBytes(@Valid @RequestBody payload: DelegateTransactionPayload): ByteArray = transactionService.getBytes(payload)

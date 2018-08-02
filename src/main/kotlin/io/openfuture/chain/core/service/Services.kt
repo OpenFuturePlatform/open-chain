@@ -17,7 +17,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransa
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.rpc.domain.base.PageRequest
-import io.openfuture.chain.rpc.domain.node.*
+import io.openfuture.chain.core.model.node.*
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest

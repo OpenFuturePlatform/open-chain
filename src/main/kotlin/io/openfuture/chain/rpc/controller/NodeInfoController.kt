@@ -2,7 +2,7 @@ package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.core.service.HardwareInfoService
 import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.rpc.domain.node.HardwareInfo
+import io.openfuture.chain.core.model.node.HardwareInfo
 import org.springframework.context.ApplicationContext
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
