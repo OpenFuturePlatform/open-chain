@@ -167,6 +167,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
     @Test
     fun handleApproveMessageShouldCommitApproveTwoMessages() {
         addBlockShouldAddMainBlockAndBroadcast()
+        val blockHash = "2b9fa527078f6c5d8b48cbee453e138f6a3a54f9ef1da57b7b464bb17a4d7a72"
         val publicKey = "037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"
         val publicKey2 = "020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948"
         val delegate = Delegate(publicKey, "address", 1)
@@ -174,14 +175,14 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         val message = NetworkBlockApproval(
             BlockApprovalStage.COMMIT.value,
             2L,
-            "2b9fa527078f6c5d8b48cbee453e138f6a3a54f9ef1da57b7b464bb17a4d7a72",
+            blockHash,
             publicKey,
             "MEUCIQDkR3bVd0CSPjKMNwPbBfdvp9elSAHri5bptmEfH8k2xwIgQZ45FZodbc43khzM52guR5iXkI1zxDa2hhGk8sQq+gM="
         )
         val message2 = NetworkBlockApproval(
             BlockApprovalStage.COMMIT.value,
             2L,
-            "2b9fa527078f6c5d8b48cbee453e138f6a3a54f9ef1da57b7b464bb17a4d7a72",
+            blockHash,
             publicKey2,
             "MEUCIQCFYDosVmdgjhSn59dciBBWoyXcc8/m8z2MVuBFbSu31gIgCuz3/9eufmCmBL8tX5cHgLCnKIS3W6vCCVQNo8QWd+0="
         )
