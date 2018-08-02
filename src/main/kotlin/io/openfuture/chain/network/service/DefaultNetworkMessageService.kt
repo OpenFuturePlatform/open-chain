@@ -3,7 +3,6 @@ package io.openfuture.chain.network.service
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.network.message.TimeMessage
 import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.message.network.HeartBeatMessage
 import io.openfuture.chain.network.message.network.HeartBeatMessage.Type.PING
@@ -12,6 +11,7 @@ import io.openfuture.chain.network.message.network.address.AddressesMessage
 import io.openfuture.chain.network.message.network.address.FindAddressesMessage
 import io.openfuture.chain.network.message.network.address.NetworkAddressMessage
 import io.openfuture.chain.network.message.network.time.AskTimeMessage
+import io.openfuture.chain.network.message.network.time.TimeMessage
 import io.openfuture.chain.network.property.NodeProperties
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component

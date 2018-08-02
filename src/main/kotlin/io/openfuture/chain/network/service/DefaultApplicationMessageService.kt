@@ -1,14 +1,13 @@
 package io.openfuture.chain.network.service
 
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.core.model.entity.block.GenesisBlock
-import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.CommonBlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
-import io.openfuture.chain.network.message.application.block.BlockRequestMessage
-import io.openfuture.chain.network.message.application.block.GenesisBlockMessage
-import io.openfuture.chain.network.message.application.block.MainBlockMessage
+import io.openfuture.chain.network.message.application.block.*
+import io.openfuture.chain.network.message.application.transaction.DelegateTransactionMessage
+import io.openfuture.chain.network.message.application.transaction.TransferTransactionMessage
+import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
 import org.springframework.stereotype.Component
 
 @Component
@@ -17,17 +16,16 @@ class DefaultApplicationMessageService(
     private val genesisBlockService: GenesisBlockService, // TODO: ask for interface
     private val mainBlockService: MainBlockService // TODO: ask for interface
 ) : ApplicationMessageService {
-
     override fun onNetworkBlockRequest(ctx: ChannelHandlerContext, request: BlockRequestMessage) {
 
         val blocks = blockService.getBlocksAfterCurrentHash(request.hash)
 
         blocks?.forEach {
-            when (it) {
+            /*when (it) {
                 is MainBlock -> ctx.channel().writeAndFlush(MainBlockMessage(it))
 
                 is GenesisBlock -> ctx.channel().writeAndFlush(GenesisBlockMessage(it))
-            }
+            }*/
         }
 
     }
@@ -47,5 +45,15 @@ class DefaultApplicationMessageService(
 
         //mainBlockService.add(block) TODO: ask for interface
     }
+
+    override fun onBlockApproval(ctx: ChannelHandlerContext, block: BlockApprovalMessage) {}
+
+    override fun onPendingBlock(ctx: ChannelHandlerContext, block: PendingBlockMessage) {}
+
+    override fun onTransferTransaction(ctx: ChannelHandlerContext, tx: TransferTransactionMessage) {}
+
+    override fun onDelegateTransaction(ctx: ChannelHandlerContext, tx: DelegateTransactionMessage) {}
+
+    override fun onVoteTransaction(ctx: ChannelHandlerContext, tx: VoteTransactionMessage) {}
 
 }

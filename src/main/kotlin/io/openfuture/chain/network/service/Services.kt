@@ -2,10 +2,10 @@ package io.openfuture.chain.network.service
 
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.network.message.TimeMessage
-import io.openfuture.chain.network.message.application.block.BlockRequestMessage
-import io.openfuture.chain.network.message.application.block.GenesisBlockMessage
-import io.openfuture.chain.network.message.application.block.MainBlockMessage
+import io.openfuture.chain.network.message.application.block.*
+import io.openfuture.chain.network.message.application.transaction.DelegateTransactionMessage
+import io.openfuture.chain.network.message.application.transaction.TransferTransactionMessage
+import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
 import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.message.network.HeartBeatMessage
@@ -13,6 +13,7 @@ import io.openfuture.chain.network.message.network.address.AddressesMessage
 import io.openfuture.chain.network.message.network.address.FindAddressesMessage
 import io.openfuture.chain.network.message.network.address.NetworkAddressMessage
 import io.openfuture.chain.network.message.network.time.AskTimeMessage
+import io.openfuture.chain.network.message.network.time.TimeMessage
 
 
 interface NetworkService {
@@ -44,6 +45,16 @@ interface ApplicationMessageService {
     fun onGenesisBlock(ctx: ChannelHandlerContext, block: GenesisBlockMessage)
 
     fun onMainBlock(ctx: ChannelHandlerContext, block: MainBlockMessage)
+
+    fun onBlockApproval(ctx: ChannelHandlerContext, block: BlockApprovalMessage)
+
+    fun onPendingBlock(ctx: ChannelHandlerContext, block: PendingBlockMessage)
+
+    fun onTransferTransaction(ctx: ChannelHandlerContext, tx: TransferTransactionMessage)
+
+    fun onDelegateTransaction(ctx: ChannelHandlerContext, tx: DelegateTransactionMessage)
+
+    fun onVoteTransaction(ctx: ChannelHandlerContext, tx: VoteTransactionMessage)
 
 }
 

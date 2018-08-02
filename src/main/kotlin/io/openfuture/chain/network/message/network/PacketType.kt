@@ -1,13 +1,14 @@
 package io.openfuture.chain.network.message.network
 
-import io.openfuture.chain.network.message.TimeMessage
-import io.openfuture.chain.network.message.application.block.BlockRequestMessage
-import io.openfuture.chain.network.message.application.block.GenesisBlockMessage
-import io.openfuture.chain.network.message.application.block.MainBlockMessage
+import io.openfuture.chain.network.message.application.block.*
+import io.openfuture.chain.network.message.application.transaction.DelegateTransactionMessage
+import io.openfuture.chain.network.message.application.transaction.TransferTransactionMessage
+import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
 import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.network.address.AddressesMessage
 import io.openfuture.chain.network.message.network.address.FindAddressesMessage
 import io.openfuture.chain.network.message.network.time.AskTimeMessage
+import io.openfuture.chain.network.message.network.time.TimeMessage
 import kotlin.reflect.KClass
 
 enum class PacketType(
@@ -23,7 +24,12 @@ enum class PacketType(
     TIME(6, TimeMessage::class),
     SYNC_BLOCKS_REQUEST(7, BlockRequestMessage::class),
     MAIN_BLOCK(8, MainBlockMessage::class),
-    GENESIS_BLOCK(9, GenesisBlockMessage::class);
+    GENESIS_BLOCK(9, GenesisBlockMessage::class),
+    PENDING_BLOCK(11, PendingBlockMessage::class),
+    BLOCK_APPROVAL(10, BlockApprovalMessage::class),
+    TRANSFER_TRANSACTION(11, TransferTransactionMessage::class),
+    DELEGATE_TRANSACTION(12, DelegateTransactionMessage::class),
+    VOTE_TRANSACTION(13, VoteTransactionMessage::class);
 
 
     companion object {
