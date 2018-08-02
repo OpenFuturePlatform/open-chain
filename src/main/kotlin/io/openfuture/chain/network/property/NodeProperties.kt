@@ -1,6 +1,6 @@
 package io.openfuture.chain.network.property
 
-import io.openfuture.chain.network.domain.network.address.NetworkAddressMessage
+import io.openfuture.chain.network.message.network.address.NetworkAddressMessage
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated

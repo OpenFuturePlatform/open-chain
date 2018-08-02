@@ -83,7 +83,8 @@ compileTestKotlin {
 noArg {
     annotations("javax.persistence.MappedSuperclass",
                 "javax.persistence.Entity",
-                "io.openfuture.chain.core.annotation.NoArgConstructor")
+                "io.openfuture.chain.core.annotation.NoArgConstructor",
+                "io.openfuture.chain.network.annotation.NoArgConstructor")
 }
 
 // Jacoco

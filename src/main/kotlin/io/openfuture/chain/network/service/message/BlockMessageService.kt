@@ -6,16 +6,16 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.CommonBlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
-import io.openfuture.chain.network.domain.application.block.BlockRequestMessage
-import io.openfuture.chain.network.domain.application.block.GenesisBlockMessage
-import io.openfuture.chain.network.domain.application.block.MainBlockMessage
+import io.openfuture.chain.network.message.application.block.BlockRequestMessage
+import io.openfuture.chain.network.message.application.block.GenesisBlockMessage
+import io.openfuture.chain.network.message.application.block.MainBlockMessage
 import org.springframework.stereotype.Component
 
 @Component
 class BlockMessageService(
-    private val blockService:CommonBlockService,
-    private val genesisBlockService: GenesisBlockService,
-    private val mainBlockService: MainBlockService
+    private val blockService:CommonBlockService, // TODO: ask for interface
+    private val genesisBlockService: GenesisBlockService, // TODO: ask for interface
+    private val mainBlockService: MainBlockService // TODO: ask for interface
 ) {
 
     fun handleNetworkBlockRequest(ctx: ChannelHandlerContext, request: BlockRequestMessage) {
@@ -37,7 +37,7 @@ class BlockMessageService(
             return
         }
 
-        genesisBlockService.add(block)
+        //genesisBlockService.add(block) TODO: ask for interface
     }
 
     fun handleNetworkMainBlock(ctx: ChannelHandlerContext, block: MainBlockMessage) {
@@ -45,7 +45,7 @@ class BlockMessageService(
             return
         }
 
-        mainBlockService.add(block)
+        //mainBlockService.add(block) TODO: ask for interface
     }
 
 }

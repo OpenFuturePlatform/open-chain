@@ -3,10 +3,10 @@ package io.openfuture.chain.network.service
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelFuture
 import io.openfuture.chain.core.service.CommonBlockService
-import io.openfuture.chain.network.domain.application.block.BlockRequestMessage
-import io.openfuture.chain.network.domain.base.BaseMessage
-import io.openfuture.chain.network.domain.network.address.FindAddressesMessage
-import io.openfuture.chain.network.domain.network.address.NetworkAddressMessage
+import io.openfuture.chain.network.message.application.block.BlockRequestMessage
+import io.openfuture.chain.network.message.base.BaseMessage
+import io.openfuture.chain.network.message.network.address.FindAddressesMessage
+import io.openfuture.chain.network.message.network.address.NetworkAddressMessage
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.server.TcpServer
 import org.slf4j.LoggerFactory

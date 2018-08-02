@@ -1,8 +1,8 @@
 package io.openfuture.chain.network.service.message
 
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.network.domain.network.GreetingMessage
-import io.openfuture.chain.network.domain.network.address.NetworkAddressMessage
+import io.openfuture.chain.network.message.network.GreetingMessage
+import io.openfuture.chain.network.message.network.address.NetworkAddressMessage
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.ConnectionService
 import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE

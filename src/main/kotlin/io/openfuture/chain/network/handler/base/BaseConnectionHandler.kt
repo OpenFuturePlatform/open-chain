@@ -2,17 +2,17 @@ package io.openfuture.chain.network.handler.base
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
-import io.openfuture.chain.network.domain.TimeMessage
-import io.openfuture.chain.network.domain.application.block.BlockRequestMessage
-import io.openfuture.chain.network.domain.application.block.GenesisBlockMessage
-import io.openfuture.chain.network.domain.application.block.MainBlockMessage
-import io.openfuture.chain.network.domain.network.GreetingMessage
-import io.openfuture.chain.network.domain.network.HeartBeatMessage
-import io.openfuture.chain.network.domain.network.Packet
-import io.openfuture.chain.network.domain.network.PacketType
-import io.openfuture.chain.network.domain.network.address.AddressesMessage
-import io.openfuture.chain.network.domain.network.address.FindAddressesMessage
-import io.openfuture.chain.network.domain.network.time.AskTimeMessage
+import io.openfuture.chain.network.message.TimeMessage
+import io.openfuture.chain.network.message.application.block.BlockRequestMessage
+import io.openfuture.chain.network.message.application.block.GenesisBlockMessage
+import io.openfuture.chain.network.message.application.block.MainBlockMessage
+import io.openfuture.chain.network.message.network.GreetingMessage
+import io.openfuture.chain.network.message.network.HeartBeatMessage
+import io.openfuture.chain.network.message.network.Packet
+import io.openfuture.chain.network.message.network.PacketType
+import io.openfuture.chain.network.message.network.address.AddressesMessage
+import io.openfuture.chain.network.message.network.address.FindAddressesMessage
+import io.openfuture.chain.network.message.network.time.AskTimeMessage
 import io.openfuture.chain.network.service.message.*
 import org.slf4j.LoggerFactory
 

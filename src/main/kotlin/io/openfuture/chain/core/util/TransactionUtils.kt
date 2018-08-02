@@ -1,9 +1,9 @@
 package io.openfuture.chain.core.util
 
+import io.openfuture.chain.core.model.dto.transaction.data.BaseTransactionData
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.domain.application.transaction.data.BaseTransactionData
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.nio.ByteBuffer
 

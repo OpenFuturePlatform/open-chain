@@ -2,6 +2,8 @@ package io.openfuture.chain.core.service.transaction.unconfirmed
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.model.dto.transaction.BaseTransactionDto
+import io.openfuture.chain.core.model.dto.transaction.data.BaseTransactionData
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.UCommonTransactionService
@@ -11,15 +13,13 @@ import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.network.domain.application.transaction.BaseTransactionMessage
-import io.openfuture.chain.network.domain.application.transaction.data.BaseTransactionData
 import io.openfuture.chain.rpc.domain.transaction.BaseTransactionRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
 abstract class DefaultUTransactionService<UEntity : UTransaction, Data : BaseTransactionData,
-    Dto : BaseTransactionMessage<Data>, Req : BaseTransactionRequest<UEntity, Data>>(
+    Dto : BaseTransactionDto<Data>, Req : BaseTransactionRequest<UEntity, Data>>(
     protected open var repository: UTransactionRepository<UEntity>
 ) : UTransactionService<UEntity, Data, Dto, Req> {
 

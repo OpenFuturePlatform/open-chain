@@ -1,7 +1,7 @@
 package io.openfuture.chain.network.extension
 
 import io.netty.buffer.ByteBuf
-import io.openfuture.chain.network.domain.base.BaseMessage
+import io.openfuture.chain.network.message.base.BaseMessage
 import java.nio.charset.StandardCharsets.UTF_8
 
 fun ByteBuf.writeString(string: String) {

@@ -1,7 +1,8 @@
 package io.openfuture.chain.core.service.transaction
 
-import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
+import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.core.repository.UVoteTransactionRepository
 import io.openfuture.chain.core.repository.VoteTransactionRepository
@@ -9,7 +10,6 @@ import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.util.DictionaryUtil
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import io.openfuture.chain.network.domain.application.transaction.VoteTransactionMessage
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -22,7 +22,7 @@ class DefaultVoteTransactionService(
     VoteTransactionService {
 
     @Transactional
-    override fun toBlock(dto: VoteTransactionMessage, block: MainBlock) {
+    override fun toBlock(dto: VoteTransactionDto, block: MainBlock) {
         val type = DictionaryUtil.valueOf(VoteType::class.java, dto.data.voteTypeId)
         updateWalletVotes(dto.data.delegateKey, dto.data.senderAddress, type)
         super.processAndSave(dto.toEntity(), block)

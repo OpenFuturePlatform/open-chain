@@ -2,6 +2,14 @@ package io.openfuture.chain.core.service
 
 import io.openfuture.chain.consensus.model.entity.transaction.DelegateTransaction
 import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
+import io.openfuture.chain.core.model.dto.transaction.BaseTransactionDto
+import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
+import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
+import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
+import io.openfuture.chain.core.model.dto.transaction.data.BaseTransactionData
+import io.openfuture.chain.core.model.dto.transaction.data.DelegateTransactionData
+import io.openfuture.chain.core.model.dto.transaction.data.TransferTransactionData
+import io.openfuture.chain.core.model.dto.transaction.data.VoteTransactionData
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.model.entity.block.BaseBlock
@@ -13,16 +21,8 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransactio
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.entity.transaction.VoteTransaction
-import io.openfuture.chain.network.domain.application.block.GenesisBlockMessage
-import io.openfuture.chain.network.domain.application.block.MainBlockMessage
-import io.openfuture.chain.network.domain.application.transaction.BaseTransactionMessage
-import io.openfuture.chain.network.domain.application.transaction.DelegateTransactionMessage
-import io.openfuture.chain.network.domain.application.transaction.TransferTransactionMessage
-import io.openfuture.chain.network.domain.application.transaction.VoteTransactionMessage
-import io.openfuture.chain.network.domain.application.transaction.data.BaseTransactionData
-import io.openfuture.chain.network.domain.application.transaction.data.DelegateTransactionData
-import io.openfuture.chain.network.domain.application.transaction.data.TransferTransactionData
-import io.openfuture.chain.network.domain.application.transaction.data.VoteTransactionData
+import io.openfuture.chain.network.domain.NetworkGenesisBlock
+import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.node.*
 import io.openfuture.chain.rpc.domain.transaction.BaseTransactionRequest
@@ -47,7 +47,7 @@ interface HardwareInfoService {
 
 interface GenesisBlockService {
 
-    fun add(dto: GenesisBlockMessage)
+    fun add(dto: NetworkGenesisBlock)
 
     fun getLast(): GenesisBlock
 
@@ -59,7 +59,7 @@ interface GenesisBlockService {
 
 interface MainBlockService {
 
-    fun add(dto: MainBlockMessage)
+    fun add(dto: NetworkMainBlock)
 
     fun getLast(): MainBlock
 
@@ -77,23 +77,23 @@ interface TransactionService<Entity : Transaction, UEntity : UTransaction> {
 
 interface TransferTransactionService : TransactionService<TransferTransaction, UTransferTransaction> {
 
-    fun toBlock(dto: TransferTransactionMessage, block: MainBlock)
+    fun toBlock(dto: TransferTransactionDto, block: MainBlock)
 
 }
 
 interface VoteTransactionService : TransactionService<VoteTransaction, UVoteTransaction> {
 
-    fun toBlock(dto: VoteTransactionMessage, block: MainBlock)
+    fun toBlock(dto: VoteTransactionDto, block: MainBlock)
 
 }
 
 interface DelegateTransactionService : TransactionService<DelegateTransaction, UDelegateTransaction> {
 
-    fun toBlock(dto: DelegateTransactionMessage, block: MainBlock)
+    fun toBlock(dto: DelegateTransactionDto, block: MainBlock)
 
 }
 
-interface UTransactionService<UEntity : UTransaction, Data : BaseTransactionData, Dto : BaseTransactionMessage<Data>,
+interface UTransactionService<UEntity : UTransaction, Data : BaseTransactionData, Dto : BaseTransactionDto<Data>,
     Req : BaseTransactionRequest<UEntity, Data>> {
 
     fun get(hash: String): UEntity
@@ -107,13 +107,13 @@ interface UTransactionService<UEntity : UTransaction, Data : BaseTransactionData
 }
 
 interface UTransferTransactionService : UTransactionService<UTransferTransaction, TransferTransactionData,
-    TransferTransactionMessage, TransferTransactionRequest>
+    TransferTransactionDto, TransferTransactionRequest>
 
 interface UVoteTransactionService : UTransactionService<UVoteTransaction, VoteTransactionData,
-    VoteTransactionMessage, VoteTransactionRequest>
+    VoteTransactionDto, VoteTransactionRequest>
 
 interface UDelegateTransactionService : UTransactionService<UDelegateTransaction, DelegateTransactionData,
-    DelegateTransactionMessage, DelegateTransactionRequest>
+    DelegateTransactionDto, DelegateTransactionRequest>
 
 interface DelegateService {
 

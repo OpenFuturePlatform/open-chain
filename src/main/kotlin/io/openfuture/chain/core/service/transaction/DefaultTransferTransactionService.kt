@@ -1,12 +1,12 @@
 package io.openfuture.chain.core.service.transaction
 
-import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
+import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.core.repository.TransferTransactionRepository
 import io.openfuture.chain.core.repository.UTransferTransactionRepository
 import io.openfuture.chain.core.service.TransferTransactionService
-import io.openfuture.chain.network.domain.application.transaction.TransferTransactionMessage
 import org.springframework.stereotype.Service
 
 @Service
@@ -16,7 +16,7 @@ class DefaultTransferTransactionService(
 ) : DefaultTransactionService<TransferTransaction, UTransferTransaction>(repository, uRepository),
     TransferTransactionService {
 
-    override fun toBlock(dto: TransferTransactionMessage, block: MainBlock) {
+    override fun toBlock(dto: TransferTransactionDto, block: MainBlock) {
         processAndSave(dto.toEntity(), block)
     }
 

@@ -1,7 +1,7 @@
 package io.openfuture.chain.core.model.entity
 
 import io.openfuture.chain.core.model.entity.base.BaseModel
-import io.openfuture.chain.network.domain.application.delegate.DelegateMessage
+import io.openfuture.chain.network.domain.NetworkDelegate
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Table
@@ -21,9 +21,9 @@ class Delegate(
 ) : BaseModel(id) {
 
     companion object {
-        fun of(delegate: DelegateMessage): Delegate = Delegate(
-            delegate.publicKey,
-            delegate.address
+        fun of(delegateDto: NetworkDelegate): Delegate = Delegate(
+            delegateDto.publicKey,
+            delegateDto.address
         )
     }
 

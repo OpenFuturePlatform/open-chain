@@ -1,7 +1,7 @@
 package io.openfuture.chain.network.service
 
 import io.netty.channel.Channel
-import io.openfuture.chain.network.domain.network.address.NetworkAddressMessage
+import io.openfuture.chain.network.message.network.address.NetworkAddressMessage
 import org.springframework.stereotype.Service
 import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap

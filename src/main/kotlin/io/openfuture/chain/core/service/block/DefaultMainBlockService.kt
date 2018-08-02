@@ -1,20 +1,20 @@
 package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.consensus.component.block.TimeSlot
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.consensus.model.entity.transaction.DelegateTransaction
 import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
+import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.core.exception.NotFoundException
-import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.Transaction
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.core.service.VoteTransactionService
-import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.network.domain.application.block.MainBlockMessage
+import io.openfuture.chain.network.domain.NetworkMainBlock
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -33,7 +33,7 @@ class DefaultMainBlockService(
         ?: throw NotFoundException("Last block not found")
 
     @Transactional
-    override fun add(dto: MainBlockMessage) {
+    override fun add(dto: NetworkMainBlock) {
         val savedBlock = repository.save(dto.toEntity())
 
         dto.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }

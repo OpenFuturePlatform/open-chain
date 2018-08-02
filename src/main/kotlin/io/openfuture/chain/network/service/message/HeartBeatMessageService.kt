@@ -2,9 +2,9 @@ package io.openfuture.chain.network.service.message
 
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.network.domain.network.HeartBeatMessage
-import io.openfuture.chain.network.domain.network.HeartBeatMessage.Type.PING
-import io.openfuture.chain.network.domain.network.HeartBeatMessage.Type.PONG
+import io.openfuture.chain.network.message.network.HeartBeatMessage
+import io.openfuture.chain.network.message.network.HeartBeatMessage.Type.PING
+import io.openfuture.chain.network.message.network.HeartBeatMessage.Type.PONG
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ScheduledFuture
