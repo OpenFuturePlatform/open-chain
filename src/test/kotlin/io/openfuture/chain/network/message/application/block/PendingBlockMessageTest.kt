@@ -48,11 +48,11 @@ class PendingBlockMessageTest {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualBlock = MainBlockMessage::class.java.newInstance()
+        val actualMessage = MainBlockMessage::class.java.newInstance()
 
-        actualBlock.read(buffer)
+        actualMessage.read(buffer)
 
-        assertThat(actualBlock).isEqualToComparingFieldByFieldRecursively(message)
+        assertThat(actualMessage).isEqualToComparingFieldByFieldRecursively(message)
     }
 
     private fun createBuffer(value: String) : ByteBuf = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump((value)))

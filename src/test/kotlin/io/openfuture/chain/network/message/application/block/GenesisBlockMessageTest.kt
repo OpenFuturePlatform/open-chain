@@ -35,11 +35,11 @@ class GenesisBlockMessageTest {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualBlock = GenesisBlockMessage::class.java.newInstance()
+        val actualMessage = GenesisBlockMessage::class.java.newInstance()
 
-        actualBlock.read(buffer)
+        actualMessage.read(buffer)
 
-        assertThat(actualBlock).isEqualToComparingFieldByFieldRecursively(message)
+        assertThat(actualMessage).isEqualToComparingFieldByFieldRecursively(message)
     }
 
     private fun createBuffer(value: String) : ByteBuf = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump((value)))
