@@ -1,8 +1,8 @@
 package io.openfuture.chain.core.service.transaction
 
-import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.core.repository.UVoteTransactionRepository
 import io.openfuture.chain.core.repository.VoteTransactionRepository

@@ -22,13 +22,14 @@ class DefaultPendingBlockHandler(
     private val networkService: NetworkService
 ) : PendingBlockHandler {
 
+    val pendingBlocks: MutableSet<MainBlock> = mutableSetOf()
+    val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
+    val commits: MutableMap<String, MutableList<Delegate>> = mutableMapOf()
+
     private var observable: MainBlock? = null
     private var timeSlotNumber: Long = 0
     private var stage: BlockApprovalStage = IDLE
 
-    private val pendingBlocks: MutableSet<MainBlock> = mutableSetOf()
-    private val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
-    private val commits: MutableMap<String, MutableList<Delegate>> = mutableMapOf()
 
     override fun addBlock(block: MainBlock) {
         val blockSlotNumber = epochService.getSlotNumber(block.timestamp)
