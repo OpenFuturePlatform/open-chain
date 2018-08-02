@@ -20,13 +20,9 @@ class NodeInfoController(
     fun getVersion() { }
 
     @GetMapping("/getUptime")
-    fun getUptime(): Long {
-        return nodeClock.nodeTime() - context.startupDate
-    }
+    fun getUptime(): Long = nodeClock.nodeTime() - context.startupDate
 
     @GetMapping("/getHardwareInfo")
-    fun getHardwareInfo(): HardwareInfo {
-        return hardwareInfoService.getHardwareInfo()
-    }
+    fun getHardwareInfo(): HardwareInfo = hardwareInfoService.getHardwareInfo()
 
 }

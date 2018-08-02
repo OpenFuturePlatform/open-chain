@@ -1,4 +1,4 @@
-package io.openfuture.chain.rpc.domain.transaction
+package io.openfuture.chain.rpc.domain.transaction.request
 
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
