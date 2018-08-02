@@ -19,11 +19,11 @@ class AddressDiscoveryMessageService(
     private val connectionService: ConnectionService
 ) {
 
-    fun handleFindAddressMessage(ctx: ChannelHandlerContext, message: FindAddressesMessage) {
+    fun onFindAddresses(ctx: ChannelHandlerContext, message: FindAddressesMessage) {
         ctx.writeAndFlush(AddressesMessage(connectionService.getConnectionAddresses().toList()))
     }
 
-    fun handleAddressMessage(ctx: ChannelHandlerContext, message: AddressesMessage) {
+    fun onAddresses(ctx: ChannelHandlerContext, message: AddressesMessage) {
         networkService.connect(message.values)
     }
 

@@ -18,7 +18,7 @@ class BlockMessageService(
     private val mainBlockService: MainBlockService // TODO: ask for interface
 ) {
 
-    fun handleNetworkBlockRequest(ctx: ChannelHandlerContext, request: BlockRequestMessage) {
+    fun onNetworkBlockRequest(ctx: ChannelHandlerContext, request: BlockRequestMessage) {
 
         val blocks = blockService.getBlocksAfterCurrentHash(request.hash)
 
@@ -32,7 +32,7 @@ class BlockMessageService(
 
     }
 
-    fun handleNetworkGenesisBlock(ctx: ChannelHandlerContext, block: GenesisBlockMessage) {
+    fun onGenesisBlock(ctx: ChannelHandlerContext, block: GenesisBlockMessage) {
         if (blockService.isExists(block.hash)) {
             return
         }
@@ -40,7 +40,7 @@ class BlockMessageService(
         //genesisBlockService.add(block) TODO: ask for interface
     }
 
-    fun handleNetworkMainBlock(ctx: ChannelHandlerContext, block: MainBlockMessage) {
+    fun onMainBlock(ctx: ChannelHandlerContext, block: MainBlockMessage) {
         if (blockService.isExists(block.hash)) {
             return
         }

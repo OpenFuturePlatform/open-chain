@@ -9,7 +9,7 @@ import io.openfuture.chain.network.message.application.block.MainBlockMessage
 import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.message.network.HeartBeatMessage
 import io.openfuture.chain.network.message.network.Packet
-import io.openfuture.chain.network.message.network.PacketType
+import io.openfuture.chain.network.message.network.PacketType.*
 import io.openfuture.chain.network.message.network.address.AddressesMessage
 import io.openfuture.chain.network.message.network.address.FindAddressesMessage
 import io.openfuture.chain.network.message.network.time.AskTimeMessage
@@ -30,25 +30,25 @@ abstract class BaseConnectionHandler(
 
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        greetingService.handleChannelActive(ctx)
+        greetingService.onChannelActive(ctx)
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, packet: Packet) {
         when(packet.type) {
-            PacketType.ADDRESSES -> addressService.handleAddressMessage(ctx, packet.data as AddressesMessage)
-            PacketType.FIND_ADDRESSES -> addressService.handleFindAddressMessage(ctx, packet.data as FindAddressesMessage)
-            PacketType.GREETING -> greetingService.handleGreetingMessage(ctx, packet.data as GreetingMessage)
-            PacketType.HEART_BEAT -> heartBeatService.handleHeartBeatMessage(ctx, packet.data as HeartBeatMessage)
-            PacketType.TIME -> timeSyncService.handleTimeMessage(ctx, packet.data as TimeMessage)
-            PacketType.MAIN_BLOCK -> blockService.handleNetworkMainBlock(ctx, packet.data as MainBlockMessage)
-            PacketType.GENESIS_BLOCK -> blockService.handleNetworkGenesisBlock(ctx, packet.data as GenesisBlockMessage)
-            PacketType.ASK_TIME -> timeSyncService.handleAskTimeMessage(ctx, packet.data as AskTimeMessage)
-            PacketType.SYNC_BLOCKS_REQUEST -> blockService.handleNetworkBlockRequest(ctx, packet.data as BlockRequestMessage)
+            ADDRESSES -> addressService.onAddresses(ctx, packet.data as AddressesMessage)
+            FIND_ADDRESSES -> addressService.onFindAddresses(ctx, packet.data as FindAddressesMessage)
+            GREETING -> greetingService.onGreeting(ctx, packet.data as GreetingMessage)
+            HEART_BEAT -> heartBeatService.onHeartBeat(ctx, packet.data as HeartBeatMessage)
+            TIME -> timeSyncService.onTime(ctx, packet.data as TimeMessage)
+            MAIN_BLOCK -> blockService.onMainBlock(ctx, packet.data as MainBlockMessage)
+            GENESIS_BLOCK -> blockService.onGenesisBlock(ctx, packet.data as GenesisBlockMessage)
+            ASK_TIME -> timeSyncService.onAskTime(ctx, packet.data as AskTimeMessage)
+            SYNC_BLOCKS_REQUEST -> blockService.onNetworkBlockRequest(ctx, packet.data as BlockRequestMessage)
         }
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        greetingService.handleChannelInactive(ctx)
+        greetingService.onChannelInactive(ctx)
     }
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {

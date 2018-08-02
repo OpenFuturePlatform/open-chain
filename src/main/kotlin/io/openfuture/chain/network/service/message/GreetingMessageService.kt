@@ -16,16 +16,16 @@ class GreetingMessageService(
     private val properties: NodeProperties
 ) {
 
-    fun handleChannelActive(ctx: ChannelHandlerContext) {
+    fun onChannelActive(ctx: ChannelHandlerContext) {
         ctx.writeAndFlush(GreetingMessage(NetworkAddressMessage(properties.host!!, properties.port!!)))
         ctx.fireChannelActive()
     }
 
-    fun handleGreetingMessage(ctx: ChannelHandlerContext, message: GreetingMessage) {
+    fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage) {
         service.addConnection(ctx.channel(), message.address)
     }
 
-    fun handleChannelInactive(ctx: ChannelHandlerContext) {
+    fun onChannelInactive(ctx: ChannelHandlerContext) {
         service.removeConnection(ctx.channel())
         ctx.fireChannelInactive()
     }

@@ -27,8 +27,8 @@ class ConnectionClientHandler(
 
         super.channelActive(ctx)
 
-        timeSyncService.handleChannelActive(ctx)
-        heartBeatService.handleChannelActive(ctx)
+        timeSyncService.onChannelActive(ctx)
+        heartBeatService.onChannelActive(ctx)
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
@@ -36,8 +36,8 @@ class ConnectionClientHandler(
 
         super.channelInactive(ctx)
 
-        timeSyncService.handleChannelInactive(ctx)
-        heartBeatService.handleChannelInactive(ctx)
+        timeSyncService.onChannelInactive(ctx)
+        heartBeatService.onChannelInactive(ctx)
     }
 
 }

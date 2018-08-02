@@ -15,20 +15,20 @@ class HeartBeatMessageService{
 
     private val tasks: MutableMap<Channel, ScheduledFuture<*>> = ConcurrentHashMap()
 
-    fun handleChannelActive(ctx: ChannelHandlerContext) {
+    fun onChannelActive(ctx: ChannelHandlerContext) {
         val task = ctx.channel()
             .eventLoop()
             .scheduleAtFixedRate({ ctx.writeAndFlush(HeartBeatMessage(PING)) }, 0, 20, TimeUnit.SECONDS)
         tasks[ctx.channel()] = task
     }
 
-    fun handleHeartBeatMessage(ctx: ChannelHandlerContext, heartBeat: HeartBeatMessage) {
+    fun onHeartBeat(ctx: ChannelHandlerContext, heartBeat: HeartBeatMessage) {
         if (heartBeat.type == PING) {
             ctx.channel().writeAndFlush(HeartBeatMessage(PONG))
         }
     }
 
-    fun handleChannelInactive(ctx: ChannelHandlerContext) {
+    fun onChannelInactive(ctx: ChannelHandlerContext) {
         val task = tasks.remove(ctx.channel())!!
         task.cancel(true)
     }
