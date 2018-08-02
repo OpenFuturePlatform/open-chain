@@ -1,59 +1,30 @@
 package io.openfuture.chain.network.message.application.transaction
 
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
-import io.openfuture.chain.entity.transaction.VoteTransaction
-import io.openfuture.chain.network.message.application.transaction.data.VoteTransactionData
+import io.netty.buffer.ByteBuf
+import io.openfuture.chain.network.extension.readString
+import io.openfuture.chain.network.extension.writeString
 
 class VoteTransactionMessage(
-    data: VoteTransactionData,
     timestamp: Long,
+    fee: Long,
+    senderAddress: String,
     senderPublicKey: String,
     senderSignature: String,
-    hash: String
-) : BaseTransactionMessage<VoteTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
+    hash: String,
+    var voteTypeId: Int,
+    var delegateKey: String
+) : BaseTransactionMessage(timestamp, fee, senderAddress, senderPublicKey, senderSignature, hash) {
 
-    constructor(tx: VoteTransaction) : this(
-        VoteTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress, tx.getVoteType().getId(), tx.delegateKey),
-        tx.timestamp,
-        tx.senderPublicKey,
-        tx.senderSignature,
-        tx.hash
-    )
+    override fun read(buffer: ByteBuf) {
+        super.read(buffer)
+        voteTypeId = buffer.readInt()
+        delegateKey = buffer.readString()
+    }
 
-    constructor(tx: UVoteTransaction) : this(
-        VoteTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress, tx.getVoteType().getId(), tx.delegateKey),
-        tx.timestamp,
-        tx.senderPublicKey,
-        tx.senderSignature,
-        tx.hash
-    )
-
-    fun toEntity(): VoteTransaction = VoteTransaction(
-        timestamp,
-        data.amount,
-        data.fee,
-        data.recipientAddress,
-        data.senderAddress,
-        senderPublicKey,
-        senderSignature,
-        hash,
-        data.voteTypeId,
-        data.delegateKey
-    )
-
-    fun toUEntity(): UVoteTransaction = UVoteTransaction(
-        timestamp,
-        data.amount,
-        data.fee,
-        data.recipientAddress,
-        data.senderAddress,
-        senderPublicKey,
-        senderSignature,
-        hash,
-        data.voteTypeId,
-        data.delegateKey
-    )
-
-    override fun getDataInstance(): VoteTransactionData = VoteTransactionData::class.java.newInstance()
+    override fun write(buffer: ByteBuf) {
+        super.write(buffer)
+        buffer.writeInt(voteTypeId)
+        buffer.writeString(delegateKey)
+    }
 
 }

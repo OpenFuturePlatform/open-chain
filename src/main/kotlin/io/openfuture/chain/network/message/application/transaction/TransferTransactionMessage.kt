@@ -1,57 +1,32 @@
 package io.openfuture.chain.network.message.application.transaction
 
-import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
+import io.netty.buffer.ByteBuf
 import io.openfuture.chain.network.annotation.NoArgConstructor
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
-import io.openfuture.chain.network.message.application.transaction.data.TransferTransactionData
+import io.openfuture.chain.network.extension.readString
+import io.openfuture.chain.network.extension.writeString
 
 @NoArgConstructor
 class TransferTransactionMessage(
-    data: TransferTransactionData,
     timestamp: Long,
+    fee: Long,
+    senderAddress: String,
     senderPublicKey: String,
     senderSignature: String,
-    hash: String
-) : BaseTransactionMessage<TransferTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
+    hash: String,
+    var amount: Long,
+    var recipientAddress: String
+) : BaseTransactionMessage(timestamp, fee, senderAddress, senderPublicKey, senderSignature, hash) {
 
-    constructor(tx: TransferTransaction) : this(
-        TransferTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress),
-        tx.timestamp,
-        tx.senderPublicKey,
-        tx.senderSignature,
-        tx.hash
-    )
+    override fun read(buffer: ByteBuf) {
+        super.read(buffer)
+        amount = buffer.readLong()
+        recipientAddress = buffer.readString()
+    }
 
-    constructor(tx: UTransferTransaction) : this(
-        TransferTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress),
-        tx.timestamp,
-        tx.senderPublicKey,
-        tx.senderSignature,
-        tx.hash
-    )
-
-    fun toEntity(): TransferTransaction = TransferTransaction(
-        timestamp,
-        data.amount,
-        data.fee,
-        data.recipientAddress,
-        data.senderAddress,
-        senderPublicKey,
-        senderSignature,
-        hash
-    )
-
-    fun toUEntity(): UTransferTransaction = UTransferTransaction(
-        timestamp,
-        data.amount,
-        data.fee,
-        data.recipientAddress,
-        data.senderAddress,
-        senderPublicKey,
-        senderSignature,
-        hash
-    )
-
-    override fun getDataInstance(): TransferTransactionData = TransferTransactionData::class.java.newInstance()
+    override fun write(buffer: ByteBuf) {
+        super.write(buffer)
+        buffer.writeLong(amount)
+        buffer.writeString(recipientAddress)
+    }
 
 }
