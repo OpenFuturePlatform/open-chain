@@ -12,6 +12,7 @@ class BlockRequestMessageTest {
     private lateinit var message: BlockRequestMessage
     private lateinit var buffer: ByteBuf
 
+
     @Before
     fun setup(){
         buffer = createBuffer("0000000468617368")

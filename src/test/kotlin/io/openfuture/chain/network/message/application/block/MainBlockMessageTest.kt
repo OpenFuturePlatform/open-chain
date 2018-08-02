@@ -15,6 +15,7 @@ class MainBlockMessageTest {
     private lateinit var message: MainBlockMessage
     private lateinit var buffer: ByteBuf
 
+
     @Before
     fun setup(){
         buffer = createBuffer("00000000000000010000000c70726576696f7573486173680000000000000001000000000000000a000000097" +
