@@ -3,9 +3,10 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
-import io.openfuture.chain.core.repository.TransferTransactionRepository
-import io.openfuture.chain.core.repository.UTransferTransactionRepository
+import io.openfuture.chain.core.repository.TransactionRepository
+import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.rpc.domain.transaction.TransferTransactionRequest
 import org.springframework.stereotype.Service
@@ -14,8 +15,8 @@ import javax.xml.bind.ValidationException
 
 @Service
 class DefaultTransferTransactionService(
-    private val repository: TransferTransactionRepository,
-    private val uRepository: UTransferTransactionRepository
+    private val repository: TransactionRepository<TransferTransaction>,
+    private val uRepository: UTransactionRepository<UTransferTransaction>
 ) : BaseTransactionService(), TransferTransactionService {
 
     @Transactional(readOnly = true)
@@ -29,7 +30,7 @@ class DefaultTransferTransactionService(
             return
         }
 
-        val tx = dto.toUEntity()
+        val tx = UTransferTransaction.of(dto)
         validate(tx)
         updateUnconfirmedBalanceByFee(tx)
         uRepository.save(tx)

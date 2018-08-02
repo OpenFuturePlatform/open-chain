@@ -5,53 +5,13 @@ import io.openfuture.chain.core.model.dto.transaction.data.TransferTransactionDa
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 
-@NoArgConstructor
 class TransferTransactionDto(
-    data: TransferTransactionData,
     timestamp: Long,
+    fee: Long,
+    senderAddress: String,
     senderPublicKey: String,
     senderSignature: String,
-    hash: String
-) : BaseTransactionDto<TransferTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
-
-    constructor(tx: TransferTransaction) : this(
-        TransferTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress),
-        tx.timestamp,
-        tx.senderPublicKey,
-        tx.senderSignature,
-        tx.hash
-    )
-
-    constructor(tx: UTransferTransaction) : this(
-        TransferTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress),
-        tx.timestamp,
-        tx.senderPublicKey,
-        tx.senderSignature,
-        tx.hash
-    )
-
-    fun toEntity(): TransferTransaction = TransferTransaction(
-        timestamp,
-        data.amount,
-        data.fee,
-        data.recipientAddress,
-        data.senderAddress,
-        senderPublicKey,
-        senderSignature,
-        hash
-    )
-
-    fun toUEntity(): UTransferTransaction = UTransferTransaction(
-        timestamp,
-        data.amount,
-        data.fee,
-        data.recipientAddress,
-        data.senderAddress,
-        senderPublicKey,
-        senderSignature,
-        hash
-    )
-
-    override fun getDataInstance(): TransferTransactionData = TransferTransactionData::class.java.newInstance()
-
-}
+    hash: String,
+    var amount: Long,
+    var recipientAddress: String
+) : BaseTransactionDto(timestamp, fee, senderAddress, senderPublicKey, senderSignature, hash)

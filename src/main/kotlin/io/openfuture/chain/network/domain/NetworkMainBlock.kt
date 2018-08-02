@@ -15,33 +15,28 @@ import io.openfuture.chain.network.extension.writeList
 import io.openfuture.chain.network.extension.writeString
 
 @NoArgConstructor
-class NetworkMainBlock(
-    height: Long,
-    previousHash: String,
-    blockTimestamp: Long,
-    reward: Long,
-    hash: String,
-    signature: String,
-    publicKey: String,
-    var merkleHash: String,
-    var transferTransactions: MutableList<TransferTransactionDto>,
-    var voteTransactions: MutableList<VoteTransactionDto>,
+class NetworkMainBlock : NetworkBlock {
+    var merkleHash: String
+    var transferTransactions: MutableList<TransferTransactionDto>
+    var voteTransactions: MutableList<VoteTransactionDto>
     var delegateTransactions: MutableList<DelegateTransactionDto>
-) : NetworkBlock(height, previousHash, blockTimestamp, reward, publicKey, hash, signature) {
 
-    constructor(block: MainBlock) : this(
-        block.height,
-        block.previousHash,
-        block.timestamp,
-        block.reward,
-        block.hash,
-        block.signature!!,
-        block.publicKey,
-        block.merkleHash,
-        block.transactions.filterIsInstance(TransferTransaction::class.java).map { TransferTransactionDto(it) }.toMutableList(),
-        block.transactions.filterIsInstance(VoteTransaction::class.java).map { VoteTransactionDto(it) }.toMutableList(),
-        block.transactions.filterIsInstance(DelegateTransaction::class.java).map { DelegateTransactionDto(it) }.toMutableList()
-    )
+    constructor(height: Long, previousHash: String, blockTimestamp: Long, reward: Long, hash: String, signature: String,
+                publicKey: String, merkleHash: String, transferTransactions: MutableList<TransferTransactionDto>,
+                voteTransactions: MutableList<VoteTransactionDto>, delegateTransactions: MutableList<DelegateTransactionDto>
+    ) : super(height, previousHash, blockTimestamp, reward, publicKey, hash, signature) {
+        this.merkleHash = merkleHash
+        this.transferTransactions = transferTransactions
+        this.voteTransactions = voteTransactions
+        this.delegateTransactions = delegateTransactions
+    }
+
+    constructor(block: MainBlock) : super(block) {
+        merkleHash = block.merkleHash
+        transferTransactions = block.transactions.filterIsInstance(TransferTransaction::class.java).map { TransferTransactionDto(it) }.toMutableList(),
+        voteTransactions = block.transactions.filterIsInstance(VoteTransaction::class.java).map { VoteTransactionDto(it) }.toMutableList(),
+        delegateTransactions = block.transactions.filterIsInstance(DelegateTransaction::class.java).map { DelegateTransactionDto(it) }.toMutableList()
+    }
 
     override fun readParams(buffer: ByteBuf) {
         super.readParams(buffer)

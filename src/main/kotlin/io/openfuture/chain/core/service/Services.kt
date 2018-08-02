@@ -11,6 +11,7 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.network.domain.NetworkBlock
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -31,6 +32,17 @@ interface HardwareInfoService {
     fun getDiskStorageInfo(): List<StorageInfo>
 
     fun getNetworksInfo(): List<NetworkInfo>
+
+}
+
+/** Common block info service */
+interface BlockService {
+
+    fun getCount(): Long
+
+    fun getProducingSpeed(): Long
+
+    fun getLastBlock(): NetworkBlock
 
 }
 
@@ -56,6 +68,13 @@ interface MainBlockService {
 
 }
 
+/** Common transaction info service */
+interface TransactionService {
+
+    fun getCount(): Long
+
+}
+
 interface TransferTransactionService {
 
     fun getUnconfirmedByHash (hash: String): UTransferTransaction
@@ -70,10 +89,6 @@ interface TransferTransactionService {
 
 interface VoteTransactionService {
 
-    fun getAllUnconfirmed(): List<UVoteTransaction>
-
-    fun getUnconfirmedByHash (hash: String): UVoteTransaction
-
     fun add(dto: VoteTransactionDto)
 
     fun add(request: VoteTransactionRequest)
@@ -83,8 +98,6 @@ interface VoteTransactionService {
 }
 
 interface DelegateTransactionService {
-
-    fun getUnconfirmedByHash (hash: String): UDelegateTransaction
 
     fun add(dto: DelegateTransactionDto)
 

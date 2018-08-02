@@ -3,6 +3,7 @@ package io.openfuture.chain.network.domain
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.consensus.annotation.NoArgConstructor
 import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.writeList
@@ -19,17 +20,6 @@ class NetworkGenesisBlock(
     var epochIndex: Long,
     var activeDelegates: MutableSet<NetworkDelegate>
 ) : NetworkBlock(height, previousHash, blockTimestamp, reward, publicKey, hash, signature) {
-    
-    constructor(block: GenesisBlock) : this(
-        block.height,
-        block.previousHash,
-        block.timestamp,
-        block.reward,
-        block.publicKey,
-        block.hash,
-        block.signature!!,
-        block.epochIndex,
-        block.activeDelegates.map { NetworkDelegate(it) }.toMutableSet())
 
     override fun readParams(buffer: ByteBuf) {
         super.readParams(buffer)

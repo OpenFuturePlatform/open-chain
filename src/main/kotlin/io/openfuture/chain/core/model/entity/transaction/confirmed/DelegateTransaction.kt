@@ -24,7 +24,7 @@ class DelegateTransaction(
 
 ) : Transaction(timestamp, senderPublicKey, senderAddress, senderSignature, hash, block) {
 
-    override fun getPayload(): BaseTransactionPayload {
+    override fun getPayload(): DelegateTransactionPayload {
         return payload
     }
 

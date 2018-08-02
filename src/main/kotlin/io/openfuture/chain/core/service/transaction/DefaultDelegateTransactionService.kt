@@ -4,9 +4,10 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
-import io.openfuture.chain.core.repository.DelegateTransactionRepository
-import io.openfuture.chain.core.repository.UDelegateTransactionRepository
+import io.openfuture.chain.core.repository.TransactionRepository
+import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
@@ -15,14 +16,10 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultDelegateTransactionService(
-    private val repository: DelegateTransactionRepository,
-    private val uRepository: UDelegateTransactionRepository,
+    private val repository: TransactionRepository<DelegateTransaction>,
+    private val uRepository: UTransactionRepository<UDelegateTransaction>,
     private val delegateService: DelegateService
 ) : BaseTransactionService(), DelegateTransactionService {
-
-    @Transactional(readOnly = true)
-    override fun getUnconfirmedByHash(hash: String): UDelegateTransaction = uRepository.findOneByHash(hash)
-        ?: throw NotFoundException("Unconfirmed delegate transaction with hash: $hash not found")
 
     @Transactional
     override fun add(dto: DelegateTransactionDto) {
@@ -31,7 +28,7 @@ class DefaultDelegateTransactionService(
             return
         }
 
-        val tx = dto.toUEntity()
+        val tx = UDelegateTransaction.of(dto)
         validate(tx)
         updateUnconfirmedBalanceByFee(tx)
         uRepository.save(tx)
@@ -58,5 +55,8 @@ class DefaultDelegateTransactionService(
         uRepository.delete(unconfirmedTx)
         repository.save(tx)
     }
+
+    private fun getUnconfirmedByHash(hash: String): UDelegateTransaction = uRepository.findOneByHash(hash)
+        ?: throw NotFoundException("Unconfirmed delegate transaction with hash: $hash not found")
 
 }

@@ -5,9 +5,10 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
-import io.openfuture.chain.core.repository.UVoteTransactionRepository
-import io.openfuture.chain.core.repository.VoteTransactionRepository
+import io.openfuture.chain.core.repository.TransactionRepository
+import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.rpc.domain.transaction.VoteTransactionRequest
@@ -17,20 +18,11 @@ import javax.xml.bind.ValidationException
 
 @Service
 class DefaultVoteTransactionService(
-    private val repository: VoteTransactionRepository,
-    private val uRepository: UVoteTransactionRepository,
+    private val repository: TransactionRepository<VoteTransaction>,
+    private val uRepository: UTransactionRepository<UVoteTransaction>,
     private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties
 ) : BaseTransactionService(), VoteTransactionService {
-
-    @Transactional(readOnly = true)
-    override fun getAllUnconfirmed(): List<UVoteTransaction> {
-        return uRepository.findAll()
-    }
-
-    @Transactional(readOnly = true)
-    override fun getUnconfirmedByHash(hash: String): UVoteTransaction = uRepository.findOneByHash(hash)
-        ?: throw NotFoundException("Unconfirmed vote transaction with hash: $hash not found")
 
     @Transactional
     override fun add(dto: VoteTransactionDto) {
@@ -39,7 +31,7 @@ class DefaultVoteTransactionService(
             return
         }
 
-        val tx = dto.toUEntity()
+        val tx = UVoteTransaction.of(dto)
         validate(tx)
         updateUnconfirmedBalanceByFee(tx)
         uRepository.save(tx)
@@ -103,5 +95,12 @@ class DefaultVoteTransactionService(
         }
         return true
     }
+
+    private fun getAllUnconfirmed(): List<UVoteTransaction> {
+        return uRepository.findAll()
+    }
+
+    private fun getUnconfirmedByHash(hash: String): UVoteTransaction = uRepository.findOneByHash(hash)
+        ?: throw NotFoundException("Unconfirmed vote transaction with hash: $hash not found")
 
 }

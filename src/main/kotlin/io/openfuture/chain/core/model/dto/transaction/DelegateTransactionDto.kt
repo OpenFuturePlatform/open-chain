@@ -1,59 +1,19 @@
 package io.openfuture.chain.core.model.dto.transaction
 
-import io.openfuture.chain.consensus.annotation.NoArgConstructor
-import io.openfuture.chain.core.model.dto.transaction.data.DelegateTransactionData
-import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
 
-@NoArgConstructor
 class DelegateTransactionDto(
-    data: DelegateTransactionData,
     timestamp: Long,
+    fee: Long,
+    senderAddress: String,
     senderPublicKey: String,
     senderSignature: String,
-    hash: String
-) : BaseTransactionDto<DelegateTransactionData>(data, timestamp, senderPublicKey, senderSignature, hash) {
-
-    constructor(tx: DelegateTransaction) : this(
-        DelegateTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress, tx.delegateKey),
-        tx.timestamp,
-        tx.senderPublicKey,
-        tx.senderSignature,
-        tx.hash
-    )
+    hash: String,
+    var delegateKey: String
+) : BaseTransactionDto(timestamp, fee, senderAddress, senderPublicKey, senderSignature, hash) {
 
     constructor(tx: UDelegateTransaction) : this(
-        DelegateTransactionData(tx.amount, tx.fee, tx.recipientAddress, tx.senderAddress, tx.delegateKey),
-        tx.timestamp,
-        tx.senderPublicKey,
-        tx.senderSignature,
-        tx.hash
+        tx.timestamp, tx.getPayload().fee, tx.senderAddress, tx.senderPublicKey, tx.senderSignature, tx.hash, tx.getPayload().delegateKey
     )
-
-    fun toEntity(): DelegateTransaction = DelegateTransaction(
-        timestamp,
-        data.amount,
-        data.fee,
-        data.recipientAddress,
-        data.senderAddress,
-        senderPublicKey,
-        senderSignature,
-        hash,
-        data.delegateKey
-    )
-
-    fun toUEntity(): UDelegateTransaction = UDelegateTransaction(
-        timestamp,
-        data.amount,
-        data.fee,
-        data.recipientAddress,
-        data.senderAddress,
-        senderPublicKey,
-        senderSignature,
-        hash,
-        data.delegateKey
-    )
-
-    override fun getDataInstance(): DelegateTransactionData = DelegateTransactionData::class.java.newInstance()
 
 }

@@ -25,7 +25,6 @@ import javax.annotation.PostConstruct
 
 @Component
 class BlockCreationProcessor(
-    private val commonTransactionService: UCommonTransactionService,
     private val commonBlockService: CommonBlockService,
     private val genesisBlockService: GenesisBlockService,
     private val signatureCollector: SignatureCollector,

@@ -2,10 +2,10 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.consensus.annotation.NoArgConstructor
+import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 
-@NoArgConstructor
 abstract class NetworkBlock(
     var height: Long,
     var previousHash: String,
