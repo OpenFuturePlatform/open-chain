@@ -141,7 +141,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         defaultPendingBlockHandler.handleApproveMessage(message)
 
         verify(networkService, times(3)).broadcast(any(NetworkBlockApproval::class.java))
-        assertThat(defaultPendingBlockHandler.prepareVotes.get(message.publicKey)).isEqualTo(delegate)
+        assertThat(defaultPendingBlockHandler.prepareVotes[message.publicKey]).isEqualTo(delegate)
     }
 
     @Test
@@ -160,7 +160,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
         defaultPendingBlockHandler.handleApproveMessage(message)
 
-        assertThat(defaultPendingBlockHandler.commits.get(message.hash))
+        assertThat(defaultPendingBlockHandler.commits[message.hash])
             .isEqualTo(mutableListOf(delegate))
     }
 
