@@ -6,9 +6,12 @@ import io.openfuture.chain.core.util.TransactionUtils
 import javax.validation.constraints.NotBlank
 
 class DelegateTransactionRequest(
+    senderAddress: String,
+    senderPublicKey: String,
+    senderSignature: String,
     @field:NotBlank var fee: Long? = null,
     @field:NotBlank var delegateKey: String? = null
-) : BaseTransactionRequest() {
+) : BaseTransactionRequest(senderAddress, senderPublicKey, senderSignature) {
 
     override fun toUEntity(timestamp: Long): UDelegateTransaction = UDelegateTransaction(
         timestamp,

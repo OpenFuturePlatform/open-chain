@@ -8,17 +8,20 @@ import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
+import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
+import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.core.model.node.*
 import io.openfuture.chain.network.domain.NetworkBlock
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.rpc.domain.base.PageRequest
-import io.openfuture.chain.rpc.domain.node.*
-import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
-import io.openfuture.chain.rpc.domain.transaction.TransferTransactionRequest
-import io.openfuture.chain.rpc.domain.transaction.VoteTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import org.springframework.data.domain.Page
 
 interface HardwareInfoService {
@@ -77,11 +80,13 @@ interface TransactionService {
 
 interface TransferTransactionService {
 
+    fun getBytes(payload: TransferTransactionPayload): ByteArray
+
     fun getUnconfirmedByHash (hash: String): UTransferTransaction
 
     fun add(dto: TransferTransactionDto)
 
-    fun add(request: TransferTransactionRequest)
+    fun add(request: TransferTransactionRequest): UTransferTransaction
 
     fun toBlock(hash: String, block: MainBlock)
 
@@ -89,9 +94,11 @@ interface TransferTransactionService {
 
 interface VoteTransactionService {
 
+    fun getBytes(payload: VoteTransactionPayload): ByteArray
+
     fun add(dto: VoteTransactionDto)
 
-    fun add(request: VoteTransactionRequest)
+    fun add(request: VoteTransactionRequest): UVoteTransaction
 
     fun toBlock(hash: String, block: MainBlock)
 
@@ -99,9 +106,11 @@ interface VoteTransactionService {
 
 interface DelegateTransactionService {
 
+    fun getBytes(payload: DelegateTransactionPayload): ByteArray
+
     fun add(dto: DelegateTransactionDto)
 
-    fun add(request: DelegateTransactionRequest)
+    fun add(request: DelegateTransactionRequest): UDelegateTransaction
 
     fun toBlock(hash: String, block: MainBlock)
 
