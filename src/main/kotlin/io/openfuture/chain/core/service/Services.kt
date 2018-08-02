@@ -8,19 +8,17 @@ import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.network.domain.NetworkBlock
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.rpc.domain.base.PageRequest
-import io.openfuture.chain.core.model.node.*
-import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
-import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
-import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
+import io.openfuture.chain.rpc.domain.node.*
+import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.TransferTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.VoteTransactionRequest
 import org.springframework.data.domain.Page
 
 interface HardwareInfoService {
@@ -34,6 +32,17 @@ interface HardwareInfoService {
     fun getDiskStorageInfo(): List<StorageInfo>
 
     fun getNetworksInfo(): List<NetworkInfo>
+
+}
+
+/** Common block info service */
+interface BlockService {
+
+    fun getCount(): Long
+
+    fun getProducingSpeed(): Long
+
+    fun getLastBlock(): NetworkBlock
 
 }
 
@@ -59,15 +68,20 @@ interface MainBlockService {
 
 }
 
-interface TransferTransactionService {
+/** Common transaction info service */
+interface TransactionService {
 
-    fun getBytes (payload: TransferTransactionPayload): ByteArray
+    fun getCount(): Long
+
+}
+
+interface TransferTransactionService {
 
     fun getUnconfirmedByHash (hash: String): UTransferTransaction
 
     fun add(dto: TransferTransactionDto)
 
-    fun add(request: TransferTransactionRequest) : UTransferTransaction
+    fun add(request: TransferTransactionRequest)
 
     fun toBlock(hash: String, block: MainBlock)
 
@@ -75,15 +89,9 @@ interface TransferTransactionService {
 
 interface VoteTransactionService {
 
-    fun getBytes (payload: VoteTransactionPayload): ByteArray
-
-    fun getAllUnconfirmed(): List<UVoteTransaction>
-
-    fun getUnconfirmedByHash (hash: String): UVoteTransaction
-
     fun add(dto: VoteTransactionDto)
 
-    fun add(request: VoteTransactionRequest) : UVoteTransaction
+    fun add(request: VoteTransactionRequest)
 
     fun toBlock(hash: String, block: MainBlock)
 
@@ -91,13 +99,9 @@ interface VoteTransactionService {
 
 interface DelegateTransactionService {
 
-    fun getBytes (payload: DelegateTransactionPayload): ByteArray
-
-    fun getUnconfirmedByHash (hash: String): UDelegateTransaction
-
     fun add(dto: DelegateTransactionDto)
 
-    fun add(request: DelegateTransactionRequest) : UDelegateTransaction
+    fun add(request: DelegateTransactionRequest)
 
     fun toBlock(hash: String, block: MainBlock)
 

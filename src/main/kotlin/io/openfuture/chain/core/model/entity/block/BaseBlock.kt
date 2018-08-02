@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.model.entity.block
 
 import io.openfuture.chain.core.model.entity.base.BaseModel
+import io.openfuture.chain.network.domain.NetworkBlock
 import javax.persistence.*
 
 @Entity
@@ -27,9 +28,11 @@ abstract class BaseBlock(
     var hash: String,
 
     @Column(name = "signature", nullable = false)
-    var signature: String? = null
+    var signature: String
 
 ) : BaseModel() {
+
+    abstract fun toMessage() : NetworkBlock
 
     abstract fun sign(privateKey: ByteArray): BaseBlock
 

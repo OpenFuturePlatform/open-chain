@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.model.entity.transaction.confirmed
 
+import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.payload.BaseTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
