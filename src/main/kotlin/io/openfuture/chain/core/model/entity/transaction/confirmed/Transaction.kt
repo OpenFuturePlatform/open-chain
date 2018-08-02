@@ -1,6 +1,7 @@
-package io.openfuture.chain.core.model.entity.transaction
+package io.openfuture.chain.core.model.entity.transaction.confirmed
 
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import javax.persistence.*
 
 @Entity
@@ -8,16 +9,13 @@ import javax.persistence.*
 @Inheritance(strategy = InheritanceType.JOINED)
 abstract class Transaction(
     timestamp: Long,
-    amount: Long,
-    fee: Long,
-    recipientAddress: String,
     senderAddress: String,
     senderPublicKey: String,
     senderSignature: String,
     hash: String,
 
     @ManyToOne
-    @JoinColumn(name = "block_id", nullable = false)
+    @JoinColumn(name = "hash", nullable = false)
     var block: MainBlock? = null
 
-) : BaseTransaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash)
+) : BaseTransaction(timestamp, senderAddress, senderPublicKey, senderSignature, hash)

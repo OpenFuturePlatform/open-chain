@@ -81,7 +81,7 @@ class SeedPhraseValidator(
      * from [bitSkip] bit to byte edge of [byteSkip] byte
      *
      * firstValue is byte value to fill it from byteSkip bit to byte edge bit with first part of [value]
-     * toWrite the value where it shift right by bytes [OUT_OF_BYTE_SIZE] with [bitSkip] to get the byte value of first
+     * toWrite the value where it shift right by bytes [OUT_OF_BYTE_SIZE] with [bitSkip] to getUnconfirmedByHash the byte value of first
      * byte.
      * Next the computed value toWrite is added to firstValue and assigned to byte in array
      *
@@ -103,7 +103,7 @@ class SeedPhraseValidator(
      *
      * valueInByte is byte value to fill it from 0 bit to WORD_INDEX_SIZE - [SeedConstant.BYTE_SIZE] + bitSkip bit with
      * value from [value] parameter.
-     * shitBitCount shift bit count to get second part of value
+     * shitBitCount shift bit count to getUnconfirmedByHash second part of value
      * Next the computed toWrite value is added to firstValue and assigned to byte in array
      *
      * @param bytes byte array to fill [byteSkip] + 1 byte from [value]

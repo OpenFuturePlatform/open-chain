@@ -1,31 +1,20 @@
 package io.openfuture.chain.core.service
 
-import io.openfuture.chain.consensus.model.entity.transaction.DelegateTransaction
-import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
-import io.openfuture.chain.core.model.dto.transaction.BaseTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
-import io.openfuture.chain.core.model.dto.transaction.data.BaseTransactionData
-import io.openfuture.chain.core.model.dto.transaction.data.DelegateTransactionData
-import io.openfuture.chain.core.model.dto.transaction.data.TransferTransactionData
-import io.openfuture.chain.core.model.dto.transaction.data.VoteTransactionData
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.Transaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
-import io.openfuture.chain.entity.transaction.VoteTransaction
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.node.*
-import io.openfuture.chain.rpc.domain.transaction.BaseTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.VoteTransactionRequest
@@ -59,61 +48,51 @@ interface GenesisBlockService {
 
 interface MainBlockService {
 
+    fun create(): NetworkMainBlock
+
     fun add(dto: NetworkMainBlock)
 
-    fun getLast(): MainBlock
-
-    fun save(block: MainBlock): MainBlock
-
-    fun isValid(block: MainBlock): Boolean
+    fun isValid(block: NetworkMainBlock): Boolean
 
 }
 
-interface TransactionService<Entity : Transaction, UEntity : UTransaction> {
+interface TransferTransactionService {
+
+    fun getUnconfirmedByHash (hash: String): UTransferTransaction
+
+    fun add(dto: TransferTransactionDto)
+
+    fun add(request: TransferTransactionRequest)
 
     fun toBlock(hash: String, block: MainBlock)
 
 }
 
-interface TransferTransactionService : TransactionService<TransferTransaction, UTransferTransaction> {
+interface VoteTransactionService {
 
-    fun toBlock(dto: TransferTransactionDto, block: MainBlock)
+    fun getAllUnconfirmed(): List<UVoteTransaction>
 
-}
+    fun getUnconfirmedByHash (hash: String): UVoteTransaction
 
-interface VoteTransactionService : TransactionService<VoteTransaction, UVoteTransaction> {
+    fun add(dto: VoteTransactionDto)
 
-    fun toBlock(dto: VoteTransactionDto, block: MainBlock)
+    fun add(request: VoteTransactionRequest)
 
-}
-
-interface DelegateTransactionService : TransactionService<DelegateTransaction, UDelegateTransaction> {
-
-    fun toBlock(dto: DelegateTransactionDto, block: MainBlock)
+    fun toBlock(hash: String, block: MainBlock)
 
 }
 
-interface UTransactionService<UEntity : UTransaction, Data : BaseTransactionData, Dto : BaseTransactionDto<Data>,
-    Req : BaseTransactionRequest<UEntity, Data>> {
+interface DelegateTransactionService {
 
-    fun get(hash: String): UEntity
+    fun getUnconfirmedByHash (hash: String): UDelegateTransaction
 
-    fun getAll(): MutableSet<UEntity>
+    fun add(dto: DelegateTransactionDto)
 
-    fun add(dto: Dto): UEntity
+    fun add(request: DelegateTransactionRequest)
 
-    fun add(request: Req): UEntity
+    fun toBlock(hash: String, block: MainBlock)
 
 }
-
-interface UTransferTransactionService : UTransactionService<UTransferTransaction, TransferTransactionData,
-    TransferTransactionDto, TransferTransactionRequest>
-
-interface UVoteTransactionService : UTransactionService<UVoteTransaction, VoteTransactionData,
-    VoteTransactionDto, VoteTransactionRequest>
-
-interface UDelegateTransactionService : UTransactionService<UDelegateTransaction, DelegateTransactionData,
-    DelegateTransactionDto, DelegateTransactionRequest>
 
 interface DelegateService {
 
@@ -131,13 +110,19 @@ interface WalletService {
 
     fun getByAddress(address: String): Wallet
 
+    fun getUnspentBalanceByAddress(address: String): Long
+
     fun getBalanceByAddress(address: String): Long
 
     fun getVotesByAddress(address: String): MutableSet<Delegate>
 
     fun save(wallet: Wallet)
 
-    fun updateBalance(from: String, to: String, amount: Long, fee: Long)
+    fun increaseBalance(address: String, amount: Long)
+
+    fun decreaseBalance(address: String, amount: Long)
+
+    fun decreaseUnconfirmedBalance(address: String, amount: Long)
 
 }
 
@@ -150,19 +135,5 @@ interface CommonBlockService {
     fun getBlocksAfterCurrentHash(hash: String): List<BaseBlock>?
 
     fun isExists(hash: String): Boolean
-
-}
-
-interface CommonTransactionService {
-
-    fun get(hash: String): Transaction
-
-    fun isExists(hash: String): Boolean
-
-}
-
-interface UCommonTransactionService {
-
-    fun getAll(): MutableSet<UTransaction>
 
 }

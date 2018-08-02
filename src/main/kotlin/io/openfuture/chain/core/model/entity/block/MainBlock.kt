@@ -1,6 +1,6 @@
 package io.openfuture.chain.core.model.entity.block
 
-import io.openfuture.chain.core.model.entity.transaction.Transaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils

@@ -6,9 +6,9 @@ import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.consensus.model.entity.transaction.DelegateTransaction
-import io.openfuture.chain.consensus.model.entity.transaction.TransferTransaction
-import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeList

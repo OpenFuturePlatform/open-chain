@@ -10,7 +10,7 @@ import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.service.CommonBlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
-import io.openfuture.chain.entity.transaction.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.network.component.node.NodeClock
 import org.assertj.core.api.Assertions.assertThat
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
