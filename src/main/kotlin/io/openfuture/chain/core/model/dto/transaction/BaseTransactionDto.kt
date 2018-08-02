@@ -9,8 +9,4 @@ abstract class BaseTransactionDto (
     var senderPublicKey: String,
     var senderSignature: String,
     var hash: String
-) {
-
-
-
-}
+)

@@ -28,4 +28,15 @@ class VoteTransaction(
         return payload
     }
 
+    override fun toMessage(): VoteTransactionDto = VoteTransactionDto(
+        timestamp,
+        payload.fee,
+        senderAddress,
+        senderPublicKey,
+        senderSignature,
+        hash,
+        payload.voteTypeId,
+        payload.delegateKey
+    )
+
 }

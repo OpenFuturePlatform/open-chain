@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.block
 
+import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.BlockService
@@ -17,11 +18,15 @@ class DefaultBlockService(
         return repository.count()
     }
 
+    @Transactional
     override fun getProducingSpeed(): Long {
         return 0
     }
 
-    override fun getLastBlock(): NetworkBlock {
-        val block = repository.findFirstByOrderByHeightDesc()!!.toMessage()
+    @Transactional
+    override fun getLast(): NetworkBlock {
+        val block = repository.findFirstByOrderByHeightDesc() ?: throw NotFoundException("Last block not found!")
+        return block.toMessage()
     }
+
 }

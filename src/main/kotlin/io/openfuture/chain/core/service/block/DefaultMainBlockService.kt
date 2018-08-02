@@ -1,83 +1,141 @@
 package io.openfuture.chain.core.service.block
 
-import io.openfuture.chain.consensus.component.block.TimeSlot
+import io.openfuture.chain.consensus.property.ConsensusProperties
+import io.openfuture.chain.core.component.NodeKeyHolder
+import io.openfuture.chain.core.model.dto.transaction.BaseTransactionDto
+import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
+import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
+import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.util.TransactionUtils
-import io.openfuture.chain.core.exception.NotFoundException
-import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
-import io.openfuture.chain.core.repository.MainBlockRepository
-import io.openfuture.chain.core.service.DelegateTransactionService
-import io.openfuture.chain.core.service.MainBlockService
-import io.openfuture.chain.core.service.TransferTransactionService
-import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.repository.BlockRepository
+import io.openfuture.chain.core.service.*
+import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
+import io.openfuture.chain.network.domain.NetworkBlock
 import io.openfuture.chain.network.domain.NetworkMainBlock
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultMainBlockService(
-    private val repository: MainBlockRepository,
+    private val repository: BlockRepository<MainBlock>,
     private val clock: NodeClock,
-    private val timeSlot: TimeSlot,
+    private val keyHolder: NodeKeyHolder,
+    private val blockService: BlockService,
     private val voteTransactionService: VoteTransactionService,
+    private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
-    private val delegateTransactionService: DelegateTransactionService
+    private val consensusProperties: ConsensusProperties
 ) : MainBlockService {
 
     @Transactional(readOnly = true)
-    override fun getLast(): MainBlock = repository.findFirstByOrderByHeightDesc()
-        ?: throw NotFoundException("Last block not found")
+    override fun create(): NetworkMainBlock {
+        val lastBlock = blockService.getLast()
+        val height = lastBlock.height + 1
+        val previousHash = lastBlock.hash!!
+        val time = clock.networkTime()
+        val transactions = getAllUnconfirmed()
+        val reward = transactions.map { it.fee }.sum() + consensusProperties.rewardBlock!!
+        val merkleHash = calculateMerkleRoot(transactions)
+
+        return NetworkMainBlock(height, previousHash, time, reward, merkleHash, transactions)
+            .sign(ByteUtils.toHexString(keyHolder.getPublicKey()), keyHolder.getPrivateKey())
+    }
 
     @Transactional
     override fun add(dto: NetworkMainBlock) {
-        val savedBlock = repository.save(dto.toEntity())
-
-        dto.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
-        dto.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
-        dto.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
-    }
-
-    @Transactional
-    override fun save(block: MainBlock): MainBlock {
-        val savedBlock = repository.save(block)
-        val transactions = block.transactions
-        for (transaction in transactions) {
-            addTransactionToBlock(transaction, savedBlock)
+        if (!isValid(dto)) {
+            return
         }
-        return savedBlock
+
+        val block = repository.findOneByHash(dto.hash!!)
+        if (null != block) {
+            return
+        }
+
+        val persistBlock = repository.save(MainBlock.of(dto))
+        dto.transactions.forEach { toBlock(it, persistBlock) }
+        // todo broadcast
     }
 
-    override fun isValid(block: MainBlock): Boolean {
-        val currentTime = clock.networkTime()
+    @Transactional(readOnly = true)
+    override fun isValid(block: NetworkMainBlock): Boolean {
+        val lastBlock = blockService.getLast()
 
-        return timeSlot.verifyTimeSlot(currentTime, block) && isTransactionsValid(block)
+        return isValidPreviousHash(block, lastBlock)
+            && isValidHeight(block, lastBlock)
+            && isValidTimeStamp(block, lastBlock)
+            && !block.transactions.isEmpty()
+            && isValidMerkleHash(block.transactions, block.merkleHash)
+            && null != block.hash
+            && !isValidHash(block.getBytes(), block.hash!!)
+            && null != block.signature
+            && null != block.publicKey
+            && !isValidSignature(block.getBytes(), block.publicKey!!, block.signature!!)
     }
 
-    private fun isTransactionsValid(block: MainBlock): Boolean {
-        val transactions = block.transactions
+    private fun getAllUnconfirmed(): MutableSet<BaseTransactionDto> {
+        val transactions = mutableSetOf<BaseTransactionDto>()
+        transactions.addAll(voteTransactionService.getAllUnconfirmed().map { it.toMessage() })
+        transactions.addAll(delegateTransactionService.getAllUnconfirmed().map { it.toMessage() })
+        transactions.addAll(transferTransactionService.getAllUnconfirmed().map { it.toMessage() })
+        return transactions
+    }
 
-        if (transactions.isEmpty() || !transactionsIsWellFormed(transactions)) {
+    private fun calculateMerkleRoot(transactions: Set<BaseTransactionDto>): String {
+        if (transactions.size == 1) {
+            return transactions.single().hash
+        }
+        var previousTreeLayout = transactions.map { it.hash.toByteArray() }
+        var treeLayout = mutableListOf<ByteArray>()
+        while(previousTreeLayout.size != 2) {
+            for (i in 0 until previousTreeLayout.size step 2) {
+                val leftHash = previousTreeLayout[i]
+                val rightHash = if (i + 1 == previousTreeLayout.size) {
+                    previousTreeLayout[i]
+                } else {
+                    previousTreeLayout[i + 1]
+                }
+                treeLayout.add(HashUtils.sha256(leftHash + rightHash))
+            }
+            previousTreeLayout = treeLayout
+            treeLayout = mutableListOf()
+        }
+        return ByteUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
+    }
+
+    private fun isValidPreviousHash(block: NetworkBlock, lastBlock: NetworkBlock): Boolean = (block.previousHash == lastBlock.hash)
+
+    private fun isValidTimeStamp(block: NetworkBlock, lastBlock: NetworkBlock): Boolean = (block.timestamp > lastBlock.timestamp)
+
+    private fun isValidHeight(block: NetworkBlock, lastBlock: NetworkBlock): Boolean = (block.height == lastBlock.height + 1)
+
+    private fun isValidHash(byteData: ByteArray, hash: String): Boolean {
+        return ByteUtils.toHexString(HashUtils.doubleSha256((byteData))) == hash
+    }
+
+    private fun isValidSignature(byteData: ByteArray, publicKey: String, signature: String): Boolean {
+            return SignatureUtils.verify(byteData, signature, ByteUtils.fromHexString(publicKey))
+    }
+
+    private fun isValidMerkleHash(transactions: MutableSet<BaseTransactionDto>, merkleHash: String): Boolean {
+        if (transactions.isEmpty()) {
             return false
         }
 
-        val transactionsMerkleHash = TransactionUtils.calculateMerkleRoot(transactions)
-        return block.merkleHash == transactionsMerkleHash
+        return merkleHash == calculateMerkleRoot(transactions)
     }
 
-    private fun transactionsIsWellFormed(transactions: Set<Transaction>): Boolean {
-        val transactionHashes = transactions.map { it.hash }.toSet()
-        return transactionHashes.size == transactions.size
-    }
-
-    private fun addTransactionToBlock(tx: Transaction, block: MainBlock) {
-        when (tx) {
-            is VoteTransaction -> voteTransactionService.toBlock(tx.hash, block)
-            is TransferTransaction -> transferTransactionService.toBlock(tx.hash, block)
-            is DelegateTransaction -> delegateTransactionService.toBlock(tx.hash, block)
+    private fun toBlock(dto: BaseTransactionDto, block: MainBlock) {
+        when (dto) {
+            is VoteTransactionDto -> voteTransactionService.toBlock(dto.hash, block)
+            is TransferTransactionDto -> transferTransactionService.toBlock(dto.hash, block)
+            is DelegateTransactionDto -> delegateTransactionService.toBlock(dto.hash, block)
             else -> throw IllegalStateException("Unknown transaction type")
         }
     }

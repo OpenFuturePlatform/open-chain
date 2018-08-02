@@ -10,21 +10,21 @@ import org.springframework.stereotype.Component
 @NoArgConstructor
 abstract class Packet(
     var version: String? = null,
-    var timestamp: Long? = null
+    var time: Long? = null
 ) : NetworkEntity() {
 
     override fun read(buffer: ByteBuf) {
         version = buffer.readString()
-        timestamp = buffer.readLong()
+        time = buffer.readLong()
         readParams(buffer)
     }
 
     override fun write(buffer: ByteBuf) {
-        if (StringUtils.isEmpty(version) || null == timestamp) {
+        if (StringUtils.isEmpty(version) || null == time) {
             throw IllegalStateException("Can't write packet without version or timestamp")
         }
         buffer.writeString(version!!)
-        buffer.writeLong(timestamp!!)
+        buffer.writeLong(time!!)
         writeParams(buffer)
     }
 

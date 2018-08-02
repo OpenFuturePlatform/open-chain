@@ -27,4 +27,9 @@ class Delegate(
         )
     }
 
+    fun toMessage() : NetworkDelegate = NetworkDelegate(
+        publicKey,
+        address
+    )
+
 }

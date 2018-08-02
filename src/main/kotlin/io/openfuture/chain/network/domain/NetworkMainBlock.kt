@@ -1,70 +1,45 @@
 package io.openfuture.chain.network.domain
 
-import io.netty.buffer.ByteBuf
 import io.openfuture.chain.consensus.annotation.NoArgConstructor
-import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
-import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
-import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
-import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import io.openfuture.chain.network.extension.readList
-import io.openfuture.chain.network.extension.readString
-import io.openfuture.chain.network.extension.writeList
-import io.openfuture.chain.network.extension.writeString
+import io.openfuture.chain.core.model.dto.transaction.BaseTransactionDto
+import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.crypto.util.SignatureUtils
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 
 @NoArgConstructor
-class NetworkMainBlock : NetworkBlock {
-    var merkleHash: String
-    var transferTransactions: MutableList<TransferTransactionDto>
-    var voteTransactions: MutableList<VoteTransactionDto>
-    var delegateTransactions: MutableList<DelegateTransactionDto>
+class NetworkMainBlock(
+    height: Long,
+    previousHash: String,
+    timestamp: Long,
+    reward: Long,
+    var merkleHash: String,
+    var transactions: MutableSet<BaseTransactionDto>
+) : NetworkBlock(height, previousHash, timestamp, reward) {
 
-    constructor(height: Long, previousHash: String, blockTimestamp: Long, reward: Long, hash: String, signature: String,
-                publicKey: String, merkleHash: String, transferTransactions: MutableList<TransferTransactionDto>,
-                voteTransactions: MutableList<VoteTransactionDto>, delegateTransactions: MutableList<DelegateTransactionDto>
-    ) : super(height, previousHash, blockTimestamp, reward, publicKey, hash, signature) {
-        this.merkleHash = merkleHash
-        this.transferTransactions = transferTransactions
-        this.voteTransactions = voteTransactions
-        this.delegateTransactions = delegateTransactions
+    constructor(height: Long, previousHash: String, timestamp: Long, reward: Long, hash: String, publicKey: String,
+                signature: String, merkleHash: String, transactions: MutableSet<BaseTransactionDto>) :
+        this(height, previousHash, timestamp, reward, merkleHash, transactions) {
+        this.hash = hash
+        this.publicKey = publicKey
+        this.signature = signature
     }
 
-    constructor(block: MainBlock) : super(block) {
-        merkleHash = block.merkleHash
-        transferTransactions = block.transactions.filterIsInstance(TransferTransaction::class.java).map { TransferTransactionDto(it) }.toMutableList(),
-        voteTransactions = block.transactions.filterIsInstance(VoteTransaction::class.java).map { VoteTransactionDto(it) }.toMutableList(),
-        delegateTransactions = block.transactions.filterIsInstance(DelegateTransaction::class.java).map { DelegateTransactionDto(it) }.toMutableList()
+    fun sign(publicKey: String, privateKey: ByteArray) : NetworkMainBlock {
+        this.publicKey = publicKey
+        this.hash = ByteUtils.toHexString(HashUtils.doubleSha256((getBytes())))
+        this.signature = SignatureUtils.sign(getBytes(), privateKey)
+        return this
     }
 
-    override fun readParams(buffer: ByteBuf) {
-        super.readParams(buffer)
-
-        merkleHash = buffer.readString()
-        transferTransactions = buffer.readList()
-        voteTransactions = buffer.readList()
-        delegateTransactions = buffer.readList()
+    override fun getBytes() : ByteArray {
+        val builder = StringBuilder()
+        builder.append(height)
+        builder.append(previousHash)
+        builder.append(time)
+        builder.append(reward)
+        builder.append(merkleHash)
+        return builder.toString().toByteArray()
     }
-
-    override fun writeParams(buffer: ByteBuf) {
-        super.writeParams(buffer)
-
-        buffer.writeString(merkleHash)
-        buffer.writeList(transferTransactions)
-        buffer.writeList(voteTransactions)
-        buffer.writeList(delegateTransactions)
-    }
-
-    fun toEntity(): MainBlock = MainBlock(
-        height,
-        previousHash,
-        blockTimestamp,
-        reward,
-        publicKey,
-        merkleHash,
-        mutableSetOf()).apply { signature = super.signature }
-
 
     override fun toString() = "NetworkMainBlock(hash=$hash)"
 

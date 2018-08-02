@@ -1,10 +1,11 @@
-package io.openfuture.chain.core.service.transaction
+package io.openfuture.chain.core.service.transaction.internal
 
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.TransferTransactionService
@@ -14,36 +15,32 @@ import org.springframework.transaction.annotation.Transactional
 import javax.xml.bind.ValidationException
 
 @Service
-class DefaultTransferTransactionService(
+internal class DefaultTransferTransactionService(
     private val repository: TransactionRepository<TransferTransaction>,
     private val uRepository: UTransactionRepository<UTransferTransaction>
 ) : BaseTransactionService(), TransferTransactionService {
 
-    @Transactional(readOnly = true)
-    override fun getUnconfirmedByHash(hash: String): UTransferTransaction = uRepository.findOneByHash(hash)
-        ?: throw NotFoundException("Unconfirmed transfer transaction with hash: $hash not found")
-
     @Transactional
-    override fun add(dto: TransferTransactionDto) {
+    override fun add(dto: TransferTransactionDto): UTransferTransaction {
         val transaction = repository.findOneByHash(dto.hash)
         if (null != transaction) {
-            return
+            return UTransferTransaction.of(dto)
         }
 
         val tx = UTransferTransaction.of(dto)
         validate(tx)
         updateUnconfirmedBalanceByFee(tx)
-        uRepository.save(tx)
         // todo broadcast
+        return uRepository.save(tx)
     }
 
     @Transactional
-    override fun add(request: TransferTransactionRequest) {
+    override fun add(request: TransferTransactionRequest): UTransferTransaction {
         val tx = request.toUEntity(clock.networkTime())
         validate(tx)
         updateUnconfirmedBalanceByFee(tx)
-        uRepository.save(tx)
         // todo broadcast
+        return uRepository.save(tx)
     }
 
     @Transactional
@@ -79,5 +76,8 @@ class DefaultTransferTransactionService(
         }
         return true
     }
+
+    private fun getUnconfirmedByHash(hash: String): UTransferTransaction = uRepository.findOneByHash(hash)
+        ?: throw NotFoundException("Unconfirmed vote transaction with hash: $hash not found")
 
 }

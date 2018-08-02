@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.model.entity.transaction.confirmed
 
+import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.payload.BaseTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
@@ -27,5 +28,15 @@ class DelegateTransaction(
     override fun getPayload(): DelegateTransactionPayload {
         return payload
     }
+
+    override fun toMessage(): DelegateTransactionDto = DelegateTransactionDto(
+        timestamp,
+        payload.fee,
+        senderAddress,
+        senderPublicKey,
+        senderSignature,
+        hash,
+        payload.delegateKey
+    )
 
 }

@@ -1,4 +1,4 @@
-package io.openfuture.chain.core.service.transaction
+package io.openfuture.chain.core.service.transaction.internal
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.NotFoundException
@@ -6,6 +6,7 @@ import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
@@ -17,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 import javax.xml.bind.ValidationException
 
 @Service
-class DefaultVoteTransactionService(
+internal class DefaultVoteTransactionService(
     private val repository: TransactionRepository<VoteTransaction>,
     private val uRepository: UTransactionRepository<UVoteTransaction>,
     private val delegateService: DelegateService,
@@ -25,26 +26,26 @@ class DefaultVoteTransactionService(
 ) : BaseTransactionService(), VoteTransactionService {
 
     @Transactional
-    override fun add(dto: VoteTransactionDto) {
+    override fun add(dto: VoteTransactionDto): UVoteTransaction {
         val transaction = repository.findOneByHash(dto.hash)
         if (null != transaction) {
-            return
+            return UVoteTransaction.of(dto)
         }
 
         val tx = UVoteTransaction.of(dto)
         validate(tx)
         updateUnconfirmedBalanceByFee(tx)
-        uRepository.save(tx)
         // todo broadcast
+        return uRepository.save(tx)
     }
 
     @Transactional
-    override fun add(request: VoteTransactionRequest) {
+    override fun add(request: VoteTransactionRequest): UVoteTransaction {
         val tx = request.toUEntity(clock.networkTime())
         validate(tx)
         updateUnconfirmedBalanceByFee(tx)
-        uRepository.save(tx)
         // todo broadcast
+        return uRepository.save(tx)
     }
 
     @Transactional
@@ -96,7 +97,8 @@ class DefaultVoteTransactionService(
         return true
     }
 
-    private fun getAllUnconfirmed(): List<UVoteTransaction> {
+    @Transactional(readOnly = true)
+    override fun getAllUnconfirmed(): MutableList<UVoteTransaction> {
         return uRepository.findAll()
     }
 

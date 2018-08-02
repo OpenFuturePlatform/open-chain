@@ -1,11 +1,13 @@
-package io.openfuture.chain.core.service.transaction
+package io.openfuture.chain.core.service.transaction.internal
 
 import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.model.dto.transaction.BaseTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
@@ -15,33 +17,33 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class DefaultDelegateTransactionService(
+internal class DefaultDelegateTransactionService(
     private val repository: TransactionRepository<DelegateTransaction>,
     private val uRepository: UTransactionRepository<UDelegateTransaction>,
     private val delegateService: DelegateService
 ) : BaseTransactionService(), DelegateTransactionService {
 
     @Transactional
-    override fun add(dto: DelegateTransactionDto) {
+    override fun add(dto: DelegateTransactionDto): UDelegateTransaction {
         val transaction = repository.findOneByHash(dto.hash)
         if (null != transaction) {
-            return
+            return UDelegateTransaction.of(dto)
         }
 
         val tx = UDelegateTransaction.of(dto)
         validate(tx)
         updateUnconfirmedBalanceByFee(tx)
-        uRepository.save(tx)
         // todo broadcast
+        return uRepository.save(tx)
     }
 
     @Transactional
-    override fun add(request: DelegateTransactionRequest) {
+    override fun add(request: DelegateTransactionRequest): UDelegateTransaction {
         val tx = request.toUEntity(clock.networkTime())
         validate(tx)
         updateUnconfirmedBalanceByFee(tx)
-        uRepository.save(tx)
         // todo broadcast
+        return uRepository.save(tx)
     }
 
     @Transactional

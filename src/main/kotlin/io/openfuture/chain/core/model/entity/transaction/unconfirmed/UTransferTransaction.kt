@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 
+import io.openfuture.chain.core.model.dto.transaction.BaseTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -34,6 +35,17 @@ class UTransferTransaction(
             TransferTransactionPayload(dto.fee, dto.amount, dto.recipientAddress)
         )
     }
+
+    override fun toMessage(): TransferTransactionDto = TransferTransactionDto(
+        timestamp,
+        payload.fee,
+        senderAddress,
+        senderPublicKey,
+        senderSignature,
+        hash,
+        payload.amount,
+        payload.recipientAddress
+    )
 
     override fun toConfirmed(): TransferTransaction = TransferTransaction(
         timestamp,

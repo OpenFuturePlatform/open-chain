@@ -16,7 +16,7 @@ interface BaseRepository<T> : JpaRepository<T, Int>, PagingAndSortingRepository<
 @Repository
 interface BlockRepository<Entity: BaseBlock> : BaseRepository<Entity>{
 
-    fun findByHash(hash: String): Entity?
+    fun findOneByHash(hash: String): Entity?
 
     fun findByHeightGreaterThan(height: Long): List<Entity>?
 
@@ -38,7 +38,7 @@ interface UTransactionRepository<UEntity : UTransaction> : BaseRepository<UEntit
 
     fun findOneByHash(hash: String): UEntity?
 
-    fun findAllByOrderByFeeDesc(): MutableList<UEntity>
+    fun findAllByOrderByFeeDesc(): MutableSet<UEntity>
 
 }
 

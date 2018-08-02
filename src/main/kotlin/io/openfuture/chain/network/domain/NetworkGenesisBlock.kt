@@ -1,49 +1,46 @@
 package io.openfuture.chain.network.domain
 
-import io.netty.buffer.ByteBuf
 import io.openfuture.chain.consensus.annotation.NoArgConstructor
-import io.openfuture.chain.core.model.entity.Delegate
-import io.openfuture.chain.core.model.entity.block.BaseBlock
-import io.openfuture.chain.core.model.entity.block.GenesisBlock
-import io.openfuture.chain.network.extension.readList
-import io.openfuture.chain.network.extension.writeList
+import io.openfuture.chain.core.model.dto.transaction.BaseTransactionDto
+import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.crypto.util.SignatureUtils
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 
 @NoArgConstructor
 class NetworkGenesisBlock(
     height: Long,
     previousHash: String,
-    blockTimestamp: Long,
+    timestamp: Long,
     reward: Long,
-    publicKey: String,
-    hash: String,
-    signature: String,
     var epochIndex: Long,
     var activeDelegates: MutableSet<NetworkDelegate>
-) : NetworkBlock(height, previousHash, blockTimestamp, reward, publicKey, hash, signature) {
+) : NetworkBlock(height, previousHash, timestamp, reward) {
 
-    override fun readParams(buffer: ByteBuf) {
-        super.readParams(buffer)
-
-        epochIndex = buffer.readLong()
-        activeDelegates = buffer.readList<NetworkDelegate>().toMutableSet()
+    constructor(height: Long, previousHash: String, timestamp: Long, reward: Long, hash: String, publicKey: String,
+                signature: String, epochIndex: Long, activeDelegates: MutableSet<NetworkDelegate>) :
+        this(height, previousHash, timestamp, reward, epochIndex, activeDelegates) {
+        this.hash = hash
+        this.publicKey = publicKey
+        this.signature = signature
     }
 
-    override fun writeParams(buffer: ByteBuf) {
-        super.writeParams(buffer)
-
-        buffer.writeLong(epochIndex)
-        buffer.writeList(activeDelegates.toList())
+    fun sign(publicKey: String, privateKey: ByteArray) : NetworkGenesisBlock {
+        this.publicKey = publicKey
+        this.hash = ByteUtils.toHexString(HashUtils.doubleSha256((getBytes())))
+        this.signature = SignatureUtils.sign(getBytes(), privateKey)
+        return this
     }
 
-    fun toEntity(): GenesisBlock = GenesisBlock(
-        height,
-        previousHash,
-        blockTimestamp,
-        reward,
-        publicKey,
-        epochIndex,
-        activeDelegates.map { Delegate.of(it) }.toMutableSet()
-    ).apply { signature = super.signature }
+    override fun getBytes() : ByteArray {
+        val builder = StringBuilder()
+        builder.append(height)
+        builder.append(previousHash)
+        builder.append(time)
+        builder.append(reward)
+        builder.append(epochIndex)
+        builder.append(activeDelegates)
+        return builder.toString().toByteArray()
+    }
 
     override fun toString() = "NetworkGenesisBlock(hash=$hash)"
 

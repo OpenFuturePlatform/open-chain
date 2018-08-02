@@ -2,7 +2,6 @@ package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 
 import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import io.openfuture.chain.core.model.entity.transaction.payload.BaseTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
 import javax.persistence.Embedded
 import javax.persistence.Entity
@@ -32,6 +31,17 @@ class UVoteTransaction(
             VoteTransactionPayload(dto.fee, dto.voteTypeId, dto.delegateKey)
         )
     }
+
+    override fun toMessage(): VoteTransactionDto = VoteTransactionDto(
+        timestamp,
+        payload.fee,
+        senderAddress,
+        senderPublicKey,
+        senderSignature,
+        hash,
+        payload.voteTypeId,
+        payload.delegateKey
+    )
 
     override fun toConfirmed(): VoteTransaction = VoteTransaction(
         timestamp,

@@ -1,4 +1,4 @@
-package io.openfuture.chain.core.service.transaction
+package io.openfuture.chain.core.service.transaction.internal
 
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
@@ -12,7 +12,7 @@ import io.openfuture.chain.network.component.node.NodeClock
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.beans.factory.annotation.Autowired
 
-abstract class BaseTransactionService {
+internal abstract class BaseTransactionService {
 
     @Autowired
     protected lateinit var clock: NodeClock

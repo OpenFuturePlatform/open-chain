@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service
 
+import io.openfuture.chain.core.model.dto.transaction.BaseTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
@@ -9,6 +10,7 @@ import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.network.domain.NetworkBlock
@@ -16,6 +18,7 @@ import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.node.*
+import io.openfuture.chain.rpc.domain.transaction.BaseTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.VoteTransactionRequest
@@ -42,19 +45,20 @@ interface BlockService {
 
     fun getProducingSpeed(): Long
 
-    fun getLastBlock(): NetworkBlock
+    fun getLast(): NetworkBlock
+
 
 }
 
 interface GenesisBlockService {
 
-    fun add(dto: NetworkGenesisBlock)
-
     fun getLast(): GenesisBlock
 
-    fun save(block: GenesisBlock): GenesisBlock
+    fun create(): NetworkGenesisBlock
 
-    fun isValid(block: GenesisBlock): Boolean
+    fun add(dto: NetworkGenesisBlock)
+
+    fun isValid(block: NetworkGenesisBlock): Boolean
 
 }
 
@@ -68,8 +72,10 @@ interface MainBlockService {
 
 }
 
-/** Common transaction info service */
+/** Transaction api for other modules */
 interface TransactionService {
+
+    fun getAllUnconfirmed(): MutableSet<UTransaction>
 
     fun getCount(): Long
 
@@ -77,11 +83,11 @@ interface TransactionService {
 
 interface TransferTransactionService {
 
-    fun getUnconfirmedByHash (hash: String): UTransferTransaction
+    fun getAllUnconfirmed(): MutableList<UTransferTransaction>
 
-    fun add(dto: TransferTransactionDto)
+    fun add(dto: TransferTransactionDto): UTransferTransaction
 
-    fun add(request: TransferTransactionRequest)
+    fun add(request: TransferTransactionRequest): UTransferTransaction
 
     fun toBlock(hash: String, block: MainBlock)
 
@@ -89,9 +95,11 @@ interface TransferTransactionService {
 
 interface VoteTransactionService {
 
-    fun add(dto: VoteTransactionDto)
+    fun getAllUnconfirmed(): MutableList<UVoteTransaction>
 
-    fun add(request: VoteTransactionRequest)
+    fun add(dto: VoteTransactionDto): UVoteTransaction
+
+    fun add(request: VoteTransactionRequest): UVoteTransaction
 
     fun toBlock(hash: String, block: MainBlock)
 
@@ -99,9 +107,11 @@ interface VoteTransactionService {
 
 interface DelegateTransactionService {
 
-    fun add(dto: DelegateTransactionDto)
+    fun getAllUnconfirmed(): MutableList<UDelegateTransaction>
 
-    fun add(request: DelegateTransactionRequest)
+    fun add(dto: DelegateTransactionDto): UDelegateTransaction
+
+    fun add(request: DelegateTransactionRequest): UDelegateTransaction
 
     fun toBlock(hash: String, block: MainBlock)
 

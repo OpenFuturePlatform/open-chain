@@ -35,6 +35,16 @@ class UDelegateTransaction(
         )
     }
 
+    override fun toMessage(): DelegateTransactionDto = DelegateTransactionDto(
+        timestamp,
+        payload.fee,
+        senderAddress,
+        senderPublicKey,
+        senderSignature,
+        hash,
+        payload.delegateKey
+    )
+
     override fun toConfirmed(): DelegateTransaction = DelegateTransaction(
         timestamp,
         senderAddress,
