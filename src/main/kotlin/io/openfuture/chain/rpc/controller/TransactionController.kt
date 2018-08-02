@@ -16,22 +16,24 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/rpc/transactions")
 class TransactionController(
-    private val transactionService: TransactionService
+    private val voteTransactionService: VoteTransactionService,
+    private val transferTransactionService: TransferTransactionService,
+    private val delegateTransactionService: DelegateTransactionService
 ) {
 
     @PostMapping("/votes")
     fun addVote(@Valid @RequestBody request: VoteTransactionRequest) {
-        transactionService.add(request)
+        voteTransactionService.add(request)
     }
 
     @PostMapping("/transfers")
     fun addTransfer(@Valid @RequestBody request: TransferTransactionRequest) {
-        transactionService.add(request)
+        transferTransactionService.add(request)
     }
 
     @PostMapping("/delegates")
     fun addDelegates(@Valid @RequestBody request: DelegateTransactionRequest) {
-        transactionService.add(request)
+        delegateTransactionService.add(request)
     }
 
 }
