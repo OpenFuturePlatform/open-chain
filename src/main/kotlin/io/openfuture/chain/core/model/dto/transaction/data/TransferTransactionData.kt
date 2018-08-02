@@ -1,6 +1,6 @@
 package io.openfuture.chain.core.model.dto.transaction.data
 
-import io.openfuture.chain.consensus.annotation.NoArgConstructor
+import io.openfuture.chain.core.annotation.NoArgConstructor
 
 @NoArgConstructor
 class TransferTransactionData(

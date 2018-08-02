@@ -1,4 +1,4 @@
-package io.openfuture.chain.consensus.annotation
+package io.openfuture.chain.core.annotation
 
 @Target(AnnotationTarget.CLASS)
 annotation class NoArgConstructor
