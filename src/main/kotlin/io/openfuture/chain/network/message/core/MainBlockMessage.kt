@@ -17,9 +17,9 @@ class MainBlockMessage(
     signature: String,
     publicKey: String,
     var merkleHash: String,
-    var transferTransactions: MutableList<TransferTransactionMessage>,
-    var voteTransactions: MutableList<VoteTransactionMessage>,
-    var delegateTransactions: MutableList<DelegateTransactionMessage>
+    var transferTransactions: List<TransferTransactionMessage>,
+    var voteTransactions: List<VoteTransactionMessage>,
+    var delegateTransactions: List<DelegateTransactionMessage>
 ) : BlockMessage(height, previousHash, blockTimestamp, reward, publicKey, hash, signature) {
 
     override fun read(buffer: ByteBuf) {

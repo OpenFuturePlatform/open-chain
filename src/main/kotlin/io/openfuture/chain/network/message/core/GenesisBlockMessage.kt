@@ -15,21 +15,21 @@ class GenesisBlockMessage(
     hash: String,
     signature: String,
     var epochIndex: Long,
-    var activeDelegates: MutableSet<DelegateMessage>
+    var activeDelegates: List<DelegateMessage>
 ) : BlockMessage(height, previousHash, blockTimestamp, reward, publicKey, hash, signature) {
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)
 
         epochIndex = buffer.readLong()
-        activeDelegates = buffer.readList<DelegateMessage>().toMutableSet()
+        activeDelegates = buffer.readList()
     }
 
     override fun write(buffer: ByteBuf) {
         super.write(buffer)
 
         buffer.writeLong(epochIndex)
-        buffer.writeList(activeDelegates.toList())
+        buffer.writeList(activeDelegates)
     }
 
     override fun toString() = "NetworkGenesisBlock(hash=$hash)"

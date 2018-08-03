@@ -23,6 +23,10 @@ class DefaultNetworkMessageService(
 
     private val heartBeatTasks: MutableMap<Channel, ScheduledFuture<*>> = ConcurrentHashMap()
 
+    companion object {
+        private const val HEART_BEAT_INTERVAL = 20L
+    }
+
 
     override fun onChannelActive(ctx: ChannelHandlerContext) {
         ctx.writeAndFlush(GreetingMessage(NetworkAddressMessage(properties.host!!, properties.port!!)))
@@ -34,7 +38,7 @@ class DefaultNetworkMessageService(
 
         val task = ctx.channel()
             .eventLoop()
-            .scheduleAtFixedRate({ ctx.writeAndFlush(HeartBeatMessage(PING)) }, 0, 20, TimeUnit.SECONDS)
+            .scheduleAtFixedRate({ ctx.writeAndFlush(HeartBeatMessage(PING)) }, 0, HEART_BEAT_INTERVAL, TimeUnit.SECONDS)
         heartBeatTasks[ctx.channel()] = task
     }
 
