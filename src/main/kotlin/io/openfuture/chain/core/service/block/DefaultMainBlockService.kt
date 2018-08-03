@@ -46,11 +46,6 @@ class DefaultMainBlockService(
         return MainBlock(timestamp, height, hash, signature, publicKey, payload)
     }
 
-    private fun createPayload(lastBlock: BaseBlock, transactions: List<BaseTransaction>): MainBlockPayload {
-
-        return MainBlockPayload(previousHash, reward, merkleHash)
-    }
-
     @Transactional
     override fun add(message: MainBlockMessage) {
         if (!isValid(message)) {
