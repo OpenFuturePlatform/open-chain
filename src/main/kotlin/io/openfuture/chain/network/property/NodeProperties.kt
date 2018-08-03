@@ -49,7 +49,7 @@ class NodeProperties(
 
     /** Directly Connected Peers Number */
     @field:NotNull
-    @field:Min(1)
+    @field:Min(5)
     var peersNumber: Int? = null,
 
     /** Private key path */

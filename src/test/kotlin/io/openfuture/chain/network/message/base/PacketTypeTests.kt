@@ -16,7 +16,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.util.*
 
-class PacketTypeTest {
+class PacketTypeTests {
 
     @Test
     fun getShouldReturnTypeForEachKnownId() {

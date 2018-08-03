@@ -1,23 +1,23 @@
-package io.openfuture.chain.network.message.network
+package io.openfuture.chain.network.message.base
 
 import io.netty.buffer.ByteBuf
-import io.netty.buffer.ByteBufUtil
 import io.netty.buffer.Unpooled
-import io.openfuture.chain.network.message.network.address.NetworkAddressMessage
+import io.openfuture.chain.config.MessageTests
+import io.openfuture.chain.network.message.network.address.FindAddressesMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
-class GreetingMessageTest {
+class PacketTests : MessageTests() {
 
-    private lateinit var message: GreetingMessage
+    private lateinit var message: Packet
     private lateinit var buffer: ByteBuf
 
 
     @Before
-    fun setup(){
-        buffer = createBuffer("000000093132372e302e302e3100002382")
-        message = GreetingMessage(NetworkAddressMessage("127.0.0.1", 9090))
+    fun setup() {
+        buffer = createBuffer("00000005312e302e30000000000000007b0002")
+        message = Packet(FindAddressesMessage(), "1.0.0", 123)
     }
 
     @Test
@@ -31,13 +31,11 @@ class GreetingMessageTest {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = GreetingMessage::class.java.newInstance()
+        val actualMessage = Packet::class.java.newInstance()
 
         actualMessage.read(buffer)
 
         assertThat(actualMessage).isEqualToComparingFieldByFieldRecursively(message)
     }
-
-    private fun createBuffer(value: String) : ByteBuf = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump((value)))
 
 }

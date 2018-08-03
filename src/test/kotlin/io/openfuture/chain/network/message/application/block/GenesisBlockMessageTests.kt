@@ -1,21 +1,21 @@
 package io.openfuture.chain.network.message.application.block
 
 import io.netty.buffer.ByteBuf
-import io.netty.buffer.ByteBufUtil
 import io.netty.buffer.Unpooled
+import io.openfuture.chain.config.MessageTests
 import io.openfuture.chain.network.message.application.delegate.DelegateMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
-class GenesisBlockMessageTest {
+class GenesisBlockMessageTests : MessageTests() {
 
     private lateinit var message: GenesisBlockMessage
     private lateinit var buffer: ByteBuf
 
 
     @Before
-    fun setup(){
+    fun setup() {
         buffer = createBuffer("00000000000000010000000c70726576696f7573486173680000000000000001000000000000000a000000097" +
             "075626c69634b65790000000468617368000000097369676e6174757265000000000000000100000001000000096c6f63616c686f73" +
             "74000000036b6579")
@@ -41,7 +41,5 @@ class GenesisBlockMessageTest {
 
         assertThat(actualMessage).isEqualToComparingFieldByFieldRecursively(message)
     }
-
-    private fun createBuffer(value: String) : ByteBuf = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump((value)))
 
 }

@@ -2,7 +2,8 @@ package io.openfuture.chain.network.handler.server
 
 import io.netty.channel.ChannelHandler
 import io.openfuture.chain.network.handler.base.BaseConnectionHandler
-import io.openfuture.chain.network.service.DefaultApplicationMessageService
+import io.openfuture.chain.network.service.ConsensusMessageService
+import io.openfuture.chain.network.service.DefaultCoreMessageService
 import io.openfuture.chain.network.service.NetworkMessageService
 import org.springframework.stereotype.Component
 
@@ -10,5 +11,6 @@ import org.springframework.stereotype.Component
 @ChannelHandler.Sharable
 class ConnectionServerHandler(
     networkService: NetworkMessageService,
-    applicationService: DefaultApplicationMessageService
-) : BaseConnectionHandler(networkService, applicationService)
+    coreService: DefaultCoreMessageService,
+    consensusService: ConsensusMessageService
+) : BaseConnectionHandler(networkService, coreService, consensusService)

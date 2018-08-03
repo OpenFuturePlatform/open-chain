@@ -4,20 +4,22 @@ import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.core.service.CommonBlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
-import io.openfuture.chain.network.message.application.block.*
+import io.openfuture.chain.network.message.application.block.GenesisBlockMessage
+import io.openfuture.chain.network.message.application.block.MainBlockMessage
+import io.openfuture.chain.network.message.application.block.SyncBlockRequestMessage
 import io.openfuture.chain.network.message.application.transaction.DelegateTransactionMessage
 import io.openfuture.chain.network.message.application.transaction.TransferTransactionMessage
 import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
 import org.springframework.stereotype.Component
 
 @Component
-class DefaultApplicationMessageService(
+class DefaultCoreMessageService(
     private val blockService: CommonBlockService, // TODO: ask for interface
     private val genesisBlockService: GenesisBlockService, // TODO: ask for interface
     private val mainBlockService: MainBlockService // TODO: ask for interface
-) : ApplicationMessageService {
-    override fun onNetworkBlockRequest(ctx: ChannelHandlerContext, request: SyncBlockRequestMessage) {
+) : CoreMessageService {
 
+    override fun onNetworkBlockRequest(ctx: ChannelHandlerContext, request: SyncBlockRequestMessage) {
         val blocks = blockService.getBlocksAfterCurrentHash(request.hash)
 
         blocks?.forEach {
@@ -27,7 +29,6 @@ class DefaultApplicationMessageService(
                 is GenesisBlock -> ctx.channel().writeAndFlush(GenesisBlockMessage(it))
             }*/
         }
-
     }
 
     override fun onGenesisBlock(ctx: ChannelHandlerContext, block: GenesisBlockMessage) {
@@ -45,10 +46,6 @@ class DefaultApplicationMessageService(
 
         //mainBlockService.add(block) TODO: ask for interface
     }
-
-    override fun onBlockApproval(ctx: ChannelHandlerContext, block: BlockApprovalMessage) {}
-
-    override fun onPendingBlock(ctx: ChannelHandlerContext, block: PendingBlockMessage) {}
 
     override fun onTransferTransaction(ctx: ChannelHandlerContext, tx: TransferTransactionMessage) {}
 

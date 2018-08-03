@@ -1,23 +1,22 @@
-package io.openfuture.chain.network.message.base
+package io.openfuture.chain.network.message.network.time
 
 import io.netty.buffer.ByteBuf
-import io.netty.buffer.ByteBufUtil
 import io.netty.buffer.Unpooled
-import io.openfuture.chain.network.message.network.address.FindAddressesMessage
+import io.openfuture.chain.config.MessageTests
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
-class PacketTest {
+class AskTimeMessageTests : MessageTests() {
 
-    private lateinit var message: Packet
+    private lateinit var message: AskTimeMessage
     private lateinit var buffer: ByteBuf
 
 
     @Before
-    fun setup(){
-        buffer = createBuffer("00000005312e302e30000000000000007b0002")
-        message = Packet(FindAddressesMessage(), "1.0.0", 123)
+    fun setup() {
+        buffer = createBuffer("0000001caab5c3b3")
+        message = AskTimeMessage(123123123123)
     }
 
     @Test
@@ -31,13 +30,11 @@ class PacketTest {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = Packet::class.java.newInstance()
+        val actualMessage = AskTimeMessage::class.java.newInstance()
 
         actualMessage.read(buffer)
 
         assertThat(actualMessage).isEqualToComparingFieldByFieldRecursively(message)
     }
-
-    private fun createBuffer(value: String) : ByteBuf = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump((value)))
 
 }

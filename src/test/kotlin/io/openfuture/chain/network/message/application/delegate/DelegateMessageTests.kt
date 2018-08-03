@@ -1,20 +1,20 @@
 package io.openfuture.chain.network.message.application.delegate
 
 import io.netty.buffer.ByteBuf
-import io.netty.buffer.ByteBufUtil
 import io.netty.buffer.Unpooled
+import io.openfuture.chain.config.MessageTests
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
-class NetworkDelegateTest {
+class DelegateMessageTests : MessageTests() {
 
     private lateinit var message: DelegateMessage
     private lateinit var buffer: ByteBuf
 
 
     @Before
-    fun setup(){
+    fun setup() {
         buffer = createBuffer("000000093132372e302e302e31000000036b6579")
         message = DelegateMessage("127.0.0.1", "key")
     }
@@ -36,7 +36,5 @@ class NetworkDelegateTest {
 
         assertThat(actualMessage).isEqualTo(message)
     }
-
-    private fun createBuffer(value: String) : ByteBuf = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump((value)))
 
 }

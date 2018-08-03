@@ -38,7 +38,7 @@ interface ConnectionService {
 
 }
 
-interface ApplicationMessageService {
+interface CoreMessageService {
 
     fun onNetworkBlockRequest(ctx: ChannelHandlerContext, request: SyncBlockRequestMessage)
 
@@ -46,15 +46,19 @@ interface ApplicationMessageService {
 
     fun onMainBlock(ctx: ChannelHandlerContext, block: MainBlockMessage)
 
-    fun onBlockApproval(ctx: ChannelHandlerContext, block: BlockApprovalMessage)
-
-    fun onPendingBlock(ctx: ChannelHandlerContext, block: PendingBlockMessage)
-
     fun onTransferTransaction(ctx: ChannelHandlerContext, tx: TransferTransactionMessage)
 
     fun onDelegateTransaction(ctx: ChannelHandlerContext, tx: DelegateTransactionMessage)
 
     fun onVoteTransaction(ctx: ChannelHandlerContext, tx: VoteTransactionMessage)
+
+}
+
+interface ConsensusMessageService {
+
+    fun onBlockApproval(ctx: ChannelHandlerContext, block: BlockApprovalMessage)
+
+    fun onPendingBlock(ctx: ChannelHandlerContext, block: PendingBlockMessage)
 
 }
 

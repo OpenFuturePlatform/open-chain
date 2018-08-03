@@ -1,8 +1,8 @@
 package io.openfuture.chain.network.message.application.block
 
 import io.netty.buffer.ByteBuf
-import io.netty.buffer.ByteBufUtil
 import io.netty.buffer.Unpooled
+import io.openfuture.chain.config.MessageTests
 import io.openfuture.chain.network.message.application.transaction.DelegateTransactionMessage
 import io.openfuture.chain.network.message.application.transaction.TransferTransactionMessage
 import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
@@ -10,14 +10,14 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
-class MainBlockMessageTest {
+class PendingBlockMessageTests : MessageTests() {
 
-    private lateinit var message: MainBlockMessage
+    private lateinit var message: PendingBlockMessage
     private lateinit var buffer: ByteBuf
 
 
     @Before
-    fun setup(){
+    fun setup() {
         buffer = createBuffer("00000000000000010000000c70726576696f7573486173680000000000000001000000000000000a000000097" +
             "075626c69634b65790000000468617368000000097369676e61747572650000000a6d65726b6c654861736800000001000000000001" +
             "e0f300000000000000010000000d73656e646572416464726573730000000f73656e6465725075626c69634b65790000000f73656e6" +
@@ -33,7 +33,7 @@ class MainBlockMessageTest {
             "senderSignature", "hash", 1, "delegateKey"))
         val delegateTransaction = mutableListOf(DelegateTransactionMessage(123123, 1, "senderAddress", "senderPublicKey",
             "senderSignature", "hash", "delegateKey"))
-        message = MainBlockMessage(1, "previousHash", 1, 10, "hash", "signature", "publicKey", "merkleHash",
+        message = PendingBlockMessage(1, "previousHash", 1, 10, "hash", "signature", "publicKey", "merkleHash",
             transferTransaction, voteTransaction, delegateTransaction)
     }
 
@@ -54,7 +54,5 @@ class MainBlockMessageTest {
 
         assertThat(actualMessage).isEqualToComparingFieldByFieldRecursively(message)
     }
-
-    private fun createBuffer(value: String) : ByteBuf = Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump((value)))
 
 }
