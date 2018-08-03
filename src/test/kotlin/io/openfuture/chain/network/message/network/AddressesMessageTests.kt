@@ -1,23 +1,24 @@
-package io.openfuture.chain.network.message.application.delegate
+package io.openfuture.chain.network.message.network
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.config.MessageTests
-import io.openfuture.chain.network.message.core.DelegateMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
-class DelegateMessageTests : MessageTests() {
+class AddressesMessageTests : MessageTests() {
 
-    private lateinit var message: DelegateMessage
+    private lateinit var message: AddressesMessage
     private lateinit var buffer: ByteBuf
 
 
     @Before
     fun setup() {
-        buffer = createBuffer("000000093132372e302e302e31000000036b6579")
-        message = DelegateMessage("127.0.0.1", "key")
+        buffer = createBuffer("00000002000000093132372e302e302e3100002382000000093132372e302e302e3100002383")
+        message = AddressesMessage(listOf(
+            NetworkAddressMessage("127.0.0.1", 9090),
+            NetworkAddressMessage("127.0.0.1", 9091)))
     }
 
     @Test
@@ -31,11 +32,11 @@ class DelegateMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = DelegateMessage::class.java.newInstance()
+        val actualMessage = AddressesMessage::class.java.newInstance()
 
         actualMessage.read(buffer)
 
-        assertThat(actualMessage).isEqualTo(message)
+        assertThat(actualMessage).isEqualToComparingFieldByFieldRecursively(message)
     }
 
 }

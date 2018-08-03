@@ -1,23 +1,22 @@
-package io.openfuture.chain.network.message.network.address
+package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.config.MessageTests
-import io.openfuture.chain.network.message.network.NetworkAddressMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
-class NetworkAddressMessageTests : MessageTests() {
+class SyncBlockRequestMessageTests : MessageTests() {
 
-    private lateinit var message: NetworkAddressMessage
+    private lateinit var message: SyncBlockRequestMessage
     private lateinit var buffer: ByteBuf
 
 
     @Before
     fun setup() {
-        buffer = createBuffer("000000093132372e302e302e3100002382")
-        message = NetworkAddressMessage("127.0.0.1", 9090)
+        buffer = createBuffer("0000000468617368")
+        message = SyncBlockRequestMessage("hash")
     }
 
     @Test
@@ -31,7 +30,7 @@ class NetworkAddressMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = NetworkAddressMessage::class.java.newInstance()
+        val actualMessage = SyncBlockRequestMessage::class.java.newInstance()
 
         actualMessage.read(buffer)
 

@@ -1,23 +1,22 @@
-package io.openfuture.chain.network.message.application.block
+package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.config.MessageTests
-import io.openfuture.chain.network.message.core.SyncBlockRequestMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
-class BlockRequestMessageTests : MessageTests() {
+class DelegateMessageTests : MessageTests() {
 
-    private lateinit var message: SyncBlockRequestMessage
+    private lateinit var message: DelegateMessage
     private lateinit var buffer: ByteBuf
 
 
     @Before
     fun setup() {
-        buffer = createBuffer("0000000468617368")
-        message = SyncBlockRequestMessage("hash")
+        buffer = createBuffer("000000093132372e302e302e31000000036b6579")
+        message = DelegateMessage("127.0.0.1", "key")
     }
 
     @Test
@@ -31,11 +30,11 @@ class BlockRequestMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = SyncBlockRequestMessage::class.java.newInstance()
+        val actualMessage = DelegateMessage::class.java.newInstance()
 
         actualMessage.read(buffer)
 
-        assertThat(actualMessage).isEqualToComparingFieldByFieldRecursively(message)
+        assertThat(actualMessage).isEqualTo(message)
     }
 
 }

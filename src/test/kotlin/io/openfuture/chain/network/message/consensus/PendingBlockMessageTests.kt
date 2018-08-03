@@ -1,19 +1,19 @@
-package io.openfuture.chain.network.message.application.block
+package io.openfuture.chain.network.message.consensus
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.config.MessageTests
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
-import io.openfuture.chain.network.message.core.MainBlockMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
-class MainBlockMessageTests : MessageTests() {
+class PendingBlockMessageTests : MessageTests() {
 
-    private lateinit var message: MainBlockMessage
+    private lateinit var message: PendingBlockMessage
     private lateinit var buffer: ByteBuf
 
 
@@ -34,7 +34,7 @@ class MainBlockMessageTests : MessageTests() {
             "senderSignature", "hash", 1, "delegateKey"))
         val delegateTransaction = mutableListOf(DelegateTransactionMessage(123123, 1, "senderAddress", "senderPublicKey",
             "senderSignature", "hash", "delegateKey"))
-        message = MainBlockMessage(1, "previousHash", 1, 10, "hash", "signature", "publicKey", "merkleHash",
+        message = PendingBlockMessage(1, "previousHash", 1, 10, "hash", "signature", "publicKey", "merkleHash",
             transferTransaction, voteTransaction, delegateTransaction)
     }
 

@@ -1,9 +1,8 @@
-package io.openfuture.chain.network.message.application.transaction
+package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.config.MessageTests
-import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test

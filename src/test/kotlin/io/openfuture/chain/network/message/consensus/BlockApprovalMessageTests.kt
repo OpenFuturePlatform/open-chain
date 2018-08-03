@@ -1,23 +1,22 @@
-package io.openfuture.chain.network.message.network.time
+package io.openfuture.chain.network.message.consensus
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.config.MessageTests
-import io.openfuture.chain.network.message.network.AskTimeMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
-class AskTimeMessageTests : MessageTests() {
+class BlockApprovalMessageTests : MessageTests() {
 
-    private lateinit var message: AskTimeMessage
+    private lateinit var message: BlockApprovalMessage
     private lateinit var buffer: ByteBuf
 
 
     @Before
     fun setup() {
-        buffer = createBuffer("0000001caab5c3b3")
-        message = AskTimeMessage(123123123123)
+        buffer = createBuffer("000100000000000000010000000468617368000000097075626c69634b6579000000097369676e6174757265")
+        message = BlockApprovalMessage(1, 1, "hash", "publicKey", "signature")
     }
 
     @Test
@@ -31,7 +30,7 @@ class AskTimeMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = AskTimeMessage::class.java.newInstance()
+        val actualMessage = BlockApprovalMessage::class.java.newInstance()
 
         actualMessage.read(buffer)
 

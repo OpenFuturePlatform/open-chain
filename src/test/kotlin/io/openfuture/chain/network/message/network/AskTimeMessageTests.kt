@@ -1,23 +1,22 @@
-package io.openfuture.chain.network.message.network.time
+package io.openfuture.chain.network.message.network
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.config.MessageTests
-import io.openfuture.chain.network.message.network.TimeMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
-class TimeMessageTests : MessageTests() {
+class AskTimeMessageTests : MessageTests() {
 
-    private lateinit var message: TimeMessage
+    private lateinit var message: AskTimeMessage
     private lateinit var buffer: ByteBuf
 
 
     @Before
     fun setup() {
-        buffer = createBuffer("000000000756b5b3000000001b34f908")
-        message = TimeMessage(123123123, 456456456)
+        buffer = createBuffer("0000001caab5c3b3")
+        message = AskTimeMessage(123123123123)
     }
 
     @Test
@@ -31,7 +30,7 @@ class TimeMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = TimeMessage::class.java.newInstance()
+        val actualMessage = AskTimeMessage::class.java.newInstance()
 
         actualMessage.read(buffer)
 

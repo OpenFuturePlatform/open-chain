@@ -1,26 +1,22 @@
-package io.openfuture.chain.network.message.network.address
+package io.openfuture.chain.network.message.network
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.config.MessageTests
-import io.openfuture.chain.network.message.network.AddressesMessage
-import io.openfuture.chain.network.message.network.NetworkAddressMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
-class AddressesMessageTests : MessageTests() {
+class FindAddressesMessageTests : MessageTests() {
 
-    private lateinit var message: AddressesMessage
+    private lateinit var message: FindAddressesMessage
     private lateinit var buffer: ByteBuf
 
 
     @Before
     fun setup() {
-        buffer = createBuffer("00000002000000093132372e302e302e3100002382000000093132372e302e302e3100002383")
-        message = AddressesMessage(listOf(
-            NetworkAddressMessage("127.0.0.1", 9090),
-            NetworkAddressMessage("127.0.0.1", 9091)))
+        buffer = createBuffer("")
+        message = FindAddressesMessage()
     }
 
     @Test
@@ -34,7 +30,7 @@ class AddressesMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = AddressesMessage::class.java.newInstance()
+        val actualMessage = FindAddressesMessage::class.java.newInstance()
 
         actualMessage.read(buffer)
 
