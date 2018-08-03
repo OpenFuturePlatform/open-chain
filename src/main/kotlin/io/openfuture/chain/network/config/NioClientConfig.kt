@@ -4,7 +4,7 @@ import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelOption.SO_KEEPALIVE
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioSocketChannel
-import io.openfuture.chain.network.client.handler.ClientChannelInitializer
+import io.openfuture.chain.network.handler.client.ClientChannelInitializer
 import io.openfuture.chain.network.property.NodeProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

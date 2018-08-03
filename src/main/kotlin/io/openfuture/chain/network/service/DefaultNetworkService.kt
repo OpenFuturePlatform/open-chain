@@ -3,21 +3,21 @@ package io.openfuture.chain.network.service
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelFuture
 import io.openfuture.chain.core.service.CommonBlockService
-import io.openfuture.chain.network.domain.FindAddresses
-import io.openfuture.chain.network.domain.NetworkAddress
-import io.openfuture.chain.network.domain.NetworkBlockRequest
-import io.openfuture.chain.network.domain.Packet
+import io.openfuture.chain.network.message.application.block.SyncBlockRequestMessage
+import io.openfuture.chain.network.message.base.BaseMessage
+import io.openfuture.chain.network.message.network.address.FindAddressesMessage
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.server.TcpServer
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationListener
-import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import java.security.SecureRandom
 import java.util.concurrent.Executors
 
 @Service
+@Lazy(true)
 class DefaultNetworkService(
     private val bootstrap: Bootstrap,
     private val blockService: CommonBlockService,
@@ -38,7 +38,7 @@ class DefaultNetworkService(
         bootstrap.connect(address.host, address.port).addListener { future ->
             future as ChannelFuture
             if (future.isSuccess) {
-                future.channel().writeAndFlush(FindAddresses())
+                future.channel().writeAndFlush(FindAddressesMessage())
 
                 future.channel().writeAndFlush(getNetworkBlockRequest())
             } else {
@@ -47,45 +47,16 @@ class DefaultNetworkService(
         }
     }
 
-    @Scheduled(cron = "*/30 * * * * *")
-    override fun maintainConnectionNumber() {
-        if (isConnectionNeeded()) {
-            requestAddresses()
-        }
-    }
-
-    override fun broadcast(packet: Packet) {
+    override fun broadcast(message: BaseMessage) {
         connectionService.getConnections().keys.forEach {
-            it.writeAndFlush(packet)
+            it.writeAndFlush(message)
         }
     }
 
-    override fun connect(peers: List<NetworkAddress>) {
-        peers.map { NetworkAddress(it.host, it.port) }
-            .filter { !connectionService.getConnectionAddresses().contains(it) && it != NetworkAddress(properties.host!!,
-                properties.port!!) }
-            .forEach { bootstrap.connect(it.host, it.port) }
-    }
-
-    private fun isConnectionNeeded(): Boolean = properties.peersNumber!! > connectionService.getConnections().size
-
-    private fun getNetworkBlockRequest(): NetworkBlockRequest {
+    private fun getNetworkBlockRequest(): SyncBlockRequestMessage {
         val lastBlockHash = blockService.getLast().hash
 
-        return NetworkBlockRequest(lastBlockHash)
-    }
-
-    private fun requestAddresses() {
-        send(FindAddresses())
-    }
-
-    private fun send(message: Packet) {
-        val address = connectionService.getConnectionAddresses().shuffled(SecureRandom()).firstOrNull()
-            ?: properties.getRootAddresses().shuffled().first()
-
-        val channel = connectionService.getConnections().filter { it.value == address }.map { it.key }.firstOrNull()
-            ?: bootstrap.connect(address.host, address.port).channel()
-        channel.writeAndFlush(message)
+        return SyncBlockRequestMessage(lastBlockHash)
     }
 
 }

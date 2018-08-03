@@ -1,6 +1,6 @@
 package io.openfuture.chain.network.property
 
-import io.openfuture.chain.network.domain.NetworkAddress
+import io.openfuture.chain.network.message.network.address.NetworkAddressMessage
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
@@ -62,9 +62,9 @@ class NodeProperties(
 
 ) {
 
-    fun getRootAddresses(): List<NetworkAddress> = rootNodes.map {
+    fun getRootAddresses(): List<NetworkAddressMessage> = rootNodes.map {
         val split = it.split(':')
-        NetworkAddress(split[0], split[1].toInt())
+        NetworkAddressMessage(split[0], split[1].toInt())
     }
 
 }
