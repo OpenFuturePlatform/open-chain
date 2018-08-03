@@ -16,24 +16,24 @@ class NodeClock {
     }
 
     @Volatile
-    private var adjustment : Long = 0
+    private var adjustment: Long = 0
 
     private val networkTimeOffsets: ConcurrentHashMap<String, Long> = ConcurrentHashMap()
 
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
 
-    fun nodeTime() : Long = System.currentTimeMillis()
+    fun nodeTime(): Long = System.currentTimeMillis()
 
-    fun networkTime() : Long {
+    fun networkTime(): Long {
         lock.readLock().lock()
-        try{
+        try {
             return nodeTime() + adjustment
         } finally {
             lock.readLock().unlock()
         }
     }
 
-    fun calculateTimeOffset(nodeTimestamp: Long, networkTimestamp: Long) : Long {
+    fun calculateTimeOffset(nodeTimestamp: Long, networkTimestamp: Long): Long {
         val networkLatency = (nodeTime() - nodeTimestamp) / 2
         val expectedNetworkTimestamp = nodeTimestamp + networkLatency
         return networkTimestamp - expectedNetworkTimestamp
@@ -41,7 +41,7 @@ class NodeClock {
 
     fun addTimeOffset(remoteAddress: String, offset: Long) {
         lock.writeLock().lock()
-        try{
+        try {
             networkTimeOffsets[remoteAddress] = offset
             recalculateAdjustment()
         } finally {
@@ -51,7 +51,7 @@ class NodeClock {
 
     fun removeTimeOffset(remoteAddress: String) {
         lock.writeLock().lock()
-        try{
+        try {
             networkTimeOffsets.remove(remoteAddress)
             recalculateAdjustment()
         } finally {
@@ -61,7 +61,7 @@ class NodeClock {
 
     private fun recalculateAdjustment() {
         if (networkTimeOffsets.size % 2 == 1 &&
-                networkTimeOffsets.size >= MINIMUM_OFFSETS_SIZE_TO_DO_SYNC) {
+            networkTimeOffsets.size >= MINIMUM_OFFSETS_SIZE_TO_DO_SYNC) {
             val offsetList = ArrayList(networkTimeOffsets.values)
             offsetList.sort()
             adjustment = offsetList[networkTimeOffsets.size / 2]

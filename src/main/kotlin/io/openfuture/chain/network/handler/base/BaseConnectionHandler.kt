@@ -2,18 +2,22 @@ package io.openfuture.chain.network.handler.base
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
-import io.openfuture.chain.network.message.application.block.*
-import io.openfuture.chain.network.message.application.transaction.DelegateTransactionMessage
-import io.openfuture.chain.network.message.application.transaction.TransferTransactionMessage
-import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
+import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.network.message.core.TransferTransactionMessage
+import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.network.message.base.Packet
 import io.openfuture.chain.network.message.base.PacketType.*
+import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
+import io.openfuture.chain.network.message.consensus.PendingBlockMessage
+import io.openfuture.chain.network.message.core.GenesisBlockMessage
+import io.openfuture.chain.network.message.core.MainBlockMessage
+import io.openfuture.chain.network.message.core.SyncBlockRequestMessage
 import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.message.network.HeartBeatMessage
-import io.openfuture.chain.network.message.network.address.AddressesMessage
-import io.openfuture.chain.network.message.network.address.FindAddressesMessage
-import io.openfuture.chain.network.message.network.time.AskTimeMessage
-import io.openfuture.chain.network.message.network.time.TimeMessage
+import io.openfuture.chain.network.message.network.AddressesMessage
+import io.openfuture.chain.network.message.network.FindAddressesMessage
+import io.openfuture.chain.network.message.network.AskTimeMessage
+import io.openfuture.chain.network.message.network.TimeMessage
 import io.openfuture.chain.network.service.ConsensusMessageService
 import io.openfuture.chain.network.service.CoreMessageService
 import io.openfuture.chain.network.service.NetworkMessageService
@@ -36,7 +40,7 @@ abstract class BaseConnectionHandler(
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, packet: Packet) {
-        when(packet.type) {
+        when (packet.type) {
             ADDRESSES -> networkService.onAddresses(ctx, packet.data as AddressesMessage)
             FIND_ADDRESSES -> networkService.onFindAddresses(ctx, packet.data as FindAddressesMessage)
             GREETING -> networkService.onGreeting(ctx, packet.data as GreetingMessage)

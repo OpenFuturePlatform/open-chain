@@ -1,4 +1,4 @@
-package io.openfuture.chain.network.message.network.address
+package io.openfuture.chain.network.message.network
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.network.annotation.NoArgConstructor

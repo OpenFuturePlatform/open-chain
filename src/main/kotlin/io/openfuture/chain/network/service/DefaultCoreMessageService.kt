@@ -4,19 +4,15 @@ import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.core.service.CommonBlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
-import io.openfuture.chain.network.message.application.block.GenesisBlockMessage
-import io.openfuture.chain.network.message.application.block.MainBlockMessage
-import io.openfuture.chain.network.message.application.block.SyncBlockRequestMessage
-import io.openfuture.chain.network.message.application.transaction.DelegateTransactionMessage
-import io.openfuture.chain.network.message.application.transaction.TransferTransactionMessage
-import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
+import io.openfuture.chain.network.message.core.*
 import org.springframework.stereotype.Component
 
+// TODO: call core API here
 @Component
 class DefaultCoreMessageService(
-    private val blockService: CommonBlockService, // TODO: ask for interface
-    private val genesisBlockService: GenesisBlockService, // TODO: ask for interface
-    private val mainBlockService: MainBlockService // TODO: ask for interface
+    private val blockService: CommonBlockService,
+    private val genesisBlockService: GenesisBlockService,
+    private val mainBlockService: MainBlockService
 ) : CoreMessageService {
 
     override fun onNetworkBlockRequest(ctx: ChannelHandlerContext, request: SyncBlockRequestMessage) {
@@ -36,7 +32,7 @@ class DefaultCoreMessageService(
             return
         }
 
-        //genesisBlockService.add(block) TODO: ask for interface
+        //genesisBlockService.add(block)
     }
 
     override fun onMainBlock(ctx: ChannelHandlerContext, block: MainBlockMessage) {
@@ -44,7 +40,7 @@ class DefaultCoreMessageService(
             return
         }
 
-        //mainBlockService.add(block) TODO: ask for interface
+        //mainBlockService.add(block)
     }
 
     override fun onTransferTransaction(ctx: ChannelHandlerContext, tx: TransferTransactionMessage) {}

@@ -3,9 +3,11 @@ package io.openfuture.chain.network.message.application.block
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.config.MessageTests
-import io.openfuture.chain.network.message.application.transaction.DelegateTransactionMessage
-import io.openfuture.chain.network.message.application.transaction.TransferTransactionMessage
-import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
+import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.network.message.core.TransferTransactionMessage
+import io.openfuture.chain.network.message.core.VoteTransactionMessage
+import io.openfuture.chain.network.message.consensus.PendingBlockMessage
+import io.openfuture.chain.network.message.core.MainBlockMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test

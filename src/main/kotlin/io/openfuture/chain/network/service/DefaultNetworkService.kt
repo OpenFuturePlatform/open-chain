@@ -3,21 +3,19 @@ package io.openfuture.chain.network.service
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelFuture
 import io.openfuture.chain.core.service.CommonBlockService
-import io.openfuture.chain.network.message.application.block.SyncBlockRequestMessage
 import io.openfuture.chain.network.message.base.BaseMessage
-import io.openfuture.chain.network.message.network.address.FindAddressesMessage
+import io.openfuture.chain.network.message.core.SyncBlockRequestMessage
+import io.openfuture.chain.network.message.network.FindAddressesMessage
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.server.TcpServer
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationListener
-import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import java.security.SecureRandom
 import java.util.concurrent.Executors
 
 @Service
-@Lazy(true)
 class DefaultNetworkService(
     private val bootstrap: Bootstrap,
     private val blockService: CommonBlockService,

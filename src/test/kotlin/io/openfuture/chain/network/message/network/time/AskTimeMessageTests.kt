@@ -3,6 +3,7 @@ package io.openfuture.chain.network.message.network.time
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.config.MessageTests
+import io.openfuture.chain.network.message.network.AskTimeMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test

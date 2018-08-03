@@ -1,4 +1,4 @@
-package io.openfuture.chain.network.message.application.block
+package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.network.annotation.NoArgConstructor
@@ -6,12 +6,9 @@ import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeList
 import io.openfuture.chain.network.extension.writeString
-import io.openfuture.chain.network.message.application.transaction.DelegateTransactionMessage
-import io.openfuture.chain.network.message.application.transaction.TransferTransactionMessage
-import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
 
 @NoArgConstructor
-class PendingBlockMessage(
+class MainBlockMessage(
     height: Long,
     previousHash: String,
     blockTimestamp: Long,
@@ -43,6 +40,6 @@ class PendingBlockMessage(
         buffer.writeList(delegateTransactions)
     }
 
-    override fun toString() = "PendingBlockMessage(hash=$hash)"
+    override fun toString() = "MainBlockMessage(hash=$hash)"
 
 }

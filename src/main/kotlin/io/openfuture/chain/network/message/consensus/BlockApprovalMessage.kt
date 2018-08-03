@@ -1,4 +1,4 @@
-package io.openfuture.chain.network.message.application.block
+package io.openfuture.chain.network.message.consensus
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.network.annotation.NoArgConstructor

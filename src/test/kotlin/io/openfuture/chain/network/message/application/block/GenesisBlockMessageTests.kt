@@ -3,7 +3,8 @@ package io.openfuture.chain.network.message.application.block
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.config.MessageTests
-import io.openfuture.chain.network.message.application.delegate.DelegateMessage
+import io.openfuture.chain.network.message.core.DelegateMessage
+import io.openfuture.chain.network.message.core.GenesisBlockMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test

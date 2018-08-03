@@ -1,17 +1,11 @@
 package io.openfuture.chain.network.message.base
 
 import io.netty.buffer.ByteBuf
-import io.openfuture.chain.network.message.application.block.*
-import io.openfuture.chain.network.message.application.transaction.DelegateTransactionMessage
-import io.openfuture.chain.network.message.application.transaction.TransferTransactionMessage
-import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
 import io.openfuture.chain.network.message.base.PacketType.*
-import io.openfuture.chain.network.message.network.GreetingMessage
-import io.openfuture.chain.network.message.network.HeartBeatMessage
-import io.openfuture.chain.network.message.network.address.AddressesMessage
-import io.openfuture.chain.network.message.network.address.FindAddressesMessage
-import io.openfuture.chain.network.message.network.time.AskTimeMessage
-import io.openfuture.chain.network.message.network.time.TimeMessage
+import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
+import io.openfuture.chain.network.message.consensus.PendingBlockMessage
+import io.openfuture.chain.network.message.core.*
+import io.openfuture.chain.network.message.network.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.util.*

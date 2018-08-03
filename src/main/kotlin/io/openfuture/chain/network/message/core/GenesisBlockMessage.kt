@@ -1,10 +1,9 @@
-package io.openfuture.chain.network.message.application.block
+package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.network.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.writeList
-import io.openfuture.chain.network.message.application.delegate.DelegateMessage
 
 @NoArgConstructor
 class GenesisBlockMessage(
