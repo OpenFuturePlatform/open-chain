@@ -17,13 +17,13 @@ class PendingBlockMessage(
     blockTimestamp: Long,
     reward: Long,
     hash: String,
-    signature: String,
     publicKey: String,
+    signature: String,
     var merkleHash: String,
     var transferTransactions: MutableList<TransferTransactionMessage>,
     var voteTransactions: MutableList<VoteTransactionMessage>,
     var delegateTransactions: MutableList<DelegateTransactionMessage>
-) : BlockMessage(height, previousHash, blockTimestamp, reward, publicKey, hash, signature) {
+) : BlockMessage(height, previousHash, blockTimestamp, reward, hash, publicKey, signature) {
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)

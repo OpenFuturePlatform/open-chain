@@ -1,20 +1,18 @@
 package io.openfuture.chain.core.service
 
-import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
-import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
-import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.Wallet
-import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
-import io.openfuture.chain.network.domain.NetworkBlock
-import io.openfuture.chain.network.domain.NetworkGenesisBlock
-import io.openfuture.chain.network.domain.NetworkMainBlock
+import io.openfuture.chain.network.message.application.block.BlockMessage
+import io.openfuture.chain.network.message.application.block.GenesisBlockMessage
+import io.openfuture.chain.network.message.application.block.MainBlockMessage
+import io.openfuture.chain.network.message.application.transaction.DelegateTransactionMessage
+import io.openfuture.chain.network.message.application.transaction.TransferTransactionMessage
+import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.node.*
 import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
@@ -43,9 +41,9 @@ interface BlockService {
 
     fun getProducingSpeed(): Long
 
-    fun getLast(): NetworkBlock
+    fun getLast(): BlockMessage
 
-    fun getBlocksAfterCurrentHash(hash: String): List<NetworkBlock>
+    fun getBlocksAfterCurrentHash(hash: String): List<BlockMessage>
 
 }
 
@@ -53,21 +51,21 @@ interface GenesisBlockService {
 
     fun getLast(): GenesisBlock
 
-    fun create(): NetworkGenesisBlock
+    fun create(): GenesisBlockMessage
 
-    fun add(dto: NetworkGenesisBlock)
+    fun add(dto: GenesisBlockMessage)
 
-    fun isValid(block: NetworkGenesisBlock): Boolean
+    fun isValid(block: GenesisBlockMessage): Boolean
 
 }
 
 interface MainBlockService {
 
-    fun create(): NetworkMainBlock
+    fun create(): MainBlockMessage
 
-    fun add(dto: NetworkMainBlock)
+    fun add(dto: MainBlockMessage)
 
-    fun isValid(block: NetworkMainBlock): Boolean
+    fun isValid(block: MainBlockMessage): Boolean
 
 }
 
@@ -82,7 +80,7 @@ interface TransferTransactionService {
 
     fun getAllUnconfirmed(): MutableList<UTransferTransaction>
 
-    fun add(dto: TransferTransactionDto): UTransferTransaction
+    fun add(dto: TransferTransactionMessage): UTransferTransaction
 
     fun add(request: TransferTransactionRequest): UTransferTransaction
 
@@ -94,7 +92,7 @@ interface VoteTransactionService {
 
     fun getAllUnconfirmed(): MutableList<UVoteTransaction>
 
-    fun add(dto: VoteTransactionDto): UVoteTransaction
+    fun add(dto: VoteTransactionMessage): UVoteTransaction
 
     fun add(request: VoteTransactionRequest): UVoteTransaction
 
@@ -106,7 +104,7 @@ interface DelegateTransactionService {
 
     fun getAllUnconfirmed(): MutableList<UDelegateTransaction>
 
-    fun add(dto: DelegateTransactionDto): UDelegateTransaction
+    fun add(dto: DelegateTransactionMessage): UDelegateTransaction
 
     fun add(request: DelegateTransactionRequest): UDelegateTransaction
 

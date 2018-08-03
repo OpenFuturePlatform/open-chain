@@ -7,10 +7,13 @@ import javax.persistence.Embedded
 import javax.persistence.MappedSuperclass
 
 @MappedSuperclass
-abstract class BaseTransaction(
+abstract class BaseTransaction<T : BaseTransactionPayload>(
 
     @Column(name = "timestamp", nullable = false)
     var timestamp: Long,
+
+    @Embedded
+    var payload: T,
 
     @Column(name = "sender_address", nullable = false)
     var senderAddress: String,
@@ -24,8 +27,4 @@ abstract class BaseTransaction(
     @Column(name = "hash", nullable = false, unique = true)
     var hash: String
 
-) : BaseModel() {
-
-    abstract fun getPayload(): BaseTransactionPayload
-
-}
+) : BaseModel()

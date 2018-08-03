@@ -1,10 +1,6 @@
 package io.openfuture.chain.core.model.entity.transaction.confirmed
 
-import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
-import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.payload.BaseTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
-import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.Table
 
@@ -12,31 +8,9 @@ import javax.persistence.Table
 @Table(name = "vote_transactions")
 class VoteTransaction(
     timestamp: Long,
+    payload: VoteTransactionPayload,
     senderAddress: String,
     senderPublicKey: String,
     senderSignature: String,
-    hash: String,
-
-    @Embedded
-    private var payload: VoteTransactionPayload,
-
-    block: MainBlock? = null
-
-) : Transaction(timestamp, senderAddress, senderPublicKey, senderSignature, hash, block) {
-
-    override fun getPayload(): BaseTransactionPayload {
-        return payload
-    }
-
-    override fun toMessage(): VoteTransactionDto = VoteTransactionDto(
-        timestamp,
-        payload.fee,
-        senderAddress,
-        senderPublicKey,
-        senderSignature,
-        hash,
-        payload.voteTypeId,
-        payload.delegateKey
-    )
-
-}
+    hash: String
+) : Transaction<VoteTransactionPayload>(timestamp, payload, senderAddress, senderPublicKey, senderSignature, hash)

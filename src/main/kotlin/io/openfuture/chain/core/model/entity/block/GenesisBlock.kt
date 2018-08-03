@@ -1,54 +1,38 @@
 package io.openfuture.chain.core.model.entity.block
 
-import io.openfuture.chain.core.model.entity.Delegate
-import io.openfuture.chain.network.domain.NetworkGenesisBlock
-import javax.persistence.*
+import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
+import io.openfuture.chain.network.message.application.block.GenesisBlockMessage
+import javax.persistence.Entity
+import javax.persistence.Table
 
 @Entity
 @Table(name = "genesis_blocks")
 class GenesisBlock(
-    height: Long,
-    previousHash: String,
     timestamp: Long,
-    reward: Long,
+    height: Long,
+    payload: GenesisBlockPayload,
     hash: String,
-    publicKey: String,
     signature: String,
+    publicKey: String
 
-    @Column(name = "epoch_index", nullable = false)
-    var epochIndex: Long,
-
-    @ManyToMany(fetch = FetchType.EAGER, cascade = [(CascadeType.ALL)])
-    @JoinTable(name = "delegate2genesis",
-        joinColumns = [JoinColumn(name = "genesis_id")],
-        inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
-    var activeDelegates: Set<Delegate> = mutableSetOf()
-
-) : BaseBlock(height, previousHash, timestamp, reward, hash, publicKey, signature) {
+) : BaseBlock<GenesisBlockPayload>(timestamp, height, payload, hash, signature, publicKey) {
 
     companion object {
-        fun of(dto: NetworkGenesisBlock) : GenesisBlock = GenesisBlock(
-            dto.height,
-            dto.previousHash,
+        fun of(dto: GenesisBlockMessage): GenesisBlock = GenesisBlock(
             dto.timestamp,
-            dto.reward,
-            dto.hash!!,
-            dto.publicKey!!,
-            dto.signature!!,
-            dto.epochIndex
+            dto.height,
+            GenesisBlockPayload(dto.previousHash, dto.reward, dto.epochIndex),
+            dto.hash,
+            dto.signature,
+            dto.publicKey
         )
     }
 
-    override fun toMessage(): NetworkGenesisBlock  = NetworkGenesisBlock (
-        height,
-        previousHash,
-        timestamp,
-        reward,
-        hash,
-        publicKey,
-        signature,
-        epochIndex,
-        activeDelegates.map { it.toMessage() }.toMutableSet()
-    )
+//    fun sign(publicKey: String, privateKey: ByteArray): GenesisBlock {
+//        this.publicKey = publicKey
+//        this.hash = ByteUtils.toHexString(HashUtils.doubleSha256((getBytes())))
+//        this.signature = SignatureUtils.sign(getBytes(), privateKey)
+//        return this
+//    }
 
 }

@@ -11,7 +11,7 @@ import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.network.domain.NetworkMainBlock
+import io.openfuture.chain.network.message.application.block.MainBlockMessage
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,7 +29,7 @@ class DefaultMainBlockService(
 ) : BaseBlockService(blockService), MainBlockService {
 
     @Transactional(readOnly = true)
-    override fun create(): NetworkMainBlock {
+    override fun create(): MainBlockMessage {
         val lastBlock = blockService.getLast()
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash!!
@@ -43,7 +43,7 @@ class DefaultMainBlockService(
     }
 
     @Transactional
-    override fun add(dto: NetworkMainBlock) {
+    override fun add(dto: MainBlockMessage) {
         if (!isValid(dto)) {
             return
         }
@@ -59,7 +59,7 @@ class DefaultMainBlockService(
     }
 
     @Transactional(readOnly = true)
-    override fun isValid(block: NetworkMainBlock): Boolean {
+    override fun isValid(block: MainBlockMessage): Boolean {
         return super.isValid(block)
             && !block.transactions.isEmpty()
             && isValidMerkleHash(block.transactions, block.merkleHash)

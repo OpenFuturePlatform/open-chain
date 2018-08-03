@@ -1,55 +1,44 @@
 package io.openfuture.chain.core.model.entity.block
 
-import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
+import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
+import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.domain.NetworkBlock
-import io.openfuture.chain.network.domain.NetworkMainBlock
+import io.openfuture.chain.network.message.application.block.MainBlockMessage
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import javax.persistence.*
+import javax.persistence.Entity
+import javax.persistence.Table
 
 @Entity
 @Table(name = "main_blocks")
 class MainBlock(
-    height: Long,
-    previousHash: String,
     timestamp: Long,
-    reward: Long,
+    height: Long,
+    payload: MainBlockPayload,
     hash: String,
-    publicKey: String,
     signature: String,
+    publicKey: String
 
-    @Column(name = "merkle_hash", nullable = false)
-    var merkleHash: String,
-
-    @OneToMany(mappedBy = "block", fetch = FetchType.EAGER)
-    var transactions: MutableSet<Transaction> = mutableSetOf()
-
-) : BaseBlock(height, previousHash, timestamp, reward, hash, publicKey, signature) {
+) : BaseBlock<MainBlockPayload>(timestamp, height, payload, hash, signature, publicKey) {
 
     companion object {
-        fun of(dto: NetworkMainBlock) : MainBlock = MainBlock(
-            dto.height,
-            dto.previousHash,
+        fun of(dto: MainBlockMessage) : MainBlock = MainBlock(
             dto.timestamp,
-            dto.reward,
-            dto.hash!!,
-            dto.publicKey!!,
-            dto.signature!!,
-            dto.merkleHash
+            dto.height,
+            MainBlockPayload(dto.previousHash, dto.reward, dto.merkleHash),
+            dto.hash,
+            dto.signature,
+            dto.publicKey
         )
     }
 
-    override fun toMessage(): NetworkMainBlock = NetworkMainBlock(
-        height,
-        previousHash,
-        timestamp,
-        reward,
-        hash,
-        publicKey,
-        signature,
-        merkleHash,
-        transactions.map { it.toMessage() }.toMutableSet()
-    )
+//    fun sign() : MainBlock {
+//        this.publicKey = publicKey
+//        this.hash = ByteUtils.toHexString(HashUtils.doubleSha256((getBytes())))
+//        this.signature = SignatureUtils.sign(getBytes(), privateKey)
+//        return this
+//    }
+
+
 
 }

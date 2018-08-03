@@ -1,7 +1,6 @@
 package io.openfuture.chain.core.model.entity
 
 import io.openfuture.chain.core.model.entity.base.BaseModel
-import io.openfuture.chain.network.domain.NetworkDelegate
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Table

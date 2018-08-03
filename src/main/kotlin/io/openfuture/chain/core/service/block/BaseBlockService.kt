@@ -3,7 +3,7 @@ package io.openfuture.chain.core.service.block
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.domain.NetworkBlock
+import io.openfuture.chain.network.message.application.block.BlockMessage
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.transaction.annotation.Transactional
 
@@ -12,7 +12,7 @@ abstract class BaseBlockService(
 ) {
 
     @Transactional(readOnly = true)
-    open fun isValid(block: NetworkBlock): Boolean {
+    open fun isValid(block: BlockMessage): Boolean {
         val lastBlock = blockService.getLast()
 
         return isValidPreviousHash(block, lastBlock)
@@ -25,11 +25,11 @@ abstract class BaseBlockService(
             && !isValidSignature(block.getBytes(), block.publicKey!!, block.signature!!)
     }
 
-    private fun isValidPreviousHash(block: NetworkBlock, lastBlock: NetworkBlock): Boolean = (block.previousHash == lastBlock.hash)
+    private fun isValidPreviousHash(block: BlockMessage, lastBlock: BlockMessage): Boolean = (block.previousHash == lastBlock.hash)
 
-    private fun isValidTimeStamp(block: NetworkBlock, lastBlock: NetworkBlock): Boolean = (block.timestamp > lastBlock.timestamp)
+    private fun isValidTimeStamp(block: BlockMessage, lastBlock: BlockMessage): Boolean = (block.timestamp > lastBlock.timestamp)
 
-    private fun isValidHeight(block: NetworkBlock, lastBlock: NetworkBlock): Boolean = (block.height == lastBlock.height + 1)
+    private fun isValidHeight(block: BlockMessage, lastBlock: BlockMessage): Boolean = (block.height == lastBlock.height + 1)
 
     private fun isValidHash(byteData: ByteArray, hash: String): Boolean {
         return ByteUtils.toHexString(HashUtils.doubleSha256((byteData))) == hash

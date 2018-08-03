@@ -1,9 +1,7 @@
 package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 
-import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
-import javax.persistence.Embedded
+import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
 import javax.persistence.Entity
 import javax.persistence.Table
 
@@ -11,49 +9,23 @@ import javax.persistence.Table
 @Table(name = "u_vote_transactions")
 class UVoteTransaction(
     timestamp: Long,
+    payload: VoteTransactionPayload,
     senderAddress: String,
     senderPublicKey: String,
     senderSignature: String,
-    hash: String,
+    hash: String
 
-    @Embedded
-    private var payload: VoteTransactionPayload
-
-) : UTransaction(timestamp, senderAddress, senderPublicKey, senderSignature, hash) {
+) : UTransaction<VoteTransactionPayload>(timestamp, payload, senderAddress, senderPublicKey, senderSignature, hash) {
 
     companion object {
-        fun of(dto: VoteTransactionDto): UVoteTransaction = UVoteTransaction(
+        fun of(dto: VoteTransactionMessage): UVoteTransaction = UVoteTransaction(
             dto.timestamp,
+            VoteTransactionPayload(dto.fee, dto.voteTypeId, dto.delegateKey),
             dto.senderAddress,
             dto.senderPublicKey,
             dto.senderSignature,
-            dto.hash,
-            VoteTransactionPayload(dto.fee, dto.voteTypeId, dto.delegateKey)
+            dto.hash
         )
-    }
-
-    override fun toMessage(): VoteTransactionDto = VoteTransactionDto(
-        timestamp,
-        payload.fee,
-        senderAddress,
-        senderPublicKey,
-        senderSignature,
-        hash,
-        payload.voteTypeId,
-        payload.delegateKey
-    )
-
-    override fun toConfirmed(): VoteTransaction = VoteTransaction(
-        timestamp,
-        senderAddress,
-        senderPublicKey,
-        senderSignature,
-        hash,
-        payload
-    )
-
-    override fun getPayload(): VoteTransactionPayload {
-        return payload
     }
 
 }

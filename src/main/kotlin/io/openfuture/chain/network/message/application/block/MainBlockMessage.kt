@@ -1,6 +1,11 @@
 package io.openfuture.chain.network.message.application.block
 
 import io.netty.buffer.ByteBuf
+import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.readString
@@ -9,12 +14,13 @@ import io.openfuture.chain.network.extension.writeString
 import io.openfuture.chain.network.message.application.transaction.DelegateTransactionMessage
 import io.openfuture.chain.network.message.application.transaction.TransferTransactionMessage
 import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 
 @NoArgConstructor
 class MainBlockMessage(
     height: Long,
     previousHash: String,
-    blockTimestamp: Long,
+    timestamp: Long,
     reward: Long,
     hash: String,
     signature: String,
@@ -23,7 +29,7 @@ class MainBlockMessage(
     var transferTransactions: MutableList<TransferTransactionMessage>,
     var voteTransactions: MutableList<VoteTransactionMessage>,
     var delegateTransactions: MutableList<DelegateTransactionMessage>
-) : BlockMessage(height, previousHash, blockTimestamp, reward, publicKey, hash, signature) {
+) : BlockMessage(height, previousHash, timestamp, reward, hash, signature, publicKey) {
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)

@@ -1,12 +1,7 @@
 package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 
-import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
-import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
-import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.payload.BaseTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
-import javax.persistence.Embedded
+import io.openfuture.chain.network.message.application.transaction.DelegateTransactionMessage
 import javax.persistence.Entity
 import javax.persistence.Table
 
@@ -14,48 +9,27 @@ import javax.persistence.Table
 @Table(name = "u_delegate_transactions")
 class UDelegateTransaction(
     timestamp: Long,
+    payload: DelegateTransactionPayload,
     senderAddress: String,
     senderPublicKey: String,
     senderSignature: String,
-    hash: String,
+    hash: String
 
-    @Embedded
-    private var payload: DelegateTransactionPayload
-
-) : UTransaction(timestamp, senderPublicKey, senderAddress, senderSignature, hash) {
+) : UTransaction<DelegateTransactionPayload>(timestamp, payload, senderPublicKey, senderAddress, senderSignature, hash) {
 
     companion object {
-        fun of(dto: DelegateTransactionDto): UDelegateTransaction = UDelegateTransaction(
+        fun of(dto: DelegateTransactionMessage): UDelegateTransaction = UDelegateTransaction(
             dto.timestamp,
+            DelegateTransactionPayload(dto.fee, dto.delegateKey),
             dto.senderAddress,
             dto.senderPublicKey,
             dto.senderSignature,
-            dto.hash,
-            DelegateTransactionPayload(dto.fee, dto.delegateKey)
+            dto.hash
         )
     }
 
-    override fun toMessage(): DelegateTransactionDto = DelegateTransactionDto(
-        timestamp,
-        payload.fee,
-        senderAddress,
-        senderPublicKey,
-        senderSignature,
-        hash,
-        payload.delegateKey
-    )
-
-    override fun toConfirmed(): DelegateTransaction = DelegateTransaction(
-        timestamp,
-        senderAddress,
-        senderPublicKey,
-        senderSignature,
-        hash,
-        payload
-    )
-
-    override fun getPayload(): DelegateTransactionPayload {
-        return payload
-    }
+//    override fun getPayload(): DelegateTransactionPayload {
+//        return payload
+//    }
 
 }
