@@ -1,8 +1,6 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
-import io.openfuture.chain.core.exception.NotFoundException
-import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
@@ -11,6 +9,7 @@ import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
+import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.VoteTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -24,19 +23,14 @@ internal class DefaultVoteTransactionService(
     private val consensusProperties: ConsensusProperties
 ) : BaseTransactionService(), VoteTransactionService {
 
-    @Transactional(readOnly = true)
-    override fun getAllUnconfirmed(): MutableList<UVoteTransaction> {
-        return uRepository.findAll()
-    }
-
     @Transactional
-    override fun add(dto: VoteTransactionDto): UVoteTransaction {
-        val transaction = repository.findOneByHash(dto.hash)
+    override fun add(message: VoteTransactionMessage): UVoteTransaction {
+        val transaction = repository.findOneByHash(message.hash)
         if (null != transaction) {
-            return UVoteTransaction.of(dto)
+            return UVoteTransaction.of(message)
         }
 
-        val tx = UVoteTransaction.of(dto)
+        val tx = UVoteTransaction.of(message)
         validate(tx)
         updateUnconfirmedBalanceByFee(tx)
         // todo broadcast
@@ -53,15 +47,14 @@ internal class DefaultVoteTransactionService(
     }
 
     @Transactional
-    override fun toBlock(hash: String, block: MainBlock) {
-        val unconfirmedTx = getUnconfirmedByHash(hash)
-        val type = unconfirmedTx.getPayload().getVoteType()
-        updateWalletVotes(unconfirmedTx.getPayload().delegateKey, unconfirmedTx.senderAddress, type)
+    override fun toBlock(utx: UVoteTransaction, block: MainBlock) {
+        val type = utx.payload.getVoteType()
+        updateWalletVotes(utx.payload.delegateKey, utx.senderAddress, type)
 
-        val tx = unconfirmedTx.toConfirmed()
+        val tx = VoteTransaction.of(utx)
         tx.block = block
         updateBalanceByFee(tx)
-        uRepository.delete(unconfirmedTx)
+        uRepository.delete(utx)
         repository.save(tx)
     }
 
@@ -90,8 +83,8 @@ internal class DefaultVoteTransactionService(
 
     private fun isValidVoteCount(senderAddress: String): Boolean {
         val confirmedVotes = walletService.getVotesByAddress(senderAddress).count()
-        val unconfirmedForVotes = getAllUnconfirmed()
-            .filter { it.senderAddress == senderAddress && it.getPayload().getVoteType() == VoteType.FOR }
+        val unconfirmedForVotes = uRepository.findAll()
+            .filter { it.senderAddress == senderAddress && it.payload.getVoteType() == VoteType.FOR }
             .count()
 
         val unspentVotes = confirmedVotes + unconfirmedForVotes
@@ -100,8 +93,5 @@ internal class DefaultVoteTransactionService(
         }
         return true
     }
-
-    private fun getUnconfirmedByHash(hash: String): UVoteTransaction = uRepository.findOneByHash(hash)
-        ?: throw NotFoundException("Unconfirmed vote transaction with hash: $hash not found")
 
 }

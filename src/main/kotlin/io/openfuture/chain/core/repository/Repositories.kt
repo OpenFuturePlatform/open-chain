@@ -18,11 +18,7 @@ interface BlockRepository<Entity: BaseBlock> : BaseRepository<Entity>{
 
     fun findOneByHash(hash: String): Entity?
 
-    fun findByHeightGreaterThan(height: Long): List<Entity>
-
     fun findFirstByOrderByHeightDesc(): Entity?
-
-    fun existsByHash(hash: String): Boolean
 
 }
 
@@ -38,7 +34,7 @@ interface UTransactionRepository<UEntity : UTransaction> : BaseRepository<UEntit
 
     fun findOneByHash(hash: String): UEntity?
 
-    fun findAllByOrderByFeeDesc(): MutableSet<UEntity>
+    fun findAllByOrderByPayloadFeeDesc(): MutableList<UEntity>
 
 }
 

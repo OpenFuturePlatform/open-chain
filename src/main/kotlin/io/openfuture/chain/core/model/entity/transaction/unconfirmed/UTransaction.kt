@@ -10,17 +10,11 @@ import javax.persistence.Table
 @Entity
 @Table(name = "u_transactions")
 @Inheritance(strategy = InheritanceType.JOINED)
-abstract class UTransaction<T : BaseTransactionPayload>(
+abstract class UTransaction(
     timestamp: Long,
-    payload: T,
     senderAddress: String,
     senderPublicKey: String,
     senderSignature: String,
-    hash: String
-) : BaseTransaction<T>(timestamp, payload, senderAddress, senderPublicKey, senderSignature, hash) {
-
-//    abstract fun toMessage() : BaseTransactionDto
-
-//    abstract fun toConfirmed(): Transaction
-
-}
+    hash: String,
+    payload: BaseTransactionPayload
+) : BaseTransaction(timestamp, senderAddress, senderPublicKey, senderSignature, hash, payload)

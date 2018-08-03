@@ -25,15 +25,15 @@ internal abstract class BaseTransactionService {
 
 
     protected fun updateBalanceByFee(tx: Transaction) {
-        walletService.decreaseBalance(tx.senderAddress, tx.getPayload().fee)
+        walletService.decreaseBalance(tx.senderAddress, tx.payload.fee)
     }
 
     protected fun updateUnconfirmedBalanceByFee(tx: UTransaction) {
-        walletService.decreaseUnconfirmedBalance(tx.senderAddress, tx.getPayload().fee)
+        walletService.decreaseUnconfirmedBalance(tx.senderAddress, tx.payload.fee)
     }
 
     protected fun validate(tx: UTransaction) {
-        if (!isValidHash(tx.getPayload(), tx.senderPublicKey, tx.senderSignature, tx.hash)) {
+        if (!isValidHash(tx.payload, tx.senderPublicKey, tx.senderSignature, tx.hash)) {
             throw ValidationException("Invalid transaction hash")
         }
 
@@ -41,11 +41,11 @@ internal abstract class BaseTransactionService {
             throw ValidationException("Address and public key are incompatible")
         }
 
-        if (!isValidFee(tx.senderAddress, tx.getPayload().fee)) {
+        if (!isValidFee(tx.senderAddress, tx.payload.fee)) {
             throw ValidationException("Invalid wallet balance")
         }
 
-        if (!isValidaSignature(tx.getPayload(), tx.senderPublicKey, tx.senderSignature)) {
+        if (!isValidaSignature(tx.payload, tx.senderPublicKey, tx.senderSignature)) {
             throw ValidationException("Invalid transaction signature")
         }
     }

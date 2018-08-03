@@ -16,33 +16,33 @@ class GenesisBlockMessage(
     signature: String,
     publicKey: String,
     var epochIndex: Long,
-    var activeDelegates: MutableSet<DelegateMessage>
+    var delegates: List<String>
 ) : BlockMessage(height, previousHash, timestamp, reward, hash, signature, publicKey) {
 
     constructor(block: GenesisBlock) : this(
         block.height,
-        block.payload.previousHash,
+        block.getPayload().previousHash,
         block.timestamp,
-        block.payload.reward,
+        block.getPayload().reward,
         block.hash,
         block.signature,
         block.publicKey,
-        block.payload.epochIndex,
-        block.payload.activeDelegates.map { DelegateMessage(it) }.toMutableSet()
+        block.getPayload().epochIndex,
+        block.getPayload().activeDelegates.map { it.publicKey }
     )
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)
 
         epochIndex = buffer.readLong()
-        activeDelegates = buffer.readList<DelegateMessage>().toMutableSet()
+//        delegates = buffer.readList<String>()
     }
 
     override fun write(buffer: ByteBuf) {
         super.write(buffer)
 
         buffer.writeLong(epochIndex)
-        buffer.writeList(activeDelegates.toList())
+//        buffer.writeList(delegates.toList())
     }
 
     override fun toString() = "NetworkGenesisBlock(hash=$hash)"

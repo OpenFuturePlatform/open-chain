@@ -4,7 +4,6 @@ import javax.persistence.Column
 import javax.persistence.Embeddable
 import javax.persistence.MappedSuperclass
 
-@Embeddable
 @MappedSuperclass
 abstract class BaseTransactionPayload(
 

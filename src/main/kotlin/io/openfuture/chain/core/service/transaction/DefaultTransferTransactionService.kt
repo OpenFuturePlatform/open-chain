@@ -1,13 +1,12 @@
 package io.openfuture.chain.core.service.transaction
 
-import io.openfuture.chain.core.exception.NotFoundException
-import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.TransferTransactionService
+import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.TransferTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,19 +18,14 @@ internal class DefaultTransferTransactionService(
     private val uRepository: UTransactionRepository<UTransferTransaction>
 ) : BaseTransactionService(), TransferTransactionService {
 
-    @Transactional(readOnly = true)
-    override fun getAllUnconfirmed(): MutableList<UTransferTransaction> {
-        return uRepository.findAll()
-    }
-
     @Transactional
-    override fun add(dto: TransferTransactionDto): UTransferTransaction {
-        val transaction = repository.findOneByHash(dto.hash)
+    override fun add(message: TransferTransactionMessage): UTransferTransaction {
+        val transaction = repository.findOneByHash(message.hash)
         if (null != transaction) {
-            return UTransferTransaction.of(dto)
+            return UTransferTransaction.of(message)
         }
 
-        val tx = UTransferTransaction.of(dto)
+        val tx = UTransferTransaction.of(message)
         validate(tx)
         updateUnconfirmedBalanceByFee(tx)
         // todo broadcast
@@ -48,21 +42,19 @@ internal class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun toBlock(hash: String, block: MainBlock) {
-        val unconfirmedTx = getUnconfirmedByHash(hash)
-        updateTransferBalance(unconfirmedTx.senderAddress, unconfirmedTx.getPayload().recipientAddress,
-            unconfirmedTx.getPayload().amount)
+    override fun toBlock(utx: UTransferTransaction, block: MainBlock) {
+        updateTransferBalance(utx.senderAddress, utx.payload.recipientAddress, utx.payload.amount)
 
-        val tx = unconfirmedTx.toConfirmed()
+        val tx = TransferTransaction.of(utx)
         tx.block = block
         updateBalanceByFee(tx)
-        uRepository.delete(unconfirmedTx)
+        uRepository.delete(utx)
         repository.save(tx)
     }
 
     @Transactional
     fun validate(tx: UTransferTransaction) {
-        if (!isValidTransferBalance(tx.senderAddress, tx.getPayload().amount + tx.getPayload().fee)) {
+        if (!isValidTransferBalance(tx.senderAddress, tx.payload.amount + tx.payload.fee)) {
             throw ValidationException("There is not enough money on the wallet for transfer operation!")
         }
         super.validate(tx)
@@ -80,8 +72,5 @@ internal class DefaultTransferTransactionService(
         }
         return true
     }
-
-    private fun getUnconfirmedByHash(hash: String): UTransferTransaction = uRepository.findOneByHash(hash)
-        ?: throw NotFoundException("Unconfirmed vote transaction with hash: $hash not found")
 
 }

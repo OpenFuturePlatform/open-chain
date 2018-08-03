@@ -2,18 +2,13 @@ package io.openfuture.chain.core.model.entity.transaction
 
 import io.openfuture.chain.core.model.entity.base.BaseModel
 import io.openfuture.chain.core.model.entity.transaction.payload.BaseTransactionPayload
-import javax.persistence.Column
-import javax.persistence.Embedded
-import javax.persistence.MappedSuperclass
+import javax.persistence.*
 
 @MappedSuperclass
-abstract class BaseTransaction<T : BaseTransactionPayload>(
+abstract class BaseTransaction (
 
     @Column(name = "timestamp", nullable = false)
     var timestamp: Long,
-
-    @Embedded
-    var payload: T,
 
     @Column(name = "sender_address", nullable = false)
     var senderAddress: String,
@@ -25,6 +20,9 @@ abstract class BaseTransaction<T : BaseTransactionPayload>(
     var senderSignature: String,
 
     @Column(name = "hash", nullable = false, unique = true)
-    var hash: String
+    var hash: String,
+
+    @Embedded
+    open val payload: BaseTransactionPayload
 
 ) : BaseModel()

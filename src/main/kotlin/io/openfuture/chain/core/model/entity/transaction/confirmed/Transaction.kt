@@ -8,16 +8,16 @@ import javax.persistence.*
 @Entity
 @Table(name = "transactions")
 @Inheritance(strategy = InheritanceType.JOINED)
-abstract class Transaction<T : BaseTransactionPayload>(
+abstract class Transaction(
     timestamp: Long,
-    payload: T,
     senderAddress: String,
     senderPublicKey: String,
     senderSignature: String,
     hash: String,
+    payload: BaseTransactionPayload,
 
     @ManyToOne
-    @JoinColumn(name = "hash", nullable = false)
+    @JoinColumn(name = "block_id", nullable = false)
     var block: MainBlock? = null
 
-) : BaseTransaction<T>(timestamp, payload, senderAddress, senderPublicKey, senderSignature, hash)
+) : BaseTransaction(timestamp, senderAddress, senderPublicKey, senderSignature, hash, payload)

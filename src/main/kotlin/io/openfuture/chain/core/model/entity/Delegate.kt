@@ -17,18 +17,4 @@ class Delegate(
 
     id: Int = 0
 
-) : BaseModel(id) {
-
-    companion object {
-        fun of(delegateDto: NetworkDelegate): Delegate = Delegate(
-            delegateDto.publicKey,
-            delegateDto.address
-        )
-    }
-
-    fun toMessage() : NetworkDelegate = NetworkDelegate(
-        publicKey,
-        address
-    )
-
-}
+) : BaseModel(id)

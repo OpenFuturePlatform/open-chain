@@ -2,7 +2,7 @@ package io.openfuture.chain.network.service
 
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelFuture
-import io.openfuture.chain.core.service.CommonBlockService
+import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.core.SyncBlockRequestMessage
 import io.openfuture.chain.network.message.network.FindAddressesMessage
@@ -18,10 +18,10 @@ import java.util.concurrent.Executors
 @Service
 class DefaultNetworkService(
     private val bootstrap: Bootstrap,
-    private val blockService: CommonBlockService,
     private val tcpServer: TcpServer,
     private val properties: NodeProperties,
-    private val connectionService: ConnectionService
+    private val connectionService: ConnectionService,
+    private val blockService: BlockService
 ) : NetworkService, ApplicationListener<ApplicationReadyEvent> {
 
     companion object {

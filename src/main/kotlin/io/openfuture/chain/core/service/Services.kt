@@ -2,17 +2,14 @@ package io.openfuture.chain.core.service
 
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.Wallet
+import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
-import io.openfuture.chain.network.message.application.block.BlockMessage
-import io.openfuture.chain.network.message.application.block.GenesisBlockMessage
-import io.openfuture.chain.network.message.application.block.MainBlockMessage
-import io.openfuture.chain.network.message.application.transaction.DelegateTransactionMessage
-import io.openfuture.chain.network.message.application.transaction.TransferTransactionMessage
-import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
+import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.node.*
 import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
@@ -41,9 +38,9 @@ interface BlockService {
 
     fun getProducingSpeed(): Long
 
-    fun getLast(): BlockMessage
+    fun getLast(): BaseBlock
 
-    fun getBlocksAfterCurrentHash(hash: String): List<BlockMessage>
+    fun isExists(hash: String): Boolean
 
 }
 
@@ -51,21 +48,21 @@ interface GenesisBlockService {
 
     fun getLast(): GenesisBlock
 
-    fun create(): GenesisBlockMessage
+    fun create(): GenesisBlock
 
-    fun add(dto: GenesisBlockMessage)
+    fun add(message: GenesisBlockMessage)
 
-    fun isValid(block: GenesisBlockMessage): Boolean
+    fun isValid(message: GenesisBlockMessage): Boolean
 
 }
 
 interface MainBlockService {
 
-    fun create(): MainBlockMessage
+    fun create(): MainBlock
 
-    fun add(dto: MainBlockMessage)
+    fun add(message: MainBlockMessage)
 
-    fun isValid(block: MainBlockMessage): Boolean
+    fun isValid(message: MainBlockMessage): Boolean
 
 }
 
@@ -74,41 +71,41 @@ interface TransactionService {
 
     fun getCount(): Long
 
+    fun getAllUnconfirmed(): MutableList<UTransaction>
+
+    fun getUnconfirmedByHash(hash: String): UTransaction
+
+    fun toBlock(hash: String, block: MainBlock)
+
 }
 
 interface TransferTransactionService {
 
-    fun getAllUnconfirmed(): MutableList<UTransferTransaction>
-
-    fun add(dto: TransferTransactionMessage): UTransferTransaction
+    fun add(message: TransferTransactionMessage): UTransferTransaction
 
     fun add(request: TransferTransactionRequest): UTransferTransaction
 
-    fun toBlock(hash: String, block: MainBlock)
+    fun toBlock(utx: UTransferTransaction, block: MainBlock)
 
 }
 
 interface VoteTransactionService {
 
-    fun getAllUnconfirmed(): MutableList<UVoteTransaction>
-
-    fun add(dto: VoteTransactionMessage): UVoteTransaction
+    fun add(message: VoteTransactionMessage): UVoteTransaction
 
     fun add(request: VoteTransactionRequest): UVoteTransaction
 
-    fun toBlock(hash: String, block: MainBlock)
+    fun toBlock(utx: UVoteTransaction, block: MainBlock)
 
 }
 
 interface DelegateTransactionService {
 
-    fun getAllUnconfirmed(): MutableList<UDelegateTransaction>
-
-    fun add(dto: DelegateTransactionMessage): UDelegateTransaction
+    fun add(message: DelegateTransactionMessage): UDelegateTransaction
 
     fun add(request: DelegateTransactionRequest): UDelegateTransaction
 
-    fun toBlock(hash: String, block: MainBlock)
+    fun toBlock(utx: UDelegateTransaction, block: MainBlock)
 
 }
 

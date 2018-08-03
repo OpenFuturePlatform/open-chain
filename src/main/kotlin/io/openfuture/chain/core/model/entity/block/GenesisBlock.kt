@@ -1,7 +1,10 @@
 package io.openfuture.chain.core.model.entity.block
 
+import io.openfuture.chain.core.model.entity.block.payload.BaseBlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
-import io.openfuture.chain.network.message.application.block.GenesisBlockMessage
+import io.openfuture.chain.network.message.core.GenesisBlockMessage
+import javax.persistence.Column
+import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.Table
 
@@ -10,29 +13,28 @@ import javax.persistence.Table
 class GenesisBlock(
     timestamp: Long,
     height: Long,
-    payload: GenesisBlockPayload,
     hash: String,
     signature: String,
-    publicKey: String
+    publicKey: String,
 
-) : BaseBlock<GenesisBlockPayload>(timestamp, height, payload, hash, signature, publicKey) {
+    @Embedded
+    private var payload: GenesisBlockPayload
+
+) : BaseBlock(timestamp, height, hash, signature, publicKey) {
 
     companion object {
         fun of(dto: GenesisBlockMessage): GenesisBlock = GenesisBlock(
             dto.timestamp,
             dto.height,
-            GenesisBlockPayload(dto.previousHash, dto.reward, dto.epochIndex),
             dto.hash,
             dto.signature,
-            dto.publicKey
+            dto.publicKey,
+            GenesisBlockPayload(dto.previousHash, dto.reward, dto.epochIndex)
         )
     }
 
-//    fun sign(publicKey: String, privateKey: ByteArray): GenesisBlock {
-//        this.publicKey = publicKey
-//        this.hash = ByteUtils.toHexString(HashUtils.doubleSha256((getBytes())))
-//        this.signature = SignatureUtils.sign(getBytes(), privateKey)
-//        return this
-//    }
+    override fun getPayload(): GenesisBlockPayload {
+        return payload
+    }
 
 }

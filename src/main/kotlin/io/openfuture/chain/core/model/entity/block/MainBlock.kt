@@ -1,11 +1,9 @@
 package io.openfuture.chain.core.model.entity.block
 
-import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
+import io.openfuture.chain.core.model.entity.block.payload.BaseBlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
-import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.message.application.block.MainBlockMessage
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import io.openfuture.chain.network.message.core.MainBlockMessage
+import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.Table
 
@@ -14,31 +12,28 @@ import javax.persistence.Table
 class MainBlock(
     timestamp: Long,
     height: Long,
-    payload: MainBlockPayload,
     hash: String,
     signature: String,
-    publicKey: String
+    publicKey: String,
 
-) : BaseBlock<MainBlockPayload>(timestamp, height, payload, hash, signature, publicKey) {
+    @Embedded
+    private var payload: MainBlockPayload
+
+) : BaseBlock(timestamp, height, hash, signature, publicKey) {
 
     companion object {
-        fun of(dto: MainBlockMessage) : MainBlock = MainBlock(
+        fun of(dto: MainBlockMessage): MainBlock = MainBlock(
             dto.timestamp,
             dto.height,
-            MainBlockPayload(dto.previousHash, dto.reward, dto.merkleHash),
             dto.hash,
             dto.signature,
-            dto.publicKey
+            dto.publicKey,
+            MainBlockPayload(dto.previousHash, dto.reward, dto.merkleHash)
         )
     }
 
-//    fun sign() : MainBlock {
-//        this.publicKey = publicKey
-//        this.hash = ByteUtils.toHexString(HashUtils.doubleSha256((getBytes())))
-//        this.signature = SignatureUtils.sign(getBytes(), privateKey)
-//        return this
-//    }
-
-
+    override fun getPayload(): MainBlockPayload {
+        return payload
+    }
 
 }

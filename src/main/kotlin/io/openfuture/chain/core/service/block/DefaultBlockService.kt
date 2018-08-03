@@ -23,15 +23,14 @@ class DefaultBlockService(
     }
 
     @Transactional(readOnly = true)
-    override fun getLast(): NetworkBlock {
-        val block = repository.findFirstByOrderByHeightDesc() ?: throw NotFoundException("Last block not found!")
-        return block.toMessage()
+    override fun getLast(): BaseBlock {
+        return repository.findFirstByOrderByHeightDesc() ?: throw NotFoundException("Last block not found!")
     }
 
     @Transactional(readOnly = true)
-    override fun getBlocksAfterCurrentHash(hash: String): List<NetworkBlock> {
-        val block = repository.findOneByHash(hash) ?: return emptyList()
-        return repository.findByHeightGreaterThan(block.height).map { it.toMessage() }
+    override fun isExists(hash: String): Boolean {
+        val block = repository.findOneByHash(hash)
+        return null != block
     }
 
 }

@@ -20,7 +20,7 @@ class GenesisBlockPayload(
 
 ) : BaseBlockPayload(previousHash, reward) {
 
-    override fun getBytes() : ByteArray {
+    override fun getBytes(): ByteArray {
         val builder = StringBuilder()
         builder.append(previousHash)
         builder.append(reward)

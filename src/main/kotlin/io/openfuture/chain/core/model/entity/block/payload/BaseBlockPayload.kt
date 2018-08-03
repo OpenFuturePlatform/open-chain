@@ -1,8 +1,10 @@
 package io.openfuture.chain.core.model.entity.block.payload
 
 import javax.persistence.Column
+import javax.persistence.Embeddable
 import javax.persistence.MappedSuperclass
 
+@Embeddable
 @MappedSuperclass
 abstract class BaseBlockPayload(
 
