@@ -1,13 +1,11 @@
-package io.openfuture.chain.core.service.transaction.internal
+package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.NotFoundException
-import io.openfuture.chain.core.model.dto.transaction.BaseTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
@@ -22,6 +20,11 @@ internal class DefaultDelegateTransactionService(
     private val uRepository: UTransactionRepository<UDelegateTransaction>,
     private val delegateService: DelegateService
 ) : BaseTransactionService(), DelegateTransactionService {
+
+    @Transactional(readOnly = true)
+    override fun getAllUnconfirmed(): MutableList<UDelegateTransaction> {
+        return uRepository.findAll()
+    }
 
     @Transactional
     override fun add(dto: DelegateTransactionDto): UDelegateTransaction {

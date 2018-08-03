@@ -1,11 +1,10 @@
-package io.openfuture.chain.core.service.transaction.internal
+package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.TransferTransactionService
@@ -19,6 +18,11 @@ internal class DefaultTransferTransactionService(
     private val repository: TransactionRepository<TransferTransaction>,
     private val uRepository: UTransactionRepository<UTransferTransaction>
 ) : BaseTransactionService(), TransferTransactionService {
+
+    @Transactional(readOnly = true)
+    override fun getAllUnconfirmed(): MutableList<UTransferTransaction> {
+        return uRepository.findAll()
+    }
 
     @Transactional
     override fun add(dto: TransferTransactionDto): UTransferTransaction {

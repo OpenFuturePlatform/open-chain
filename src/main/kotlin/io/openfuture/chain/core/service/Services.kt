@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.service
 
-import io.openfuture.chain.core.model.dto.transaction.BaseTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.DelegateTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.TransferTransactionDto
 import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
@@ -18,7 +17,6 @@ import io.openfuture.chain.network.domain.NetworkGenesisBlock
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.node.*
-import io.openfuture.chain.rpc.domain.transaction.BaseTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.VoteTransactionRequest
@@ -47,6 +45,7 @@ interface BlockService {
 
     fun getLast(): NetworkBlock
 
+    fun getBlocksAfterCurrentHash(hash: String): List<NetworkBlock>
 
 }
 
@@ -72,10 +71,8 @@ interface MainBlockService {
 
 }
 
-/** Transaction api for other modules */
+/** Common base transaction service */
 interface TransactionService {
-
-    fun getAllUnconfirmed(): MutableSet<UTransaction>
 
     fun getCount(): Long
 
@@ -146,17 +143,5 @@ interface WalletService {
     fun decreaseBalance(address: String, amount: Long)
 
     fun decreaseUnconfirmedBalance(address: String, amount: Long)
-
-}
-
-interface CommonBlockService {
-
-    fun get(hash: String): BaseBlock
-
-    fun getLast(): BaseBlock
-
-    fun getBlocksAfterCurrentHash(hash: String): List<BaseBlock>?
-
-    fun isExists(hash: String): Boolean
 
 }

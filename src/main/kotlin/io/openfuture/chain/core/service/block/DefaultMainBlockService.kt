@@ -23,15 +23,15 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultMainBlockService(
+    blockService: BlockService,
     private val repository: BlockRepository<MainBlock>,
     private val clock: NodeClock,
     private val keyHolder: NodeKeyHolder,
-    private val blockService: BlockService,
     private val voteTransactionService: VoteTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
     private val consensusProperties: ConsensusProperties
-) : MainBlockService {
+) : BaseBlockService(blockService), MainBlockService {
 
     @Transactional(readOnly = true)
     override fun create(): NetworkMainBlock {
@@ -65,18 +65,9 @@ class DefaultMainBlockService(
 
     @Transactional(readOnly = true)
     override fun isValid(block: NetworkMainBlock): Boolean {
-        val lastBlock = blockService.getLast()
-
-        return isValidPreviousHash(block, lastBlock)
-            && isValidHeight(block, lastBlock)
-            && isValidTimeStamp(block, lastBlock)
+        return super.isValid(block)
             && !block.transactions.isEmpty()
             && isValidMerkleHash(block.transactions, block.merkleHash)
-            && null != block.hash
-            && !isValidHash(block.getBytes(), block.hash!!)
-            && null != block.signature
-            && null != block.publicKey
-            && !isValidSignature(block.getBytes(), block.publicKey!!, block.signature!!)
     }
 
     private fun getAllUnconfirmed(): MutableSet<BaseTransactionDto> {
@@ -107,20 +98,6 @@ class DefaultMainBlockService(
             treeLayout = mutableListOf()
         }
         return ByteUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
-    }
-
-    private fun isValidPreviousHash(block: NetworkBlock, lastBlock: NetworkBlock): Boolean = (block.previousHash == lastBlock.hash)
-
-    private fun isValidTimeStamp(block: NetworkBlock, lastBlock: NetworkBlock): Boolean = (block.timestamp > lastBlock.timestamp)
-
-    private fun isValidHeight(block: NetworkBlock, lastBlock: NetworkBlock): Boolean = (block.height == lastBlock.height + 1)
-
-    private fun isValidHash(byteData: ByteArray, hash: String): Boolean {
-        return ByteUtils.toHexString(HashUtils.doubleSha256((byteData))) == hash
-    }
-
-    private fun isValidSignature(byteData: ByteArray, publicKey: String, signature: String): Boolean {
-            return SignatureUtils.verify(byteData, signature, ByteUtils.fromHexString(publicKey))
     }
 
     private fun isValidMerkleHash(transactions: MutableSet<BaseTransactionDto>, merkleHash: String): Boolean {

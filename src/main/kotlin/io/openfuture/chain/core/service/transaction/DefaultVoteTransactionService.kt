@@ -1,4 +1,4 @@
-package io.openfuture.chain.core.service.transaction.internal
+package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.NotFoundException
@@ -6,7 +6,6 @@ import io.openfuture.chain.core.model.dto.transaction.VoteTransactionDto
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
@@ -24,6 +23,11 @@ internal class DefaultVoteTransactionService(
     private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties
 ) : BaseTransactionService(), VoteTransactionService {
+
+    @Transactional(readOnly = true)
+    override fun getAllUnconfirmed(): MutableList<UVoteTransaction> {
+        return uRepository.findAll()
+    }
 
     @Transactional
     override fun add(dto: VoteTransactionDto): UVoteTransaction {
@@ -95,11 +99,6 @@ internal class DefaultVoteTransactionService(
             return false
         }
         return true
-    }
-
-    @Transactional(readOnly = true)
-    override fun getAllUnconfirmed(): MutableList<UVoteTransaction> {
-        return uRepository.findAll()
     }
 
     private fun getUnconfirmedByHash(hash: String): UVoteTransaction = uRepository.findOneByHash(hash)

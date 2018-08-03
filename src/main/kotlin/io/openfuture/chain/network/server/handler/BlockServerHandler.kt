@@ -3,6 +3,7 @@ package io.openfuture.chain.network.server.handler
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.CommonBlockService
 import io.openfuture.chain.network.domain.NetworkBlockRequest
 import io.openfuture.chain.network.domain.NetworkGenesisBlock
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 @Scope("prototype")
 class BlockServerHandler(
-    private val blockService: CommonBlockService
+    private val blockService: BlockService
 ) : ServerHandler<NetworkBlockRequest>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, message: NetworkBlockRequest) {
