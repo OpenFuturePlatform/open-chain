@@ -16,13 +16,13 @@ class DefaultApplicationMessageService(
     private val genesisBlockService: GenesisBlockService, // TODO: ask for interface
     private val mainBlockService: MainBlockService // TODO: ask for interface
 ) : ApplicationMessageService {
-    override fun onNetworkBlockRequest(ctx: ChannelHandlerContext, request: BlockRequestMessage) {
+    override fun onNetworkBlockRequest(ctx: ChannelHandlerContext, request: SyncBlockRequestMessage) {
 
         val blocks = blockService.getBlocksAfterCurrentHash(request.hash)
 
         blocks?.forEach {
             /*when (it) {
-                is MainBlock -> ctx.channel().writeAndFlush(MainBlockMessage(it))
+                is MainBlock -> ctx.channel().writeAndFlush(it.to)
 
                 is GenesisBlock -> ctx.channel().writeAndFlush(GenesisBlockMessage(it))
             }*/

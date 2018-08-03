@@ -5,8 +5,8 @@ import java.io.Serializable
 
 interface BaseMessage : Serializable {
 
-    fun read(buffer: ByteBuf) {}
+    fun read(buffer: ByteBuf)
 
-    fun write(buffer: ByteBuf) {}
+    fun write(buffer: ByteBuf)
 
 }

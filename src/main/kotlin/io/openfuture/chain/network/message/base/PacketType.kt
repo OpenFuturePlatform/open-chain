@@ -1,10 +1,11 @@
-package io.openfuture.chain.network.message.network
+package io.openfuture.chain.network.message.base
 
 import io.openfuture.chain.network.message.application.block.*
 import io.openfuture.chain.network.message.application.transaction.DelegateTransactionMessage
 import io.openfuture.chain.network.message.application.transaction.TransferTransactionMessage
 import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
-import io.openfuture.chain.network.message.base.BaseMessage
+import io.openfuture.chain.network.message.network.GreetingMessage
+import io.openfuture.chain.network.message.network.HeartBeatMessage
 import io.openfuture.chain.network.message.network.address.AddressesMessage
 import io.openfuture.chain.network.message.network.address.FindAddressesMessage
 import io.openfuture.chain.network.message.network.time.AskTimeMessage
@@ -22,23 +23,21 @@ enum class PacketType(
     HEART_BEAT(4, HeartBeatMessage::class),
     ASK_TIME(5, AskTimeMessage::class),
     TIME(6, TimeMessage::class),
-    SYNC_BLOCKS_REQUEST(7, BlockRequestMessage::class),
+    SYNC_BLOCKS_REQUEST(7, SyncBlockRequestMessage::class),
     MAIN_BLOCK(8, MainBlockMessage::class),
     GENESIS_BLOCK(9, GenesisBlockMessage::class),
-    PENDING_BLOCK(11, PendingBlockMessage::class),
     BLOCK_APPROVAL(10, BlockApprovalMessage::class),
-    TRANSFER_TRANSACTION(11, TransferTransactionMessage::class),
-    DELEGATE_TRANSACTION(12, DelegateTransactionMessage::class),
-    VOTE_TRANSACTION(13, VoteTransactionMessage::class);
+    PENDING_BLOCK(11, PendingBlockMessage::class),
+    TRANSFER_TRANSACTION(12, TransferTransactionMessage::class),
+    DELEGATE_TRANSACTION(13, DelegateTransactionMessage::class),
+    VOTE_TRANSACTION(14, VoteTransactionMessage::class);
 
 
     companion object {
 
         fun get(id: Short) = values().single { id == it.id }
 
-        fun get(clazz: KClass<out BaseMessage>) = values().single { clazz == it.clazz }
-
-        fun get(packet: BaseMessage) = get(packet::class)
+        fun get(packet: BaseMessage) = values().single { packet::class == it.clazz }
 
     }
 

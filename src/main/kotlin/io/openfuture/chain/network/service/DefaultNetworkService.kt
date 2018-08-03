@@ -3,7 +3,7 @@ package io.openfuture.chain.network.service
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelFuture
 import io.openfuture.chain.core.service.CommonBlockService
-import io.openfuture.chain.network.message.application.block.BlockRequestMessage
+import io.openfuture.chain.network.message.application.block.SyncBlockRequestMessage
 import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.network.address.FindAddressesMessage
 import io.openfuture.chain.network.property.NodeProperties
@@ -53,10 +53,10 @@ class DefaultNetworkService(
         }
     }
 
-    private fun getNetworkBlockRequest(): BlockRequestMessage {
+    private fun getNetworkBlockRequest(): SyncBlockRequestMessage {
         val lastBlockHash = blockService.getLast().hash
 
-        return BlockRequestMessage(lastBlockHash)
+        return SyncBlockRequestMessage(lastBlockHash)
     }
 
 }

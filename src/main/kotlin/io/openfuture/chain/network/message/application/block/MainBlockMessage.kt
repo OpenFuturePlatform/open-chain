@@ -1,7 +1,6 @@
 package io.openfuture.chain.network.message.application.block
 
 import io.netty.buffer.ByteBuf
-import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.network.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.readString
@@ -26,20 +25,6 @@ class MainBlockMessage(
     var delegateTransactions: MutableList<DelegateTransactionMessage>
 ) : BlockMessage(height, previousHash, blockTimestamp, reward, publicKey, hash, signature) {
 
-    /*constructor(block: MainBlock) : this(
-        block.height,
-        block.previousHash,
-        block.timestamp,
-        block.reward,
-        block.hash,
-        block.signature!!,
-        block.publicKey,
-        block.merkleHash,
-        block.transactions.filterIsInstance(TransferTransaction::class.java).map { TransferTransactionMessage(it) }.toMutableList(),
-        block.transactions.filterIsInstance(VoteTransaction::class.java).map { VoteTransactionMessage(it) }.toMutableList(),
-        block.transactions.filterIsInstance(DelegateTransaction::class.java).map { DelegateTransactionMessage(it) }.toMutableList()
-    )*/
-
     override fun read(buffer: ByteBuf) {
         super.read(buffer)
 
@@ -57,16 +42,6 @@ class MainBlockMessage(
         buffer.writeList(voteTransactions)
         buffer.writeList(delegateTransactions)
     }
-
-    fun toEntity(): MainBlock = MainBlock(
-        height,
-        previousHash,
-        blockTimestamp,
-        reward,
-        publicKey,
-        merkleHash,
-        mutableSetOf()).apply { signature = super.signature }
-
 
     override fun toString() = "MainBlockMessage(hash=$hash)"
 

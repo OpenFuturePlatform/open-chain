@@ -7,7 +7,7 @@ import io.openfuture.chain.network.extension.writeString
 import io.openfuture.chain.network.message.base.BaseMessage
 
 @NoArgConstructor
-data class BlockRequestMessage(
+data class SyncBlockRequestMessage(
     var hash: String
 ) : BaseMessage {
 

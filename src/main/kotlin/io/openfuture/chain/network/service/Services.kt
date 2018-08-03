@@ -40,7 +40,7 @@ interface ConnectionService {
 
 interface ApplicationMessageService {
 
-    fun onNetworkBlockRequest(ctx: ChannelHandlerContext, request: BlockRequestMessage)
+    fun onNetworkBlockRequest(ctx: ChannelHandlerContext, request: SyncBlockRequestMessage)
 
     fun onGenesisBlock(ctx: ChannelHandlerContext, block: GenesisBlockMessage)
 

@@ -8,8 +8,8 @@ import io.openfuture.chain.network.message.application.transaction.TransferTrans
 import io.openfuture.chain.network.message.application.transaction.VoteTransactionMessage
 import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.message.network.HeartBeatMessage
-import io.openfuture.chain.network.message.network.Packet
-import io.openfuture.chain.network.message.network.PacketType.*
+import io.openfuture.chain.network.message.base.Packet
+import io.openfuture.chain.network.message.base.PacketType.*
 import io.openfuture.chain.network.message.network.address.AddressesMessage
 import io.openfuture.chain.network.message.network.address.FindAddressesMessage
 import io.openfuture.chain.network.message.network.time.AskTimeMessage
@@ -43,7 +43,7 @@ abstract class BaseConnectionHandler(
             ASK_TIME -> networkService.onAskTime(ctx, packet.data as AskTimeMessage)
             MAIN_BLOCK -> applicationService.onMainBlock(ctx, packet.data as MainBlockMessage)
             GENESIS_BLOCK -> applicationService.onGenesisBlock(ctx, packet.data as GenesisBlockMessage)
-            SYNC_BLOCKS_REQUEST -> applicationService.onNetworkBlockRequest(ctx, packet.data as BlockRequestMessage)
+            SYNC_BLOCKS_REQUEST -> applicationService.onNetworkBlockRequest(ctx, packet.data as SyncBlockRequestMessage)
             PENDING_BLOCK -> applicationService.onPendingBlock(ctx, packet.data as PendingBlockMessage)
             BLOCK_APPROVAL -> applicationService.onBlockApproval(ctx, packet.data as BlockApprovalMessage)
             TRANSFER_TRANSACTION -> applicationService.onTransferTransaction(ctx, packet.data as TransferTransactionMessage)

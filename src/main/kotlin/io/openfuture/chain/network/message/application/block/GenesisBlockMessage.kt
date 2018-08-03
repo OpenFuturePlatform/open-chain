@@ -1,7 +1,6 @@
 package io.openfuture.chain.network.message.application.block
 
 import io.netty.buffer.ByteBuf
-import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.network.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.writeList
@@ -19,17 +18,6 @@ class GenesisBlockMessage(
     var epochIndex: Long,
     var activeDelegates: MutableSet<DelegateMessage>
 ) : BlockMessage(height, previousHash, blockTimestamp, reward, publicKey, hash, signature) {
-    
-    constructor(block: GenesisBlock) : this(
-        block.height,
-        block.previousHash,
-        block.timestamp,
-        block.reward,
-        block.publicKey,
-        block.hash,
-        block.signature!!,
-        block.epochIndex,
-        block.activeDelegates.map { DelegateMessage(it) }.toMutableSet())
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)

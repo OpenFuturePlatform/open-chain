@@ -1,8 +1,7 @@
-package io.openfuture.chain.network.message.network
+package io.openfuture.chain.network.message.base
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.network.annotation.NoArgConstructor
-import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 
@@ -13,7 +12,7 @@ data class Packet(
     var timestamp: Long
 ) : BaseMessage {
 
-    lateinit var type: PacketType
+    var type: PacketType = PacketType.get(data)
 
     override fun read(buffer: ByteBuf) {
         version = buffer.readString()
