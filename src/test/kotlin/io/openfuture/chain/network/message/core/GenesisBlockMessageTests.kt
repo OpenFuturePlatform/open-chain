@@ -19,7 +19,7 @@ class GenesisBlockMessageTests : MessageTests() {
             "075626c69634b65790000000468617368000000097369676e6174757265000000000000000100000001000000096c6f63616c686f73" +
             "74000000036b6579")
 
-        val delegates = mutableSetOf(DelegateMessage("localhost", "key"))
+        val delegates = listOf(DelegateMessage("localhost", "key"))
         message = GenesisBlockMessage(1, "previousHash", 1, 10, "publicKey", "hash", "signature", 1, delegates)
     }
 

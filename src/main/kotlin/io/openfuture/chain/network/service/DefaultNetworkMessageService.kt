@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ScheduledFuture
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.SECONDS
 
 @Component
 class DefaultNetworkMessageService(
@@ -42,12 +42,12 @@ class DefaultNetworkMessageService(
             .scheduleAtFixedRate({ ctx.writeAndFlush(HeartBeatMessage(PING)) },
                 HEART_BEAT_DELAY,
                 HEART_BEAT_INTERVAL,
-                TimeUnit.SECONDS)
+                SECONDS)
         heartBeatTasks[ctx.channel()] = task
     }
 
     override fun onHeartBeat(ctx: ChannelHandlerContext, heartBeat: HeartBeatMessage) {
-        if (heartBeat.type == HeartBeatMessage.Type.PING) {
+        if (heartBeat.type == PING) {
             ctx.channel().writeAndFlush(HeartBeatMessage(PONG))
         }
     }
