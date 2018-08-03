@@ -10,17 +10,21 @@ import java.nio.ByteBuffer
 
 object BlockUtils {
 
-    fun createHash(payload: BaseBlockPayload, publicKey: ByteArray, signature: String): String {
-        val bytes = getBytes(publicKey, signature.toByteArray(), payload.getBytes())
-        return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
+    fun createHash(timestamp: Long, height: Long, previousHash: String, reward: Long, payload: BaseBlockPayload): ByteArray {
+        val bytes = getBytes(timestamp, height, previousHash, reward, payload)
+        return HashUtils.doubleSha256(bytes)
     }
 
-    private fun getBytes(publicKey: ByteArray, signature: ByteArray, data: ByteArray): ByteArray {
-        return ByteBuffer.allocate(data.size + publicKey.size + signature.size)
-            .put(data)
-            .put(publicKey)
-            .put(signature)
-            .array()
+    private fun getBytes(timestamp: Long, height: Long, previousHash: String, reward: Long,
+                         payload: BaseBlockPayload): ByteArray {
+        val builder = StringBuilder()
+        builder.append(timestamp)
+        builder.append(height)
+        builder.append(previousHash)
+        builder.append(reward)
+        builder.append(payload)
+        return builder.toString().toByteArray()
     }
+
 
 }

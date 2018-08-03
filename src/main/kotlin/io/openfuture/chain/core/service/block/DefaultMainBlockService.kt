@@ -35,18 +35,19 @@ class DefaultMainBlockService(
         val lastBlock = blockService.getLast()
         val height = lastBlock.height + 1
         val transactions = transactionService.getAllUnconfirmed()
-        val payload = createPayload(lastBlock, transactions)
-        val signature = SignatureUtils.sign(payload.getBytes(), keyHolder.getPrivateKey())
-        val hash = BlockUtils.createHash(payload, keyHolder.getPublicKey(), signature)
+        val previousHash = lastBlock.hash
+        val reward = transactions.map { it.payload.fee }.sum() + consensusProperties.rewardBlock!!
+        val merkleHash = calculateMerkleRoot(transactions)
+
+        val hash = BlockUtils.createHash(timestamp, height, previousHash, reward, payload)
+        val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
 
         return MainBlock(timestamp, height, hash, signature, publicKey, payload)
     }
 
     private fun createPayload(lastBlock: BaseBlock, transactions: List<BaseTransaction>): MainBlockPayload {
-        val merkleHash = calculateMerkleRoot(transactions)
-        val previousHash = lastBlock.hash
-        val reward = transactions.map { it.payload.fee }.sum() + consensusProperties.rewardBlock!!
+
         return MainBlockPayload(previousHash, reward, merkleHash)
     }
 

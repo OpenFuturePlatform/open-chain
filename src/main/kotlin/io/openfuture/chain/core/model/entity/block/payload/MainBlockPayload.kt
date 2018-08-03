@@ -19,12 +19,5 @@ class MainBlockPayload(
 
 ) : BaseBlockPayload(previousHash, reward) {
 
-    override fun getBytes(): ByteArray {
-        val builder = StringBuilder()
-        builder.append(previousHash)
-        builder.append(reward)
-        builder.append(merkleHash)
-        return builder.toString().toByteArray()
-    }
 
 }
