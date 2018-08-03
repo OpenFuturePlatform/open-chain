@@ -8,13 +8,11 @@ import io.openfuture.chain.consensus.model.entity.transaction.TransferTransactio
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.Delegate
-import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.Transaction
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.util.TransactionUtils
-import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.domain.NetworkBlockApproval
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.network.service.NetworkService
@@ -99,15 +97,6 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
     fun handleApproveMessageShouldPrepareApproveMessage() {
         val publicKey = "037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"
         val delegate = Delegate(publicKey, "address", 1)
-        val genesisBlock = GenesisBlock(
-            1L,
-            "previousHash",
-            2L,
-            4L,
-            publicKey,
-            3L,
-            setOf(delegate)
-        )
         val transactions: MutableSet<Transaction> = mutableSetOf(
             TransferTransaction(
                 1L,
@@ -137,10 +126,6 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
             publicKey,
             "MEUCIQDJ8KF201VgsyrL4geU80Lv+JqqnCRuH1ScxtxJ1mYLVAIgPiB6GUWVD6jB7uk6smJCV7jzCUmK/JkIqhZO0/81q5M="
         )
-
-        val ss = SignatureUtils.sign(message.getBytes(), ByteUtils.fromHexString(
-            "529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"))
-        println(ss)
 
         val privateKey = "529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"
         mainBlock.sign(ByteUtils.fromHexString(privateKey))
@@ -177,7 +162,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
         defaultPendingBlockHandler.handleApproveMessage(message)
 
-        Assertions.assertThat(defaultPendingBlockHandler.commitVotes.get(message.hash))
+        Assertions.assertThat(defaultPendingBlockHandler.commits.get(message.hash))
             .isEqualTo(mutableListOf(delegate))
     }
 
