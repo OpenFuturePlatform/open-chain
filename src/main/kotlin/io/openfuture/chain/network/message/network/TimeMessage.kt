@@ -5,17 +5,19 @@ import io.openfuture.chain.network.annotation.NoArgConstructor
 import io.openfuture.chain.network.message.base.BaseMessage
 
 @NoArgConstructor
-data class GreetingMessage(
-    var address: NetworkAddressMessage
+data class TimeMessage(
+    var nodeTimestamp: Long,
+    var networkTimestamp: Long
 ) : BaseMessage {
 
     override fun read(buffer: ByteBuf) {
-        address = NetworkAddressMessage::class.java.newInstance()
-        address.read(buffer)
+        nodeTimestamp = buffer.readLong()
+        networkTimestamp = buffer.readLong()
     }
 
     override fun write(buffer: ByteBuf) {
-        address.write(buffer)
+        buffer.writeLong(nodeTimestamp)
+        buffer.writeLong(networkTimestamp)
     }
 
 }

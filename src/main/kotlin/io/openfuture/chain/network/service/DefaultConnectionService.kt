@@ -4,8 +4,8 @@ import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
 import io.openfuture.chain.network.message.base.BaseMessage
-import io.openfuture.chain.network.message.network.address.FindAddressesMessage
-import io.openfuture.chain.network.message.network.address.NetworkAddressMessage
+import io.openfuture.chain.network.message.network.FindAddressesMessage
+import io.openfuture.chain.network.message.network.NetworkAddressMessage
 import io.openfuture.chain.network.property.NodeProperties
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
@@ -35,8 +35,9 @@ class DefaultConnectionService(
 
     override fun connect(peers: List<NetworkAddressMessage>) {
         peers.map { NetworkAddressMessage(it.host, it.port) }
-            .filter { !getConnectionAddresses().contains(it) && it != NetworkAddressMessage(properties.host!!,
-                properties.port!!)
+            .filter {
+                !getConnectionAddresses().contains(it) && it != NetworkAddressMessage(properties.host!!,
+                    properties.port!!)
             }
             .forEach { bootstrap.connect(it.host, it.port) }
     }

@@ -3,7 +3,8 @@ package io.openfuture.chain.network.handler.client
 import io.netty.channel.ChannelHandler
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.handler.base.BaseConnectionHandler
-import io.openfuture.chain.network.service.DefaultApplicationMessageService
+import io.openfuture.chain.network.service.ConsensusMessageService
+import io.openfuture.chain.network.service.CoreMessageService
 import io.openfuture.chain.network.service.NetworkMessageService
 import org.springframework.stereotype.Component
 
@@ -11,8 +12,9 @@ import org.springframework.stereotype.Component
 @ChannelHandler.Sharable
 class ConnectionClientHandler(
     networkService: NetworkMessageService,
-    applicationService: DefaultApplicationMessageService
-) : BaseConnectionHandler(networkService, applicationService) {
+    coreService: CoreMessageService,
+    consensusService: ConsensusMessageService
+) : BaseConnectionHandler(networkService, coreService, consensusService) {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         super.channelActive(ctx)
