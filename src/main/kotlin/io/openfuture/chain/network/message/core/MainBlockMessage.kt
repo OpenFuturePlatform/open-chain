@@ -2,13 +2,13 @@ package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.network.annotation.NoArgConstructor
-import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.readString
-import io.openfuture.chain.network.extension.writeList
+import io.openfuture.chain.network.extension.readStringList
 import io.openfuture.chain.network.extension.writeString
+import io.openfuture.chain.network.extension.writeStringList
 
 @NoArgConstructor
-class MainBlockMessage(
+open class MainBlockMessage(
     height: Long,
     previousHash: String,
     blockTimestamp: Long,
@@ -17,27 +17,21 @@ class MainBlockMessage(
     signature: String,
     publicKey: String,
     var merkleHash: String,
-    var transferTransactions: List<TransferTransactionMessage>,
-    var voteTransactions: List<VoteTransactionMessage>,
-    var delegateTransactions: List<DelegateTransactionMessage>
+    var transactions: List<String>
 ) : BlockMessage(height, previousHash, blockTimestamp, reward, publicKey, hash, signature) {
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)
 
         merkleHash = buffer.readString()
-        transferTransactions = buffer.readList()
-        voteTransactions = buffer.readList()
-        delegateTransactions = buffer.readList()
+        transactions = buffer.readStringList()
     }
 
     override fun write(buffer: ByteBuf) {
         super.write(buffer)
 
         buffer.writeString(merkleHash)
-        buffer.writeList(transferTransactions)
-        buffer.writeList(voteTransactions)
-        buffer.writeList(delegateTransactions)
+        buffer.writeStringList(transactions)
     }
 
     override fun toString() = "MainBlockMessage(hash=$hash)"

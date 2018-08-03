@@ -9,25 +9,34 @@ fun ByteBuf.writeString(string: String) {
     this.writeCharSequence(string, UTF_8)
 }
 
-fun ByteBuf.readString(): String {
-    val length = this.readInt()
-    return this.readCharSequence(length, UTF_8).toString()
+fun ByteBuf.readString(): String = this.readCharSequence(this.readInt(), UTF_8).toString()
+
+fun ByteBuf.readStringList() : List<String>{
+    val size = this.readInt()
+    val list = mutableListOf<String>()
+    for (index in 1..size) {
+        list.add(readString())
+    }
+    return list
+}
+
+fun ByteBuf.writeStringList(list: List<String>) {
+    this.writeInt(list.size)
+    list.forEach { this.writeString(it) }
 }
 
 inline fun <reified T : BaseMessage> ByteBuf.readList(): MutableList<T> {
     val size = this.readInt()
     val list = mutableListOf<T>()
     for (index in 1..size) {
-        val address = T::class.java.newInstance()
-        address.read(this)
-        list.add(address)
+        val instance = T::class.java.newInstance()
+        instance.read(this)
+        list.add(instance)
     }
     return list
 }
 
 fun <T : BaseMessage> ByteBuf.writeList(list: List<T>) {
     this.writeInt(list.size)
-    for (element in list) {
-        element.write(this)
-    }
+    list.forEach { it.write(this) }
 }
