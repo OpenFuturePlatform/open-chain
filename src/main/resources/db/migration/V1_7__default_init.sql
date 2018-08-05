@@ -23,7 +23,7 @@ INSERT INTO genesis_blocks (id, epoch_index) VALUES (1, 1);
 insert into wallets (id, address, balance)
   select
     1,
-    'Test wallet address',
+    '0x41D9B5378d0DE11b2174673552326dEbC09c7F42',
     100;
 --
 insert into delegates (id, public_key, address)

@@ -4,7 +4,7 @@ import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayl
 import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
 import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
-import io.openfuture.chain.rpc.domain.transaction.VoteTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionRequest
 import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.Table
@@ -35,11 +35,12 @@ class UVoteTransaction(
             VoteTransactionPayload(dto.voteTypeId, dto.delegateKey)
         )
 
-        fun of(time: Long, request: VoteTransactionRequest): UVoteTransaction = UVoteTransaction(
-            time,
+        fun of(request: VoteTransactionRequest): UVoteTransaction = UVoteTransaction(
+            request.timestamp!!,
             request.fee!!,
             request.senderAddress!!,
-            TransactionUtils.generateHash(time, request.fee!!, VoteTransactionPayload(request.voteTypeId!!, request.delegateKey!!)),
+            TransactionUtils.generateHash(request.timestamp!!, request.fee!!, VoteTransactionPayload(request.voteTypeId!!,
+                request.delegateKey!!)),
             request.senderSignature!!,
             request.senderPublicKey!!,
             VoteTransactionPayload(request.voteTypeId!!, request.delegateKey!!)

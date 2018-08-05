@@ -8,7 +8,6 @@ import java.nio.ByteBuffer
 
 object TransactionUtils {
 
-
     fun generateHash(timestamp: Long, fee: Long, payload: TransactionPayload): String {
         val bytes = getBytes(timestamp, fee, payload)
         return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))

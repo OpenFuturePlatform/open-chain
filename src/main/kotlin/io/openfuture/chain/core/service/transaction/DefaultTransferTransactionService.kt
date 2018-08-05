@@ -2,12 +2,15 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.TransferTransactionService
+import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
-import io.openfuture.chain.rpc.domain.transaction.TransferTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionHashRequest
+import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.xml.bind.ValidationException
@@ -45,6 +48,11 @@ class DefaultTransferTransactionService(
         updateUnconfirmedBalanceByFee(tx)
         // todo broadcast
         return uRepository.save(tx)
+    }
+
+    override fun generateHash(request: TransferTransactionHashRequest): String {
+        return TransactionUtils.generateHash(request.timestamp!!, request.fee!!,
+            TransferTransactionPayload(request.amount!!, request.recipientAddress!!))
     }
 
     @Transactional

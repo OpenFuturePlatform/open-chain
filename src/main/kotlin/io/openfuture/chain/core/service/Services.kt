@@ -13,12 +13,15 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTr
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.core.model.node.*
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.rpc.domain.base.PageRequest
-import io.openfuture.chain.rpc.domain.node.*
-import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
-import io.openfuture.chain.rpc.domain.transaction.TransferTransactionRequest
-import io.openfuture.chain.rpc.domain.transaction.VoteTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionHashRequest
+import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionHashRequest
+import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionHashRequest
+import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionRequest
 import org.springframework.data.domain.Page
 
 interface HardwareInfoService {
@@ -62,7 +65,7 @@ interface GenesisBlockService {
 
 interface MainBlockService {
 
-    fun create(): MainBlock
+    fun create(): MainBlockMessage
 
     fun add(message: MainBlockMessage)
 
@@ -91,6 +94,8 @@ interface TransferTransactionService {
 
     fun toBlock(utx: UTransferTransaction, block: MainBlock): TransferTransaction
 
+    fun generateHash(request: TransferTransactionHashRequest): String
+
 }
 
 interface VoteTransactionService {
@@ -101,6 +106,8 @@ interface VoteTransactionService {
 
     fun toBlock(utx: UVoteTransaction, block: MainBlock): VoteTransaction
 
+    fun generateHash(request: VoteTransactionHashRequest): String
+
 }
 
 interface DelegateTransactionService {
@@ -110,6 +117,8 @@ interface DelegateTransactionService {
     fun add(request: DelegateTransactionRequest): UDelegateTransaction
 
     fun toBlock(utx: UDelegateTransaction, block: MainBlock): DelegateTransaction
+
+    fun generateHash(request: DelegateTransactionHashRequest): String
 
 }
 

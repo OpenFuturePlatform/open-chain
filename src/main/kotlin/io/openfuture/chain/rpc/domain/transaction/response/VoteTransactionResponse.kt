@@ -4,21 +4,23 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransa
 import javax.validation.constraints.NotBlank
 
 class VoteTransactionResponse(
+    timestamp: Long,
+    fee: Long,
     senderAddress: String,
     senderPublicKey: String,
     senderSignature: String,
-    @field:NotBlank var fee: Long? = null,
     @field:NotBlank var voteTypeId: Int? = null,
     @field:NotBlank var delegateKey: String? = null
-) : BaseTransactionResponse(senderAddress, senderPublicKey, senderSignature) {
+) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey) {
 
-    constructor(transaction: UVoteTransaction) : this(
-        transaction.senderAddress,
-        transaction.senderPublicKey,
-        transaction.senderSignature,
-        transaction.getPayload().fee,
-        transaction.getPayload().voteTypeId,
-        transaction.getPayload().delegateKey
+    constructor(tx: UVoteTransaction) : this(
+        tx.timestamp,
+        tx.fee,
+        tx.senderAddress,
+        tx.senderSignature,
+        tx.senderPublicKey,
+        tx.payload.voteTypeId,
+        tx.payload.delegateKey
     )
 
 }

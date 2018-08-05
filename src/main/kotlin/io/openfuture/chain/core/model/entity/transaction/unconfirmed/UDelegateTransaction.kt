@@ -4,7 +4,7 @@ import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayl
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
-import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionRequest
 import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.Table

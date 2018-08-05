@@ -1,8 +1,8 @@
-package io.openfuture.chain.rpc.controller
+package io.openfuture.chain.rpc.controller.transaction
 
-import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.service.TransferTransactionService
-import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionHashRequest
+import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.TransferTransactionResponse
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -14,10 +14,13 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/rpc/transactions/transfer")
 class TransferTransactionController(
-    private val transactionService: TransferTransactionService) {
+    private val transactionService: TransferTransactionService
+) {
 
     @PostMapping("/doGenerateHash")
-    fun getBytes(@Valid @RequestBody payload: TransferTransactionPayload): ByteArray = transactionService.getBytes(payload)
+    fun getBytes(@Valid @RequestBody request: TransferTransactionHashRequest): String {
+        return transactionService.generateHash(request)
+    }
 
     @PostMapping
     fun add(@Valid @RequestBody request: TransferTransactionRequest): TransferTransactionResponse {

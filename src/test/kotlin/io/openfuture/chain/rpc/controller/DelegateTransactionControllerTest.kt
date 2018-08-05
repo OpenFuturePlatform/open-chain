@@ -4,7 +4,8 @@ import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.core.service.DelegateTransactionService
-import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
+import io.openfuture.chain.rpc.controller.transaction.DelegateTransactionController
+import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.DelegateTransactionResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

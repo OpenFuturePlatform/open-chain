@@ -4,7 +4,8 @@ import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.core.service.TransferTransactionService
-import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
+import io.openfuture.chain.rpc.controller.transaction.TransferTransactionController
+import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.TransferTransactionResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

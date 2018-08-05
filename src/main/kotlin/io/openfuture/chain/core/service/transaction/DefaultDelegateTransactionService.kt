@@ -3,13 +3,16 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateTransactionService
+import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
-import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionHashRequest
+import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.xml.bind.ValidationException
@@ -48,6 +51,11 @@ class DefaultDelegateTransactionService(
         updateUnconfirmedBalanceByFee(tx)
         // todo broadcast
         return uRepository.save(tx)
+    }
+
+    override fun generateHash(request: DelegateTransactionHashRequest): String {
+        return TransactionUtils.generateHash(request.timestamp!!, request.fee!!,
+            DelegateTransactionPayload(request.delegateKey!!))
     }
 
     @Transactional

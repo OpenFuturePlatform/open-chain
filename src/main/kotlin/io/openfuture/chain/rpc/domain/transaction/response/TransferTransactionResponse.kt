@@ -4,21 +4,23 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTr
 import javax.validation.constraints.NotBlank
 
 class TransferTransactionResponse(
+    timestamp: Long,
+    fee: Long,
     senderAddress: String,
     senderPublicKey: String,
     senderSignature: String,
-    @field:NotBlank var fee: Long? = null,
     @field:NotBlank var amount: Long? = null,
     @field:NotBlank var recipientAddress: String? = null
-) : BaseTransactionResponse(senderAddress, senderPublicKey, senderSignature) {
+) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey) {
 
-    constructor(transaction: UTransferTransaction) : this(
-        transaction.senderAddress,
-        transaction.senderPublicKey,
-        transaction.senderSignature,
-        transaction.getPayload().fee,
-        transaction.getPayload().amount,
-        transaction.getPayload().recipientAddress
+    constructor(tx: UTransferTransaction) : this(
+        tx.timestamp,
+        tx.fee,
+        tx.senderAddress,
+        tx.senderSignature,
+        tx.senderPublicKey,
+        tx.payload.amount,
+        tx.payload.recipientAddress
     )
 
 }

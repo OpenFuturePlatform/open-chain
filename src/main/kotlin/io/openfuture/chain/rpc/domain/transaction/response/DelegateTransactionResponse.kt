@@ -4,19 +4,21 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTr
 import javax.validation.constraints.NotBlank
 
 class DelegateTransactionResponse(
+    timestamp: Long,
+    fee: Long,
     senderAddress: String,
-    senderPublicKey: String,
     senderSignature: String,
-    @field:NotBlank var fee: Long? = null,
+    senderPublicKey: String,
     @field:NotBlank var delegateKey: String? = null
-) : BaseTransactionResponse(senderAddress, senderPublicKey, senderSignature) {
+) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey) {
 
-    constructor(transaction: UDelegateTransaction) : this(
-        transaction.senderAddress,
-        transaction.senderPublicKey,
-        transaction.senderSignature,
-        transaction.getPayload().fee,
-        transaction.getPayload().delegateKey
+    constructor(tx: UDelegateTransaction) : this(
+        tx.timestamp,
+        tx.fee,
+        tx.senderAddress,
+        tx.senderSignature,
+        tx.senderPublicKey,
+        tx.payload.delegateKey
     )
 
 }

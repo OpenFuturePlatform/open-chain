@@ -4,13 +4,16 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
+import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
-import io.openfuture.chain.rpc.domain.transaction.VoteTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionHashRequest
+import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.xml.bind.ValidationException
@@ -42,7 +45,7 @@ internal class DefaultVoteTransactionService(
 
     @Transactional
     override fun add(request: VoteTransactionRequest): UVoteTransaction {
-        val tx = UVoteTransaction.of(clock.networkTime(), request)
+        val tx = UVoteTransaction.of(request)
         if (!isValid(tx)) {
             throw ValidationException("Transaction is invalid!")
         }
@@ -50,6 +53,11 @@ internal class DefaultVoteTransactionService(
         updateUnconfirmedBalanceByFee(tx)
         // todo broadcast
         return uRepository.save(tx)
+    }
+
+    override fun generateHash(request: VoteTransactionHashRequest): String {
+        return TransactionUtils.generateHash(request.timestamp!!, request.fee!!,
+            VoteTransactionPayload(request.voteTypeId!!, request.delegateKey!!))
     }
 
     @Transactional
@@ -84,8 +92,7 @@ internal class DefaultVoteTransactionService(
             .filter { it.senderAddress == senderAddress && it.payload.getVoteType() == VoteType.FOR }
             .count()
 
-        val unspentVotes = confirmedVotes + unconfirmedForVotes
-        if (consensusProperties.delegatesCount!! <= unspentVotes) {
+        if (consensusProperties.delegatesCount!! <= confirmedVotes + unconfirmedForVotes) {
             return false
         }
         return true

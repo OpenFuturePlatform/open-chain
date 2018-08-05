@@ -4,7 +4,7 @@ import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayl
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
-import io.openfuture.chain.rpc.domain.transaction.TransferTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionRequest
 import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.Table

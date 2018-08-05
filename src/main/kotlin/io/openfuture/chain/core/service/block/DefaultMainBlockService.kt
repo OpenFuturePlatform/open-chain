@@ -27,7 +27,7 @@ class DefaultMainBlockService(
 ) : BaseBlockService(blockService), MainBlockService {
 
     @Transactional(readOnly = true)
-    override fun create(): MainBlock {
+    override fun create(): MainBlockMessage {
         val timestamp = clock.networkTime()
         val lastBlock = blockService.getLast()
         val height = lastBlock.height + 1
@@ -41,7 +41,8 @@ class DefaultMainBlockService(
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
 
-        return MainBlock(timestamp, height, previousHash, reward, ByteUtils.toHexString(hash), signature, publicKey, payload)
+        val block = MainBlock(timestamp, height, previousHash, reward, ByteUtils.toHexString(hash), signature, publicKey, payload)
+        return MainBlockMessage(block, transactions)
     }
 
     @Transactional
@@ -57,7 +58,8 @@ class DefaultMainBlockService(
             return
         }
 
-        repository.save(block)
+        val savedBlock = repository.save(block)
+        transactions.forEach { transactionService.toBlock(it, repository.save(savedBlock)) }
         // todo broadcast
     }
 
