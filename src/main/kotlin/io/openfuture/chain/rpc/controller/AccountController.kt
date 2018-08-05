@@ -28,9 +28,7 @@ class AccountController(
     }
 
     @GetMapping("/wallets/{address}/balance")
-    fun getBalance(@PathVariable address: String): Long {
-        return walletService.getBalanceByAddress(address)
-    }
+    fun getBalance(@PathVariable address: String): Long = walletService.getBalanceByAddress(address)
 
     @PostMapping("/wallets/validateAddress")
     fun validateAddress(@RequestBody @Valid request: ValidateAddressRequest): ValidateAddressRequest = request
@@ -60,8 +58,6 @@ class AccountController(
     }
 
     @PostMapping("/keys/doImportWif")
-    fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): WalletDto {
-        return WalletDto(cryptoService.importWifKey(request.decodedKey!!))
-    }
+    fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): WalletDto = WalletDto(cryptoService.importWifKey(request.decodedKey!!))
 
 }

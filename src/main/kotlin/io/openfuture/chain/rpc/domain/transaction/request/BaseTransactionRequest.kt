@@ -1,4 +1,4 @@
-package io.openfuture.chain.rpc.domain.transaction
+package io.openfuture.chain.rpc.domain.transaction.request
 
 import javax.validation.constraints.NotBlank
 

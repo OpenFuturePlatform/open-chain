@@ -1,4 +1,4 @@
-package io.openfuture.chain.rpc.domain.node
+package io.openfuture.chain.core.model.node
 
 data class StorageInfo(
     val name: String,

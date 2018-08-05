@@ -15,8 +15,6 @@ class DelegateController(
     private val delegateService: DelegateService) {
 
     @GetMapping
-    fun getAll(request: PageRequest): PageResponse<Delegate> {
-        return PageResponse(delegateService.getAll(request))
-    }
+    fun getAll(request: PageRequest): PageResponse<Delegate> = PageResponse(delegateService.getAll(request))
 
 }
