@@ -1,8 +1,7 @@
 package io.openfuture.chain.core.model.entity.block
 
 import io.openfuture.chain.core.model.entity.base.BaseModel
-import io.openfuture.chain.core.model.entity.block.payload.BaseBlockPayload
-import io.openfuture.chain.core.model.entity.transaction.payload.BaseTransactionPayload
+import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import javax.persistence.*
 
 @Entity
@@ -16,6 +15,12 @@ abstract class BaseBlock(
     @Column(name = "height", nullable = false)
     var height: Long,
 
+    @Column(name = "previous_hash", nullable = false)
+    var previousHash: String,
+
+    @Column(name = "reward", nullable = false)
+    var reward: Long,
+
     @Column(name = "hash", nullable = false, unique = true)
     var hash: String,
 
@@ -27,6 +32,6 @@ abstract class BaseBlock(
 
 ) : BaseModel() {
 
-    abstract fun getPayload(): BaseBlockPayload
+    abstract fun getPayload(): BlockPayload
 
 }

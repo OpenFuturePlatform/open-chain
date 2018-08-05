@@ -1,9 +1,12 @@
 package io.openfuture.chain.core.service.transaction
 
-import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
-import io.openfuture.chain.core.model.entity.transaction.payload.BaseTransactionPayload
+import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
+import io.openfuture.chain.core.repository.TransactionRepository
+import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.crypto.service.CryptoService
@@ -12,7 +15,10 @@ import io.openfuture.chain.network.component.node.NodeClock
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.beans.factory.annotation.Autowired
 
-internal abstract class BaseTransactionService {
+abstract class BaseTransactionService<T : Transaction, U: UTransaction> (
+    protected val repository: TransactionRepository<T>,
+    protected val uRepository: UTransactionRepository<U>
+) {
 
     @Autowired
     protected lateinit var clock: NodeClock
@@ -24,38 +30,30 @@ internal abstract class BaseTransactionService {
     private lateinit var cryptoService: CryptoService
 
 
-    protected fun updateBalanceByFee(tx: Transaction) {
-        walletService.decreaseBalance(tx.senderAddress, tx.payload.fee)
+    protected fun toBlock(utx: U, tx: T, block: MainBlock): T {
+        tx.block = block
+        updateBalanceByFee(tx)
+        uRepository.delete(utx)
+        return repository.save(tx)
     }
 
-    protected fun updateUnconfirmedBalanceByFee(tx: UTransaction) {
-        walletService.decreaseUnconfirmedBalance(tx.senderAddress, tx.payload.fee)
+    protected fun updateBalanceByFee(tx: T) {
+        walletService.decreaseBalance(tx.senderAddress, tx.fee)
     }
 
-    protected fun validate(tx: UTransaction) {
-        if (!isValidHash(tx.payload, tx.senderPublicKey, tx.senderSignature, tx.hash)) {
-            throw ValidationException("Invalid transaction hash")
-        }
-
-        if (!cryptoService.isValidAddress(tx.senderAddress, ByteUtils.fromHexString(tx.senderPublicKey))) {
-            throw ValidationException("Address and public key are incompatible")
-        }
-
-        if (!isValidFee(tx.senderAddress, tx.payload.fee)) {
-            throw ValidationException("Invalid wallet balance")
-        }
-
-        if (!isValidaSignature(tx.payload, tx.senderPublicKey, tx.senderSignature)) {
-            throw ValidationException("Invalid transaction signature")
-        }
+    protected fun updateUnconfirmedBalanceByFee(tx: U) {
+        walletService.decreaseUnconfirmedBalance(tx.senderAddress, tx.fee)
     }
 
-    private fun isValidHash(payload: BaseTransactionPayload, publicKey: String, signature: String, hash: String): Boolean {
-        return TransactionUtils.createHash(payload, publicKey, signature) == hash
+    protected fun isValid(tx: BaseTransaction): Boolean {
+        return isValidAddress(tx.senderAddress, tx.senderPublicKey)
+            && isValidFee(tx.senderAddress, tx.fee)
+            && isValidHash(tx.timestamp, tx.fee, tx.getPayload(), tx.hash)
+            && isValidaSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
     }
 
-    private fun isValidaSignature(payload: BaseTransactionPayload, publicKey: String, signature: String): Boolean {
-        return SignatureUtils.verify(payload.getBytes(), signature, ByteUtils.fromHexString(publicKey))
+    private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean {
+        return !cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
     }
 
     private fun isValidFee(senderAddress: String, amount: Long): Boolean {
@@ -64,6 +62,14 @@ internal abstract class BaseTransactionService {
             return false
         }
         return true
+    }
+
+    private fun isValidHash(timestamp: Long, fee: Long, payload: TransactionPayload, hash: String): Boolean {
+        return TransactionUtils.generateHash(timestamp, fee, payload) == hash
+    }
+
+    private fun isValidaSignature(hash: String, signature: String, publicKey: String): Boolean {
+        return SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
     }
 
 }

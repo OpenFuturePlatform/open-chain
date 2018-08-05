@@ -17,11 +17,11 @@ import javax.xml.bind.ValidationException
 
 @Service
 internal class DefaultVoteTransactionService(
-    private val repository: TransactionRepository<VoteTransaction>,
-    private val uRepository: UTransactionRepository<UVoteTransaction>,
+    repository: TransactionRepository<VoteTransaction>,
+    uRepository: UTransactionRepository<UVoteTransaction>,
     private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties
-) : BaseTransactionService(), VoteTransactionService {
+) : BaseTransactionService<VoteTransaction, UVoteTransaction>(repository, uRepository), VoteTransactionService {
 
     @Transactional
     override fun add(message: VoteTransactionMessage): UVoteTransaction {
@@ -31,7 +31,10 @@ internal class DefaultVoteTransactionService(
         }
 
         val tx = UVoteTransaction.of(message)
-        validate(tx)
+        if (!isValid(tx)) {
+            throw ValidationException("Transaction is invalid!")
+        }
+
         updateUnconfirmedBalanceByFee(tx)
         // todo broadcast
         return uRepository.save(tx)
@@ -39,31 +42,25 @@ internal class DefaultVoteTransactionService(
 
     @Transactional
     override fun add(request: VoteTransactionRequest): UVoteTransaction {
-        val tx = request.toUEntity(clock.networkTime())
-        validate(tx)
+        val tx = UVoteTransaction.of(clock.networkTime(), request)
+        if (!isValid(tx)) {
+            throw ValidationException("Transaction is invalid!")
+        }
+
         updateUnconfirmedBalanceByFee(tx)
         // todo broadcast
         return uRepository.save(tx)
     }
 
     @Transactional
-    override fun toBlock(utx: UVoteTransaction, block: MainBlock) {
+    override fun toBlock(utx: UVoteTransaction, block: MainBlock): VoteTransaction {
         val type = utx.payload.getVoteType()
         updateWalletVotes(utx.payload.delegateKey, utx.senderAddress, type)
-
-        val tx = VoteTransaction.of(utx)
-        tx.block = block
-        updateBalanceByFee(tx)
-        uRepository.delete(utx)
-        repository.save(tx)
+        return super.toBlock(utx, VoteTransaction.of(utx), block)
     }
 
-    @Transactional
-    fun validate(tx: UVoteTransaction) {
-        if (!isValidVoteCount(tx.senderAddress)) {
-            throw ValidationException("Wallet ${tx.senderAddress} already spent all votes!")
-        }
-        super.validate(tx)
+    private fun isValid(tx: UVoteTransaction): Boolean {
+        return isValidVoteCount(tx.senderAddress) && super.isValid(tx)
     }
 
     private fun updateWalletVotes(delegateKey: String, senderAddress: String, type: VoteType) {

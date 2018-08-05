@@ -2,12 +2,9 @@ package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import io.openfuture.chain.core.model.entity.transaction.payload.BaseTransactionPayload
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.util.BlockUtils
@@ -36,29 +33,31 @@ class DefaultMainBlockService(
         val height = lastBlock.height + 1
         val transactions = transactionService.getAllUnconfirmed()
         val previousHash = lastBlock.hash
-        val reward = transactions.map { it.payload.fee }.sum() + consensusProperties.rewardBlock!!
+        val reward = transactions.map { it.fee }.sum() + consensusProperties.rewardBlock!!
         val merkleHash = calculateMerkleRoot(transactions)
+        val payload = MainBlockPayload(merkleHash)
 
         val hash = BlockUtils.createHash(timestamp, height, previousHash, reward, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
 
-        return MainBlock(timestamp, height, hash, signature, publicKey, payload)
+        return MainBlock(timestamp, height, previousHash, reward, ByteUtils.toHexString(hash), signature, publicKey, payload)
     }
 
     @Transactional
     override fun add(message: MainBlockMessage) {
-        if (!isValid(message)) {
+        if (null != repository.findOneByHash(message.hash)) {
             return
         }
 
-        val block = repository.findOneByHash(message.hash)
-        if (null != block) {
+        val block = MainBlock.of(message)
+        val transactions = message.transactions.map { transactionService.getUnconfirmedByHash(it) }
+
+        if (!isValid(block, transactions)) {
             return
         }
 
-        val persistBlock = repository.save(MainBlock.of(message))
-        message.transactions.forEach { transactionService.toBlock(it, persistBlock) }
+        repository.save(block)
         // todo broadcast
     }
 
@@ -66,9 +65,11 @@ class DefaultMainBlockService(
     override fun isValid(message: MainBlockMessage): Boolean {
         val block = MainBlock.of(message)
         val transactions = message.transactions.map { transactionService.getUnconfirmedByHash(it) }
-        return super.isValid(block)
-            && !message.transactions.isEmpty()
-            && isValidMerkleHash(transactions, message.merkleHash)
+        return isValid(block, transactions)
+    }
+
+    private fun isValid(block: MainBlock, transactions: List<BaseTransaction>): Boolean {
+        return isValidMerkleHash(block, transactions) && super.isValid(block)
     }
 
     private fun calculateMerkleRoot(transactions: List<BaseTransaction>): String {
@@ -93,12 +94,11 @@ class DefaultMainBlockService(
         return ByteUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
     }
 
-    private fun isValidMerkleHash(transactions: List<BaseTransaction>, merkleHash: String): Boolean {
+    private fun isValidMerkleHash(block: MainBlock, transactions: List<BaseTransaction>): Boolean {
         if (transactions.isEmpty()) {
             return false
         }
-
-        return merkleHash == calculateMerkleRoot(transactions)
+        return block.payload.merkleHash == calculateMerkleRoot(transactions)
     }
 
 }

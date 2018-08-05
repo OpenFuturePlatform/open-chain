@@ -34,7 +34,7 @@ interface UTransactionRepository<UEntity : UTransaction> : BaseRepository<UEntit
 
     fun findOneByHash(hash: String): UEntity?
 
-    fun findAllByOrderByPayloadFeeDesc(): MutableList<UEntity>
+    fun findAllByOrderByFeeDesc(): MutableList<UEntity>
 
 }
 

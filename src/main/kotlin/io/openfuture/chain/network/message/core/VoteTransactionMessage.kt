@@ -9,20 +9,20 @@ class VoteTransactionMessage(
     timestamp: Long,
     fee: Long,
     senderAddress: String,
-    senderPublicKey: String,
-    senderSignature: String,
     hash: String,
+    senderSignature: String,
+    senderPublicKey: String,
     var voteTypeId: Int,
     var delegateKey: String
-) : BaseTransactionMessage(timestamp, fee, senderAddress, senderPublicKey, senderSignature, hash) {
+) : BaseTransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
     constructor(tx: VoteTransaction) : this(
         tx.timestamp,
-        tx.payload.fee,
+        tx.fee,
         tx.senderAddress,
-        tx.senderPublicKey,
-        tx.senderSignature,
         tx.hash,
+        tx.senderSignature,
+        tx.senderPublicKey,
         tx.payload.voteTypeId,
         tx.payload.delegateKey
     )

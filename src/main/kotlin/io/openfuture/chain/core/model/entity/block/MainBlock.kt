@@ -1,6 +1,6 @@
 package io.openfuture.chain.core.model.entity.block
 
-import io.openfuture.chain.core.model.entity.block.payload.BaseBlockPayload
+import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.network.message.core.MainBlockMessage
 import javax.persistence.Embedded
@@ -12,27 +12,31 @@ import javax.persistence.Table
 class MainBlock(
     timestamp: Long,
     height: Long,
+    previousHash: String,
+    reward: Long,
     hash: String,
     signature: String,
     publicKey: String,
 
     @Embedded
-    private var payload: MainBlockPayload
+    var payload: MainBlockPayload
 
-) : BaseBlock(timestamp, height, hash, signature, publicKey) {
+) : BaseBlock(timestamp, height, previousHash, reward, hash, signature, publicKey) {
 
     companion object {
         fun of(dto: MainBlockMessage): MainBlock = MainBlock(
             dto.timestamp,
             dto.height,
+            dto.previousHash,
+            dto.reward,
             dto.hash,
             dto.signature,
             dto.publicKey,
-            MainBlockPayload(dto.previousHash, dto.reward, dto.merkleHash)
+            MainBlockPayload(dto.merkleHash)
         )
     }
 
-    override fun getPayload(): MainBlockPayload {
+    override fun getPayload(): BlockPayload {
         return payload
     }
 

@@ -11,27 +11,27 @@ abstract class BaseTransactionMessage(
     var timestamp: Long,
     var fee: Long,
     var senderAddress: String,
-    var senderPublicKey: String,
+    var hash: String,
     var senderSignature: String,
-    var hash: String
+    var senderPublicKey: String
 ) : BaseMessage {
 
     override fun read(buffer: ByteBuf) {
         timestamp = buffer.readLong()
         fee = buffer.readLong()
         senderAddress = buffer.readString()
-        senderPublicKey = buffer.readString()
-        senderSignature = buffer.readString()
         hash = buffer.readString()
+        senderSignature = buffer.readString()
+        senderPublicKey = buffer.readString()
     }
 
     override fun write(buffer: ByteBuf) {
         buffer.writeLong(timestamp)
         buffer.writeLong(fee)
         buffer.writeString(senderAddress)
-        buffer.writeString(senderPublicKey)
-        buffer.writeString(senderSignature)
         buffer.writeString(hash)
+        buffer.writeString(senderSignature)
+        buffer.writeString(senderPublicKey)
     }
 
 }

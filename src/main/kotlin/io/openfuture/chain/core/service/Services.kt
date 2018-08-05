@@ -5,6 +5,10 @@ import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
@@ -75,7 +79,7 @@ interface TransactionService {
 
     fun getUnconfirmedByHash(hash: String): UTransaction
 
-    fun toBlock(hash: String, block: MainBlock)
+    fun toBlock(utx: UTransaction, block: MainBlock): Transaction
 
 }
 
@@ -85,7 +89,7 @@ interface TransferTransactionService {
 
     fun add(request: TransferTransactionRequest): UTransferTransaction
 
-    fun toBlock(utx: UTransferTransaction, block: MainBlock)
+    fun toBlock(utx: UTransferTransaction, block: MainBlock): TransferTransaction
 
 }
 
@@ -95,7 +99,7 @@ interface VoteTransactionService {
 
     fun add(request: VoteTransactionRequest): UVoteTransaction
 
-    fun toBlock(utx: UVoteTransaction, block: MainBlock)
+    fun toBlock(utx: UVoteTransaction, block: MainBlock): VoteTransaction
 
 }
 
@@ -105,7 +109,7 @@ interface DelegateTransactionService {
 
     fun add(request: DelegateTransactionRequest): UDelegateTransaction
 
-    fun toBlock(utx: UDelegateTransaction, block: MainBlock)
+    fun toBlock(utx: UDelegateTransaction, block: MainBlock): DelegateTransaction
 
 }
 
@@ -115,7 +119,9 @@ interface DelegateService {
 
     fun getByPublicKey(key: String): Delegate
 
-    fun getActiveDelegates(): Set<Delegate>
+    fun getActiveDelegates(): List<Delegate>
+
+    fun isExists(key: String): Boolean
 
     fun save(delegate: Delegate): Delegate
 

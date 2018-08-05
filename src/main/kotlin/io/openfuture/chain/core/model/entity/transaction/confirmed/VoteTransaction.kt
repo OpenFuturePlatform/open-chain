@@ -1,6 +1,6 @@
 package io.openfuture.chain.core.model.entity.transaction.confirmed
 
-import io.openfuture.chain.core.model.entity.transaction.payload.BaseTransactionPayload
+import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
 import javax.persistence.Embedded
@@ -11,29 +11,31 @@ import javax.persistence.Table
 @Table(name = "vote_transactions")
 class VoteTransaction(
     timestamp: Long,
-    senderAddress: String,
-    senderPublicKey: String,
-    senderSignature: String,
+    fee: Long,
     hash: String,
+    senderAddress: String,
+    senderSignature: String,
+    senderPublicKey: String,
 
     @Embedded
-    override val payload: VoteTransactionPayload
+    val payload: VoteTransactionPayload
 
-) : Transaction(timestamp, senderAddress, senderPublicKey, senderSignature, hash, payload) {
+) : Transaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
     companion object {
         fun of(utx: UVoteTransaction): VoteTransaction = VoteTransaction(
             utx.timestamp,
+            utx.fee,
             utx.senderAddress,
-            utx.senderPublicKey,
-            utx.senderSignature,
             utx.hash,
+            utx.senderSignature,
+            utx.senderPublicKey,
             utx.payload
         )
     }
 
-//    override fun getPayload(): VoteTransactionPayload {
-//        return payload
-//    }
+    override fun getPayload(): TransactionPayload {
+        return payload
+    }
 
 }

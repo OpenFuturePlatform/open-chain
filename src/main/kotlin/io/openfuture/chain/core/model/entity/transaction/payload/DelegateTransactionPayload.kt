@@ -1,23 +1,19 @@
 package io.openfuture.chain.core.model.entity.transaction.payload
 
+import java.nio.charset.StandardCharsets.UTF_8
 import javax.persistence.Column
 import javax.persistence.Embeddable
 
 @Embeddable
 class DelegateTransactionPayload(
 
-    fee: Long,
-
     @Column(name = "delegate_key", nullable = false, unique = true)
     var delegateKey: String
 
-) : BaseTransactionPayload(fee) {
+) : TransactionPayload {
 
     override fun getBytes(): ByteArray {
-        val builder = StringBuilder()
-        builder.append(fee)
-        builder.append(delegateKey)
-        return builder.toString().toByteArray()
+        return delegateKey.toByteArray(UTF_8)
     }
 
 }

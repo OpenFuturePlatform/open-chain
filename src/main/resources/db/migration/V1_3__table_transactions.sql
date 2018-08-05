@@ -3,9 +3,9 @@ CREATE TABLE transactions (
   timestamp        BIGINT         NOT NULL,
   fee              BIGINT         NOT NULL,
   sender_address   VARCHAR        NOT NULL,
+  hash             VARCHAR UNIQUE NOT NULL,
   sender_signature VARCHAR        NOT NULL,
   sender_key       VARCHAR        NOT NULL,
-  hash             VARCHAR UNIQUE NOT NULL,
   block_id         INTEGER        NOT NULL REFERENCES main_blocks
 );
 --
@@ -39,10 +39,10 @@ CREATE TABLE u_transactions (
   id               INTEGER PRIMARY KEY,
   timestamp        BIGINT         NOT NULL,
   fee              BIGINT         NOT NULL,
-  sender_key       VARCHAR        NOT NULL,
   sender_address   VARCHAR        NOT NULL,
+  hash             VARCHAR UNIQUE NOT NULL,
   sender_signature VARCHAR        NOT NULL,
-  hash             VARCHAR UNIQUE NOT NULL
+  sender_key       VARCHAR        NOT NULL
 );
 --
 CREATE TABLE u_transfer_transactions (

@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.network.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readList
+import io.openfuture.chain.network.extension.readStringList
 import io.openfuture.chain.network.extension.writeList
 
 @NoArgConstructor
@@ -21,28 +22,28 @@ class GenesisBlockMessage(
 
     constructor(block: GenesisBlock) : this(
         block.height,
-        block.getPayload().previousHash,
+        block.previousHash,
         block.timestamp,
-        block.getPayload().reward,
+        block.reward,
         block.hash,
         block.signature,
         block.publicKey,
-        block.getPayload().epochIndex,
-        block.getPayload().activeDelegates.map { it.publicKey }
+        block.payload.epochIndex,
+        block.payload.activeDelegates.map { it.publicKey }
     )
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)
 
         epochIndex = buffer.readLong()
-//        delegates = buffer.readList<String>()
+        delegates = buffer.readStringList()
     }
 
     override fun write(buffer: ByteBuf) {
         super.write(buffer)
 
         buffer.writeLong(epochIndex)
-//        buffer.writeList(delegates.toList())
+        delegates = buffer.readStringList()
     }
 
     override fun toString() = "NetworkGenesisBlock(hash=$hash)"

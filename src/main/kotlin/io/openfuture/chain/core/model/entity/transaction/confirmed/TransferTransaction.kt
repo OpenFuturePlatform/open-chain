@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.model.entity.transaction.confirmed
 
+import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import javax.persistence.Embedded
@@ -10,25 +11,31 @@ import javax.persistence.Table
 @Table(name = "transfer_transactions")
 class TransferTransaction(
     timestamp: Long,
+    fee: Long,
     senderAddress: String,
-    senderPublicKey: String,
-    senderSignature: String,
     hash: String,
+    senderSignature: String,
+    senderPublicKey: String,
 
     @Embedded
-    override val payload: TransferTransactionPayload
+    val payload: TransferTransactionPayload
 
-) : Transaction(timestamp, senderAddress, senderPublicKey, senderSignature, hash, payload) {
+) : Transaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
     companion object {
         fun of(utx: UTransferTransaction): TransferTransaction = TransferTransaction(
             utx.timestamp,
+            utx.fee,
             utx.senderAddress,
-            utx.senderPublicKey,
-            utx.senderSignature,
             utx.hash,
+            utx.senderSignature,
+            utx.senderPublicKey,
             utx.payload
         )
+    }
+
+    override fun getPayload(): TransactionPayload {
+        return payload
     }
 
 }

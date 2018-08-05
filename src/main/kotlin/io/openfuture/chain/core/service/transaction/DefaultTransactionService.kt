@@ -27,12 +27,12 @@ class DefaultTransactionService(
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(): MutableList<UTransaction> {
-        return unconfirmedRepository.findAllByOrderByPayloadFeeDesc()
+        return unconfirmedRepository.findAllByOrderByFeeDesc()
     }
 
     @Transactional(readOnly = true)
-    override fun getUnconfirmedByHash(hash: String): UTransaction = unconfirmedRepository.findOneByHash(hash) ?:
-    throw NotFoundException("Transaction  with hash $hash not found")
+    override fun getUnconfirmedByHash(hash: String): UTransaction = unconfirmedRepository.findOneByHash(hash)
+        ?: throw NotFoundException("Transaction  with hash $hash not found")
 
     @Transactional(readOnly = true)
     override fun getCount(): Long {
@@ -40,10 +40,8 @@ class DefaultTransactionService(
     }
 
     @Transactional
-    override fun toBlock(hash: String, block: MainBlock) {
-        val utx = getUnconfirmedByHash(hash)
-
-        when (utx) {
+    override fun toBlock(utx: UTransaction, block: MainBlock): Transaction {
+        return when (utx) {
             is UVoteTransaction -> voteTransactionService.toBlock(utx, block)
             is UTransferTransaction -> transferTransactionService.toBlock(utx, block)
             is UDelegateTransaction -> delegateTransactionService.toBlock(utx, block)

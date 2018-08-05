@@ -12,13 +12,14 @@ import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.DelegateTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import javax.xml.bind.ValidationException
 
 @Service
-internal class DefaultDelegateTransactionService(
-    private val repository: TransactionRepository<DelegateTransaction>,
-    private val uRepository: UTransactionRepository<UDelegateTransaction>,
+class DefaultDelegateTransactionService(
+    repository: TransactionRepository<DelegateTransaction>,
+    uRepository: UTransactionRepository<UDelegateTransaction>,
     private val delegateService: DelegateService
-) : BaseTransactionService(), DelegateTransactionService {
+) : BaseTransactionService<DelegateTransaction, UDelegateTransaction>(repository, uRepository), DelegateTransactionService {
 
     @Transactional
     override fun add(message: DelegateTransactionMessage): UDelegateTransaction {
@@ -28,7 +29,10 @@ internal class DefaultDelegateTransactionService(
         }
 
         val tx = UDelegateTransaction.of(message)
-        validate(tx)
+        if (!isValid(tx)) {
+            throw ValidationException("Transaction is invalid!")
+        }
+
         updateUnconfirmedBalanceByFee(tx)
         // todo broadcast
         return uRepository.save(tx)
@@ -36,22 +40,28 @@ internal class DefaultDelegateTransactionService(
 
     @Transactional
     override fun add(request: DelegateTransactionRequest): UDelegateTransaction {
-        val tx = request.toUEntity(clock.networkTime())
-        validate(tx)
+        val tx = UDelegateTransaction.of(clock.networkTime(), request)
+        if (!isValid(tx)) {
+            throw ValidationException("Transaction is invalid!")
+        }
+
         updateUnconfirmedBalanceByFee(tx)
         // todo broadcast
         return uRepository.save(tx)
     }
 
     @Transactional
-    override fun toBlock(utx: UDelegateTransaction, block: MainBlock) {
+    override fun toBlock(utx: UDelegateTransaction, block: MainBlock): DelegateTransaction {
         delegateService.save(Delegate(utx.payload.delegateKey, utx.senderAddress))
+        return super.toBlock(utx, DelegateTransaction.of(utx), block)
+    }
 
-        val tx = DelegateTransaction.of(utx)
-        tx.block = block
-        updateBalanceByFee(tx)
-        uRepository.delete(utx)
-        repository.save(tx)
+    private fun isValid(tx: UDelegateTransaction): Boolean {
+        return isNotExistDelegate(tx.senderAddress) && super.isValid(tx)
+    }
+
+    private fun isNotExistDelegate(key: String): Boolean {
+        return !delegateService.isExists(key)
     }
 
 }

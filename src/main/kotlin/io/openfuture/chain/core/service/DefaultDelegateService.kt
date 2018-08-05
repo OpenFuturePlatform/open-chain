@@ -32,7 +32,7 @@ class DefaultDelegateService(
         ?: throw NotFoundException("Delegate with key: $key not exist!")
 
     @Transactional(readOnly = true)
-    override fun getActiveDelegates(): Set<Delegate> {
+    override fun getActiveDelegates(): List<Delegate> {
         val sql = "select sum(wll.balance) rating, dg.public_key $PUBLIC_KEY, dg.address $ADDRESS, dg.id $ID " +
             "from wallets2delegates as s2d\n" +
             "  join wallets as wll on wll.id = s2d.wallet_id\n" +
@@ -43,7 +43,12 @@ class DefaultDelegateService(
 
         return jdbcTemplate.query(sql) { rs, rowNum ->
             Delegate(rs.getString(PUBLIC_KEY), rs.getString(ADDRESS), rs.getInt(ID))
-        }.toSet()
+        }
+    }
+
+    @Transactional(readOnly = true)
+    override fun isExists(key: String): Boolean {
+        return null != repository.findOneByPublicKey(key)
     }
 
     @Transactional

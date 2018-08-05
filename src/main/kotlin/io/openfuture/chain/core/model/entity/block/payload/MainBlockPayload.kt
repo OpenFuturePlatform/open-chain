@@ -1,23 +1,19 @@
 package io.openfuture.chain.core.model.entity.block.payload
 
-import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
+import java.nio.charset.StandardCharsets.UTF_8
 import javax.persistence.Column
 import javax.persistence.Embeddable
-import javax.persistence.FetchType
-import javax.persistence.OneToMany
 
 @Embeddable
 class MainBlockPayload(
-    previousHash: String,
-    reward: Long,
 
     @Column(name = "merkle_hash", nullable = false)
-    var merkleHash: String,
+    var merkleHash: String
 
-    @OneToMany(mappedBy = "block", fetch = FetchType.EAGER)
-    var transactions: MutableSet<Transaction> = mutableSetOf()
+) : BlockPayload {
 
-) : BaseBlockPayload(previousHash, reward) {
-
+    override fun getBytes(): ByteArray {
+        return merkleHash.toByteArray(UTF_8)
+    }
 
 }

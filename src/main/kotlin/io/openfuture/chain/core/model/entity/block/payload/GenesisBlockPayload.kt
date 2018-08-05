@@ -1,13 +1,13 @@
 package io.openfuture.chain.core.model.entity.block.payload
 
 import io.openfuture.chain.core.model.entity.Delegate
-import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
+import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
+import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets.UTF_8
 import javax.persistence.*
 
 @Embeddable
 class GenesisBlockPayload(
-    previousHash: String,
-    reward: Long,
 
     @Column(name = "epoch_index", nullable = false)
     var epochIndex: Long,
@@ -16,17 +16,18 @@ class GenesisBlockPayload(
     @JoinTable(name = "delegate2genesis",
         joinColumns = [(JoinColumn(name = "genesis_id"))],
         inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
-    var activeDelegates: Set<Delegate> = mutableSetOf()
+    var activeDelegates: List<Delegate> = listOf()
 
-) : BaseBlockPayload(previousHash, reward) {
+) : BlockPayload {
 
     override fun getBytes(): ByteArray {
-        val builder = StringBuilder()
-        builder.append(previousHash)
-        builder.append(reward)
-        builder.append(epochIndex)
-        builder.append(activeDelegates)
-        return builder.toString().toByteArray()
+        val keys = activeDelegates.map { it.publicKey }
+        val keysLength = keys.map { it.toByteArray(UTF_8).size }.sum()
+
+        val buffer = ByteBuffer.allocate(LONG_BYTES + keysLength)
+        buffer.putLong(epochIndex)
+        keys.map { buffer.put(it.toByteArray(UTF_8))}
+        return buffer.array()
     }
 
 }

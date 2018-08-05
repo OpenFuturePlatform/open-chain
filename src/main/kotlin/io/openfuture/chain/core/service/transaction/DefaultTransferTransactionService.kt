@@ -13,10 +13,10 @@ import org.springframework.transaction.annotation.Transactional
 import javax.xml.bind.ValidationException
 
 @Service
-internal class DefaultTransferTransactionService(
-    private val repository: TransactionRepository<TransferTransaction>,
-    private val uRepository: UTransactionRepository<UTransferTransaction>
-) : BaseTransactionService(), TransferTransactionService {
+class DefaultTransferTransactionService(
+    repository: TransactionRepository<TransferTransaction>,
+    uRepository: UTransactionRepository<UTransferTransaction>
+) : BaseTransactionService<TransferTransaction, UTransferTransaction>(repository, uRepository), TransferTransactionService {
 
     @Transactional
     override fun add(message: TransferTransactionMessage): UTransferTransaction {
@@ -26,7 +26,10 @@ internal class DefaultTransferTransactionService(
         }
 
         val tx = UTransferTransaction.of(message)
-        validate(tx)
+        if (!isValid(tx)) {
+            throw ValidationException("Transaction is invalid!")
+        }
+
         updateUnconfirmedBalanceByFee(tx)
         // todo broadcast
         return uRepository.save(tx)
@@ -34,30 +37,24 @@ internal class DefaultTransferTransactionService(
 
     @Transactional
     override fun add(request: TransferTransactionRequest): UTransferTransaction {
-        val tx = request.toUEntity(clock.networkTime())
-        validate(tx)
+        val tx = UTransferTransaction.of(clock.networkTime(), request)
+        if (!isValid(tx)) {
+            throw ValidationException("Transaction is invalid!")
+        }
+
         updateUnconfirmedBalanceByFee(tx)
         // todo broadcast
         return uRepository.save(tx)
     }
 
     @Transactional
-    override fun toBlock(utx: UTransferTransaction, block: MainBlock) {
+    override fun toBlock(utx: UTransferTransaction, block: MainBlock): TransferTransaction {
         updateTransferBalance(utx.senderAddress, utx.payload.recipientAddress, utx.payload.amount)
-
-        val tx = TransferTransaction.of(utx)
-        tx.block = block
-        updateBalanceByFee(tx)
-        uRepository.delete(utx)
-        repository.save(tx)
+        return super.toBlock(utx, TransferTransaction.of(utx), block)
     }
 
-    @Transactional
-    fun validate(tx: UTransferTransaction) {
-        if (!isValidTransferBalance(tx.senderAddress, tx.payload.amount + tx.payload.fee)) {
-            throw ValidationException("There is not enough money on the wallet for transfer operation!")
-        }
-        super.validate(tx)
+    private fun isValid(tx: UTransferTransaction): Boolean {
+        return isValidTransferBalance(tx.senderAddress, tx.payload.amount + tx.fee) && super.isValid(tx)
     }
 
     private fun updateTransferBalance(from: String, to: String, amount: Long) {
