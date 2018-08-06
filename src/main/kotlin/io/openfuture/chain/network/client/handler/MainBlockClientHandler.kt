@@ -35,9 +35,10 @@ class MainBlockClientHandler(
     }
 
     private fun toTransactions(
-            transferTransactions: MutableList<TransferTransactionDto>,
-            voteTransactions: MutableList<VoteTransactionDto>,
-            delegateTransactions: MutableList<DelegateTransactionDto>): MutableSet<Transaction> {
+        transferTransactions: MutableList<TransferTransactionDto>,
+        voteTransactions: MutableList<VoteTransactionDto>,
+        delegateTransactions: MutableList<DelegateTransactionDto>
+    ): MutableSet<Transaction> {
         return mutableSetOf(
             *transferTransactions.map { it.toEntity() }.toTypedArray(),
             *voteTransactions.map { it.toEntity() }.toTypedArray(),
