@@ -5,6 +5,7 @@ import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransac
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.rpc.controller.transaction.DelegateTransactionController
+import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionHashRequest
 import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.DelegateTransactionResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -24,27 +25,27 @@ class DelegateTransactionControllerTest : ControllerTests() {
 
     @Test
     fun doDeriveHashReturnBytesOfPayload() {
-        val payload = DelegateTransactionPayload(1L, "delegateKey")
-        val bytes = ByteArray(1)
+        val hashRequest = DelegateTransactionHashRequest(1L, 1L, "delegateKey")
+        val hash = ByteArray(1).toString()
 
-        given(service.getBytes(payload)).willReturn(bytes)
+        given(service.generateHash(hashRequest)).willReturn(hash)
 
         val result = webClient.post().uri("/rpc/transactions/delegates/doGenerateHash")
-            .body(Mono.just(payload), DelegateTransactionPayload::class.java)
+            .body(Mono.just(hashRequest), DelegateTransactionHashRequest::class.java)
             .exchange()
             .expectStatus().isOk
             .expectBody(String::class.java)
             .returnResult().responseBody!!
 
-        assertThat(result).isEqualTo(bytes)
+        assertThat(result).isEqualTo(hash)
     }
 
     @Test
     fun addTransaction() {
-        val transactionRequest = DelegateTransactionRequest("senderAddress", "senderPublicKey", "senderSignature",
-            1L, "delegateKey")
-        val transactionDto = UDelegateTransaction(1, "senderAddress", "senderPublicKey", "senderSignature",
-            "hash", DelegateTransactionPayload(1L, "delegateKey"))
+        val transactionRequest = DelegateTransactionRequest(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
+            "delegateKey")
+        val transactionDto = UDelegateTransaction(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
+            "hash", DelegateTransactionPayload("delegateKey"))
 
         given(service.add(transactionRequest)).willReturn(transactionDto)
 
