@@ -68,6 +68,7 @@ class DefaultPendingBlockHandler(
         if (null == delegate || message.hash != observable!!.hash || !isActiveDelegate()) {
             return
         }
+
         if (!prepareVotes.containsKey(message.publicKey) && isValidApprovalSignature(message)) {
             prepareVotes[message.publicKey] = delegate
             networkService.broadcast(message)
