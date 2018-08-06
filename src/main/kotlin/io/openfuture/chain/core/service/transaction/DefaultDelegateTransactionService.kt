@@ -5,7 +5,7 @@ import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
@@ -21,35 +21,35 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultDelegateTransactionService(
     repository: TransactionRepository<DelegateTransaction>,
-    uRepository: UTransactionRepository<UDelegateTransaction>,
+    uRepository: UTransactionRepository<UnconfirmedDelegateTransaction>,
     private val delegateService: DelegateService,
     private val networkService: NetworkService
-) : BaseTransactionService<DelegateTransaction, UDelegateTransaction>(repository, uRepository), DelegateTransactionService {
+) : BaseTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository), DelegateTransactionService {
 
     @Transactional(readOnly = true)
-    override fun getAllUnconfirmed(): MutableList<UDelegateTransaction> {
+    override fun getAllUnconfirmed(): MutableList<UnconfirmedDelegateTransaction> {
         return uRepository.findAllByOrderByFeeDesc()
     }
 
     @Transactional(readOnly = true)
-    override fun getUnconfirmedByHash(hash: String): UDelegateTransaction = uRepository.findOneByHash(hash)
+    override fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction = uRepository.findOneByHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional
-    override fun add(message: DelegateTransactionMessage): UDelegateTransaction {
+    override fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction {
         val persistTx = repository.findOneByHash(message.hash)
         if (null != persistTx) {
-            return UDelegateTransaction.of(message)
+            return UnconfirmedDelegateTransaction.of(message)
         }
 
-        val savedUtx = super.save(UDelegateTransaction.of(message))
+        val savedUtx = super.save(UnconfirmedDelegateTransaction.of(message))
         networkService.broadcast(message)
         return savedUtx
     }
 
     @Transactional
-    override fun add(request: DelegateTransactionRequest): UDelegateTransaction {
-        val savedUtx = super.save(UDelegateTransaction.of(clock.networkTime(), request))
+    override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction {
+        val savedUtx = super.save(UnconfirmedDelegateTransaction.of(clock.networkTime(), request))
         networkService.broadcast(DelegateTransactionMessage(savedUtx))
         return savedUtx
     }
@@ -87,7 +87,7 @@ class DefaultDelegateTransactionService(
     }
 
     @Transactional
-    override fun isValid(utx: UDelegateTransaction): Boolean {
+    override fun isValid(utx: UnconfirmedDelegateTransaction): Boolean {
         return isNotExistDelegate(utx.senderAddress) && super.isValid(utx)
     }
 

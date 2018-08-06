@@ -9,7 +9,7 @@ import javax.persistence.Table
 @Entity
 @Table(name = "u_transactions")
 @Inheritance(strategy = InheritanceType.JOINED)
-abstract class UTransaction(
+abstract class UnconfirmedTransaction(
     timestamp: Long,
     fee: Long,
     senderAddress: String,

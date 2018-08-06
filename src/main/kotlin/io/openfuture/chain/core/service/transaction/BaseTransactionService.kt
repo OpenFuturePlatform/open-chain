@@ -4,7 +4,7 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.WalletService
@@ -16,7 +16,7 @@ import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.beans.factory.annotation.Autowired
 import javax.xml.bind.ValidationException
 
-abstract class BaseTransactionService<T : Transaction, U: UTransaction> (
+abstract class BaseTransactionService<T : Transaction, U: UnconfirmedTransaction> (
     protected val repository: TransactionRepository<T>,
     protected val uRepository: UTransactionRepository<U>
 ) {

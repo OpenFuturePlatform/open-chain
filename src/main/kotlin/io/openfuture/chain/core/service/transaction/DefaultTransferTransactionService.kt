@@ -4,7 +4,7 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.TransferTransactionService
@@ -19,34 +19,34 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultTransferTransactionService(
     repository: TransactionRepository<TransferTransaction>,
-    uRepository: UTransactionRepository<UTransferTransaction>,
+    uRepository: UTransactionRepository<UnconfirmedTransferTransaction>,
     private val networkService: NetworkService
-) : BaseTransactionService<TransferTransaction, UTransferTransaction>(repository, uRepository), TransferTransactionService {
+) : BaseTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
 
     @Transactional(readOnly = true)
-    override fun getAllUnconfirmed(): MutableList<UTransferTransaction> {
+    override fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction> {
         return uRepository.findAllByOrderByFeeDesc()
     }
 
     @Transactional(readOnly = true)
-    override fun getUnconfirmedByHash(hash: String): UTransferTransaction = uRepository.findOneByHash(hash)
+    override fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction = uRepository.findOneByHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional
-    override fun add(message: TransferTransactionMessage): UTransferTransaction {
+    override fun add(message: TransferTransactionMessage): UnconfirmedTransferTransaction {
         val transaction = repository.findOneByHash(message.hash)
         if (null != transaction) {
-            return UTransferTransaction.of(message)
+            return UnconfirmedTransferTransaction.of(message)
         }
 
-        val savedUtx = super.save(UTransferTransaction.of(message))
+        val savedUtx = super.save(UnconfirmedTransferTransaction.of(message))
         networkService.broadcast(message)
         return savedUtx
     }
 
     @Transactional
-    override fun add(request: TransferTransactionRequest): UTransferTransaction {
-        val savedUtx = super.save(UTransferTransaction.of(clock.networkTime(), request))
+    override fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction {
+        val savedUtx = super.save(UnconfirmedTransferTransaction.of(clock.networkTime(), request))
         networkService.broadcast(TransferTransactionMessage(savedUtx))
         return savedUtx
     }
@@ -78,7 +78,7 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun isValid(utx: UTransferTransaction): Boolean {
+    override fun isValid(utx: UnconfirmedTransferTransaction): Boolean {
         return isValidTransferBalance(utx.senderAddress, utx.payload.amount + utx.fee) && super.isValid(utx)
     }
 

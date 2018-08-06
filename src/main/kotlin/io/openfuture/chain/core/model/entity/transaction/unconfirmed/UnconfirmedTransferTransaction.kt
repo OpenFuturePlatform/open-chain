@@ -11,7 +11,7 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "u_transfer_transactions")
-class UTransferTransaction(
+class UnconfirmedTransferTransaction(
     timestamp: Long,
     fee: Long,
     hash: String,
@@ -22,10 +22,10 @@ class UTransferTransaction(
     @Embedded
     var payload: TransferTransactionPayload
 
-) : UTransaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
+) : UnconfirmedTransaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
     companion object {
-        fun of(dto: TransferTransactionMessage): UTransferTransaction = UTransferTransaction(
+        fun of(dto: TransferTransactionMessage): UnconfirmedTransferTransaction = UnconfirmedTransferTransaction(
             dto.timestamp,
             dto.fee,
             dto.senderAddress,
@@ -35,7 +35,7 @@ class UTransferTransaction(
             TransferTransactionPayload(dto.amount, dto.recipientAddress)
         )
 
-        fun of(time: Long, request: TransferTransactionRequest): UTransferTransaction = UTransferTransaction(
+        fun of(time: Long, request: TransferTransactionRequest): UnconfirmedTransferTransaction = UnconfirmedTransferTransaction(
             time,
             request.fee!!,
             request.senderAddress!!,

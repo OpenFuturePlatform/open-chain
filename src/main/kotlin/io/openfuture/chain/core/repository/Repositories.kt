@@ -4,7 +4,7 @@ import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.data.repository.PagingAndSortingRepository
@@ -30,7 +30,7 @@ interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 }
 
 @Repository
-interface UTransactionRepository<UEntity : UTransaction> : BaseRepository<UEntity> {
+interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseRepository<UEntity> {
 
     fun findOneByHash(hash: String): UEntity?
 

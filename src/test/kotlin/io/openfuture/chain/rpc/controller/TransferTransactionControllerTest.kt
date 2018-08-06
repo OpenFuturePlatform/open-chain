@@ -2,7 +2,7 @@ package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.rpc.controller.transaction.TransferTransactionController
 import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionHashRequest
@@ -43,7 +43,7 @@ class TransferTransactionControllerTest : ControllerTests() {
     fun addTransaction() {
         val transactionRequest = TransferTransactionRequest(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
             1, "delegateKey")
-        val transactionDto = UTransferTransaction(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
+        val transactionDto = UnconfirmedTransferTransaction(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
             "hash", TransferTransactionPayload(1L, "delegateKey"))
 
         given(service.add(transactionRequest)).willReturn(transactionDto)

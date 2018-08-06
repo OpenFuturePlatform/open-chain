@@ -10,7 +10,7 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "vote_transactions")
-class ConfirmedVoteTransaction(
+class VoteTransaction(
     timestamp: Long,
     fee: Long,
     hash: String,
@@ -25,7 +25,7 @@ class ConfirmedVoteTransaction(
 
     companion object {
 
-        fun of(message: VoteTransactionMessage): ConfirmedVoteTransaction = ConfirmedVoteTransaction(
+        fun of(message: VoteTransactionMessage): VoteTransaction = VoteTransaction(
             message.timestamp,
             message.fee,
             message.senderAddress,
@@ -35,7 +35,7 @@ class ConfirmedVoteTransaction(
             VoteTransactionPayload(message.voteTypeId, message.delegateKey)
         )
 
-        fun of(utx: UnconfirmedVoteTransaction): ConfirmedVoteTransaction = ConfirmedVoteTransaction(
+        fun of(utx: UnconfirmedVoteTransaction): VoteTransaction = VoteTransaction(
             utx.timestamp,
             utx.fee,
             utx.senderAddress,

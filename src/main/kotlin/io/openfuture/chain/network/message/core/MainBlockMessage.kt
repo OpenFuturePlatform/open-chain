@@ -2,7 +2,7 @@ package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.confirmed.ConfirmedVoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.network.annotation.NoArgConstructor
@@ -23,7 +23,7 @@ class MainBlockMessage(
     var transferTxs: List<TransferTransactionMessage>
 ) : BlockMessage(height, previousHash, timestamp, reward, hash, signature, publicKey) {
 
-    constructor(block: MainBlock, voteTxs: List<ConfirmedVoteTransaction>, delegateTxs: List<DelegateTransaction>,
+    constructor(block: MainBlock, voteTxs: List<VoteTransaction>, delegateTxs: List<DelegateTransaction>,
                 transferTxs: List<TransferTransaction>) : this(
         block.height,
         block.previousHash,

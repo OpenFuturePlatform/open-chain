@@ -11,7 +11,7 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "u_delegate_transactions")
-class UDelegateTransaction(
+class UnconfirmedDelegateTransaction(
     timestamp: Long,
     fee: Long,
     senderAddress: String,
@@ -22,10 +22,10 @@ class UDelegateTransaction(
     @Embedded
     var payload: DelegateTransactionPayload
 
-) : UTransaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
+) : UnconfirmedTransaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
     companion object {
-        fun of(dto: DelegateTransactionMessage): UDelegateTransaction = UDelegateTransaction(
+        fun of(dto: DelegateTransactionMessage): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
             dto.timestamp,
             dto.fee,
             dto.hash,
@@ -35,7 +35,7 @@ class UDelegateTransaction(
             DelegateTransactionPayload(dto.delegateKey)
         )
 
-        fun of(time: Long, request: DelegateTransactionRequest): UDelegateTransaction = UDelegateTransaction(
+        fun of(time: Long, request: DelegateTransactionRequest): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
             time,
             request.fee!!,
             request.senderAddress!!,

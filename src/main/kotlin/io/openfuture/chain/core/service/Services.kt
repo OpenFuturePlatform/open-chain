@@ -6,12 +6,10 @@ import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.ConfirmedVoteTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.node.*
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
@@ -85,13 +83,13 @@ interface TransactionService {
 
 interface TransferTransactionService {
 
-    fun getAllUnconfirmed(): MutableList<UTransferTransaction>
+    fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction>
 
-    fun getUnconfirmedByHash(hash: String): UTransferTransaction
+    fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction
 
-    fun add(message: TransferTransactionMessage): UTransferTransaction
+    fun add(message: TransferTransactionMessage): UnconfirmedTransferTransaction
 
-    fun add(request: TransferTransactionRequest): UTransferTransaction
+    fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction
 
     fun synchronize(message: TransferTransactionMessage, block: MainBlock)
 
@@ -113,7 +111,7 @@ interface VoteTransactionService {
 
     fun synchronize(message: VoteTransactionMessage, block: MainBlock)
 
-    fun toBlock(hash: String, block: MainBlock): ConfirmedVoteTransaction
+    fun toBlock(hash: String, block: MainBlock): VoteTransaction
 
     fun generateHash(request: VoteTransactionHashRequest): String
 
@@ -121,13 +119,13 @@ interface VoteTransactionService {
 
 interface DelegateTransactionService {
 
-    fun getAllUnconfirmed(): MutableList<UDelegateTransaction>
+    fun getAllUnconfirmed(): MutableList<UnconfirmedDelegateTransaction>
 
-    fun getUnconfirmedByHash(hash: String): UDelegateTransaction
+    fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction
 
-    fun add(message: DelegateTransactionMessage): UDelegateTransaction
+    fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction
 
-    fun add(request: DelegateTransactionRequest): UDelegateTransaction
+    fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction
 
     fun synchronize(message: DelegateTransactionMessage, block: MainBlock)
 

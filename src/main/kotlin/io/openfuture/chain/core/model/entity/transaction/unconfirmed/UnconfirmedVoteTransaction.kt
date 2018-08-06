@@ -22,7 +22,7 @@ class UnconfirmedVoteTransaction(
     @Embedded
     val payload: VoteTransactionPayload
 
-) : UTransaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
+) : UnconfirmedTransaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
     companion object {
         fun of(dto: VoteTransactionMessage): UnconfirmedVoteTransaction = UnconfirmedVoteTransaction(

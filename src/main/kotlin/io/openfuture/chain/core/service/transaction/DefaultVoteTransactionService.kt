@@ -4,7 +4,7 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
-import io.openfuture.chain.core.model.entity.transaction.confirmed.ConfirmedVoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.vote.VoteTransactionPayload
 import io.openfuture.chain.core.repository.TransactionRepository
@@ -21,12 +21,12 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 internal class DefaultVoteTransactionService(
-    repository: TransactionRepository<ConfirmedVoteTransaction>,
+    repository: TransactionRepository<VoteTransaction>,
     uRepository: UTransactionRepository<UnconfirmedVoteTransaction>,
     private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties,
     private val networkService: NetworkService
-) : BaseTransactionService<ConfirmedVoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository), VoteTransactionService {
+) : BaseTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository), VoteTransactionService {
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(): MutableList<UnconfirmedVoteTransaction> {
@@ -68,7 +68,7 @@ internal class DefaultVoteTransactionService(
             toBlock(persistUtx.hash, block)
             return
         }
-        super.save(ConfirmedVoteTransaction.of(message))
+        super.save(VoteTransaction.of(message))
     }
 
     override fun generateHash(request: VoteTransactionHashRequest): String {
@@ -77,15 +77,15 @@ internal class DefaultVoteTransactionService(
     }
 
     @Transactional
-    override fun toBlock(hash: String, block: MainBlock): ConfirmedVoteTransaction {
+    override fun toBlock(hash: String, block: MainBlock): VoteTransaction {
         val utx = getUnconfirmedByHash(hash)
         val type = utx.payload.getVoteType()
         updateWalletVotes(utx.payload.delegateKey, utx.senderAddress, type)
-        return super.toBlock(utx, ConfirmedVoteTransaction.of(utx), block)
+        return super.toBlock(utx, VoteTransaction.of(utx), block)
     }
 
     @Transactional
-    override fun isValid(tx: ConfirmedVoteTransaction): Boolean {
+    override fun isValid(tx: VoteTransaction): Boolean {
         return isValidVoteCount(tx.senderAddress) && super.isValid(tx)
     }
 

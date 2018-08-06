@@ -1,6 +1,6 @@
 package io.openfuture.chain.rpc.domain.transaction.response
 
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import javax.validation.constraints.NotBlank
 
 class DelegateTransactionResponse(
@@ -12,7 +12,7 @@ class DelegateTransactionResponse(
     @field:NotBlank var delegateKey: String? = null
 ) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey) {
 
-    constructor(tx: UDelegateTransaction) : this(
+    constructor(tx: UnconfirmedDelegateTransaction) : this(
         tx.timestamp,
         tx.fee,
         tx.senderAddress,

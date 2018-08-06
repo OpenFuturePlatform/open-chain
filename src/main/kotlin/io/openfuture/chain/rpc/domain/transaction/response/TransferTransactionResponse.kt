@@ -1,6 +1,6 @@
 package io.openfuture.chain.rpc.domain.transaction.response
 
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import javax.validation.constraints.NotBlank
 
 class TransferTransactionResponse(
@@ -13,7 +13,7 @@ class TransferTransactionResponse(
     @field:NotBlank var recipientAddress: String? = null
 ) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey) {
 
-    constructor(tx: UTransferTransaction) : this(
+    constructor(tx: UnconfirmedTransferTransaction) : this(
         tx.timestamp,
         tx.fee,
         tx.senderAddress,
