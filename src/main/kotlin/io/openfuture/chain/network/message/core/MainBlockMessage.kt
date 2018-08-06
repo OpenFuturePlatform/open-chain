@@ -2,10 +2,10 @@ package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.network.annotation.NoArgConstructor
+import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.readString
-import io.openfuture.chain.network.extension.readStringList
+import io.openfuture.chain.network.extension.writeList
 import io.openfuture.chain.network.extension.writeString
-import io.openfuture.chain.network.extension.writeStringList
 
 @NoArgConstructor
 open class MainBlockMessage(
@@ -17,21 +17,27 @@ open class MainBlockMessage(
     signature: String,
     publicKey: String,
     var merkleHash: String,
-    var transactions: List<String>
+    var transferTransactions: MutableList<TransferTransactionMessage>,
+    var voteTransactions: MutableList<VoteTransactionMessage>,
+    var delegateTransactions: MutableList<DelegateTransactionMessage>
 ) : BlockMessage(height, previousHash, blockTimestamp, reward, publicKey, hash, signature) {
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)
 
         merkleHash = buffer.readString()
-        transactions = buffer.readStringList()
+        transferTransactions = buffer.readList()
+        voteTransactions = buffer.readList()
+        delegateTransactions = buffer.readList()
     }
 
     override fun write(buffer: ByteBuf) {
         super.write(buffer)
 
         buffer.writeString(merkleHash)
-        buffer.writeStringList(transactions)
+        buffer.writeList(transferTransactions)
+        buffer.writeList(voteTransactions)
+        buffer.writeList(delegateTransactions)
     }
 
     override fun toString() = "MainBlockMessage(hash=$hash)"

@@ -18,7 +18,7 @@ data class Packet(
     override fun read(buffer: ByteBuf) {
         version = buffer.readString()
         timestamp = buffer.readLong()
-        type = PacketType.get(buffer.readShort())
+        type = PacketType.get(buffer.readByte())
         data = type.clazz.java.newInstance()
         data.read(buffer)
     }
@@ -26,7 +26,7 @@ data class Packet(
     override fun write(buffer: ByteBuf) {
         buffer.writeString(version)
         buffer.writeLong(timestamp)
-        buffer.writeShort(PacketType.get(data).id.toInt())
+        buffer.writeByte(PacketType.get(data).id.toInt())
         data.write(buffer)
     }
 

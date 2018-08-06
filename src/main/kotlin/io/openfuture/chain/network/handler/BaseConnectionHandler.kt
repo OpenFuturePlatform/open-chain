@@ -1,4 +1,4 @@
-package io.openfuture.chain.network.handler.base
+package io.openfuture.chain.network.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
@@ -10,20 +10,14 @@ import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.network.*
 import io.openfuture.chain.network.service.ConsensusMessageService
 import io.openfuture.chain.network.service.CoreMessageService
-import io.openfuture.chain.network.service.NetworkMessageService
+import io.openfuture.chain.network.service.InnerNetworkService
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 
-abstract class BaseConnectionHandler : SimpleChannelInboundHandler<Packet>() {
-
-    @Autowired
-    protected lateinit var networkService: NetworkMessageService
-
-    @Autowired
-    protected lateinit var coreService: CoreMessageService
-
-    @Autowired
-    protected lateinit var consensusService: ConsensusMessageService
+abstract class BaseConnectionHandler(
+    protected var networkService: InnerNetworkService,
+    protected var coreService: CoreMessageService,
+    protected var consensusService: ConsensusMessageService
+) : SimpleChannelInboundHandler<Packet>() {
 
     companion object {
         val log = LoggerFactory.getLogger(BaseConnectionHandler::class.java)

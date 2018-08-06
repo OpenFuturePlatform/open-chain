@@ -9,25 +9,37 @@ import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.network.*
 
 
-interface NetworkService {
+interface NetworkApiService {
 
     fun broadcast(message: BaseMessage)
 
 }
 
-interface ConnectionService {
+interface InnerNetworkService {
 
     fun maintainConnectionNumber()
 
-    fun connect(peers: List<NetworkAddressMessage>)
+    fun getChannels(): Set<Channel>
 
-    fun addConnection(channel: Channel, networkAddress: NetworkAddressMessage)
+    fun onChannelActive(ctx: ChannelHandlerContext)
 
-    fun removeConnection(channel: Channel): NetworkAddressMessage?
+    fun onClientChannelActive(ctx: ChannelHandlerContext)
 
-    fun getConnectionAddresses(): Set<NetworkAddressMessage>
+    fun onHeartBeat(ctx: ChannelHandlerContext, heartBeat: HeartBeatMessage)
 
-    fun getConnections(): Map<Channel, NetworkAddressMessage>
+    fun onFindAddresses(ctx: ChannelHandlerContext, message: FindAddressesMessage)
+
+    fun onAddresses(ctx: ChannelHandlerContext, message: AddressesMessage)
+
+    fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage)
+
+    fun onAskTime(ctx: ChannelHandlerContext, askTime: AskTimeMessage)
+
+    fun onTime(ctx: ChannelHandlerContext, message: TimeMessage)
+
+    fun onChannelInactive(ctx: ChannelHandlerContext)
+
+    fun onClientChannelInactive(ctx: ChannelHandlerContext)
 
 }
 
@@ -52,29 +64,5 @@ interface ConsensusMessageService {
     fun onBlockApproval(ctx: ChannelHandlerContext, block: BlockApprovalMessage)
 
     fun onPendingBlock(ctx: ChannelHandlerContext, block: PendingBlockMessage)
-
-}
-
-interface NetworkMessageService {
-
-    fun onChannelActive(ctx: ChannelHandlerContext)
-
-    fun onClientChannelActive(ctx: ChannelHandlerContext)
-
-    fun onHeartBeat(ctx: ChannelHandlerContext, heartBeat: HeartBeatMessage)
-
-    fun onFindAddresses(ctx: ChannelHandlerContext, message: FindAddressesMessage)
-
-    fun onAddresses(ctx: ChannelHandlerContext, message: AddressesMessage)
-
-    fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage)
-
-    fun onAskTime(ctx: ChannelHandlerContext, askTime: AskTimeMessage)
-
-    fun onTime(ctx: ChannelHandlerContext, message: TimeMessage)
-
-    fun onChannelInactive(ctx: ChannelHandlerContext)
-
-    fun onClientChannelInactive(ctx: ChannelHandlerContext)
 
 }
