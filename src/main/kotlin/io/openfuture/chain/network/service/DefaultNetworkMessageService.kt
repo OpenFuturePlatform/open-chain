@@ -8,12 +8,12 @@ import io.openfuture.chain.network.message.network.HeartBeatMessage.Type.PING
 import io.openfuture.chain.network.message.network.HeartBeatMessage.Type.PONG
 import io.openfuture.chain.network.property.NodeProperties
 import org.springframework.context.annotation.Lazy
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit.SECONDS
 
-@Component
+@Service
 class DefaultNetworkMessageService(
     @Lazy
     private val connectionService: ConnectionService,

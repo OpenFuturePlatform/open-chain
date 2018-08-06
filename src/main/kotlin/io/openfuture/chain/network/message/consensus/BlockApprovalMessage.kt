@@ -36,13 +36,11 @@ data class BlockApprovalMessage(
         buffer.writeCharSequence(signature, UTF_8)
     }
 
-    fun getBytes(): ByteArray {
-        return StringBuilder()
-            .append(stageId)
-            .append(height)
-            .append(hash)
-            .append(publicKey)
-            .toString().toByteArray()
-    }
+    fun getBytes(): ByteArray = StringBuilder()
+        .append(stageId)
+        .append(height)
+        .append(hash)
+        .append(publicKey)
+        .toString().toByteArray()
 
 }

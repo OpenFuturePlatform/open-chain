@@ -24,7 +24,6 @@ class DefaultConnectionService(
 
     companion object {
         private val log = LoggerFactory.getLogger(DefaultNetworkService::class.java)
-
     }
 
 

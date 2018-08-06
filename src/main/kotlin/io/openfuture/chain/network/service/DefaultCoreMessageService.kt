@@ -5,10 +5,10 @@ import io.openfuture.chain.core.service.CommonBlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.network.message.core.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 
 // TODO: call core API here
-@Component
+@Service
 class DefaultCoreMessageService(
     private val blockService: CommonBlockService,
     private val genesisBlockService: GenesisBlockService,
