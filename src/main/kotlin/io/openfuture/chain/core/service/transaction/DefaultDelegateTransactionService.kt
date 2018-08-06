@@ -37,7 +37,7 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction {
-        val persistTx = repository.findOneByHash(message.hash)
+        val persistTx = uRepository.findOneByHash(message.hash)
         if (null != persistTx) {
             return UnconfirmedDelegateTransaction.of(message)
         }

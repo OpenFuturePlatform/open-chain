@@ -39,7 +39,7 @@ internal class DefaultVoteTransactionService(
 
     @Transactional
     override fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction {
-        val transaction = repository.findOneByHash(message.hash)
+        val transaction = uRepository.findOneByHash(message.hash)
         if (null != transaction) {
             return UnconfirmedVoteTransaction.of(message)
         }

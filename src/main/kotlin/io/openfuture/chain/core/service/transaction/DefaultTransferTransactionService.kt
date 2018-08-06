@@ -34,7 +34,7 @@ class DefaultTransferTransactionService(
 
     @Transactional
     override fun add(message: TransferTransactionMessage): UnconfirmedTransferTransaction {
-        val transaction = repository.findOneByHash(message.hash)
+        val transaction = uRepository.findOneByHash(message.hash)
         if (null != transaction) {
             return UnconfirmedTransferTransaction.of(message)
         }
