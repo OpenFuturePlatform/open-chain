@@ -1,9 +1,7 @@
 CREATE TABLE wallets (
   id               INTEGER PRIMARY KEY,
   address          VARCHAR UNIQUE NOT NULL,
-  balance          BIGINT DEFAULT 0,
-  unconfirmed_out   BIGINT DEFAULT 0,
-  unconfirmed_input BIGINT DEFAULT 0
+  balance          BIGINT DEFAULT 0
 );
 
 CREATE TABLE wallets2delegates (

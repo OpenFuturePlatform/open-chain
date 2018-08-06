@@ -28,16 +28,16 @@ class DefaultDelegateTransactionService(
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(): MutableList<UnconfirmedDelegateTransaction> {
-        return uRepository.findAllByOrderByFeeDesc()
+        return unconfirmedRepository.findAllByOrderByFeeDesc()
     }
 
     @Transactional(readOnly = true)
-    override fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction = uRepository.findOneByHash(hash)
+    override fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction = unconfirmedRepository.findOneByHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional
     override fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction {
-        val persistTx = uRepository.findOneByHash(message.hash)
+        val persistTx = unconfirmedRepository.findOneByHash(message.hash)
         if (null != persistTx) {
             return UnconfirmedDelegateTransaction.of(message)
         }
@@ -61,7 +61,7 @@ class DefaultDelegateTransactionService(
             return
         }
 
-        val persistUtx = uRepository.findOneByHash(message.hash)
+        val persistUtx = unconfirmedRepository.findOneByHash(message.hash)
         if (null != persistUtx) {
             toBlock(persistUtx.hash, block)
             return

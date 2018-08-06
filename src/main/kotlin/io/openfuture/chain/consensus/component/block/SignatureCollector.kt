@@ -51,6 +51,7 @@ class SignatureCollector(
     }
 
     fun applyBlock() {
+        //todo wait changes from consensus
 //        try {
 //            while (timeSlot.verifyTimeSlot(clock.networkTime(), pendingBlock)) {
 //                val genesisBlock = genesisBlockService.getLast()

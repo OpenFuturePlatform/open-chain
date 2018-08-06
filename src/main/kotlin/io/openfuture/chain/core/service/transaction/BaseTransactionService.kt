@@ -19,7 +19,7 @@ import javax.xml.bind.ValidationException
 
 abstract class BaseTransactionService<T : Transaction, U: UnconfirmedTransaction> (
     protected val repository: TransactionRepository<T>,
-    protected val uRepository: UTransactionRepository<U>
+    protected val unconfirmedRepository: UTransactionRepository<U>
 ) {
 
     @Autowired
@@ -38,7 +38,7 @@ abstract class BaseTransactionService<T : Transaction, U: UnconfirmedTransaction
         if (!isValid(utx)) {
             throw ValidationException("Transaction is invalid!")
         }
-        return uRepository.save(utx)
+        return unconfirmedRepository.save(utx)
     }
 
     protected fun save(tx: T) : T {
@@ -51,7 +51,7 @@ abstract class BaseTransactionService<T : Transaction, U: UnconfirmedTransaction
 
     protected fun toBlock(utx: U, tx: T, block: MainBlock): T {
         updateBalanceByFee(utx)
-        uRepository.delete(utx)
+        unconfirmedRepository.delete(utx)
         return repository.save(tx.apply { tx.block = block })
     }
 

@@ -30,16 +30,16 @@ internal class DefaultVoteTransactionService(
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(): MutableList<UnconfirmedVoteTransaction> {
-        return uRepository.findAllByOrderByFeeDesc()
+        return unconfirmedRepository.findAllByOrderByFeeDesc()
     }
 
     @Transactional(readOnly = true)
-    override fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction = uRepository.findOneByHash(hash)
+    override fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction = unconfirmedRepository.findOneByHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional
     override fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction {
-        val transaction = uRepository.findOneByHash(message.hash)
+        val transaction = unconfirmedRepository.findOneByHash(message.hash)
         if (null != transaction) {
             return UnconfirmedVoteTransaction.of(message)
         }
@@ -63,7 +63,7 @@ internal class DefaultVoteTransactionService(
             return
         }
 
-        val persistUtx = uRepository.findOneByHash(message.hash)
+        val persistUtx = unconfirmedRepository.findOneByHash(message.hash)
         if (null != persistUtx) {
             toBlock(persistUtx.hash, block)
             return
@@ -111,7 +111,7 @@ internal class DefaultVoteTransactionService(
 
     private fun isValidVoteCount(senderAddress: String): Boolean {
         val confirmedVotes = walletService.getVotesByAddress(senderAddress).count()
-        val unconfirmedForVotes = uRepository.findAll()
+        val unconfirmedForVotes = unconfirmedRepository.findAll()
             .filter { it.senderAddress == senderAddress && it.payload.getVoteType() == VoteType.FOR }
             .count()
 

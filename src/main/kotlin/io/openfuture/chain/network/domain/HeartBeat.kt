@@ -1,7 +1,7 @@
 package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
-import io.openfuture.chain.consensus.annotation.NoArgConstructor
+import io.openfuture.chain.network.annotation.NoArgConstructor
 import io.openfuture.chain.network.domain.HeartBeat.Type.PING
 import io.openfuture.chain.network.domain.HeartBeat.Type.PONG
 

@@ -25,16 +25,16 @@ class DefaultTransferTransactionService(
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction> {
-        return uRepository.findAllByOrderByFeeDesc()
+        return unconfirmedRepository.findAllByOrderByFeeDesc()
     }
 
     @Transactional(readOnly = true)
-    override fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction = uRepository.findOneByHash(hash)
+    override fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction = unconfirmedRepository.findOneByHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional
     override fun add(message: TransferTransactionMessage): UnconfirmedTransferTransaction {
-        val transaction = uRepository.findOneByHash(message.hash)
+        val transaction = unconfirmedRepository.findOneByHash(message.hash)
         if (null != transaction) {
             return UnconfirmedTransferTransaction.of(message)
         }
@@ -57,7 +57,7 @@ class DefaultTransferTransactionService(
             return
         }
 
-        val persistUtx = uRepository.findOneByHash(message.hash)
+        val persistUtx = unconfirmedRepository.findOneByHash(message.hash)
         if (null != persistUtx) {
             toBlock(persistUtx.hash, block)
             return
@@ -94,7 +94,7 @@ class DefaultTransferTransactionService(
 
     private fun isValidTransferBalance(address: String, amount: Long): Boolean {
         val balance = walletService.getBalanceByAddress(address)
-        val unspentBalance = balance - uRepository.findAllBySenderAddress(address).map { it.payload.amount }.sum()
+        val unspentBalance = balance - unconfirmedRepository.findAllBySenderAddress(address).map { it.payload.amount }.sum()
         if (unspentBalance < amount) {
             return false
         }

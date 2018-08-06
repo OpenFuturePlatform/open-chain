@@ -1,6 +1,6 @@
 package io.openfuture.chain.network.domain
 
-import io.openfuture.chain.consensus.annotation.NoArgConstructor
+import io.openfuture.chain.network.annotation.NoArgConstructor
 
 @NoArgConstructor
 class FindAddresses : Packet() {
