@@ -9,6 +9,7 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTrans
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.node.*
@@ -22,6 +23,7 @@ import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTrans
 import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionHashRequest
 import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionRequest
 import org.springframework.data.domain.Page
+import org.springframework.transaction.annotation.Transactional
 
 interface HardwareInfoService {
 
@@ -78,6 +80,8 @@ interface MainBlockService {
 interface TransactionService {
 
     fun getCount(): Long
+
+    fun getAllUnconfirmedByAddress(address: String): List<UnconfirmedTransaction>
 
 }
 
@@ -153,8 +157,6 @@ interface WalletService {
 
     fun getByAddress(address: String): Wallet
 
-    fun getUnspentBalanceByAddress(address: String): Long
-
     fun getBalanceByAddress(address: String): Long
 
     fun getVotesByAddress(address: String): MutableSet<Delegate>
@@ -164,7 +166,5 @@ interface WalletService {
     fun increaseBalance(address: String, amount: Long)
 
     fun decreaseBalance(address: String, amount: Long)
-
-    fun decreaseUnconfirmedBalance(address: String, amount: Long)
 
 }

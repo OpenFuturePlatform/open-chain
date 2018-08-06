@@ -13,8 +13,8 @@ import javax.persistence.Table
 class VoteTransaction(
     timestamp: Long,
     fee: Long,
-    hash: String,
     senderAddress: String,
+    hash: String,
     senderSignature: String,
     senderPublicKey: String,
 

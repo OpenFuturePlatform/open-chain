@@ -7,6 +7,7 @@ import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayl
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
+import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.crypto.service.CryptoService
@@ -22,6 +23,9 @@ abstract class BaseTransactionService<T : Transaction, U: UnconfirmedTransaction
 ) {
 
     @Autowired
+    protected lateinit var baseService: TransactionService
+
+    @Autowired
     protected lateinit var clock: NodeClock
 
     @Autowired
@@ -34,7 +38,6 @@ abstract class BaseTransactionService<T : Transaction, U: UnconfirmedTransaction
         if (!isValid(utx)) {
             throw ValidationException("Transaction is invalid!")
         }
-        updateUnconfirmedBalanceByFee(utx)
         return uRepository.save(utx)
     }
 
@@ -42,15 +45,14 @@ abstract class BaseTransactionService<T : Transaction, U: UnconfirmedTransaction
         if (!isValid(tx)) {
             throw ValidationException("Transaction is invalid!")
         }
-        updateUnconfirmedBalanceByFee(tx)
+        updateBalanceByFee(tx)
         return repository.save(tx)
     }
 
     protected fun toBlock(utx: U, tx: T, block: MainBlock): T {
-        tx.block = block
-        updateBalanceByFee(tx)
+        updateBalanceByFee(utx)
         uRepository.delete(utx)
-        return repository.save(tx)
+        return repository.save(tx.apply { tx.block = block })
     }
 
     open fun isValid(utx: U): Boolean {
@@ -61,12 +63,8 @@ abstract class BaseTransactionService<T : Transaction, U: UnconfirmedTransaction
         return this.isValidBase(tx)
     }
 
-    private fun updateBalanceByFee(tx: T) {
+    private fun updateBalanceByFee(tx: BaseTransaction) {
         walletService.decreaseBalance(tx.senderAddress, tx.fee)
-    }
-
-    private fun updateUnconfirmedBalanceByFee(tx: BaseTransaction) {
-        walletService.decreaseUnconfirmedBalance(tx.senderAddress, tx.fee)
     }
 
     private fun isValidBase(tx: BaseTransaction): Boolean {
@@ -80,9 +78,11 @@ abstract class BaseTransactionService<T : Transaction, U: UnconfirmedTransaction
         return !cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
     }
 
-    private fun isValidFee(senderAddress: String, amount: Long): Boolean {
-        val unspentBalance = walletService.getUnspentBalanceByAddress(senderAddress)
-        if (unspentBalance < amount) {
+    private fun isValidFee(senderAddress: String, fee: Long): Boolean {
+        val balance = walletService.getBalanceByAddress(senderAddress)
+        val unspentBalance = balance - baseService.getAllUnconfirmedByAddress(senderAddress).map { it.fee }.sum()
+
+        if (unspentBalance < fee) {
             return false
         }
         return true

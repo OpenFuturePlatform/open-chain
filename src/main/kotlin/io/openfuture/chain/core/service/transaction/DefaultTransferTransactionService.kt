@@ -5,8 +5,8 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
-import io.openfuture.chain.core.repository.TransactionRepository
-import io.openfuture.chain.core.repository.UTransactionRepository
+import io.openfuture.chain.core.repository.TransferTransactionRepository
+import io.openfuture.chain.core.repository.UTransferTransactionRepository
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
@@ -18,8 +18,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultTransferTransactionService(
-    repository: TransactionRepository<TransferTransaction>,
-    uRepository: UTransactionRepository<UnconfirmedTransferTransaction>,
+    repository: TransferTransactionRepository,
+    uRepository: UTransferTransactionRepository,
     private val networkService: NetworkService
 ) : BaseTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
 
@@ -93,7 +93,8 @@ class DefaultTransferTransactionService(
     }
 
     private fun isValidTransferBalance(address: String, amount: Long): Boolean {
-        val unspentBalance = walletService.getUnspentBalanceByAddress(address)
+        val balance = walletService.getBalanceByAddress(address)
+        val unspentBalance = balance - uRepository.findAllBySenderAddress(address).map { it.payload.amount }.sum()
         if (unspentBalance < amount) {
             return false
         }

@@ -7,8 +7,8 @@ import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.vote.VoteTransactionPayload
-import io.openfuture.chain.core.repository.TransactionRepository
-import io.openfuture.chain.core.repository.UTransactionRepository
+import io.openfuture.chain.core.repository.UVoteTransactionRepository
+import io.openfuture.chain.core.repository.VoteTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.util.TransactionUtils
@@ -21,8 +21,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 internal class DefaultVoteTransactionService(
-    repository: TransactionRepository<VoteTransaction>,
-    uRepository: UTransactionRepository<UnconfirmedVoteTransaction>,
+    repository: VoteTransactionRepository,
+    uRepository: UVoteTransactionRepository,
     private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties,
     private val networkService: NetworkService
