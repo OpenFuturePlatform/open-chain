@@ -5,6 +5,7 @@ import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransac
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.rpc.controller.transaction.TransferTransactionController
+import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionHashRequest
 import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.TransferTransactionResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -23,27 +24,27 @@ class TransferTransactionControllerTest : ControllerTests() {
 
     @Test
     fun doDeriveHashReturnBytesOfPayload() {
-        val payload = TransferTransactionPayload(1L, 1, "delegateKey")
-        val bytes = ByteArray(1)
+        val hashRequest = TransferTransactionHashRequest(1L, 1L, 1L, "recipientAddress")
+        val hash = ByteArray(1).toString()
 
-        given(service.getBytes(payload)).willReturn(bytes)
+        given(service.generateHash(hashRequest)).willReturn(hash)
 
         val result = webClient.post().uri("/rpc/transactions/transfer/doGenerateHash")
-            .body(Mono.just(payload), TransferTransactionPayload::class.java)
+            .body(Mono.just(hashRequest), TransferTransactionHashRequest::class.java)
             .exchange()
             .expectStatus().isOk
             .expectBody(String::class.java)
             .returnResult().responseBody!!
 
-        assertThat(result).isEqualTo(bytes)
+        assertThat(result).isEqualTo(hash)
     }
 
     @Test
     fun addTransaction() {
-        val transactionRequest = TransferTransactionRequest("senderAddress", "senderPublicKey", "senderSignature",
-            1L, 1, "delegateKey")
-        val transactionDto = UTransferTransaction(1, "senderAddress", "senderPublicKey", "senderSignature",
-            "hash", TransferTransactionPayload(1L, 1, "delegateKey"))
+        val transactionRequest = TransferTransactionRequest(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
+            1, "delegateKey")
+        val transactionDto = UTransferTransaction(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
+            "hash", TransferTransactionPayload(1L, "delegateKey"))
 
         given(service.add(transactionRequest)).willReturn(transactionDto)
 

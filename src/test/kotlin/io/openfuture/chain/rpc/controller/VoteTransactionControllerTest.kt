@@ -5,6 +5,7 @@ import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.rpc.controller.transaction.VoteTransactionController
+import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionHashRequest
 import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.VoteTransactionResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -23,27 +24,27 @@ class VoteTransactionControllerTest : ControllerTests() {
 
     @Test
     fun doDeriveHashReturnBytesOfPayload() {
-        val payload = VoteTransactionPayload(1L, 1, "delegateKey")
-        val bytes = ByteArray(1)
+        val hashRequest = VoteTransactionHashRequest(1L, 1L, 1, "delegateKey")
+        val hash = ByteArray(1).toString()
 
-        given(service.getBytes(payload)).willReturn(bytes)
+        given(service.generateHash(hashRequest)).willReturn(hash)
 
         val result = webClient.post().uri("/rpc/transactions/votes/doGenerateHash")
-            .body(Mono.just(payload), VoteTransactionPayload::class.java)
+            .body(Mono.just(hashRequest), VoteTransactionHashRequest::class.java)
             .exchange()
             .expectStatus().isOk
             .expectBody(String::class.java)
             .returnResult().responseBody!!
 
-        assertThat(result).isEqualTo(bytes)
+        assertThat(result).isEqualTo(hash)
     }
 
     @Test
     fun addTransaction() {
-        val transactionRequest = VoteTransactionRequest("senderAddress", "senderPublicKey", "senderSignature",
-            1L, 1, "delegateKey")
-        val transactionDto = UVoteTransaction(1, "senderAddress", "senderPublicKey", "senderSignature",
-            "hash", VoteTransactionPayload(1L, 1, "delegateKey"))
+        val transactionRequest = VoteTransactionRequest(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
+            1, "delegateKey")
+        val transactionDto = UVoteTransaction(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
+            "hash", VoteTransactionPayload(1, "delegateKey"))
 
         given(service.add(transactionRequest)).willReturn(transactionDto)
 
