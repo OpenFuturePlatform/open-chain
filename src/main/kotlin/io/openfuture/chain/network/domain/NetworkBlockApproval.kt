@@ -2,6 +2,8 @@ package io.openfuture.chain.network.domain
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
+import io.openfuture.chain.network.extension.readString
+import kotlin.text.Charsets.UTF_8
 
 @NoArgConstructor
 data class NetworkBlockApproval(
@@ -12,35 +14,26 @@ data class NetworkBlockApproval(
     var signature: String? = null
 ) : Packet() {
 
-    fun getBytes(): ByteArray {
-        return StringBuilder()
-            .append(stageId)
-            .append(height)
-            .append(hash)
-            .append(publicKey)
-            .toString().toByteArray()
-    }
+    fun getBytes(): ByteArray
+        = StringBuilder().append(stageId).append(height).append(hash).append(publicKey).toString().toByteArray()
 
     override fun readParams(buffer: ByteBuf) {
         stageId = buffer.readInt()
         height = buffer.readLong()
-        val hashLength = buffer.readInt()
-        hash = buffer.readCharSequence(hashLength, Charsets.UTF_8).toString()
-        val publicKeyLength = buffer.readInt()
-        publicKey = buffer.readCharSequence(publicKeyLength, Charsets.UTF_8).toString()
-        val signatureLength = buffer.readInt()
-        signature = buffer.readCharSequence(signatureLength, Charsets.UTF_8).toString()
+        hash = buffer.readString()
+        publicKey = buffer.readString()
+        signature = buffer.readString()
     }
 
     override fun writeParams(buffer: ByteBuf) {
         buffer.writeInt(stageId)
         buffer.writeLong(height)
         buffer.writeInt(hash.length)
-        buffer.writeCharSequence(hash, Charsets.UTF_8)
+        buffer.writeCharSequence(hash, UTF_8)
         buffer.writeInt(publicKey.length)
-        buffer.writeCharSequence(publicKey, Charsets.UTF_8)
+        buffer.writeCharSequence(publicKey, UTF_8)
         buffer.writeInt(signature!!.length)
-        buffer.writeCharSequence(signature, Charsets.UTF_8)
+        buffer.writeCharSequence(signature, UTF_8)
     }
 
 }
