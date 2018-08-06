@@ -13,7 +13,7 @@ import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
-import io.openfuture.chain.network.service.NetworkService
+import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionHashRequest
 import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionRequest
 import org.springframework.stereotype.Service
@@ -25,7 +25,7 @@ internal class DefaultVoteTransactionService(
     uRepository: UVoteTransactionRepository,
     private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties,
-    private val networkService: NetworkService
+    private val networkService: NetworkApiService
 ) : BaseTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository), VoteTransactionService {
 
     @Transactional(readOnly = true)

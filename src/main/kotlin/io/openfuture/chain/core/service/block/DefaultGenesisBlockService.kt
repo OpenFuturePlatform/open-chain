@@ -13,9 +13,8 @@ import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
-import io.openfuture.chain.network.service.NetworkService
+import io.openfuture.chain.network.service.NetworkApiService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,7 +27,7 @@ class DefaultGenesisBlockService(
     private val clock: NodeClock,
     private val consensusProperties: ConsensusProperties,
     private val keyHolder: NodeKeyHolder,
-    private val networkService: NetworkService
+    private val networkService: NetworkApiService
 ) : BaseBlockService(blockService), GenesisBlockService {
 
     @Transactional(readOnly = true)

@@ -10,7 +10,7 @@ import io.openfuture.chain.core.repository.UTransferTransactionRepository
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
-import io.openfuture.chain.network.service.NetworkService
+import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionHashRequest
 import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionRequest
 import org.springframework.stereotype.Service
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
     uRepository: UTransferTransactionRepository,
-    private val networkService: NetworkService
+    private val networkService: NetworkApiService
 ) : BaseTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
 
     @Transactional(readOnly = true)

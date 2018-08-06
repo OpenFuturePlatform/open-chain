@@ -22,13 +22,13 @@ class PendingBlockMessage(
     signature: String,
     publicKey: String,
     var merkleHash: String,
-    var voteTxs: List<String>,
-    var delegateTxs: List<String>,
-    var transferTxs: List<String>
+    var voteTransactions: List<String>,
+    var delegateTransactions: List<String>,
+    var transferTransactions: List<String>
 ) : BlockMessage(height, previousHash, timestamp, reward, hash, signature, publicKey) {
 
-    constructor(block: MainBlock, voteTxs: List<UnconfirmedVoteTransaction>, delegateTxs: List<UnconfirmedDelegateTransaction>,
-                transferTxs: List<UnconfirmedTransferTransaction>) : this(
+    constructor(block: MainBlock, voteTransactions: List<UnconfirmedVoteTransaction>, delegateTransactions: List<UnconfirmedDelegateTransaction>,
+                transferTransactions: List<UnconfirmedTransferTransaction>) : this(
         block.height,
         block.previousHash,
         block.timestamp,
@@ -37,31 +37,31 @@ class PendingBlockMessage(
         block.signature,
         block.publicKey,
         block.payload.merkleHash,
-        voteTxs.map { it.hash },
-        delegateTxs.map { it.hash },
-        transferTxs.map { it.hash }
+        voteTransactions.map { it.hash },
+        delegateTransactions.map { it.hash },
+        transferTransactions.map { it.hash }
     )
 
     fun getAllTransactions(): List<String> {
-        return voteTxs + delegateTxs + transferTxs
+        return voteTransactions + delegateTransactions + transferTransactions
     }
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)
 
         merkleHash = buffer.readString()
-        voteTxs = buffer.readStringList()
-        delegateTxs = buffer.readStringList()
-        transferTxs = buffer.readStringList()
+        voteTransactions = buffer.readStringList()
+        delegateTransactions = buffer.readStringList()
+        transferTransactions = buffer.readStringList()
     }
 
     override fun write(buffer: ByteBuf) {
         super.write(buffer)
 
         buffer.writeString(merkleHash)
-        buffer.writeStringList(voteTxs)
-        buffer.writeStringList(delegateTxs)
-        buffer.writeStringList(transferTxs)
+        buffer.writeStringList(voteTransactions)
+        buffer.writeStringList(delegateTransactions)
+        buffer.writeStringList(transferTransactions)
     }
 
     override fun toString() = "MainBlockMessage(hash=$hash)"

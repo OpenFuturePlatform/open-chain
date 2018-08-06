@@ -12,7 +12,7 @@ import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
-import io.openfuture.chain.network.service.NetworkService
+import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionHashRequest
 import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionRequest
 import org.springframework.stereotype.Service
@@ -23,7 +23,7 @@ class DefaultDelegateTransactionService(
     repository: DelegateTransactionRepository,
     uRepository: UDelegateTransactionRepository,
     private val delegateService: DelegateService,
-    private val networkService: NetworkService
+    private val networkService: NetworkApiService
 ) : BaseTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository), DelegateTransactionService {
 
     @Transactional(readOnly = true)

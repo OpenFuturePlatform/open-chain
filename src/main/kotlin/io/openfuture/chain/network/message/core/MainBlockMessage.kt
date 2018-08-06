@@ -23,8 +23,8 @@ class MainBlockMessage(
     var transferTransactions: List<TransferTransactionMessage>
 ) : BlockMessage(height, previousHash, timestamp, reward, hash, signature, publicKey) {
 
-    constructor(block: MainBlock, voteTxs: List<VoteTransaction>, delegateTxs: List<DelegateTransaction>,
-                transferTxs: List<TransferTransaction>) : this(
+    constructor(block: MainBlock, voteTransactions: List<VoteTransaction>, delegateTransactions: List<DelegateTransaction>,
+                transferTransactions: List<TransferTransaction>) : this(
         block.height,
         block.previousHash,
         block.timestamp,
@@ -33,9 +33,9 @@ class MainBlockMessage(
         block.signature,
         block.publicKey,
         block.payload.merkleHash,
-        voteTxs.map { VoteTransactionMessage(it) },
-        delegateTxs.map { DelegateTransactionMessage(it) },
-        transferTxs.map { TransferTransactionMessage(it) }
+        voteTransactions.map { VoteTransactionMessage(it) },
+        delegateTransactions.map { DelegateTransactionMessage(it) },
+        transferTransactions.map { TransferTransactionMessage(it) }
     )
 
     fun getAllTransactions(): List<BaseTransactionMessage> {

@@ -12,7 +12,7 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.MainBlockMessage
-import io.openfuture.chain.network.service.NetworkService
+import io.openfuture.chain.network.service.NetworkApiService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -27,7 +27,7 @@ class DefaultMainBlockService(
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
     private val consensusProperties: ConsensusProperties,
-    private val networkService: NetworkService
+    private val networkService: NetworkApiService
 ) : BaseBlockService(blockService), MainBlockService {
 
     @Transactional(readOnly = true)
@@ -67,9 +67,9 @@ class DefaultMainBlockService(
         }
 
         val savedBlock = repository.save(block)
-        message.voteTxs.map { voteTransactionService.toBlock(it, savedBlock) }
-        message.delegateTxs.map { delegateTransactionService.toBlock(it, savedBlock) }
-        message.transferTxs.map { transferTransactionService.toBlock(it, savedBlock) }
+        message.voteTransactions.map { voteTransactionService.toBlock(it, savedBlock) }
+        message.delegateTransactions.map { delegateTransactionService.toBlock(it, savedBlock) }
+        message.transferTransactions.map { transferTransactionService.toBlock(it, savedBlock) }
         networkService.broadcast(message)
     }
 
@@ -85,9 +85,9 @@ class DefaultMainBlockService(
         }
 
         val savedBlock = repository.save(block)
-        message.voteTxs.forEach { voteTransactionService.synchronize(it, repository.save(savedBlock)) }
-        message.delegateTxs.forEach { delegateTransactionService.synchronize(it, repository.save(savedBlock)) }
-        message.transferTxs.forEach { transferTransactionService.synchronize(it, repository.save(savedBlock)) }
+        message.voteTransactions.forEach { voteTransactionService.synchronize(it, repository.save(savedBlock)) }
+        message.delegateTransactions.forEach { delegateTransactionService.synchronize(it, repository.save(savedBlock)) }
+        message.transferTransactions.forEach { transferTransactionService.synchronize(it, repository.save(savedBlock)) }
     }
 
     @Transactional(readOnly = true)
@@ -102,7 +102,7 @@ class DefaultMainBlockService(
 
     private fun calculateMerkleRoot(transactions: List<String>): String {
         if (transactions.isEmpty()) {
-            throw IllegalArgumentException("Transaction must not be empty!")
+            throw IllegalArgumentException("Transactions must not be empty!")
         }
 
         if (transactions.size == 1) {
