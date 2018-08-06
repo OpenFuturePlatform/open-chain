@@ -25,12 +25,6 @@ class DefaultWalletService(
     override fun getBalanceByAddress(address: String): Long =
         repository.findOneByAddress(address)?.balance ?: DEFAULT_WALLET_BALANCE
 
-    override fun getUnspentBalanceByAddress(address: String): Long {
-        val wallet = getByAddress(address)
-        return wallet.balance - wallet.uncomfirmedOut
-
-    }
-
     @Transactional(readOnly = true)
     override fun getVotesByAddress(address: String): MutableSet<Delegate> = this.getByAddress(address).votes
 
@@ -47,13 +41,6 @@ class DefaultWalletService(
     @Transactional
     override fun decreaseBalance(address: String, amount: Long) {
         updateByAddress(address, -amount)
-    }
-
-    @Transactional
-    override fun decreaseUnconfirmedBalance(address: String, amount: Long) {
-        val wallet = repository.findOneByAddress(address) ?: Wallet(address)
-        wallet.uncomfirmedOut += amount
-        repository.save(wallet)
     }
 
     private fun updateByAddress(address: String, amount: Long) {

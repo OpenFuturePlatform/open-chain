@@ -14,8 +14,8 @@ import javax.persistence.Table
 class UnconfirmedTransferTransaction(
     timestamp: Long,
     fee: Long,
-    hash: String,
     senderAddress: String,
+    hash: String,
     senderSignature: String,
     senderPublicKey: String,
 

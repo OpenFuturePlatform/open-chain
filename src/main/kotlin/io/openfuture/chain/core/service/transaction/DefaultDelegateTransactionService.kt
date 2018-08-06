@@ -6,8 +6,8 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
-import io.openfuture.chain.core.repository.TransactionRepository
-import io.openfuture.chain.core.repository.UTransactionRepository
+import io.openfuture.chain.core.repository.DelegateTransactionRepository
+import io.openfuture.chain.core.repository.UDelegateTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.core.util.TransactionUtils
@@ -20,8 +20,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultDelegateTransactionService(
-    repository: TransactionRepository<DelegateTransaction>,
-    uRepository: UTransactionRepository<UnconfirmedDelegateTransaction>,
+    repository: DelegateTransactionRepository,
+    uRepository: UDelegateTransactionRepository,
     private val delegateService: DelegateService,
     private val networkService: NetworkService
 ) : BaseTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository), DelegateTransactionService {
