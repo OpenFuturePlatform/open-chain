@@ -14,8 +14,6 @@ interface EpochService {
 
     fun getEpochIndex(): Long
 
-    fun switchEpoch(genesisBlock: GenesisBlock)
-
     fun getCurrentSlotOwner(): Delegate
 
     fun getSlotNumber(): Long

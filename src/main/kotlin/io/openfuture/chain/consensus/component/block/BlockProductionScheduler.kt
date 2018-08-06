@@ -33,6 +33,7 @@ class BlockProductionScheduler(
 
     private var currentTimeSlot: Long = 0
 
+
     @PostConstruct
     fun init() {
         executor.submit {
@@ -46,8 +47,8 @@ class BlockProductionScheduler(
                         // create genesis block
                         // epochService.switchEpoch()
                     } else if (keyHolder.getPublicKey() == slotOwner.publicKey) {
-                        // create genesis block
-                        // epochService.switchEpoch()
+                        // create main block
+                        // pendingBlockHandler.addBlock()
                     }
                 }
                 Thread.sleep(100)
