@@ -1,11 +1,11 @@
 package io.openfuture.chain.rpc.domain.transaction.request.delegate
 
-import io.openfuture.chain.rpc.domain.transaction.request.BaseTransactionHashRequest
 import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotNull
 
-class DelegateTransactionHashRequest(
-    timestamp: Long? = null,
-    fee: Long? = null,
-    senderAddress: String? = null,
+data class DelegateTransactionHashRequest(
+    @field:NotNull var timestamp: Long? = null,
+    @field:NotNull var fee: Long? = null,
+    @field:NotBlank var senderAddress: String? = null,
     @field:NotBlank var delegateKey: String? = null
-) : BaseTransactionHashRequest(timestamp, fee, senderAddress)
+)

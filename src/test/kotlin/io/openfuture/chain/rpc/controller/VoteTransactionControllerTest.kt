@@ -1,8 +1,8 @@
 package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
-import io.openfuture.chain.core.model.entity.transaction.vote.VoteTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.vote.VoteTransactionPayload
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.rpc.controller.transaction.VoteTransactionController
 import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionHashRequest
@@ -16,7 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import reactor.core.publisher.Mono
 
 @WebFluxTest(VoteTransactionController::class)
-class ConfirmedVoteTransactionControllerTest : ControllerTests() {
+class VoteTransactionControllerTest : ControllerTests() {
 
     @MockBean
     private lateinit var service: VoteTransactionService
@@ -24,7 +24,7 @@ class ConfirmedVoteTransactionControllerTest : ControllerTests() {
 
     @Test
     fun doDeriveHashReturnBytesOfPayload() {
-        val hashRequest = VoteTransactionHashRequest(1L, 1L, 1, "delegateKey")
+        val hashRequest = VoteTransactionHashRequest(1L, 1L, "senderAddress", 1, "delegateKey")
         val hash = ByteArray(1).toString()
 
         given(service.generateHash(hashRequest)).willReturn(hash)
@@ -43,19 +43,19 @@ class ConfirmedVoteTransactionControllerTest : ControllerTests() {
     fun addTransaction() {
         val transactionRequest = VoteTransactionRequest(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
             1, "delegateKey")
-        val transactionDto = UnconfirmedVoteTransaction(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
+        val unconfirmedVoteTransaction = UnconfirmedVoteTransaction(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
             "hash", VoteTransactionPayload(1, "delegateKey"))
 
-        given(service.add(transactionRequest)).willReturn(transactionDto)
+        given(service.add(transactionRequest)).willReturn(unconfirmedVoteTransaction)
 
-        val result = webClient.post().uri("/rpc/transactions/votes/doGenerateHash")
+        val result = webClient.post().uri("/rpc/transactions/votes")
             .body(Mono.just(transactionRequest), VoteTransactionRequest::class.java)
             .exchange()
             .expectStatus().isOk
-            .expectBody(String::class.java)
+            .expectBody(VoteTransactionResponse::class.java)
             .returnResult().responseBody!!
 
-        assertThat(result).isEqualTo(VoteTransactionResponse(transactionDto))
+        assertThat(result).isEqualToComparingFieldByField(VoteTransactionResponse(unconfirmedVoteTransaction))
     }
 
 }

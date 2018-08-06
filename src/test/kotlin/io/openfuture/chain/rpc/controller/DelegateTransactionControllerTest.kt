@@ -25,7 +25,7 @@ class DelegateTransactionControllerTest : ControllerTests() {
 
     @Test
     fun doDeriveHashReturnBytesOfPayload() {
-        val hashRequest = DelegateTransactionHashRequest(1L, 1L, "delegateKey")
+        val hashRequest = DelegateTransactionHashRequest(1L, 1L, "senderAddress", "delegateKey")
         val hash = ByteArray(1).toString()
 
         given(service.generateHash(hashRequest)).willReturn(hash)
@@ -44,19 +44,19 @@ class DelegateTransactionControllerTest : ControllerTests() {
     fun addTransaction() {
         val transactionRequest = DelegateTransactionRequest(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
             "delegateKey")
-        val transactionDto = UnconfirmedDelegateTransaction(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
+        val unconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
             "hash", DelegateTransactionPayload("delegateKey"))
 
-        given(service.add(transactionRequest)).willReturn(transactionDto)
+        given(service.add(transactionRequest)).willReturn(unconfirmedDelegateTransaction)
 
-        val result = webClient.post().uri("/rpc/transactions/votes/doGenerateHash")
+        val result = webClient.post().uri("/rpc/transactions/delegates")
             .body(Mono.just(transactionRequest), DelegateTransactionRequest::class.java)
             .exchange()
             .expectStatus().isOk
-            .expectBody(String::class.java)
+            .expectBody(DelegateTransactionResponse::class.java)
             .returnResult().responseBody!!
 
-        assertThat(result).isEqualTo(DelegateTransactionResponse(transactionDto))
+        assertThat(result).isEqualToComparingFieldByField(DelegateTransactionResponse(unconfirmedDelegateTransaction))
     }
 
 }

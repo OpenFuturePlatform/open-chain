@@ -1,15 +1,14 @@
 package io.openfuture.chain.rpc.domain.transaction.request.vote
 
-import io.openfuture.chain.rpc.domain.transaction.request.BaseTransactionRequest
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
-class VoteTransactionRequest(
-    timestamp: Long,
-    fee: Long,
-    senderAddress: String,
-    senderSignature: String,
-    senderPublicKey: String,
+data class VoteTransactionRequest(
+    @field:NotNull var timestamp: Long? = null,
+    @field:NotNull var fee: Long? = null,
+    @field:NotBlank var senderAddress: String? = null,
+    @field:NotBlank var senderSignature: String? = null,
+    @field:NotBlank var senderPublicKey: String? = null,
     @field:NotNull var voteTypeId: Int? = null,
     @field:NotBlank var delegateKey: String? = null
-) : BaseTransactionRequest(timestamp, fee, senderAddress, senderSignature, senderPublicKey)
+)

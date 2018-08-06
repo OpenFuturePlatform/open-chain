@@ -24,7 +24,7 @@ class TransferTransactionControllerTest : ControllerTests() {
 
     @Test
     fun doDeriveHashReturnBytesOfPayload() {
-        val hashRequest = TransferTransactionHashRequest(1L, 1L, 1L, "recipientAddress")
+        val hashRequest = TransferTransactionHashRequest(1L, 1L, "senderAddress", 1L, "recipientAddress")
         val hash = ByteArray(1).toString()
 
         given(service.generateHash(hashRequest)).willReturn(hash)
@@ -42,20 +42,20 @@ class TransferTransactionControllerTest : ControllerTests() {
     @Test
     fun addTransaction() {
         val transactionRequest = TransferTransactionRequest(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
-            1, "delegateKey")
-        val transactionDto = UnconfirmedTransferTransaction(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
+            1, "recipientAddress")
+        val unconfirmedTransferTransaction = UnconfirmedTransferTransaction(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
             "hash", TransferTransactionPayload(1L, "delegateKey"))
 
-        given(service.add(transactionRequest)).willReturn(transactionDto)
+        given(service.add(transactionRequest)).willReturn(unconfirmedTransferTransaction)
 
-        val result = webClient.post().uri("/rpc/transactions/votes/doGenerateHash")
+        val result = webClient.post().uri("/rpc/transactions/transfer")
             .body(Mono.just(transactionRequest), TransferTransactionRequest::class.java)
             .exchange()
             .expectStatus().isOk
-            .expectBody(String::class.java)
+            .expectBody(TransferTransactionResponse::class.java)
             .returnResult().responseBody!!
 
-        assertThat(result).isEqualTo(TransferTransactionResponse(transactionDto))
+        assertThat(result).isEqualToComparingFieldByField(TransferTransactionResponse(unconfirmedTransferTransaction))
     }
 
 }
