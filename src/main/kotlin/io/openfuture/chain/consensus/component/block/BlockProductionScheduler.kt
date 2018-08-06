@@ -55,8 +55,7 @@ class BlockProductionScheduler(
     }
 
     private fun isGenesisBlockRequired(): Boolean {
-        val lastBlock = commonBlockService.getLast()
-        val blocksProduced = lastBlock.height - epochService.getGenesisBlockHeight()
+        val blocksProduced = commonBlockService.getLast().height - epochService.getGenesisBlockHeight()
         return (consensusProperties.epochHeight!! - 1) <= blocksProduced
     }
 

@@ -24,9 +24,8 @@ class DefaultEpochService(
 
     override fun getCurrentSlotOwner(): Delegate {
         val genesisBlock = genesisBlockService.getLast()
-        val delegates = genesisBlock.activeDelegates
         val random = Random(genesisBlock.height + getSlotNumber())
-        return delegates.shuffled(random).first()
+        return genesisBlock.activeDelegates.shuffled(random).first()
     }
 
     override fun getSlotNumber(): Long = ((clock.networkTime() - getEpochStart()) / properties.timeSlotDuration!!)
