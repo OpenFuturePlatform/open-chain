@@ -4,6 +4,7 @@ import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.service.DelegateTransactionService
+import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.rpc.controller.transaction.DelegateTransactionController
 import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionHashRequest
 import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionRequest
@@ -21,6 +22,9 @@ class DelegateTransactionControllerTest : ControllerTests() {
 
     @MockBean
     private lateinit var service: DelegateTransactionService
+
+    @MockBean
+    private lateinit var nodeClock: NodeClock
 
 
     @Test
@@ -48,6 +52,8 @@ class DelegateTransactionControllerTest : ControllerTests() {
             "hash", DelegateTransactionPayload("delegateKey"))
 
         given(service.add(transactionRequest)).willReturn(unconfirmedDelegateTransaction)
+        given(nodeClock.networkTime()).willReturn(1L)
+
 
         val result = webClient.post().uri("/rpc/transactions/delegates")
             .body(Mono.just(transactionRequest), DelegateTransactionRequest::class.java)

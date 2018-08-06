@@ -101,6 +101,10 @@ class DefaultMainBlockService(
     }
 
     private fun calculateMerkleRoot(transactions: List<String>): String {
+        if (transactions.isEmpty()) {
+            throw IllegalArgumentException("Transaction must not be empty!")
+        }
+
         if (transactions.size == 1) {
             return transactions.single()
         }

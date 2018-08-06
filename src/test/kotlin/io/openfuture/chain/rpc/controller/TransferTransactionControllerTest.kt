@@ -4,6 +4,7 @@ import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.service.TransferTransactionService
+import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.rpc.controller.transaction.TransferTransactionController
 import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionHashRequest
 import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionRequest
@@ -21,6 +22,9 @@ class TransferTransactionControllerTest : ControllerTests() {
     @MockBean
     private lateinit var service: TransferTransactionService
 
+    @MockBean
+    private lateinit var nodeClock: NodeClock
+
 
     @Test
     fun doDeriveHashReturnBytesOfPayload() {
@@ -28,6 +32,7 @@ class TransferTransactionControllerTest : ControllerTests() {
         val hash = ByteArray(1).toString()
 
         given(service.generateHash(hashRequest)).willReturn(hash)
+        given(nodeClock.networkTime()).willReturn(1L)
 
         val result = webClient.post().uri("/rpc/transactions/transfer/doGenerateHash")
             .body(Mono.just(hashRequest), TransferTransactionHashRequest::class.java)

@@ -4,6 +4,7 @@ import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.vote.VoteTransactionPayload
 import io.openfuture.chain.core.service.VoteTransactionService
+import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.rpc.controller.transaction.VoteTransactionController
 import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionHashRequest
 import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionRequest
@@ -20,6 +21,9 @@ class VoteTransactionControllerTest : ControllerTests() {
 
     @MockBean
     private lateinit var service: VoteTransactionService
+
+    @MockBean
+    private lateinit var nodeClock: NodeClock
 
 
     @Test
@@ -47,6 +51,7 @@ class VoteTransactionControllerTest : ControllerTests() {
             "hash", VoteTransactionPayload(1, "delegateKey"))
 
         given(service.add(transactionRequest)).willReturn(unconfirmedVoteTransaction)
+        given(nodeClock.networkTime()).willReturn(1L)
 
         val result = webClient.post().uri("/rpc/transactions/votes")
             .body(Mono.just(transactionRequest), VoteTransactionRequest::class.java)
