@@ -3,6 +3,7 @@ package io.openfuture.chain.network.message.network
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.config.MessageTests
+import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -15,7 +16,7 @@ class FindAddressesMessageTests : MessageTests() {
 
     @Before
     fun setup() {
-        buffer = createBuffer("")
+        buffer = createBuffer(StringUtils.EMPTY)
         message = FindAddressesMessage()
     }
 

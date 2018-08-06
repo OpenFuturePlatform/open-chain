@@ -3,10 +3,10 @@ package io.openfuture.chain.network.service
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.network.message.core.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 
 // TODO: call core API here
-@Component
+@Service
 class DefaultCoreMessageService(
     private val blockService: BlockService
 ) : CoreMessageService {

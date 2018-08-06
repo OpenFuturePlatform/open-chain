@@ -7,6 +7,6 @@ import io.netty.buffer.Unpooled
 abstract class MessageTests {
 
     protected fun createBuffer(hexDump: String): ByteBuf =
-        Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump((hexDump)))
+        Unpooled.buffer().writeBytes(ByteBufUtil.decodeHexDump(hexDump))
 
 }

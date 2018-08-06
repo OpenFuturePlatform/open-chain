@@ -8,12 +8,12 @@ import io.openfuture.chain.network.message.network.HeartBeatMessage.Type.PING
 import io.openfuture.chain.network.message.network.HeartBeatMessage.Type.PONG
 import io.openfuture.chain.network.property.NodeProperties
 import org.springframework.context.annotation.Lazy
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ScheduledFuture
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.SECONDS
 
-@Component
+@Service
 class DefaultNetworkMessageService(
     @Lazy
     private val connectionService: ConnectionService,
@@ -22,6 +22,11 @@ class DefaultNetworkMessageService(
 ) : NetworkMessageService {
 
     private val heartBeatTasks: MutableMap<Channel, ScheduledFuture<*>> = ConcurrentHashMap()
+
+    companion object {
+        private const val HEART_BEAT_DELAY = 0L
+        private const val HEART_BEAT_INTERVAL = 20L
+    }
 
 
     override fun onChannelActive(ctx: ChannelHandlerContext) {
@@ -34,12 +39,15 @@ class DefaultNetworkMessageService(
 
         val task = ctx.channel()
             .eventLoop()
-            .scheduleAtFixedRate({ ctx.writeAndFlush(HeartBeatMessage(PING)) }, 0, 20, TimeUnit.SECONDS)
+            .scheduleAtFixedRate({ ctx.writeAndFlush(HeartBeatMessage(PING)) },
+                HEART_BEAT_DELAY,
+                HEART_BEAT_INTERVAL,
+                SECONDS)
         heartBeatTasks[ctx.channel()] = task
     }
 
     override fun onHeartBeat(ctx: ChannelHandlerContext, heartBeat: HeartBeatMessage) {
-        if (heartBeat.type == HeartBeatMessage.Type.PING) {
+        if (heartBeat.type == PING) {
             ctx.channel().writeAndFlush(HeartBeatMessage(PONG))
         }
     }

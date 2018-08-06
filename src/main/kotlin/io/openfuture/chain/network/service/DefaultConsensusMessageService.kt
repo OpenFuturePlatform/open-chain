@@ -3,10 +3,10 @@ package io.openfuture.chain.network.service
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 
 //TODO: call consensus API here
-@Component
+@Service
 class DefaultConsensusMessageService : ConsensusMessageService {
 
     override fun onBlockApproval(ctx: ChannelHandlerContext, block: BlockApprovalMessage) {}

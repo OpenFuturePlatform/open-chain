@@ -20,11 +20,12 @@ class DefaultConnectionService(
     private val properties: NodeProperties
 ) : ConnectionService {
 
+    private val connections: MutableMap<Channel, NetworkAddressMessage> = ConcurrentHashMap()
+
     companion object {
         private val log = LoggerFactory.getLogger(DefaultNetworkService::class.java)
     }
 
-    private val connections: MutableMap<Channel, NetworkAddressMessage> = ConcurrentHashMap()
 
     @Scheduled(cron = "*/30 * * * * *")
     override fun maintainConnectionNumber() {
@@ -34,11 +35,8 @@ class DefaultConnectionService(
     }
 
     override fun connect(peers: List<NetworkAddressMessage>) {
-        peers.map { NetworkAddressMessage(it.host, it.port) }
-            .filter {
-                !getConnectionAddresses().contains(it) && it != NetworkAddressMessage(properties.host!!,
-                    properties.port!!)
-            }
+        val connections = getConnectionAddresses()
+        peers.filter { !connections.contains(it) && it != NetworkAddressMessage(properties.host!!, properties.port!!) }
             .forEach { bootstrap.connect(it.host, it.port) }
     }
 

@@ -14,6 +14,7 @@ data class Packet(
 
     var type: PacketType = PacketType.get(data)
 
+
     override fun read(buffer: ByteBuf) {
         version = buffer.readString()
         timestamp = buffer.readLong()
