@@ -38,15 +38,11 @@ class MainBlockClientHandler(
             transferTransactions: MutableList<TransferTransactionDto>,
             voteTransactions: MutableList<VoteTransactionDto>,
             delegateTransactions: MutableList<DelegateTransactionDto>): MutableSet<Transaction> {
-        val transferTransactionEntities = transferTransactions.map { it.toEntity() }.toSet()
-        val voteTransactionEntities = voteTransactions.map { it.toEntity() }.toSet()
-        val delegateTransactionEntities = delegateTransactions.map { it.toEntity() }.toSet()
-
-        val transactions = HashSet<Transaction>()
-        transactions.addAll(transferTransactionEntities)
-        transactions.addAll(voteTransactionEntities)
-        transactions.addAll(delegateTransactionEntities)
-        return transactions
+        return setOf(
+            *transferTransactions.map { it.toEntity() }.toTypedArray(),
+            *voteTransactions.map { it.toEntity() }.toTypedArray(),
+            *delegateTransactions.map { it.toEntity() }.toTypedArray()
+        ).toMutableSet()
     }
 
 }
