@@ -14,8 +14,8 @@ data class NetworkBlockApproval(
     var signature: String? = null
 ) : Packet() {
 
-    fun getBytes(): ByteArray
-        = StringBuilder().append(stageId).append(height).append(hash).append(publicKey).toString().toByteArray()
+    fun getBytes(): ByteArray =
+        StringBuilder().append(stageId).append(height).append(hash).append(publicKey).toString().toByteArray()
 
     override fun readParams(buffer: ByteBuf) {
         stageId = buffer.readInt()

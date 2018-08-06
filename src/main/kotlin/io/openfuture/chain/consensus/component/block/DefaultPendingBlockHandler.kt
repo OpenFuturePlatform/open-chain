@@ -105,10 +105,10 @@ class DefaultPendingBlockHandler(
         pendingBlocks.clear()
     }
 
-    private fun isValidApprovalSignature(message: NetworkBlockApproval): Boolean
-        = SignatureUtils.verify(message.getBytes(), message.signature!!, ByteUtils.fromHexString(message.publicKey))
+    private fun isValidApprovalSignature(message: NetworkBlockApproval): Boolean =
+        SignatureUtils.verify(message.getBytes(), message.signature!!, ByteUtils.fromHexString(message.publicKey))
 
-    private fun isActiveDelegate(): Boolean
-        = null != epochService.getDelegates().find { it.publicKey == keyHolder.getPublicKey() }
+    private fun isActiveDelegate(): Boolean =
+        null != epochService.getDelegates().find { it.publicKey == keyHolder.getPublicKey() }
 
 }
