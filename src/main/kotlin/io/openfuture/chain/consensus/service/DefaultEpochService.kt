@@ -14,21 +14,13 @@ class DefaultEpochService(
     private val clock: NodeClock
 ) : EpochService {
 
-    override fun getEpochStart(): Long {
-        return genesisBlockService.getLast().timestamp
-    }
+    override fun getEpochStart(): Long = genesisBlockService.getLast().timestamp
 
-    override fun getDelegates(): Set<Delegate> {
-        return genesisBlockService.getLast().activeDelegates
-    }
+    override fun getDelegates(): Set<Delegate> = genesisBlockService.getLast().activeDelegates
 
-    override fun getEpochIndex(): Long {
-        return genesisBlockService.getLast().epochIndex
-    }
+    override fun getEpochIndex(): Long = genesisBlockService.getLast().epochIndex
 
-    override fun getGenesisBlockHeight(): Long {
-        return genesisBlockService.getLast().height
-    }
+    override fun getGenesisBlockHeight(): Long = genesisBlockService.getLast().height
 
     override fun getCurrentSlotOwner(): Delegate {
         val genesisBlock = genesisBlockService.getLast()
@@ -37,12 +29,8 @@ class DefaultEpochService(
         return delegates.shuffled(random).first()
     }
 
-    override fun getSlotNumber(): Long {
-        return ((clock.networkTime() - getEpochStart()) / properties.timeSlotDuration!!)
-    }
+    override fun getSlotNumber(): Long = ((clock.networkTime() - getEpochStart()) / properties.timeSlotDuration!!)
 
-    override fun getSlotNumber(time: Long): Long {
-        return ((time - getEpochStart()) / properties.timeSlotDuration!!)
-    }
+    override fun getSlotNumber(time: Long): Long = ((time - getEpochStart()) / properties.timeSlotDuration!!)
 
 }
