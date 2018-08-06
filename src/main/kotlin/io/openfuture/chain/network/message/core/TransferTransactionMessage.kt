@@ -19,6 +19,17 @@ class TransferTransactionMessage(
     var recipientAddress: String
 ) : BaseTransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
+    constructor(tx: TransferTransaction) : this(
+        tx.timestamp,
+        tx.fee,
+        tx.senderAddress,
+        tx.hash,
+        tx.senderSignature,
+        tx.senderPublicKey,
+        tx.payload.amount,
+        tx.payload.recipientAddress
+    )
+
     constructor(utx: UTransferTransaction) : this(
         utx.timestamp,
         utx.fee,

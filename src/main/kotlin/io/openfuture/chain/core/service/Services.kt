@@ -81,19 +81,13 @@ interface TransactionService {
 
     fun getCount(): Long
 
-    fun getAllUnconfirmed(): MutableList<UTransaction>
-
-    fun getUnconfirmedByHash(hash: String): UTransaction
-
-    fun add(message: BaseTransactionMessage): UTransaction
-
-    fun synchronize(message: BaseTransactionMessage, block: MainBlock)
-
-    fun toBlock(utx: UTransaction, block: MainBlock): Transaction
-
 }
 
 interface TransferTransactionService {
+
+    fun getAllUnconfirmed(): MutableList<UTransferTransaction>
+
+    fun getUnconfirmedByHash(hash: String): UTransferTransaction
 
     fun add(message: TransferTransactionMessage): UTransferTransaction
 
@@ -101,7 +95,7 @@ interface TransferTransactionService {
 
     fun synchronize(message: TransferTransactionMessage, block: MainBlock)
 
-    fun toBlock(utx: UTransferTransaction, block: MainBlock): TransferTransaction
+    fun toBlock(hash: String, block: MainBlock): TransferTransaction
 
     fun generateHash(request: TransferTransactionHashRequest): String
 
@@ -109,13 +103,17 @@ interface TransferTransactionService {
 
 interface VoteTransactionService {
 
+    fun getAllUnconfirmed(): MutableList<UnconfirmedVoteTransaction>
+
+    fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction
+
     fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction
 
     fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction
 
     fun synchronize(message: VoteTransactionMessage, block: MainBlock)
 
-    fun toBlock(utx: UnconfirmedVoteTransaction, block: MainBlock): ConfirmedVoteTransaction
+    fun toBlock(hash: String, block: MainBlock): ConfirmedVoteTransaction
 
     fun generateHash(request: VoteTransactionHashRequest): String
 
@@ -123,13 +121,17 @@ interface VoteTransactionService {
 
 interface DelegateTransactionService {
 
+    fun getAllUnconfirmed(): MutableList<UDelegateTransaction>
+
+    fun getUnconfirmedByHash(hash: String): UDelegateTransaction
+
     fun add(message: DelegateTransactionMessage): UDelegateTransaction
 
     fun add(request: DelegateTransactionRequest): UDelegateTransaction
 
     fun synchronize(message: DelegateTransactionMessage, block: MainBlock)
 
-    fun toBlock(utx: UDelegateTransaction, block: MainBlock): DelegateTransaction
+    fun toBlock(hash: String, block: MainBlock): DelegateTransaction
 
     fun generateHash(request: DelegateTransactionHashRequest): String
 

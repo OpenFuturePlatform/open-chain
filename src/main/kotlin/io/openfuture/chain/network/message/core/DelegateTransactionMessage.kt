@@ -19,6 +19,16 @@ class DelegateTransactionMessage(
     var delegateKey: String
 ) : BaseTransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
+    constructor(tx: DelegateTransaction) : this(
+        tx.timestamp,
+        tx.fee,
+        tx.senderAddress,
+        tx.hash,
+        tx.senderSignature,
+        tx.senderPublicKey,
+        tx.payload.delegateKey
+    )
+
     constructor(utx: UDelegateTransaction) : this(
         utx.timestamp,
         utx.fee,

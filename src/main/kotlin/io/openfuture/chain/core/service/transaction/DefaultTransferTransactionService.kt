@@ -1,7 +1,7 @@
 package io.openfuture.chain.core.service.transaction
 
+import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
@@ -15,7 +15,6 @@ import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTrans
 import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import javax.xml.bind.ValidationException
 
 @Service
 class DefaultTransferTransactionService(
@@ -23,6 +22,15 @@ class DefaultTransferTransactionService(
     uRepository: UTransactionRepository<UTransferTransaction>,
     private val networkService: NetworkService
 ) : BaseTransactionService<TransferTransaction, UTransferTransaction>(repository, uRepository), TransferTransactionService {
+
+    @Transactional(readOnly = true)
+    override fun getAllUnconfirmed(): MutableList<UTransferTransaction> {
+        return uRepository.findAllByOrderByFeeDesc()
+    }
+
+    @Transactional(readOnly = true)
+    override fun getUnconfirmedByHash(hash: String): UTransferTransaction = uRepository.findOneByHash(hash)
+        ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional
     override fun add(message: TransferTransactionMessage): UTransferTransaction {
@@ -51,7 +59,7 @@ class DefaultTransferTransactionService(
 
         val persistUtx = uRepository.findOneByHash(message.hash)
         if (null != persistUtx) {
-            toBlock(persistUtx, block)
+            toBlock(persistUtx.hash, block)
             return
         }
         super.save(TransferTransaction.of(message))
@@ -63,7 +71,8 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun toBlock(utx: UTransferTransaction, block: MainBlock): TransferTransaction {
+    override fun toBlock(hash: String, block: MainBlock): TransferTransaction {
+        val utx = getUnconfirmedByHash(hash)
         updateTransferBalance(utx.senderAddress, utx.payload.recipientAddress, utx.payload.amount)
         return super.toBlock(utx, TransferTransaction.of(utx), block)
     }

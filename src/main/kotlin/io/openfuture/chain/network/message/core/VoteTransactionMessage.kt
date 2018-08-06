@@ -1,6 +1,7 @@
 package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
+import io.openfuture.chain.core.model.entity.transaction.confirmed.ConfirmedVoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
@@ -15,6 +16,17 @@ class VoteTransactionMessage(
     var voteTypeId: Int,
     var delegateKey: String
 ) : BaseTransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
+
+    constructor(tx: ConfirmedVoteTransaction) : this(
+        tx.timestamp,
+        tx.fee,
+        tx.senderAddress,
+        tx.hash,
+        tx.senderSignature,
+        tx.senderPublicKey,
+        tx.payload.voteTypeId,
+        tx.payload.delegateKey
+    )
 
     constructor(utx: UnconfirmedVoteTransaction) : this(
         utx.timestamp,

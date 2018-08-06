@@ -1,8 +1,8 @@
 package io.openfuture.chain.core.service.transaction
 
+import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
@@ -25,6 +25,15 @@ class DefaultDelegateTransactionService(
     private val delegateService: DelegateService,
     private val networkService: NetworkService
 ) : BaseTransactionService<DelegateTransaction, UDelegateTransaction>(repository, uRepository), DelegateTransactionService {
+
+    @Transactional(readOnly = true)
+    override fun getAllUnconfirmed(): MutableList<UDelegateTransaction> {
+        return uRepository.findAllByOrderByFeeDesc()
+    }
+
+    @Transactional(readOnly = true)
+    override fun getUnconfirmedByHash(hash: String): UDelegateTransaction = uRepository.findOneByHash(hash)
+        ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional
     override fun add(message: DelegateTransactionMessage): UDelegateTransaction {
@@ -54,7 +63,7 @@ class DefaultDelegateTransactionService(
 
         val persistUtx = uRepository.findOneByHash(message.hash)
         if (null != persistUtx) {
-            toBlock(persistUtx, block)
+            toBlock(persistUtx.hash, block)
             return
         }
         super.save(DelegateTransaction.of(message))
@@ -66,7 +75,8 @@ class DefaultDelegateTransactionService(
     }
 
     @Transactional
-    override fun toBlock(utx: UDelegateTransaction, block: MainBlock): DelegateTransaction {
+    override fun toBlock(hash: String, block: MainBlock): DelegateTransaction {
+        val utx = getUnconfirmedByHash(hash)
         delegateService.save(Delegate(utx.payload.delegateKey, utx.senderAddress))
         return super.toBlock(utx, DelegateTransaction.of(utx), block)
     }

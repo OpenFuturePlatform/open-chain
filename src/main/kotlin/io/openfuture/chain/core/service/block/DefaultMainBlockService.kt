@@ -23,7 +23,9 @@ class DefaultMainBlockService(
     private val repository: BlockRepository<MainBlock>,
     private val clock: NodeClock,
     private val keyHolder: NodeKeyHolder,
-    private val transactionService: TransactionService,
+    private val voteTransactionService: VoteTransactionService,
+    private val delegateTransactionService: DelegateTransactionService,
+    private val transferTransactionService: TransferTransactionService,
     private val consensusProperties: ConsensusProperties,
     private val networkService: NetworkService
 ) : BaseBlockService(blockService), MainBlockService {
@@ -33,8 +35,14 @@ class DefaultMainBlockService(
         val timestamp = clock.networkTime()
         val lastBlock = blockService.getLast()
         val height = lastBlock.height + 1
-        val transactions = transactionService.getAllUnconfirmed()
         val previousHash = lastBlock.hash
+
+        // -- transactions by type
+        val voteTxs = voteTransactionService.getAllUnconfirmed()
+        val delegateTxs = delegateTransactionService.getAllUnconfirmed()
+        val transferTxs = transferTransactionService.getAllUnconfirmed()
+        val transactions = voteTxs + delegateTxs + transferTxs
+
         val reward = transactions.map { it.fee }.sum() + consensusProperties.rewardBlock!!
         val merkleHash = calculateMerkleRoot(transactions.map { it.hash })
         val payload = MainBlockPayload(merkleHash)
@@ -44,7 +52,7 @@ class DefaultMainBlockService(
         val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
 
         val block = MainBlock(timestamp, height, previousHash, reward, ByteUtils.toHexString(hash), signature, publicKey, payload)
-        return PendingBlockMessage(block, transactions)
+        return PendingBlockMessage(block, voteTxs, delegateTxs, transferTxs)
     }
 
     @Transactional
@@ -54,14 +62,14 @@ class DefaultMainBlockService(
         }
 
         val block = MainBlock.of(message)
-        if (!isValid(block, message.transactions)) {
+        if (!isValid(block, message.getAllTransactions())) {
             return
         }
 
         val savedBlock = repository.save(block)
-        message.transactions
-            .map { transactionService.getUnconfirmedByHash(it) }
-            .forEach { transactionService.toBlock(it, repository.save(savedBlock)) }
+        message.voteTxs.map { voteTransactionService.toBlock(it, savedBlock) }
+        message.delegateTxs.map { delegateTransactionService.toBlock(it, savedBlock) }
+        message.transferTxs.map { transferTransactionService.toBlock(it, savedBlock) }
         networkService.broadcast(message)
     }
 
@@ -72,19 +80,20 @@ class DefaultMainBlockService(
         }
 
         val block = MainBlock.of(message)
-        if (!isValid(block, message.transactions.map { it.hash })) {
+        if (!isValid(block, message.getAllTransactions().map { it.hash })) {
             return
         }
 
         val savedBlock = repository.save(block)
-        message.transactions.forEach { transactionService.synchronize(it, repository.save(savedBlock)) }
+        message.voteTxs.forEach { voteTransactionService.synchronize(it, repository.save(savedBlock)) }
+        message.delegateTxs.forEach { delegateTransactionService.synchronize(it, repository.save(savedBlock)) }
+        message.transferTxs.forEach { transferTransactionService.synchronize(it, repository.save(savedBlock)) }
     }
 
     @Transactional(readOnly = true)
     override fun isValid(message: PendingBlockMessage): Boolean {
         val block = MainBlock.of(message)
-        val transactions = message.transactions.map { transactionService.getUnconfirmedByHash(it) }
-        return isValid(block, transactions.map { it.hash })
+        return isValid(block, message.getAllTransactions())
     }
 
     private fun isValid(block: MainBlock, transactions: List<String>): Boolean {

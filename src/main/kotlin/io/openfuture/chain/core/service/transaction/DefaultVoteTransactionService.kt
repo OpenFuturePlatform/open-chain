@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
+import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.confirmed.ConfirmedVoteTransaction
@@ -26,6 +27,15 @@ internal class DefaultVoteTransactionService(
     private val consensusProperties: ConsensusProperties,
     private val networkService: NetworkService
 ) : BaseTransactionService<ConfirmedVoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository), VoteTransactionService {
+
+    @Transactional(readOnly = true)
+    override fun getAllUnconfirmed(): MutableList<UnconfirmedVoteTransaction> {
+        return uRepository.findAllByOrderByFeeDesc()
+    }
+
+    @Transactional(readOnly = true)
+    override fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction = uRepository.findOneByHash(hash)
+        ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional
     override fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction {
@@ -55,7 +65,7 @@ internal class DefaultVoteTransactionService(
 
         val persistUtx = uRepository.findOneByHash(message.hash)
         if (null != persistUtx) {
-            toBlock(persistUtx, block)
+            toBlock(persistUtx.hash, block)
             return
         }
         super.save(ConfirmedVoteTransaction.of(message))
@@ -67,7 +77,8 @@ internal class DefaultVoteTransactionService(
     }
 
     @Transactional
-    override fun toBlock(utx: UnconfirmedVoteTransaction, block: MainBlock): ConfirmedVoteTransaction {
+    override fun toBlock(hash: String, block: MainBlock): ConfirmedVoteTransaction {
+        val utx = getUnconfirmedByHash(hash)
         val type = utx.payload.getVoteType()
         updateWalletVotes(utx.payload.delegateKey, utx.senderAddress, type)
         return super.toBlock(utx, ConfirmedVoteTransaction.of(utx), block)
