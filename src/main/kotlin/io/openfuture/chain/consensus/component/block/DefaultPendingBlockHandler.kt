@@ -22,9 +22,9 @@ class DefaultPendingBlockHandler(
     private val networkService: NetworkService
 ) : PendingBlockHandler {
 
-    val pendingBlocks: MutableSet<MainBlock> = mutableSetOf()
-    val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
-    val commits: MutableMap<String, MutableList<Delegate>> = mutableMapOf()
+    private val pendingBlocks: MutableSet<MainBlock> = mutableSetOf()
+    private val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
+    private val commits: MutableMap<String, MutableList<Delegate>> = mutableMapOf()
 
     private var observable: MainBlock? = null
     private var timeSlotNumber: Long = 0
@@ -65,7 +65,7 @@ class DefaultPendingBlockHandler(
         val delegates = epochService.getDelegates()
         val delegate = delegates.find { message.publicKey == it.publicKey }
 
-        if (null == delegate || message.hash != observable!!.hash) {
+        if (null == delegate || message.hash != observable!!.hash || !isActiveDelegate()) {
             return
         }
         if (!prepareVotes.containsKey(message.publicKey) && isValidApprovalSignature(message)) {

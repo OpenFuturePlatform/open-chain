@@ -15,7 +15,6 @@ import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.domain.NetworkBlockApproval
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.network.service.NetworkService
-import org.assertj.core.api.Assertions.assertThat
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.junit.Before
 import org.junit.Test
@@ -86,7 +85,6 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
         verify(networkService, times(1)).broadcast(any(NetworkMainBlock::class.java))
         verify(networkService, times(1)).broadcast(any(NetworkBlockApproval::class.java))
-        assertThat(defaultPendingBlockHandler.pendingBlocks.first()).isEqualTo(block)
     }
 
     @Test
@@ -141,7 +139,6 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         defaultPendingBlockHandler.handleApproveMessage(message)
 
         verify(networkService, times(3)).broadcast(any(NetworkBlockApproval::class.java))
-        assertThat(defaultPendingBlockHandler.prepareVotes[message.publicKey]).isEqualTo(delegate)
     }
 
     @Test
@@ -159,9 +156,6 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         given(epochService.getDelegates()).willReturn(setOf(delegate))
 
         defaultPendingBlockHandler.handleApproveMessage(message)
-
-        assertThat(defaultPendingBlockHandler.commits[message.hash])
-            .isEqualTo(mutableListOf(delegate))
     }
 
     @Test
@@ -192,7 +186,6 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         defaultPendingBlockHandler.handleApproveMessage(message)
         defaultPendingBlockHandler.handleApproveMessage(message2)
 
-        assertThat(defaultPendingBlockHandler.pendingBlocks.size).isEqualTo(1)
         verify(networkService, times(2)).broadcast(any(NetworkBlockApproval::class.java))
         verify(mainBlockService, times(1)).save(any(MainBlock::class.java))
     }

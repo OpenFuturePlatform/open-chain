@@ -17,12 +17,17 @@ class DefaultEpochService(
 
     private var genesisBlock: GenesisBlock = genesisBlockService.getLast()
 
+
     override fun getEpochStart(): Long {
         return genesisBlock.timestamp
     }
 
     override fun getDelegates(): Set<Delegate> {
         return genesisBlock.activeDelegates
+    }
+
+    override fun getEpochIndex(): Long {
+        return genesisBlock.epochIndex
     }
 
     override fun getGenesisBlockHeight(): Long {
