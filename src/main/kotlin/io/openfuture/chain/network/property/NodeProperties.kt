@@ -63,8 +63,8 @@ class NodeProperties(
 ) {
 
     fun getRootAddresses(): List<NetworkAddressMessage> = rootNodes.map {
-        val split = it.split(':')
-        NetworkAddressMessage(split[0], split[1].toInt())
+        val addressParts = it.split(':')
+        NetworkAddressMessage(addressParts[0], addressParts[1].toInt())
     }
 
 }

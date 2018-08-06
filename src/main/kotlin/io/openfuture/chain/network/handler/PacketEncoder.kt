@@ -1,4 +1,4 @@
-package io.openfuture.chain.network.handler.base
+package io.openfuture.chain.network.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToMessageEncoder

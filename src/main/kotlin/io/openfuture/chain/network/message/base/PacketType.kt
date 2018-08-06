@@ -7,7 +7,7 @@ import io.openfuture.chain.network.message.network.*
 import kotlin.reflect.KClass
 
 enum class PacketType(
-    val id: Short,
+    val id: Byte,
     val clazz: KClass<out BaseMessage>
 ) {
 
@@ -29,7 +29,7 @@ enum class PacketType(
 
     companion object {
 
-        fun get(id: Short) = values().single { id == it.id }
+        fun get(id: Byte) = values().single { id == it.id }
 
         fun get(packet: BaseMessage) = values().single { packet::class == it.clazz }
 

@@ -16,7 +16,7 @@ class PacketTests : MessageTests() {
 
     @Before
     fun setup() {
-        buffer = createBuffer("00000005312e302e30000000000000007b0002")
+        buffer = createBuffer("00000005312e302e30000000000000007b02")
         message = Packet(FindAddressesMessage(), "1.0.0", 123)
     }
 

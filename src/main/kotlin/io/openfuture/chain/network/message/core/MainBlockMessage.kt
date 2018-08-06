@@ -18,9 +18,9 @@ class MainBlockMessage(
     signature: String,
     publicKey: String,
     var merkleHash: String,
-    var voteTxs: List<VoteTransactionMessage>,
-    var delegateTxs: List<DelegateTransactionMessage>,
-    var transferTxs: List<TransferTransactionMessage>
+    var voteTransactions: List<VoteTransactionMessage>,
+    var delegateTransactions: List<DelegateTransactionMessage>,
+    var transferTransactions: List<TransferTransactionMessage>
 ) : BlockMessage(height, previousHash, timestamp, reward, hash, signature, publicKey) {
 
     constructor(block: MainBlock, voteTxs: List<VoteTransaction>, delegateTxs: List<DelegateTransaction>,
@@ -39,25 +39,25 @@ class MainBlockMessage(
     )
 
     fun getAllTransactions(): List<BaseTransactionMessage> {
-        return voteTxs + delegateTxs + transferTxs
+        return voteTransactions + delegateTransactions + transferTransactions
     }
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)
 
         merkleHash = buffer.readString()
-        voteTxs = buffer.readList()
-        delegateTxs = buffer.readList()
-        transferTxs = buffer.readList()
+        voteTransactions = buffer.readList()
+        delegateTransactions = buffer.readList()
+        transferTransactions = buffer.readList()
     }
 
     override fun write(buffer: ByteBuf) {
         super.write(buffer)
 
         buffer.writeString(merkleHash)
-        buffer.writeList(voteTxs)
-        buffer.writeList(delegateTxs)
-        buffer.writeList(transferTxs)
+        buffer.writeList(voteTransactions)
+        buffer.writeList(delegateTransactions)
+        buffer.writeList(transferTransactions)
     }
 
     override fun toString() = "MainBlockMessage(hash=$hash)"
