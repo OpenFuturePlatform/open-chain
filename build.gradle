@@ -19,8 +19,6 @@ repositories {
 
 ext {
     kotlinVersion = '1.2.60'
-    queryDslVersion = '4.2.1'
-    bouncycastleVersion = '1.59'
 }
 
 dependencies {
@@ -49,7 +47,7 @@ dependencies {
     compileOnly('org.springframework.boot:spring-boot-configuration-processor')
 
     //Cryptography
-    compile("org.bouncycastle:bcprov-jdk15on:$bouncycastleVersion")
+    compile("org.bouncycastle:bcprov-jdk15on:1.59")
 
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
