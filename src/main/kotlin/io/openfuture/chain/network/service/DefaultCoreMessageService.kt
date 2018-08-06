@@ -28,7 +28,7 @@ class DefaultCoreMessageService(
             return
         }
 
-        //genesisBlockService.add(block)
+        //genesisBlockService.save(block)
     }
 
     override fun onMainBlock(ctx: ChannelHandlerContext, block: MainBlockMessage) {
@@ -36,7 +36,7 @@ class DefaultCoreMessageService(
             return
         }
 
-        //mainBlockService.add(block)
+        //mainBlockService.save(block)
     }
 
     override fun onTransferTransaction(ctx: ChannelHandlerContext, tx: TransferTransactionMessage) {}

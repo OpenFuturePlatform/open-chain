@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
@@ -16,7 +17,6 @@ import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTrans
 import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import javax.xml.bind.ValidationException
 
 @Service
 class DefaultDelegateTransactionService(
@@ -28,35 +28,40 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun add(message: DelegateTransactionMessage): UDelegateTransaction {
-        val transaction = repository.findOneByHash(message.hash)
-        if (null != transaction) {
+        val persistTx = repository.findOneByHash(message.hash)
+        if (null != persistTx) {
             return UDelegateTransaction.of(message)
         }
 
-        val utx = UDelegateTransaction.of(message)
-        if (!isValid(utx)) {
-            throw ValidationException("Transaction is invalid!")
-        }
-
-        val savedUtx = super.add(utx)
+        val savedUtx = super.save(UDelegateTransaction.of(message))
         networkService.broadcast(message)
         return savedUtx
     }
 
     @Transactional
     override fun add(request: DelegateTransactionRequest): UDelegateTransaction {
-        val utx = UDelegateTransaction.of(clock.networkTime(), request)
-        if (!isValid(utx)) {
-            throw ValidationException("Transaction is invalid!")
-        }
-
-        val savedUtx = super.add(utx)
+        val savedUtx = super.save(UDelegateTransaction.of(clock.networkTime(), request))
         networkService.broadcast(DelegateTransactionMessage(savedUtx))
         return savedUtx
     }
 
+    @Transactional
+    override fun synchronize(message: DelegateTransactionMessage, block: MainBlock) {
+        val persistTx = repository.findOneByHash(message.hash)
+        if (null != persistTx) {
+            return
+        }
+
+        val persistUtx = uRepository.findOneByHash(message.hash)
+        if (null != persistUtx) {
+            toBlock(persistUtx, block)
+            return
+        }
+        super.save(DelegateTransaction.of(message))
+    }
+
     override fun generateHash(request: DelegateTransactionHashRequest): String {
-        return TransactionUtils.generateHash(request.timestamp!!, request.fee!!,
+        return TransactionUtils.generateHash(request.timestamp!!, request.fee!!, request.senderAddress!!,
             DelegateTransactionPayload(request.delegateKey!!))
     }
 
@@ -66,7 +71,13 @@ class DefaultDelegateTransactionService(
         return super.toBlock(utx, DelegateTransaction.of(utx), block)
     }
 
-    private fun isValid(utx: UDelegateTransaction): Boolean {
+    @Transactional
+    override fun isValid(tx: DelegateTransaction): Boolean {
+        return isNotExistDelegate(tx.senderAddress) && super.isValid(tx)
+    }
+
+    @Transactional
+    override fun isValid(utx: UDelegateTransaction): Boolean {
         return isNotExistDelegate(utx.senderAddress) && super.isValid(utx)
     }
 

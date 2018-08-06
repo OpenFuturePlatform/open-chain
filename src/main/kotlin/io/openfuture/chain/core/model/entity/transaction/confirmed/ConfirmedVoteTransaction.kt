@@ -1,15 +1,16 @@
 package io.openfuture.chain.core.model.entity.transaction.confirmed
 
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.vote.VoteTransactionPayload
+import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.Table
 
 @Entity
 @Table(name = "vote_transactions")
-class VoteTransaction(
+class ConfirmedVoteTransaction(
     timestamp: Long,
     fee: Long,
     hash: String,
@@ -23,7 +24,18 @@ class VoteTransaction(
 ) : Transaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
     companion object {
-        fun of(utx: UVoteTransaction): VoteTransaction = VoteTransaction(
+
+        fun of(message: VoteTransactionMessage): ConfirmedVoteTransaction = ConfirmedVoteTransaction(
+            message.timestamp,
+            message.fee,
+            message.senderAddress,
+            message.hash,
+            message.senderSignature,
+            message.senderPublicKey,
+            VoteTransactionPayload(message.voteTypeId, message.delegateKey)
+        )
+
+        fun of(utx: UnconfirmedVoteTransaction): ConfirmedVoteTransaction = ConfirmedVoteTransaction(
             utx.timestamp,
             utx.fee,
             utx.senderAddress,

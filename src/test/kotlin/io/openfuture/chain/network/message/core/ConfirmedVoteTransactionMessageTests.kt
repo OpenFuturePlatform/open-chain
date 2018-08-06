@@ -7,7 +7,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
-class VoteTransactionMessageTests : MessageTests() {
+class ConfirmedVoteTransactionMessageTests : MessageTests() {
 
     private lateinit var message: VoteTransactionMessage
     private lateinit var buffer: ByteBuf

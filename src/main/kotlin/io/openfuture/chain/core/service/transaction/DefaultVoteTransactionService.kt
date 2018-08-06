@@ -3,9 +3,9 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.ConfirmedVoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.vote.VoteTransactionPayload
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
@@ -17,59 +17,69 @@ import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionHa
 import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import javax.xml.bind.ValidationException
 
 @Service
 internal class DefaultVoteTransactionService(
-    repository: TransactionRepository<VoteTransaction>,
-    uRepository: UTransactionRepository<UVoteTransaction>,
+    repository: TransactionRepository<ConfirmedVoteTransaction>,
+    uRepository: UTransactionRepository<UnconfirmedVoteTransaction>,
     private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties,
     private val networkService: NetworkService
-) : BaseTransactionService<VoteTransaction, UVoteTransaction>(repository, uRepository), VoteTransactionService {
+) : BaseTransactionService<ConfirmedVoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository), VoteTransactionService {
 
     @Transactional
-    override fun add(message: VoteTransactionMessage): UVoteTransaction {
+    override fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction {
         val transaction = repository.findOneByHash(message.hash)
         if (null != transaction) {
-            return UVoteTransaction.of(message)
+            return UnconfirmedVoteTransaction.of(message)
         }
 
-        val utx = UVoteTransaction.of(message)
-        if (!isValid(utx)) {
-            throw ValidationException("Transaction is invalid!")
-        }
-
-        val savedUtx = super.add(utx)
+        val savedUtx = super.save(UnconfirmedVoteTransaction.of(message))
         networkService.broadcast(message)
         return savedUtx
     }
 
     @Transactional
-    override fun add(request: VoteTransactionRequest): UVoteTransaction {
-        val utx = UVoteTransaction.of(request)
-        if (!isValid(utx)) {
-            throw ValidationException("Transaction is invalid!")
-        }
-
-        val savedUtx = super.add(utx)
+    override fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction {
+        val savedUtx = super.save(UnconfirmedVoteTransaction.of(request))
         networkService.broadcast(VoteTransactionMessage(savedUtx))
         return savedUtx
     }
 
+    @Transactional
+    override fun synchronize(message: VoteTransactionMessage, block: MainBlock) {
+        val persistTx = repository.findOneByHash(message.hash)
+        if (null != persistTx) {
+            return
+        }
+
+        val persistUtx = uRepository.findOneByHash(message.hash)
+        if (null != persistUtx) {
+            toBlock(persistUtx, block)
+            return
+        }
+        super.save(ConfirmedVoteTransaction.of(message))
+    }
+
     override fun generateHash(request: VoteTransactionHashRequest): String {
-        return TransactionUtils.generateHash(request.timestamp!!, request.fee!!,
+        return TransactionUtils.generateHash(request.timestamp!!, request.fee!!, request.senderAddress!!,
             VoteTransactionPayload(request.voteTypeId!!, request.delegateKey!!))
     }
 
     @Transactional
-    override fun toBlock(utx: UVoteTransaction, block: MainBlock): VoteTransaction {
+    override fun toBlock(utx: UnconfirmedVoteTransaction, block: MainBlock): ConfirmedVoteTransaction {
         val type = utx.payload.getVoteType()
         updateWalletVotes(utx.payload.delegateKey, utx.senderAddress, type)
-        return super.toBlock(utx, VoteTransaction.of(utx), block)
+        return super.toBlock(utx, ConfirmedVoteTransaction.of(utx), block)
     }
 
-    private fun isValid(utx: UVoteTransaction): Boolean {
+    @Transactional
+    override fun isValid(tx: ConfirmedVoteTransaction): Boolean {
+        return isValidVoteCount(tx.senderAddress) && super.isValid(tx)
+    }
+
+    @Transactional
+    override fun isValid(utx: UnconfirmedVoteTransaction): Boolean {
         return isValidVoteCount(utx.senderAddress) && super.isValid(utx)
     }
 

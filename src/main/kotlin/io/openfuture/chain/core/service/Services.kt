@@ -8,12 +8,13 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.ConfirmedVoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.node.*
+import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionHashRequest
@@ -55,7 +56,7 @@ interface GenesisBlockService {
 
     fun getLast(): GenesisBlock
 
-    fun create(): GenesisBlock
+    fun create(): GenesisBlockMessage
 
     fun add(message: GenesisBlockMessage)
 
@@ -65,11 +66,13 @@ interface GenesisBlockService {
 
 interface MainBlockService {
 
-    fun create(): MainBlockMessage
+    fun create(): PendingBlockMessage
 
-    fun add(message: MainBlockMessage)
+    fun add(message: PendingBlockMessage)
 
-    fun isValid(message: MainBlockMessage): Boolean
+    fun isValid(message: PendingBlockMessage): Boolean
+
+    fun synchronize(message: MainBlockMessage)
 
 }
 
@@ -82,6 +85,10 @@ interface TransactionService {
 
     fun getUnconfirmedByHash(hash: String): UTransaction
 
+    fun add(message: BaseTransactionMessage): UTransaction
+
+    fun synchronize(message: BaseTransactionMessage, block: MainBlock)
+
     fun toBlock(utx: UTransaction, block: MainBlock): Transaction
 
 }
@@ -92,6 +99,8 @@ interface TransferTransactionService {
 
     fun add(request: TransferTransactionRequest): UTransferTransaction
 
+    fun synchronize(message: TransferTransactionMessage, block: MainBlock)
+
     fun toBlock(utx: UTransferTransaction, block: MainBlock): TransferTransaction
 
     fun generateHash(request: TransferTransactionHashRequest): String
@@ -100,11 +109,13 @@ interface TransferTransactionService {
 
 interface VoteTransactionService {
 
-    fun add(message: VoteTransactionMessage): UVoteTransaction
+    fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction
 
-    fun add(request: VoteTransactionRequest): UVoteTransaction
+    fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction
 
-    fun toBlock(utx: UVoteTransaction, block: MainBlock): VoteTransaction
+    fun synchronize(message: VoteTransactionMessage, block: MainBlock)
+
+    fun toBlock(utx: UnconfirmedVoteTransaction, block: MainBlock): ConfirmedVoteTransaction
 
     fun generateHash(request: VoteTransactionHashRequest): String
 
@@ -115,6 +126,8 @@ interface DelegateTransactionService {
     fun add(message: DelegateTransactionMessage): UDelegateTransaction
 
     fun add(request: DelegateTransactionRequest): UDelegateTransaction
+
+    fun synchronize(message: DelegateTransactionMessage, block: MainBlock)
 
     fun toBlock(utx: UDelegateTransaction, block: MainBlock): DelegateTransaction
 

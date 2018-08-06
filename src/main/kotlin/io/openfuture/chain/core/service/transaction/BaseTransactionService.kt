@@ -12,10 +12,9 @@ import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.network.message.core.BaseTransactionMessage
-import io.openfuture.chain.network.service.NetworkService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.beans.factory.annotation.Autowired
+import javax.xml.bind.ValidationException
 
 abstract class BaseTransactionService<T : Transaction, U: UTransaction> (
     protected val repository: TransactionRepository<T>,
@@ -31,9 +30,20 @@ abstract class BaseTransactionService<T : Transaction, U: UTransaction> (
     @Autowired
     private lateinit var cryptoService: CryptoService
 
-    protected fun add(utx: U) : U {
+    protected fun save(utx: U) : U {
+        if (!isValid(utx)) {
+            throw ValidationException("Transaction is invalid!")
+        }
         updateUnconfirmedBalanceByFee(utx)
         return uRepository.save(utx)
+    }
+
+    protected fun save(tx: T) : T {
+        if (!isValid(tx)) {
+            throw ValidationException("Transaction is invalid!")
+        }
+        updateUnconfirmedBalanceByFee(tx)
+        return repository.save(tx)
     }
 
     protected fun toBlock(utx: U, tx: T, block: MainBlock): T {
@@ -43,18 +53,26 @@ abstract class BaseTransactionService<T : Transaction, U: UTransaction> (
         return repository.save(tx)
     }
 
-    protected fun updateBalanceByFee(tx: T) {
+    open fun isValid(utx: U): Boolean {
+        return this.isValidBase(utx)
+    }
+
+    open fun isValid(tx: T): Boolean {
+        return this.isValidBase(tx)
+    }
+
+    private fun updateBalanceByFee(tx: T) {
         walletService.decreaseBalance(tx.senderAddress, tx.fee)
     }
 
-    protected fun updateUnconfirmedBalanceByFee(tx: U) {
+    private fun updateUnconfirmedBalanceByFee(tx: BaseTransaction) {
         walletService.decreaseUnconfirmedBalance(tx.senderAddress, tx.fee)
     }
 
-    protected fun isValid(tx: BaseTransaction): Boolean {
+    private fun isValidBase(tx: BaseTransaction): Boolean {
         return isValidAddress(tx.senderAddress, tx.senderPublicKey)
             && isValidFee(tx.senderAddress, tx.fee)
-            && isValidHash(tx.timestamp, tx.fee, tx.getPayload(), tx.hash)
+            && isValidHash(tx.timestamp, tx.fee, tx.senderAddress, tx.getPayload(), tx.hash)
             && isValidaSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
     }
 
@@ -70,8 +88,8 @@ abstract class BaseTransactionService<T : Transaction, U: UTransaction> (
         return true
     }
 
-    private fun isValidHash(timestamp: Long, fee: Long, payload: TransactionPayload, hash: String): Boolean {
-        return TransactionUtils.generateHash(timestamp, fee, payload) == hash
+    private fun isValidHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload, hash: String): Boolean {
+        return TransactionUtils.generateHash(timestamp, fee, senderAddress, payload) == hash
     }
 
     private fun isValidaSignature(hash: String, signature: String, publicKey: String): Boolean {

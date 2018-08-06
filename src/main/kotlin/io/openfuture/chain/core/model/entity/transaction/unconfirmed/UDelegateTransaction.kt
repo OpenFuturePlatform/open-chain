@@ -39,7 +39,8 @@ class UDelegateTransaction(
             time,
             request.fee!!,
             request.senderAddress!!,
-            TransactionUtils.generateHash(time, request.fee!!, DelegateTransactionPayload(request.delegateKey!!)),
+            TransactionUtils.generateHash(time, request.fee!!, request.senderAddress!!,
+                DelegateTransactionPayload(request.delegateKey!!)),
             request.senderSignature!!,
             request.senderPublicKey!!,
             DelegateTransactionPayload(request.delegateKey!!)

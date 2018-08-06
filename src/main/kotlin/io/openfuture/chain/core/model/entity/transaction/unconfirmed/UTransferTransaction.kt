@@ -39,7 +39,8 @@ class UTransferTransaction(
             time,
             request.fee!!,
             request.senderAddress!!,
-            TransactionUtils.generateHash(time, request.fee!!, TransferTransactionPayload(request.amount!!, request.recipientAddress!!)),
+            TransactionUtils.generateHash(time, request.fee!!, request.senderAddress!!,
+                TransferTransactionPayload(request.amount!!, request.recipientAddress!!)),
             request.senderSignature!!,
             request.senderPublicKey!!,
             TransferTransactionPayload(request.amount!!, request.recipientAddress!!)

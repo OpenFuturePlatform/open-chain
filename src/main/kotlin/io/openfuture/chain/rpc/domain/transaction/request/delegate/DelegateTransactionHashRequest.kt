@@ -6,5 +6,6 @@ import javax.validation.constraints.NotBlank
 class DelegateTransactionHashRequest(
     timestamp: Long? = null,
     fee: Long? = null,
+    senderAddress: String? = null,
     @field:NotBlank var delegateKey: String? = null
-) : BaseTransactionHashRequest(timestamp, fee)
+) : BaseTransactionHashRequest(timestamp, fee, senderAddress)

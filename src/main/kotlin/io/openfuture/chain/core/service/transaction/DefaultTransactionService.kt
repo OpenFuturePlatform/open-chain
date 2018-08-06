@@ -6,7 +6,7 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UVoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.DelegateTransactionService
@@ -17,7 +17,6 @@ import io.openfuture.chain.network.message.core.BaseTransactionMessage
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
-import org.bouncycastle.crypto.tls.CipherType.block
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -45,9 +44,29 @@ class DefaultTransactionService(
     }
 
     @Transactional
+    override fun add(message: BaseTransactionMessage): UTransaction {
+         return when (message) {
+            is VoteTransactionMessage -> voteTransactionService.add(message)
+            is TransferTransactionMessage -> transferTransactionService.add(message)
+            is DelegateTransactionMessage -> delegateTransactionService.add(message)
+            else -> throw IllegalStateException("Unknown transaction type")
+        }
+    }
+
+    @Transactional
+    override fun synchronize(message: BaseTransactionMessage, block: MainBlock) {
+        return when (message) {
+            is VoteTransactionMessage -> voteTransactionService.synchronize(message, block)
+            is TransferTransactionMessage -> transferTransactionService.synchronize(message, block)
+            is DelegateTransactionMessage -> delegateTransactionService.synchronize(message, block)
+            else -> throw IllegalStateException("Unknown transaction type")
+        }
+    }
+
+    @Transactional
     override fun toBlock(utx: UTransaction, block: MainBlock): Transaction {
         return when (utx) {
-            is UVoteTransaction -> voteTransactionService.toBlock(utx, block)
+            is UnconfirmedVoteTransaction -> voteTransactionService.toBlock(utx, block)
             is UTransferTransaction -> transferTransactionService.toBlock(utx, block)
             is UDelegateTransaction -> delegateTransactionService.toBlock(utx, block)
             else -> throw IllegalStateException("Unknown transaction type")

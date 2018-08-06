@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull
 class VoteTransactionHashRequest(
     timestamp: Long? = null,
     fee: Long? = null,
+    senderAddress: String? = null,
     @field:NotNull var voteTypeId: Int? = null,
     @field:NotBlank var delegateKey: String? = null
-) : BaseTransactionHashRequest(timestamp, fee)
+) : BaseTransactionHashRequest(timestamp, fee, senderAddress)

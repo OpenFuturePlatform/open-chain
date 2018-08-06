@@ -3,6 +3,7 @@ package io.openfuture.chain.core.model.entity.transaction.confirmed
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransferTransaction
+import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.Table
@@ -23,6 +24,16 @@ class TransferTransaction(
 ) : Transaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
     companion object {
+        fun of(message: TransferTransactionMessage): TransferTransaction = TransferTransaction(
+            message.timestamp,
+            message.fee,
+            message.senderAddress,
+            message.hash,
+            message.senderSignature,
+            message.senderPublicKey,
+            TransferTransactionPayload(message.amount, message.recipientAddress)
+        )
+
         fun of(utx: UTransferTransaction): TransferTransaction = TransferTransaction(
             utx.timestamp,
             utx.fee,

@@ -13,7 +13,9 @@ import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
+import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
+import io.openfuture.chain.network.service.NetworkService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,14 +27,15 @@ class DefaultGenesisBlockService(
     private val delegateService: DefaultDelegateService,
     private val clock: NodeClock,
     private val consensusProperties: ConsensusProperties,
-    private val keyHolder: NodeKeyHolder
+    private val keyHolder: NodeKeyHolder,
+    private val networkService: NetworkService
 ) : BaseBlockService(blockService), GenesisBlockService {
 
     @Transactional(readOnly = true)
     override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()
         ?: throw NotFoundException("Last block not found")
 
-    override fun create(): GenesisBlock {
+    override fun create(): GenesisBlockMessage {
         val timestamp = clock.networkTime()
         val lastBlock = blockService.getLast()
         val height = lastBlock.height + 1
@@ -43,7 +46,8 @@ class DefaultGenesisBlockService(
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
 
-        return GenesisBlock(timestamp, height, previousHash, reward, ByteUtils.toHexString(hash), signature, publicKey, payload)
+        val block = GenesisBlock(timestamp, height, previousHash, reward, ByteUtils.toHexString(hash), signature, publicKey, payload)
+        return GenesisBlockMessage(block)
     }
 
     private fun createPayload(): GenesisBlockPayload {
@@ -67,7 +71,7 @@ class DefaultGenesisBlockService(
 
         block.payload.activeDelegates = delegates
         repository.save(block)
-        // todo broadcast
+        networkService.broadcast(message)
     }
 
     @Transactional(readOnly = true)
