@@ -38,11 +38,11 @@ class MainBlockClientHandler(
             transferTransactions: MutableList<TransferTransactionDto>,
             voteTransactions: MutableList<VoteTransactionDto>,
             delegateTransactions: MutableList<DelegateTransactionDto>): MutableSet<Transaction> {
-        return setOf(
+        return mutableSetOf(
             *transferTransactions.map { it.toEntity() }.toTypedArray(),
             *voteTransactions.map { it.toEntity() }.toTypedArray(),
             *delegateTransactions.map { it.toEntity() }.toTypedArray()
-        ).toMutableSet()
+        )
     }
 
 }

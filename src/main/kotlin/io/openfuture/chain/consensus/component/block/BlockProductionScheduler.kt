@@ -6,11 +6,7 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.service.CommonBlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.annotation.PostConstruct
@@ -29,8 +25,6 @@ class BlockProductionScheduler(
 
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     private var currentTimeSlot: Long = 0
 
 
@@ -40,7 +34,6 @@ class BlockProductionScheduler(
             while (true) {
                 val timeSlot = epochService.getSlotNumber()
                 if (timeSlot > currentTimeSlot) {
-                    logger.info("Time slot changed with value $timeSlot")
                     currentTimeSlot = timeSlot
                     val slotOwner = epochService.getCurrentSlotOwner()
                     if (isGenesisBlockRequired()) {
