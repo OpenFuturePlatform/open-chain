@@ -12,6 +12,7 @@ import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
+import io.openfuture.chain.network.service.NetworkService
 import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionHashRequest
 import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionRequest
 import org.springframework.stereotype.Service
@@ -23,7 +24,8 @@ internal class DefaultVoteTransactionService(
     repository: TransactionRepository<VoteTransaction>,
     uRepository: UTransactionRepository<UVoteTransaction>,
     private val delegateService: DelegateService,
-    private val consensusProperties: ConsensusProperties
+    private val consensusProperties: ConsensusProperties,
+    private val networkService: NetworkService
 ) : BaseTransactionService<VoteTransaction, UVoteTransaction>(repository, uRepository), VoteTransactionService {
 
     @Transactional
@@ -33,26 +35,26 @@ internal class DefaultVoteTransactionService(
             return UVoteTransaction.of(message)
         }
 
-        val tx = UVoteTransaction.of(message)
-        if (!isValid(tx)) {
+        val utx = UVoteTransaction.of(message)
+        if (!isValid(utx)) {
             throw ValidationException("Transaction is invalid!")
         }
 
-        updateUnconfirmedBalanceByFee(tx)
-        // todo broadcast
-        return uRepository.save(tx)
+        val savedUtx = super.add(utx)
+        networkService.broadcast(message)
+        return savedUtx
     }
 
     @Transactional
     override fun add(request: VoteTransactionRequest): UVoteTransaction {
-        val tx = UVoteTransaction.of(request)
-        if (!isValid(tx)) {
+        val utx = UVoteTransaction.of(request)
+        if (!isValid(utx)) {
             throw ValidationException("Transaction is invalid!")
         }
 
-        updateUnconfirmedBalanceByFee(tx)
-        // todo broadcast
-        return uRepository.save(tx)
+        val savedUtx = super.add(utx)
+        networkService.broadcast(VoteTransactionMessage(savedUtx))
+        return savedUtx
     }
 
     override fun generateHash(request: VoteTransactionHashRequest): String {
@@ -67,8 +69,8 @@ internal class DefaultVoteTransactionService(
         return super.toBlock(utx, VoteTransaction.of(utx), block)
     }
 
-    private fun isValid(tx: UVoteTransaction): Boolean {
-        return isValidVoteCount(tx.senderAddress) && super.isValid(tx)
+    private fun isValid(utx: UVoteTransaction): Boolean {
+        return isValidVoteCount(utx.senderAddress) && super.isValid(utx)
     }
 
     private fun updateWalletVotes(delegateKey: String, senderAddress: String, type: VoteType) {

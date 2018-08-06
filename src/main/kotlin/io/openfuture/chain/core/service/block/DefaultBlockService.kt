@@ -4,6 +4,7 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.BlockService
+import io.openfuture.chain.core.service.MainBlockService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

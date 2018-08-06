@@ -9,6 +9,7 @@ import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
+import io.openfuture.chain.network.service.NetworkService
 import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionHashRequest
 import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionRequest
 import org.springframework.stereotype.Service
@@ -18,7 +19,8 @@ import javax.xml.bind.ValidationException
 @Service
 class DefaultTransferTransactionService(
     repository: TransactionRepository<TransferTransaction>,
-    uRepository: UTransactionRepository<UTransferTransaction>
+    uRepository: UTransactionRepository<UTransferTransaction>,
+    private val networkService: NetworkService
 ) : BaseTransactionService<TransferTransaction, UTransferTransaction>(repository, uRepository), TransferTransactionService {
 
     @Transactional
@@ -28,26 +30,26 @@ class DefaultTransferTransactionService(
             return UTransferTransaction.of(message)
         }
 
-        val tx = UTransferTransaction.of(message)
-        if (!isValid(tx)) {
+        val utx = UTransferTransaction.of(message)
+        if (!isValid(utx)) {
             throw ValidationException("Transaction is invalid!")
         }
 
-        updateUnconfirmedBalanceByFee(tx)
-        // todo broadcast
-        return uRepository.save(tx)
+        val savedUtx = super.add(utx)
+        networkService.broadcast(message)
+        return savedUtx
     }
 
     @Transactional
     override fun add(request: TransferTransactionRequest): UTransferTransaction {
-        val tx = UTransferTransaction.of(clock.networkTime(), request)
-        if (!isValid(tx)) {
+        val utx = UTransferTransaction.of(clock.networkTime(), request)
+        if (!isValid(utx)) {
             throw ValidationException("Transaction is invalid!")
         }
 
-        updateUnconfirmedBalanceByFee(tx)
-        // todo broadcast
-        return uRepository.save(tx)
+        val savedUtx = super.add(utx)
+        networkService.broadcast(TransferTransactionMessage(savedUtx))
+        return savedUtx
     }
 
     override fun generateHash(request: TransferTransactionHashRequest): String {
@@ -61,8 +63,8 @@ class DefaultTransferTransactionService(
         return super.toBlock(utx, TransferTransaction.of(utx), block)
     }
 
-    private fun isValid(tx: UTransferTransaction): Boolean {
-        return isValidTransferBalance(tx.senderAddress, tx.payload.amount + tx.fee) && super.isValid(tx)
+    private fun isValid(utx: UTransferTransaction): Boolean {
+        return isValidTransferBalance(utx.senderAddress, utx.payload.amount + utx.fee) && super.isValid(utx)
     }
 
     private fun updateTransferBalance(from: String, to: String, amount: Long) {

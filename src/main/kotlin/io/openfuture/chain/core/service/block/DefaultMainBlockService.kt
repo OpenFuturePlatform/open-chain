@@ -12,6 +12,7 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.core.MainBlockMessage
+import io.openfuture.chain.network.service.NetworkService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -23,7 +24,8 @@ class DefaultMainBlockService(
     private val clock: NodeClock,
     private val keyHolder: NodeKeyHolder,
     private val transactionService: TransactionService,
-    private val consensusProperties: ConsensusProperties
+    private val consensusProperties: ConsensusProperties,
+    private val networkService: NetworkService
 ) : BaseBlockService(blockService), MainBlockService {
 
     @Transactional(readOnly = true)
@@ -60,7 +62,7 @@ class DefaultMainBlockService(
 
         val savedBlock = repository.save(block)
         transactions.forEach { transactionService.toBlock(it, repository.save(savedBlock)) }
-        // todo broadcast
+        networkService.broadcast(message)
     }
 
     @Transactional(readOnly = true)

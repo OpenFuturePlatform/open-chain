@@ -13,6 +13,11 @@ import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.core.service.VoteTransactionService
+import io.openfuture.chain.network.message.core.BaseTransactionMessage
+import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.network.message.core.TransferTransactionMessage
+import io.openfuture.chain.network.message.core.VoteTransactionMessage
+import org.bouncycastle.crypto.tls.CipherType.block
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

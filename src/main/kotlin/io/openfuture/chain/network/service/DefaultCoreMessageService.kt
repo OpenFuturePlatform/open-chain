@@ -2,17 +2,13 @@ package io.openfuture.chain.network.service
 
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.core.service.BlockService
-import io.openfuture.chain.core.service.GenesisBlockService
-import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.network.message.core.*
 import org.springframework.stereotype.Component
 
 // TODO: call core API here
 @Component
 class DefaultCoreMessageService(
-    private val blockService: BlockService,
-    private val genesisBlockService: GenesisBlockService,
-    private val mainBlockService: MainBlockService
+    private val blockService: BlockService
 ) : CoreMessageService {
 
     override fun onNetworkBlockRequest(ctx: ChannelHandlerContext, request: SyncBlockRequestMessage) {

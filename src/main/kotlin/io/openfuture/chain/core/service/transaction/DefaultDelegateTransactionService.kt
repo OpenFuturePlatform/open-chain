@@ -11,6 +11,7 @@ import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.network.service.NetworkService
 import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionHashRequest
 import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionRequest
 import org.springframework.stereotype.Service
@@ -21,7 +22,8 @@ import javax.xml.bind.ValidationException
 class DefaultDelegateTransactionService(
     repository: TransactionRepository<DelegateTransaction>,
     uRepository: UTransactionRepository<UDelegateTransaction>,
-    private val delegateService: DelegateService
+    private val delegateService: DelegateService,
+    private val networkService: NetworkService
 ) : BaseTransactionService<DelegateTransaction, UDelegateTransaction>(repository, uRepository), DelegateTransactionService {
 
     @Transactional
@@ -31,26 +33,26 @@ class DefaultDelegateTransactionService(
             return UDelegateTransaction.of(message)
         }
 
-        val tx = UDelegateTransaction.of(message)
-        if (!isValid(tx)) {
+        val utx = UDelegateTransaction.of(message)
+        if (!isValid(utx)) {
             throw ValidationException("Transaction is invalid!")
         }
 
-        updateUnconfirmedBalanceByFee(tx)
-        // todo broadcast
-        return uRepository.save(tx)
+        val savedUtx = super.add(utx)
+        networkService.broadcast(message)
+        return savedUtx
     }
 
     @Transactional
     override fun add(request: DelegateTransactionRequest): UDelegateTransaction {
-        val tx = UDelegateTransaction.of(clock.networkTime(), request)
-        if (!isValid(tx)) {
+        val utx = UDelegateTransaction.of(clock.networkTime(), request)
+        if (!isValid(utx)) {
             throw ValidationException("Transaction is invalid!")
         }
 
-        updateUnconfirmedBalanceByFee(tx)
-        // todo broadcast
-        return uRepository.save(tx)
+        val savedUtx = super.add(utx)
+        networkService.broadcast(DelegateTransactionMessage(savedUtx))
+        return savedUtx
     }
 
     override fun generateHash(request: DelegateTransactionHashRequest): String {
@@ -64,8 +66,8 @@ class DefaultDelegateTransactionService(
         return super.toBlock(utx, DelegateTransaction.of(utx), block)
     }
 
-    private fun isValid(tx: UDelegateTransaction): Boolean {
-        return isNotExistDelegate(tx.senderAddress) && super.isValid(tx)
+    private fun isValid(utx: UDelegateTransaction): Boolean {
+        return isNotExistDelegate(utx.senderAddress) && super.isValid(utx)
     }
 
     private fun isNotExistDelegate(key: String): Boolean {

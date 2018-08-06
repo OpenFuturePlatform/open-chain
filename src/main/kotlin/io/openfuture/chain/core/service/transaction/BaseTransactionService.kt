@@ -12,6 +12,8 @@ import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
+import io.openfuture.chain.network.message.core.BaseTransactionMessage
+import io.openfuture.chain.network.service.NetworkService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -29,6 +31,10 @@ abstract class BaseTransactionService<T : Transaction, U: UTransaction> (
     @Autowired
     private lateinit var cryptoService: CryptoService
 
+    protected fun add(utx: U) : U {
+        updateUnconfirmedBalanceByFee(utx)
+        return uRepository.save(utx)
+    }
 
     protected fun toBlock(utx: U, tx: T, block: MainBlock): T {
         tx.block = block
