@@ -13,6 +13,8 @@ interface NetworkApiService {
 
     fun broadcast(message: BaseMessage)
 
+    fun send(message: BaseMessage)
+
 }
 
 interface InnerNetworkService {

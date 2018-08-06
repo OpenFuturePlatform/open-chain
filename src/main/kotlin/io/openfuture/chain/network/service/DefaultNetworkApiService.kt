@@ -14,4 +14,8 @@ class DefaultNetworkApiService(
         }
     }
 
+    override fun send(message: BaseMessage) {
+        networkInnerService.getChannels().shuffled().firstOrNull()?.writeAndFlush(message)
+    }
+
 }
