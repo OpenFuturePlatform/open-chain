@@ -110,6 +110,6 @@ class DefaultPendingBlockHandler(
         SignatureUtils.verify(message.getBytes(), message.signature!!, ByteUtils.fromHexString(message.publicKey))
 
     private fun isActiveDelegate(): Boolean =
-        null != epochService.getDelegates().find { it.publicKey == keyHolder.getPublicKey() }
+        epochService.getDelegates().any { it.publicKey == keyHolder.getPublicKey() }
 
 }
