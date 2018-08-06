@@ -21,8 +21,16 @@ class NetworkGenesisBlock(
 ) : NetworkBlock(height, previousHash, blockTimestamp, reward, publicKey, hash, signature) {
 
 
-    constructor(block: GenesisBlock) : this(block.height, block.previousHash, block.timestamp, block.reward, block.publicKey,
-        block.hash, block.signature!!, block.epochIndex, block.activeDelegates.map { NetworkDelegate(it) }.toMutableSet())
+    constructor(block: GenesisBlock) : this(
+        block.height,
+        block.previousHash,
+        block.timestamp,
+        block.reward,
+        block.publicKey,
+        block.hash,
+        block.signature!!,
+        block.epochIndex,
+        block.activeDelegates.map { NetworkDelegate(it) }.toMutableSet())
 
     override fun readParams(buffer: ByteBuf) {
         super.readParams(buffer)
