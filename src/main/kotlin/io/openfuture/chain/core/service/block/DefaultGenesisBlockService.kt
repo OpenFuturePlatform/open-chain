@@ -5,6 +5,7 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.BlockService
@@ -15,7 +16,9 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
 import io.openfuture.chain.network.service.NetworkApiService
+import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -29,6 +32,9 @@ class DefaultGenesisBlockService(
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService
 ) : BaseBlockService(blockService), GenesisBlockService {
+
+    @Transactional(readOnly = true)
+    override fun getAll(request: PageRequest): Page<GenesisBlock> = repository.findAll(request)
 
     @Transactional(readOnly = true)
     override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()

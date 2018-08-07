@@ -51,6 +51,8 @@ interface BlockService {
 
 interface GenesisBlockService {
 
+    fun getAll(request: PageRequest): Page<GenesisBlock>
+
     fun getLast(): GenesisBlock
 
     fun create(): GenesisBlockMessage
@@ -62,6 +64,8 @@ interface GenesisBlockService {
 }
 
 interface MainBlockService {
+
+    fun getAll(request: PageRequest): Page<MainBlock>
 
     fun create(): PendingBlockMessage
 
