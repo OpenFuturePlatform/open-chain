@@ -46,7 +46,7 @@ class DefaultPendingBlockHandler(
                 this.observable = block
                 this.stage = PREPARE
                 this.timeSlotNumber = blockSlotNumber
-                val vote = NetworkBlockApproval(PREPARE.getId(), block.height, block.hash, keyHolder.getPublicKey())
+                val vote = NetworkBlockApproval(PREPARE.getId(), block.hash, keyHolder.getPublicKey())
                 vote.signature = SignatureUtils.sign(vote.getBytes(), keyHolder.getPrivateKey())
                 networkService.broadcast(vote)
             }
@@ -74,7 +74,7 @@ class DefaultPendingBlockHandler(
             networkService.broadcast(message)
             if (prepareVotes.size > (delegates.size - 1) / 3) {
                 this.stage = COMMIT
-                val commit = NetworkBlockApproval(COMMIT.getId(), message.height, message.hash, keyHolder.getPublicKey())
+                val commit = NetworkBlockApproval(COMMIT.getId(), message.hash, keyHolder.getPublicKey())
                 commit.signature = SignatureUtils.sign(message.getBytes(), keyHolder.getPrivateKey())
                 networkService.broadcast(commit)
             }

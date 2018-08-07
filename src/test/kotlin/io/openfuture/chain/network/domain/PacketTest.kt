@@ -244,10 +244,9 @@ class PacketTest {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBlockApprovalMessage() {
-        val buf = createBuffer("000a00000005312e302e30000000000756b5b30000000300000000000000010000000468617368000000097075626c69634b6579000000097369676e6174757265")
+        val buf = createBuffer("000a00000005312e302e30000000000756b5b3000000030000000468617368000000097075626c69634b6579000000097369676e6174757265")
         val message = NetworkBlockApproval(
             BlockApprovalStage.COMMIT.getId(),
-            1L,
             "hash",
             "publicKey",
             "signature"

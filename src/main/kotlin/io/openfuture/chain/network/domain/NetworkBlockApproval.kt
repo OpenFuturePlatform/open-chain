@@ -8,18 +8,16 @@ import kotlin.text.Charsets.UTF_8
 @NoArgConstructor
 data class NetworkBlockApproval(
     var stageId: Int,
-    var height: Long,
     var hash: String,
     var publicKey: String,
     var signature: String? = null
 ) : Packet() {
 
     fun getBytes(): ByteArray =
-        StringBuilder().append(stageId).append(height).append(hash).append(publicKey).toString().toByteArray()
+        StringBuilder().append(stageId).append(hash).append(publicKey).toString().toByteArray()
 
     override fun readParams(buffer: ByteBuf) {
         stageId = buffer.readInt()
-        height = buffer.readLong()
         hash = buffer.readString()
         publicKey = buffer.readString()
         signature = buffer.readString()
@@ -27,7 +25,6 @@ data class NetworkBlockApproval(
 
     override fun writeParams(buffer: ByteBuf) {
         buffer.writeInt(stageId)
-        buffer.writeLong(height)
         buffer.writeInt(hash.length)
         buffer.writeCharSequence(hash, UTF_8)
         buffer.writeInt(publicKey.length)

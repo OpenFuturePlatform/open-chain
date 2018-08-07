@@ -12,6 +12,7 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.Transaction
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.util.TransactionUtils
+import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.domain.NetworkBlockApproval
 import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.network.service.NetworkService
@@ -89,7 +90,8 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
     @Test
     fun handleApproveMessageShouldPrepareApproveMessage() {
-        val publicKey = "037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"
+        val privateKey = "237a1f68f5e6ee331c2d1fac4107807f7eaf7eed2265490d9a9a330c3549a43d"
+        val publicKey = "020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948"
         val delegate = Delegate(publicKey, "address", 1)
         val transactions: MutableSet<Transaction> = mutableSetOf(
             TransferTransaction(
@@ -115,13 +117,12 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         )
         val message = NetworkBlockApproval(
             BlockApprovalStage.PREPARE.value,
-            2L,
-            "2a897fecaaaddcd924a9f562be1cdacf0c7cf3370d1d13c3209f0d05be6bd26f",
+            "22c626c74fdc7aa6b2809d88a60068e6017a3d7015113ebd0af18cdf9f3809c6",
             publicKey,
-            "MEUCIQDJ8KF201VgsyrL4geU80Lv+JqqnCRuH1ScxtxJ1mYLVAIgPiB6GUWVD6jB7uk6smJCV7jzCUmK/JkIqhZO0/81q5M="
+            null
         )
 
-        val privateKey = "529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"
+        message.signature = SignatureUtils.sign(message.getBytes(), ByteUtils.fromHexString(privateKey))
         mainBlock.sign(ByteUtils.fromHexString(privateKey))
 
         given(keyHolder.getPrivateKey()).willReturn(
@@ -131,7 +132,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         given(epochService.getCurrentSlotOwner()).willReturn(delegate)
         given(mainBlockService.isValid(mainBlock)).willReturn(true)
         given(epochService.getDelegates()).willReturn(
-            setOf(Delegate("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4", "address", 1)))
+            setOf(Delegate("020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948", "address", 1)))
         defaultPendingBlockHandler.addBlock(mainBlock)
 
         given(epochService.getDelegates()).willReturn(setOf(delegate))
@@ -147,7 +148,6 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         val delegate = Delegate(publicKey, "address", 1)
         val message = NetworkBlockApproval(
             BlockApprovalStage.COMMIT.value,
-            2L,
             "2a897fecaaaddcd924a9f562be1cdacf0c7cf3370d1d13c3209f0d05be6bd26f",
             publicKey,
             "MEYCIQCjcs54dZxldCIqIwpwKxsUAYIeMGNdlaBudCF7Ps7SYwIhAJiKsUUoOuTiVHZNePFDjPWF5sarUFguNqV+lMDnsieX"
@@ -162,24 +162,26 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
     fun handleApproveMessageShouldCommitApproveTwoMessages() {
         addBlockShouldAddMainBlockAndBroadcast()
         val blockHash = "2b9fa527078f6c5d8b48cbee453e138f6a3a54f9ef1da57b7b464bb17a4d7a72"
-        val publicKey = "037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"
-        val publicKey2 = "020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948"
+        val privateKey = "237a1f68f5e6ee331c2d1fac4107807f7eaf7eed2265490d9a9a330c3549a43d"
+        val privateKey2 = "a3ddaee50c7986bb95816b0d389eadbff39146af546fa795a6433c67af97c6c9"
+        val publicKey = "020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948"
+        val publicKey2 = "02fb3085f5f8bd7a095198211fb1d4781fd7f0643dec52328151b6cb46e46931fd"
         val delegate = Delegate(publicKey, "address", 1)
         val delegate2 = Delegate(publicKey2, "address2", 2)
         val message = NetworkBlockApproval(
             BlockApprovalStage.COMMIT.value,
-            2L,
             blockHash,
             publicKey,
-            "MEUCIQDkR3bVd0CSPjKMNwPbBfdvp9elSAHri5bptmEfH8k2xwIgQZ45FZodbc43khzM52guR5iXkI1zxDa2hhGk8sQq+gM="
+            null
         )
+        message.signature = SignatureUtils.sign(message.getBytes(), ByteUtils.fromHexString(privateKey))
         val message2 = NetworkBlockApproval(
             BlockApprovalStage.COMMIT.value,
-            2L,
             blockHash,
             publicKey2,
-            "MEUCIQCFYDosVmdgjhSn59dciBBWoyXcc8/m8z2MVuBFbSu31gIgCuz3/9eufmCmBL8tX5cHgLCnKIS3W6vCCVQNo8QWd+0="
+            null
         )
+        message2.signature = SignatureUtils.sign(message2.getBytes(), ByteUtils.fromHexString(privateKey2))
 
         given(epochService.getDelegates()).willReturn(setOf(delegate, delegate2))
 
