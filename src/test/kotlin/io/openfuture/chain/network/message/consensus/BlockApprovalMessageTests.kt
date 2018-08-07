@@ -1,6 +1,7 @@
 package io.openfuture.chain.network.message.consensus
 
 import io.netty.buffer.ByteBuf
+import io.netty.buffer.ByteBufUtil
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.config.MessageTests
 import org.assertj.core.api.Assertions.assertThat
@@ -15,8 +16,8 @@ class BlockApprovalMessageTests : MessageTests() {
 
     @Before
     fun setup() {
-        buffer = createBuffer("000100000000000000010000000468617368000000097075626c69634b6579000000097369676e6174757265")
-        message = BlockApprovalMessage(1, 1, "hash", "publicKey", "signature")
+        buffer = createBuffer("000000010000000468617368000000097075626c69634b6579000000097369676e6174757265")
+        message = BlockApprovalMessage(1, "hash", "publicKey", "signature")
     }
 
     @Test

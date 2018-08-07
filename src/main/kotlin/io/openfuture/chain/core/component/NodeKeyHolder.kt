@@ -6,6 +6,7 @@ import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Component
 import java.io.File
 import javax.annotation.PostConstruct
+import kotlin.text.Charsets.UTF_8
 
 @Component
 class NodeKeyHolder(
@@ -14,24 +15,20 @@ class NodeKeyHolder(
 ) {
 
     private var privateKey: ByteArray? = null
-    private var publicKey: ByteArray? = null
+    private var publicKey: String? = null
 
 
     @PostConstruct
     private fun init() {
         generatePrivatePublicKeysIfNotExist()
 
-        privateKey = ByteUtils.fromHexString(File(properties.privateKeyPath).readText(Charsets.UTF_8))
-        publicKey = ByteUtils.fromHexString(File(properties.publicKeyPath).readText(Charsets.UTF_8))
+        privateKey = ByteUtils.fromHexString(File(properties.privateKeyPath).readText(UTF_8))
+        publicKey = File(properties.publicKeyPath).readText(UTF_8)
     }
 
-    fun getPrivateKey(): ByteArray {
-        return privateKey!!
-    }
+    fun getPrivateKey(): ByteArray = privateKey!!
 
-    fun getPublicKey(): ByteArray {
-        return publicKey!!
-    }
+    fun getPublicKey(): String = publicKey!!
 
     private fun generatePrivatePublicKeysIfNotExist() {
         val privateKeyFile = File(properties.privateKeyPath)
@@ -41,8 +38,8 @@ class NodeKeyHolder(
             val seedPhrase = cryptoService.generateSeedPhrase()
             val masterKey = cryptoService.getMasterKey(seedPhrase).ecKey
 
-            privateKeyFile.writeText(ByteUtils.toHexString(masterKey.getPrivate()), Charsets.UTF_8)
-            publicKeyFile.writeText(ByteUtils.toHexString(masterKey.public), Charsets.UTF_8)
+            privateKeyFile.writeText(ByteUtils.toHexString(masterKey.getPrivate()), UTF_8)
+            publicKeyFile.writeText(ByteUtils.toHexString(masterKey.public), UTF_8)
         }
     }
 
