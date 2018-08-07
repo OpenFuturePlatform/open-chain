@@ -60,7 +60,6 @@ build-jar:
     - sprint
     - master
     - tags
-    - add-frontend-submodule
 
 ###########################
 # Packaging
