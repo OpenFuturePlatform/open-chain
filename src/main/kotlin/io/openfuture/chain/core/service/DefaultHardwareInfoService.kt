@@ -1,6 +1,6 @@
 package io.openfuture.chain.core.service
 
-import io.openfuture.chain.rpc.domain.node.*
+import io.openfuture.chain.core.model.node.*
 import org.springframework.stereotype.Service
 import oshi.SystemInfo
 import java.net.NetworkInterface

@@ -6,7 +6,7 @@ interface EpochService {
 
     fun getEpochStart(): Long
 
-    fun getDelegates(): Set<Delegate>
+    fun getDelegates(): List<Delegate>
 
     fun getGenesisBlockHeight(): Long
 
@@ -17,5 +17,7 @@ interface EpochService {
     fun getSlotNumber(): Long
 
     fun getSlotNumber(time: Long): Long
+
+    fun getEpochEndTime(): Long
 
 }

@@ -1,36 +1,43 @@
 package io.openfuture.chain.core.model.entity.block
 
 import io.openfuture.chain.core.model.entity.Delegate
-import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.crypto.util.SignatureUtils
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import javax.persistence.*
+import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
+import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
+import io.openfuture.chain.network.message.core.GenesisBlockMessage
+import javax.persistence.Embedded
+import javax.persistence.Entity
+import javax.persistence.Table
 
 @Entity
 @Table(name = "genesis_blocks")
 class GenesisBlock(
+    timestamp: Long,
     height: Long,
     previousHash: String,
-    timestamp: Long,
     reward: Long,
+    hash: String,
+    signature: String,
     publicKey: String,
 
-    @Column(name = "epoch_index", nullable = false)
-    var epochIndex: Long,
+    @Embedded
+    val payload: GenesisBlockPayload
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = [(CascadeType.ALL)])
-    @JoinTable(name = "delegate2genesis",
-        joinColumns = [JoinColumn(name = "genesis_id")],
-        inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
-    var activeDelegates: Set<Delegate>
+) : BaseBlock(timestamp, height, previousHash, reward, hash, signature, publicKey) {
 
-) : BaseBlock(height, previousHash, timestamp, reward, publicKey,
-    ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + timestamp + height + publicKey).toByteArray()))
-) {
 
-    override fun sign(privateKey: ByteArray): GenesisBlock {
-        this.signature = SignatureUtils.sign((previousHash + timestamp + height).toByteArray(), privateKey)
-        return this
+    companion object {
+        fun of(dto: GenesisBlockMessage): GenesisBlock = GenesisBlock(
+            dto.timestamp,
+            dto.height,
+            dto.previousHash,
+            dto.reward,
+            dto.hash,
+            dto.signature,
+            dto.publicKey,
+            GenesisBlockPayload(dto.epochIndex)
+        )
     }
+
+    override fun getPayload(): BlockPayload  = payload
 
 }

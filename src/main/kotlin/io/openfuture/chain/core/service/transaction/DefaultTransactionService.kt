@@ -1,42 +1,24 @@
 package io.openfuture.chain.core.service.transaction
 
-import io.openfuture.chain.core.exception.NotFoundException
-import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.Transaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
-import io.openfuture.chain.core.service.CommonTransactionService
 import io.openfuture.chain.core.service.TransactionService
-import io.openfuture.chain.core.service.WalletService
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
-abstract class DefaultTransactionService<Entity : Transaction, UEntity : UTransaction>(
-    private val repository: TransactionRepository<Entity>,
-    private val uRepository: UTransactionRepository<UEntity>
-) : TransactionService<Entity, UEntity> {
+@Service
+class DefaultTransactionService(
+    private val repository: TransactionRepository<Transaction>,
+    private val uRepository: UTransactionRepository<UnconfirmedTransaction>
+) : TransactionService {
 
-    @Autowired
-    protected lateinit var walletService: WalletService
+    @Transactional(readOnly = true)
+    override fun getAllUnconfirmedByAddress(address: String): List<UnconfirmedTransaction> =
+        uRepository.findAllBySenderAddress(address)
 
-    @Autowired
-    private lateinit var commonService: CommonTransactionService
-
-    protected fun getUnconfirmed(hash: String): UEntity = uRepository.findOneByHash(hash)
-        ?: throw NotFoundException("Unconfirmed transaction with hash: $hash not found")
-
-    protected fun processAndSave(tx: Entity, block: MainBlock) {
-        if (commonService.isExists(tx.hash)) {
-            return
-        }
-
-        tx.block = block
-        updateBalance(tx)
-        repository.save(tx)
-    }
-
-    private fun updateBalance(tx: Entity) {
-        walletService.updateBalance(tx.senderAddress, tx.recipientAddress, tx.amount, tx.fee)
-    }
+    @Transactional(readOnly = true)
+    override fun getCount(): Long = repository.count()
 
 }

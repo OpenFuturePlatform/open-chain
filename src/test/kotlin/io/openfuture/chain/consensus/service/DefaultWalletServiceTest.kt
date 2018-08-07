@@ -1,7 +1,6 @@
 package io.openfuture.chain.consensus.service
 
 import io.openfuture.chain.config.ServiceTests
-import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.repository.WalletRepository
 import io.openfuture.chain.core.service.DefaultWalletService
@@ -16,14 +15,13 @@ import org.mockito.Mockito.verify
 class DefaultWalletServiceTest : ServiceTests() {
 
     @Mock private lateinit var repository: WalletRepository
-    @Mock private lateinit var properties: ConsensusProperties
 
     private lateinit var service: WalletService
 
 
     @Before
     fun setUp() {
-        service = DefaultWalletService(repository, properties)
+        service = DefaultWalletService(repository)
     }
 
     @Test
@@ -54,22 +52,15 @@ class DefaultWalletServiceTest : ServiceTests() {
     @Test
     fun updateBalanceShouldChangeWalletsBalanceValueTest() {
         val amount = 2L
-        val fee = 1L
-        val genesisAddress = "genesisAddress"
-        val senderAddress = "senderAddress"
         val recipientAddress = "recipientAddress"
 
-        val senderWallet = Wallet(senderAddress, 1)
         val recipientWallet = Wallet(recipientAddress, 5)
 
-        given(repository.findOneByAddress(senderAddress)).willReturn(senderWallet)
         given(repository.findOneByAddress(recipientAddress)).willReturn(recipientWallet)
-        given(properties.genesisAddress).willReturn(genesisAddress)
 
-        service.updateBalance(senderAddress, recipientAddress, amount, fee)
+        service.increaseBalance(recipientAddress, amount)
 
-        verify(repository).save(senderWallet.apply { balance += amount })
-        verify(repository).save(recipientWallet.apply { balance -= (amount + fee) })
+        verify(repository).save(recipientWallet.apply { balance += amount })
     }
 
 }

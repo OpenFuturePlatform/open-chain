@@ -1,10 +1,11 @@
-package io.openfuture.chain.entity.transaction
+package io.openfuture.chain.core.model.entity.transaction.confirmed
 
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.dictionary.VoteType
-import io.openfuture.chain.core.model.entity.transaction.Transaction
-import io.openfuture.chain.core.util.DictionaryUtils
-import javax.persistence.Column
+import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.vote.VoteTransactionPayload
+import io.openfuture.chain.network.message.core.VoteTransactionMessage
+import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.Table
 
@@ -12,28 +13,42 @@ import javax.persistence.Table
 @Table(name = "vote_transactions")
 class VoteTransaction(
     timestamp: Long,
-    amount: Long,
     fee: Long,
-    recipientAddress: String,
     senderAddress: String,
-    senderPublicKey: String,
-    senderSignature: String,
     hash: String,
+    senderSignature: String,
+    senderPublicKey: String,
+    block: MainBlock,
 
-    @Column(name = "vote_type_id", nullable = false)
-    private var voteTypeId: Int,
+    @Embedded
+    val payload: VoteTransactionPayload
 
-    @Column(name = "delegate_key", nullable = false)
-    var delegateKey: String,
+) : Transaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey, block) {
 
-    block: MainBlock? = null
+    companion object {
+        fun of(message: VoteTransactionMessage, block: MainBlock): VoteTransaction = VoteTransaction(
+            message.timestamp,
+            message.fee,
+            message.senderAddress,
+            message.hash,
+            message.senderSignature,
+            message.senderPublicKey,
+            block,
+            VoteTransactionPayload(message.voteTypeId, message.delegateKey)
+        )
 
-) : Transaction(timestamp, amount, fee, recipientAddress, senderAddress, senderPublicKey, senderSignature, hash, block) {
-
-    fun getVoteType(): VoteType = DictionaryUtils.valueOf(VoteType::class.java, voteTypeId)
-
-    fun setVoteType(voteType: VoteType) {
-        voteTypeId = voteType.getId()
+        fun of(utx: UnconfirmedVoteTransaction, block: MainBlock): VoteTransaction = VoteTransaction(
+            utx.timestamp,
+            utx.fee,
+            utx.senderAddress,
+            utx.hash,
+            utx.senderSignature,
+            utx.senderPublicKey,
+            block,
+            utx.payload
+        )
     }
+
+    override fun getPayload(): TransactionPayload = payload
 
 }

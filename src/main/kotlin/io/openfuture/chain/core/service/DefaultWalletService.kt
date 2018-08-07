@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.service
 
-import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.Wallet
@@ -10,8 +9,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultWalletService(
-    private val repository: WalletRepository,
-    private val consensusProperties: ConsensusProperties
+    private val repository: WalletRepository
 ) : WalletService {
 
     companion object {
@@ -36,11 +34,13 @@ class DefaultWalletService(
     }
 
     @Transactional
-    override fun updateBalance(from: String, to: String, amount: Long, fee: Long) {
-        if (consensusProperties.genesisAddress!! != from) {
-            updateByAddress(from, -(amount + fee))
-        }
-        updateByAddress(to, amount)
+    override fun increaseBalance(address: String, amount: Long) {
+        updateByAddress(address, amount)
+    }
+
+    @Transactional
+    override fun decreaseBalance(address: String, amount: Long) {
+        updateByAddress(address, -amount)
     }
 
     private fun updateByAddress(address: String, amount: Long) {

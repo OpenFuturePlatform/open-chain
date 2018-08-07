@@ -1,8 +1,11 @@
-package io.openfuture.chain.consensus.model.entity.transaction
+package io.openfuture.chain.core.model.entity.transaction.confirmed
 
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.Transaction
-import javax.persistence.Column
+import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
+import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
+import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.Table
 
@@ -10,17 +13,42 @@ import javax.persistence.Table
 @Table(name = "delegate_transactions")
 class DelegateTransaction(
     timestamp: Long,
-    amount: Long,
     fee: Long,
-    recipientAddress: String,
     senderAddress: String,
-    senderPublicKey: String,
-    senderSignature: String,
     hash: String,
+    senderSignature: String,
+    senderPublicKey: String,
+    block: MainBlock,
 
-    @Column(name = "delegate_key", nullable = false, unique = true)
-    var delegateKey: String,
+    @Embedded
+    val payload: DelegateTransactionPayload
 
-    block: MainBlock? = null
+) : Transaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey, block) {
 
-) : Transaction(timestamp, amount, fee, recipientAddress, senderPublicKey, senderAddress, senderSignature, hash, block)
+    companion object {
+        fun of(message: DelegateTransactionMessage, block: MainBlock): DelegateTransaction = DelegateTransaction(
+            message.timestamp,
+            message.fee,
+            message.senderAddress,
+            message.hash,
+            message.senderSignature,
+            message.senderPublicKey,
+            block,
+            DelegateTransactionPayload(message.delegateKey)
+        )
+
+        fun of(utx: UnconfirmedDelegateTransaction, block: MainBlock): DelegateTransaction = DelegateTransaction(
+            utx.timestamp,
+            utx.fee,
+            utx.senderAddress,
+            utx.hash,
+            utx.senderSignature,
+            utx.senderPublicKey,
+            block,
+            utx.payload
+        )
+    }
+
+    override fun getPayload(): TransactionPayload = payload
+
+}

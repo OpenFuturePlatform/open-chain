@@ -3,7 +3,7 @@ package io.openfuture.chain.consensus.component.block
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.service.CommonBlockService
+import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
 import org.springframework.stereotype.Component
@@ -16,7 +16,7 @@ import javax.annotation.PreDestroy
 class BlockProductionScheduler(
     private val keyHolder: NodeKeyHolder,
     private val epochService: EpochService,
-    private val commonBlockService: CommonBlockService,
+    private val blockService: BlockService,
     private val mainBlockService: MainBlockService,
     private val genesisBlockService: GenesisBlockService,
     private val consensusProperties: ConsensusProperties,
@@ -37,11 +37,12 @@ class BlockProductionScheduler(
                     currentTimeSlot = timeSlot
                     val slotOwner = epochService.getCurrentSlotOwner()
                     if (isGenesisBlockRequired()) {
-                        // create genesis block
-                        // epochService.switchEpoch()
+                        val genesisBlock = genesisBlockService.create()
+                        genesisBlock.timestamp = epochService.getEpochEndTime()
+                        genesisBlockService.add(genesisBlock)
                     } else if (keyHolder.getPublicKey() == slotOwner.publicKey) {
-                        // create main block
-                        // pendingBlockHandler.addBlock()
+                        val block = mainBlockService.create()
+                        pendingBlockHandler.addBlock(block)
                     }
                 }
                 Thread.sleep(100)
@@ -55,7 +56,7 @@ class BlockProductionScheduler(
     }
 
     private fun isGenesisBlockRequired(): Boolean {
-        val blocksProduced = commonBlockService.getLast().height - epochService.getGenesisBlockHeight()
+        val blocksProduced = blockService.getLast().height - epochService.getGenesisBlockHeight()
         return (consensusProperties.epochHeight!! - 1) <= blocksProduced
     }
 

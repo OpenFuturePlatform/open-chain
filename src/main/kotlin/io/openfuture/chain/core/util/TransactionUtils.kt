@@ -1,56 +1,25 @@
 package io.openfuture.chain.core.util
 
-import io.openfuture.chain.core.model.dto.transaction.data.BaseTransactionData
-import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
+import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
+import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets.UTF_8
 
 object TransactionUtils {
 
-    fun createHash(data: BaseTransactionData, publicKey: String, signature: String): String {
-        val bytes = getBytes(publicKey.toByteArray(), signature.toByteArray(), data.getBytes())
+    fun generateHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload): String {
+        val bytes = getBytes(timestamp, fee, senderAddress, payload)
         return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
     }
 
-    fun createHash(data: BaseTransactionData, publicKey: ByteArray, privateKey: ByteArray): String {
-        val signature = getSignature(data, privateKey)
-        val bytes = getBytes(publicKey, signature.toByteArray(), data.getBytes())
-        return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
-    }
-
-    fun calculateMerkleRoot(transactions: Set<BaseTransaction>): String {
-        if (transactions.size == 1) {
-            return transactions.single().hash
-        }
-        var previousTreeLayout = transactions.map { it.hash.toByteArray() }
-        var treeLayout = mutableListOf<ByteArray>()
-        while(previousTreeLayout.size != 2) {
-            for (i in 0 until previousTreeLayout.size step 2) {
-                val leftHash = previousTreeLayout[i]
-                val rightHash = if (i + 1 == previousTreeLayout.size) {
-                    previousTreeLayout[i]
-                } else {
-                    previousTreeLayout[i + 1]
-                }
-                treeLayout.add(HashUtils.sha256(leftHash + rightHash))
-            }
-            previousTreeLayout = treeLayout
-            treeLayout = mutableListOf()
-        }
-        return ByteUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
-    }
-
-    private fun getSignature(data: BaseTransactionData, privateKey: ByteArray): String {
-        return SignatureUtils.sign(data.getBytes(), privateKey)
-    }
-
-    private fun getBytes(publicKey: ByteArray, signature: ByteArray, data: ByteArray): ByteArray {
-        return ByteBuffer.allocate(data.size + publicKey.size + signature.size)
-            .put(data)
-            .put(publicKey)
-            .put(signature)
+    private fun getBytes(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload): ByteArray {
+        return ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + senderAddress.toByteArray(UTF_8).size + payload.getBytes().size)
+            .putLong(timestamp)
+            .putLong(fee)
+            .put(senderAddress.toByteArray(UTF_8))
+            .put(payload.getBytes())
             .array()
     }
 

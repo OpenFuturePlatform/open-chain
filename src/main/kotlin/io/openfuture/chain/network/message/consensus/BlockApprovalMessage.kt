@@ -5,7 +5,6 @@ import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 import io.openfuture.chain.network.message.base.BaseMessage
-import java.nio.charset.StandardCharsets.UTF_8
 
 @NoArgConstructor
 data class BlockApprovalMessage(

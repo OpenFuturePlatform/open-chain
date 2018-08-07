@@ -4,12 +4,11 @@ import io.openfuture.chain.consensus.component.block.BlockApprovalStage.*
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.Delegate
-import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.domain.NetworkMainBlock
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
+import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.service.NetworkApiService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Component
@@ -22,17 +21,17 @@ class DefaultPendingBlockHandler(
     private val networkService: NetworkApiService
 ) : PendingBlockHandler {
 
-    private val pendingBlocks: MutableSet<MainBlock> = mutableSetOf()
+    private val pendingBlocks: MutableSet<PendingBlockMessage> = mutableSetOf()
     private val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
     private val commits: MutableMap<String, MutableList<Delegate>> = mutableMapOf()
 
-    private var observable: MainBlock? = null
+    private var observable: PendingBlockMessage? = null
     private var timeSlotNumber: Long = 0
     private var stage: BlockApprovalStage = IDLE
 
 
     @Synchronized
-    override fun addBlock(block: MainBlock) {
+    override fun addBlock(block: PendingBlockMessage) {
         val blockSlotNumber = epochService.getSlotNumber(block.timestamp)
         if (blockSlotNumber > timeSlotNumber) {
             this.reset()
@@ -41,8 +40,7 @@ class DefaultPendingBlockHandler(
         pendingBlocks.add(block)
         val slotOwner = epochService.getCurrentSlotOwner()
         if (slotOwner.publicKey == block.publicKey && mainBlockService.isValid(block)) {
-            val networkBlock = NetworkMainBlock(block)
-            networkService.broadcast(networkBlock)
+            networkService.broadcast(block)
             if (IDLE == stage && isActiveDelegate()) {
                 this.observable = block
                 this.stage = PREPARE
@@ -93,7 +91,7 @@ class DefaultPendingBlockHandler(
                 blockCommits.add(delegate)
                 networkService.broadcast(message)
                 if (blockCommits.size > (delegates.size - 1) / 3 * 2) {
-                    pendingBlocks.find { it.hash == message.hash }?.let { mainBlockService.save(it) }
+                    pendingBlocks.find { it.hash == message.hash }?.let { mainBlockService.add(it) }
                 }
             }
         } else {
