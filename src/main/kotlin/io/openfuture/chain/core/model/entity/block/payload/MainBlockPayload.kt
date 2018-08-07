@@ -12,8 +12,6 @@ class MainBlockPayload(
 
 ) : BlockPayload {
 
-    override fun getBytes(): ByteArray {
-        return merkleHash.toByteArray(UTF_8)
-    }
+    override fun getBytes(): ByteArray = merkleHash.toByteArray(UTF_8)
 
 }

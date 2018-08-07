@@ -17,7 +17,7 @@ import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.beans.factory.annotation.Autowired
 import javax.xml.bind.ValidationException
 
-abstract class BaseTransactionService<T : Transaction, U: UnconfirmedTransaction> (
+abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransaction>(
     protected val repository: TransactionRepository<T>,
     protected val unconfirmedRepository: UTransactionRepository<U>
 ) {
@@ -34,14 +34,14 @@ abstract class BaseTransactionService<T : Transaction, U: UnconfirmedTransaction
     @Autowired
     private lateinit var cryptoService: CryptoService
 
-    protected fun save(utx: U) : U {
+    protected fun save(utx: U): U {
         if (!isValid(utx)) {
             throw ValidationException("Transaction is invalid!")
         }
         return unconfirmedRepository.save(utx)
     }
 
-    protected fun save(tx: T) : T {
+    protected fun save(tx: T): T {
         if (!isValid(tx)) {
             throw ValidationException("Transaction is invalid!")
         }
@@ -82,10 +82,7 @@ abstract class BaseTransactionService<T : Transaction, U: UnconfirmedTransaction
         val balance = walletService.getBalanceByAddress(senderAddress)
         val unspentBalance = balance - baseService.getAllUnconfirmedByAddress(senderAddress).map { it.fee }.sum()
 
-        if (unspentBalance < fee) {
-            return false
-        }
-        return true
+        return unspentBalance >= fee
     }
 
     private fun isValidHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload, hash: String): Boolean {

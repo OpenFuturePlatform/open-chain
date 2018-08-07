@@ -91,8 +91,6 @@ class DefaultDelegateTransactionService(
         return isNotExistDelegate(utx.senderAddress) && super.isValid(utx)
     }
 
-    private fun isNotExistDelegate(key: String): Boolean {
-        return !delegateService.isExists(key)
-    }
+    private fun isNotExistDelegate(key: String): Boolean = !delegateService.isExists(key)
 
 }

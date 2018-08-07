@@ -12,8 +12,6 @@ class DelegateTransactionPayload(
 
 ) : TransactionPayload {
 
-    override fun getBytes(): ByteArray {
-        return delegateKey.toByteArray(UTF_8)
-    }
+    override fun getBytes(): ByteArray = delegateKey.toByteArray(UTF_8)
 
 }

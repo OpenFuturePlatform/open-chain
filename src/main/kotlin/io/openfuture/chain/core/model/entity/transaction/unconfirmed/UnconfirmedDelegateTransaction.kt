@@ -39,8 +39,12 @@ class UnconfirmedDelegateTransaction(
             request.timestamp!!,
             request.fee!!,
             request.senderAddress!!,
-            TransactionUtils.generateHash(request.timestamp!!, request.fee!!, request.senderAddress!!,
-                DelegateTransactionPayload(request.delegateKey!!)),
+            TransactionUtils.generateHash(
+                request.timestamp!!,
+                request.fee!!,
+                request.senderAddress!!,
+                DelegateTransactionPayload(request.delegateKey!!)
+            ),
             request.senderSignature!!,
             request.senderPublicKey!!,
             DelegateTransactionPayload(request.delegateKey!!)

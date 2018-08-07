@@ -24,9 +24,7 @@ class DefaultTransferTransactionService(
 ) : BaseTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
 
     @Transactional(readOnly = true)
-    override fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction> {
-        return unconfirmedRepository.findAllByOrderByFeeDesc()
-    }
+    override fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction> = unconfirmedRepository.findAllByOrderByFeeDesc()
 
     @Transactional(readOnly = true)
     override fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction = unconfirmedRepository.findOneByHash(hash)
@@ -95,10 +93,7 @@ class DefaultTransferTransactionService(
     private fun isValidTransferBalance(address: String, amount: Long): Boolean {
         val balance = walletService.getBalanceByAddress(address)
         val unspentBalance = balance - unconfirmedRepository.findAllBySenderAddress(address).map { it.payload.amount }.sum()
-        if (unspentBalance < amount) {
-            return false
-        }
-        return true
+        return unspentBalance >= amount
     }
 
 }

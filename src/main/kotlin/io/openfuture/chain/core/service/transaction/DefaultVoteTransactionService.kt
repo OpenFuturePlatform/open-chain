@@ -29,9 +29,7 @@ internal class DefaultVoteTransactionService(
 ) : BaseTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository), VoteTransactionService {
 
     @Transactional(readOnly = true)
-    override fun getAllUnconfirmed(): MutableList<UnconfirmedVoteTransaction> {
-        return unconfirmedRepository.findAllByOrderByFeeDesc()
-    }
+    override fun getAllUnconfirmed(): MutableList<UnconfirmedVoteTransaction> = unconfirmedRepository.findAllByOrderByFeeDesc()
 
     @Transactional(readOnly = true)
     override fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction = unconfirmedRepository.findOneByHash(hash)
@@ -115,10 +113,7 @@ internal class DefaultVoteTransactionService(
             .filter { it.senderAddress == senderAddress && it.payload.getVoteType() == VoteType.FOR }
             .count()
 
-        if (consensusProperties.delegatesCount!! <= confirmedVotes + unconfirmedForVotes) {
-            return false
-        }
-        return true
+        return consensusProperties.delegatesCount!! > confirmedVotes + unconfirmedForVotes
     }
 
 }
