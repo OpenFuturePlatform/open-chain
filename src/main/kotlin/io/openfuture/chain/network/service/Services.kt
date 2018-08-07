@@ -21,6 +21,8 @@ interface InnerNetworkService {
 
     fun maintainConnectionNumber()
 
+    fun startExploring()
+
     fun getChannels(): Set<Channel>
 
     fun onChannelActive(ctx: ChannelHandlerContext)
@@ -32,6 +34,10 @@ interface InnerNetworkService {
     fun onFindAddresses(ctx: ChannelHandlerContext, message: FindAddressesMessage)
 
     fun onAddresses(ctx: ChannelHandlerContext, message: AddressesMessage)
+
+    fun onExplorerFindAddresses(ctx: ChannelHandlerContext, message: ExplorerFindAddressesMessage)
+
+    fun onExplorerAddresses(ctx: ChannelHandlerContext, message: ExplorerAddressesMessage)
 
     fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage)
 

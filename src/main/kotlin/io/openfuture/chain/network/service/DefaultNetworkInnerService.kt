@@ -16,6 +16,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import java.lang.Math.max
 import java.net.InetSocketAddress
 import java.security.SecureRandom
 import java.util.concurrent.ConcurrentHashMap
@@ -33,6 +34,7 @@ class DefaultNetworkInnerService(
 
     private val connections: MutableMap<Channel, NetworkAddressMessage> = ConcurrentHashMap()
     private val heartBeatTasks: MutableMap<Channel, ScheduledFuture<*>> = ConcurrentHashMap()
+    private val knownAddresses: MutableSet<NetworkAddressMessage> = ConcurrentHashMap.newKeySet()
 
     companion object {
         private const val HEART_BEAT_DELAY = 0L
@@ -47,9 +49,19 @@ class DefaultNetworkInnerService(
 
     @Scheduled(cron = "*/30 * * * * *")
     override fun maintainConnectionNumber() {
-        if (isConnectionNeeded()) {
+        log.info("Connected addresses ${getConnectionAddresses().size} : ${getConnectionAddresses()}")
+        if (connectionNeededNumber() > 0) {
             requestAddresses()
         }
+    }
+
+    @Scheduled(cron = "0 */2 * * * *")
+    override fun startExploring() {
+        log.info("Known addresses ${knownAddresses.size} : $knownAddresses")
+        knownAddresses.clear()
+        val connectedAddresses = getConnectionAddresses()
+        knownAddresses.addAll(connectedAddresses)
+        connectedAddresses.forEach { send(it, ExplorerFindAddressesMessage()) }
     }
 
     override fun getChannels(): Set<Channel> = connections.keys
@@ -84,8 +96,24 @@ class DefaultNetworkInnerService(
     override fun onAddresses(ctx: ChannelHandlerContext, message: AddressesMessage) {
         val peers = message.values
         val connections = getConnectionAddresses()
-        peers.filter { !connections.contains(it) && it != NetworkAddressMessage(properties.host!!, properties.port!!) }
+        peers
+            .filter { !connections.contains(it) && it != NetworkAddressMessage(properties.host!!, properties.port!!) }
+            .shuffled()
+            .take(connectionNeededNumber())
             .forEach { bootstrap.connect(it.host, it.port) }
+    }
+
+    override fun onExplorerFindAddresses(ctx: ChannelHandlerContext, message: ExplorerFindAddressesMessage) {
+        ctx.writeAndFlush(ExplorerAddressesMessage(getConnectionAddresses().toList()))
+    }
+
+    override fun onExplorerAddresses(ctx: ChannelHandlerContext, message: ExplorerAddressesMessage) {
+        message.values.forEach {
+            if (!knownAddresses.contains(it)) {
+                knownAddresses.add(it)
+                sendAndClose(it, ExplorerFindAddressesMessage())
+            }
+        }
     }
 
     override fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage) {
@@ -112,7 +140,7 @@ class DefaultNetworkInnerService(
 
     private fun getConnectionAddresses(): Set<NetworkAddressMessage> = connections.values.toSet()
 
-    private fun isConnectionNeeded(): Boolean = properties.peersNumber!! > getInboundConnections().size
+    private fun connectionNeededNumber(): Int = max(properties.peersNumber!! - getInboundConnections().size, 0)
 
     private fun getInboundConnections(): Map<Channel, NetworkAddressMessage> {
         return connections.filter {
@@ -136,6 +164,18 @@ class DefaultNetworkInnerService(
                 }
             }.channel()
         channel.writeAndFlush(message)
+    }
+
+    private fun sendAndClose(address: NetworkAddressMessage, message: BaseMessage) {
+        val channel = connections.filter { it.value == address }.map { it.key }.firstOrNull()
+            ?: bootstrap.connect(address.host, address.port).addListener { future ->
+                future as ChannelFuture
+                if (!future.isSuccess) {
+                    log.warn("Can not connect to ${address.host}:${address.port}")
+                }
+            }.channel()
+        channel.writeAndFlush(message)
+        channel.eventLoop().schedule({ channel.close() }, 1, SECONDS)
     }
 
 }

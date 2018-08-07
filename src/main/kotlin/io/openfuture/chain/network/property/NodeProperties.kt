@@ -24,7 +24,7 @@ class NodeProperties(
 
     /** Root Nodes List */
     @field:NotEmpty
-    @field:Size(min = 1, max = 8)
+    @field:Size(min = 1, max = 21)
     var rootNodes: List<String> = emptyList(),
 
     /** Node Communication Protocol Version */
@@ -49,7 +49,7 @@ class NodeProperties(
 
     /** Directly Connected Peers Number */
     @field:NotNull
-    @field:Min(5)
+    @field:Min(3)
     var peersNumber: Int? = null,
 
     /** Private key path */
