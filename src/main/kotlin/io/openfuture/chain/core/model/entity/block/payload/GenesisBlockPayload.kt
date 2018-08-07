@@ -12,7 +12,7 @@ class GenesisBlockPayload(
     @Column(name = "epoch_index", nullable = false)
     var epochIndex: Long,
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = [(CascadeType.ALL)])
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "delegate2genesis",
         joinColumns = [(JoinColumn(name = "genesis_id"))],
         inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
@@ -26,7 +26,7 @@ class GenesisBlockPayload(
 
         val buffer = ByteBuffer.allocate(LONG_BYTES + keysLength)
         buffer.putLong(epochIndex)
-        keys.map { buffer.put(it.toByteArray(UTF_8))}
+        keys.forEach { buffer.put(it.toByteArray(UTF_8))}
         return buffer.array()
     }
 

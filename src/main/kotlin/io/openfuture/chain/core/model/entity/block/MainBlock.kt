@@ -48,8 +48,6 @@ class MainBlock(
         )
     }
 
-    override fun getPayload(): BlockPayload {
-        return payload
-    }
+    override fun getPayload(): BlockPayload = payload
 
 }

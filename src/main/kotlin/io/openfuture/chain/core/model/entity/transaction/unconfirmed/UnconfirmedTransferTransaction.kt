@@ -47,8 +47,6 @@ class UnconfirmedTransferTransaction(
         )
     }
 
-    override fun getPayload(): TransactionPayload {
-        return payload
-    }
+    override fun getPayload(): TransactionPayload = payload
 
 }
