@@ -1,4 +1,4 @@
 [submodule "frontend"]
 	path = frontend
-	url = ../open-wallet.git
+	url = ../wallet.git
 	branch = master
