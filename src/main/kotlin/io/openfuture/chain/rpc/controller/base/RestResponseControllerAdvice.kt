@@ -21,12 +21,12 @@ class RestResponseControllerAdvice(
     override fun supports(returnType: MethodParameter, converterType: Class<out HttpMessageConverter<*>>): Boolean {
         val parameterType = returnType.parameterType
 
-        return !parameterType.isAssignableFrom(RestResponse::class.java)
+        return !parameterType.isAssignableFrom(RestResponse::class.java) && !parameterType.isAssignableFrom(String::class.java)
     }
 
     override fun beforeBodyWrite(body: Any?, returnType: MethodParameter, selectedContentType: MediaType,
-                                 selectedConverterType: Class<out HttpMessageConverter<*>>,
-                                 request: ServerHttpRequest, response: ServerHttpResponse): RestResponse<Any?> {
+                                 selectedConverterType: Class<out HttpMessageConverter<*>>, request: ServerHttpRequest,
+                                 response: ServerHttpResponse): RestResponse<Any?> {
         return RestResponse(nodeClock.networkTime(), nodeProperties.version!!, body)
     }
 

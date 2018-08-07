@@ -1,32 +1,53 @@
 package io.openfuture.chain.core.model.entity.block
 
-import io.openfuture.chain.core.model.entity.transaction.Transaction
-import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.crypto.util.SignatureUtils
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import javax.persistence.*
+import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
+import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
+import io.openfuture.chain.network.message.consensus.PendingBlockMessage
+import io.openfuture.chain.network.message.core.MainBlockMessage
+import javax.persistence.Embedded
+import javax.persistence.Entity
+import javax.persistence.Table
 
 @Entity
 @Table(name = "main_blocks")
 class MainBlock(
+    timestamp: Long,
     height: Long,
     previousHash: String,
-    timestamp: Long,
     reward: Long,
+    hash: String,
+    signature: String,
     publicKey: String,
 
-    @Column(name = "merkle_hash", nullable = false)
-    var merkleHash: String,
+    @Embedded
+    var payload: MainBlockPayload
 
-    @OneToMany(mappedBy = "block", fetch = FetchType.EAGER)
-    var transactions: MutableSet<Transaction>
+) : BaseBlock(timestamp, height, previousHash, reward, hash, signature, publicKey) {
 
-) : BaseBlock(height, previousHash, timestamp, reward, publicKey,
-    ByteUtils.toHexString(HashUtils.doubleSha256((previousHash + merkleHash + timestamp + height + publicKey).toByteArray()))) {
+    companion object {
+        fun of(message: PendingBlockMessage): MainBlock = MainBlock(
+            message.timestamp,
+            message.height,
+            message.previousHash,
+            message.reward,
+            message.hash,
+            message.signature,
+            message.publicKey,
+            MainBlockPayload(message.merkleHash)
+        )
 
-    override fun sign(privateKey: ByteArray): MainBlock {
-        this.signature = SignatureUtils.sign((previousHash + merkleHash + timestamp + height).toByteArray(), privateKey)
-        return this
+        fun of(message: MainBlockMessage): MainBlock = MainBlock(
+            message.timestamp,
+            message.height,
+            message.previousHash,
+            message.reward,
+            message.hash,
+            message.signature,
+            message.publicKey,
+            MainBlockPayload(message.merkleHash)
+        )
     }
+
+    override fun getPayload(): BlockPayload = payload
 
 }

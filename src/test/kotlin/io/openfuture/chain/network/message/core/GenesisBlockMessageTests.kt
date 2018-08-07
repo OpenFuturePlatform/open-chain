@@ -15,12 +15,11 @@ class GenesisBlockMessageTests : MessageTests() {
 
     @Before
     fun setup() {
-        buffer = createBuffer("00000000000000010000000c70726576696f7573486173680000000000000001000000000000000a00000009" +
-            "7075626c69634b65790000000468617368000000097369676e6174757265000000000000000100000001000000097075626c69634b6" +
-            "579")
+        buffer = createBuffer("00000000000000010000000c70726576696f7573486173680000000000000001000000000000000a" +
+            "0000000468617368000000097369676e6174757265000000097075626c69634b6579000000000000000100000001000000097075626c69634b6579")
 
-        val delegates = listOf("publicKey")
-        message = GenesisBlockMessage(1, "previousHash", 1, 10, "publicKey", "hash", "signature", 1, delegates)
+        message = GenesisBlockMessage(1, "previousHash", 1, 10, "hash",
+            "signature", "publicKey", 1, listOf("publicKey"))
     }
 
     @Test

@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.service.HardwareInfoService
 import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.rpc.domain.node.CpuInfo
-import io.openfuture.chain.rpc.domain.node.HardwareInfo
-import io.openfuture.chain.rpc.domain.node.NetworkInfo
-import io.openfuture.chain.rpc.domain.node.RamInfo
+import io.openfuture.chain.core.model.node.CpuInfo
+import io.openfuture.chain.core.model.node.HardwareInfo
+import io.openfuture.chain.core.model.node.NetworkInfo
+import io.openfuture.chain.core.model.node.RamInfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.mockito.BDDMockito.given

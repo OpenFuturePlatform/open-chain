@@ -15,23 +15,23 @@ class MainBlockMessageTests : MessageTests() {
 
     @Before
     fun setup() {
-        buffer = createBuffer("00000000000000010000000c70726576696f7573486173680000000000000001000000000000000a000000097" +
-            "075626c69634b65790000000468617368000000097369676e61747572650000000a6d65726b6c654861736800000001000000000001" +
-            "e0f300000000000000010000000d73656e646572416464726573730000000f73656e6465725075626c69634b65790000000f73656e6" +
-            "465725369676e61747572650000000468617368000000000000000a00000010726563697069656e7441646472657373000000010000" +
-            "00000000007b00000000000000010000000d73656e646572416464726573730000000f73656e6465725075626c69634b65790000000" +
-            "f73656e6465725369676e61747572650000000468617368000000010000000b64656c65676174654b657900000001000000000001e0" +
-            "f300000000000000010000000d73656e646572416464726573730000000f73656e6465725075626c69634b65790000000f73656e646" +
-            "5725369676e617475726500000004686173680000000b64656c65676174654b6579")
+        buffer = createBuffer("00000000000000010000000870726576486173680000000000000001000000000000000a000000046861736800000009736" +
+            "9676e6174757265000000097075626c69634b65790000000a6d65726b6c6548617368000000010000000000000001000000000000" +
+            "00010000000d73656e6465724164647265737300000004686173680000000f73656e6465725369676e61747572650000000f73656" +
+            "e6465725075626c69634b6579000000010000000b64656c65676174654b657900000001000000000000000100000000000000010" +
+            "000000d73656e6465724164647265737300000004686173680000000f73656e6465725369676e61747572650000000f73656e64" +
+            "65725075626c69634b65790000000b64656c65676174654b6579000000010000000000000001000000000000000100000004686" +
+            "173680000000d73656e646572416464726573730000000f73656e6465725369676e61747572650000000f73656e6465725075626c" +
+            "69634b657900000000000000010000000b64656c65676174654b6579")
+        val voteTransactionMessage = listOf(VoteTransactionMessage(1L, 1L, "senderAddress", "hash", "senderSignature",
+            "senderPublicKey", 1, "delegateKey"))
+        val transferTransactionMessage = listOf(TransferTransactionMessage(1L, 1L, "senderAddress", "hash", "senderSignature",
+            "senderPublicKey", 1, "delegateKey"))
+        val delegateTransactionMessage = listOf(DelegateTransactionMessage(1L, 1L, "senderAddress", "hash", "senderSignature",
+            "senderPublicKey", "delegateKey"))
 
-        val transferTransaction = mutableListOf(TransferTransactionMessage(123123, 1, "senderAddress", "senderPublicKey",
-            "senderSignature", "hash", 10, "recipientAddress"))
-        val voteTransaction = mutableListOf(VoteTransactionMessage(123, 1, "senderAddress", "senderPublicKey",
-            "senderSignature", "hash", 1, "delegateKey"))
-        val delegateTransaction = mutableListOf(DelegateTransactionMessage(123123, 1, "senderAddress", "senderPublicKey",
-            "senderSignature", "hash", "delegateKey"))
-        message = MainBlockMessage(1, "previousHash", 1, 10, "hash", "signature", "publicKey", "merkleHash",
-            transferTransaction, voteTransaction, delegateTransaction)
+        message = MainBlockMessage(1, "prevHash", 1, 10, "hash", "signature", "publicKey", "merkleHash",
+            voteTransactionMessage, delegateTransactionMessage, transferTransactionMessage)
     }
 
     @Test
