@@ -14,13 +14,10 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/rpc/transactions/transfer")
 class TransferTransactionController(
-    private val transactionService: TransferTransactionService
-) {
+    private val transactionService: TransferTransactionService) {
 
     @PostMapping("/doGenerateHash")
-    fun getHash(@Valid @RequestBody request: TransferTransactionHashRequest): String {
-        return transactionService.generateHash(request)
-    }
+    fun getHash(@Valid @RequestBody request: TransferTransactionHashRequest): String = transactionService.generateHash(request)
 
     @PostMapping
     fun add(@Valid @RequestBody request: TransferTransactionRequest): TransferTransactionResponse {

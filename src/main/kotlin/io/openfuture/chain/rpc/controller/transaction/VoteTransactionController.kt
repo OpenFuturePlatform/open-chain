@@ -13,13 +13,10 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/rpc/transactions/votes")
 class VoteTransactionController(
-    private val voteService: VoteTransactionService
-) {
+    private val voteService: VoteTransactionService) {
 
     @PostMapping("/doGenerateHash")
-    fun getHash(@Valid @RequestBody request: VoteTransactionHashRequest): String {
-        return voteService.generateHash(request)
-    }
+    fun getHash(@Valid @RequestBody request: VoteTransactionHashRequest): String = voteService.generateHash(request)
 
     @PostMapping
     fun add(@Valid @RequestBody request: VoteTransactionRequest): VoteTransactionResponse {
