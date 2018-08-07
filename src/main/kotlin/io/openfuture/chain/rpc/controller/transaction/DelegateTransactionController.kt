@@ -13,13 +13,10 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/rpc/transactions/delegates")
 class DelegateTransactionController(
-    private val transactionService: DelegateTransactionService
-) {
+    private val transactionService: DelegateTransactionService) {
 
     @PostMapping("/doGenerateHash")
-    fun getHash(@Valid @RequestBody request: DelegateTransactionHashRequest): String {
-        return transactionService.generateHash(request)
-    }
+    fun getHash(@Valid @RequestBody request: DelegateTransactionHashRequest): String = transactionService.generateHash(request)
 
     @PostMapping
     fun add(@Valid @RequestBody request: DelegateTransactionRequest): DelegateTransactionResponse {
