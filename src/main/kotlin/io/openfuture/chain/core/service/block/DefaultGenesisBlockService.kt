@@ -22,13 +22,13 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultGenesisBlockService(
     blockService: BlockService,
-    private val repository: BlockRepository<GenesisBlock>,
+    repository: BlockRepository<GenesisBlock>,
     private val delegateService: DefaultDelegateService,
     private val clock: NodeClock,
     private val consensusProperties: ConsensusProperties,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService
-) : BaseBlockService(blockService), GenesisBlockService {
+) : BaseBlockService<GenesisBlock>(repository, blockService), GenesisBlockService {
 
     @Transactional(readOnly = true)
     override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()
@@ -62,27 +62,26 @@ class DefaultGenesisBlockService(
             return
         }
 
-        val block = GenesisBlock.of(message)
         val delegates = message.delegates.map { delegateService.getByPublicKey(it) }
+        val block = GenesisBlock.of(message, delegates)
 
-        if (!isValid(block, delegates)) {
+        if (!isValid(block)) {
             return
         }
 
-        block.payload.activeDelegates = delegates
-        repository.save(block)
+        super.save(block)
         networkService.broadcast(message)
     }
 
     @Transactional(readOnly = true)
     override fun isValid(message: GenesisBlockMessage): Boolean {
-        val block = GenesisBlock.of(message)
         val delegates = message.delegates.map { delegateService.getByPublicKey(it) }
-        return isValid(block, delegates)
+        val block = GenesisBlock.of(message, delegates)
+        return isValid(block)
     }
 
-    private fun isValid(block: GenesisBlock, delegates: List<Delegate>): Boolean {
-        return isValidateActiveDelegates(delegates)
+    private fun isValid(block: GenesisBlock): Boolean {
+        return isValidateActiveDelegates(block.payload.activeDelegates)
             && isValidEpochIndex(this.getLast().payload.epochIndex, block.payload.epochIndex)
             && super.isValid(block)
     }
