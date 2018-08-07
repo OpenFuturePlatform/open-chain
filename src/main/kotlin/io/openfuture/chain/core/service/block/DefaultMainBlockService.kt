@@ -67,9 +67,9 @@ class DefaultMainBlockService(
         }
 
         val savedBlock = repository.save(block)
-        message.voteTransactions.map { voteTransactionService.toBlock(it, savedBlock) }
-        message.delegateTransactions.map { delegateTransactionService.toBlock(it, savedBlock) }
-        message.transferTransactions.map { transferTransactionService.toBlock(it, savedBlock) }
+        message.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
+        message.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
+        message.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
         networkService.broadcast(message)
     }
 
