@@ -37,6 +37,12 @@ class ConsensusProperties(
     var timeSlotWaitDuration: Long? = null,
 
     /**
+     * Time between time slot
+     */
+    @field:NotNull
+    var timeSlotInterval: Long? =null,
+
+    /**
      * Genesis address
      */
     @field:NotNull

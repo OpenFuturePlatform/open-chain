@@ -33,7 +33,7 @@ class DefaultPendingBlockHandler(
     @Synchronized
     override fun addBlock(block: PendingBlockMessage) {
         val blockSlotNumber = epochService.getSlotNumber(block.timestamp)
-        if (blockSlotNumber > timeSlotNumber) {
+        if (blockSlotNumber > timeSlotNumber || !epochService.isInTimeSlot(block.timestamp)) {
             this.reset()
         }
 

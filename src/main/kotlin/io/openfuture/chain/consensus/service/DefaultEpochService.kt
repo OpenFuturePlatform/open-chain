@@ -28,10 +28,17 @@ class DefaultEpochService(
         return genesisBlock.payload.activeDelegates.shuffled(random).first()
     }
 
-    override fun getSlotNumber(): Long = ((clock.networkTime() - getEpochStart()) / properties.timeSlotDuration!!)
+    override fun getSlotNumber(): Long = ((clock.networkTime() - getEpochStart()) / fullTimeSlotDuration())
 
-    override fun getSlotNumber(time: Long): Long = ((time - getEpochStart()) / properties.timeSlotDuration!!)
+    override fun isInTimeSlot(time: Long): Boolean = (getTimeSlotStart(time) < properties.timeSlotDuration!!)
 
-    override fun getEpochEndTime(): Long = getEpochStart() + getSlotNumber() * properties.timeSlotDuration!!
+    override fun timeToNextTimeSlot(time: Long): Long = (fullTimeSlotDuration() - getTimeSlotStart(time))
 
+    override fun getSlotNumber(time: Long): Long = ((time - getEpochStart()) / fullTimeSlotDuration())
+
+    override fun getEpochEndTime(): Long = (getEpochStart() + getSlotNumber() * fullTimeSlotDuration())
+
+    private fun getTimeSlotStart(time: Long): Long = (time - getEpochStart()) % fullTimeSlotDuration()
+
+    private fun fullTimeSlotDuration(): Long = (properties.timeSlotDuration!! + properties.timeSlotInterval!!)
 }

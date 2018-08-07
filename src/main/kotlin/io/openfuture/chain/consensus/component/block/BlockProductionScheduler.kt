@@ -6,6 +6,7 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
+import io.openfuture.chain.network.component.node.NodeClock
 import org.springframework.stereotype.Component
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -20,7 +21,8 @@ class BlockProductionScheduler(
     private val mainBlockService: MainBlockService,
     private val genesisBlockService: GenesisBlockService,
     private val consensusProperties: ConsensusProperties,
-    private val pendingBlockHandler: PendingBlockHandler
+    private val pendingBlockHandler: PendingBlockHandler,
+    private val clock: NodeClock
 ) {
 
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
@@ -33,19 +35,22 @@ class BlockProductionScheduler(
         executor.submit {
             while (true) {
                 val timeSlot = epochService.getSlotNumber()
-                if (timeSlot > currentTimeSlot) {
-                    currentTimeSlot = timeSlot
-                    val slotOwner = epochService.getCurrentSlotOwner()
-                    if (isGenesisBlockRequired()) {
-                        val genesisBlock = genesisBlockService.create()
-                        genesisBlock.timestamp = epochService.getEpochEndTime()
-                        genesisBlockService.add(genesisBlock)
-                    } else if (keyHolder.getPublicKey() == slotOwner.publicKey) {
-                        val block = mainBlockService.create()
-                        pendingBlockHandler.addBlock(block)
-                    }
+                val networkTime = clock.networkTime()
+                if (!epochService.isInTimeSlot(networkTime) || timeSlot <= currentTimeSlot) {
+                    Thread.sleep(epochService.timeToNextTimeSlot(networkTime))
+                    continue
                 }
-                Thread.sleep(100)
+
+                currentTimeSlot = timeSlot
+                val slotOwner = epochService.getCurrentSlotOwner()
+                if (isGenesisBlockRequired()) {
+                    val genesisBlock = genesisBlockService.create()
+                    genesisBlock.timestamp = epochService.getEpochEndTime()
+                    genesisBlockService.add(genesisBlock)
+                } else if (keyHolder.getPublicKey() == slotOwner.publicKey) {
+                    val block = mainBlockService.create()
+                    pendingBlockHandler.addBlock(block)
+                }
             }
         }
     }
