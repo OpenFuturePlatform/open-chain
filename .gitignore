@@ -1,6 +1,7 @@
 .idea/
 build/
 out/
+frontend/
 .gradle/
 *.iml
 *.db
