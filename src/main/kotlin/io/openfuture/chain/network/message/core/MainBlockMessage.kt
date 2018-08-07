@@ -5,7 +5,7 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.network.annotation.NoArgConstructor
+import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.*
 
 @NoArgConstructor

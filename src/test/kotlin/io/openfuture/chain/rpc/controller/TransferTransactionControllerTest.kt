@@ -46,10 +46,10 @@ class TransferTransactionControllerTest : ControllerTests() {
 
     @Test
     fun addTransaction() {
-        val transactionRequest = TransferTransactionRequest(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
-            1, "recipientAddress")
-        val unconfirmedTransferTransaction = UnconfirmedTransferTransaction(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
-            "hash", TransferTransactionPayload(1L, "delegateKey"))
+        val transactionRequest = TransferTransactionRequest(1L, 1L, "senderAddress",
+            1, "recipientAddress", "senderSignature", "recipientAddress")
+        val unconfirmedTransferTransaction = UnconfirmedTransferTransaction(1L, 1L, "senderAddress",
+            "hash", "senderSignature", "senderPublicKey", TransferTransactionPayload(1L, "delegateKey"))
 
         given(service.add(transactionRequest)).willReturn(unconfirmedTransferTransaction)
 
