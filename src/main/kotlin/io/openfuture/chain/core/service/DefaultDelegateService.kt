@@ -1,8 +1,8 @@
 package io.openfuture.chain.core.service
 
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.repository.DelegateRepository
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.springframework.data.domain.Page

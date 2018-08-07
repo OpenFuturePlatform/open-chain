@@ -49,7 +49,7 @@ class DefaultMainBlockService(
 
         val hash = BlockUtils.createHash(timestamp, height, previousHash, reward, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
-        val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
+        val publicKey = keyHolder.getPublicKey()
 
         val block = MainBlock(timestamp, height, previousHash, reward, ByteUtils.toHexString(hash), signature, publicKey, payload)
         return PendingBlockMessage(block, voteTxs, delegateTxs, transferTxs)
