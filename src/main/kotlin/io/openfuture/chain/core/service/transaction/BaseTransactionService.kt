@@ -55,13 +55,9 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return repository.save(tx)
     }
 
-    open fun isValid(utx: U): Boolean {
-        return this.isValidBase(utx)
-    }
+    open fun isValid(utx: U): Boolean = this.isValidBase(utx)
 
-    open fun isValid(tx: T): Boolean {
-        return this.isValidBase(tx)
-    }
+    open fun isValid(tx: T): Boolean = this.isValidBase(tx)
 
     private fun updateBalanceByFee(tx: BaseTransaction) {
         walletService.decreaseBalance(tx.senderAddress, tx.fee)
