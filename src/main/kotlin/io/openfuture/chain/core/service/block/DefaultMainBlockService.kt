@@ -49,7 +49,7 @@ class DefaultMainBlockService(
 
         val hash = BlockUtils.createHash(timestamp, height, previousHash, reward, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
-        val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
+        val publicKey = keyHolder.getPublicKey()
 
         val block = MainBlock(timestamp, height, previousHash, reward, ByteUtils.toHexString(hash), signature, publicKey, payload)
         return PendingBlockMessage(block, voteTxs, delegateTxs, transferTxs)
@@ -67,9 +67,9 @@ class DefaultMainBlockService(
         }
 
         val savedBlock = repository.save(block)
-        message.voteTransactions.map { voteTransactionService.toBlock(it, savedBlock) }
-        message.delegateTransactions.map { delegateTransactionService.toBlock(it, savedBlock) }
-        message.transferTransactions.map { transferTransactionService.toBlock(it, savedBlock) }
+        message.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
+        message.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
+        message.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
         networkService.broadcast(message)
     }
 

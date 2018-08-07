@@ -23,7 +23,6 @@ import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTrans
 import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionHashRequest
 import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionRequest
 import org.springframework.data.domain.Page
-import org.springframework.transaction.annotation.Transactional
 
 interface HardwareInfoService {
 
@@ -84,6 +83,8 @@ interface TransactionService {
 }
 
 interface TransferTransactionService {
+
+    fun getAll(request: PageRequest): Page<TransferTransaction>
 
     fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction>
 

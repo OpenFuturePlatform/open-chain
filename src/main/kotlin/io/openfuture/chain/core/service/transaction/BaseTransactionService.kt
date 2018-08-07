@@ -71,7 +71,7 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
     }
 
     private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean {
-        return !cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
+        return cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
     }
 
     private fun isValidFee(senderAddress: String, fee: Long): Boolean {
