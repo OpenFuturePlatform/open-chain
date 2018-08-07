@@ -17,7 +17,7 @@ class DelegateTransactionController(
 ) {
 
     @PostMapping("/doGenerateHash")
-    fun getBytes(@Valid @RequestBody request: DelegateTransactionHashRequest): String {
+    fun getHash(@Valid @RequestBody request: DelegateTransactionHashRequest): String {
         return transactionService.generateHash(request)
     }
 

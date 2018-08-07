@@ -17,7 +17,7 @@ class VoteTransactionController(
 ) {
 
     @PostMapping("/doGenerateHash")
-    fun getBytes(@Valid @RequestBody request: VoteTransactionHashRequest): String {
+    fun getHash(@Valid @RequestBody request: VoteTransactionHashRequest): String {
         return voteService.generateHash(request)
     }
 

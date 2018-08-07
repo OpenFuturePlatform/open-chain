@@ -24,7 +24,6 @@ class VoteTransaction(
 ) : Transaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
     companion object {
-
         fun of(message: VoteTransactionMessage): VoteTransaction = VoteTransaction(
             message.timestamp,
             message.fee,

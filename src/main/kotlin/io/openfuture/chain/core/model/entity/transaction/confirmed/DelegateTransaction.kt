@@ -24,7 +24,6 @@ class DelegateTransaction(
 ) : Transaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
     companion object {
-
         fun of(message: DelegateTransactionMessage): DelegateTransaction = DelegateTransaction(
             message.timestamp,
             message.fee,

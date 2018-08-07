@@ -18,7 +18,7 @@ class TransferTransactionController(
 ) {
 
     @PostMapping("/doGenerateHash")
-    fun getBytes(@Valid @RequestBody request: TransferTransactionHashRequest): String {
+    fun getHash(@Valid @RequestBody request: TransferTransactionHashRequest): String {
         return transactionService.generateHash(request)
     }
 
