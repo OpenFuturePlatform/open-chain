@@ -17,6 +17,6 @@ abstract class Transaction(
 
     @ManyToOne
     @JoinColumn(name = "block_id", nullable = false)
-    var block: MainBlock? = null
+    var block: MainBlock
 
 ) : BaseTransaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey)

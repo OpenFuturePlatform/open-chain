@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.model.entity.transaction.confirmed
 
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -17,30 +18,33 @@ class TransferTransaction(
     hash: String,
     senderSignature: String,
     senderPublicKey: String,
+    block: MainBlock,
 
     @Embedded
     val payload: TransferTransactionPayload
 
-) : Transaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
+) : Transaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey, block) {
 
     companion object {
-        fun of(message: TransferTransactionMessage): TransferTransaction = TransferTransaction(
+        fun of(message: TransferTransactionMessage, block: MainBlock): TransferTransaction = TransferTransaction(
             message.timestamp,
             message.fee,
             message.senderAddress,
             message.hash,
             message.senderSignature,
             message.senderPublicKey,
+            block,
             TransferTransactionPayload(message.amount, message.recipientAddress)
         )
 
-        fun of(utx: UnconfirmedTransferTransaction): TransferTransaction = TransferTransaction(
+        fun of(utx: UnconfirmedTransferTransaction, block: MainBlock): TransferTransaction = TransferTransaction(
             utx.timestamp,
             utx.fee,
             utx.senderAddress,
             utx.hash,
             utx.senderSignature,
             utx.senderPublicKey,
+            block,
             utx.payload
         )
     }

@@ -56,17 +56,17 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun synchronize(message: DelegateTransactionMessage, block: MainBlock) {
-        val persistTx = repository.findOneByHash(message.hash)
-        if (null != persistTx) {
+        val tx = repository.findOneByHash(message.hash)
+        if (null != tx) {
             return
         }
 
-        val persistUtx = unconfirmedRepository.findOneByHash(message.hash)
-        if (null != persistUtx) {
-            toBlock(persistUtx.hash, block)
+        val utx = unconfirmedRepository.findOneByHash(message.hash)
+        if (null != utx) {
+            confirm(utx, block)
             return
         }
-        super.save(DelegateTransaction.of(message))
+        super.save(DelegateTransaction.of(message, block))
     }
 
     override fun generateHash(request: DelegateTransactionHashRequest): String {
@@ -77,8 +77,7 @@ class DefaultDelegateTransactionService(
     @Transactional
     override fun toBlock(hash: String, block: MainBlock): DelegateTransaction {
         val utx = getUnconfirmedByHash(hash)
-        delegateService.save(Delegate(utx.payload.delegateKey, utx.senderAddress))
-        return super.toBlock(utx, DelegateTransaction.of(utx), block)
+        return confirm(utx, block)
     }
 
     @Transactional
@@ -89,6 +88,11 @@ class DefaultDelegateTransactionService(
     @Transactional
     override fun isValid(utx: UnconfirmedDelegateTransaction): Boolean {
         return isNotExistDelegate(utx.senderAddress) && super.isValid(utx)
+    }
+
+    private fun confirm(utx: UnconfirmedDelegateTransaction, block: MainBlock): DelegateTransaction {
+        delegateService.save(Delegate(utx.payload.delegateKey, utx.senderAddress))
+        return super.confirmProcess(utx, DelegateTransaction.of(utx, block))
     }
 
     private fun isNotExistDelegate(key: String): Boolean = !delegateService.isExists(key)

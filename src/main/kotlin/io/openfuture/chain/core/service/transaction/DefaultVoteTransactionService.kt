@@ -56,17 +56,17 @@ internal class DefaultVoteTransactionService(
 
     @Transactional
     override fun synchronize(message: VoteTransactionMessage, block: MainBlock) {
-        val persistTx = repository.findOneByHash(message.hash)
-        if (null != persistTx) {
+        val tx = repository.findOneByHash(message.hash)
+        if (null != tx) {
             return
         }
 
-        val persistUtx = unconfirmedRepository.findOneByHash(message.hash)
-        if (null != persistUtx) {
-            toBlock(persistUtx.hash, block)
+        val utx = unconfirmedRepository.findOneByHash(message.hash)
+        if (null != utx) {
+            confirm(utx, block)
             return
         }
-        super.save(VoteTransaction.of(message))
+        super.save(VoteTransaction.of(message, block))
     }
 
     override fun generateHash(request: VoteTransactionHashRequest): String {
@@ -77,9 +77,7 @@ internal class DefaultVoteTransactionService(
     @Transactional
     override fun toBlock(hash: String, block: MainBlock): VoteTransaction {
         val utx = getUnconfirmedByHash(hash)
-        val type = utx.payload.getVoteType()
-        updateWalletVotes(utx.payload.delegateKey, utx.senderAddress, type)
-        return super.toBlock(utx, VoteTransaction.of(utx), block)
+        return confirm(utx, block)
     }
 
     @Transactional
@@ -105,6 +103,12 @@ internal class DefaultVoteTransactionService(
             }
         }
         walletService.save(wallet)
+    }
+
+    private fun confirm(utx: UnconfirmedVoteTransaction, block: MainBlock): VoteTransaction {
+        val type = utx.payload.getVoteType()
+        updateWalletVotes(utx.payload.delegateKey, utx.senderAddress, type)
+        return super.confirmProcess(utx, VoteTransaction.of(utx, block))
     }
 
     private fun isValidVoteCount(senderAddress: String): Boolean {

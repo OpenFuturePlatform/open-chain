@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.model.entity.transaction.confirmed
 
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.vote.VoteTransactionPayload
@@ -17,30 +18,33 @@ class VoteTransaction(
     hash: String,
     senderSignature: String,
     senderPublicKey: String,
+    block: MainBlock,
 
     @Embedded
     val payload: VoteTransactionPayload
 
-) : Transaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
+) : Transaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey, block) {
 
     companion object {
-        fun of(message: VoteTransactionMessage): VoteTransaction = VoteTransaction(
+        fun of(message: VoteTransactionMessage, block: MainBlock): VoteTransaction = VoteTransaction(
             message.timestamp,
             message.fee,
             message.senderAddress,
             message.hash,
             message.senderSignature,
             message.senderPublicKey,
+            block,
             VoteTransactionPayload(message.voteTypeId, message.delegateKey)
         )
 
-        fun of(utx: UnconfirmedVoteTransaction): VoteTransaction = VoteTransaction(
+        fun of(utx: UnconfirmedVoteTransaction, block: MainBlock): VoteTransaction = VoteTransaction(
             utx.timestamp,
             utx.fee,
             utx.senderAddress,
             utx.hash,
             utx.senderSignature,
             utx.senderPublicKey,
+            block,
             utx.payload
         )
     }

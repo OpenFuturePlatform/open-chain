@@ -20,13 +20,11 @@ abstract class BaseBlockService(
             && isValidSignature(block.hash, block.signature, block.publicKey)
     }
 
-    private fun isValidPreviousHash(block: BaseBlock, lastBlock: BaseBlock): Boolean = (block.previousHash == lastBlock.hash)
+    private fun isValidPreviousHash(block: BaseBlock, lastBlock: BaseBlock): Boolean = block.previousHash == lastBlock.hash
 
-    private fun isValidTimeStamp(block: BaseBlock, lastBlock: BaseBlock): Boolean = (block.timestamp > lastBlock.timestamp)
+    private fun isValidTimeStamp(block: BaseBlock, lastBlock: BaseBlock): Boolean = block.timestamp > lastBlock.timestamp
 
-    private fun isValidHeight(block: BaseBlock, lastBlock: BaseBlock): Boolean {
-        return (block.height == lastBlock.height + 1)
-    }
+    private fun isValidHeight(block: BaseBlock, lastBlock: BaseBlock): Boolean = block.height == lastBlock.height + 1
 
     private fun isValidHash(block: BaseBlock): Boolean {
         val dataHash = BlockUtils.createHash(block.timestamp, block.height, block.previousHash, block.reward,

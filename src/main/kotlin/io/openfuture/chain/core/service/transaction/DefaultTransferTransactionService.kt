@@ -50,17 +50,17 @@ class DefaultTransferTransactionService(
     }
 
     override fun synchronize(message: TransferTransactionMessage, block: MainBlock) {
-        val persistTx = repository.findOneByHash(message.hash)
-        if (null != persistTx) {
+        val tx = repository.findOneByHash(message.hash)
+        if (null != tx) {
             return
         }
 
-        val persistUtx = unconfirmedRepository.findOneByHash(message.hash)
-        if (null != persistUtx) {
-            toBlock(persistUtx.hash, block)
+        val utx = unconfirmedRepository.findOneByHash(message.hash)
+        if (null != utx) {
+            confirm(utx, block)
             return
         }
-        super.save(TransferTransaction.of(message))
+        super.save(TransferTransaction.of(message, block))
     }
 
     override fun generateHash(request: TransferTransactionHashRequest): String {
@@ -71,8 +71,7 @@ class DefaultTransferTransactionService(
     @Transactional
     override fun toBlock(hash: String, block: MainBlock): TransferTransaction {
         val utx = getUnconfirmedByHash(hash)
-        updateTransferBalance(utx.senderAddress, utx.payload.recipientAddress, utx.payload.amount)
-        return super.toBlock(utx, TransferTransaction.of(utx), block)
+        return confirm(utx, block)
     }
 
     @Transactional
@@ -83,6 +82,11 @@ class DefaultTransferTransactionService(
     @Transactional
     override fun isValid(tx: TransferTransaction): Boolean {
         return isValidTransferBalance(tx.senderAddress, tx.payload.amount + tx.fee) && super.isValid(tx)
+    }
+
+    private fun confirm(utx: UnconfirmedTransferTransaction, block: MainBlock): TransferTransaction {
+        updateTransferBalance(utx.senderAddress, utx.payload.recipientAddress, utx.payload.amount)
+        return super.confirmProcess(utx, TransferTransaction.of(utx, block))
     }
 
     private fun updateTransferBalance(from: String, to: String, amount: Long) {
