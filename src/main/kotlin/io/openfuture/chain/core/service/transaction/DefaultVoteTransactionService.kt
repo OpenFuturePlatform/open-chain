@@ -69,10 +69,13 @@ internal class DefaultVoteTransactionService(
         super.save(VoteTransaction.of(message, block))
     }
 
-    override fun generateHash(request: VoteTransactionHashRequest): String {
-        return TransactionUtils.generateHash(request.timestamp!!, request.fee!!, request.senderAddress!!,
-            VoteTransactionPayload(request.voteTypeId!!, request.delegateKey!!))
-    }
+    override fun generateHash(request: VoteTransactionHashRequest): String =
+        TransactionUtils.generateHash(
+            request.timestamp!!,
+            request.fee!!,
+            request.senderAddress!!,
+            VoteTransactionPayload(request.voteTypeId!!, request.delegateKey!!)
+        )
 
     @Transactional
     override fun toBlock(hash: String, block: MainBlock): VoteTransaction {
@@ -81,14 +84,10 @@ internal class DefaultVoteTransactionService(
     }
 
     @Transactional
-    override fun isValid(tx: VoteTransaction): Boolean {
-        return isValidVoteCount(tx.senderAddress) && super.isValid(tx)
-    }
+    override fun isValid(tx: VoteTransaction): Boolean = isValidVoteCount(tx.senderAddress) && super.isValid(tx)
 
     @Transactional
-    override fun isValid(utx: UnconfirmedVoteTransaction): Boolean {
-        return isValidVoteCount(utx.senderAddress) && super.isValid(utx)
-    }
+    override fun isValid(utx: UnconfirmedVoteTransaction): Boolean = isValidVoteCount(utx.senderAddress) && super.isValid(utx)
 
     private fun updateWalletVotes(delegateKey: String, senderAddress: String, type: VoteType) {
         val delegate = delegateService.getByPublicKey(delegateKey)

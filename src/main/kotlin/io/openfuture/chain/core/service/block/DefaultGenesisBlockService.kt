@@ -45,7 +45,8 @@ class DefaultGenesisBlockService(
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = ByteUtils.toHexString(keyHolder.getPublicKey())
 
-        val block = GenesisBlock(timestamp, height, previousHash, reward, ByteUtils.toHexString(hash), signature, publicKey, payload)
+        val block = GenesisBlock(timestamp, height, previousHash, reward, ByteUtils.toHexString(hash), signature,
+            publicKey, payload)
         return GenesisBlockMessage(block)
     }
 
@@ -81,9 +82,8 @@ class DefaultGenesisBlockService(
     }
 
     private fun isValid(block: GenesisBlock, delegates: List<Delegate>): Boolean {
-        val lastGenesisBlock = this.getLast()
         return isValidateActiveDelegates(delegates)
-            && isValidEpochIndex(lastGenesisBlock.payload.epochIndex, block.payload.epochIndex)
+            && isValidEpochIndex(this.getLast().payload.epochIndex, block.payload.epochIndex)
             && super.isValid(block)
     }
 
@@ -99,8 +99,6 @@ class DefaultGenesisBlockService(
         return persistPublicKeys.containsAll(publicKeys)
     }
 
-    private fun isValidEpochIndex(lastEpoch: Long, newEpoch: Long): Boolean {
-        return (lastEpoch + 1 == newEpoch)
-    }
+    private fun isValidEpochIndex(lastEpoch: Long, newEpoch: Long): Boolean = lastEpoch + 1 == newEpoch
 
 }

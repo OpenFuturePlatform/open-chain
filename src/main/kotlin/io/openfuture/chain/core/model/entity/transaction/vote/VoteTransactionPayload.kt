@@ -20,9 +20,7 @@ class VoteTransactionPayload(
 
 ) : TransactionPayload {
 
-    fun getVoteType(): VoteType {
-        return DictionaryUtil.valueOf(VoteType::class.java, voteTypeId)
-    }
+    fun getVoteType(): VoteType = DictionaryUtil.valueOf(VoteType::class.java, voteTypeId)
 
     override fun getBytes(): ByteArray {
         val buffer = ByteBuffer.allocate(ByteConstants.INT_BYTES + delegateKey.toByteArray(StandardCharsets.UTF_8).size)

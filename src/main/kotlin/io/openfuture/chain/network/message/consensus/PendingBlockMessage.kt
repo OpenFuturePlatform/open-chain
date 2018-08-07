@@ -64,6 +64,6 @@ class PendingBlockMessage(
         buffer.writeStringList(transferTransactions)
     }
 
-    override fun toString() = "MainBlockMessage(hash=$hash)"
+    override fun toString() = "PendingBlockMessage(hash=$hash)"
 
 }

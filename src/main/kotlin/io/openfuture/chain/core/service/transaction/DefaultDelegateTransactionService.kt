@@ -69,10 +69,13 @@ class DefaultDelegateTransactionService(
         super.save(DelegateTransaction.of(message, block))
     }
 
-    override fun generateHash(request: DelegateTransactionHashRequest): String {
-        return TransactionUtils.generateHash(request.timestamp!!, request.fee!!, request.senderAddress!!,
-            DelegateTransactionPayload(request.delegateKey!!))
-    }
+    override fun generateHash(request: DelegateTransactionHashRequest): String =
+        TransactionUtils.generateHash(
+            request.timestamp!!,
+            request.fee!!,
+            request.senderAddress!!,
+            DelegateTransactionPayload(request.delegateKey!!)
+        )
 
     @Transactional
     override fun toBlock(hash: String, block: MainBlock): DelegateTransaction {

@@ -85,16 +85,13 @@ class DefaultMainBlockService(
         }
 
         val savedBlock = repository.save(block)
-        message.voteTransactions.forEach { voteTransactionService.synchronize(it, repository.save(savedBlock)) }
-        message.delegateTransactions.forEach { delegateTransactionService.synchronize(it, repository.save(savedBlock)) }
-        message.transferTransactions.forEach { transferTransactionService.synchronize(it, repository.save(savedBlock)) }
+        message.voteTransactions.forEach { voteTransactionService.synchronize(it, savedBlock) }
+        message.delegateTransactions.forEach { delegateTransactionService.synchronize(it, savedBlock) }
+        message.transferTransactions.forEach { transferTransactionService.synchronize(it, savedBlock) }
     }
 
     @Transactional(readOnly = true)
-    override fun isValid(message: PendingBlockMessage): Boolean {
-        val block = MainBlock.of(message)
-        return isValid(block, message.getAllTransactions())
-    }
+    override fun isValid(message: PendingBlockMessage): Boolean = isValid(MainBlock.of(message), message.getAllTransactions())
 
     private fun isValid(block: MainBlock, transactions: List<String>): Boolean {
         return isValidMerkleHash(block.payload.merkleHash, transactions) && super.isValid(block)

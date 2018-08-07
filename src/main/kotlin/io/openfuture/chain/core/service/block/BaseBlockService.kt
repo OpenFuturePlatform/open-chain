@@ -32,8 +32,7 @@ abstract class BaseBlockService(
         return ByteUtils.toHexString(dataHash) == block.hash
     }
 
-    private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean {
-        return SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
-    }
+    private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean =
+        SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
 
 }

@@ -63,10 +63,13 @@ class DefaultTransferTransactionService(
         super.save(TransferTransaction.of(message, block))
     }
 
-    override fun generateHash(request: TransferTransactionHashRequest): String {
-        return TransactionUtils.generateHash(request.timestamp!!, request.fee!!, request.senderAddress!!,
-            TransferTransactionPayload(request.amount!!, request.recipientAddress!!))
-    }
+    override fun generateHash(request: TransferTransactionHashRequest): String =
+        TransactionUtils.generateHash(
+            request.timestamp!!,
+            request.fee!!,
+            request.senderAddress!!,
+            TransferTransactionPayload(request.amount!!, request.recipientAddress!!)
+        )
 
     @Transactional
     override fun toBlock(hash: String, block: MainBlock): TransferTransaction {
@@ -75,14 +78,12 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun isValid(utx: UnconfirmedTransferTransaction): Boolean {
-        return isValidTransferBalance(utx.senderAddress, utx.payload.amount + utx.fee) && super.isValid(utx)
-    }
+    override fun isValid(utx: UnconfirmedTransferTransaction): Boolean =
+        isValidTransferBalance(utx.senderAddress, utx.payload.amount + utx.fee) && super.isValid(utx)
 
     @Transactional
-    override fun isValid(tx: TransferTransaction): Boolean {
-        return isValidTransferBalance(tx.senderAddress, tx.payload.amount + tx.fee) && super.isValid(tx)
-    }
+    override fun isValid(tx: TransferTransaction): Boolean =
+        isValidTransferBalance(tx.senderAddress, tx.payload.amount + tx.fee) && super.isValid(tx)
 
     private fun confirm(utx: UnconfirmedTransferTransaction, block: MainBlock): TransferTransaction {
         updateTransferBalance(utx.senderAddress, utx.payload.recipientAddress, utx.payload.amount)

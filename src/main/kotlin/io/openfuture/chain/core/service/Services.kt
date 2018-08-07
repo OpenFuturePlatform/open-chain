@@ -44,8 +44,6 @@ interface BlockService {
 
     fun getCount(): Long
 
-    fun getProducingSpeed(): Long
-
     fun getLast(): BaseBlock
 
     fun isExists(hash: String): Boolean
