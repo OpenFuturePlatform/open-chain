@@ -35,11 +35,11 @@ class UnconfirmedDelegateTransaction(
             DelegateTransactionPayload(dto.delegateKey)
         )
 
-        fun of(time: Long, request: DelegateTransactionRequest): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
-            time,
+        fun of(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
+            request.timestamp!!,
             request.fee!!,
             request.senderAddress!!,
-            TransactionUtils.generateHash(time, request.fee!!, request.senderAddress!!,
+            TransactionUtils.generateHash(request.timestamp!!, request.fee!!, request.senderAddress!!,
                 DelegateTransactionPayload(request.delegateKey!!)),
             request.senderSignature!!,
             request.senderPublicKey!!,

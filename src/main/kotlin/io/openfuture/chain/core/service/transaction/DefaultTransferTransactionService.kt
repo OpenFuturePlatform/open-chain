@@ -46,7 +46,7 @@ class DefaultTransferTransactionService(
 
     @Transactional
     override fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction {
-        val savedUtx = super.save(UnconfirmedTransferTransaction.of(clock.networkTime(), request))
+        val savedUtx = super.save(UnconfirmedTransferTransaction.of(request))
         networkService.broadcast(TransferTransactionMessage(savedUtx))
         return savedUtx
     }

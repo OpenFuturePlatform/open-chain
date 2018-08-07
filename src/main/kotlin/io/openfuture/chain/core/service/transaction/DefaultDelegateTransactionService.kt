@@ -49,7 +49,7 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction {
-        val savedUtx = super.save(UnconfirmedDelegateTransaction.of(clock.networkTime(), request))
+        val savedUtx = super.save(UnconfirmedDelegateTransaction.of(request))
         networkService.broadcast(DelegateTransactionMessage(savedUtx))
         return savedUtx
     }
