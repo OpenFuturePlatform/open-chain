@@ -15,7 +15,9 @@ interface CryptoService {
 
     fun isValidAddress(address: String, publicKey: ByteArray): Boolean
 
-    fun importKey(key: String): ExtendedKey
+    fun importPrivateKey(privateKey: String): ECKey
+
+    fun importExtendedKey(extendedKey: String): ExtendedKey
 
     fun importWifKey(wifKey: String): ECKey
 
