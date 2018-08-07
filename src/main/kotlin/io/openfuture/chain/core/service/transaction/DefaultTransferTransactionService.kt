@@ -11,8 +11,10 @@ import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.network.service.NetworkApiService
+import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionHashRequest
 import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionRequest
+import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -22,6 +24,9 @@ class DefaultTransferTransactionService(
     uRepository: UTransferTransactionRepository,
     private val networkService: NetworkApiService
 ) : BaseTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
+    
+    @Transactional(readOnly = true)
+    override fun getAll(request: PageRequest): Page<TransferTransaction> = repository.findAll(request)
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction> = unconfirmedRepository.findAllByOrderByFeeDesc()
