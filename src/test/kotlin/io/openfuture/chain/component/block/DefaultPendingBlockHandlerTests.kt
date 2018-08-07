@@ -13,9 +13,9 @@ import io.openfuture.chain.core.model.entity.transaction.Transaction
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.domain.NetworkBlockApproval
 import io.openfuture.chain.network.domain.NetworkMainBlock
-import io.openfuture.chain.network.service.NetworkService
+import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
+import io.openfuture.chain.network.service.NetworkApiService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.junit.Before
 import org.junit.Test
@@ -30,7 +30,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
     @Mock private lateinit var epochService: EpochService
     @Mock private lateinit var mainBlockService: MainBlockService
     @Mock private lateinit var keyHolder: NodeKeyHolder
-    @Mock private lateinit var networkService: NetworkService
+    @Mock private lateinit var networkService: NetworkApiService
 
     private lateinit var defaultPendingBlockHandler: DefaultPendingBlockHandler
 
@@ -85,7 +85,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         defaultPendingBlockHandler.addBlock(block)
 
         verify(networkService, times(1)).broadcast(any(NetworkMainBlock::class.java))
-        verify(networkService, times(1)).broadcast(any(NetworkBlockApproval::class.java))
+        verify(networkService, times(1)).broadcast(any(BlockApprovalMessage::class.java))
     }
 
     @Test
@@ -115,7 +115,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
             TransactionUtils.calculateMerkleRoot(transactions),
             transactions
         )
-        val message = NetworkBlockApproval(
+        val message = BlockApprovalMessage(
             BlockApprovalStage.PREPARE.value,
             "22c626c74fdc7aa6b2809d88a60068e6017a3d7015113ebd0af18cdf9f3809c6",
             publicKey,
@@ -139,14 +139,14 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
         defaultPendingBlockHandler.handleApproveMessage(message)
 
-        verify(networkService, times(3)).broadcast(any(NetworkBlockApproval::class.java))
+        verify(networkService, times(3)).broadcast(any(BlockApprovalMessage::class.java))
     }
 
     @Test
     fun handleApproveMessageShouldCommitApproveMessage() {
         val publicKey = "037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"
         val delegate = Delegate(publicKey, "address", 1)
-        val message = NetworkBlockApproval(
+        val message = BlockApprovalMessage(
             BlockApprovalStage.COMMIT.value,
             "2a897fecaaaddcd924a9f562be1cdacf0c7cf3370d1d13c3209f0d05be6bd26f",
             publicKey,
@@ -168,14 +168,14 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         val publicKey2 = "02fb3085f5f8bd7a095198211fb1d4781fd7f0643dec52328151b6cb46e46931fd"
         val delegate = Delegate(publicKey, "address", 1)
         val delegate2 = Delegate(publicKey2, "address2", 2)
-        val message = NetworkBlockApproval(
+        val message = BlockApprovalMessage(
             BlockApprovalStage.COMMIT.value,
             blockHash,
             publicKey,
             null
         )
         message.signature = SignatureUtils.sign(message.getBytes(), ByteUtils.fromHexString(privateKey))
-        val message2 = NetworkBlockApproval(
+        val message2 = BlockApprovalMessage(
             BlockApprovalStage.COMMIT.value,
             blockHash,
             publicKey2,
@@ -188,7 +188,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         defaultPendingBlockHandler.handleApproveMessage(message)
         defaultPendingBlockHandler.handleApproveMessage(message2)
 
-        verify(networkService, times(2)).broadcast(any(NetworkBlockApproval::class.java))
+        verify(networkService, times(2)).broadcast(any(BlockApprovalMessage::class.java))
         verify(mainBlockService, times(1)).save(any(MainBlock::class.java))
     }
 

@@ -1,14 +1,8 @@
 package io.openfuture.chain.network.domain
 
-import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
-import java.io.Serializable
+import io.openfuture.chain.network.message.base.BaseMessage
 
+//TODO: remove domain package after resolving merge conflict and migrating to messages
 @NoArgConstructor
-abstract class NetworkEntity : Serializable {
-
-    abstract fun read(buffer: ByteBuf)
-
-    abstract fun write(buffer: ByteBuf)
-
-}
+abstract class NetworkEntity : BaseMessage

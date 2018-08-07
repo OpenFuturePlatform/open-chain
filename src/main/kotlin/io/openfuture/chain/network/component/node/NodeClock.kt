@@ -9,33 +9,37 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 @Component
 class NodeClock {
 
+    @Volatile private var adjustment: Long = 0
+
+    private val networkTimeOffsets: ConcurrentHashMap<String, Long> = ConcurrentHashMap()
+    private val lock: ReadWriteLock = ReentrantReadWriteLock()
+
     companion object {
         private val log = LoggerFactory.getLogger(NodeClock::class.java)
-
         private const val MINIMUM_OFFSETS_SIZE_TO_DO_SYNC = 5
     }
 
-    @Volatile
-    private var adjustment : Long = 0
 
-    private val networkTimeOffsets: ConcurrentHashMap<String, Long> = ConcurrentHashMap()
+    fun nodeTime(): Long = System.currentTimeMillis()
 
-    private val lock: ReadWriteLock = ReentrantReadWriteLock()
-
-    fun nodeTime() : Long = System.currentTimeMillis()
-
-    fun networkTime() : Long {
+    fun networkTime(): Long {
         lock.readLock().lock()
-        try{
+        try {
             return nodeTime() + adjustment
         } finally {
             lock.readLock().unlock()
         }
     }
 
+    fun calculateTimeOffset(nodeTimestamp: Long, networkTimestamp: Long): Long {
+        val networkLatency = (nodeTime() - nodeTimestamp) / 2
+        val expectedNetworkTimestamp = nodeTimestamp + networkLatency
+        return networkTimestamp - expectedNetworkTimestamp
+    }
+
     fun addTimeOffset(remoteAddress: String, offset: Long) {
         lock.writeLock().lock()
-        try{
+        try {
             networkTimeOffsets[remoteAddress] = offset
             recalculateAdjustment()
         } finally {
@@ -45,7 +49,7 @@ class NodeClock {
 
     fun removeTimeOffset(remoteAddress: String) {
         lock.writeLock().lock()
-        try{
+        try {
             networkTimeOffsets.remove(remoteAddress)
             recalculateAdjustment()
         } finally {
@@ -54,8 +58,7 @@ class NodeClock {
     }
 
     private fun recalculateAdjustment() {
-        if (networkTimeOffsets.size % 2 == 1 &&
-                networkTimeOffsets.size >= MINIMUM_OFFSETS_SIZE_TO_DO_SYNC) {
+        if (networkTimeOffsets.size % 2 == 1 && networkTimeOffsets.size >= MINIMUM_OFFSETS_SIZE_TO_DO_SYNC) {
             val offsetList = ArrayList(networkTimeOffsets.values)
             offsetList.sort()
             adjustment = offsetList[networkTimeOffsets.size / 2]

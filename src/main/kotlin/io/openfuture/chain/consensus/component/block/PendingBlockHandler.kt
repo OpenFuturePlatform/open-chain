@@ -1,12 +1,12 @@
 package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.network.domain.NetworkBlockApproval
+import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
 
 interface PendingBlockHandler {
 
     fun addBlock(block: MainBlock)
 
-    fun handleApproveMessage(message: NetworkBlockApproval)
+    fun handleApproveMessage(message: BlockApprovalMessage)
 
 }

@@ -8,9 +8,9 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.domain.NetworkBlockApproval
 import io.openfuture.chain.network.domain.NetworkMainBlock
-import io.openfuture.chain.network.service.NetworkService
+import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
+import io.openfuture.chain.network.service.NetworkApiService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Component
 
@@ -19,7 +19,7 @@ class DefaultPendingBlockHandler(
     private val epochService: EpochService,
     private val mainBlockService: MainBlockService,
     private val keyHolder: NodeKeyHolder,
-    private val networkService: NetworkService
+    private val networkService: NetworkApiService
 ) : PendingBlockHandler {
 
     private val pendingBlocks: MutableSet<MainBlock> = mutableSetOf()
@@ -31,6 +31,7 @@ class DefaultPendingBlockHandler(
     private var stage: BlockApprovalStage = IDLE
 
 
+    @Synchronized
     override fun addBlock(block: MainBlock) {
         val blockSlotNumber = epochService.getSlotNumber(block.timestamp)
         if (blockSlotNumber > timeSlotNumber) {
@@ -46,14 +47,15 @@ class DefaultPendingBlockHandler(
                 this.observable = block
                 this.stage = PREPARE
                 this.timeSlotNumber = blockSlotNumber
-                val vote = NetworkBlockApproval(PREPARE.getId(), block.hash, keyHolder.getPublicKey())
+                val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKey())
                 vote.signature = SignatureUtils.sign(vote.getBytes(), keyHolder.getPrivateKey())
                 networkService.broadcast(vote)
             }
         }
     }
 
-    override fun handleApproveMessage(message: NetworkBlockApproval) {
+    @Synchronized
+    override fun handleApproveMessage(message: BlockApprovalMessage) {
         when (DictionaryUtils.valueOf(BlockApprovalStage::class.java, message.stageId)) {
             PREPARE -> handlePrevote(message)
             COMMIT -> handleCommit(message)
@@ -61,7 +63,7 @@ class DefaultPendingBlockHandler(
         }
     }
 
-    private fun handlePrevote(message: NetworkBlockApproval) {
+    private fun handlePrevote(message: BlockApprovalMessage) {
         val delegates = epochService.getDelegates()
         val delegate = delegates.find { message.publicKey == it.publicKey }
 
@@ -74,14 +76,14 @@ class DefaultPendingBlockHandler(
             networkService.broadcast(message)
             if (prepareVotes.size > (delegates.size - 1) / 3) {
                 this.stage = COMMIT
-                val commit = NetworkBlockApproval(COMMIT.getId(), message.hash, keyHolder.getPublicKey())
+                val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKey())
                 commit.signature = SignatureUtils.sign(message.getBytes(), keyHolder.getPrivateKey())
                 networkService.broadcast(commit)
             }
         }
     }
 
-    private fun handleCommit(message: NetworkBlockApproval) {
+    private fun handleCommit(message: BlockApprovalMessage) {
         val delegates = epochService.getDelegates()
         val delegate = delegates.find { message.publicKey == it.publicKey } ?: return
 
@@ -106,7 +108,7 @@ class DefaultPendingBlockHandler(
         pendingBlocks.clear()
     }
 
-    private fun isValidApprovalSignature(message: NetworkBlockApproval): Boolean =
+    private fun isValidApprovalSignature(message: BlockApprovalMessage): Boolean =
         SignatureUtils.verify(message.getBytes(), message.signature!!, ByteUtils.fromHexString(message.publicKey))
 
     private fun isActiveDelegate(): Boolean =

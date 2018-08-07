@@ -1,28 +1,70 @@
 package io.openfuture.chain.network.service
 
 import io.netty.channel.Channel
-import io.openfuture.chain.network.domain.NetworkAddress
-import io.openfuture.chain.network.domain.Packet
+import io.netty.channel.ChannelHandlerContext
+import io.openfuture.chain.network.message.base.BaseMessage
+import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
+import io.openfuture.chain.network.message.consensus.PendingBlockMessage
+import io.openfuture.chain.network.message.core.*
+import io.openfuture.chain.network.message.network.*
 
 
-interface NetworkService {
+interface NetworkApiService {
 
-    fun broadcast(packet: Packet)
+    fun broadcast(message: BaseMessage)
 
-    fun maintainConnectionNumber()
-
-    fun connect(peers: List<NetworkAddress>)
+    fun send(message: BaseMessage)
 
 }
 
-interface ConnectionService {
+interface InnerNetworkService {
 
-    fun addConnection(channel: Channel, networkAddress: NetworkAddress)
+    fun maintainConnectionNumber()
 
-    fun removeConnection(channel: Channel): NetworkAddress?
+    fun getChannels(): Set<Channel>
 
-    fun getConnectionAddresses(): Set<NetworkAddress>
+    fun onChannelActive(ctx: ChannelHandlerContext)
 
-    fun getConnections(): MutableMap<Channel, NetworkAddress>
+    fun onClientChannelActive(ctx: ChannelHandlerContext)
+
+    fun onHeartBeat(ctx: ChannelHandlerContext, heartBeat: HeartBeatMessage)
+
+    fun onFindAddresses(ctx: ChannelHandlerContext, message: FindAddressesMessage)
+
+    fun onAddresses(ctx: ChannelHandlerContext, message: AddressesMessage)
+
+    fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage)
+
+    fun onAskTime(ctx: ChannelHandlerContext, askTime: AskTimeMessage)
+
+    fun onTime(ctx: ChannelHandlerContext, message: TimeMessage)
+
+    fun onChannelInactive(ctx: ChannelHandlerContext)
+
+    fun onClientChannelInactive(ctx: ChannelHandlerContext)
+
+}
+
+interface CoreMessageService {
+
+    fun onNetworkBlockRequest(ctx: ChannelHandlerContext, request: SyncBlockRequestMessage)
+
+    fun onGenesisBlock(ctx: ChannelHandlerContext, block: GenesisBlockMessage)
+
+    fun onMainBlock(ctx: ChannelHandlerContext, block: MainBlockMessage)
+
+    fun onTransferTransaction(ctx: ChannelHandlerContext, tx: TransferTransactionMessage)
+
+    fun onDelegateTransaction(ctx: ChannelHandlerContext, tx: DelegateTransactionMessage)
+
+    fun onVoteTransaction(ctx: ChannelHandlerContext, tx: VoteTransactionMessage)
+
+}
+
+interface ConsensusMessageService {
+
+    fun onBlockApproval(ctx: ChannelHandlerContext, block: BlockApprovalMessage)
+
+    fun onPendingBlock(ctx: ChannelHandlerContext, block: PendingBlockMessage)
 
 }
