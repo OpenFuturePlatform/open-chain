@@ -16,7 +16,7 @@ interface EpochService {
 
     fun getSlotNumber(): Long
 
-    fun isInTimeSlot(time: Long): Boolean
+    fun isInIntermission(time: Long): Boolean
 
     fun timeToNextTimeSlot(time: Long): Long
 

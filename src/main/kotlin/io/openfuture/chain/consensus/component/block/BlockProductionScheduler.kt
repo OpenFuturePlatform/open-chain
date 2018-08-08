@@ -7,6 +7,8 @@ import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.network.component.node.NodeClock
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -25,6 +27,10 @@ class BlockProductionScheduler(
     private val clock: NodeClock
 ) {
 
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(BlockProductionScheduler::class.java)
+    }
+
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
     private var currentTimeSlot: Long = 0
@@ -32,11 +38,20 @@ class BlockProductionScheduler(
 
     @PostConstruct
     fun init() {
-        executor.submit {
-            while (true) {
+        executor.submit { proceedProductionLoop() }
+    }
+
+    @PreDestroy
+    fun shutdown() {
+        executor.shutdown()
+    }
+
+    private fun proceedProductionLoop() {
+        while (true) {
+            try {
                 val networkTime = clock.networkTime()
                 val timeSlot = epochService.getSlotNumber(networkTime)
-                if (!epochService.isInTimeSlot(networkTime) || timeSlot <= currentTimeSlot) {
+                if (epochService.isInIntermission(networkTime) || timeSlot <= currentTimeSlot) {
                     Thread.sleep(epochService.timeToNextTimeSlot(networkTime))
                     continue
                 }
@@ -51,13 +66,10 @@ class BlockProductionScheduler(
                     val block = mainBlockService.create()
                     pendingBlockHandler.addBlock(block)
                 }
+            } catch (ex: Exception) {
+                log.error("Block creation failure inbound: ${ex.message}")
             }
         }
-    }
-
-    @PreDestroy
-    fun shutdown() {
-        executor.shutdown()
     }
 
     private fun isGenesisBlockRequired(): Boolean {
