@@ -4,6 +4,7 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.BlockService
+import io.openfuture.chain.network.message.core.BlockMessage
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -11,6 +12,12 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultBlockService(
     private val repository: BlockRepository<BaseBlock>
 ) : BlockService {
+
+    @Transactional(readOnly = true)
+    override fun getAfterCurrentHash(hash: String): List<BaseBlock> {
+        val startBlock = repository.findOneByHash(hash) ?: return emptyList()
+        return repository.findAllByHeightGreaterThan(startBlock.height)
+    }
 
     @Transactional(readOnly = true)
     override fun getCount(): Long = repository.count()

@@ -50,7 +50,7 @@ class DefaultDelegateTransactionService(
     @Transactional
     override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction {
         val savedUtx = super.save(UnconfirmedDelegateTransaction.of(request))
-        networkService.broadcast(DelegateTransactionMessage(savedUtx))
+        networkService.broadcast(savedUtx.toMessage())
         return savedUtx
     }
 

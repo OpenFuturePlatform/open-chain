@@ -17,29 +17,7 @@ class TransferTransactionMessage(
     senderPublicKey: String,
     var amount: Long,
     var recipientAddress: String
-) : BaseTransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
-
-    constructor(tx: TransferTransaction) : this(
-        tx.timestamp,
-        tx.fee,
-        tx.senderAddress,
-        tx.hash,
-        tx.senderSignature,
-        tx.senderPublicKey,
-        tx.payload.amount,
-        tx.payload.recipientAddress
-    )
-
-    constructor(utx: UnconfirmedTransferTransaction) : this(
-        utx.timestamp,
-        utx.fee,
-        utx.senderAddress,
-        utx.hash,
-        utx.senderSignature,
-        utx.senderPublicKey,
-        utx.payload.amount,
-        utx.payload.recipientAddress
-    )
+) : TransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)

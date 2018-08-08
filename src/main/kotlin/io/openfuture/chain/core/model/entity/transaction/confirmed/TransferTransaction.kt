@@ -50,4 +50,16 @@ class TransferTransaction(
     }
 
     override fun getPayload(): TransactionPayload = payload
+
+    override fun toMessage(): TransferTransactionMessage = TransferTransactionMessage(
+        timestamp,
+        fee,
+        senderAddress,
+        hash,
+        senderSignature,
+        senderPublicKey,
+        payload.amount,
+        payload.recipientAddress
+    )
+    
 }

@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.model.entity.block
 
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
@@ -24,7 +23,6 @@ class GenesisBlock(
 
 ) : BaseBlock(timestamp, height, previousHash, reward, hash, signature, publicKey) {
 
-
     companion object {
         fun of(dto: GenesisBlockMessage): GenesisBlock = GenesisBlock(
             dto.timestamp,
@@ -38,6 +36,18 @@ class GenesisBlock(
         )
     }
 
-    override fun getPayload(): BlockPayload  = payload
+    override fun getPayload(): BlockPayload = payload
+
+    override fun toMessage(): GenesisBlockMessage = GenesisBlockMessage (
+        height,
+        previousHash,
+        timestamp,
+        reward,
+        hash,
+        signature,
+        publicKey,
+        payload.epochIndex,
+        payload.activeDelegates.map { it.publicKey }
+    )
 
 }

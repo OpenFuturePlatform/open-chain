@@ -19,18 +19,6 @@ class GenesisBlockMessage(
     var delegates: List<String>
 ) : BlockMessage(height, previousHash, timestamp, reward, hash, signature, publicKey) {
 
-    constructor(block: GenesisBlock) : this(
-        block.height,
-        block.previousHash,
-        block.timestamp,
-        block.reward,
-        block.hash,
-        block.signature,
-        block.publicKey,
-        block.payload.epochIndex,
-        block.payload.activeDelegates.map { it.publicKey }
-    )
-
     override fun read(buffer: ByteBuf) {
         super.read(buffer)
 

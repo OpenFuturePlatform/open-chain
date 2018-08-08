@@ -50,7 +50,7 @@ internal class DefaultVoteTransactionService(
     @Transactional
     override fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction {
         val savedUtx = super.save(UnconfirmedVoteTransaction.of(request))
-        networkService.broadcast(VoteTransactionMessage(savedUtx))
+        networkService.broadcast(savedUtx.toMessage())
         return savedUtx
     }
 

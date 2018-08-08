@@ -51,4 +51,15 @@ class VoteTransaction(
 
     override fun getPayload(): TransactionPayload = payload
 
+    override fun toMessage(): VoteTransactionMessage = VoteTransactionMessage (
+        timestamp,
+        fee,
+        senderAddress,
+        hash,
+        senderSignature,
+        senderPublicKey,
+        payload.voteTypeId,
+        payload.delegateKey
+    )
+
 }

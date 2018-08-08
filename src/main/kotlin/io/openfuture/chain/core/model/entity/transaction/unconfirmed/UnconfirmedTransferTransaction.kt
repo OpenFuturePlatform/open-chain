@@ -3,6 +3,7 @@ package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.util.TransactionUtils
+import io.openfuture.chain.network.message.core.TransactionMessage
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionRequest
 import javax.persistence.Embedded
@@ -51,5 +52,16 @@ class UnconfirmedTransferTransaction(
     }
 
     override fun getPayload(): TransactionPayload = payload
+
+    override fun toMessage(): TransferTransactionMessage = TransferTransactionMessage(
+        timestamp,
+        fee,
+        senderAddress,
+        hash,
+        senderSignature,
+        senderPublicKey,
+        payload.amount,
+        payload.recipientAddress
+    )
 
 }

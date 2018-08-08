@@ -15,29 +15,8 @@ class DelegateTransactionMessage(
     hash: String,
     senderSignature: String,
     senderPublicKey: String,
-
     var delegateKey: String
-) : BaseTransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
-
-    constructor(tx: DelegateTransaction) : this(
-        tx.timestamp,
-        tx.fee,
-        tx.senderAddress,
-        tx.hash,
-        tx.senderSignature,
-        tx.senderPublicKey,
-        tx.payload.delegateKey
-    )
-
-    constructor(utx: UnconfirmedDelegateTransaction) : this(
-        utx.timestamp,
-        utx.fee,
-        utx.senderAddress,
-        utx.hash,
-        utx.senderSignature,
-        utx.senderPublicKey,
-        utx.payload.delegateKey
-    )
+) : TransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)

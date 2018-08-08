@@ -5,12 +5,14 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.repository.BlockRepository
+import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
+import io.openfuture.chain.network.message.core.BlockMessage
 import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.service.NetworkApiService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -20,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultMainBlockService(
     blockService: BlockService,
-    private val repository: BlockRepository<MainBlock>,
+    private val repository: MainBlockRepository,
     private val clock: NodeClock,
     private val keyHolder: NodeKeyHolder,
     private val voteTransactionService: VoteTransactionService,
@@ -37,11 +39,10 @@ class DefaultMainBlockService(
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
 
-        // -- transactions by type
-        val voteTxs = voteTransactionService.getAllUnconfirmed()
-        val delegateTxs = delegateTransactionService.getAllUnconfirmed()
-        val transferTxs = transferTransactionService.getAllUnconfirmed()
-        val transactions = voteTxs + delegateTxs + transferTxs
+        val voteTransactions = voteTransactionService.getAllUnconfirmed()
+        val delegateTransactions = delegateTransactionService.getAllUnconfirmed()
+        val transferTransactions = transferTransactionService.getAllUnconfirmed()
+        val transactions = voteTransactions + delegateTransactions + transferTransactions
 
         val reward = transactions.map { it.fee }.sum() + consensusProperties.rewardBlock!!
         val merkleHash = calculateMerkleRoot(transactions.map { it.hash })
@@ -51,8 +52,8 @@ class DefaultMainBlockService(
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKey()
 
-        val block = MainBlock(timestamp, height, previousHash, reward, ByteUtils.toHexString(hash), signature, publicKey, payload)
-        return PendingBlockMessage(block, voteTxs, delegateTxs, transferTxs)
+        return PendingBlockMessage(height, previousHash, timestamp, reward, ByteUtils.toHexString(hash), signature, publicKey,
+            merkleHash, voteTransactions.map { it.hash }, delegateTransactions.map { it.hash }, transferTransactions.map { it.hash })
     }
 
     @Transactional

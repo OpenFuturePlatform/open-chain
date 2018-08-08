@@ -23,13 +23,18 @@ class DefaultSyncBlockHandler(
 
 
     override fun blockHashRequest(ctx: ChannelHandlerContext, message: HashBlockRequestMessage) {
-        val lastHash = blockService.getLastHashAfterCurrent(message.hash)
+        if (!blockService.isExists(message.hash)) {
+            send(ctx, HashBlockResponseMessage(message.hash))
+            return
+        }
 
-        send(ctx, HashBlockResponseMessage(lastHash))
+        val lastBlock = blockService.getLast()
+        send(ctx, HashBlockResponseMessage(lastBlock.hash))
     }
 
     override fun blockHashResponse(ctx: ChannelHandlerContext, message: HashBlockResponseMessage) {
         val lastHash = blockService.getLast().hash
+
         if (message.hash != lastHash) {
             blockHash = message.hash
 
@@ -40,9 +45,9 @@ class DefaultSyncBlockHandler(
     }
 
     override fun getBlocks(ctx: ChannelHandlerContext, message: SyncBlockRequestMessage) {
-        val blocks = blockService.getAfterCurrentHash(message.hash)
-
-        blocks.forEach { block -> send(ctx, block) }
+        blockService.getAfterCurrentHash(message.hash)
+            .map { it.toMessage() }
+            .forEach { block -> send(ctx, block) }
     }
 
     override fun saveBlocks(block: MainBlockMessage) {

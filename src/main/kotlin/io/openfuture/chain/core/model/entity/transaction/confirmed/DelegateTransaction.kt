@@ -5,6 +5,7 @@ import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayl
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.network.message.core.TransactionMessage
 import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.Table
@@ -50,5 +51,15 @@ class DelegateTransaction(
     }
 
     override fun getPayload(): TransactionPayload = payload
+
+    override fun toMessage(): DelegateTransactionMessage = DelegateTransactionMessage(
+        timestamp,
+        fee,
+        senderAddress,
+        hash,
+        senderSignature,
+        senderPublicKey,
+        payload.delegateKey
+    )
 
 }

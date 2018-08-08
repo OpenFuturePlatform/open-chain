@@ -3,6 +3,8 @@ package io.openfuture.chain.core.repository
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.model.entity.block.BaseBlock
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -26,7 +28,15 @@ interface BlockRepository<Entity: BaseBlock> : BaseRepository<Entity>{
 
     fun findFirstByOrderByHeightDesc(): Entity?
 
+    fun findAllByHeightGreaterThan(height: Long): List<Entity>
+
 }
+
+@Repository
+interface MainBlockRepository : BlockRepository<MainBlock>
+
+@Repository
+interface GenesisBlockRepository : BlockRepository<GenesisBlock>
 
 @Repository
 interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {

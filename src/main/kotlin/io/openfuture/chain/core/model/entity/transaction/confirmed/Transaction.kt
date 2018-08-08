@@ -2,6 +2,7 @@ package io.openfuture.chain.core.model.entity.transaction.confirmed
 
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
+import io.openfuture.chain.network.message.core.TransactionMessage
 import javax.persistence.*
 
 @Entity
@@ -19,4 +20,8 @@ abstract class Transaction(
     @JoinColumn(name = "block_id", nullable = false)
     var block: MainBlock
 
-) : BaseTransaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey)
+) : BaseTransaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
+
+    abstract fun toMessage(): TransactionMessage
+
+}

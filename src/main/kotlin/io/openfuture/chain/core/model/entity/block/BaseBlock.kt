@@ -2,6 +2,7 @@ package io.openfuture.chain.core.model.entity.block
 
 import io.openfuture.chain.core.model.entity.base.BaseModel
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
+import io.openfuture.chain.network.message.core.BlockMessage
 import javax.persistence.*
 
 @Entity
@@ -33,5 +34,7 @@ abstract class BaseBlock(
 ) : BaseModel() {
 
     abstract fun getPayload(): BlockPayload
+
+    abstract fun toMessage(): BlockMessage
 
 }

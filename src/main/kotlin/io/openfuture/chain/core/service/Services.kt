@@ -45,9 +45,7 @@ interface BlockService {
 
     fun getLast(): BaseBlock
 
-    fun getAfterCurrentHash(hash: String): List<BlockMessage>
-
-    fun getLastHashAfterCurrent(hash: String): String
+    fun getAfterCurrentHash(hash: String): List<BaseBlock>
 
     fun isExists(hash: String): Boolean
 
