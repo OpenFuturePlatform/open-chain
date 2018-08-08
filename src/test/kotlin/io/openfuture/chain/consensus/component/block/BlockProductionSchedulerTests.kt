@@ -89,7 +89,7 @@ class BlockProductionSchedulerTests : ServiceTests() {
 
         blockProductionScheduler.init()
 
-        Thread.sleep(1000)
+        Thread.sleep(500)
         val genesisBlockServiceInvocations = Mockito.mockingDetails(genesisBlockService).invocations
         assertThat(genesisBlockServiceInvocations.size).isEqualTo(2)
     }
@@ -120,7 +120,7 @@ class BlockProductionSchedulerTests : ServiceTests() {
 
         blockProductionScheduler.init()
 
-        Thread.sleep(1000)
+        Thread.sleep(500)
 
         val pendingBlockHandlerInvocations = Mockito.mockingDetails(pendingBlockHandler).invocations
         assertThat(pendingBlockHandlerInvocations.size).isEqualTo(1)
