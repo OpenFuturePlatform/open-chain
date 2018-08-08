@@ -12,15 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired
 
 abstract class BaseBlockService<T : BaseBlock>(
     protected val repository: BlockRepository<T>,
-    protected val blockService: BlockService
+    protected val blockService: BlockService,
+    private val walletService: WalletService,
+    protected val delegateService: DelegateService
 ) {
-
-    @Autowired
-    private lateinit var walletService: WalletService
-
-    @Autowired
-    private lateinit var delegateService: DelegateService
-
 
     protected fun save(block: T): T {
         updateBalanceByReward(block)

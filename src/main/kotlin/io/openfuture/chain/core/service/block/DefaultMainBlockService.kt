@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultMainBlockService(
     blockService: BlockService,
     repository: BlockRepository<MainBlock>,
+    walletService: WalletService,
+    delegateService: DelegateService,
     private val clock: NodeClock,
     private val keyHolder: NodeKeyHolder,
     private val voteTransactionService: VoteTransactionService,
@@ -28,7 +30,7 @@ class DefaultMainBlockService(
     private val transferTransactionService: TransferTransactionService,
     private val consensusProperties: ConsensusProperties,
     private val networkService: NetworkApiService
-) : BaseBlockService<MainBlock>(repository, blockService), MainBlockService {
+) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
 
     @Transactional(readOnly = true)
     override fun create(): PendingBlockMessage {
