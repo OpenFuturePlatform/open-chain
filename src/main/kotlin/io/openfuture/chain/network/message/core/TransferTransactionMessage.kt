@@ -11,8 +11,8 @@ import io.openfuture.chain.network.extension.writeString
 class TransferTransactionMessage(
     timestamp: Long,
     fee: Long,
-    hash: String,
     senderAddress: String,
+    hash: String,
     senderSignature: String,
     senderPublicKey: String,
     var amount: Long,

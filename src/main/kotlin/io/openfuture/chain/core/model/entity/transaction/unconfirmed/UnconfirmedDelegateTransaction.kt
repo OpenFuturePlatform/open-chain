@@ -28,8 +28,8 @@ class UnconfirmedDelegateTransaction(
         fun of(dto: DelegateTransactionMessage): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
             dto.timestamp,
             dto.fee,
-            dto.hash,
             dto.senderAddress,
+            dto.hash,
             dto.senderSignature,
             dto.senderPublicKey,
             DelegateTransactionPayload(dto.delegateKey)
