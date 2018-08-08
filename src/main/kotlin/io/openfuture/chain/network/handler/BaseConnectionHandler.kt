@@ -34,20 +34,14 @@ abstract class BaseConnectionHandler(
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, packet: Packet) {
-        when (packet.type) {
-            HASH_BLOCK_REQUEST -> syncBlockHandler.blockHashRequest(ctx, packet.data as HashBlockRequestMessage)
-            HASH_BLOCK_RESPONSE -> syncBlockHandler.blockHashResponse(ctx, packet.data as HashBlockResponseMessage)
-            SYNC_BLOCKS_REQUEST -> syncBlockHandler.getBlocks(ctx, packet.data as SyncBlockRequestMessage)
-            MAIN_BLOCK -> syncBlockHandler.saveBlocks(packet.data as MainBlockMessage)
-            GENESIS_BLOCK -> syncBlockHandler.saveBlocks(packet.data as GenesisBlockMessage)
-        }
-
         if(packet.type is HashMessage || packet.type is BlockMessage) {
+            channelReadSyncMessages(ctx, packet)
             return
         }
 
-        lock.readLock().lock()
         try {
+            lock.readLock().lock()
+
             when (packet.type) {
                 HEART_BEAT -> networkService.onHeartBeat(ctx, packet.data as HeartBeatMessage)
                 TRANSFER_TRANSACTION -> coreService.onTransferTransaction(ctx, packet.data as TransferTransactionMessage)
@@ -63,6 +57,16 @@ abstract class BaseConnectionHandler(
             }
         } finally {
             lock.readLock().unlock()
+        }
+    }
+
+    private fun channelReadSyncMessages(ctx: ChannelHandlerContext, packet: Packet) {
+        when (packet.type) {
+            HASH_BLOCK_REQUEST -> syncBlockHandler.blockHashRequest(ctx, packet.data as HashBlockRequestMessage)
+            HASH_BLOCK_RESPONSE -> syncBlockHandler.blockHashResponse(ctx, packet.data as HashBlockResponseMessage)
+            SYNC_BLOCKS_REQUEST -> syncBlockHandler.getBlocks(ctx, packet.data as SyncBlockRequestMessage)
+            MAIN_BLOCK -> syncBlockHandler.saveBlocks(packet.data as MainBlockMessage)
+            GENESIS_BLOCK -> syncBlockHandler.saveBlocks(packet.data as GenesisBlockMessage)
         }
     }
 
