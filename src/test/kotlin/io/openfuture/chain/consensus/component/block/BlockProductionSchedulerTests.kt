@@ -16,13 +16,12 @@ import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
+import org.mockito.BDDMockito.verify
 import org.mockito.Mock
 import org.mockito.Mockito
-
 
 class BlockProductionSchedulerTests : ServiceTests() {
 
@@ -90,8 +89,7 @@ class BlockProductionSchedulerTests : ServiceTests() {
         blockProductionScheduler.init()
 
         Thread.sleep(500)
-        val genesisBlockServiceInvocations = Mockito.mockingDetails(genesisBlockService).invocations
-        assertThat(genesisBlockServiceInvocations.size).isEqualTo(2)
+        verify(genesisBlockService, Mockito.times(1)).add(genesisBlockMessage)
     }
 
     @Test
@@ -122,8 +120,7 @@ class BlockProductionSchedulerTests : ServiceTests() {
 
         Thread.sleep(500)
 
-        val pendingBlockHandlerInvocations = Mockito.mockingDetails(pendingBlockHandler).invocations
-        assertThat(pendingBlockHandlerInvocations.size).isEqualTo(1)
+        verify(pendingBlockHandler, Mockito.times(1)).addBlock(mainBlockMessage)
     }
 
 }
