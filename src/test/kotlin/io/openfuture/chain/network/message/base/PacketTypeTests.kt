@@ -32,7 +32,7 @@ class PacketTypeTests {
 
     @Test(expected = NoSuchElementException::class)
     fun getShouldThrowExceptionForUnknownId() {
-        assertThat(PacketType.get(15)).isEqualTo(VOTE_TRANSACTION)
+        PacketType.get(20)
     }
 
     @Test

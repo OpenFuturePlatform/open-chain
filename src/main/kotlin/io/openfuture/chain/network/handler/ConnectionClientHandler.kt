@@ -2,6 +2,7 @@ package io.openfuture.chain.network.handler
 
 import io.netty.channel.ChannelHandler
 import io.netty.channel.ChannelHandlerContext
+import io.openfuture.chain.core.sync.SyncBlockHandler
 import io.openfuture.chain.network.service.ConsensusMessageService
 import io.openfuture.chain.network.service.CoreMessageService
 import io.openfuture.chain.network.service.InnerNetworkService
@@ -14,8 +15,9 @@ class ConnectionClientHandler(
     networkService: InnerNetworkService,
     coreService: CoreMessageService,
     consensusService: ConsensusMessageService,
-    lock: ReentrantReadWriteLock
-) : BaseConnectionHandler(networkService, coreService, consensusService, lock) {
+    lock: ReentrantReadWriteLock,
+    syncBlockHandler: SyncBlockHandler
+) : BaseConnectionHandler(lock, coreService, syncBlockHandler, networkService, consensusService) {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         super.channelActive(ctx)

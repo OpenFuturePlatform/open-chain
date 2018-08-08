@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
+import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.service.NetworkApiService
 import org.springframework.stereotype.Service
@@ -22,34 +23,39 @@ class DefaultSyncBlockHandler(
 
 
     override fun blockHashRequest(ctx: ChannelHandlerContext, message: HashBlockRequestMessage) {
-        val lastHash = blockService.getLast().hash
+        val lastHash = blockService.getLastHashAfterCurrent(message.hash)
 
-        ctx.channel().writeAndFlush(HashBlockResponseMessage(lastHash))
+        send(ctx, HashBlockResponseMessage(lastHash))
     }
 
     override fun blockHashResponse(ctx: ChannelHandlerContext, message: HashBlockResponseMessage) {
         val lastHash = blockService.getLast().hash
-        if (lastHash != message.hash) {
+        if (message.hash != lastHash) {
             blockHash = message.hash
-            ctx.channel().writeAndFlush(SyncBlockRequestMessage(lastHash))
-        }
-    }
 
-    override fun getBlocks(ctx: ChannelHandlerContext, message: SyncBlockRequestMessage) {
-        val blocks = blockService.getLast()
-
-        ctx.channel().writeAndFlush(blocks)
-    }
-
-    override fun saveBlocks(block: MainBlockMessage) {
-        mainBlockService.synchronize(block)
-        if (block.hash == blockHash) {
+            send(ctx, SyncBlockRequestMessage(lastHash))
+        } else {
             lock.writeLock().unlock()
         }
     }
 
+    override fun getBlocks(ctx: ChannelHandlerContext, message: SyncBlockRequestMessage) {
+        val blocks = blockService.getAfterCurrentHash(message.hash)
+
+        blocks.forEach { block -> send(ctx, block) }
+    }
+
+    override fun saveBlocks(block: MainBlockMessage) {
+        mainBlockService.synchronize(block)
+
+        unlockIfAllBlockSynchronized(block)
+    }
+
+
     override fun saveBlocks(block: GenesisBlockMessage) {
-        genesisBlockService.synchronize(block)
+        genesisBlockService.add(block)
+
+        unlockIfAllBlockSynchronized(block)
     }
 
     override fun sync() {
@@ -61,5 +67,14 @@ class DefaultSyncBlockHandler(
             sync()
         }
     }
+
+    private fun unlockIfAllBlockSynchronized(block: BlockMessage) {
+        if (block.hash == blockHash) {
+            lock.writeLock().unlock()
+        }
+    }
+
+    private fun send(ctx: ChannelHandlerContext, message: BaseMessage) = ctx.channel().writeAndFlush(message)
+
 
 }
