@@ -41,11 +41,6 @@ class BlockProductionScheduler(
         executor.submit { proceedProductionLoop() }
     }
 
-    @PreDestroy
-    fun shutdown() {
-        executor.shutdown()
-    }
-
     private fun proceedProductionLoop() {
         while (true) {
             try {

@@ -37,7 +37,9 @@ class DefaultPendingBlockHandler(
             this.reset()
         }
 
-        pendingBlocks.add(block)
+        if (!pendingBlocks.add(block)){
+            return
+        }
         val slotOwner = epochService.getCurrentSlotOwner()
         if (slotOwner.publicKey == block.publicKey && mainBlockService.isValid(block)) {
             networkService.broadcast(block)
@@ -75,7 +77,7 @@ class DefaultPendingBlockHandler(
             if (prepareVotes.size > (delegates.size - 1) / 3) {
                 this.stage = COMMIT
                 val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKey())
-                commit.signature = SignatureUtils.sign(message.getBytes(), keyHolder.getPrivateKey())
+                commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())
                 networkService.broadcast(commit)
             }
         }

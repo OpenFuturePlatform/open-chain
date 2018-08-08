@@ -66,4 +66,26 @@ class PendingBlockMessage(
 
     override fun toString() = "PendingBlockMessage(hash=$hash)"
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as PendingBlockMessage
+
+        if (merkleHash != other.merkleHash) return false
+        if (voteTransactions != other.voteTransactions) return false
+        if (delegateTransactions != other.delegateTransactions) return false
+        if (transferTransactions != other.transferTransactions) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = merkleHash.hashCode()
+        result = 31 * result + voteTransactions.hashCode()
+        result = 31 * result + delegateTransactions.hashCode()
+        result = 31 * result + transferTransactions.hashCode()
+        return result
+    }
+
 }
