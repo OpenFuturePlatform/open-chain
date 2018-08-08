@@ -1,9 +1,9 @@
 plugins {
     id 'jacoco'
     id 'idea'
-    id 'org.jetbrains.kotlin.jvm' version '1.2.51'
-    id 'org.jetbrains.kotlin.plugin.spring' version '1.2.51'
-    id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.51'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.60'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.2.60'
+    id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.60'
     id 'org.springframework.boot' version '2.0.4.RELEASE'
 }
 
@@ -18,9 +18,7 @@ repositories {
 }
 
 ext {
-    kotlinVersion = '1.2.51'
-    queryDslVersion = '4.2.1'
-    bouncycastleVersion = '1.59'
+    kotlinVersion = '1.2.60'
 }
 
 dependencies {
@@ -32,6 +30,7 @@ dependencies {
 
     // Spring
     compile('org.springframework.boot:spring-boot-starter-webflux')
+    compile("org.springframework.boot:spring-boot-starter-freemarker")
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
     compile('org.springframework.boot:spring-boot-starter-web')
 
@@ -49,7 +48,7 @@ dependencies {
     compileOnly('org.springframework.boot:spring-boot-configuration-processor')
 
     //Cryptography
-    compile("org.bouncycastle:bcprov-jdk15on:$bouncycastleVersion")
+    compile("org.bouncycastle:bcprov-jdk15on:1.59")
 
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
@@ -59,7 +58,7 @@ dependencies {
 
 sourceSets {
     main.kotlin.srcDirs += 'src/main/kotlin'
-    main.resources.srcDirs += 'src/main/resources'
+    main.resources.srcDirs += 'frontend/build/resources'
 }
 
 // Jar
@@ -83,8 +82,7 @@ compileTestKotlin {
 noArg {
     annotations("javax.persistence.MappedSuperclass",
                 "javax.persistence.Entity",
-                "io.openfuture.chain.consensus.annotation.NoArgConstructor",
-                "io.openfuture.chain.network.annotation.NoArgConstructor")
+                "io.openfuture.chain.core.annotation.NoArgConstructor")
 }
 
 // Jacoco
@@ -95,3 +93,6 @@ jacocoTestReport {
     }
 }
 check.dependsOn jacocoTestReport
+
+// Front
+processResources.dependsOn(':frontend:assemble')

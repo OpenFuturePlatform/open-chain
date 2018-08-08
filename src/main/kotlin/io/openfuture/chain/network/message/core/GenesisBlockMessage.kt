@@ -1,7 +1,8 @@
 package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
-import io.openfuture.chain.network.annotation.NoArgConstructor
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
+import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readStringList
 import io.openfuture.chain.network.extension.writeStringList
 
@@ -9,27 +10,39 @@ import io.openfuture.chain.network.extension.writeStringList
 class GenesisBlockMessage(
     height: Long,
     previousHash: String,
-    blockTimestamp: Long,
+    timestamp: Long,
     reward: Long,
-    publicKey: String,
     hash: String,
     signature: String,
+    publicKey: String,
     var epochIndex: Long,
-    var activeDelegates: List<String>
-) : BlockMessage(height, previousHash, blockTimestamp, reward, publicKey, hash, signature) {
+    var delegates: List<String>
+) : BlockMessage(height, previousHash, timestamp, reward, hash, signature, publicKey) {
+
+    constructor(block: GenesisBlock) : this(
+        block.height,
+        block.previousHash,
+        block.timestamp,
+        block.reward,
+        block.hash,
+        block.signature,
+        block.publicKey,
+        block.payload.epochIndex,
+        block.payload.activeDelegates.map { it.publicKey }
+    )
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)
 
         epochIndex = buffer.readLong()
-        activeDelegates = buffer.readStringList()
+        delegates = buffer.readStringList()
     }
 
     override fun write(buffer: ByteBuf) {
         super.write(buffer)
 
         buffer.writeLong(epochIndex)
-        buffer.writeStringList(activeDelegates)
+        buffer.writeStringList(delegates)
     }
 
     override fun toString() = "NetworkGenesisBlock(hash=$hash)"

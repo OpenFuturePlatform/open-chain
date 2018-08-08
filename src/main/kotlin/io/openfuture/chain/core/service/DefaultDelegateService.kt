@@ -1,8 +1,8 @@
 package io.openfuture.chain.core.service
 
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.repository.DelegateRepository
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.springframework.data.domain.Page
@@ -32,7 +32,7 @@ class DefaultDelegateService(
         ?: throw NotFoundException("Delegate with key: $key not exist!")
 
     @Transactional(readOnly = true)
-    override fun getActiveDelegates(): Set<Delegate> {
+    override fun getActiveDelegates(): List<Delegate> {
         val sql = "select sum(wll.balance) rating, dg.public_key $PUBLIC_KEY, dg.address $ADDRESS, dg.id $ID " +
             "from wallets2delegates as s2d\n" +
             "  join wallets as wll on wll.id = s2d.wallet_id\n" +
@@ -43,8 +43,11 @@ class DefaultDelegateService(
 
         return jdbcTemplate.query(sql) { rs, rowNum ->
             Delegate(rs.getString(PUBLIC_KEY), rs.getString(ADDRESS), rs.getInt(ID))
-        }.toSet()
+        }
     }
+
+    @Transactional(readOnly = true)
+    override fun isExists(key: String): Boolean = repository.findOneByPublicKey(key)?.let { true } ?: false
 
     @Transactional
     override fun save(delegate: Delegate): Delegate = repository.save(delegate)
