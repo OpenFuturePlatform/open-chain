@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultGenesisBlockService(
     blockService: BlockService,
-    repository: BlockRepository<GenesisBlock>,
+    repository: GenesisBlockRepository,
     walletService: WalletService,
     delegateService: DefaultDelegateService,
     private val clock: NodeClock,
