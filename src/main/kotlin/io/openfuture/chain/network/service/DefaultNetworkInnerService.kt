@@ -4,6 +4,7 @@ import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelHandlerContext
+import io.openfuture.chain.core.sync.DefaultSyncBlockHandler
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.network.*
@@ -29,7 +30,7 @@ class DefaultNetworkInnerService(
     private val clock: NodeClock,
     private val bootstrap: Bootstrap,
     private val tcpServer: TcpServer,
-    private val syncService: SyncService
+    private val syncService: DefaultSyncBlockHandler
 ) : ApplicationListener<ApplicationReadyEvent>, InnerNetworkService {
 
     private val connections: MutableMap<Channel, NetworkAddressMessage> = ConcurrentHashMap()

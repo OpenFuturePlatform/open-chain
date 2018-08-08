@@ -2,6 +2,7 @@ package io.openfuture.chain.network.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
+import io.openfuture.chain.core.sync.SyncBlockHandler
 import io.openfuture.chain.network.message.base.Packet
 import io.openfuture.chain.network.message.base.PacketType.*
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
@@ -18,7 +19,8 @@ abstract class BaseConnectionHandler(
     protected var networkService: InnerNetworkService,
     private var coreService: CoreMessageService,
     private var consensusService: ConsensusMessageService,
-    private val lock: ReentrantReadWriteLock
+    private val lock: ReentrantReadWriteLock,
+    private val syncBlockHandler: SyncBlockHandler
 ) : SimpleChannelInboundHandler<Packet>() {
 
     companion object {
@@ -33,12 +35,14 @@ abstract class BaseConnectionHandler(
 
     override fun channelRead0(ctx: ChannelHandlerContext, packet: Packet) {
         when (packet.type) {
-            SYNC_BLOCKS_REQUEST -> coreService.onNetworkBlockRequest(ctx, packet.data as SyncBlockRequestMessage)
-            MAIN_BLOCK -> coreService.onMainBlock(ctx, packet.data as MainBlockMessage)
-            GENESIS_BLOCK -> coreService.onGenesisBlock(ctx, packet.data as GenesisBlockMessage)
+            HASH_BLOCK_REQUEST -> syncBlockHandler.blockHashRequest(ctx, packet.data as HashBlockRequestMessage)
+            HASH_BLOCK_RESPONSE -> syncBlockHandler.blockHashResponse(ctx, packet.data as HashBlockResponseMessage)
+            SYNC_BLOCKS_REQUEST -> syncBlockHandler.getBlocks(ctx, packet.data as SyncBlockRequestMessage)
+            MAIN_BLOCK -> syncBlockHandler.saveBlocks(packet.data as MainBlockMessage)
+            GENESIS_BLOCK -> syncBlockHandler.saveBlocks(packet.data as GenesisBlockMessage)
         }
 
-        if(listOf(SYNC_BLOCKS_REQUEST, MAIN_BLOCK, GENESIS_BLOCK).contains(packet.type)) {
+        if(listOf(HASH_BLOCK_REQUEST, HASH_BLOCK_RESPONSE, SYNC_BLOCKS_REQUEST, MAIN_BLOCK, GENESIS_BLOCK).contains(packet.type)) {
             return
         }
 

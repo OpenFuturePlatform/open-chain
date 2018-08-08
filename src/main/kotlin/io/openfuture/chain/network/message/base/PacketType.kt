@@ -24,7 +24,10 @@ enum class PacketType(
     PENDING_BLOCK(11, PendingBlockMessage::class),
     TRANSFER_TRANSACTION(12, TransferTransactionMessage::class),
     DELEGATE_TRANSACTION(13, DelegateTransactionMessage::class),
-    VOTE_TRANSACTION(14, VoteTransactionMessage::class);
+    VOTE_TRANSACTION(14, VoteTransactionMessage::class),
+    HASH_BLOCK_REQUEST(15, HashBlockRequestMessage::class),
+    HASH_BLOCK_RESPONSE(16, HashBlockResponseMessage::class);
+
 
 
     companion object {
