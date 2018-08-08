@@ -10,11 +10,11 @@ import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.network.*
 import io.openfuture.chain.network.service.ConsensusMessageService
 import io.openfuture.chain.network.service.CoreMessageService
-import io.openfuture.chain.network.service.InnerNetworkService
+import io.openfuture.chain.network.service.NetworkInnerService
 import org.slf4j.LoggerFactory
 
 abstract class BaseConnectionHandler(
-    protected var networkService: InnerNetworkService,
+    protected var networkService: NetworkInnerService,
     protected var coreService: CoreMessageService,
     protected var consensusService: ConsensusMessageService
 ) : SimpleChannelInboundHandler<Packet>() {

@@ -15,13 +15,17 @@ interface NetworkApiService {
 
     fun send(message: BaseMessage)
 
+    fun getNetworkSize(): Int
+
 }
 
-interface InnerNetworkService {
+interface NetworkInnerService {
 
     fun maintainConnectionNumber()
 
     fun startExploring()
+
+    fun getNetworkSize(): Int
 
     fun getChannels(): Set<Channel>
 

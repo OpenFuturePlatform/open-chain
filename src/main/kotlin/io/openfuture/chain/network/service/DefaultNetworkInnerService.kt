@@ -22,6 +22,7 @@ import java.security.SecureRandom
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.SECONDS
 
 @Service
@@ -30,11 +31,13 @@ class DefaultNetworkInnerService(
     private val clock: NodeClock,
     private val bootstrap: Bootstrap,
     private val tcpServer: TcpServer
-    ) : ApplicationListener<ApplicationReadyEvent>, InnerNetworkService {
+    ) : ApplicationListener<ApplicationReadyEvent>, NetworkInnerService {
 
     private val connections: MutableMap<Channel, NetworkAddressMessage> = ConcurrentHashMap()
     private val heartBeatTasks: MutableMap<Channel, ScheduledFuture<*>> = ConcurrentHashMap()
     private val knownAddresses: MutableSet<NetworkAddressMessage> = ConcurrentHashMap.newKeySet()
+
+    @Volatile private var networkSize: Int = 1
 
     companion object {
         private const val HEART_BEAT_DELAY = 0L
@@ -49,20 +52,22 @@ class DefaultNetworkInnerService(
 
     @Scheduled(cron = "*/30 * * * * *")
     override fun maintainConnectionNumber() {
-        log.info("Connected addresses ${getConnectionAddresses().size} : ${getConnectionAddresses()}")
         if (connectionNeededNumber() > 0) {
             requestAddresses()
         }
     }
 
-    @Scheduled(cron = "0 */2 * * * *")
+    @Scheduled(fixedRateString = "\${node.explorer-interval}")
     override fun startExploring() {
-        log.info("Known addresses ${knownAddresses.size} : $knownAddresses")
+        networkSize = knownAddresses.size
         knownAddresses.clear()
+        knownAddresses.add(NetworkAddressMessage(properties.host!!, properties.port!!))
         val connectedAddresses = getConnectionAddresses()
         knownAddresses.addAll(connectedAddresses)
         connectedAddresses.forEach { send(it, ExplorerFindAddressesMessage()) }
     }
+
+    override fun getNetworkSize() = networkSize
 
     override fun getChannels(): Set<Channel> = connections.keys
 
@@ -96,8 +101,7 @@ class DefaultNetworkInnerService(
     override fun onAddresses(ctx: ChannelHandlerContext, message: AddressesMessage) {
         val peers = message.values
         val connections = getConnectionAddresses()
-        peers
-            .filter { !connections.contains(it) && it != NetworkAddressMessage(properties.host!!, properties.port!!) }
+        peers.filter { !connections.contains(it) && it != NetworkAddressMessage(properties.host!!, properties.port!!) }
             .shuffled()
             .take(connectionNeededNumber())
             .forEach { bootstrap.connect(it.host, it.port) }
@@ -131,10 +135,10 @@ class DefaultNetworkInnerService(
 
     override fun onChannelInactive(ctx: ChannelHandlerContext) {
         clock.removeTimeOffset(ctx.channel().remoteAddress().toString())
+        connections.remove(ctx.channel())
     }
 
     override fun onClientChannelInactive(ctx: ChannelHandlerContext) {
-        connections.remove(ctx.channel())
         heartBeatTasks.remove(ctx.channel())!!.cancel(true)
     }
 
@@ -151,11 +155,14 @@ class DefaultNetworkInnerService(
 
     private fun requestAddresses() {
         val address = getConnectionAddresses().shuffled(SecureRandom()).firstOrNull()
-            ?: properties.getRootAddresses().shuffled().first()
+            ?: properties.getRootAddresses()
+                .filter { !getConnectionAddresses().contains(it) && it != NetworkAddressMessage(properties.host!!, properties.port!!) }
+                .shuffled()
+                .first()
         send(address, FindAddressesMessage())
     }
 
-    private fun send(address: NetworkAddressMessage, message: BaseMessage) {
+    private fun send(address: NetworkAddressMessage, message: BaseMessage) : Channel {
         val channel = connections.filter { it.value == address }.map { it.key }.firstOrNull()
             ?: bootstrap.connect(address.host, address.port).addListener { future ->
                 future as ChannelFuture
@@ -164,18 +171,12 @@ class DefaultNetworkInnerService(
                 }
             }.channel()
         channel.writeAndFlush(message)
+        return channel
     }
 
     private fun sendAndClose(address: NetworkAddressMessage, message: BaseMessage) {
-        val channel = connections.filter { it.value == address }.map { it.key }.firstOrNull()
-            ?: bootstrap.connect(address.host, address.port).addListener { future ->
-                future as ChannelFuture
-                if (!future.isSuccess) {
-                    log.warn("Can not connect to ${address.host}:${address.port}")
-                }
-            }.channel()
-        channel.writeAndFlush(message)
-        channel.eventLoop().schedule({ channel.close() }, 1, SECONDS)
+        val channel = send(address, message)
+        channel.eventLoop().schedule({ channel.close() }, 100, MILLISECONDS)
     }
 
 }

@@ -58,7 +58,11 @@ class NodeProperties(
 
     /** Public key path */
     @field:NotNull
-    var publicKeyPath: String? = null
+    var publicKeyPath: String? = null,
+
+    /** Interval for triggering node explorer task */
+    @field:NotNull
+    var explorerInterval: Long? = null
 
 ) {
 
