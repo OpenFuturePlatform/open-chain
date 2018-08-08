@@ -34,8 +34,8 @@ class BlockProductionScheduler(
     fun init() {
         executor.submit {
             while (true) {
-                val timeSlot = epochService.getSlotNumber()
                 val networkTime = clock.networkTime()
+                val timeSlot = epochService.getSlotNumber(networkTime)
                 if (!epochService.isInTimeSlot(networkTime) || timeSlot <= currentTimeSlot) {
                     Thread.sleep(epochService.timeToNextTimeSlot(networkTime))
                     continue

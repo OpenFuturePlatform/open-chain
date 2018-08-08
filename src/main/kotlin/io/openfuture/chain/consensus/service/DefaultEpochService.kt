@@ -30,15 +30,15 @@ class DefaultEpochService(
 
     override fun getSlotNumber(): Long = ((clock.networkTime() - getEpochStart()) / fullTimeSlotDuration())
 
-    override fun isInTimeSlot(time: Long): Boolean = (getTimeSlotStart(time) < properties.timeSlotDuration!!)
+    override fun isInTimeSlot(time: Long): Boolean = (getTimeSlotFromStart(time) < properties.timeSlotDuration!!)
 
-    override fun timeToNextTimeSlot(time: Long): Long = (fullTimeSlotDuration() - getTimeSlotStart(time))
+    override fun timeToNextTimeSlot(time: Long): Long = (fullTimeSlotDuration() - getTimeSlotFromStart(time))
 
     override fun getSlotNumber(time: Long): Long = ((time - getEpochStart()) / fullTimeSlotDuration())
 
     override fun getEpochEndTime(): Long = (getEpochStart() + getSlotNumber() * fullTimeSlotDuration())
 
-    private fun getTimeSlotStart(time: Long): Long = (time - getEpochStart()) % fullTimeSlotDuration()
+    private fun getTimeSlotFromStart(time: Long): Long = (time - getEpochStart()) % fullTimeSlotDuration()
 
     private fun fullTimeSlotDuration(): Long = (properties.timeSlotDuration!! + properties.timeSlotInterval!!)
 }
