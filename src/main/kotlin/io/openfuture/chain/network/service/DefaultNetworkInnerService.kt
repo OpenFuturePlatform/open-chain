@@ -28,8 +28,9 @@ class DefaultNetworkInnerService(
     private val properties: NodeProperties,
     private val clock: NodeClock,
     private val bootstrap: Bootstrap,
-    private val tcpServer: TcpServer
-    ) : ApplicationListener<ApplicationReadyEvent>, InnerNetworkService {
+    private val tcpServer: TcpServer,
+    private val syncService: SyncService
+) : ApplicationListener<ApplicationReadyEvent>, InnerNetworkService {
 
     private val connections: MutableMap<Channel, NetworkAddressMessage> = ConcurrentHashMap()
     private val heartBeatTasks: MutableMap<Channel, ScheduledFuture<*>> = ConcurrentHashMap()
@@ -81,11 +82,14 @@ class DefaultNetworkInnerService(
         ctx.writeAndFlush(AddressesMessage(getConnectionAddresses().toList()))
     }
 
+
     override fun onAddresses(ctx: ChannelHandlerContext, message: AddressesMessage) {
         val peers = message.values
         val connections = getConnectionAddresses()
         peers.filter { !connections.contains(it) && it != NetworkAddressMessage(properties.host!!, properties.port!!) }
             .forEach { bootstrap.connect(it.host, it.port) }
+
+        syncService.sync()
     }
 
     override fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage) {

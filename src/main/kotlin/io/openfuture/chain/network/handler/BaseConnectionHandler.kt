@@ -12,11 +12,13 @@ import io.openfuture.chain.network.service.ConsensusMessageService
 import io.openfuture.chain.network.service.CoreMessageService
 import io.openfuture.chain.network.service.InnerNetworkService
 import org.slf4j.LoggerFactory
+import java.util.concurrent.locks.ReentrantReadWriteLock
 
 abstract class BaseConnectionHandler(
     protected var networkService: InnerNetworkService,
-    protected var coreService: CoreMessageService,
-    protected var consensusService: ConsensusMessageService
+    private var coreService: CoreMessageService,
+    private var consensusService: ConsensusMessageService,
+    private val lock: ReentrantReadWriteLock
 ) : SimpleChannelInboundHandler<Packet>() {
 
     companion object {
@@ -31,20 +33,32 @@ abstract class BaseConnectionHandler(
 
     override fun channelRead0(ctx: ChannelHandlerContext, packet: Packet) {
         when (packet.type) {
-            HEART_BEAT -> networkService.onHeartBeat(ctx, packet.data as HeartBeatMessage)
-            TRANSFER_TRANSACTION -> coreService.onTransferTransaction(ctx, packet.data as TransferTransactionMessage)
-            DELEGATE_TRANSACTION -> coreService.onDelegateTransaction(ctx, packet.data as DelegateTransactionMessage)
-            VOTE_TRANSACTION -> coreService.onVoteTransaction(ctx, packet.data as VoteTransactionMessage)
-            BLOCK_APPROVAL -> consensusService.onBlockApproval(ctx, packet.data as BlockApprovalMessage)
-            PENDING_BLOCK -> consensusService.onPendingBlock(ctx, packet.data as PendingBlockMessage)
-            GREETING -> networkService.onGreeting(ctx, packet.data as GreetingMessage)
-            ADDRESSES -> networkService.onAddresses(ctx, packet.data as AddressesMessage)
-            FIND_ADDRESSES -> networkService.onFindAddresses(ctx, packet.data as FindAddressesMessage)
-            TIME -> networkService.onTime(ctx, packet.data as TimeMessage)
-            ASK_TIME -> networkService.onAskTime(ctx, packet.data as AskTimeMessage)
             SYNC_BLOCKS_REQUEST -> coreService.onNetworkBlockRequest(ctx, packet.data as SyncBlockRequestMessage)
             MAIN_BLOCK -> coreService.onMainBlock(ctx, packet.data as MainBlockMessage)
             GENESIS_BLOCK -> coreService.onGenesisBlock(ctx, packet.data as GenesisBlockMessage)
+        }
+
+        if(listOf(SYNC_BLOCKS_REQUEST, MAIN_BLOCK, GENESIS_BLOCK).contains(packet.type)) {
+            return
+        }
+
+        lock.readLock().lock()
+        try {
+            when (packet.type) {
+                HEART_BEAT -> networkService.onHeartBeat(ctx, packet.data as HeartBeatMessage)
+                TRANSFER_TRANSACTION -> coreService.onTransferTransaction(ctx, packet.data as TransferTransactionMessage)
+                DELEGATE_TRANSACTION -> coreService.onDelegateTransaction(ctx, packet.data as DelegateTransactionMessage)
+                VOTE_TRANSACTION -> coreService.onVoteTransaction(ctx, packet.data as VoteTransactionMessage)
+                BLOCK_APPROVAL -> consensusService.onBlockApproval(ctx, packet.data as BlockApprovalMessage)
+                PENDING_BLOCK -> consensusService.onPendingBlock(ctx, packet.data as PendingBlockMessage)
+                GREETING -> networkService.onGreeting(ctx, packet.data as GreetingMessage)
+                ADDRESSES -> networkService.onAddresses(ctx, packet.data as AddressesMessage)
+                FIND_ADDRESSES -> networkService.onFindAddresses(ctx, packet.data as FindAddressesMessage)
+                TIME -> networkService.onTime(ctx, packet.data as TimeMessage)
+                ASK_TIME -> networkService.onAskTime(ctx, packet.data as AskTimeMessage)
+            }
+        } finally {
+            lock.readLock().unlock()
         }
     }
 
