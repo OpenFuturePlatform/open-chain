@@ -18,8 +18,13 @@ class SyncService(
             lock.writeLock().lock()
             networkApiService.send(NetworkBlockRequest(blockService.getLast().hash))
         } catch (e: Exception) {
+            lock.writeLock().unlock()
             sync()
-        } finally {
+        }
+    }
+
+    fun isLastSyncBlock(hash: String) {
+        if (hash == lastHash) {
             lock.writeLock().unlock()
         }
     }
