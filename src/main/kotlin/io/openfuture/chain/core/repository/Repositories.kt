@@ -15,14 +15,13 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
-import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.stereotype.Repository
 
 @NoRepositoryBean
-interface BaseRepository<T> : JpaRepository<T, Int>, PagingAndSortingRepository<T, Int>
+interface BaseRepository<T> : JpaRepository<T, Int>
 
 @Repository
-interface BlockRepository<Entity: BaseBlock> : BaseRepository<Entity>{
+interface BlockRepository<Entity : BaseBlock> : BaseRepository<Entity> {
 
     fun findOneByHash(hash: String): Entity?
 
@@ -46,13 +45,13 @@ interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 }
 
 @Repository
-interface VoteTransactionRepository: TransactionRepository<VoteTransaction>
+interface VoteTransactionRepository : TransactionRepository<VoteTransaction>
 
 @Repository
-interface DelegateTransactionRepository: TransactionRepository<DelegateTransaction>
+interface DelegateTransactionRepository : TransactionRepository<DelegateTransaction>
 
 @Repository
-interface TransferTransactionRepository: TransactionRepository<TransferTransaction>
+interface TransferTransactionRepository : TransactionRepository<TransferTransaction>
 
 @Repository
 interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseRepository<UEntity> {
@@ -66,13 +65,13 @@ interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseReposit
 }
 
 @Repository
-interface UVoteTransactionRepository: UTransactionRepository<UnconfirmedVoteTransaction>
+interface UVoteTransactionRepository : UTransactionRepository<UnconfirmedVoteTransaction>
 
 @Repository
-interface UDelegateTransactionRepository: UTransactionRepository<UnconfirmedDelegateTransaction>
+interface UDelegateTransactionRepository : UTransactionRepository<UnconfirmedDelegateTransaction>
 
 @Repository
-interface UTransferTransactionRepository: UTransactionRepository<UnconfirmedTransferTransaction>
+interface UTransferTransactionRepository : UTransactionRepository<UnconfirmedTransferTransaction>
 
 @Repository
 interface DelegateRepository : BaseRepository<Delegate> {
