@@ -57,7 +57,7 @@ abstract class BaseConnectionHandler(
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         log.error("Connection error ${ctx.channel().remoteAddress()} with cause", cause)
-        ctx.channel().close()
+        //ctx.channel().close() TODO: uncomment this once block chain sync logic will handle ValidationException
     }
 
 }
