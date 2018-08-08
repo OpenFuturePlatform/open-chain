@@ -56,8 +56,8 @@ abstract class BaseConnectionHandler(
     }
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
-        log.error("Connection error ${ctx.channel().remoteAddress()} with $cause")
-        ctx.close()
+        log.error("Connection error ${ctx.channel().remoteAddress()} with cause", cause)
+        ctx.channel().close()
     }
 
 }

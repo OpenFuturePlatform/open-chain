@@ -24,6 +24,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.SECONDS
+import javax.validation.ValidationException
 
 @Service
 class DefaultNetworkInnerService(
@@ -44,6 +45,7 @@ class DefaultNetworkInnerService(
         private const val HEART_BEAT_INTERVAL = 20L
         private val log = LoggerFactory.getLogger(DefaultNetworkInnerService::class.java)
     }
+
 
     override fun onApplicationEvent(event: ApplicationReadyEvent) {
         Executors.newSingleThreadExecutor().execute(tcpServer)
@@ -156,9 +158,14 @@ class DefaultNetworkInnerService(
     private fun requestAddresses() {
         val address = getConnectionAddresses().shuffled(SecureRandom()).firstOrNull()
             ?: properties.getRootAddresses()
-                .filter { !getConnectionAddresses().contains(it) && it != NetworkAddressMessage(properties.host!!, properties.port!!) }
+                .filter {it != NetworkAddressMessage(properties.host!!, properties.port!!) }
                 .shuffled()
-                .first()
+                .firstOrNull()
+
+        if (address == null) {
+            throw ValidationException("There are no available addresses")
+        }
+
         send(address, FindAddressesMessage())
     }
 

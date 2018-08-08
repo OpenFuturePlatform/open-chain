@@ -1,9 +1,9 @@
 package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
+import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
-import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 
@@ -48,5 +48,8 @@ class DelegateTransactionMessage(
         super.write(buffer)
         buffer.writeString(delegateKey)
     }
+
+    override fun toString() = "DelegateTransactionMessage($timestamp," +
+        "$fee,$senderAddress,$hash,$senderSignature,$senderPublicKey,$delegateKey)"
 
 }
