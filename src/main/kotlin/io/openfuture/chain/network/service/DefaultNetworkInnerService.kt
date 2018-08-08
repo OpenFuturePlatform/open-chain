@@ -43,6 +43,8 @@ class DefaultNetworkInnerService(
     companion object {
         private const val HEART_BEAT_DELAY = 0L
         private const val HEART_BEAT_INTERVAL = 20L
+        private const val WAIT_FOR_RESPONSE_TIME = 100L
+        private const val CHECK_CONNECTIONS_PERIOD = 15000L
         private val log = LoggerFactory.getLogger(DefaultNetworkInnerService::class.java)
     }
 
@@ -51,7 +53,7 @@ class DefaultNetworkInnerService(
         Executors.newSingleThreadExecutor().execute(tcpServer)
     }
 
-    @Scheduled(fixedRate = 15000)
+    @Scheduled(fixedRate = CHECK_CONNECTIONS_PERIOD)
     override fun maintainConnectionNumber() {
         if (connectionNeededNumber() > 0) {
             requestAddresses()
@@ -182,7 +184,7 @@ class DefaultNetworkInnerService(
 
     private fun sendAndClose(address: NetworkAddressMessage, message: BaseMessage) {
         val channel = send(address, message)
-        channel.eventLoop().schedule({ channel.close() }, 100, MILLISECONDS)
+        channel.eventLoop().schedule({ channel.close() }, WAIT_FOR_RESPONSE_TIME, MILLISECONDS)
     }
 
 }
