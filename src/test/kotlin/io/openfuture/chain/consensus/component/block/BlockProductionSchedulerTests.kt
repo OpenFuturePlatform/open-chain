@@ -14,11 +14,15 @@ import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.network.component.node.NodeClock
+import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
+import org.mockito.Mockito
+
 
 class BlockProductionSchedulerTests : ServiceTests() {
 
@@ -35,6 +39,7 @@ class BlockProductionSchedulerTests : ServiceTests() {
 
     @Before
     fun setUp() {
+        given(epochService.getEpochEndTime()).willReturn(1L)
         blockProductionScheduler = BlockProductionScheduler(
             keyHolder,
             epochService,
@@ -48,7 +53,7 @@ class BlockProductionSchedulerTests : ServiceTests() {
     }
 
     @Test
-    fun testInit() {
+    fun testInitShouldCreateGenesisBlock() {
         val delegate = Delegate("publicKey", "address", 1)
         val mainBlockPayload = MainBlockPayload("merkleHash")
         val genesisBlockPayload = GenesisBlockPayload(
@@ -76,14 +81,49 @@ class BlockProductionSchedulerTests : ServiceTests() {
         )
         val genesisBlockMessage = GenesisBlockMessage(genesisBlock)
 
-        given(epochService.getSlotNumber()).willReturn(1L, 2L)
+        given(epochService.getSlotNumber(any(Long::class.java))).willReturn(1L, 2L)
         given(epochService.isInTimeSlot(any(Long::class.java))).willReturn(false, true)
         given(epochService.getCurrentSlotOwner()).willReturn(delegate)
         given(blockService.getLast()).willReturn(mainBlock)
         given(genesisBlockService.create()).willReturn(genesisBlockMessage)
-        given(epochService.getEpochEndTime()).willReturn(1L)
 
         blockProductionScheduler.init()
+
+        Thread.sleep(1000)
+        val genesisBlockServiceInvocations = Mockito.mockingDetails(genesisBlockService).invocations
+        assertThat(genesisBlockServiceInvocations.size).isEqualTo(2)
+    }
+
+    @Test
+    fun testInitShouldCreateMainBlock() {
+        val delegate = Delegate("publicKey", "address", 1)
+        val mainBlockPayload = MainBlockPayload("merkleHash")
+        val mainBlock = MainBlock(
+            1L,
+            2L,
+            "previousHash",
+            3L,
+            "hash",
+            "signature",
+            "publicKey",
+            mainBlockPayload
+        )
+        val mainBlockMessage = PendingBlockMessage(mainBlock, listOf(), listOf(), listOf())
+
+        given(epochService.getSlotNumber(any(Long::class.java))).willReturn(1L, 2L)
+        given(epochService.isInTimeSlot(any(Long::class.java))).willReturn(false, true)
+        given(epochService.getCurrentSlotOwner()).willReturn(delegate)
+        given(blockService.getLast()).willReturn(mainBlock)
+        given(mainBlockService.create()).willReturn(mainBlockMessage)
+        given(consensusProperties.epochHeight).willReturn(10)
+        given(keyHolder.getPublicKey()).willReturn("publicKey")
+
+        blockProductionScheduler.init()
+
+        Thread.sleep(1000)
+
+        val pendingBlockHandlerInvocations = Mockito.mockingDetails(pendingBlockHandler).invocations
+        assertThat(pendingBlockHandlerInvocations.size).isEqualTo(1)
     }
 
 }
