@@ -16,15 +16,15 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
 abstract class BaseConnectionHandler(
-    protected var networkService: InnerNetworkService,
-    private var coreService: CoreMessageService,
-    private var consensusService: ConsensusMessageService,
     private val lock: ReentrantReadWriteLock,
-    private val syncBlockHandler: SyncBlockHandler
+    private var coreService: CoreMessageService,
+    private val syncBlockHandler: SyncBlockHandler,
+    protected var networkService: InnerNetworkService,
+    private var consensusService: ConsensusMessageService
 ) : SimpleChannelInboundHandler<Packet>() {
 
     companion object {
-        val log = LoggerFactory.getLogger(BaseConnectionHandler::class.java)
+        val log = LoggerFactory.getLogger(BaseConnectionHandler::class.java)!!
     }
 
 
@@ -42,7 +42,7 @@ abstract class BaseConnectionHandler(
             GENESIS_BLOCK -> syncBlockHandler.saveBlocks(packet.data as GenesisBlockMessage)
         }
 
-        if(listOf(HASH_BLOCK_REQUEST, HASH_BLOCK_RESPONSE, SYNC_BLOCKS_REQUEST, MAIN_BLOCK, GENESIS_BLOCK).contains(packet.type)) {
+        if(packet.type is HashMessage || packet.type is BlockMessage) {
             return
         }
 

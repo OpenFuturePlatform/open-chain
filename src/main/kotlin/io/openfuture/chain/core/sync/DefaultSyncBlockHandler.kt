@@ -20,6 +20,7 @@ class DefaultSyncBlockHandler(
 
     private var blockHash: String? = null
 
+
     override fun blockHashRequest(ctx: ChannelHandlerContext, message: HashBlockRequestMessage) {
         val lastHash = blockService.getLast().hash
 
@@ -42,7 +43,7 @@ class DefaultSyncBlockHandler(
 
     override fun saveBlocks(block: MainBlockMessage) {
         mainBlockService.synchronize(block)
-        if (block.hash == lastHash) {
+        if (block.hash == blockHash) {
             lock.writeLock().unlock()
         }
     }
@@ -50,8 +51,6 @@ class DefaultSyncBlockHandler(
     override fun saveBlocks(block: GenesisBlockMessage) {
         genesisBlockService.synchronize(block)
     }
-
-    private val lastHash: String? = null
 
     override fun sync() {
         try {
