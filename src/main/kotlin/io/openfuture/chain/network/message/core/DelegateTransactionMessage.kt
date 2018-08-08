@@ -15,7 +15,6 @@ class DelegateTransactionMessage(
     hash: String,
     senderSignature: String,
     senderPublicKey: String,
-
     var delegateKey: String
 ) : BaseTransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 

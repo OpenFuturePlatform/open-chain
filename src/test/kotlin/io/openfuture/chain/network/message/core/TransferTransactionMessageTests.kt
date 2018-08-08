@@ -15,10 +15,11 @@ class TransferTransactionMessageTests : MessageTests() {
 
     @Before
     fun setup() {
-        buffer = createBuffer("000000000001e0f300000000000000010000000f73656e6465725075626c69634b65790000000d73656e6465724164" +
-            "64726573730000000f73656e6465725369676e61747572650000000468617368000000000000000a00000010726563697069656e7441646472657373")
-        message = TransferTransactionMessage(123123, 1, "senderAddress", "senderPublicKey", "senderSignature", "hash",
-            10, "recipientAddress")
+        buffer = createBuffer("000000000001e0f300000000000000010000000d73656e64657241646472657373000000046861" +
+            "73680000000f73656e6465725369676e61747572650000000f73656e6465725075626c69634b6579000000000000000a00000010" +
+            "726563697069656e7441646472657373")
+        message = TransferTransactionMessage(123123, 1, "senderAddress", "hash",
+            "senderSignature", "senderPublicKey", 10, "recipientAddress")
     }
 
     @Test
