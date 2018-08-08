@@ -12,4 +12,5 @@ class ExplorerFindAddressesMessage : BaseMessage {
     override fun write(buffer: ByteBuf) {}
 
     override fun toString() = "ExplorerFindAddressesMessage()"
+
 }
