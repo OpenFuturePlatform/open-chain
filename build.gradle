@@ -30,6 +30,7 @@ dependencies {
 
     // Spring
     compile('org.springframework.boot:spring-boot-starter-webflux')
+    compile("org.springframework.boot:spring-boot-starter-freemarker")
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
     compile('org.springframework.boot:spring-boot-starter-web')
 
@@ -57,7 +58,7 @@ dependencies {
 
 sourceSets {
     main.kotlin.srcDirs += 'src/main/kotlin'
-    main.resources.srcDirs += 'src/main/resources'
+    main.resources.srcDirs += 'frontend/build/resources'
 }
 
 // Jar
@@ -92,3 +93,6 @@ jacocoTestReport {
     }
 }
 check.dependsOn jacocoTestReport
+
+// Front
+processResources.dependsOn(':frontend:assemble')
