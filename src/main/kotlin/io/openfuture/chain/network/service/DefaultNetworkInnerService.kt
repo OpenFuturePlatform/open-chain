@@ -46,16 +46,6 @@ class DefaultNetworkInnerService(
         private val log = LoggerFactory.getLogger(DefaultNetworkInnerService::class.java)
     }
 
-    @Scheduled(cron = "*/15 * * * * *")
-    fun monitor(){
-        log.info("Connections: ${connections.size} ")
-        val str = StringBuilder().append("\n")
-        connections.forEach{
-            str.append("Key = ${it.key.remoteAddress()}, value = ${it.value}\n")
-        }
-        log.info(str.toString())
-    }
-
 
     override fun onApplicationEvent(event: ApplicationReadyEvent) {
         Executors.newSingleThreadExecutor().execute(tcpServer)
