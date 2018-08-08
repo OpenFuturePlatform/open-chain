@@ -15,9 +15,10 @@ class ConfirmedVoteTransactionMessageTests : MessageTests() {
 
     @Before
     fun setup() {
-        buffer = createBuffer("000000000000007b00000000000000010000000d73656e646572416464726573730000000f73656e646572507" +
-            "5626c69634b65790000000f73656e6465725369676e61747572650000000468617368000000010000000b64656c65676174654b6579")
-        message = VoteTransactionMessage(123, 1, "senderAddress", "senderPublicKey", "senderSignature", "hash", 1, "delegateKey")
+        buffer = createBuffer("000000000000007b00000000000000010000000d73656e6465724164647265737300000004686" +
+            "173680000000f73656e6465725369676e61747572650000000f73656e6465725075626c69634b6579000000010000000b64656c6" +
+            "5676174654b6579")
+        message = VoteTransactionMessage(123, 1, "senderAddress", "hash", "senderSignature", "senderPublicKey", 1, "delegateKey")
     }
 
     @Test

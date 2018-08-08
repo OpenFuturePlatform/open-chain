@@ -7,6 +7,7 @@ import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.repository.BlockRepository
+import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DefaultDelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
@@ -22,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultGenesisBlockService(
     blockService: BlockService,
-    private val repository: BlockRepository<GenesisBlock>,
+    private val repository: GenesisBlockRepository,
     private val delegateService: DefaultDelegateService,
     private val clock: NodeClock,
     private val consensusProperties: ConsensusProperties,
