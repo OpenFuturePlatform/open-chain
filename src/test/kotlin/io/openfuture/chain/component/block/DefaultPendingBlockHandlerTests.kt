@@ -14,6 +14,8 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.service.NetworkApiService
+import org.bouncycastle.asn1.x509.ObjectDigestInfo.publicKey
+import org.bouncycastle.crypto.tls.CipherType.block
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.junit.Before
 import org.junit.Test
@@ -49,24 +51,16 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         val payload = MainBlockPayload(
             "merkleHash"
         )
-        val block = MainBlock(
-            1L,
-            2L,
-            "previousHash",
-            2L,
-            "hash",
-            "signature",
-            "publicKey",
-            payload
-        )
+
         val privateKey = "529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"
-        block.signature = SignatureUtils.sign(block.payload.getBytes(), ByteUtils.fromHexString(privateKey))
-        val pendingBlock = PendingBlockMessage(block, listOf(), listOf(), listOf())
+
+        val pendingBlock = PendingBlockMessage(2L, "previousHash", 1L, 2L,
+            "hash", "signature", "publicKey", payload.merkleHash, listOf(), listOf(), listOf())
 
         given(keyHolder.getPrivateKey()).willReturn(
             ByteUtils.fromHexString(privateKey))
         given(keyHolder.getPublicKey()).willReturn("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4")
-        given(epochService.getSlotNumber(block.timestamp)).willReturn(2L)
+        given(epochService.getSlotNumber(pendingBlock.timestamp)).willReturn(2L)
         given(epochService.getCurrentSlotOwner()).willReturn(delegate)
         given(epochService.getDelegates()).willReturn(
             listOf(Delegate("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4", "address", 1)))
@@ -87,18 +81,9 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         val payload = MainBlockPayload(
             "merkleHash"
         )
-        val block = MainBlock(
-            1L,
-            2L,
-            "previousHash",
-            2L,
-            hash,
-            "signature",
-            publicKey,
-            payload
-        )
-        block.signature = SignatureUtils.sign(block.payload.getBytes(), ByteUtils.fromHexString(privateKey))
-        val pendingBlock = PendingBlockMessage(block, listOf(), listOf(), listOf())
+
+        val pendingBlock = PendingBlockMessage(2L, "previousHash", 1L, 2L,
+            hash, "signature", publicKey, payload.merkleHash, listOf(), listOf(), listOf())
 
         val message = BlockApprovalMessage(
             BlockApprovalStage.PREPARE.value,

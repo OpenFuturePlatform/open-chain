@@ -84,10 +84,14 @@ internal class DefaultVoteTransactionService(
     }
 
     @Transactional
-    override fun isValid(tx: VoteTransaction): Boolean = isValidVoteCount(tx.senderAddress) && super.isValid(tx)
+    override fun isValid(tx: VoteTransaction): Boolean {
+        return isNotExistsVote() && isValidVoteCount(tx.senderAddress) && super.isValid(tx)
+    }
 
     @Transactional
-    override fun isValid(utx: UnconfirmedVoteTransaction): Boolean = isValidVoteCount(utx.senderAddress) && super.isValid(utx)
+    override fun isValid(utx: UnconfirmedVoteTransaction): Boolean {
+        return isNotExistsVote() && isValidVoteCount(utx.senderAddress) && super.isValid(utx)
+    }
 
     private fun updateWalletVotes(delegateKey: String, senderAddress: String, type: VoteType) {
         val delegate = delegateService.getByPublicKey(delegateKey)
@@ -117,6 +121,11 @@ internal class DefaultVoteTransactionService(
             .count()
 
         return consensusProperties.delegatesCount!! > confirmedVotes + unconfirmedForVotes
+    }
+
+    private fun isNotExistsVote(): Boolean {
+        //todo !!
+        return true
     }
 
 }

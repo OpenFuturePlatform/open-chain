@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.model.entity.block
 
+import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
@@ -24,7 +25,7 @@ class GenesisBlock(
 ) : BaseBlock(timestamp, height, previousHash, reward, hash, signature, publicKey) {
 
     companion object {
-        fun of(dto: GenesisBlockMessage): GenesisBlock = GenesisBlock(
+        fun of(dto: GenesisBlockMessage, delegates: List<Delegate>): GenesisBlock = GenesisBlock(
             dto.timestamp,
             dto.height,
             dto.previousHash,
@@ -32,7 +33,7 @@ class GenesisBlock(
             dto.hash,
             dto.signature,
             dto.publicKey,
-            GenesisBlockPayload(dto.epochIndex)
+            GenesisBlockPayload(dto.epochIndex, delegates)
         )
     }
 

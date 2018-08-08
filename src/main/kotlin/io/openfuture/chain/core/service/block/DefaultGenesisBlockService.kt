@@ -11,6 +11,7 @@ import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DefaultDelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
@@ -23,13 +24,14 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultGenesisBlockService(
     blockService: BlockService,
-    private val repository: GenesisBlockRepository,
-    private val delegateService: DefaultDelegateService,
+    repository: GenesisBlockRepository,
+    walletService: WalletService,
+    delegateService: DefaultDelegateService,
     private val clock: NodeClock,
     private val consensusProperties: ConsensusProperties,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService
-) : BaseBlockService(blockService), GenesisBlockService {
+) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService), GenesisBlockService {
 
     @Transactional(readOnly = true)
     override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()
@@ -46,7 +48,7 @@ class DefaultGenesisBlockService(
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKey()
 
-        return GenesisBlockMessage(timestamp, previousHash, height, reward, ByteUtils.toHexString(hash), signature,
+        return GenesisBlockMessage(height, previousHash, timestamp, reward, ByteUtils.toHexString(hash), signature,
             publicKey, payload.epochIndex, payload.activeDelegates.map { it.publicKey })
     }
 
@@ -62,27 +64,26 @@ class DefaultGenesisBlockService(
             return
         }
 
-        val block = GenesisBlock.of(message)
         val delegates = message.delegates.map { delegateService.getByPublicKey(it) }
+        val block = GenesisBlock.of(message, delegates)
 
-        if (!isValid(block, delegates)) {
+        if (!isValid(block)) {
             return
         }
 
-        block.payload.activeDelegates = delegates
-        repository.save(block)
+        super.save(block)
         networkService.broadcast(message)
     }
 
     @Transactional(readOnly = true)
     override fun isValid(message: GenesisBlockMessage): Boolean {
-        val block = GenesisBlock.of(message)
         val delegates = message.delegates.map { delegateService.getByPublicKey(it) }
-        return isValid(block, delegates)
+        val block = GenesisBlock.of(message, delegates)
+        return isValid(block)
     }
 
-    private fun isValid(block: GenesisBlock, delegates: List<Delegate>): Boolean {
-        return isValidateActiveDelegates(delegates)
+    private fun isValid(block: GenesisBlock): Boolean {
+        return isValidateActiveDelegates(block.payload.activeDelegates)
             && isValidEpochIndex(this.getLast().payload.epochIndex, block.payload.epochIndex)
             && super.isValid(block)
     }

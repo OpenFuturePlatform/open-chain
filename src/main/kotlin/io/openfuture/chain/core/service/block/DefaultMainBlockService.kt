@@ -20,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultMainBlockService(
     blockService: BlockService,
-    private val repository: MainBlockRepository,
+    repository: MainBlockRepository,
+    walletService: WalletService,
+    delegateService: DelegateService,
     private val clock: NodeClock,
     private val keyHolder: NodeKeyHolder,
     private val voteTransactionService: VoteTransactionService,
@@ -28,7 +30,7 @@ class DefaultMainBlockService(
     private val transferTransactionService: TransferTransactionService,
     private val consensusProperties: ConsensusProperties,
     private val networkService: NetworkApiService
-) : BaseBlockService(blockService), MainBlockService {
+) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
 
     @Transactional(readOnly = true)
     override fun create(): PendingBlockMessage {
@@ -65,7 +67,7 @@ class DefaultMainBlockService(
             return
         }
 
-        val savedBlock = repository.save(block)
+        val savedBlock= super.save(block)
         message.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
         message.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
         message.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
@@ -82,8 +84,7 @@ class DefaultMainBlockService(
         if (!isValid(block, message.getAllTransactions().map { it.hash })) {
             return
         }
-
-        val savedBlock = repository.save(block)
+        val savedBlock = super.save(block)
         message.voteTransactions.forEach { voteTransactionService.synchronize(it, savedBlock) }
         message.delegateTransactions.forEach { delegateTransactionService.synchronize(it, savedBlock) }
         message.transferTransactions.forEach { transferTransactionService.synchronize(it, savedBlock) }
