@@ -11,6 +11,4 @@ class FindAddressesMessage : BaseMessage {
 
     override fun write(buffer: ByteBuf) {}
 
-    override fun toString() = "FindAddressesMessage()"
-
 }

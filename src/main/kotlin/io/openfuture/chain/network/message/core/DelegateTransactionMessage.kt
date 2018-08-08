@@ -49,12 +49,4 @@ class DelegateTransactionMessage(
         buffer.writeString(delegateKey)
     }
 
-    override fun toString() = "DelegateTransactionMessage(timestamp=$timestamp," +
-        "fee=$fee," +
-        "senderAddress=$senderAddress," +
-        "hash=$hash," +
-        "senderSignature=$senderSignature," +
-        "senderPublicKey=$senderPublicKey," +
-        "delegateKey=$delegateKey)"
-
 }

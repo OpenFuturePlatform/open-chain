@@ -53,13 +53,4 @@ class TransferTransactionMessage(
         buffer.writeString(recipientAddress)
     }
 
-    override fun toString() = "TransferTransactionMessage(timestamp=$timestamp," +
-        "fee=$fee," +
-        "senderAddress=$senderAddress," +
-        "hash=$hash," +
-        "senderSignature=$senderSignature," +
-        "senderPublicKey=$senderPublicKey," +
-        "amount=$amount," +
-        "recipientAddress=$recipientAddress)"
-
 }

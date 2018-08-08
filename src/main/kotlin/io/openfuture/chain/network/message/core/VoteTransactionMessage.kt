@@ -53,13 +53,4 @@ class VoteTransactionMessage(
         buffer.writeString(delegateKey)
     }
 
-    override fun toString() = "VoteTransactionMessage(timestamp=$timestamp," +
-        "fee=$fee," +
-        "senderAddress=$senderAddress," +
-        "hash=$hash," +
-        "senderSignature=$senderSignature," +
-        "senderPublicKey=$senderPublicKey," +
-        "voteTypeId=$voteTypeId" +
-        "delegateKey=$delegateKey)"
-
 }
