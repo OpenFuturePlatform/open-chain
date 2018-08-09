@@ -21,7 +21,7 @@ import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.verify
 import org.mockito.Mock
-import org.mockito.Mockito
+import org.mockito.Mockito.times
 import org.springframework.context.annotation.Import
 
 @Import(ConsensusProperties::class)
@@ -95,7 +95,7 @@ class BlockProductionSchedulerTests : ServiceTests() {
         blockProductionScheduler.init()
 
         Thread.sleep(500)
-        verify(genesisBlockService, Mockito.times(1)).add(genesisBlockMessage)
+        verify(genesisBlockService, times(1)).add(genesisBlockMessage)
     }
 
     @Test
@@ -125,7 +125,7 @@ class BlockProductionSchedulerTests : ServiceTests() {
 
         Thread.sleep(500)
 
-        verify(pendingBlockHandler, Mockito.times(1)).addBlock(mainBlockMessage)
+        verify(pendingBlockHandler, times(1)).addBlock(mainBlockMessage)
     }
 
 }
