@@ -1,12 +1,15 @@
 package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
+import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.annotation.NoArgConstructor
-import io.openfuture.chain.network.extension.*
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.network.extension.readList
+import io.openfuture.chain.network.extension.readString
+import io.openfuture.chain.network.extension.writeList
+import io.openfuture.chain.network.extension.writeString
 
 @NoArgConstructor
 class MainBlockMessage(
@@ -59,7 +62,5 @@ class MainBlockMessage(
         buffer.writeList(delegateTransactions)
         buffer.writeList(transferTransactions)
     }
-
-    override fun toString() = "MainBlockMessage(hash=$hash)"
 
 }

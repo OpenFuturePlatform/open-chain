@@ -8,7 +8,6 @@ import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.network.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import java.util.*
 
 class PacketTypeTests {
 
@@ -28,11 +27,13 @@ class PacketTypeTests {
         assertThat(PacketType.get(12)).isEqualTo(TRANSFER_TRANSACTION)
         assertThat(PacketType.get(13)).isEqualTo(DELEGATE_TRANSACTION)
         assertThat(PacketType.get(14)).isEqualTo(VOTE_TRANSACTION)
+        assertThat(PacketType.get(15)).isEqualTo(EXPLORER_FIND_ADDRESSES)
+        assertThat(PacketType.get(16)).isEqualTo(EXPLORER_ADDRESSES)
     }
 
     @Test(expected = NoSuchElementException::class)
     fun getShouldThrowExceptionForUnknownId() {
-        assertThat(PacketType.get(15)).isEqualTo(VOTE_TRANSACTION)
+        PacketType.get(17)
     }
 
     @Test
@@ -51,6 +52,8 @@ class PacketTypeTests {
         assertThat(PacketType.get(TransferTransactionMessage::class.java.newInstance())).isEqualTo(TRANSFER_TRANSACTION)
         assertThat(PacketType.get(DelegateTransactionMessage::class.java.newInstance())).isEqualTo(DELEGATE_TRANSACTION)
         assertThat(PacketType.get(VoteTransactionMessage::class.java.newInstance())).isEqualTo(VOTE_TRANSACTION)
+        assertThat(PacketType.get(ExplorerFindAddressesMessage::class.java.newInstance())).isEqualTo(EXPLORER_FIND_ADDRESSES)
+        assertThat(PacketType.get(ExplorerAddressesMessage::class.java.newInstance())).isEqualTo(EXPLORER_ADDRESSES)
     }
 
     @Test(expected = NoSuchElementException::class)
