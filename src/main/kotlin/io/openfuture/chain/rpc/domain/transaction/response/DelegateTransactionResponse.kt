@@ -1,7 +1,6 @@
 package io.openfuture.chain.rpc.domain.transaction.response
 
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
-import javax.validation.constraints.NotBlank
 
 class DelegateTransactionResponse(
     timestamp: Long,
@@ -9,7 +8,7 @@ class DelegateTransactionResponse(
     senderAddress: String,
     senderSignature: String,
     senderPublicKey: String,
-    @field:NotBlank var delegateKey: String? = null
+    val delegateKey: String
 ) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey) {
 
     constructor(tx: UnconfirmedDelegateTransaction) : this(
