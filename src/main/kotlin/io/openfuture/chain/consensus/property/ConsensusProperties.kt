@@ -31,10 +31,10 @@ class ConsensusProperties(
     var timeSlotDuration: Long? = null,
 
     /**
-     * Time to wait between failure apply block method calling
+     * Time between time slot
      */
     @field:NotNull
-    var timeSlotWaitDuration: Long? = null,
+    var timeSlotInterval: Long? =null,
 
     /**
      * Genesis address

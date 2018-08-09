@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 
+@NoArgConstructor
 class VoteTransactionMessage(
     timestamp: Long,
     fee: Long,

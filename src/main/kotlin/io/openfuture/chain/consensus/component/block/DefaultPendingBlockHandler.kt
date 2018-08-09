@@ -33,13 +33,16 @@ class DefaultPendingBlockHandler(
     @Synchronized
     override fun addBlock(block: PendingBlockMessage) {
         val blockSlotNumber = epochService.getSlotNumber(block.timestamp)
-        if (blockSlotNumber > timeSlotNumber) {
+        if (blockSlotNumber > timeSlotNumber || epochService.isInIntermission(block.timestamp)) {
             this.reset()
         }
 
-        pendingBlocks.add(block)
         val slotOwner = epochService.getCurrentSlotOwner()
         if (slotOwner.publicKey == block.publicKey && mainBlockService.isValid(block)) {
+            if (!pendingBlocks.add(block)) {
+                return
+            }
+
             networkService.broadcast(block)
             if (IDLE == stage && isActiveDelegate()) {
                 this.observable = block
@@ -75,7 +78,7 @@ class DefaultPendingBlockHandler(
             if (prepareVotes.size > (delegates.size - 1) / 3) {
                 this.stage = COMMIT
                 val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKey())
-                commit.signature = SignatureUtils.sign(message.getBytes(), keyHolder.getPrivateKey())
+                commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())
                 networkService.broadcast(commit)
             }
         }

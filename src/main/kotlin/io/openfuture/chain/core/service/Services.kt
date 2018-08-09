@@ -90,6 +90,8 @@ interface TransferTransactionService {
 
     fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction>
 
+    fun getByAddress(address: String): List<TransferTransaction>
+
     fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction
 
     fun add(message: TransferTransactionMessage): UnconfirmedTransferTransaction

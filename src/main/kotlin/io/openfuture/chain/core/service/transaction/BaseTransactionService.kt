@@ -50,8 +50,8 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
     }
 
     protected fun confirmProcess(utx: U, tx: T): T {
-        updateBalanceByFee(utx)
         unconfirmedRepository.delete(utx)
+        updateBalanceByFee(tx)
         return repository.save(tx)
     }
 

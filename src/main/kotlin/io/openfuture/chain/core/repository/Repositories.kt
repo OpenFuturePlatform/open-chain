@@ -42,6 +42,8 @@ interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 
     fun findOneByHash(hash: String): Entity?
 
+    fun findAllBySenderAddress(senderAddress: String): List<Entity>
+
 }
 
 @Repository
@@ -51,7 +53,11 @@ interface VoteTransactionRepository : TransactionRepository<VoteTransaction>
 interface DelegateTransactionRepository : TransactionRepository<DelegateTransaction>
 
 @Repository
-interface TransferTransactionRepository : TransactionRepository<TransferTransaction>
+interface TransferTransactionRepository : TransactionRepository<TransferTransaction> {
+
+    fun findAllByPayloadRecipientAddress(payloadRecipientAddress: String): List<TransferTransaction>
+
+}
 
 @Repository
 interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseRepository<UEntity> {

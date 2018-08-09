@@ -1,8 +1,8 @@
 package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
-import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.annotation.NoArgConstructor
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.network.extension.readStringList
 import io.openfuture.chain.network.extension.writeStringList
 
@@ -32,7 +32,5 @@ class GenesisBlockMessage(
         buffer.writeLong(epochIndex)
         buffer.writeStringList(delegates)
     }
-
-    override fun toString() = "NetworkGenesisBlock(hash=$hash)"
 
 }

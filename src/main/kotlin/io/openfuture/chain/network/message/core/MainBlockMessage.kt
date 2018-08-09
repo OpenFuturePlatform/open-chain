@@ -44,6 +44,4 @@ class MainBlockMessage(
         buffer.writeList(transferTransactions)
     }
 
-    override fun toString() = "MainBlockMessage(hash=$hash)"
-
 }
