@@ -14,7 +14,9 @@ interface EpochService {
 
     fun getCurrentSlotOwner(): Delegate
 
-    fun getSlotNumber(): Long
+    fun isInIntermission(time: Long): Boolean
+
+    fun timeToNextTimeSlot(time: Long): Long
 
     fun getSlotNumber(time: Long): Long
 

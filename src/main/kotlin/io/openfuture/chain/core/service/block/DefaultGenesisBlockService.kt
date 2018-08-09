@@ -6,7 +6,6 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
-import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DefaultDelegateService

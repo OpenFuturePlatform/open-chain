@@ -16,7 +16,7 @@ class DefaultConsensusMessageService(
     }
 
     override fun onPendingBlock(ctx: ChannelHandlerContext, block: PendingBlockMessage) {
-
+        pendingBlockHandler.addBlock(block)
     }
 
 }
