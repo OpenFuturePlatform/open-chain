@@ -10,6 +10,7 @@ import io.openfuture.chain.crypto.model.dictionary.PhraseLength
 import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import io.openfuture.chain.crypto.validation.SeedPhraseValidator
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 
 @Service
@@ -41,7 +42,16 @@ class DefaultCryptoService(
     override fun isValidAddress(address: String, publicKey: ByteArray): Boolean =
         address == ECKey(publicKey, false).getAddress()
 
-    override fun importKey(key: String): ExtendedKey = deserializer.deserialize(key)
+    override fun importPrivateKey(privateKey: String): ECKey {
+        val ecKey = ECKey(ByteUtils.fromHexString(privateKey), true)
+        if (privateKey != ByteUtils.toHexString(ecKey.getPrivate())) {
+            throw IllegalArgumentException("Invalid private key")
+        }
+
+        return ecKey
+    }
+
+    override fun importExtendedKey(extendedKey: String): ExtendedKey = deserializer.deserialize(extendedKey)
 
     override fun importWifKey(wifKey: String): ECKey = keyManager.importPrivateKey(wifKey)
 
