@@ -16,7 +16,7 @@ class GenesisBlockPayload(
     @JoinTable(name = "delegate2genesis",
         joinColumns = [(JoinColumn(name = "genesis_id"))],
         inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
-    var activeDelegates: List<Delegate> = listOf()
+    var activeDelegates: List<Delegate>
 
 ) : BlockPayload {
 
