@@ -37,11 +37,12 @@ class DefaultPendingBlockHandler(
             this.reset()
         }
 
-        if (!pendingBlocks.add(block)){
-            return
-        }
         val slotOwner = epochService.getCurrentSlotOwner()
         if (slotOwner.publicKey == block.publicKey && mainBlockService.isValid(block)) {
+            if (!pendingBlocks.add(block)){
+                return
+            }
+
             networkService.broadcast(block)
             if (IDLE == stage && isActiveDelegate()) {
                 this.observable = block
