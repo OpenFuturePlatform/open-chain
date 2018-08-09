@@ -16,6 +16,7 @@ import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -87,12 +88,14 @@ class BlockProductionSchedulerTests : ServiceTests() {
         given(epochService.getSlotNumber(any(Long::class.java))).willReturn(1L, 2L)
         given(epochService.isInIntermission(any(Long::class.java))).willReturn(true, false)
         given(epochService.getCurrentSlotOwner()).willReturn(delegate)
+        given(epochService.getEpochEndTime()).willReturn(111L)
         given(blockService.getLast()).willReturn(mainBlock)
         given(genesisBlockService.create()).willReturn(genesisBlockMessage)
 
         blockProductionScheduler.init()
 
         Thread.sleep(500)
+        assertThat(genesisBlockMessage.timestamp).isEqualTo(111L)
         verify(genesisBlockService, times(1)).add(genesisBlockMessage)
     }
 
