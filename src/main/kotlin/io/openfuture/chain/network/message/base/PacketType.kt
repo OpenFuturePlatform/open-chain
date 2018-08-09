@@ -26,7 +26,7 @@ enum class PacketType(
     DELEGATE_TRANSACTION(13, DelegateTransactionMessage::class),
     VOTE_TRANSACTION(14, VoteTransactionMessage::class),
     EXPLORER_FIND_ADDRESSES(15, ExplorerFindAddressesMessage::class),
-    EXPLORER_ADDRESSES(16, ExplorerAddressesMessage::class);
+    EXPLORER_ADDRESSES(16, ExplorerAddressesMessage::class),
     HASH_BLOCK_REQUEST(17, HashBlockRequestMessage::class),
     HASH_BLOCK_RESPONSE(18, HashBlockResponseMessage::class);
 

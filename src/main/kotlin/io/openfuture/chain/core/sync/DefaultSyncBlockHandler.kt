@@ -7,16 +7,17 @@ import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.service.NetworkApiService
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
 @Service
 class DefaultSyncBlockHandler(
-    private val blockService: BlockService,
+    @Lazy private val blockService: BlockService,
     private val lock: ReentrantReadWriteLock,
-    private val mainBlockService: MainBlockService,
-    private val networkApiService: NetworkApiService,
-    private val genesisBlockService: GenesisBlockService
+    @Lazy private val mainBlockService: MainBlockService,
+    @Lazy private val networkApiService: NetworkApiService,
+    @Lazy private val genesisBlockService: GenesisBlockService
 ) : SyncBlockHandler {
 
     private var blockHash: String? = null
@@ -53,14 +54,14 @@ class DefaultSyncBlockHandler(
     override fun saveBlocks(block: MainBlockMessage) {
         mainBlockService.synchronize(block)
 
-        unlockIfAllBlockSynchronized(block)
+        unlockIfAllBlocksSynchronized(block)
     }
 
 
     override fun saveBlocks(block: GenesisBlockMessage) {
         genesisBlockService.add(block)
 
-        unlockIfAllBlockSynchronized(block)
+        unlockIfAllBlocksSynchronized(block)
     }
 
     override fun sync() {
@@ -73,7 +74,7 @@ class DefaultSyncBlockHandler(
         }
     }
 
-    private fun unlockIfAllBlockSynchronized(block: BlockMessage) {
+    private fun unlockIfAllBlocksSynchronized(block: BlockMessage) {
         if (block.hash == blockHash) {
             lock.writeLock().unlock()
         }
