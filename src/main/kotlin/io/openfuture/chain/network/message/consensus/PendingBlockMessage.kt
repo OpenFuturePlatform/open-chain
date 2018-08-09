@@ -1,11 +1,11 @@
 package io.openfuture.chain.network.message.consensus
 
 import io.netty.buffer.ByteBuf
+import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
-import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.readStringList
 import io.openfuture.chain.network.extension.writeString
@@ -88,14 +88,14 @@ class PendingBlockMessage(
     }
 
     override fun hashCode(): Int {
-        var result = merkleHash.hashCode()
+        var result = hash.hashCode()
         result = 31 * result + timestamp.hashCode()
         result = 31 * result + signature.hashCode()
         result = 31 * result + publicKey.hashCode()
         result = 31 * result + height.hashCode()
         result = 31 * result + previousHash.hashCode()
         result = 31 * result + reward.hashCode()
-        result = 31 * result + hash.hashCode()
+        result = 31 * result + merkleHash.hashCode()
         result = 31 * result + voteTransactions.hashCode()
         result = 31 * result + delegateTransactions.hashCode()
         result = 31 * result + transferTransactions.hashCode()
