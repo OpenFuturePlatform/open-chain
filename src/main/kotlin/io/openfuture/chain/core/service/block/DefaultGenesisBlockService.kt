@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.service.block
 
-import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.Delegate
@@ -25,7 +24,6 @@ class DefaultGenesisBlockService(
     repository: GenesisBlockRepository,
     walletService: WalletService,
     delegateService: DefaultDelegateService,
-    private val consensusProperties: ConsensusProperties,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService
 ) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService), GenesisBlockService {
@@ -38,7 +36,7 @@ class DefaultGenesisBlockService(
         val lastBlock = blockService.getLast()
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
-        val reward = consensusProperties.rewardBlock!!
+        val reward = 0L
         val payload = createPayload()
         val hash = BlockUtils.createHash(timestamp, height, previousHash, reward, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
