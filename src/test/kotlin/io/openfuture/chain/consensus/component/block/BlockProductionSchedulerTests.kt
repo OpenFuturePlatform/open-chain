@@ -22,9 +22,7 @@ import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.verify
 import org.mockito.Mock
 import org.mockito.Mockito.times
-import org.springframework.context.annotation.Import
 
-@Import(ConsensusProperties::class)
 class BlockProductionSchedulerTests : ServiceTests() {
 
     @Mock private lateinit var keyHolder: NodeKeyHolder
