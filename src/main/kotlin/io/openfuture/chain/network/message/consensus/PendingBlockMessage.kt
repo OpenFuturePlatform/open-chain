@@ -102,5 +102,4 @@ class PendingBlockMessage(
         return result
     }
 
-
 }

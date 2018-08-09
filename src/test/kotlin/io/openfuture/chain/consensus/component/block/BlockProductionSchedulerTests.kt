@@ -33,15 +33,14 @@ class BlockProductionSchedulerTests : ServiceTests() {
     @Mock private lateinit var genesisBlockService: GenesisBlockService
     @Mock private lateinit var pendingBlockHandler: PendingBlockHandler
     @Mock private lateinit var clock: NodeClock
-
-    private lateinit var consensusProperties: ConsensusProperties
+    private var consensusProperties: ConsensusProperties = ConsensusProperties()
 
     private lateinit var blockProductionScheduler: BlockProductionScheduler
 
 
     @Before
     fun setUp() {
-        consensusProperties = ConsensusProperties()
+        consensusProperties
         consensusProperties.epochHeight = 10
         given(epochService.getEpochEndTime()).willReturn(1L)
         blockProductionScheduler = BlockProductionScheduler(
