@@ -9,75 +9,86 @@ import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.service.NetworkApiService
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
-import java.util.concurrent.locks.ReentrantReadWriteLock
+import java.util.concurrent.atomic.AtomicBoolean
+import javax.annotation.PostConstruct
 
 @Service
 class DefaultSyncBlockHandler(
     @Lazy private val blockService: BlockService,
-    private val lock: ReentrantReadWriteLock,
+//    private val lock: ReentrantReadWriteLock,
     @Lazy private val mainBlockService: MainBlockService,
     @Lazy private val networkApiService: NetworkApiService,
     @Lazy private val genesisBlockService: GenesisBlockService
 ) : SyncBlockHandler {
 
-    private var blockHash: String? = null
+
+    private var syncStatus: AtomicBoolean = AtomicBoolean(false)
+    private lateinit var lastHash: String
 
 
-    override fun blockHashRequest(ctx: ChannelHandlerContext, message: HashBlockRequestMessage) {
-        if (!blockService.isExists(message.hash)) {
-            send(ctx, HashBlockResponseMessage(message.hash))
-            return
-        }
+    @PostConstruct
+    fun initSyncStatus() {
+        lock()
+        lastHash = blockService.getLast().hash
+    }
 
+    @Synchronized
+    override fun isSynchronize(): Boolean {
+        return syncStatus.get()
+    }
+
+    override fun handleHashBlockRequestMessage(ctx: ChannelHandlerContext, message: HashBlockRequestMessage) {
         val lastBlock = blockService.getLast()
         send(ctx, HashBlockResponseMessage(lastBlock.hash))
     }
 
-    override fun blockHashResponse(ctx: ChannelHandlerContext, message: HashBlockResponseMessage) {
-        val lastHash = blockService.getLast().hash
-
-        if (message.hash != lastHash) {
-            blockHash = message.hash
-
-            send(ctx, SyncBlockRequestMessage(lastHash))
-        } else {
-            lock.writeLock().unlock()
+    @Synchronized
+    override fun handleHashResponseMessage(ctx: ChannelHandlerContext, message: HashBlockResponseMessage) {
+        if (blockService.isExists(message.hash)) {
+            unlock(message.hash)
+            return
         }
+        send(ctx, SyncBlockRequestMessage(lastHash))
     }
 
-    override fun getBlocks(ctx: ChannelHandlerContext, message: SyncBlockRequestMessage) {
+    @Synchronized
+    override fun handleSyncBlocKRequestMessage(ctx: ChannelHandlerContext, message: SyncBlockRequestMessage) {
         blockService.getAfterCurrentHash(message.hash)
             .map { it.toMessage() }
             .forEach { block -> send(ctx, block) }
     }
 
-    override fun saveBlocks(block: MainBlockMessage) {
+    @Synchronized
+    override fun handleMainBlockMessage(block: MainBlockMessage) {
         mainBlockService.synchronize(block)
 
-        unlockIfAllBlocksSynchronized(block)
+        if (blockService.getLast().hash == block.hash) {
+            unlock(block.hash)
+        }
+
     }
 
 
-    override fun saveBlocks(block: GenesisBlockMessage) {
+    @Synchronized
+    override fun handleGenesisBlockMessage(block: GenesisBlockMessage) {
         genesisBlockService.add(block)
 
-        unlockIfAllBlocksSynchronized(block)
-    }
-
-    override fun sync() {
-        try {
-            lock.writeLock().lock()
-            networkApiService.send(HashBlockRequestMessage(blockService.getLast().hash))
-        } catch (e: Exception) {
-            lock.writeLock().unlock()
-            sync()
+        if (blockService.getLast().hash == block.hash) {
+            unlock(block.hash)
         }
     }
 
-    private fun unlockIfAllBlocksSynchronized(block: BlockMessage) {
-        if (block.hash == blockHash) {
-            lock.writeLock().unlock()
-        }
+    override fun synchronize() {
+        networkApiService.send(HashBlockRequestMessage(lastHash))
+    }
+
+    private fun lock() {
+        syncStatus.set(false)
+    }
+
+    private fun unlock(hash: String) {
+        lastHash = hash
+        syncStatus.set(true)
     }
 
     private fun send(ctx: ChannelHandlerContext, message: BaseMessage) = ctx.channel().writeAndFlush(message)

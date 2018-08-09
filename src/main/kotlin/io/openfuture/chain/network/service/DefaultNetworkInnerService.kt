@@ -5,7 +5,6 @@ import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.sync.SyncBlockHandler
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.network.*
@@ -32,8 +31,7 @@ class DefaultNetworkInnerService(
     private val properties: NodeProperties,
     private val clock: NodeClock,
     private val bootstrap: Bootstrap,
-    private val tcpServer: TcpServer,
-    private val syncBlockHandler: SyncBlockHandler
+    private val tcpServer: TcpServer
 ) : ApplicationListener<ApplicationReadyEvent>, NetworkInnerService {
 
     private val connections: MutableMap<Channel, NetworkAddressMessage> = ConcurrentHashMap()
@@ -111,8 +109,6 @@ class DefaultNetworkInnerService(
             .shuffled()
             .take(connectionNeededNumber())
             .forEach { bootstrap.connect(it.host, it.port) }
-
-        syncBlockHandler.sync()
     }
 
     override fun onExplorerFindAddresses(ctx: ChannelHandlerContext, message: ExplorerFindAddressesMessage) {

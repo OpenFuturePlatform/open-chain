@@ -12,7 +12,7 @@ class MainBlockPayload(
     @Column(name = "merkle_hash", nullable = false)
     var merkleHash: String,
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "transactions",
         joinColumns = [JoinColumn(name = "block_id")],
@@ -20,7 +20,7 @@ class MainBlockPayload(
     )
     var voteTransactions: MutableList<VoteTransaction> = mutableListOf(),
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "transactions",
         joinColumns = [JoinColumn(name = "block_id")],
@@ -28,7 +28,7 @@ class MainBlockPayload(
     )
     var delegateTransactions: MutableList<DelegateTransaction> = mutableListOf(),
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "transactions",
         joinColumns = [JoinColumn(name = "block_id")],

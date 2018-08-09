@@ -5,11 +5,19 @@ import io.openfuture.chain.network.message.core.*
 
 interface SyncBlockHandler {
 
-    fun sync()
-    fun saveBlocks(block: GenesisBlockMessage)
-    fun saveBlocks(block: MainBlockMessage)
-    fun getBlocks(ctx: ChannelHandlerContext, message: SyncBlockRequestMessage)
-    fun blockHashRequest(ctx: ChannelHandlerContext, message: HashBlockRequestMessage)
-    fun blockHashResponse(ctx: ChannelHandlerContext, message: HashBlockResponseMessage)
+    fun synchronize()
+
+    fun isSynchronize(): Boolean
+
+    fun handleHashBlockRequestMessage(ctx: ChannelHandlerContext, message: HashBlockRequestMessage)
+
+    fun handleHashResponseMessage(ctx: ChannelHandlerContext, message: HashBlockResponseMessage)
+
+    fun handleSyncBlocKRequestMessage(ctx: ChannelHandlerContext, message: SyncBlockRequestMessage)
+
+    fun handleMainBlockMessage(block: MainBlockMessage)
+
+    fun handleGenesisBlockMessage(block: GenesisBlockMessage)
+
 
 }
