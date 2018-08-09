@@ -5,12 +5,13 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.spring' version '1.2.60'
     id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.60'
     id 'org.springframework.boot' version '2.0.4.RELEASE'
+    id 'com.palantir.git-version' version '0.12.0-rc2'
 }
 
 apply plugin: "io.spring.dependency-management"
 
 group = 'io.openfuture.chain'
-version = '0.4.0'
+version = versionDetails().lastTag[1..-1] + (versionDetails().isCleanTag ? '' : '-DIRTY')
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -49,6 +50,9 @@ dependencies {
 
     //Cryptography
     compile("org.bouncycastle:bcprov-jdk15on:1.59")
+
+    //JAXB
+    compile("javax.xml.bind:jaxb-api:2.3.0")
 
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
