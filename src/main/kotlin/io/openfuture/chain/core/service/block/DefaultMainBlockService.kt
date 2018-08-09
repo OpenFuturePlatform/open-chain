@@ -65,6 +65,7 @@ class DefaultMainBlockService(
 
         val block = MainBlock.of(message)
         if (!isValid(block, message.getAllTransactions())) {
+            //TODO call second synchronization
             return
         }
 
