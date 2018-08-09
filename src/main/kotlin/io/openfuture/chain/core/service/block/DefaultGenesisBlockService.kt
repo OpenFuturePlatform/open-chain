@@ -26,7 +26,6 @@ class DefaultGenesisBlockService(
     repository: GenesisBlockRepository,
     walletService: WalletService,
     delegateService: DefaultDelegateService,
-    private val clock: NodeClock,
     private val consensusProperties: ConsensusProperties,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService
