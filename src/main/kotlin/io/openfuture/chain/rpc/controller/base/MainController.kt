@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 @Controller
 class MainController {
 
-    @RequestMapping(value = ["/"])
+    @RequestMapping(value = ["/", "/login", "/new", "/new/**", "/upload", "/private-key", "/wallet", "/wallet/**"])
     fun frontend(): String = "frontend"
 
 }
