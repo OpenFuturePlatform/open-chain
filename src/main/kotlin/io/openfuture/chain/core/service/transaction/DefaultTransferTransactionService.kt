@@ -24,7 +24,7 @@ class DefaultTransferTransactionService(
     uRepository: UTransferTransactionRepository,
     private val networkService: NetworkApiService
 ) : BaseTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
-    
+
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<TransferTransaction> = repository.findAll(request)
 
@@ -34,6 +34,14 @@ class DefaultTransferTransactionService(
     @Transactional(readOnly = true)
     override fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction = unconfirmedRepository.findOneByHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
+
+    @Transactional(readOnly = true)
+    override fun getByAddress(address: String): List<TransferTransaction> {
+        val senderTransactions = repository.findAllBySenderAddress(address)
+        val recipientTransactions = (repository as TransferTransactionRepository).findAllByPayloadRecipientAddress(address)
+
+        return senderTransactions + recipientTransactions
+    }
 
     @Transactional
     override fun add(message: TransferTransactionMessage): UnconfirmedTransferTransaction {
