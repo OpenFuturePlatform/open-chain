@@ -9,7 +9,7 @@ import io.openfuture.chain.network.message.base.BaseMessage
 @NoArgConstructor
 data class ExplorerAddressesMessage(
     var values: List<NetworkAddressMessage>
-) : BaseMessage{
+) : BaseMessage {
 
     override fun read(buffer: ByteBuf) {
         values = buffer.readList()

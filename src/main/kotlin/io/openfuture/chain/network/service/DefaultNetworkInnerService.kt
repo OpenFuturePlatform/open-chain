@@ -4,6 +4,7 @@ import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelHandlerContext
+import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.network.*
@@ -24,7 +25,6 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.SECONDS
-import javax.validation.ValidationException
 
 @Service
 class DefaultNetworkInnerService(
@@ -32,13 +32,14 @@ class DefaultNetworkInnerService(
     private val clock: NodeClock,
     private val bootstrap: Bootstrap,
     private val tcpServer: TcpServer
-    ) : ApplicationListener<ApplicationReadyEvent>, NetworkInnerService {
+) : ApplicationListener<ApplicationReadyEvent>, NetworkInnerService {
 
     private val connections: MutableMap<Channel, NetworkAddressMessage> = ConcurrentHashMap()
     private val heartBeatTasks: MutableMap<Channel, ScheduledFuture<*>> = ConcurrentHashMap()
     private val knownAddresses: MutableSet<NetworkAddressMessage> = ConcurrentHashMap.newKeySet()
 
-    @Volatile private var networkSize: Int = 1
+    @Volatile
+    private var networkSize: Int = 1
 
     companion object {
         private const val HEART_BEAT_DELAY = 0L
@@ -115,12 +116,12 @@ class DefaultNetworkInnerService(
     }
 
     override fun onExplorerAddresses(ctx: ChannelHandlerContext, message: ExplorerAddressesMessage) {
-        message.values.forEach {
-            if (!knownAddresses.contains(it)) {
+        message.values
+            .filter { !knownAddresses.contains(it) }
+            .forEach {
                 knownAddresses.add(it)
                 sendAndClose(it, ExplorerFindAddressesMessage())
             }
-        }
     }
 
     override fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage) {
@@ -159,18 +160,14 @@ class DefaultNetworkInnerService(
     private fun requestAddresses() {
         val address = getConnectionAddresses().shuffled(SecureRandom()).firstOrNull()
             ?: properties.getRootAddresses()
-                .filter {it != NetworkAddressMessage(properties.host!!, properties.port!!) }
+                .filter { it != NetworkAddressMessage(properties.host!!, properties.port!!) }
                 .shuffled()
-                .firstOrNull()
-
-        if (address == null) {
-            throw ValidationException("There are no available addresses")
-        }
+                .firstOrNull() ?: throw ValidationException("There are no available addresses")
 
         send(address, FindAddressesMessage())
     }
 
-    private fun send(address: NetworkAddressMessage, message: BaseMessage) : Channel {
+    private fun send(address: NetworkAddressMessage, message: BaseMessage): Channel {
         val channel = connections.filter { it.value == address }.map { it.key }.firstOrNull()
             ?: bootstrap.connect(address.host, address.port).addListener { future ->
                 future as ChannelFuture
