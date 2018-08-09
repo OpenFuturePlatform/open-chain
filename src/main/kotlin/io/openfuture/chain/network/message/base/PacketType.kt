@@ -24,7 +24,9 @@ enum class PacketType(
     PENDING_BLOCK(11, PendingBlockMessage::class),
     TRANSFER_TRANSACTION(12, TransferTransactionMessage::class),
     DELEGATE_TRANSACTION(13, DelegateTransactionMessage::class),
-    VOTE_TRANSACTION(14, VoteTransactionMessage::class);
+    VOTE_TRANSACTION(14, VoteTransactionMessage::class),
+    EXPLORER_FIND_ADDRESSES(15, ExplorerFindAddressesMessage::class),
+    EXPLORER_ADDRESSES(16, ExplorerAddressesMessage::class);
 
 
     companion object {

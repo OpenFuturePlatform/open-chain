@@ -4,13 +4,13 @@ import io.netty.channel.ChannelHandler
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.service.ConsensusMessageService
 import io.openfuture.chain.network.service.CoreMessageService
-import io.openfuture.chain.network.service.InnerNetworkService
+import io.openfuture.chain.network.service.NetworkInnerService
 import org.springframework.stereotype.Component
 
 @Component
 @ChannelHandler.Sharable
 class ConnectionClientHandler(
-    networkService: InnerNetworkService,
+    networkService: NetworkInnerService,
     coreService: CoreMessageService,
     consensusService: ConsensusMessageService
 ) : BaseConnectionHandler(networkService, coreService, consensusService) {
