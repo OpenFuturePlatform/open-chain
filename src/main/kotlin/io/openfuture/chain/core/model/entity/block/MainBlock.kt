@@ -22,7 +22,7 @@ class MainBlock(
     @Embedded
     var payload: MainBlockPayload
 
-) : BaseBlock(timestamp, height, previousHash, reward, hash, signature, publicKey) {
+) : Block(timestamp, height, previousHash, reward, hash, signature, publicKey) {
 
     companion object {
         fun of(message: PendingBlockMessage): MainBlock = MainBlock(
@@ -49,20 +49,6 @@ class MainBlock(
     }
 
     override fun getPayload(): BlockPayload = payload
-
-    fun toPendingMessage(): PendingBlockMessage = PendingBlockMessage(
-        height,
-        previousHash,
-        timestamp,
-        reward,
-        hash,
-        signature,
-        publicKey,
-        payload.merkleHash,
-        payload.voteTransactions.map { it.hash },
-        payload.delegateTransactions.map { it.hash },
-        payload.transferTransactions.map { it.hash }
-    )
 
     override fun toMessage(): MainBlockMessage = MainBlockMessage(
         height,

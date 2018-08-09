@@ -8,7 +8,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "blocks")
 @Inheritance(strategy = InheritanceType.JOINED)
-abstract class BaseBlock(
+abstract class Block(
 
     @Column(name = "timestamp", nullable = false)
     var timestamp: Long,

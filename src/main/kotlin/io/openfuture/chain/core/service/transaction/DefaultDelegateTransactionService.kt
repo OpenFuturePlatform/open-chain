@@ -85,12 +85,12 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun isValid(tx: DelegateTransaction): Boolean {
-        return isNotExistDelegate(tx.senderAddress) && super.isValid(tx)
+        return isNotExistsByDelegatePublicKey(tx.payload.delegateKey) && super.isValid(tx)
     }
 
     @Transactional
     override fun isValid(utx: UnconfirmedDelegateTransaction): Boolean {
-        return isNotExistDelegate(utx.senderAddress) && super.isValid(utx)
+        return isNotExistsByDelegatePublicKey(utx.payload.delegateKey) && super.isValid(utx)
     }
 
     private fun confirm(utx: UnconfirmedDelegateTransaction, block: MainBlock): DelegateTransaction {
@@ -98,6 +98,8 @@ class DefaultDelegateTransactionService(
         return super.confirmProcess(utx, DelegateTransaction.of(utx, block))
     }
 
-    private fun isNotExistDelegate(key: String): Boolean = !delegateService.isExists(key)
+    private fun isNotExistsByDelegatePublicKey(key: String): Boolean {
+        return !delegateService.isExistsByPublicKey(key) && !unconfirmedRepository.findAll().any { it.payload.delegateKey == key }
+    }
 
 }

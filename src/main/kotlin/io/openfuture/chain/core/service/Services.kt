@@ -2,7 +2,7 @@ package io.openfuture.chain.core.service
 
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.Wallet
-import io.openfuture.chain.core.model.entity.block.BaseBlock
+import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -43,9 +43,9 @@ interface BlockService {
 
     fun getCount(): Long
 
-    fun getLast(): BaseBlock
+    fun getLast(): Block
 
-    fun getAfterCurrentHash(hash: String): List<BaseBlock>
+    fun getAfterCurrentHash(hash: String): List<Block>
 
     fun isExists(hash: String): Boolean
 
@@ -148,7 +148,7 @@ interface DelegateService {
 
     fun getActiveDelegates(): List<Delegate>
 
-    fun isExists(key: String): Boolean
+    fun isExistsByPublicKey(key: String): Boolean
 
     fun save(delegate: Delegate): Delegate
 

@@ -15,24 +15,24 @@ class MainBlockPayload(
     @OneToMany
     @JoinTable(
         name = "transactions",
-        joinColumns = [JoinColumn(name = "id")],
-        inverseJoinColumns = [JoinColumn(name = "block_id")]
+        joinColumns = [JoinColumn(name = "block_id")],
+        inverseJoinColumns = [JoinColumn(name = "id")]
     )
     var voteTransactions: MutableList<VoteTransaction> = mutableListOf(),
 
     @OneToMany
     @JoinTable(
         name = "transactions",
-        joinColumns = [JoinColumn(name = "id")],
-        inverseJoinColumns = [JoinColumn(name = "block_id")]
+        joinColumns = [JoinColumn(name = "block_id")],
+        inverseJoinColumns = [JoinColumn(name = "id")]
     )
     var delegateTransactions: MutableList<DelegateTransaction> = mutableListOf(),
 
     @OneToMany
     @JoinTable(
         name = "transactions",
-        joinColumns = [JoinColumn(name = "id")],
-        inverseJoinColumns = [JoinColumn(name = "block_id")]
+        joinColumns = [JoinColumn(name = "block_id")],
+        inverseJoinColumns = [JoinColumn(name = "id")]
     )
     var transferTransactions: MutableList<TransferTransaction> = mutableListOf()
 

@@ -2,7 +2,7 @@ package io.openfuture.chain.core.repository
 
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.Wallet
-import io.openfuture.chain.core.model.entity.block.BaseBlock
+import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Repository
 interface BaseRepository<T> : JpaRepository<T, Int>
 
 @Repository
-interface BlockRepository<Entity : BaseBlock> : BaseRepository<Entity> {
+interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
 
     fun findOneByHash(hash: String): Entity?
 

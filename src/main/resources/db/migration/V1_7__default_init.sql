@@ -23,14 +23,14 @@ INSERT INTO genesis_blocks (id, epoch_index) VALUES (1, 1);
 insert into wallets (id, address, balance)
   select
     1,
-    '0x33c7b50F85a4Aa082988948195B9C1737DBa908e',
+    '0x6203E6165751909748A392b8a97544F3B7b034Ed',
     100;
 --
 insert into delegates (id, public_key, address)
   select
     1,
-    'Test delegate public key',
-    'Test delegate address';
+    '02d5442d91267697792f103ca0ba8f433470c622ba73be3aaed5072091f9fdf238',
+    '0x6203E6165751909748A392b8a97544F3B7b034Ed';
 --
 insert into wallets2delegates (wallet_id, delegate_id)
   select

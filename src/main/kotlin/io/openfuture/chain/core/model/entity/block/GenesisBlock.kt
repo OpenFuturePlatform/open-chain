@@ -22,7 +22,7 @@ class GenesisBlock(
     @Embedded
     val payload: GenesisBlockPayload
 
-) : BaseBlock(timestamp, height, previousHash, reward, hash, signature, publicKey) {
+) : Block(timestamp, height, previousHash, reward, hash, signature, publicKey) {
 
     companion object {
         fun of(dto: GenesisBlockMessage, delegates: List<Delegate>): GenesisBlock = GenesisBlock(
