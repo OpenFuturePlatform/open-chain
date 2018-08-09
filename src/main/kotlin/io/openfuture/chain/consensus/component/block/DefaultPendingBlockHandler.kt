@@ -39,7 +39,7 @@ class DefaultPendingBlockHandler(
 
         val slotOwner = epochService.getCurrentSlotOwner()
         if (slotOwner.publicKey == block.publicKey && mainBlockService.isValid(block)) {
-            if (!pendingBlocks.add(block)){
+            if (!pendingBlocks.add(block)) {
                 return
             }
 

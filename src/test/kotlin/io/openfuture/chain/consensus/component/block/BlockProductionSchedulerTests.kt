@@ -22,7 +22,9 @@ import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.verify
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.springframework.context.annotation.Import
 
+@Import(ConsensusProperties::class)
 class BlockProductionSchedulerTests : ServiceTests() {
 
     @Mock private lateinit var keyHolder: NodeKeyHolder
@@ -30,14 +32,18 @@ class BlockProductionSchedulerTests : ServiceTests() {
     @Mock private lateinit var blockService: BlockService
     @Mock private lateinit var mainBlockService: MainBlockService
     @Mock private lateinit var genesisBlockService: GenesisBlockService
-    @Mock private lateinit var consensusProperties: ConsensusProperties
     @Mock private lateinit var pendingBlockHandler: PendingBlockHandler
     @Mock private lateinit var clock: NodeClock
 
+    private lateinit var consensusProperties: ConsensusProperties
+
     private lateinit var blockProductionScheduler: BlockProductionScheduler
+
 
     @Before
     fun setUp() {
+        consensusProperties = ConsensusProperties()
+        consensusProperties.epochHeight = 10
         given(epochService.getEpochEndTime()).willReturn(1L)
         blockProductionScheduler = BlockProductionScheduler(
             keyHolder,
@@ -52,7 +58,7 @@ class BlockProductionSchedulerTests : ServiceTests() {
     }
 
     @Test
-    fun testInitShouldCreateGenesisBlock() {
+    fun initShouldCreateGenesisBlock() {
         val delegate = Delegate("publicKey", "address", 1)
         val mainBlockPayload = MainBlockPayload("merkleHash")
         val genesisBlockPayload = GenesisBlockPayload(
@@ -60,7 +66,7 @@ class BlockProductionSchedulerTests : ServiceTests() {
         )
         val mainBlock = MainBlock(
             1L,
-            2L,
+            11L,
             "previousHash",
             3L,
             "hash",
@@ -93,7 +99,7 @@ class BlockProductionSchedulerTests : ServiceTests() {
     }
 
     @Test
-    fun testInitShouldCreateMainBlock() {
+    fun initShouldCreateMainBlock() {
         val delegate = Delegate("publicKey", "address", 1)
         val mainBlockPayload = MainBlockPayload("merkleHash")
         val mainBlock = MainBlock(
@@ -113,7 +119,6 @@ class BlockProductionSchedulerTests : ServiceTests() {
         given(epochService.getCurrentSlotOwner()).willReturn(delegate)
         given(blockService.getLast()).willReturn(mainBlock)
         given(mainBlockService.create()).willReturn(mainBlockMessage)
-        given(consensusProperties.epochHeight).willReturn(10)
         given(keyHolder.getPublicKey()).willReturn("publicKey")
 
         blockProductionScheduler.init()

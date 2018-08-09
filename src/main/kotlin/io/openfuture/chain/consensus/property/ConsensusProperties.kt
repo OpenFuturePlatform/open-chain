@@ -31,12 +31,6 @@ class ConsensusProperties(
     var timeSlotDuration: Long? = null,
 
     /**
-     * Time to wait between failure apply block method calling
-     */
-    @field:NotNull
-    var timeSlotWaitDuration: Long? = null,
-
-    /**
      * Time between time slot
      */
     @field:NotNull
