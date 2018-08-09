@@ -72,6 +72,13 @@ class PendingBlockMessage(
 
         other as PendingBlockMessage
 
+        if (hash != other.hash) return false
+        if (timestamp != other.timestamp) return false
+        if (signature != other.signature) return false
+        if (publicKey != other.publicKey) return false
+        if (height != other.height) return false
+        if (previousHash != other.previousHash) return false
+        if (reward != other.reward) return false
         if (merkleHash != other.merkleHash) return false
         if (voteTransactions != other.voteTransactions) return false
         if (delegateTransactions != other.delegateTransactions) return false
@@ -82,10 +89,18 @@ class PendingBlockMessage(
 
     override fun hashCode(): Int {
         var result = merkleHash.hashCode()
+        result = 31 * result + timestamp.hashCode()
+        result = 31 * result + signature.hashCode()
+        result = 31 * result + publicKey.hashCode()
+        result = 31 * result + height.hashCode()
+        result = 31 * result + previousHash.hashCode()
+        result = 31 * result + reward.hashCode()
+        result = 31 * result + hash.hashCode()
         result = 31 * result + voteTransactions.hashCode()
         result = 31 * result + delegateTransactions.hashCode()
         result = 31 * result + transferTransactions.hashCode()
         return result
     }
+
 
 }
