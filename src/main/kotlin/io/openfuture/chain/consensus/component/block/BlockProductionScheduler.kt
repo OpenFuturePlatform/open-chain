@@ -52,9 +52,10 @@ class BlockProductionScheduler(
                 currentTimeSlot = timeSlot
                 val slotOwner = epochService.getCurrentSlotOwner()
                 if (isGenesisBlockRequired()) {
-                    val genesisBlock = genesisBlockService.create()
-                    genesisBlock.timestamp = epochService.getEpochEndTime()
+                    val timestamp = epochService.getEpochEndTime()
+                    val genesisBlock = genesisBlockService.create(timestamp)
                     genesisBlockService.add(genesisBlock)
+                    currentTimeSlot = 0
                 } else if (keyHolder.getPublicKey() == slotOwner.publicKey) {
                     val block = mainBlockService.create()
                     pendingBlockHandler.addBlock(block)

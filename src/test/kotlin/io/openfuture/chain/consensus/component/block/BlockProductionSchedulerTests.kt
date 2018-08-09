@@ -55,6 +55,7 @@ class BlockProductionSchedulerTests : ServiceTests() {
 
     @Test
     fun initShouldCreateGenesisBlock() {
+        val timestamp = 111L
         val delegate = Delegate("publicKey", "address", 1)
         val mainBlockPayload = MainBlockPayload("merkleHash")
         val genesisBlockPayload = GenesisBlockPayload(
@@ -71,7 +72,7 @@ class BlockProductionSchedulerTests : ServiceTests() {
             mainBlockPayload
         )
         val genesisBlock = GenesisBlock(
-            1L,
+            timestamp,
             2L,
             "previousHash2",
             3L,
@@ -82,17 +83,17 @@ class BlockProductionSchedulerTests : ServiceTests() {
         )
         val genesisBlockMessage = GenesisBlockMessage(genesisBlock)
 
-        given(epochService.getSlotNumber(any(Long::class.java))).willReturn(1L, 2L)
-        given(epochService.isInIntermission(any(Long::class.java))).willReturn(true, false)
+        given(epochService.getSlotNumber(any(Long::class.java))).willReturn(1L, 2L, 3L)
+        given(epochService.isInIntermission(any(Long::class.java))).willReturn(true, false, true)
         given(epochService.getCurrentSlotOwner()).willReturn(delegate)
-        given(epochService.getEpochEndTime()).willReturn(111L)
+        given(epochService.getEpochEndTime()).willReturn(timestamp)
         given(blockService.getLast()).willReturn(mainBlock)
-        given(genesisBlockService.create()).willReturn(genesisBlockMessage)
+        given(genesisBlockService.create(timestamp)).willReturn(genesisBlockMessage)
 
         blockProductionScheduler.init()
 
         Thread.sleep(500)
-        assertThat(genesisBlockMessage.timestamp).isEqualTo(111L)
+        assertThat(genesisBlockMessage.timestamp).isEqualTo(timestamp)
         verify(genesisBlockService, times(1)).add(genesisBlockMessage)
     }
 
