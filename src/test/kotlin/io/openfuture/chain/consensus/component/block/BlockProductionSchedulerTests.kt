@@ -83,8 +83,8 @@ class BlockProductionSchedulerTests : ServiceTests() {
         )
         val genesisBlockMessage = GenesisBlockMessage(genesisBlock)
 
-        given(epochService.getSlotNumber(any(Long::class.java))).willReturn(1L, 2L)
-        given(epochService.isInIntermission(any(Long::class.java))).willReturn(true, false)
+        given(epochService.getSlotNumber(any(Long::class.java))).willReturn(1L, 2L, 3L)
+        given(epochService.isInIntermission(any(Long::class.java))).willReturn(true, false, true)
         given(epochService.getCurrentSlotOwner()).willReturn(delegate)
         given(epochService.getEpochEndTime()).willReturn(timestamp)
         given(blockService.getLast()).willReturn(mainBlock)
