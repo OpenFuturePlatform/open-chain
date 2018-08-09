@@ -18,4 +18,6 @@ class DefaultNetworkApiService(
         networkInnerService.getChannels().shuffled().firstOrNull()?.writeAndFlush(message)
     }
 
+    override fun getNetworkSize(): Int = networkInnerService.getNetworkSize()
+
 }

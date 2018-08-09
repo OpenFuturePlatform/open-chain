@@ -1,11 +1,11 @@
 package io.openfuture.chain.network.message.consensus
 
 import io.netty.buffer.ByteBuf
+import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
-import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.readStringList
 import io.openfuture.chain.network.extension.writeString
@@ -63,7 +63,5 @@ class PendingBlockMessage(
         buffer.writeStringList(delegateTransactions)
         buffer.writeStringList(transferTransactions)
     }
-
-    override fun toString() = "PendingBlockMessage(hash=$hash)"
 
 }

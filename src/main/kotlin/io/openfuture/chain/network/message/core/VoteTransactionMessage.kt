@@ -1,11 +1,13 @@
 package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
+import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 
+@NoArgConstructor
 class VoteTransactionMessage(
     timestamp: Long,
     fee: Long,
