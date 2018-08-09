@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.annotation.PostConstruct
-import javax.annotation.PreDestroy
 
 @Component
 class BlockProductionScheduler(
@@ -32,7 +31,6 @@ class BlockProductionScheduler(
     }
 
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
-
     private var currentTimeSlot: Long = 0
 
 
