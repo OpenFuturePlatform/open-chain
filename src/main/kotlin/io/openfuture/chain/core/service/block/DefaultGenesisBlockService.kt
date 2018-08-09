@@ -36,8 +36,7 @@ class DefaultGenesisBlockService(
     override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()
         ?: throw NotFoundException("Last block not found")
 
-    override fun create(): GenesisBlockMessage {
-        val timestamp = clock.networkTime()
+    override fun create(timestamp: Long): GenesisBlockMessage {
         val lastBlock = blockService.getLast()
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
