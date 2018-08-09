@@ -16,7 +16,7 @@ OPEN Platform currently supports the following platforms:
 
 * Docker
 * macOS 10+
-* *nix
+* Linux
 * Windows
 
 ### Running
