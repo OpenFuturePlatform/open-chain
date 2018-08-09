@@ -15,11 +15,17 @@ interface NetworkApiService {
 
     fun send(message: BaseMessage)
 
+    fun getNetworkSize(): Int
+
 }
 
-interface InnerNetworkService {
+interface NetworkInnerService {
 
     fun maintainConnectionNumber()
+
+    fun startExploring()
+
+    fun getNetworkSize(): Int
 
     fun getChannels(): Set<Channel>
 
@@ -32,6 +38,10 @@ interface InnerNetworkService {
     fun onFindAddresses(ctx: ChannelHandlerContext, message: FindAddressesMessage)
 
     fun onAddresses(ctx: ChannelHandlerContext, message: AddressesMessage)
+
+    fun onExplorerFindAddresses(ctx: ChannelHandlerContext, message: ExplorerFindAddressesMessage)
+
+    fun onExplorerAddresses(ctx: ChannelHandlerContext, message: ExplorerAddressesMessage)
 
     fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage)
 
