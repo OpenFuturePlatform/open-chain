@@ -42,9 +42,8 @@ class DefaultNetworkInnerService(
     private var networkSize: Int = 1
 
     companion object {
-        private const val HEART_BEAT_DELAY = 0L
         private const val HEART_BEAT_INTERVAL = 20L
-        private const val WAIT_FOR_RESPONSE_TIME = 100L
+        private const val WAIT_FOR_RESPONSE_TIME = 1000L
         private const val CHECK_CONNECTIONS_PERIOD = 15000L
         private val log = LoggerFactory.getLogger(DefaultNetworkInnerService::class.java)
     }
@@ -86,7 +85,7 @@ class DefaultNetworkInnerService(
         val task = ctx.channel()
             .eventLoop()
             .scheduleAtFixedRate({ ctx.writeAndFlush(HeartBeatMessage(PING)) },
-                HEART_BEAT_DELAY,
+                HEART_BEAT_INTERVAL,
                 HEART_BEAT_INTERVAL,
                 SECONDS)
         heartBeatTasks[ctx.channel()] = task
@@ -167,21 +166,43 @@ class DefaultNetworkInnerService(
         send(address, FindAddressesMessage())
     }
 
-    private fun send(address: NetworkAddressMessage, message: BaseMessage): Channel {
+    private fun send(address: NetworkAddressMessage, message: BaseMessage) {
         val channel = connections.filter { it.value == address }.map { it.key }.firstOrNull()
-            ?: bootstrap.connect(address.host, address.port).addListener { future ->
+        if (channel != null) {
+            channel.writeAndFlush(message)
+        } else {
+            bootstrap.connect(address.host, address.port).addListener { future ->
                 future as ChannelFuture
-                if (!future.isSuccess) {
+                if (future.isSuccess) {
+                    future.channel().writeAndFlush(message)
+                } else {
                     log.warn("Can not connect to ${address.host}:${address.port}")
                 }
-            }.channel()
-        channel.writeAndFlush(message)
-        return channel
+            }
+        }
     }
 
     private fun sendAndClose(address: NetworkAddressMessage, message: BaseMessage) {
-        val channel = send(address, message)
-        channel.eventLoop().schedule({ channel.close() }, WAIT_FOR_RESPONSE_TIME, MILLISECONDS)
+        val channel = connections.filter { it.value == address }.map { it.key }.firstOrNull()
+        if (channel != null) {
+            channel.writeAndFlush(message)
+            closeAfterDelay(channel)
+        } else {
+            bootstrap.connect(address.host, address.port).addListener { future ->
+                future as ChannelFuture
+                if (future.isSuccess) {
+                    val newChannel = future.channel()
+                    newChannel.writeAndFlush(message)
+                    closeAfterDelay(newChannel)
+                } else {
+                    log.warn("Can not connect to ${address.host}:${address.port}")
+                }
+            }
+        }
+    }
+
+    private fun closeAfterDelay(newChannel: Channel) {
+        newChannel.eventLoop().schedule({ newChannel.close() }, WAIT_FOR_RESPONSE_TIME, MILLISECONDS)
     }
 
 }
