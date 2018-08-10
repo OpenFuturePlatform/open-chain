@@ -19,6 +19,7 @@ interface NetworkApiService {
 
     fun getNetworkSize(): Int
 
+    fun isChannelsEmpty(): Boolean
 }
 
 interface NetworkInnerService {

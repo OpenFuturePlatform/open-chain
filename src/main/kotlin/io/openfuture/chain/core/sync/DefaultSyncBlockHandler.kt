@@ -57,7 +57,7 @@ class DefaultSyncBlockHandler(
     }
 
     @Synchronized
-    override fun onSyncBlocKRequestMessage(ctx: ChannelHandlerContext, message: SyncBlockRequestMessage) {
+    override fun onSyncBlocRequestMessage(ctx: ChannelHandlerContext, message: SyncBlockRequestMessage) {
         blockService.getAfterCurrentHash(message.hash)
             .map { it.toMessage() }
             .forEach { msg -> send(ctx, msg) }

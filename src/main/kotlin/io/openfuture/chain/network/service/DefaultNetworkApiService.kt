@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 @Service
 class DefaultNetworkApiService(
     private val networkInnerService: DefaultNetworkInnerService
-) : NetworkApiService{
+) : NetworkApiService {
 
     override fun broadcast(message: BaseMessage) {
         networkInnerService.getChannels().forEach {
@@ -19,5 +19,7 @@ class DefaultNetworkApiService(
     }
 
     override fun getNetworkSize(): Int = networkInnerService.getNetworkSize()
+
+    override fun isChannelsEmpty(): Boolean = networkInnerService.getChannels().isEmpty()
 
 }

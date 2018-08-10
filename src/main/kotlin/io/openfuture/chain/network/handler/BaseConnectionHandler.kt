@@ -3,7 +3,7 @@ package io.openfuture.chain.network.handler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.core.sync.SyncBlockHandler
-import io.openfuture.chain.core.sync.SynchronizationStatus
+import io.openfuture.chain.core.sync.SynchronizationStatus.SYNCHRONIZED
 import io.openfuture.chain.network.message.base.Packet
 import io.openfuture.chain.network.message.base.PacketType.*
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
@@ -45,12 +45,12 @@ abstract class BaseConnectionHandler(
 
             HASH_BLOCK_REQUEST -> syncBlockHandler.onHashBlockRequestMessage(ctx, packet.data as HashBlockRequestMessage)
             HASH_BLOCK_RESPONSE -> syncBlockHandler.onHashResponseMessage(ctx, packet.data as HashBlockResponseMessage)
-            SYNC_BLOCKS_REQUEST -> syncBlockHandler.onSyncBlocKRequestMessage(ctx, packet.data as SyncBlockRequestMessage)
+            SYNC_BLOCKS_REQUEST -> syncBlockHandler.onSyncBlocRequestMessage(ctx, packet.data as SyncBlockRequestMessage)
             MAIN_BLOCK -> syncBlockHandler.onMainBlockMessage(packet.data as MainBlockMessage)
             GENESIS_BLOCK -> syncBlockHandler.onGenesisBlockMessage(packet.data as GenesisBlockMessage)
         }
 
-        if (syncBlockHandler.getSyncStatus() == SynchronizationStatus.SYNCHRONIZED) {
+        if (syncBlockHandler.getSyncStatus() == SYNCHRONIZED) {
             processAppMessages(ctx, packet)
         }
     }

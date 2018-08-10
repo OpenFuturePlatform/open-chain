@@ -13,7 +13,7 @@ interface SyncBlockHandler {
 
     fun onHashResponseMessage(ctx: ChannelHandlerContext, message: HashBlockResponseMessage)
 
-    fun onSyncBlocKRequestMessage(ctx: ChannelHandlerContext, message: SyncBlockRequestMessage)
+    fun onSyncBlocRequestMessage(ctx: ChannelHandlerContext, message: SyncBlockRequestMessage)
 
     fun onMainBlockMessage(block: MainBlockMessage)
 
