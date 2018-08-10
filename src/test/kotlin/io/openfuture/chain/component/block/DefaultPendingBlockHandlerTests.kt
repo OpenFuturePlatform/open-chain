@@ -7,15 +7,12 @@ import io.openfuture.chain.consensus.component.block.DefaultPendingBlockHandler
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.Delegate
-import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.service.NetworkApiService
-import org.bouncycastle.asn1.x509.ObjectDigestInfo.publicKey
-import org.bouncycastle.crypto.tls.CipherType.block
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.junit.Before
 import org.junit.Test
