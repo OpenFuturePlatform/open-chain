@@ -11,8 +11,10 @@ plugins {
 apply plugin: "io.spring.dependency-management"
 
 group = 'io.openfuture.chain'
-version = versionDetails().lastTag[1..-1] + (versionDetails().isCleanTag ? '' : '-DIRTY')
 sourceCompatibility = JavaVersion.VERSION_1_8
+
+def vDetails = versionDetails()
+version = vDetails.lastTag[1..-1] + (vDetails.isCleanTag ? '' : '-DIRTY')
 
 repositories {
     mavenCentral()
@@ -62,7 +64,7 @@ dependencies {
 
 sourceSets {
     main.kotlin.srcDirs += 'src/main/kotlin'
-    main.resources.srcDirs += 'frontend/build/resources'
+    main.resources.srcDirs += 'src/main/resources'
 }
 
 // Jar
@@ -97,6 +99,3 @@ jacocoTestReport {
     }
 }
 check.dependsOn jacocoTestReport
-
-// Front
-processResources.dependsOn(':frontend:assemble')

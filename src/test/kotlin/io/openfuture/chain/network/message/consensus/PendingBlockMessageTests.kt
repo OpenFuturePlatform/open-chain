@@ -35,7 +35,7 @@ class PendingBlockMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = PendingBlockMessage::class.java.newInstance()
+        val actualMessage = PendingBlockMessage::class.java.getConstructor().newInstance()
 
         actualMessage.read(buffer)
 

@@ -33,7 +33,7 @@ class GenesisBlockMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = GenesisBlockMessage::class.java.newInstance()
+        val actualMessage = GenesisBlockMessage::class.java.getConstructor().newInstance()
 
         actualMessage.read(buffer)
 

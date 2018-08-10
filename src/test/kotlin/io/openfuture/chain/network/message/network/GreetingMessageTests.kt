@@ -30,7 +30,7 @@ class GreetingMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = GreetingMessage::class.java.newInstance()
+        val actualMessage = GreetingMessage::class.java.getConstructor().newInstance()
 
         actualMessage.read(buffer)
 

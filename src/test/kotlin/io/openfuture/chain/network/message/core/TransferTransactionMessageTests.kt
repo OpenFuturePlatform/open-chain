@@ -33,7 +33,7 @@ class TransferTransactionMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = TransferTransactionMessage::class.java.newInstance()
+        val actualMessage = TransferTransactionMessage::class.java.getConstructor().newInstance()
 
         actualMessage.read(buffer)
 
