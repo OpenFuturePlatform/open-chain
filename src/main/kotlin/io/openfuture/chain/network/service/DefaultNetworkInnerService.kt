@@ -67,7 +67,7 @@ class DefaultNetworkInnerService(
         knownAddresses.add(NetworkAddressMessage(properties.host!!, properties.port!!))
         val connectedAddresses = getConnectionAddresses()
         knownAddresses.addAll(connectedAddresses)
-        connectedAddresses.forEach { send(it, ExplorerFindAddressesMessage()) }
+        connectedAddresses.forEach { send(it, ExplorerFindAddressesMessage(), false) }
     }
 
     override fun getNetworkSize() = networkSize
@@ -119,7 +119,7 @@ class DefaultNetworkInnerService(
             .filter { !knownAddresses.contains(it) }
             .forEach {
                 knownAddresses.add(it)
-                sendAndClose(it, ExplorerFindAddressesMessage())
+                send(it, ExplorerFindAddressesMessage(), true)
             }
     }
 
@@ -163,18 +163,18 @@ class DefaultNetworkInnerService(
                 .shuffled()
                 .firstOrNull() ?: throw ValidationException("There are no available addresses")
 
-        send(address, FindAddressesMessage())
+        send(address, FindAddressesMessage(), false)
     }
 
-    private fun send(address: NetworkAddressMessage, message: BaseMessage) {
+    private fun send(address: NetworkAddressMessage, message: BaseMessage, closeAfterSending: Boolean) {
         val channel = connections.filter { it.value == address }.map { it.key }.firstOrNull()
         if (channel != null) {
-            channel.writeAndFlush(message)
+            sendAndCloseIfNeeded(channel, message, closeAfterSending)
         } else {
             bootstrap.connect(address.host, address.port).addListener { future ->
                 future as ChannelFuture
                 if (future.isSuccess) {
-                    future.channel().writeAndFlush(message)
+                    sendAndCloseIfNeeded(future.channel(), message, closeAfterSending)
                 } else {
                     log.warn("Can not connect to ${address.host}:${address.port}")
                 }
@@ -182,27 +182,11 @@ class DefaultNetworkInnerService(
         }
     }
 
-    private fun sendAndClose(address: NetworkAddressMessage, message: BaseMessage) {
-        val channel = connections.filter { it.value == address }.map { it.key }.firstOrNull()
-        if (channel != null) {
-            channel.writeAndFlush(message)
-            closeAfterDelay(channel)
-        } else {
-            bootstrap.connect(address.host, address.port).addListener { future ->
-                future as ChannelFuture
-                if (future.isSuccess) {
-                    val newChannel = future.channel()
-                    newChannel.writeAndFlush(message)
-                    closeAfterDelay(newChannel)
-                } else {
-                    log.warn("Can not connect to ${address.host}:${address.port}")
-                }
-            }
+    private fun sendAndCloseIfNeeded(channel: Channel, message: BaseMessage, close: Boolean) {
+        channel.writeAndFlush(message)
+        if (close) {
+            channel.eventLoop().schedule({ channel.close() }, WAIT_FOR_RESPONSE_TIME, MILLISECONDS)
         }
-    }
-
-    private fun closeAfterDelay(newChannel: Channel) {
-        newChannel.eventLoop().schedule({ newChannel.close() }, WAIT_FOR_RESPONSE_TIME, MILLISECONDS)
     }
 
 }
