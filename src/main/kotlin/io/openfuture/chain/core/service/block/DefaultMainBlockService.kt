@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
+import io.openfuture.chain.core.exception.InsufficientTransactionsException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.repository.MainBlockRepository
@@ -98,7 +99,7 @@ class DefaultMainBlockService(
 
     private fun calculateMerkleRoot(transactions: List<String>): String {
         if (transactions.isEmpty()) {
-            throw IllegalArgumentException("Transactions must not be empty!")
+            throw InsufficientTransactionsException()
         }
 
         if (transactions.size == 1) {

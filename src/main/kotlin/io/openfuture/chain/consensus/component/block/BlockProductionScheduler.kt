@@ -3,6 +3,7 @@ package io.openfuture.chain.consensus.component.block
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
+import io.openfuture.chain.core.exception.InsufficientTransactionsException
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
@@ -56,9 +57,12 @@ class BlockProductionScheduler(
                 } else if (keyHolder.getPublicKey() == slotOwner.publicKey) {
                     val block = mainBlockService.create()
                     pendingBlockHandler.addBlock(block)
+                    Thread.sleep(epochService.timeToNextTimeSlot(networkTime))
                 }
             } catch (ex: Exception) {
-                log.error("Block creation failure inbound: ${ex.message}")
+                if (ex !is InsufficientTransactionsException) {
+                    log.error("Block creation failure inbound: ${ex.message}")
+                }
             }
         }
     }
