@@ -11,7 +11,7 @@ class SyncBlockScheduler(
     private val networkInnerService: NetworkInnerService
 ) {
 
-    @Scheduled(fixedDelayString = "10000")
+    @Scheduled(fixedRateString = "\${node.synchronization-interval}")
     fun syncBlock() {
         if (syncBlockHandler.getSyncStatus() == NOT_SYNCHRONIZED && !networkInnerService.getChannels().isEmpty()) {
             syncBlockHandler.synchronize()
