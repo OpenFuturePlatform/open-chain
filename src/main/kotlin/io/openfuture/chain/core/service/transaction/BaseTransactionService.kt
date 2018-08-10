@@ -55,6 +55,12 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return repository.save(tx)
     }
 
+    protected fun isExists(hash: String): Boolean {
+        val persistUtx = unconfirmedRepository.findOneByHash(hash)
+        val persistTx = repository.findOneByHash(hash)
+        return null != persistUtx || null != persistTx
+    }
+
     open fun isValid(utx: U): Boolean = this.isValidBase(utx)
 
     open fun isValid(tx: T): Boolean = this.isValidBase(tx)
@@ -67,7 +73,7 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return isValidAddress(tx.senderAddress, tx.senderPublicKey)
             && isValidFee(tx.senderAddress, tx.fee)
             && isValidHash(tx.timestamp, tx.fee, tx.senderAddress, tx.getPayload(), tx.hash)
-            && isValidaSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
+            && isValidSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
     }
 
     private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean {
@@ -85,7 +91,7 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return TransactionUtils.generateHash(timestamp, fee, senderAddress, payload) == hash
     }
 
-    private fun isValidaSignature(hash: String, signature: String, publicKey: String): Boolean {
+    private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean {
         return SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
     }
 

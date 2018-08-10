@@ -37,8 +37,7 @@ internal class DefaultVoteTransactionService(
 
     @Transactional
     override fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction {
-        val transaction = unconfirmedRepository.findOneByHash(message.hash)
-        if (null != transaction) {
+        if (isExists(message.hash)) {
             return UnconfirmedVoteTransaction.of(message)
         }
 
@@ -49,7 +48,12 @@ internal class DefaultVoteTransactionService(
 
     @Transactional
     override fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction {
-        val savedUtx = super.save(UnconfirmedVoteTransaction.of(request))
+        val uTransaction = UnconfirmedVoteTransaction.of(request)
+        if (isExists(uTransaction.hash)) {
+            return uTransaction
+        }
+
+        val savedUtx = super.save(uTransaction)
         networkService.broadcast(VoteTransactionMessage(savedUtx))
         return savedUtx
     }

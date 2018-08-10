@@ -19,25 +19,3 @@ INSERT INTO blocks (
 );
 
 INSERT INTO genesis_blocks (id, epoch_index) VALUES (1, 1);
-
-insert into wallets (id, address, balance)
-  select
-    1,
-    '0x2B65A8bD3ac3b18E5dc5b5b95c431Fc2DdE68432',
-    100;
---
-insert into delegates (id, public_key, address)
-  select
-    1,
-    'Test delegate public key',
-    'Test delegate address';
---
-insert into wallets2delegates (wallet_id, delegate_id)
-  select
-    1,
-    1;
---
-insert into delegate2genesis (delegate_id, genesis_id)
-  select
-    1,
-    1;
