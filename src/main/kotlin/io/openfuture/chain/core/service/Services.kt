@@ -53,7 +53,7 @@ interface GenesisBlockService {
 
     fun getLast(): GenesisBlock
 
-    fun create(): GenesisBlockMessage
+    fun create(timestamp: Long): GenesisBlockMessage
 
     fun add(message: GenesisBlockMessage)
 
@@ -87,6 +87,8 @@ interface TransferTransactionService {
     fun getAll(request: PageRequest): Page<TransferTransaction>
 
     fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction>
+
+    fun getByAddress(address: String): List<TransferTransaction>
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction
 

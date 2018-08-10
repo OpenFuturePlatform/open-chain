@@ -9,4 +9,6 @@ interface PendingBlockHandler {
 
     fun handleApproveMessage(message: BlockApprovalMessage)
 
+    fun resetSlotNumber()
+
 }
