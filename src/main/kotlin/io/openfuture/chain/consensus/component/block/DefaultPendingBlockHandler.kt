@@ -37,12 +37,12 @@ class DefaultPendingBlockHandler(
             this.reset()
         }
 
+        if (!pendingBlocks.add(block)) {
+            return
+        }
+
         val slotOwner = epochService.getCurrentSlotOwner()
         if (slotOwner.publicKey == block.publicKey && mainBlockService.isValid(block)) {
-            if (!pendingBlocks.add(block)) {
-                return
-            }
-
             networkService.broadcast(block)
             if (IDLE == stage && isActiveDelegate()) {
                 this.observable = block
@@ -62,6 +62,11 @@ class DefaultPendingBlockHandler(
             COMMIT -> handleCommit(message)
             IDLE -> throw IllegalArgumentException("Unacceptable message type")
         }
+    }
+
+    @Synchronized
+    override fun resetSlotNumber() {
+        timeSlotNumber = 0L
     }
 
     private fun handlePrevote(message: BlockApprovalMessage) {

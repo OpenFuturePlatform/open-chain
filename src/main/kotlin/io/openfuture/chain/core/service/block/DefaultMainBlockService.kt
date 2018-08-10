@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
+import io.openfuture.chain.core.exception.InsufficientTransactionsException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.repository.MainBlockRepository
@@ -12,7 +13,6 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.MainBlockMessage
-import io.openfuture.chain.network.service.NetworkApiService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,8 +28,7 @@ class DefaultMainBlockService(
     private val voteTransactionService: VoteTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
-    private val consensusProperties: ConsensusProperties,
-    private val networkService: NetworkApiService
+    private val consensusProperties: ConsensusProperties
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
 
     @Transactional(readOnly = true)
@@ -64,6 +63,7 @@ class DefaultMainBlockService(
 
         val block = MainBlock.of(message)
         if (!isValid(block, message.getAllTransactions())) {
+            //TODO call second synchronization
             return
         }
 
@@ -71,7 +71,6 @@ class DefaultMainBlockService(
         message.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
         message.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
         message.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
-        networkService.broadcast(message)
     }
 
     @Transactional
@@ -99,7 +98,7 @@ class DefaultMainBlockService(
 
     private fun calculateMerkleRoot(transactions: List<String>): String {
         if (transactions.isEmpty()) {
-            throw IllegalArgumentException("Transactions must not be empty!")
+            throw InsufficientTransactionsException()
         }
 
         if (transactions.size == 1) {

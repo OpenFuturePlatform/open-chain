@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.service.block
 
-import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.Delegate
@@ -13,7 +12,6 @@ import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
 import io.openfuture.chain.network.service.NetworkApiService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -26,8 +24,6 @@ class DefaultGenesisBlockService(
     repository: GenesisBlockRepository,
     walletService: WalletService,
     delegateService: DefaultDelegateService,
-    private val clock: NodeClock,
-    private val consensusProperties: ConsensusProperties,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService
 ) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService), GenesisBlockService {
@@ -36,12 +32,11 @@ class DefaultGenesisBlockService(
     override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()
         ?: throw NotFoundException("Last block not found")
 
-    override fun create(): GenesisBlockMessage {
-        val timestamp = clock.networkTime()
+    override fun create(timestamp: Long): GenesisBlockMessage {
         val lastBlock = blockService.getLast()
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
-        val reward = consensusProperties.rewardBlock!!
+        val reward = 0L
         val payload = createPayload()
         val hash = BlockUtils.createHash(timestamp, height, previousHash, reward, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
