@@ -7,7 +7,7 @@ interface SyncBlockHandler {
 
     fun synchronize()
 
-    fun isSynchronize(): Boolean
+    fun getSyncStatus(): SynchronizationStatus
 
     fun handleHashBlockRequestMessage(ctx: ChannelHandlerContext, message: HashBlockRequestMessage)
 
@@ -18,6 +18,5 @@ interface SyncBlockHandler {
     fun handleMainBlockMessage(block: MainBlockMessage)
 
     fun handleGenesisBlockMessage(block: GenesisBlockMessage)
-
 
 }

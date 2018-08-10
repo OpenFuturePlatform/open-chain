@@ -3,6 +3,7 @@ package io.openfuture.chain.network.handler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.core.sync.SyncBlockHandler
+import io.openfuture.chain.core.sync.SynchronizationStatus
 import io.openfuture.chain.network.message.base.Packet
 import io.openfuture.chain.network.message.base.PacketType.*
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
@@ -42,7 +43,7 @@ abstract class BaseConnectionHandler(
 //        try {
 //            lock.readLock().lock()
 
-        if (syncBlockHandler.isSynchronize()) {
+        if (syncBlockHandler.getSyncStatus() == SynchronizationStatus.SYNCHRONIZED) {
             processAppMessages(ctx, packet)
         } else {
             processSyncMessage(ctx, packet)

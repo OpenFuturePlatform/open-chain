@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.sync
 
+import io.openfuture.chain.core.sync.SynchronizationStatus.NOT_SYNCHRONIZED
 import io.openfuture.chain.network.service.NetworkInnerService
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -12,10 +13,9 @@ class SyncBlockScheduler(
 
     @Scheduled(fixedDelayString = "10000")
     fun syncBlock() {
-        if (!syncBlockHandler.isSynchronize() && !networkInnerService.getChannels().isEmpty()) {
+        if (syncBlockHandler.getSyncStatus() == NOT_SYNCHRONIZED && !networkInnerService.getChannels().isEmpty()) {
             syncBlockHandler.synchronize()
         }
     }
-
 
 }
