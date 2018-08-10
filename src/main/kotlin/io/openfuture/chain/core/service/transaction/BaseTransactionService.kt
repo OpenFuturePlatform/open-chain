@@ -73,7 +73,7 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return isValidAddress(tx.senderAddress, tx.senderPublicKey)
             && isValidFee(tx.senderAddress, tx.fee)
             && isValidHash(tx.timestamp, tx.fee, tx.senderAddress, tx.getPayload(), tx.hash)
-            && isValidaSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
+            && isValidSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
     }
 
     private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean {
@@ -91,7 +91,7 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return TransactionUtils.generateHash(timestamp, fee, senderAddress, payload) == hash
     }
 
-    private fun isValidaSignature(hash: String, signature: String, publicKey: String): Boolean {
+    private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean {
         return SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
     }
 
