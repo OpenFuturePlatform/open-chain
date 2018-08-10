@@ -29,6 +29,8 @@ class PacketTypeTests {
         assertThat(PacketType.get(14)).isEqualTo(VOTE_TRANSACTION)
         assertThat(PacketType.get(15)).isEqualTo(EXPLORER_FIND_ADDRESSES)
         assertThat(PacketType.get(16)).isEqualTo(EXPLORER_ADDRESSES)
+        assertThat(PacketType.get(17)).isEqualTo(HASH_BLOCK_REQUEST)
+        assertThat(PacketType.get(18)).isEqualTo(HASH_BLOCK_RESPONSE)
     }
 
     @Test(expected = NoSuchElementException::class)
@@ -54,6 +56,8 @@ class PacketTypeTests {
         assertThat(PacketType.get(VoteTransactionMessage::class.java.newInstance())).isEqualTo(VOTE_TRANSACTION)
         assertThat(PacketType.get(ExplorerFindAddressesMessage::class.java.newInstance())).isEqualTo(EXPLORER_FIND_ADDRESSES)
         assertThat(PacketType.get(ExplorerAddressesMessage::class.java.newInstance())).isEqualTo(EXPLORER_ADDRESSES)
+        assertThat(PacketType.get(HashBlockRequestMessage::class.java.newInstance())).isEqualTo(HASH_BLOCK_REQUEST)
+        assertThat(PacketType.get(HashBlockResponseMessage::class.java.newInstance())).isEqualTo(HASH_BLOCK_RESPONSE)
     }
 
     @Test(expected = NoSuchElementException::class)

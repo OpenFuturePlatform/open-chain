@@ -9,7 +9,6 @@ import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import org.springframework.stereotype.Service
 
-// TODO: call core API here
 @Service
 class DefaultCoreMessageService(
     private val voteTransactionService: VoteTransactionService,

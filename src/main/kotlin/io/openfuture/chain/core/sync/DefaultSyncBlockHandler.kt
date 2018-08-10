@@ -51,20 +51,20 @@ class DefaultSyncBlockHandler(
     }
 
     @Synchronized
-    override fun handleHashBlockRequestMessage(ctx: ChannelHandlerContext, message: HashBlockRequestMessage) {
+    override fun onHashBlockRequestMessage(ctx: ChannelHandlerContext, message: HashBlockRequestMessage) {
         val lastBlock = blockService.getLast()
         send(ctx, HashBlockResponseMessage(lastBlock.hash))
     }
 
     @Synchronized
-    override fun handleSyncBlocKRequestMessage(ctx: ChannelHandlerContext, message: SyncBlockRequestMessage) {
+    override fun onSyncBlocKRequestMessage(ctx: ChannelHandlerContext, message: SyncBlockRequestMessage) {
         blockService.getAfterCurrentHash(message.hash)
             .map { it.toMessage() }
             .forEach { msg -> send(ctx, msg) }
     }
 
     @Synchronized
-    override fun handleHashResponseMessage(ctx: ChannelHandlerContext, message: HashBlockResponseMessage) {
+    override fun onHashResponseMessage(ctx: ChannelHandlerContext, message: HashBlockResponseMessage) {
         if (expectedHash == message.hash) {
             unlock(message.hash)
             return
@@ -75,13 +75,13 @@ class DefaultSyncBlockHandler(
     }
 
     @Synchronized
-    override fun handleMainBlockMessage(block: MainBlockMessage) {
+    override fun onMainBlockMessage(block: MainBlockMessage) {
         mainBlockService.synchronize(block)
         unlockIfLastBLock(block)
     }
 
     @Synchronized
-    override fun handleGenesisBlockMessage(block: GenesisBlockMessage) {
+    override fun onGenesisBlockMessage(block: GenesisBlockMessage) {
         genesisBlockService.add(block)
         unlockIfLastBLock(block)
     }

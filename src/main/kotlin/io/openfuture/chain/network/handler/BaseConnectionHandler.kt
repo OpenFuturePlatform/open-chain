@@ -34,17 +34,20 @@ abstract class BaseConnectionHandler(
 
     override fun channelRead0(ctx: ChannelHandlerContext, packet: Packet) {
         when (packet.type) {
+            HEART_BEAT -> networkService.onHeartBeat(ctx, packet.data as HeartBeatMessage)
             GREETING -> networkService.onGreeting(ctx, packet.data as GreetingMessage)
             ADDRESSES -> networkService.onAddresses(ctx, packet.data as AddressesMessage)
             FIND_ADDRESSES -> networkService.onFindAddresses(ctx, packet.data as FindAddressesMessage)
+            TIME -> networkService.onTime(ctx, packet.data as TimeMessage)
+            ASK_TIME -> networkService.onAskTime(ctx, packet.data as AskTimeMessage)
             EXPLORER_ADDRESSES -> networkService.onExplorerAddresses(ctx, packet.data as ExplorerAddressesMessage)
             EXPLORER_FIND_ADDRESSES -> networkService.onExplorerFindAddresses(ctx, packet.data as ExplorerFindAddressesMessage)
 
-            HASH_BLOCK_REQUEST -> syncBlockHandler.handleHashBlockRequestMessage(ctx, packet.data as HashBlockRequestMessage)
-            HASH_BLOCK_RESPONSE -> syncBlockHandler.handleHashResponseMessage(ctx, packet.data as HashBlockResponseMessage)
-            SYNC_BLOCKS_REQUEST -> syncBlockHandler.handleSyncBlocKRequestMessage(ctx, packet.data as SyncBlockRequestMessage)
-            MAIN_BLOCK -> syncBlockHandler.handleMainBlockMessage(packet.data as MainBlockMessage)
-            GENESIS_BLOCK -> syncBlockHandler.handleGenesisBlockMessage(packet.data as GenesisBlockMessage)
+            HASH_BLOCK_REQUEST -> syncBlockHandler.onHashBlockRequestMessage(ctx, packet.data as HashBlockRequestMessage)
+            HASH_BLOCK_RESPONSE -> syncBlockHandler.onHashResponseMessage(ctx, packet.data as HashBlockResponseMessage)
+            SYNC_BLOCKS_REQUEST -> syncBlockHandler.onSyncBlocKRequestMessage(ctx, packet.data as SyncBlockRequestMessage)
+            MAIN_BLOCK -> syncBlockHandler.onMainBlockMessage(packet.data as MainBlockMessage)
+            GENESIS_BLOCK -> syncBlockHandler.onGenesisBlockMessage(packet.data as GenesisBlockMessage)
         }
 
         if (syncBlockHandler.getSyncStatus() == SynchronizationStatus.SYNCHRONIZED) {
@@ -54,14 +57,11 @@ abstract class BaseConnectionHandler(
 
     private fun processAppMessages(ctx: ChannelHandlerContext, packet: Packet) {
         when (packet.type) {
-            HEART_BEAT -> networkService.onHeartBeat(ctx, packet.data as HeartBeatMessage)
             TRANSFER_TRANSACTION -> coreService.onTransferTransaction(ctx, packet.data as TransferTransactionMessage)
             DELEGATE_TRANSACTION -> coreService.onDelegateTransaction(ctx, packet.data as DelegateTransactionMessage)
             VOTE_TRANSACTION -> coreService.onVoteTransaction(ctx, packet.data as VoteTransactionMessage)
             BLOCK_APPROVAL -> consensusService.onBlockApproval(ctx, packet.data as BlockApprovalMessage)
             PENDING_BLOCK -> consensusService.onPendingBlock(ctx, packet.data as PendingBlockMessage)
-            TIME -> networkService.onTime(ctx, packet.data as TimeMessage)
-            ASK_TIME -> networkService.onAskTime(ctx, packet.data as AskTimeMessage)
         }
     }
 

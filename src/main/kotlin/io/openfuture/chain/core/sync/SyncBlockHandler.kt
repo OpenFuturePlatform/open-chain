@@ -9,14 +9,14 @@ interface SyncBlockHandler {
 
     fun getSyncStatus(): SynchronizationStatus
 
-    fun handleHashBlockRequestMessage(ctx: ChannelHandlerContext, message: HashBlockRequestMessage)
+    fun onHashBlockRequestMessage(ctx: ChannelHandlerContext, message: HashBlockRequestMessage)
 
-    fun handleHashResponseMessage(ctx: ChannelHandlerContext, message: HashBlockResponseMessage)
+    fun onHashResponseMessage(ctx: ChannelHandlerContext, message: HashBlockResponseMessage)
 
-    fun handleSyncBlocKRequestMessage(ctx: ChannelHandlerContext, message: SyncBlockRequestMessage)
+    fun onSyncBlocKRequestMessage(ctx: ChannelHandlerContext, message: SyncBlockRequestMessage)
 
-    fun handleMainBlockMessage(block: MainBlockMessage)
+    fun onMainBlockMessage(block: MainBlockMessage)
 
-    fun handleGenesisBlockMessage(block: GenesisBlockMessage)
+    fun onGenesisBlockMessage(block: GenesisBlockMessage)
 
 }
