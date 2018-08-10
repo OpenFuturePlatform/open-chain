@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.transaction
 
+import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
@@ -18,7 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired
 
 abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransaction>(
     protected val repository: TransactionRepository<T>,
-    protected val unconfirmedRepository: UTransactionRepository<U>
+    protected val unconfirmedRepository: UTransactionRepository<U>,
+    private val capacityChecker: TransactionCapacityChecker
 ) {
 
     @Autowired
@@ -45,7 +47,9 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         if (!isValid(tx)) {
             throw ValidationException("Transaction is invalid!")
         }
+
         updateBalanceByFee(tx)
+        capacityChecker.incrementCapacity()
         return repository.save(tx)
     }
 
