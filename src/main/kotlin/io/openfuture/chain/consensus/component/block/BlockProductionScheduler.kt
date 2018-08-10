@@ -42,12 +42,6 @@ class BlockProductionScheduler(
     private fun proceedProductionLoop() {
         while (true) {
             try {
-                val networkTime = clock.networkTime()
-                if (epochService.isInIntermission(networkTime)) {
-                    Thread.sleep(epochService.timeToNextTimeSlot(networkTime))
-                    continue
-                }
-
                 val slotOwner = epochService.getCurrentSlotOwner()
                 if (isGenesisBlockRequired()) {
                     val timestamp = epochService.getEpochEndTime()
@@ -57,12 +51,13 @@ class BlockProductionScheduler(
                 } else if (keyHolder.getPublicKey() == slotOwner.publicKey) {
                     val block = mainBlockService.create()
                     pendingBlockHandler.addBlock(block)
-                    Thread.sleep(epochService.timeToNextTimeSlot(networkTime))
                 }
             } catch (ex: Exception) {
                 if (ex !is InsufficientTransactionsException) {
                     log.error("Block creation failure inbound: ${ex.message}")
                 }
+            } finally {
+                Thread.sleep(epochService.timeToNextTimeSlot(clock.networkTime()))
             }
         }
     }

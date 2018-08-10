@@ -37,8 +37,7 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction {
-        val persistTx = unconfirmedRepository.findOneByHash(message.hash)
-        if (null != persistTx) {
+        if (isExists(message.hash)) {
             return UnconfirmedDelegateTransaction.of(message)
         }
 
@@ -49,7 +48,12 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction {
-        val savedUtx = super.save(UnconfirmedDelegateTransaction.of(request))
+        val uTransaction = UnconfirmedDelegateTransaction.of(request)
+        if (isExists(uTransaction.hash)) {
+            return uTransaction
+        }
+
+        val savedUtx = super.save(uTransaction)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
     }
