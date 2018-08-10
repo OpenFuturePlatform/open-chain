@@ -98,41 +98,33 @@ class DefaultSyncBlockHandler(
         }
     }
 
-    private fun lock(hash: String) {
-        lock.writeLock().lock()
-        try {
-            expectedHash = hash
-            syncStatus = NOT_SYNCHRONIZED
-        } finally {
-            lock.writeLock().unlock()
-        }
-    }
-
-    private fun processing(hash: String) {
-        lock.writeLock().lock()
-        try {
-            expectedHash = hash
-            syncStatus = PROCESSING
-        } finally {
-            lock.writeLock().unlock()
-        }
-    }
-
-    private fun unlock(hash: String) {
-        lock.writeLock().lock()
-        try {
-            expectedHash = hash
-            syncStatus = SYNCHRONIZED
-        } finally {
-            lock.writeLock().unlock()
-        }
-    }
-
     private fun send(ctx: ChannelHandlerContext, message: BaseMessage) = ctx.channel().writeAndFlush(message)
 
     private fun unlockIfLastBLock(block: BlockMessage) {
         if (expectedHash == block.hash) {
             unlock(block.hash)
+        }
+    }
+
+    private fun lock(hash: String) {
+        changeSynchronizationStatus(hash, NOT_SYNCHRONIZED)
+    }
+
+    private fun processing(hash: String) {
+        changeSynchronizationStatus(hash, PROCESSING)
+    }
+
+    private fun unlock(hash: String) {
+        changeSynchronizationStatus(hash, SYNCHRONIZED)
+    }
+
+    private fun changeSynchronizationStatus(hash: String, status: SynchronizationStatus) {
+        lock.writeLock().lock()
+        try {
+            expectedHash = hash
+            syncStatus = status
+        } finally {
+            lock.writeLock().unlock()
         }
     }
 
