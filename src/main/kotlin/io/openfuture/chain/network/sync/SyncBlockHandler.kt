@@ -1,4 +1,4 @@
-package io.openfuture.chain.core.sync
+package io.openfuture.chain.network.sync
 
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.message.core.*

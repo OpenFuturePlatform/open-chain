@@ -1,7 +1,7 @@
 package io.openfuture.chain.network.handler
 
 import io.netty.channel.ChannelHandler
-import io.openfuture.chain.core.sync.SyncBlockHandler
+import io.openfuture.chain.network.sync.SyncBlockHandler
 import io.openfuture.chain.network.service.ConsensusMessageService
 import io.openfuture.chain.network.service.CoreMessageService
 import io.openfuture.chain.network.service.NetworkInnerService

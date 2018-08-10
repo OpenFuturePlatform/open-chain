@@ -1,7 +1,7 @@
-package io.openfuture.chain.core.sync
+package io.openfuture.chain.network.sync
 
-import io.openfuture.chain.core.sync.SynchronizationStatus.NOT_SYNCHRONIZED
 import io.openfuture.chain.network.service.NetworkApiService
+import io.openfuture.chain.network.sync.SynchronizationStatus.NOT_SYNCHRONIZED
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 

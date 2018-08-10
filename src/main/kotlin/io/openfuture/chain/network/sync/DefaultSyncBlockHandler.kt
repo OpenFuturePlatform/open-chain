@@ -1,14 +1,14 @@
-package io.openfuture.chain.core.sync
+package io.openfuture.chain.network.sync
 
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
-import io.openfuture.chain.core.sync.SynchronizationStatus.*
 import io.openfuture.chain.network.handler.BaseConnectionHandler
 import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.service.NetworkApiService
+import io.openfuture.chain.network.sync.SynchronizationStatus.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.concurrent.locks.ReadWriteLock
