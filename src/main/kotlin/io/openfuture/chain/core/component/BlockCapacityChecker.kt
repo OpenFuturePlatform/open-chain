@@ -26,7 +26,6 @@ class BlockCapacityChecker(
     }
 
     fun incrementCapacity(time: Long) {
-        println(time)
         val diff = time - lastBlockTime.getAndSet(time)
         capacity.getAndAdd(diff)
         counter.getAndIncrement()
