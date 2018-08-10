@@ -19,7 +19,7 @@ variables:
 ###########################
 unit-tests:
   stage: test
-  image: openjdk:8-jdk
+  image: openjdk:10-jdk
   before_script:
     - export GRADLE_USER_HOME=`pwd`/.gradle
   script:
@@ -43,7 +43,7 @@ unit-tests:
 ###########################
 build-jar:
   stage: build
-  image: openjdk:8-jdk
+  image: openjdk:10-jdk
   before_script:
     - export GRADLE_USER_HOME=`pwd`/.gradle
   script:
