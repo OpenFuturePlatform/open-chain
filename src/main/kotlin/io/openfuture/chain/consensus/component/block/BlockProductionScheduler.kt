@@ -31,7 +31,6 @@ class BlockProductionScheduler(
     }
 
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
-    private var currentTimeSlot: Long = 0
 
 
     @PostConstruct
@@ -43,19 +42,17 @@ class BlockProductionScheduler(
         while (true) {
             try {
                 val networkTime = clock.networkTime()
-                val timeSlot = epochService.getSlotNumber(networkTime)
-                if (epochService.isInIntermission(networkTime) || timeSlot <= currentTimeSlot) {
+                if (epochService.isInIntermission(networkTime)) {
                     Thread.sleep(epochService.timeToNextTimeSlot(networkTime))
                     continue
                 }
 
-                currentTimeSlot = timeSlot
                 val slotOwner = epochService.getCurrentSlotOwner()
                 if (isGenesisBlockRequired()) {
                     val timestamp = epochService.getEpochEndTime()
                     val genesisBlock = genesisBlockService.create(timestamp)
                     genesisBlockService.add(genesisBlock)
-                    currentTimeSlot = 0
+                    pendingBlockHandler.resetSlotNumber()
                 } else if (keyHolder.getPublicKey() == slotOwner.publicKey) {
                     val block = mainBlockService.create()
                     pendingBlockHandler.addBlock(block)

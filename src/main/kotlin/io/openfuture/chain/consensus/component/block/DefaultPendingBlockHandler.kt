@@ -64,6 +64,11 @@ class DefaultPendingBlockHandler(
         }
     }
 
+    @Synchronized
+    override fun resetSlotNumber() {
+        timeSlotNumber = 0L
+    }
+
     private fun handlePrevote(message: BlockApprovalMessage) {
         val delegates = epochService.getDelegates()
         val delegate = delegates.find { message.publicKey == it.publicKey }
