@@ -35,6 +35,7 @@ class DefaultSyncBlockHandler(
         val log = LoggerFactory.getLogger(BaseConnectionHandler::class.java)
     }
 
+
     @PostConstruct
     fun initSyncStatus() {
         lock(blockService.getLast().hash)
