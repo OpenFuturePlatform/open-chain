@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
+import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
@@ -23,10 +24,11 @@ import org.springframework.transaction.annotation.Transactional
 internal class DefaultVoteTransactionService(
     repository: VoteTransactionRepository,
     uRepository: UVoteTransactionRepository,
+    capacityChecker: TransactionCapacityChecker,
     private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties,
     private val networkService: NetworkApiService
-) : BaseTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository), VoteTransactionService {
+) : BaseTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository, capacityChecker), VoteTransactionService {
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(): MutableList<UnconfirmedVoteTransaction> = unconfirmedRepository.findAllByOrderByFeeDesc()

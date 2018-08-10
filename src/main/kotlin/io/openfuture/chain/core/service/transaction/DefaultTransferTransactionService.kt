@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.transaction
 
+import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -22,8 +23,9 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
     uRepository: UTransferTransactionRepository,
+    capacityChecker: TransactionCapacityChecker,
     private val networkService: NetworkApiService
-) : BaseTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
+) : BaseTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository, capacityChecker), TransferTransactionService {
 
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<TransferTransaction> = repository.findAll(request)
