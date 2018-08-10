@@ -6,7 +6,6 @@ import io.openfuture.chain.network.service.ConsensusMessageService
 import io.openfuture.chain.network.service.CoreMessageService
 import io.openfuture.chain.network.service.NetworkInnerService
 import org.springframework.stereotype.Component
-import java.util.concurrent.locks.ReentrantReadWriteLock
 
 @Component
 @ChannelHandler.Sharable
@@ -14,6 +13,5 @@ class ConnectionServerHandler(
     networkService: NetworkInnerService,
     coreService: CoreMessageService,
     consensusService: ConsensusMessageService,
-    lock: ReentrantReadWriteLock,
     syncBlockHandler: SyncBlockHandler
-) : BaseConnectionHandler(lock, coreService, syncBlockHandler, networkService, consensusService)
+) : BaseConnectionHandler(coreService, syncBlockHandler, networkService, consensusService)

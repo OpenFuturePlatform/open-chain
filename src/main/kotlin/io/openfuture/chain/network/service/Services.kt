@@ -5,7 +5,9 @@ import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.*
+import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.network.message.core.TransferTransactionMessage
+import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.network.message.network.*
 
 
@@ -56,12 +58,6 @@ interface NetworkInnerService {
 }
 
 interface CoreMessageService {
-
-    fun onNetworkBlockRequest(ctx: ChannelHandlerContext, request: SyncBlockRequestMessage)
-
-    fun onGenesisBlock(ctx: ChannelHandlerContext, block: GenesisBlockMessage)
-
-    fun onMainBlock(ctx: ChannelHandlerContext, block: MainBlockMessage)
 
     fun onTransferTransaction(ctx: ChannelHandlerContext, tx: TransferTransactionMessage)
 

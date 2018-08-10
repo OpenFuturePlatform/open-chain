@@ -15,9 +15,8 @@ class ConnectionClientHandler(
     networkService: NetworkInnerService,
     coreService: CoreMessageService,
     consensusService: ConsensusMessageService,
-    lock: ReentrantReadWriteLock,
     syncBlockHandler: SyncBlockHandler
-) : BaseConnectionHandler(lock, coreService, syncBlockHandler, networkService, consensusService) {
+) : BaseConnectionHandler(coreService, syncBlockHandler, networkService, consensusService) {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         super.channelActive(ctx)
