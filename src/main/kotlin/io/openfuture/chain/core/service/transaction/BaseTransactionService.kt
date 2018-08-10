@@ -55,6 +55,12 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return repository.save(tx)
     }
 
+    protected fun isExists(hash: String): Boolean {
+        val persistTx = unconfirmedRepository.findOneByHash(hash)
+        val persistUtx = repository.findOneByHash(hash)
+        return null != persistTx || null != persistUtx
+    }
+
     open fun isValid(utx: U): Boolean = this.isValidBase(utx)
 
     open fun isValid(tx: T): Boolean = this.isValidBase(tx)

@@ -45,8 +45,7 @@ class DefaultTransferTransactionService(
 
     @Transactional
     override fun add(message: TransferTransactionMessage): UnconfirmedTransferTransaction {
-        val transaction = unconfirmedRepository.findOneByHash(message.hash)
-        if (null != transaction) {
+        if (isExists(message.hash)) {
             return UnconfirmedTransferTransaction.of(message)
         }
 
@@ -57,7 +56,12 @@ class DefaultTransferTransactionService(
 
     @Transactional
     override fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction {
-        val savedUtx = super.save(UnconfirmedTransferTransaction.of(request))
+        val uTransaction = UnconfirmedTransferTransaction.of(request)
+        if (isExists(uTransaction.hash)) {
+            return uTransaction
+        }
+
+        val savedUtx = super.save(uTransaction)
         networkService.broadcast(TransferTransactionMessage(savedUtx))
         return savedUtx
     }
