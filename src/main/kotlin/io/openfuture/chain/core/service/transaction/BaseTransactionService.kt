@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
@@ -57,11 +58,11 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
 
     open fun isValid(tx: T): Boolean = this.isValidBase(tx)
 
-    private fun updateBalanceByFee(tx: io.openfuture.chain.core.model.entity.transaction.Transaction) {
+    private fun updateBalanceByFee(tx: io.openfuture.chain.core.model.entity.transaction.BaseTransaction) {
         walletService.decreaseBalance(tx.senderAddress, tx.fee)
     }
 
-    private fun isValidBase(tx: io.openfuture.chain.core.model.entity.transaction.Transaction): Boolean {
+    private fun isValidBase(tx: io.openfuture.chain.core.model.entity.transaction.BaseTransaction): Boolean {
         return isValidAddress(tx.senderAddress, tx.senderPublicKey)
             && isValidFee(tx.senderAddress, tx.fee)
             && isValidHash(tx.timestamp, tx.fee, tx.senderAddress, tx.getPayload(), tx.hash)

@@ -6,7 +6,7 @@ import javax.persistence.Column
 import javax.persistence.MappedSuperclass
 
 @MappedSuperclass
-abstract class Transaction(
+abstract class BaseTransaction(
 
     @Column(name = "timestamp", nullable = false)
     var timestamp: Long,

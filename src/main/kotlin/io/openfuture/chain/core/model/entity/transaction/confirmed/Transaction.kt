@@ -2,7 +2,7 @@ package io.openfuture.chain.core.model.entity.transaction.confirmed
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.Transaction
+import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.network.message.core.TransactionMessage
 import javax.persistence.*
 
@@ -22,7 +22,7 @@ abstract class Transaction(
     @JoinColumn(name = "block_id", nullable = false)
     var block: MainBlock
 
-) : Transaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
+) : BaseTransaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
     abstract fun toMessage(): TransactionMessage
 
