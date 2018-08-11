@@ -29,7 +29,7 @@ inline fun <reified T : BaseMessage> ByteBuf.readList(): MutableList<T> {
     val size = this.readInt()
     val list = mutableListOf<T>()
     for (index in 1..size) {
-        val instance = T::class.java.getConstructor().newInstance()
+        val instance = T::class.java.newInstance()
         instance.read(this)
         list.add(instance)
     }

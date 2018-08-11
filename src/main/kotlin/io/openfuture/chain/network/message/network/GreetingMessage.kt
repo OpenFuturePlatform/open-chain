@@ -10,7 +10,7 @@ data class GreetingMessage(
 ) : BaseMessage {
 
     override fun read(buffer: ByteBuf) {
-        address = NetworkAddressMessage::class.java.getConstructor().newInstance()
+        address = NetworkAddressMessage::class.java.newInstance()
         address.read(buffer)
     }
 

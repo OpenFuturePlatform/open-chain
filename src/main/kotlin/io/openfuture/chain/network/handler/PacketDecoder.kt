@@ -21,7 +21,7 @@ class PacketDecoder : ReplayingDecoder<ByteBuf>() {
 
 
     override fun decode(ctx: ChannelHandlerContext, bytes: ByteBuf, out: MutableList<Any>) {
-        val packet = Packet::class.java.getConstructor().newInstance()
+        val packet = Packet::class.java.newInstance()
         packet.read(bytes)
 
         log.info("Decoded ${ToStringBuilder.reflectionToString(packet.data, SHORT_PREFIX_STYLE)} " +
