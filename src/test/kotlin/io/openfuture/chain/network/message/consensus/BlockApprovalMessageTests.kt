@@ -31,7 +31,7 @@ class BlockApprovalMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = BlockApprovalMessage::class.java.getConstructor().newInstance()
+        val actualMessage = BlockApprovalMessage::class.java.newInstance()
 
         actualMessage.read(buffer)
 

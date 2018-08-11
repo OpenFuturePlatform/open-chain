@@ -19,7 +19,7 @@ data class Packet(
         version = buffer.readString()
         timestamp = buffer.readLong()
         type = PacketType.get(buffer.readByte())
-        data = type.clazz.java.getConstructor().newInstance()
+        data = type.clazz.java.newInstance()
         data.read(buffer)
     }
 

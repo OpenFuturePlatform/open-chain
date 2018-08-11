@@ -32,7 +32,7 @@ class ConfirmedVoteTransactionMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = VoteTransactionMessage::class.java.getConstructor().newInstance()
+        val actualMessage = VoteTransactionMessage::class.java.newInstance()
 
         actualMessage.read(buffer)
 

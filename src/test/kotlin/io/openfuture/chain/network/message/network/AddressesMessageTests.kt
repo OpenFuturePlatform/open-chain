@@ -32,7 +32,7 @@ class AddressesMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = AddressesMessage::class.java.getConstructor().newInstance()
+        val actualMessage = AddressesMessage::class.java.newInstance()
 
         actualMessage.read(buffer)
 

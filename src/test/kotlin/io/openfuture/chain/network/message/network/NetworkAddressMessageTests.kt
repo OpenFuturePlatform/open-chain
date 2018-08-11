@@ -30,7 +30,7 @@ class NetworkAddressMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = NetworkAddressMessage::class.java.getConstructor().newInstance()
+        val actualMessage = NetworkAddressMessage::class.java.newInstance()
 
         actualMessage.read(buffer)
 

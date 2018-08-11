@@ -31,7 +31,7 @@ class HeartBeatMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = HeartBeatMessage::class.java.getConstructor().newInstance()
+        val actualMessage = HeartBeatMessage::class.java.newInstance()
 
         actualMessage.read(buffer)
 

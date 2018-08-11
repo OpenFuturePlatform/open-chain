@@ -30,7 +30,7 @@ class SyncBlockRequestMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = SyncBlockRequestMessage::class.java.getConstructor().newInstance()
+        val actualMessage = SyncBlockRequestMessage::class.java.newInstance()
 
         actualMessage.read(buffer)
 
