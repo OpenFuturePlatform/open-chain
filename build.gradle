@@ -11,8 +11,8 @@ plugins {
 apply plugin: "io.spring.dependency-management"
 
 group = 'io.openfuture.chain'
+sourceCompatibility = JavaVersion.VERSION_1_10
 version = versionDetails().lastTag[1..-1] + (versionDetails().isCleanTag ? '' : '-DIRTY')
-sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
     mavenCentral()
@@ -97,6 +97,4 @@ jacocoTestReport {
     }
 }
 check.dependsOn jacocoTestReport
-
-// Front
 processResources.dependsOn(':frontend:assemble')

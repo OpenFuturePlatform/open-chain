@@ -30,7 +30,7 @@ class AskTimeMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = AskTimeMessage::class.java.newInstance()
+        val actualMessage = AskTimeMessage::class.java.getConstructor().newInstance()
 
         actualMessage.read(buffer)
 

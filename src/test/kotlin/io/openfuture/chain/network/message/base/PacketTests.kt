@@ -31,7 +31,7 @@ class PacketTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = Packet::class.java.newInstance()
+        val actualMessage = Packet::class.java.getConstructor().newInstance()
 
         actualMessage.read(buffer)
 

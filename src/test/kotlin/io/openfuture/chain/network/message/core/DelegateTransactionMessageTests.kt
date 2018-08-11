@@ -32,7 +32,7 @@ class DelegateTransactionMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = DelegateTransactionMessage::class.java.newInstance()
+        val actualMessage = DelegateTransactionMessage::class.java.getConstructor().newInstance()
 
         actualMessage.read(buffer)
 

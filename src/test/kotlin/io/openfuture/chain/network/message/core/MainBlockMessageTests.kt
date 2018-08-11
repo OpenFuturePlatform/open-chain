@@ -45,7 +45,7 @@ class MainBlockMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = MainBlockMessage::class.java.newInstance()
+        val actualMessage = MainBlockMessage::class.java.getConstructor().newInstance()
 
         actualMessage.read(buffer)
 
