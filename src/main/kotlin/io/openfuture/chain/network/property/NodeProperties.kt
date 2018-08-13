@@ -66,7 +66,11 @@ class NodeProperties(
 
     /** Interval for synchronization blocks in milliseconds */
     @field:NotNull
-    var synchronizationInterval: Long? = null
+    var synchronizationInterval: Long? = null,
+
+    /** Max synchronization response delay in milliseconds */
+    @field:NotNull
+    var synchronizationResponseDelay: Long? = null
 
 ) {
 

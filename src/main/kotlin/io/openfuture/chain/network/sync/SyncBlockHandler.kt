@@ -9,6 +9,8 @@ interface SyncBlockHandler {
 
     fun getSyncStatus(): SynchronizationStatus
 
+    fun getLastResponseTime(): Long
+
     fun onHashBlockRequestMessage(ctx: ChannelHandlerContext, message: HashBlockRequestMessage)
 
     fun onHashResponseMessage(ctx: ChannelHandlerContext, message: HashBlockResponseMessage)
