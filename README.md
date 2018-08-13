@@ -7,6 +7,7 @@
 [![License](https://img.shields.io/github/license/OpenFuturePlatform/open-chain.svg?style=flat-square)](./LICENSE.txt)
 [![Install4J](https://www.ej-technologies.com/images/product_banners/install4j_small.png)](https://www.ej-technologies.com/products/install4j/overview.html)
 
+
 ## OPEN Platform: A distributed network for the Smart Contracts
 
 OPEN Platform uses blockchain technology to leverage **smart contracts** in order to autonomously manage digital assets and to create a **smart economy** within a decentralized network.
@@ -53,6 +54,7 @@ already have one.
 **NOTE:** It is OK for your pull-request to include a large number of commits. Once your change is accepted, you will be asked to squash your commits into one or some appropriately small number of commits before your pull-request is merged.
 
 ### Appreciation
+
 * OPEN chain generates native installers by using [multi-platform installer builder Install4J](https://www.ej-technologies.com/products/install4j/overview.html) by EJ Technologies
 
 ### License
