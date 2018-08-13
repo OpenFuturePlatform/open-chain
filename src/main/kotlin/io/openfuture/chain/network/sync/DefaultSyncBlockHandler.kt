@@ -9,11 +9,11 @@ import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.network.sync.SynchronizationStatus.*
+import org.apache.commons.lang3.tuple.MutablePair
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.concurrent.locks.ReadWriteLock
 import java.util.concurrent.locks.ReentrantReadWriteLock
-import javax.annotation.PostConstruct
 
 @Service
 class DefaultSyncBlockHandler(
@@ -24,10 +24,10 @@ class DefaultSyncBlockHandler(
 ) : SyncBlockHandler {
 
     @Volatile
-    private lateinit var syncStatus: SynchronizationStatus
+    private var syncStatus: SynchronizationStatus = NOT_SYNCHRONIZED
 
     @Volatile
-    private lateinit var expectedHash: String
+    private lateinit var expectedHashAndResponseTime: MutablePair<String, Long>
 
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
 
@@ -35,11 +35,6 @@ class DefaultSyncBlockHandler(
         val log = LoggerFactory.getLogger(BaseConnectionHandler::class.java)
     }
 
-
-    @PostConstruct
-    fun initSyncStatus() {
-        lock(blockService.getLast().hash)
-    }
 
     override fun getSyncStatus(): SynchronizationStatus {
         lock.readLock().lock()
@@ -49,6 +44,8 @@ class DefaultSyncBlockHandler(
             lock.readLock().unlock()
         }
     }
+
+    override fun getLastResponseTime(): Long? = expectedHashAndResponseTime.right
 
     @Synchronized
     override fun onHashBlockRequestMessage(ctx: ChannelHandlerContext, message: HashBlockRequestMessage) {
@@ -65,13 +62,15 @@ class DefaultSyncBlockHandler(
 
     @Synchronized
     override fun onHashResponseMessage(ctx: ChannelHandlerContext, message: HashBlockResponseMessage) {
-        if (expectedHash == message.hash) {
-            unlock(message.hash)
+        val currentLastHash = blockService.getLast().hash
+        if (currentLastHash == message.hash) {
+            unlock()
             return
         } else {
-            expectedHash = message.hash
+            expectedHashAndResponseTime.left = message.hash
+            expectedHashAndResponseTime.right = System.currentTimeMillis()
         }
-        send(ctx, SyncBlockRequestMessage(blockService.getLast().hash))
+        send(ctx, SyncBlockRequestMessage(currentLastHash))
     }
 
     @Synchronized
@@ -89,9 +88,8 @@ class DefaultSyncBlockHandler(
     @Synchronized
     override fun synchronize() {
         try {
-            val hash = blockService.getLast().hash
-            processing(hash)
-            networkApiService.send(HashBlockRequestMessage(hash))
+            processing()
+            networkApiService.send(HashBlockRequestMessage(blockService.getLast().hash))
         } catch (e: Exception) {
             synchronize()
             log.error(e.message)
@@ -101,27 +99,25 @@ class DefaultSyncBlockHandler(
     private fun send(ctx: ChannelHandlerContext, message: BaseMessage) = ctx.channel().writeAndFlush(message)
 
     private fun unlockIfLastBLock(block: BlockMessage) {
-        if (expectedHash == block.hash) {
-            unlock(block.hash)
+        if (expectedHashAndResponseTime.left == block.hash) {
+            unlock()
+        } else {
+            expectedHashAndResponseTime.right = System.currentTimeMillis()
         }
     }
 
-    private fun lock(hash: String) {
-        changeSynchronizationStatus(hash, NOT_SYNCHRONIZED)
+    private fun processing() {
+        changeSynchronizationStatus(PROCESSING)
     }
 
-    private fun processing(hash: String) {
-        changeSynchronizationStatus(hash, PROCESSING)
+    private fun unlock() {
+        changeSynchronizationStatus(SYNCHRONIZED)
+        expectedHashAndResponseTime.right = null
     }
 
-    private fun unlock(hash: String) {
-        changeSynchronizationStatus(hash, SYNCHRONIZED)
-    }
-
-    private fun changeSynchronizationStatus(hash: String, status: SynchronizationStatus) {
+    private fun changeSynchronizationStatus(status: SynchronizationStatus) {
         lock.writeLock().lock()
         try {
-            expectedHash = hash
             syncStatus = status
         } finally {
             lock.writeLock().unlock()
