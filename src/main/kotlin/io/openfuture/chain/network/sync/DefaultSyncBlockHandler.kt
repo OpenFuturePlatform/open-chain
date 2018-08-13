@@ -45,7 +45,7 @@ class DefaultSyncBlockHandler(
         }
     }
 
-    override fun getLastResponseTime(): Long? = expectedHashAndResponseTime.right
+    override fun getLastResponseTime(): Long = expectedHashAndResponseTime.right
 
     @Synchronized
     override fun onHashBlockRequestMessage(ctx: ChannelHandlerContext, message: HashBlockRequestMessage) {
@@ -112,7 +112,6 @@ class DefaultSyncBlockHandler(
 
     private fun unlock() {
         changeSynchronizationStatus(SYNCHRONIZED)
-        expectedHashAndResponseTime.right = null
     }
 
     private fun changeSynchronizationStatus(status: SynchronizationStatus) {

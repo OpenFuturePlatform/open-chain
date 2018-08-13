@@ -3,6 +3,7 @@ package io.openfuture.chain.network.sync
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.network.sync.SynchronizationStatus.NOT_SYNCHRONIZED
+import io.openfuture.chain.network.sync.SynchronizationStatus.PROCESSING
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
@@ -19,15 +20,11 @@ class SyncBlockScheduler(
             return
         }
 
-        if (syncBlockHandler.getSyncStatus() == NOT_SYNCHRONIZED || isResponseTimeOut()) {
+        if (syncBlockHandler.getSyncStatus() == NOT_SYNCHRONIZED || (syncBlockHandler.getSyncStatus() == PROCESSING && isResponseTimeOut())) {
             syncBlockHandler.synchronize()
         }
     }
 
-    private fun isResponseTimeOut() : Boolean {
-        val lastResponseTime = syncBlockHandler.getLastResponseTime() ?: return false
-
-        return System.currentTimeMillis() - lastResponseTime > nodeProperties.synchronizationResponseDelay!!
-    }
+    private fun isResponseTimeOut() = System.currentTimeMillis() - syncBlockHandler.getLastResponseTime() > nodeProperties.synchronizationResponseDelay!!
 
 }
