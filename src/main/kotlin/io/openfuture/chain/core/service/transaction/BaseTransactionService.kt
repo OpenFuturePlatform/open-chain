@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -33,14 +34,14 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
     private lateinit var cryptoService: CryptoService
 
 
-    protected fun save(utx: U): U {
+    open fun save(utx: U): U {
         if (!isValid(utx)) {
             throw ValidationException("Transaction is invalid!")
         }
         return unconfirmedRepository.save(utx)
     }
 
-    protected fun save(tx: T): T {
+    open fun save(tx: T): T {
         if (!isValid(tx)) {
             throw ValidationException("Transaction is invalid!")
         }
@@ -48,10 +49,9 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return repository.save(tx)
     }
 
-    protected fun confirmProcess(utx: U, tx: T): T {
+    protected fun toBlock(utx: U, tx: T): T {
         unconfirmedRepository.delete(utx)
-        updateBalanceByFee(tx)
-        return repository.save(tx)
+        return save(tx)
     }
 
     protected fun isExists(hash: String): Boolean {

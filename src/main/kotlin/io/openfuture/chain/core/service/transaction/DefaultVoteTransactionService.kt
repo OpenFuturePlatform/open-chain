@@ -67,7 +67,7 @@ internal class DefaultVoteTransactionService(
 
         val utx = unconfirmedRepository.findOneByHash(message.hash)
         if (null != utx) {
-            confirm(utx, block)
+            toBlock(utx, VoteTransaction.of(utx, block))
             return
         }
         super.save(VoteTransaction.of(message, block))
@@ -84,7 +84,14 @@ internal class DefaultVoteTransactionService(
     @Transactional
     override fun toBlock(hash: String, block: MainBlock): VoteTransaction {
         val utx = getUnconfirmedByHash(hash)
-        return confirm(utx, block)
+        return toBlock(utx, VoteTransaction.of(utx, block))
+    }
+
+    @Transactional
+    override fun save(tx: VoteTransaction): VoteTransaction {
+        val type = tx.payload.getVoteType()
+        updateWalletVotes(tx.payload.delegateKey, tx.senderAddress, type)
+        return super.save(tx)
     }
 
     @Transactional
@@ -110,12 +117,6 @@ internal class DefaultVoteTransactionService(
             }
         }
         walletService.save(wallet)
-    }
-
-    private fun confirm(utx: UnconfirmedVoteTransaction, block: MainBlock): VoteTransaction {
-        val type = utx.payload.getVoteType()
-        updateWalletVotes(utx.payload.delegateKey, utx.senderAddress, type)
-        return super.confirmProcess(utx, VoteTransaction.of(utx, block))
     }
 
     private fun isValidVoteCount(senderAddress: String): Boolean {

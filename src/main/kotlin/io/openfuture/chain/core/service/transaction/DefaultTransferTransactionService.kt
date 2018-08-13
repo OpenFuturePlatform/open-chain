@@ -74,7 +74,7 @@ class DefaultTransferTransactionService(
 
         val utx = unconfirmedRepository.findOneByHash(message.hash)
         if (null != utx) {
-            confirm(utx, block)
+            toBlock(utx, TransferTransaction.of(utx, block))
             return
         }
         super.save(TransferTransaction.of(message, block))
@@ -91,7 +91,13 @@ class DefaultTransferTransactionService(
     @Transactional
     override fun toBlock(hash: String, block: MainBlock): TransferTransaction {
         val utx = getUnconfirmedByHash(hash)
-        return confirm(utx, block)
+        return toBlock(utx, TransferTransaction.of(utx, block))
+    }
+
+    @Transactional
+    override fun save(tx: TransferTransaction): TransferTransaction {
+        updateTransferBalance(tx.senderAddress, tx.payload.recipientAddress, tx.payload.amount)
+        return super.save(tx)
     }
 
     @Transactional
@@ -101,11 +107,6 @@ class DefaultTransferTransactionService(
     @Transactional
     override fun isValid(tx: TransferTransaction): Boolean =
         isValidTransferBalance(tx.senderAddress, tx.payload.amount + tx.fee) && super.isValid(tx)
-
-    private fun confirm(utx: UnconfirmedTransferTransaction, block: MainBlock): TransferTransaction {
-        updateTransferBalance(utx.senderAddress, utx.payload.recipientAddress, utx.payload.amount)
-        return super.confirmProcess(utx, TransferTransaction.of(utx, block))
-    }
 
     private fun updateTransferBalance(from: String, to: String, amount: Long) {
         walletService.increaseBalance(to, amount)
