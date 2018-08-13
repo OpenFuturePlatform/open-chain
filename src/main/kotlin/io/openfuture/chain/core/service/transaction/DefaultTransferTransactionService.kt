@@ -66,6 +66,7 @@ class DefaultTransferTransactionService(
         return savedUtx
     }
 
+    @Transactional
     override fun synchronize(message: TransferTransactionMessage, block: MainBlock) {
         val tx = repository.findOneByHash(message.hash)
         if (null != tx) {
