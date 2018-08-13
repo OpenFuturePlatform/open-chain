@@ -41,7 +41,7 @@ internal class DefaultVoteTransactionService(
             return UnconfirmedVoteTransaction.of(message)
         }
 
-        val savedUtx = save(UnconfirmedVoteTransaction.of(message))
+        val savedUtx = this.save(UnconfirmedVoteTransaction.of(message))
         networkService.broadcast(message)
         return savedUtx
     }
@@ -53,7 +53,7 @@ internal class DefaultVoteTransactionService(
             return uTransaction
         }
 
-        val savedUtx = save(uTransaction)
+        val savedUtx = this.save(uTransaction)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
     }
@@ -70,7 +70,7 @@ internal class DefaultVoteTransactionService(
             toBlock(utx, VoteTransaction.of(utx, block))
             return
         }
-        save(VoteTransaction.of(message, block))
+        this.save(VoteTransaction.of(message, block))
     }
 
     override fun generateHash(request: VoteTransactionHashRequest): String =

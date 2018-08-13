@@ -49,7 +49,7 @@ class DefaultTransferTransactionService(
             return UnconfirmedTransferTransaction.of(message)
         }
 
-        val savedUtx = save(UnconfirmedTransferTransaction.of(message))
+        val savedUtx = this.save(UnconfirmedTransferTransaction.of(message))
         networkService.broadcast(message)
         return savedUtx
     }
@@ -61,7 +61,7 @@ class DefaultTransferTransactionService(
             return uTransaction
         }
 
-        val savedUtx = save(uTransaction)
+        val savedUtx = this.save(uTransaction)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
     }
@@ -78,7 +78,7 @@ class DefaultTransferTransactionService(
             toBlock(utx, TransferTransaction.of(utx, block))
             return
         }
-        save(TransferTransaction.of(message, block))
+        this.save(TransferTransaction.of(message, block))
     }
 
     override fun generateHash(request: TransferTransactionHashRequest): String =

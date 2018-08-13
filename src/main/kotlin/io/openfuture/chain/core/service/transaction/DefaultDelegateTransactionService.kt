@@ -41,7 +41,7 @@ class DefaultDelegateTransactionService(
             return UnconfirmedDelegateTransaction.of(message)
         }
 
-        val savedUtx = save(UnconfirmedDelegateTransaction.of(message))
+        val savedUtx = this.save(UnconfirmedDelegateTransaction.of(message))
         networkService.broadcast(message)
         return savedUtx
     }
@@ -53,7 +53,7 @@ class DefaultDelegateTransactionService(
             return uTransaction
         }
 
-        val savedUtx = save(uTransaction)
+        val savedUtx = this.save(uTransaction)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
     }
@@ -70,7 +70,7 @@ class DefaultDelegateTransactionService(
             toBlock(utx, DelegateTransaction.of(utx, block))
             return
         }
-        save(DelegateTransaction.of(message, block))
+        this.save(DelegateTransaction.of(message, block))
     }
 
     override fun generateHash(request: DelegateTransactionHashRequest): String =

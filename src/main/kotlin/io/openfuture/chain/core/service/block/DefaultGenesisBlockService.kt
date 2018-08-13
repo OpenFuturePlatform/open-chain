@@ -59,6 +59,7 @@ class DefaultGenesisBlockService(
         networkService.broadcast(message)
     }
 
+    @Transactional
     override fun synchronize(message: GenesisBlockMessage) {
         this.save(message)
     }
