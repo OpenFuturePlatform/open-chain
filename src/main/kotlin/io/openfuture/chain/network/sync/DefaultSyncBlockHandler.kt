@@ -27,7 +27,7 @@ class DefaultSyncBlockHandler(
     private var syncStatus: SynchronizationStatus = NOT_SYNCHRONIZED
 
     @Volatile
-    private lateinit var expectedHashAndResponseTime: MutablePair<String, Long>
+    private var expectedHashAndResponseTime: MutablePair<String, Long> = MutablePair()
 
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
 
@@ -68,7 +68,6 @@ class DefaultSyncBlockHandler(
             return
         } else {
             expectedHashAndResponseTime.left = message.hash
-            expectedHashAndResponseTime.right = System.currentTimeMillis()
         }
         send(ctx, SyncBlockRequestMessage(currentLastHash))
     }
@@ -108,6 +107,8 @@ class DefaultSyncBlockHandler(
 
     private fun processing() {
         changeSynchronizationStatus(PROCESSING)
+
+        expectedHashAndResponseTime.right = System.currentTimeMillis()
     }
 
     private fun unlock() {
