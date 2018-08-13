@@ -59,6 +59,8 @@ interface GenesisBlockService {
 
     fun add(message: GenesisBlockMessage)
 
+    fun synchronize(message: GenesisBlockMessage)
+
     fun isValid(message: GenesisBlockMessage): Boolean
 
 }

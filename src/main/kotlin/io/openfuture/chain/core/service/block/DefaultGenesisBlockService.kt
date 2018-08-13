@@ -54,6 +54,23 @@ class DefaultGenesisBlockService(
 
     @Transactional
     override fun add(message: GenesisBlockMessage) {
+        this.save(message)
+
+        networkService.broadcast(message)
+    }
+
+    override fun synchronize(message: GenesisBlockMessage) {
+        this.save(message)
+    }
+
+    @Transactional(readOnly = true)
+    override fun isValid(message: GenesisBlockMessage): Boolean {
+        val delegates = message.delegates.map { delegateService.getByPublicKey(it) }
+        val block = GenesisBlock.of(message, delegates)
+        return isValid(block)
+    }
+
+    private fun save(message: GenesisBlockMessage) {
         if (null != repository.findOneByHash(message.hash)) {
             return
         }
@@ -66,14 +83,6 @@ class DefaultGenesisBlockService(
         }
 
         super.save(block)
-        networkService.broadcast(message)
-    }
-
-    @Transactional(readOnly = true)
-    override fun isValid(message: GenesisBlockMessage): Boolean {
-        val delegates = message.delegates.map { delegateService.getByPublicKey(it) }
-        val block = GenesisBlock.of(message, delegates)
-        return isValid(block)
     }
 
     private fun isValid(block: GenesisBlock): Boolean {

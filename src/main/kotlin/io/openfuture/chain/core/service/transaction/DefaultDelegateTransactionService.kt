@@ -70,6 +70,8 @@ class DefaultDelegateTransactionService(
             confirm(utx, block)
             return
         }
+
+        delegateService.save(Delegate(message.delegateKey, message.senderAddress))
         super.save(DelegateTransaction.of(message, block))
     }
 
