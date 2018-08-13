@@ -15,7 +15,7 @@ class DefaultBlockService(
 ) : BlockService {
 
     override fun getAvgProductionTime(): Long {
-        return capacityChecker.getCapacity()
+        return capacityChecker.getAvgTime()
     }
 
     @Transactional(readOnly = true)

@@ -16,7 +16,7 @@ class BlockCapacityChecker(
     private val avg = AtomicLong(0)
 
 
-    @Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedDelay = 60000)
     private fun schedule() {
         if (counter.get() == 0L) {
             avg.set(0)
@@ -31,7 +31,7 @@ class BlockCapacityChecker(
         counter.getAndIncrement()
     }
 
-    fun getCapacity(): Long {
+    fun getAvgTime(): Long {
         return avg.get()
     }
 

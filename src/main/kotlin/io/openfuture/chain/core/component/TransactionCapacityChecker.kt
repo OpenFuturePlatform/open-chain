@@ -11,6 +11,7 @@ class TransactionCapacityChecker {
     private val counter = AtomicLong(0)
     private val capacity = AtomicLong(0)
 
+
     @Scheduled(fixedDelay = 10000)
     private fun schedule() {
         capacity.set(counter.getAndSet(0) / 10)
@@ -20,7 +21,7 @@ class TransactionCapacityChecker {
         counter.incrementAndGet()
     }
 
-    fun getCapacity(): Long {
+    fun getCountPesSecond(): Long {
         return capacity.get()
     }
 

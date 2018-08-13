@@ -24,7 +24,7 @@ class DefaultTransactionService(
     override fun getCount(): Long = repository.count()
 
     override fun getProducingPerSecond(): Long {
-        return capacityChecker.getCapacity()
+        return capacityChecker.getCountPesSecond()
     }
 
 }
