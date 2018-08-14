@@ -29,7 +29,7 @@ class DefaultTransferTransactionService(
     override fun getAll(request: PageRequest): Page<TransferTransaction> = repository.findAll(request)
 
     @Transactional(readOnly = true)
-    override fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction> = unconfirmedRepository.findAllByOrderByFeeDesc()
+    override fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction> = unconfirmedRepository.findAllByOrderByHeaderFeeDesc()
 
     @Transactional(readOnly = true)
     override fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction = unconfirmedRepository.findOneByHash(hash)
@@ -37,7 +37,7 @@ class DefaultTransferTransactionService(
 
     @Transactional(readOnly = true)
     override fun getByAddress(address: String): List<TransferTransaction> {
-        val senderTransactions = repository.findAllBySenderAddress(address)
+        val senderTransactions = repository.findAllByHeaderSenderAddress(address)
         val recipientTransactions = (repository as TransferTransactionRepository).findAllByPayloadRecipientAddress(address)
 
         return senderTransactions + recipientTransactions
@@ -49,7 +49,7 @@ class DefaultTransferTransactionService(
             return UnconfirmedTransferTransaction.of(message)
         }
 
-        val savedUtx = super.save(UnconfirmedTransferTransaction.of(message))
+        val savedUtx = this.add(UnconfirmedTransferTransaction.of(message))
         networkService.broadcast(message)
         return savedUtx
     }
@@ -61,11 +61,18 @@ class DefaultTransferTransactionService(
             return uTransaction
         }
 
-        val savedUtx = super.save(uTransaction)
-        networkService.broadcast(TransferTransactionMessage(savedUtx))
+        val savedUtx = this.add(uTransaction)
+        networkService.broadcast(savedUtx.toMessage())
         return savedUtx
     }
 
+    @Transactional
+    override fun add(tx: TransferTransaction): TransferTransaction {
+        updateTransferBalance(tx.header.senderAddress, tx.payload.recipientAddress, tx.payload.amount)
+        return super.add(tx)
+    }
+
+    @Transactional
     override fun synchronize(message: TransferTransactionMessage, block: MainBlock) {
         val tx = repository.findOneByHash(message.hash)
         if (null != tx) {
@@ -74,10 +81,10 @@ class DefaultTransferTransactionService(
 
         val utx = unconfirmedRepository.findOneByHash(message.hash)
         if (null != utx) {
-            confirm(utx, block)
+            toBlock(utx, TransferTransaction.of(utx, block))
             return
         }
-        super.save(TransferTransaction.of(message, block))
+        this.add(TransferTransaction.of(message, block))
     }
 
     override fun generateHash(request: TransferTransactionHashRequest): String =
@@ -91,21 +98,16 @@ class DefaultTransferTransactionService(
     @Transactional
     override fun toBlock(hash: String, block: MainBlock): TransferTransaction {
         val utx = getUnconfirmedByHash(hash)
-        return confirm(utx, block)
+        return toBlock(utx, TransferTransaction.of(utx, block))
     }
 
     @Transactional
     override fun isValid(utx: UnconfirmedTransferTransaction): Boolean =
-        isValidTransferBalance(utx.senderAddress, utx.payload.amount + utx.fee) && super.isValid(utx)
+        isValidTransferBalance(utx.header.senderAddress, utx.payload.amount + utx.header.fee) && super.isValidBase(utx)
 
     @Transactional
     override fun isValid(tx: TransferTransaction): Boolean =
-        isValidTransferBalance(tx.senderAddress, tx.payload.amount + tx.fee) && super.isValid(tx)
-
-    private fun confirm(utx: UnconfirmedTransferTransaction, block: MainBlock): TransferTransaction {
-        updateTransferBalance(utx.senderAddress, utx.payload.recipientAddress, utx.payload.amount)
-        return super.confirmProcess(utx, TransferTransaction.of(utx, block))
-    }
+        isValidTransferBalance(tx.header.senderAddress, tx.payload.amount + tx.header.fee) && super.isValidBase(tx)
 
     private fun updateTransferBalance(from: String, to: String, amount: Long) {
         walletService.increaseBalance(to, amount)
@@ -114,7 +116,7 @@ class DefaultTransferTransactionService(
 
     private fun isValidTransferBalance(address: String, amount: Long): Boolean {
         val balance = walletService.getBalanceByAddress(address)
-        val unspentBalance = balance - unconfirmedRepository.findAllBySenderAddress(address).map { it.payload.amount }.sum()
+        val unspentBalance = balance - unconfirmedRepository.findAllByHeaderSenderAddress(address).map { it.payload.amount }.sum()
         return unspentBalance >= amount
     }
 

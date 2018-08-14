@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.util.TransactionUtils
@@ -12,9 +13,7 @@ import javax.persistence.Table
 @Entity
 @Table(name = "u_transfer_transactions")
 class UnconfirmedTransferTransaction(
-    timestamp: Long,
-    fee: Long,
-    senderAddress: String,
+    header: TransactionHeader,
     hash: String,
     senderSignature: String,
     senderPublicKey: String,
@@ -22,13 +21,11 @@ class UnconfirmedTransferTransaction(
     @Embedded
     var payload: TransferTransactionPayload
 
-) : UnconfirmedTransaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
+) : UnconfirmedTransaction(header, hash, senderSignature, senderPublicKey) {
 
     companion object {
         fun of(dto: TransferTransactionMessage): UnconfirmedTransferTransaction = UnconfirmedTransferTransaction(
-            dto.timestamp,
-            dto.fee,
-            dto.senderAddress,
+            TransactionHeader(dto.timestamp, dto.fee, dto.senderAddress),
             dto.hash,
             dto.senderSignature,
             dto.senderPublicKey,
@@ -36,9 +33,7 @@ class UnconfirmedTransferTransaction(
         )
 
         fun of(request: TransferTransactionRequest): UnconfirmedTransferTransaction = UnconfirmedTransferTransaction(
-            request.timestamp!!,
-            request.fee!!,
-            request.senderAddress!!,
+            TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
             TransactionUtils.generateHash(
                 request.timestamp!!,
                 request.fee!!,
@@ -51,5 +46,16 @@ class UnconfirmedTransferTransaction(
     }
 
     override fun getPayload(): TransactionPayload = payload
+
+    override fun toMessage(): TransferTransactionMessage = TransferTransactionMessage(
+        header.timestamp,
+        header.fee,
+        header.senderAddress,
+        hash,
+        senderSignature,
+        senderPublicKey,
+        payload.amount,
+        payload.recipientAddress
+    )
 
 }

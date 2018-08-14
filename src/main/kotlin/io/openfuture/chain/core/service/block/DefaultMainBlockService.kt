@@ -38,13 +38,12 @@ class DefaultMainBlockService(
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
 
-        // -- transactions by type
-        val voteTxs = voteTransactionService.getAllUnconfirmed()
-        val delegateTxs = delegateTransactionService.getAllUnconfirmed()
-        val transferTxs = transferTransactionService.getAllUnconfirmed()
-        val transactions = voteTxs + delegateTxs + transferTxs
+        val voteTransactions = voteTransactionService.getAllUnconfirmed()
+        val delegateTransactions = delegateTransactionService.getAllUnconfirmed()
+        val transferTransactions = transferTransactionService.getAllUnconfirmed()
+        val transactions = voteTransactions + delegateTransactions + transferTransactions
 
-        val reward = transactions.map { it.fee }.sum() + consensusProperties.rewardBlock!!
+        val reward = transactions.map { it.header.fee }.sum() + consensusProperties.rewardBlock!!
         val merkleHash = calculateMerkleRoot(transactions.map { it.hash })
         val payload = MainBlockPayload(merkleHash)
 
@@ -52,8 +51,8 @@ class DefaultMainBlockService(
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKey()
 
-        val block = MainBlock(timestamp, height, previousHash, reward, ByteUtils.toHexString(hash), signature, publicKey, payload)
-        return PendingBlockMessage(block, voteTxs, delegateTxs, transferTxs)
+        return PendingBlockMessage(height, previousHash, timestamp, reward, ByteUtils.toHexString(hash), signature, publicKey,
+            merkleHash, voteTransactions.map { it.hash }, delegateTransactions.map { it.hash }, transferTransactions.map { it.hash })
     }
 
     @Transactional
@@ -97,6 +96,13 @@ class DefaultMainBlockService(
         return isValidMerkleHash(block.payload.merkleHash, transactions) && super.isValid(block)
     }
 
+    private fun isValidMerkleHash(merkleHash: String, transactions: List<String>): Boolean {
+        if (transactions.isEmpty()) {
+            return false
+        }
+        return merkleHash == calculateMerkleRoot(transactions.map { it })
+    }
+
     private fun calculateMerkleRoot(transactions: List<String>): String {
         if (transactions.isEmpty()) {
             throw InsufficientTransactionsException()
@@ -121,13 +127,6 @@ class DefaultMainBlockService(
             treeLayout = mutableListOf()
         }
         return ByteUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
-    }
-
-    private fun isValidMerkleHash(merkleHash: String, transactions: List<String>): Boolean {
-        if (transactions.isEmpty()) {
-            return false
-        }
-        return merkleHash == calculateMerkleRoot(transactions.map { it })
     }
 
 }

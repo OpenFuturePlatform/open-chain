@@ -42,9 +42,8 @@ class DefaultGenesisBlockService(
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKey()
 
-        val block = GenesisBlock(timestamp, height, previousHash, reward, ByteUtils.toHexString(hash), signature,
-            publicKey, payload)
-        return GenesisBlockMessage(block)
+        return GenesisBlockMessage(height, previousHash, timestamp, reward, ByteUtils.toHexString(hash), signature,
+            publicKey, payload.epochIndex, payload.activeDelegates.map { it.publicKey })
     }
 
     private fun createPayload(): GenesisBlockPayload {
@@ -55,6 +54,24 @@ class DefaultGenesisBlockService(
 
     @Transactional
     override fun add(message: GenesisBlockMessage) {
+        this.save(message)
+
+        networkService.broadcast(message)
+    }
+
+    @Transactional
+    override fun synchronize(message: GenesisBlockMessage) {
+        this.save(message)
+    }
+
+    @Transactional(readOnly = true)
+    override fun isValid(message: GenesisBlockMessage): Boolean {
+        val delegates = message.delegates.map { delegateService.getByPublicKey(it) }
+        val block = GenesisBlock.of(message, delegates)
+        return isValid(block)
+    }
+
+    private fun save(message: GenesisBlockMessage) {
         if (null != repository.findOneByHash(message.hash)) {
             return
         }
@@ -67,14 +84,6 @@ class DefaultGenesisBlockService(
         }
 
         super.save(block)
-        networkService.broadcast(message)
-    }
-
-    @Transactional(readOnly = true)
-    override fun isValid(message: GenesisBlockMessage): Boolean {
-        val delegates = message.delegates.map { delegateService.getByPublicKey(it) }
-        val block = GenesisBlock.of(message, delegates)
-        return isValid(block)
     }
 
     private fun isValid(block: GenesisBlock): Boolean {

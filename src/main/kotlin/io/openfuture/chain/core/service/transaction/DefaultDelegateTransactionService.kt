@@ -28,7 +28,7 @@ class DefaultDelegateTransactionService(
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(): MutableList<UnconfirmedDelegateTransaction> {
-        return unconfirmedRepository.findAllByOrderByFeeDesc()
+        return unconfirmedRepository.findAllByOrderByHeaderFeeDesc()
     }
 
     @Transactional(readOnly = true)
@@ -41,7 +41,7 @@ class DefaultDelegateTransactionService(
             return UnconfirmedDelegateTransaction.of(message)
         }
 
-        val savedUtx = super.save(UnconfirmedDelegateTransaction.of(message))
+        val savedUtx = this.add(UnconfirmedDelegateTransaction.of(message))
         networkService.broadcast(message)
         return savedUtx
     }
@@ -53,9 +53,15 @@ class DefaultDelegateTransactionService(
             return uTransaction
         }
 
-        val savedUtx = super.save(uTransaction)
-        networkService.broadcast(DelegateTransactionMessage(savedUtx))
+        val savedUtx = this.add(uTransaction)
+        networkService.broadcast(savedUtx.toMessage())
         return savedUtx
+    }
+
+    @Transactional
+    override fun add(tx: DelegateTransaction): DelegateTransaction {
+        delegateService.save(Delegate(tx.payload.delegateKey, tx.header.senderAddress))
+        return super.add(tx)
     }
 
     @Transactional
@@ -67,10 +73,10 @@ class DefaultDelegateTransactionService(
 
         val utx = unconfirmedRepository.findOneByHash(message.hash)
         if (null != utx) {
-            confirm(utx, block)
+            toBlock(utx, DelegateTransaction.of(utx, block))
             return
         }
-        super.save(DelegateTransaction.of(message, block))
+        this.add(DelegateTransaction.of(message, block))
     }
 
     override fun generateHash(request: DelegateTransactionHashRequest): String =
@@ -84,24 +90,21 @@ class DefaultDelegateTransactionService(
     @Transactional
     override fun toBlock(hash: String, block: MainBlock): DelegateTransaction {
         val utx = getUnconfirmedByHash(hash)
-        return confirm(utx, block)
+        return toBlock(utx, DelegateTransaction.of(utx, block))
     }
 
     @Transactional
     override fun isValid(tx: DelegateTransaction): Boolean {
-        return isNotExistDelegate(tx.senderAddress) && super.isValid(tx)
+        return isNotExistsByDelegatePublicKey(tx.payload.delegateKey) && super.isValidBase(tx)
     }
 
     @Transactional
     override fun isValid(utx: UnconfirmedDelegateTransaction): Boolean {
-        return isNotExistDelegate(utx.senderAddress) && super.isValid(utx)
+        return isNotExistsByDelegatePublicKey(utx.payload.delegateKey) && super.isValidBase(utx)
     }
 
-    private fun confirm(utx: UnconfirmedDelegateTransaction, block: MainBlock): DelegateTransaction {
-        delegateService.save(Delegate(utx.payload.delegateKey, utx.senderAddress))
-        return super.confirmProcess(utx, DelegateTransaction.of(utx, block))
+    private fun isNotExistsByDelegatePublicKey(key: String): Boolean {
+        return !delegateService.isExistsByPublicKey(key) && !unconfirmedRepository.findAll().any { it.payload.delegateKey == key }
     }
-
-    private fun isNotExistDelegate(key: String): Boolean = !delegateService.isExists(key)
 
 }

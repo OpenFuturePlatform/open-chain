@@ -1,7 +1,6 @@
-package io.openfuture.chain.core.model.entity.transaction.vote
+package io.openfuture.chain.core.model.entity.transaction.payload
 
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
-import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.util.ByteConstants
 import io.openfuture.chain.core.util.DictionaryUtils
 import java.nio.ByteBuffer
