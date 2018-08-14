@@ -1,20 +1,21 @@
-package io.openfuture.chain.network.domain
+package io.openfuture.chain.network.message.network
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.writeList
+import io.openfuture.chain.network.message.base.BaseMessage
 
 @NoArgConstructor
-data class Addresses(
-    var values: List<NetworkAddress>
-) : Packet() {
+data class ExplorerAddressesMessage(
+    var values: List<NetworkAddressMessage>
+) : BaseMessage {
 
-    override fun readParams(buffer: ByteBuf) {
+    override fun read(buffer: ByteBuf) {
         values = buffer.readList()
     }
 
-    override fun writeParams(buffer: ByteBuf) {
+    override fun write(buffer: ByteBuf) {
         buffer.writeList(values)
     }
 

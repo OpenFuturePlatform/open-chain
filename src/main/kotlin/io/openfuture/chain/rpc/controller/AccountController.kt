@@ -49,15 +49,21 @@ class AccountController(
         return WalletDto(derivationKey.ecKey)
     }
 
-    @PostMapping("/keys/doImport")
-    fun importKey(@RequestBody @Valid request: ImportKeyRequest): WalletDto {
-        val key = cryptoService.importKey(request.decodedKey!!)
+    @PostMapping("/keys/doPrivateImport")
+    fun importPrivateKey(@RequestBody @Valid request: ImportKeyRequest): WalletDto =
+        WalletDto(cryptoService.importPrivateKey(request.decodedKey!!))
+
+
+    @PostMapping("/keys/doExtendedImport")
+    fun importExtendedKey(@RequestBody @Valid request: ImportKeyRequest): WalletDto {
+        val key = cryptoService.importExtendedKey(request.decodedKey!!)
         val publicKey = cryptoService.serializePublicKey(key)
         val privateKey = if (!key.ecKey.isPrivateEmpty()) cryptoService.serializePrivateKey(key) else null
         return WalletDto(KeyDto(publicKey, privateKey), key.ecKey.getAddress())
     }
 
-    @PostMapping("/keys/doImportWif")
-    fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): WalletDto = WalletDto(cryptoService.importWifKey(request.decodedKey!!))
+    @PostMapping("/keys/doWifImport")
+    fun importWifKey(@RequestBody @Valid request: ImportKeyRequest): WalletDto =
+        WalletDto(cryptoService.importWifKey(request.decodedKey!!))
 
 }

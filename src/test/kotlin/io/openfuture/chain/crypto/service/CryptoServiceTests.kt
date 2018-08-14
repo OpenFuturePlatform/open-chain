@@ -126,13 +126,13 @@ class CryptoServiceTests : ServiceTests() {
     }
 
     @Test
-    fun importKeyShouldReturnKeysValuesAndAddressWhenPrivateKeyImporting() {
+    fun importExtendedKeyShouldReturnKeysValuesAndAddressWhenPrivateKeyImporting() {
         val decodedKey = "xpub661MyMwAqRbcF1xAwgn4pRrb25d3iSwvBC4DaTsNSUcoLZ6y4jgG2gtTGNjSVSvLzLMEawq1ghm1XkJ2QEzU3"
         val extendedKey = ExtendedKey(ByteArray(64))
 
         given(deserializer.deserialize(decodedKey)).willReturn(extendedKey)
 
-        val importedKey = cryptoService.importKey(decodedKey)
+        val importedKey = cryptoService.importExtendedKey(decodedKey)
 
         assertThat(importedKey.ecKey.public).isNotNull()
         assertThat(importedKey.ecKey.private).isNotNull()
@@ -140,13 +140,13 @@ class CryptoServiceTests : ServiceTests() {
     }
 
     @Test
-    fun importKeyShouldReturnPublicKeyValueAndAddressWhenPublicKeyImporting() {
+    fun importExtendedKeyShouldReturnPublicKeyValueAndAddressWhenPublicKeyImporting() {
         val decodedKey = "xpub661MyMwAqRbcF1xAwgn4pRrb25d3iSwvBC4DaTsNSUcoLZ6y4jgG2gtTGNjSVSvLzLMEawq1ghm1XkJ2QEzU3"
         val extendedKey = ExtendedKey(ByteArray(64), ecKey = ECKey(ByteArray(0), false))
 
         given(deserializer.deserialize(decodedKey)).willReturn(extendedKey)
 
-        val importedKey = cryptoService.importKey(decodedKey)
+        val importedKey = cryptoService.importExtendedKey(decodedKey)
 
         assertThat(importedKey.ecKey.public).isNotNull()
         assertThat(importedKey.ecKey.getAddress()).isNotNull()
