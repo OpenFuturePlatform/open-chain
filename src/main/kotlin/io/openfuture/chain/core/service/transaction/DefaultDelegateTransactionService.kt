@@ -4,17 +4,14 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.repository.DelegateTransactionRepository
 import io.openfuture.chain.core.repository.UDelegateTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateTransactionService
-import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.network.service.NetworkApiService
-import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionHashRequest
-import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -72,14 +69,6 @@ class DefaultDelegateTransactionService(
         }
         super.save(DelegateTransaction.of(message, block))
     }
-
-    override fun generateHash(request: DelegateTransactionHashRequest): String =
-        TransactionUtils.generateHash(
-            request.timestamp!!,
-            request.fee!!,
-            request.senderAddress!!,
-            DelegateTransactionPayload(request.delegateKey!!)
-        )
 
     @Transactional
     override fun toBlock(hash: String, block: MainBlock): DelegateTransaction {

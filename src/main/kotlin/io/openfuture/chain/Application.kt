@@ -14,7 +14,7 @@ class Application {
     fun flywayMigrationStrategy(): FlywayMigrationStrategy {
         return FlywayMigrationStrategy { flyway ->
             flyway.clean()
-            flyway.migrate()
+           flyway.migrate()
         }
     }
 

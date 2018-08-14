@@ -9,7 +9,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
-import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.TransferTransactionResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -47,7 +47,7 @@ class TransferTransactionControllerTests : ControllerTests() {
     }
 
     @Test
-    fun getAllShouldReturnTransaferTransactionsListTest() {
+    fun getAllShouldReturnTransferTransactionsListTest() {
         val mainBlock = MainBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", MainBlockPayload("merkleHash"))
         val pageTransferTransactions = PageImpl(listOf(TransferTransaction(1, 1, "senderAddress", "hash",
             "senderSignature", "senderPublicKey", mainBlock, TransferTransactionPayload(1, "recipientAddress"))))
@@ -64,6 +64,27 @@ class TransferTransactionControllerTests : ControllerTests() {
         assertThat(actualPageResponse.totalCount).isEqualTo(expectedPageResponse.totalCount)
         assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["senderAddress"]).isEqualTo(expectedPageResponse.list.first().senderAddress)
         assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["senderPublicKey"]).isEqualTo(expectedPageResponse.list.first().senderPublicKey)
+    }
+
+    @Test
+    fun getTransactionsByAddressShouldReturnTransferTransactionsListTest() {
+        val address = "address"
+        val mainBlock = MainBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", MainBlockPayload("merkleHash"))
+        val expectedTransferTransactions = listOf(TransferTransaction(1, 1, "senderAddress", "hash",
+            "senderSignature", "senderPublicKey", mainBlock, TransferTransactionPayload(1, "recipientAddress")))
+
+        given(service.getByAddress(address)).willReturn(expectedTransferTransactions)
+
+        val actualTransferTransactions = webClient.get().uri("/rpc/transactions/transfer/$address")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(List::class.java)
+            .returnResult().responseBody!!
+
+        assertThat((actualTransferTransactions.first() as LinkedHashMap<*, *>)["senderAddress"])
+            .isEqualTo(expectedTransferTransactions.first().senderAddress)
+        assertThat((actualTransferTransactions.first()  as LinkedHashMap<*, *>)["senderPublicKey"])
+            .isEqualTo(expectedTransferTransactions.first().senderPublicKey)
     }
 
 }

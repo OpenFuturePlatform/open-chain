@@ -136,14 +136,14 @@ class AccountControllerTests : ControllerTests() {
         val key = ExtendedKey.root(ByteArray(0))
         val publicKey = "publicKey"
         val privateKey = "privateKey"
-        val expectedWalletDto =  WalletDto(KeyDto(publicKey, privateKey), key.ecKey.getAddress())
+        val expectedWalletDto =  WalletDto(KeyDto("publicKey", "privateKey"), key.ecKey.getAddress())
 
-        given(cryptoService.importKey(importKeyRequest.decodedKey!!)).willReturn(key)
+        given(cryptoService.importExtendedKey(importKeyRequest.decodedKey!!)).willReturn(key)
         given(cryptoService.serializePublicKey(key)).willReturn(publicKey)
         given(cryptoService.serializePrivateKey(key)).willReturn(privateKey)
 
 
-        val actualWalletDto = webClient.post().uri("/rpc/accounts/keys/doImport")
+        val actualWalletDto = webClient.post().uri("/rpc/accounts/keys/doExtendedImport")
             .body(Mono.just(importKeyRequest), ImportKeyRequest::class.java)
             .exchange()
             .expectStatus().isOk
@@ -161,7 +161,25 @@ class AccountControllerTests : ControllerTests() {
 
         given(cryptoService.importWifKey(importKeyRequest.decodedKey!!)).willReturn(ecKey)
 
-        val actualWalletDto = webClient.post().uri("/rpc/accounts/keys/doImportWif")
+        val actualWalletDto = webClient.post().uri("/rpc/accounts/keys/doWifImport")
+            .body(Mono.just(importKeyRequest), ImportKeyRequest::class.java)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(WalletDto::class.java)
+            .returnResult().responseBody!!
+
+        assertThat(actualWalletDto).isEqualTo(expectedWalletDto)
+    }
+
+    @Test
+    fun doImportPrivateKeyShouldReturnWalletDto() {
+        val importKeyRequest = ImportKeyRequest("decodedKey")
+        val ecKey = ECKey(ByteArray(1))
+        val expectedWalletDto =  WalletDto(ecKey)
+
+        given(cryptoService.importPrivateKey(importKeyRequest.decodedKey!!)).willReturn(ecKey)
+
+        val actualWalletDto = webClient.post().uri("/rpc/accounts/keys/doPrivateImport")
             .body(Mono.just(importKeyRequest), ImportKeyRequest::class.java)
             .exchange()
             .expectStatus().isOk

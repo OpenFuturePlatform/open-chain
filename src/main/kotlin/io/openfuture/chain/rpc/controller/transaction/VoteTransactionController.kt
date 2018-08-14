@@ -1,7 +1,7 @@
 package io.openfuture.chain.rpc.controller.transaction
 
 import io.openfuture.chain.core.service.VoteTransactionService
-import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.VoteTransactionResponse
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody

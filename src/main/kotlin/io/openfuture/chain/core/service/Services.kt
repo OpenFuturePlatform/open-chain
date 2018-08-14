@@ -16,12 +16,9 @@ import io.openfuture.chain.core.model.node.*
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.rpc.domain.base.PageRequest
-import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionHashRequest
-import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionRequest
-import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionHashRequest
-import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionRequest
-import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionHashRequest
-import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import org.springframework.data.domain.Page
 
 interface HardwareInfoService {
@@ -100,8 +97,6 @@ interface TransferTransactionService {
 
     fun toBlock(hash: String, block: MainBlock): TransferTransaction
 
-    fun generateHash(request: TransferTransactionHashRequest): String
-
 }
 
 interface VoteTransactionService {
@@ -118,8 +113,6 @@ interface VoteTransactionService {
 
     fun toBlock(hash: String, block: MainBlock): VoteTransaction
 
-    fun generateHash(request: VoteTransactionHashRequest): String
-
 }
 
 interface DelegateTransactionService {
@@ -135,8 +128,6 @@ interface DelegateTransactionService {
     fun synchronize(message: DelegateTransactionMessage, block: MainBlock)
 
     fun toBlock(hash: String, block: MainBlock): DelegateTransaction
-
-    fun generateHash(request: DelegateTransactionHashRequest): String
 
 }
 

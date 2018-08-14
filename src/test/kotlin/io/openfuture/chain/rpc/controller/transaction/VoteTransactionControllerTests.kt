@@ -4,7 +4,7 @@ import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.vote.VoteTransactionPayload
 import io.openfuture.chain.core.service.VoteTransactionService
-import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.VoteTransactionResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

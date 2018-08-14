@@ -1,7 +1,7 @@
 package io.openfuture.chain.rpc.controller.transaction
 
 import io.openfuture.chain.core.service.DelegateTransactionService
-import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.DelegateTransactionResponse
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
