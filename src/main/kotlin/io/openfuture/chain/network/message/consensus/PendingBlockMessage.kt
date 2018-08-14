@@ -27,21 +27,6 @@ class PendingBlockMessage(
     var transferTransactions: List<String>
 ) : BlockMessage(height, previousHash, timestamp, reward, hash, signature, publicKey) {
 
-    constructor(block: MainBlock, voteTransactions: List<UnconfirmedVoteTransaction>, delegateTransactions: List<UnconfirmedDelegateTransaction>,
-                transferTransactions: List<UnconfirmedTransferTransaction>) : this(
-        block.height,
-        block.previousHash,
-        block.timestamp,
-        block.reward,
-        block.hash,
-        block.signature,
-        block.publicKey,
-        block.payload.merkleHash,
-        voteTransactions.map { it.hash },
-        delegateTransactions.map { it.hash },
-        transferTransactions.map { it.hash }
-    )
-
     fun getAllTransactions(): List<String> {
         return voteTransactions + delegateTransactions + transferTransactions
     }
