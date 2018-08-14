@@ -1,8 +1,6 @@
 package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.consensus.service.EpochService
-import io.openfuture.chain.core.component.BlockCapacityChecker
-import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.network.service.NetworkApiService
@@ -12,28 +10,25 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/rpc/explorer/info")
+@RequestMapping("/rpc/explorer")
 class ExplorerController(
     private val blockService: BlockService,
     private val epochService: EpochService,
     private val networkApiService: NetworkApiService,
-    private val transactionService: TransactionService,
-    private val blockCapacityChecker: BlockCapacityChecker,
-    private val transactionCapacityChecker: TransactionCapacityChecker
-) {
+    private val transactionService: TransactionService) {
 
     @GetMapping
     fun getExplorerInfo(): ExplorerResponse {
         val blocksCount = blockService.getCount()
-        val blocksSpeed = blockCapacityChecker.getAvgTime()
+        val secondsPerBlock = blockService.getAvgProductionTime()
         val transactionsCount = transactionService.getCount()
-        val transactionsSpeed = transactionCapacityChecker.getCountPerSecond()
+        val transactionsPerSecond = transactionService.getProducingPerSecond()
         val nodesCount = networkApiService.getNetworkSize()
         val epochNumber = epochService.getEpochIndex()
         val epochDate = epochService.getEpochStart()
         val delegatesCount = epochService.getDelegates().size
 
-        return ExplorerResponse(nodesCount, blocksCount, transactionsCount, blocksSpeed, transactionsSpeed, epochNumber,
+        return ExplorerResponse(nodesCount, blocksCount, transactionsCount, secondsPerBlock, transactionsPerSecond, epochNumber,
             epochDate, delegatesCount.toByte())
     }
 
