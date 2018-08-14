@@ -14,20 +14,20 @@ import javax.validation.constraints.Size
 @ConfigurationProperties(value = "node")
 class NodeProperties(
 
-    /** Node Server Host */
+    /** Node server host */
     @field:NotNull
     var host: String? = null,
 
-    /** Node Server Port */
+    /** Node server port */
     @field:NotNull
     var port: Int? = null,
 
-    /** Root Nodes List */
+    /** Root nodes list */
     @field:NotEmpty
-    @field:Size(min = 1, max = 8)
+    @field:Size(min = 1, max = 21)
     var rootNodes: List<String> = emptyList(),
 
-    /** Node Communication Protocol Version */
+    /** Node communication protocol version */
     @field:NotNull
     var version: String? = null,
 
@@ -47,7 +47,7 @@ class NodeProperties(
     @field:NotNull
     var connectionTimeout: Int? = null,
 
-    /** Directly Connected Peers Number */
+    /** Inbound connections number */
     @field:NotNull
     @field:Min(5)
     var peersNumber: Int? = null,
@@ -58,7 +58,11 @@ class NodeProperties(
 
     /** Public key path */
     @field:NotNull
-    var publicKeyPath: String? = null
+    var publicKeyPath: String? = null,
+
+    /** Interval for triggering node explorer task in milliseconds */
+    @field:NotNull
+    var explorerInterval: Long? = null
 
 ) {
 

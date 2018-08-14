@@ -15,6 +15,9 @@ import javax.validation.Valid
 class TransferTransactionController(
     private val transactionService: TransferTransactionService) {
 
+    @GetMapping("/{address}")
+    fun getTransactions(@PathVariable address: String): List<TransferTransaction> = transactionService.getByAddress(address)
+
     @PostMapping
     fun add(@Valid @RequestBody request: TransferTransactionRequest): TransferTransactionResponse {
         val tx = transactionService.add(request)

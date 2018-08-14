@@ -6,6 +6,29 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.0] - 2018-08-10
+### Added
+- Consensus: Intervals between time slots for synchronization
+- Consensus: Prevote stage on block creation
+- Consensus: Commit stage on block creation
+- Wallet UI: Generate a seed phrase
+- Wallet UI: Create a wallet
+- Wallet UI: Save wallet data in a file
+- Wallet UI: Protect the file with password
+- Wallet UI: Access wallet with file
+- Wallet UI: Restore wallet from a private key
+- Wallet UI: Restore wallet from the seed phrase
+- RPC: Total number of nodes connected to the network
+- RPC: Get number of current epoch
+- RPC: Get when the current epoch started
+- RPC: Get number of delegates
+- RPC: Get number of an epoch when the block was created
+- RPC: Import private key in hex format
+- RPC: Get transactions by wallet address
+
+### Changed
+- New file structure
+
 ## [0.4.0] - 2018-07-27
 ### Added
 - Time slots mechanism
@@ -118,6 +141,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[0.5.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.1.0...v0.2.0

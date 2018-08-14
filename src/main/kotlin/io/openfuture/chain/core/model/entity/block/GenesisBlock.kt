@@ -26,7 +26,7 @@ class GenesisBlock(
 
 
     companion object {
-        fun of(dto: GenesisBlockMessage): GenesisBlock = GenesisBlock(
+        fun of(dto: GenesisBlockMessage, delegates: List<Delegate>): GenesisBlock = GenesisBlock(
             dto.timestamp,
             dto.height,
             dto.previousHash,
@@ -34,7 +34,7 @@ class GenesisBlock(
             dto.hash,
             dto.signature,
             dto.publicKey,
-            GenesisBlockPayload(dto.epochIndex)
+            GenesisBlockPayload(dto.epochIndex, delegates)
         )
     }
 

@@ -3,14 +3,17 @@ package io.openfuture.chain.consensus.component.block
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
+import io.openfuture.chain.core.exception.InsufficientTransactionsException
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
+import io.openfuture.chain.network.component.node.NodeClock
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.annotation.PostConstruct
-import javax.annotation.PreDestroy
 
 @Component
 class BlockProductionScheduler(
@@ -20,39 +23,43 @@ class BlockProductionScheduler(
     private val mainBlockService: MainBlockService,
     private val genesisBlockService: GenesisBlockService,
     private val consensusProperties: ConsensusProperties,
-    private val pendingBlockHandler: PendingBlockHandler
+    private val pendingBlockHandler: PendingBlockHandler,
+    private val clock: NodeClock
 ) {
 
-    private val executor: ExecutorService = Executors.newSingleThreadExecutor()
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(BlockProductionScheduler::class.java)
+    }
 
-    private var currentTimeSlot: Long = 0
+    private val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
 
     @PostConstruct
     fun init() {
-        executor.submit {
-            while (true) {
-                val timeSlot = epochService.getSlotNumber()
-                if (timeSlot > currentTimeSlot) {
-                    currentTimeSlot = timeSlot
-                    val slotOwner = epochService.getCurrentSlotOwner()
-                    if (isGenesisBlockRequired()) {
-                        val genesisBlock = genesisBlockService.create()
-                        genesisBlock.timestamp = epochService.getEpochEndTime()
-                        genesisBlockService.add(genesisBlock)
-                    } else if (keyHolder.getPublicKey() == slotOwner.publicKey) {
-                        val block = mainBlockService.create()
-                        pendingBlockHandler.addBlock(block)
-                    }
-                }
-                Thread.sleep(100)
-            }
-        }
+        executor.submit { proceedProductionLoop() }
     }
 
-    @PreDestroy
-    fun shutdown() {
-        executor.shutdown()
+    private fun proceedProductionLoop() {
+        while (true) {
+            try {
+                val slotOwner = epochService.getCurrentSlotOwner()
+                if (isGenesisBlockRequired()) {
+                    val timestamp = epochService.getEpochEndTime()
+                    val genesisBlock = genesisBlockService.create(timestamp)
+                    genesisBlockService.add(genesisBlock)
+                    pendingBlockHandler.resetSlotNumber()
+                } else if (keyHolder.getPublicKey() == slotOwner.publicKey) {
+                    val block = mainBlockService.create()
+                    pendingBlockHandler.addBlock(block)
+                }
+            } catch (ex: Exception) {
+                if (ex !is InsufficientTransactionsException) {
+                    log.error("Block creation failure inbound: ${ex.message}")
+                }
+            } finally {
+                Thread.sleep(epochService.timeToNextTimeSlot(clock.networkTime()))
+            }
+        }
     }
 
     private fun isGenesisBlockRequired(): Boolean {

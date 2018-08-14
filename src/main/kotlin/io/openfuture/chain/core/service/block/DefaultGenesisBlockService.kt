@@ -1,19 +1,17 @@
 package io.openfuture.chain.core.service.block
 
-import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
-import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DefaultDelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
 import io.openfuture.chain.network.service.NetworkApiService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -23,24 +21,22 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultGenesisBlockService(
     blockService: BlockService,
-    private val repository: GenesisBlockRepository,
-    private val delegateService: DefaultDelegateService,
-    private val clock: NodeClock,
-    private val consensusProperties: ConsensusProperties,
+    repository: GenesisBlockRepository,
+    walletService: WalletService,
+    delegateService: DefaultDelegateService,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService
-) : BaseBlockService(blockService), GenesisBlockService {
+) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService), GenesisBlockService {
 
     @Transactional(readOnly = true)
     override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()
         ?: throw NotFoundException("Last block not found")
 
-    override fun create(): GenesisBlockMessage {
-        val timestamp = clock.networkTime()
+    override fun create(timestamp: Long): GenesisBlockMessage {
         val lastBlock = blockService.getLast()
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
-        val reward = consensusProperties.rewardBlock!!
+        val reward = 0L
         val payload = createPayload()
         val hash = BlockUtils.createHash(timestamp, height, previousHash, reward, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
@@ -63,27 +59,26 @@ class DefaultGenesisBlockService(
             return
         }
 
-        val block = GenesisBlock.of(message)
         val delegates = message.delegates.map { delegateService.getByPublicKey(it) }
+        val block = GenesisBlock.of(message, delegates)
 
-        if (!isValid(block, delegates)) {
+        if (!isValid(block)) {
             return
         }
 
-        block.payload.activeDelegates = delegates
-        repository.save(block)
+        super.save(block)
         networkService.broadcast(message)
     }
 
     @Transactional(readOnly = true)
     override fun isValid(message: GenesisBlockMessage): Boolean {
-        val block = GenesisBlock.of(message)
         val delegates = message.delegates.map { delegateService.getByPublicKey(it) }
-        return isValid(block, delegates)
+        val block = GenesisBlock.of(message, delegates)
+        return isValid(block)
     }
 
-    private fun isValid(block: GenesisBlock, delegates: List<Delegate>): Boolean {
-        return isValidateActiveDelegates(delegates)
+    private fun isValid(block: GenesisBlock): Boolean {
+        return isValidateActiveDelegates(block.payload.activeDelegates)
             && isValidEpochIndex(this.getLast().payload.epochIndex, block.payload.epochIndex)
             && super.isValid(block)
     }
