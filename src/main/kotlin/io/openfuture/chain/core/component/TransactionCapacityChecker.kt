@@ -21,7 +21,7 @@ class TransactionCapacityChecker {
         counter.incrementAndGet()
     }
 
-    fun getCountPesSecond(): Long {
+    fun getCountPerSecond(): Long {
         return capacity.get()
     }
 
