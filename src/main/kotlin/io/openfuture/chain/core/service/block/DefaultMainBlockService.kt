@@ -4,7 +4,7 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
-import io.openfuture.chain.core.repository.BlockRepository
+import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.HashUtils
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultMainBlockService(
     blockService: BlockService,
-    private val repository: BlockRepository<MainBlock>,
+    private val repository: MainBlockRepository,
     private val clock: NodeClock,
     private val keyHolder: NodeKeyHolder,
     private val voteTransactionService: VoteTransactionService,
