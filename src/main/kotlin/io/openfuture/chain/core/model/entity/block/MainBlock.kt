@@ -14,7 +14,6 @@ class MainBlock(
     timestamp: Long,
     height: Long,
     previousHash: String,
-    reward: Long,
     hash: String,
     signature: String,
     publicKey: String,
@@ -22,14 +21,13 @@ class MainBlock(
     @Embedded
     var payload: MainBlockPayload
 
-) : BaseBlock(timestamp, height, previousHash, reward, hash, signature, publicKey) {
+) : BaseBlock(timestamp, height, previousHash, hash, signature, publicKey) {
 
     companion object {
         fun of(message: PendingBlockMessage): MainBlock = MainBlock(
             message.timestamp,
             message.height,
             message.previousHash,
-            message.reward,
             message.hash,
             message.signature,
             message.publicKey,
@@ -40,7 +38,6 @@ class MainBlock(
             message.timestamp,
             message.height,
             message.previousHash,
-            message.reward,
             message.hash,
             message.signature,
             message.publicKey,

@@ -17,7 +17,6 @@ class PendingBlockMessage(
     height: Long,
     previousHash: String,
     timestamp: Long,
-    reward: Long,
     hash: String,
     signature: String,
     publicKey: String,
@@ -25,14 +24,13 @@ class PendingBlockMessage(
     var voteTransactions: List<String>,
     var delegateTransactions: List<String>,
     var transferTransactions: List<String>
-) : BlockMessage(height, previousHash, timestamp, reward, hash, signature, publicKey) {
+) : BlockMessage(height, previousHash, timestamp, hash, signature, publicKey) {
 
     constructor(block: MainBlock, voteTransactions: List<UnconfirmedVoteTransaction>, delegateTransactions: List<UnconfirmedDelegateTransaction>,
                 transferTransactions: List<UnconfirmedTransferTransaction>) : this(
         block.height,
         block.previousHash,
         block.timestamp,
-        block.reward,
         block.hash,
         block.signature,
         block.publicKey,
@@ -78,7 +76,6 @@ class PendingBlockMessage(
         if (publicKey != other.publicKey) return false
         if (height != other.height) return false
         if (previousHash != other.previousHash) return false
-        if (reward != other.reward) return false
         if (merkleHash != other.merkleHash) return false
         if (voteTransactions != other.voteTransactions) return false
         if (delegateTransactions != other.delegateTransactions) return false
@@ -94,7 +91,6 @@ class PendingBlockMessage(
         result = 31 * result + publicKey.hashCode()
         result = 31 * result + height.hashCode()
         result = 31 * result + previousHash.hashCode()
-        result = 31 * result + reward.hashCode()
         result = 31 * result + merkleHash.hashCode()
         result = 31 * result + voteTransactions.hashCode()
         result = 31 * result + delegateTransactions.hashCode()

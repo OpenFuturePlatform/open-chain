@@ -48,7 +48,7 @@ class TransferTransactionControllerTests : ControllerTests() {
 
     @Test
     fun getAllShouldReturnTransferTransactionsListTest() {
-        val mainBlock = MainBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", MainBlockPayload("merkleHash"))
+        val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey", MainBlockPayload("merkleHash"))
         val pageTransferTransactions = PageImpl(listOf(TransferTransaction(1, 1, "senderAddress", "hash",
             "senderSignature", "senderPublicKey", mainBlock, TransferTransactionPayload(1, "recipientAddress"))))
         val expectedPageResponse = PageResponse(pageTransferTransactions)
@@ -69,7 +69,7 @@ class TransferTransactionControllerTests : ControllerTests() {
     @Test
     fun getTransactionsByAddressShouldReturnTransferTransactionsListTest() {
         val address = "address"
-        val mainBlock = MainBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", MainBlockPayload("merkleHash"))
+        val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey", MainBlockPayload("merkleHash"))
         val expectedTransferTransactions = listOf(TransferTransaction(1, 1, "senderAddress", "hash",
             "senderSignature", "senderPublicKey", mainBlock, TransferTransactionPayload(1, "recipientAddress")))
 

@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.service.block
 
-import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.InsufficientTransactionsException
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -27,8 +26,7 @@ class DefaultMainBlockService(
     private val keyHolder: NodeKeyHolder,
     private val voteTransactionService: VoteTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
-    private val transferTransactionService: TransferTransactionService,
-    private val consensusProperties: ConsensusProperties
+    private val transferTransactionService: TransferTransactionService
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
 
     @Transactional(readOnly = true)
@@ -44,15 +42,14 @@ class DefaultMainBlockService(
         val transferTxs = transferTransactionService.getAllUnconfirmed()
         val transactions = voteTxs + delegateTxs + transferTxs
 
-        val reward = transactions.map { it.fee }.sum() + consensusProperties.rewardBlock!!
         val merkleHash = calculateMerkleRoot(transactions.map { it.hash })
         val payload = MainBlockPayload(merkleHash)
 
-        val hash = BlockUtils.createHash(timestamp, height, previousHash, reward, payload)
+        val hash = BlockUtils.createHash(timestamp, height, previousHash, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKey()
 
-        val block = MainBlock(timestamp, height, previousHash, reward, ByteUtils.toHexString(hash), signature, publicKey, payload)
+        val block = MainBlock(timestamp, height, previousHash, ByteUtils.toHexString(hash), signature, publicKey, payload)
         return PendingBlockMessage(block, voteTxs, delegateTxs, transferTxs)
     }
 
@@ -68,7 +65,7 @@ class DefaultMainBlockService(
             return
         }
 
-        val savedBlock= super.save(block)
+        val savedBlock = repository.save(block)
         message.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
         message.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
         message.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
@@ -84,7 +81,8 @@ class DefaultMainBlockService(
         if (!isValid(block, message.getAllTransactions().map { it.hash })) {
             return
         }
-        val savedBlock = super.save(block)
+
+        val savedBlock = repository.save(block)
         message.voteTransactions.forEach { voteTransactionService.synchronize(it, savedBlock) }
         message.delegateTransactions.forEach { delegateTransactionService.synchronize(it, savedBlock) }
         message.transferTransactions.forEach { transferTransactionService.synchronize(it, savedBlock) }
@@ -129,5 +127,11 @@ class DefaultMainBlockService(
         }
         return merkleHash == calculateMerkleRoot(transactions.map { it })
     }
+
+//    private fun updateBalanceByReward(block: BaseBlock) {
+//        val delegate = delegateService.getByPublicKey(block.publicKey)
+//        val reward = transactions.map { it.fee }.sum() + consensusProperties.rewardBlock!!
+//        walletService.increaseBalance(delegate.address, block.reward)
+//    }
 
 }

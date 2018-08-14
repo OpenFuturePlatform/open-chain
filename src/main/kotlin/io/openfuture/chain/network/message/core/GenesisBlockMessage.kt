@@ -11,19 +11,17 @@ class GenesisBlockMessage(
     height: Long,
     previousHash: String,
     timestamp: Long,
-    reward: Long,
     hash: String,
     signature: String,
     publicKey: String,
     var epochIndex: Long,
     var delegates: List<String>
-) : BlockMessage(height, previousHash, timestamp, reward, hash, signature, publicKey) {
+) : BlockMessage(height, previousHash, timestamp, hash, signature, publicKey) {
 
     constructor(block: GenesisBlock) : this(
         block.height,
         block.previousHash,
         block.timestamp,
-        block.reward,
         block.hash,
         block.signature,
         block.publicKey,

@@ -8,7 +8,6 @@ import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import org.springframework.beans.factory.annotation.Autowired
 
 abstract class BaseBlockService<T : BaseBlock>(
     protected val repository: BlockRepository<T>,
@@ -16,11 +15,6 @@ abstract class BaseBlockService<T : BaseBlock>(
     private val walletService: WalletService,
     protected val delegateService: DelegateService
 ) {
-
-    protected fun save(block: T): T {
-        updateBalanceByReward(block)
-        return repository.save(block)
-    }
 
     protected fun isValid(block: BaseBlock): Boolean {
         val lastBlock = blockService.getLast()
@@ -39,17 +33,12 @@ abstract class BaseBlockService<T : BaseBlock>(
     private fun isValidHeight(block: BaseBlock, lastBlock: BaseBlock): Boolean = block.height == lastBlock.height + 1
 
     private fun isValidHash(block: BaseBlock): Boolean {
-        val dataHash = BlockUtils.createHash(block.timestamp, block.height, block.previousHash, block.reward,
+        val dataHash = BlockUtils.createHash(block.timestamp, block.height, block.previousHash,
             block.getPayload())
         return ByteUtils.toHexString(dataHash) == block.hash
     }
 
     private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean =
         SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
-
-    private fun updateBalanceByReward(block: BaseBlock) {
-        val delegate = delegateService.getByPublicKey(block.publicKey)
-        walletService.increaseBalance(delegate.address, block.reward)
-    }
 
 }

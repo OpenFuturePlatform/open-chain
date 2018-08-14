@@ -50,4 +50,5 @@ class TransferTransaction(
     }
 
     override fun getPayload(): TransactionPayload = payload
+
 }

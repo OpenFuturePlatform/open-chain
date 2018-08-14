@@ -36,13 +36,12 @@ class DefaultGenesisBlockService(
         val lastBlock = blockService.getLast()
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
-        val reward = 0L
         val payload = createPayload()
-        val hash = BlockUtils.createHash(timestamp, height, previousHash, reward, payload)
+        val hash = BlockUtils.createHash(timestamp, height, previousHash, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKey()
 
-        val block = GenesisBlock(timestamp, height, previousHash, reward, ByteUtils.toHexString(hash), signature,
+        val block = GenesisBlock(timestamp, height, previousHash, ByteUtils.toHexString(hash), signature,
             publicKey, payload)
         return GenesisBlockMessage(block)
     }
@@ -66,7 +65,7 @@ class DefaultGenesisBlockService(
             return
         }
 
-        super.save(block)
+        repository.save(block)
         networkService.broadcast(message)
     }
 
