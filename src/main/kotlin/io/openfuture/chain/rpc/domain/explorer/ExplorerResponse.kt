@@ -1,7 +1,7 @@
 package io.openfuture.chain.rpc.domain.explorer
 
 class ExplorerResponse(
-    var nodesCount: Long,
+    var nodesCount: Int,
     var blocksCount: Long,
     var transactionsCount: Long,
     var blocksSpeed: Double,
