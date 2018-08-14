@@ -1,6 +1,7 @@
 package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.service.TransferTransactionService
@@ -48,7 +49,7 @@ class TransferTransactionControllerTest : ControllerTests() {
     fun addTransaction() {
         val transactionRequest = TransferTransactionRequest(1L, 1L, "senderAddress",
             1, "recipientAddress", "senderSignature", "recipientAddress")
-        val unconfirmedTransferTransaction = UnconfirmedTransferTransaction(1L, 1L, "senderAddress",
+        val unconfirmedTransferTransaction = UnconfirmedTransferTransaction(TransactionHeader(1L, 1L, "senderAddress"),
             "hash", "senderSignature", "senderPublicKey", TransferTransactionPayload(1L, "delegateKey"))
 
         given(service.add(transactionRequest)).willReturn(unconfirmedTransferTransaction)

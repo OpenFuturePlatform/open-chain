@@ -1,6 +1,8 @@
 package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
+import io.openfuture.chain.core.model.entity.dictionary.VoteType
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
 import io.openfuture.chain.core.service.VoteTransactionService
@@ -45,10 +47,10 @@ class VoteTransactionControllerTest : ControllerTests() {
 
     @Test
     fun addTransaction() {
-        val transactionRequest = VoteTransactionRequest(1L, 1L, "senderAddress", 1,
+        val transactionRequest = VoteTransactionRequest(1L, 1L, "senderAddress", VoteType.FOR,
             "delegateKey", "senderSignature", "senderPublicKey")
-        val unconfirmedVoteTransaction = UnconfirmedVoteTransaction(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
-            "hash", VoteTransactionPayload(1, "delegateKey"))
+        val unconfirmedVoteTransaction = UnconfirmedVoteTransaction(TransactionHeader(1L, 1L, "senderAddress"),
+            "hash", "senderSignature", "senderPublicKey", VoteTransactionPayload(1, "delegateKey"))
 
         given(service.add(transactionRequest)).willReturn(unconfirmedVoteTransaction)
         given(nodeClock.networkTime()).willReturn(1L)
