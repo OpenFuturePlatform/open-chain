@@ -5,7 +5,6 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
-import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.service.BlockService

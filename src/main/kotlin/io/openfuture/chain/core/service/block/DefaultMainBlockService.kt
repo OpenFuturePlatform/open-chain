@@ -14,7 +14,9 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.MainBlockMessage
+import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -32,6 +34,9 @@ class DefaultMainBlockService(
     private val transferTransactionService: TransferTransactionService,
     private val consensusProperties: ConsensusProperties
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService, capacityChecker), MainBlockService {
+
+    @Transactional(readOnly = true)
+    override fun getAll(request: PageRequest): Page<MainBlock> = repository.findAll(request)
 
     @Transactional(readOnly = true)
     override fun create(): PendingBlockMessage {
