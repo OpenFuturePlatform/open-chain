@@ -3,17 +3,14 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.repository.TransferTransactionRepository
 import io.openfuture.chain.core.repository.UTransferTransactionRepository
 import io.openfuture.chain.core.service.TransferTransactionService
-import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.base.PageRequest
-import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionHashRequest
-import io.openfuture.chain.rpc.domain.transaction.request.transfer.TransferTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -79,14 +76,6 @@ class DefaultTransferTransactionService(
         }
         super.save(TransferTransaction.of(message, block))
     }
-
-    override fun generateHash(request: TransferTransactionHashRequest): String =
-        TransactionUtils.generateHash(
-            request.timestamp!!,
-            request.fee!!,
-            request.senderAddress!!,
-            TransferTransactionPayload(request.amount!!, request.recipientAddress!!)
-        )
 
     @Transactional
     override fun toBlock(hash: String, block: MainBlock): TransferTransaction {
