@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.block
 
+import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.BlockService
@@ -8,17 +9,18 @@ import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import org.springframework.beans.factory.annotation.Autowired
 
 abstract class BaseBlockService<T : BaseBlock>(
     protected val repository: BlockRepository<T>,
     protected val blockService: BlockService,
     private val walletService: WalletService,
-    protected val delegateService: DelegateService
+    protected val delegateService: DelegateService,
+    private val  capacityChecker: BlockCapacityChecker
 ) {
 
     protected fun save(block: T): T {
         updateBalanceByReward(block)
+        capacityChecker.incrementCapacity(block.timestamp)
         return repository.save(block)
     }
 

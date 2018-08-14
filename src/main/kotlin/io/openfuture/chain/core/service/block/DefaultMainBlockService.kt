@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
+import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.InsufficientTransactionsException
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -23,13 +24,14 @@ class DefaultMainBlockService(
     repository: MainBlockRepository,
     walletService: WalletService,
     delegateService: DelegateService,
+    capacityChecker: BlockCapacityChecker,
     private val clock: NodeClock,
     private val keyHolder: NodeKeyHolder,
     private val voteTransactionService: VoteTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
     private val consensusProperties: ConsensusProperties
-) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
+) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService, capacityChecker), MainBlockService {
 
     @Transactional(readOnly = true)
     override fun create(): PendingBlockMessage {

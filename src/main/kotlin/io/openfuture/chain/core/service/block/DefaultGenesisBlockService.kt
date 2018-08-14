@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.block
 
+import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.Delegate
@@ -27,9 +28,10 @@ class DefaultGenesisBlockService(
     repository: GenesisBlockRepository,
     walletService: WalletService,
     delegateService: DefaultDelegateService,
+    capacityChecker: BlockCapacityChecker,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService
-) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService), GenesisBlockService {
+) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService, capacityChecker), GenesisBlockService {
 
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<GenesisBlock> = repository.findAll(request)

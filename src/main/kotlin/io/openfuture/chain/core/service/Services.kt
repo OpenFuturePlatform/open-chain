@@ -47,6 +47,8 @@ interface BlockService {
 
     fun isExists(hash: String): Boolean
 
+    fun getAvgProductionTime(): Long
+
 }
 
 interface GenesisBlockService {
@@ -84,6 +86,8 @@ interface TransactionService {
 
     fun getAllUnconfirmedByAddress(address: String): List<UnconfirmedTransaction>
 
+    fun getProducingPerSecond(): Long
+    
 }
 
 interface TransferTransactionService {
