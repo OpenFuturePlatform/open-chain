@@ -7,16 +7,13 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
-import io.openfuture.chain.core.model.entity.transaction.vote.VoteTransactionPayload
 import io.openfuture.chain.core.repository.UVoteTransactionRepository
 import io.openfuture.chain.core.repository.VoteTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
-import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.network.service.NetworkApiService
-import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionHashRequest
-import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -74,14 +71,6 @@ internal class DefaultVoteTransactionService(
         }
         super.save(VoteTransaction.of(message, block))
     }
-
-    override fun generateHash(request: VoteTransactionHashRequest): String =
-        TransactionUtils.generateHash(
-            request.timestamp!!,
-            request.fee!!,
-            request.senderAddress!!,
-            VoteTransactionPayload(request.voteTypeId!!, request.delegateKey!!)
-        )
 
     @Transactional
     override fun toBlock(hash: String, block: MainBlock): VoteTransaction {

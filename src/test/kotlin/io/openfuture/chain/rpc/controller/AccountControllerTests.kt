@@ -1,16 +1,15 @@
 package io.openfuture.chain.rpc.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.service.WalletService
+import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import io.openfuture.chain.crypto.service.CryptoService
-import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.rpc.domain.crypto.AccountDto
 import io.openfuture.chain.rpc.domain.crypto.ValidateAddressRequest
 import io.openfuture.chain.rpc.domain.crypto.WalletDto
 import io.openfuture.chain.rpc.domain.crypto.key.DerivationKeyRequest
+import io.openfuture.chain.rpc.domain.crypto.key.ImportKeyRequest
 import io.openfuture.chain.rpc.domain.crypto.key.KeyDto
 import io.openfuture.chain.rpc.domain.crypto.key.RestoreRequest
 import org.assertj.core.api.Assertions.assertThat
@@ -25,12 +24,6 @@ class AccountControllerTests : ControllerTests() {
 
     @MockBean
     private lateinit var cryptoService: CryptoService
-
-    @MockBean
-    private lateinit var nodeClock: NodeClock
-
-    @MockBean
-    private lateinit var nodeProperties: NodeProperties
 
     @MockBean
     private lateinit var walletService: WalletService
@@ -69,14 +62,14 @@ class AccountControllerTests : ControllerTests() {
         given(cryptoService.getMasterKey(expectedAccount.seedPhrase)).willReturn(masterKeys)
         given(cryptoService.getDefaultDerivationKey(masterKeys)).willReturn(defaultWalletKeys)
 
-        val result = webClient.post().uri("/rpc/accounts/doRestore")
+        val actualAccount = webClient.post().uri("/rpc/accounts/doRestore")
             .body(Mono.just(RestoreRequest(expectedAccount.seedPhrase)), RestoreRequest::class.java)
             .exchange()
             .expectStatus().isOk
-            .expectBody(String::class.java)
+            .expectBody(AccountDto::class.java)
             .returnResult().responseBody!!
 
-        assertThat(result).isEqualTo(ObjectMapper().writeValueAsString(expectedAccount))
+        assertThat(actualAccount).isEqualTo(expectedAccount)
     }
 
     @Test
@@ -86,37 +79,114 @@ class AccountControllerTests : ControllerTests() {
         val derivationKeyRequest = DerivationKeyRequest(seedPhrase, derivationPath)
         val masterKeys = ExtendedKey.root(ByteArray(0))
         val defaultWalletKeys = ExtendedKey.root(ByteArray(1))
-        val expectedWallet = WalletDto(defaultWalletKeys.ecKey)
+        val expectedWalletDto = WalletDto(defaultWalletKeys.ecKey)
 
         given(cryptoService.getMasterKey(seedPhrase)).willReturn(masterKeys)
         given(cryptoService.getDerivationKey(masterKeys, derivationPath)).willReturn(defaultWalletKeys)
 
-        val result = webClient.post().uri("/rpc/accounts/doDerive")
+        val actualWalletDto = webClient.post().uri("/rpc/accounts/doDerive")
             .body(Mono.just(derivationKeyRequest), DerivationKeyRequest::class.java)
             .exchange()
             .expectStatus().isOk
-            .expectBody(String::class.java)
+            .expectBody(WalletDto::class.java)
             .returnResult().responseBody!!
 
-        assertThat(result).isEqualTo(ObjectMapper().writeValueAsString(expectedWallet))
+        assertThat(actualWalletDto).isEqualTo(expectedWalletDto)
     }
 
     @Test
-    fun getBalanceShouldReturnWalletBalanceTest() {
+    fun getBalanceShouldReturnWalletBalance() {
         val address = "address"
         val expectedBalance = 1L
 
         given(walletService.getBalanceByAddress(address)).willReturn(expectedBalance)
-        given(nodeClock.networkTime()).willReturn(0)
-        given(nodeProperties.version).willReturn("1")
 
-        val actualResult = webClient.get().uri("/rpc/accounts/wallets/$address/balance")
+        val actualBalance = webClient.get().uri("/rpc/accounts/wallets/$address/balance")
             .exchange()
             .expectStatus().isOk
-            .expectBody(String::class.java)
+            .expectBody(Long::class.java)
             .returnResult().responseBody!!
 
-        assertThat(actualResult).isEqualTo(ObjectMapper().writeValueAsString(expectedBalance))
+        assertThat(actualBalance).isEqualTo(expectedBalance)
+    }
+
+    @Test
+    fun doGenerateNewAccountShouldReturnGeneratedAccount() {
+        val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
+        val masterKeys = ExtendedKey.root(ByteArray(0))
+        val defaultDerivationKey = ExtendedKey.root(ByteArray(0))
+        val expectedAccountDto = AccountDto(seedPhrase, KeyDto(masterKeys.ecKey), WalletDto(defaultDerivationKey.ecKey))
+
+        given(cryptoService.generateSeedPhrase()).willReturn(seedPhrase)
+        given(cryptoService.getMasterKey(seedPhrase)).willReturn(masterKeys)
+        given(cryptoService.getDefaultDerivationKey(masterKeys)).willReturn(defaultDerivationKey)
+
+        val actualAccountDto = webClient.get().uri("/rpc/accounts/doGenerate")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(AccountDto::class.java)
+            .returnResult().responseBody!!
+
+        assertThat(actualAccountDto).isEqualTo(expectedAccountDto)
+    }
+
+    @Test
+    fun doImportKeyShouldReturnWalletDto() {
+        val importKeyRequest = ImportKeyRequest("decodedKey")
+        val key = ExtendedKey.root(ByteArray(0))
+        val publicKey = "publicKey"
+        val privateKey = "privateKey"
+        val expectedWalletDto =  WalletDto(KeyDto("publicKey", "privateKey"), key.ecKey.getAddress())
+
+        given(cryptoService.importExtendedKey(importKeyRequest.decodedKey!!)).willReturn(key)
+        given(cryptoService.serializePublicKey(key)).willReturn(publicKey)
+        given(cryptoService.serializePrivateKey(key)).willReturn(privateKey)
+
+
+        val actualWalletDto = webClient.post().uri("/rpc/accounts/keys/doExtendedImport")
+            .body(Mono.just(importKeyRequest), ImportKeyRequest::class.java)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(WalletDto::class.java)
+            .returnResult().responseBody!!
+
+        assertThat(actualWalletDto).isEqualTo(expectedWalletDto)
+    }
+
+    @Test
+    fun doImportWifKeyShouldReturnWalletDto() {
+        val importKeyRequest = ImportKeyRequest("decodedKey")
+        val ecKey = ECKey(ByteArray(1))
+        val expectedWalletDto =  WalletDto(ecKey)
+
+        given(cryptoService.importWifKey(importKeyRequest.decodedKey!!)).willReturn(ecKey)
+
+        val actualWalletDto = webClient.post().uri("/rpc/accounts/keys/doWifImport")
+            .body(Mono.just(importKeyRequest), ImportKeyRequest::class.java)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(WalletDto::class.java)
+            .returnResult().responseBody!!
+
+        assertThat(actualWalletDto).isEqualTo(expectedWalletDto)
+    }
+
+    @Test
+    fun doImportPrivateKeyShouldReturnWalletDto() {
+        val importKeyRequest = ImportKeyRequest("decodedKey")
+        val ecKey = ECKey(ByteArray(1))
+        val expectedWalletDto =  WalletDto(ecKey)
+
+        given(cryptoService.importPrivateKey(importKeyRequest.decodedKey!!)).willReturn(ecKey)
+
+        val actualWalletDto = webClient.post().uri("/rpc/accounts/keys/doPrivateImport")
+            .body(Mono.just(importKeyRequest), ImportKeyRequest::class.java)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(WalletDto::class.java)
+            .returnResult().responseBody!!
+
+        assertThat(actualWalletDto).isEqualTo(expectedWalletDto)
     }
 
 }

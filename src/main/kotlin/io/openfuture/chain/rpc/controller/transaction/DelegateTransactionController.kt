@@ -1,11 +1,8 @@
 package io.openfuture.chain.rpc.controller.transaction
 
 import io.openfuture.chain.core.service.DelegateTransactionService
-import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionHashRequest
-import io.openfuture.chain.rpc.domain.transaction.request.delegate.DelegateTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.DelegateTransactionResponse
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -16,11 +13,6 @@ import javax.validation.Valid
 @RequestMapping("/rpc/transactions/delegates")
 class DelegateTransactionController(
     private val transactionService: DelegateTransactionService) {
-
-    @PostMapping("/doGenerateHash")
-    fun getHash(@Valid @RequestBody request: DelegateTransactionHashRequest): String {
-        return transactionService.generateHash(request)
-    }
 
     @PostMapping
     fun add(@Valid @RequestBody request: DelegateTransactionRequest): DelegateTransactionResponse {
