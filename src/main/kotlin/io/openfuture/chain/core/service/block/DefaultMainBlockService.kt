@@ -13,7 +13,10 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.MainBlockMessage
+import io.openfuture.chain.network.sync.DefaultSyncBlockHandler
+import io.openfuture.chain.network.sync.SynchronizationStatus
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -28,7 +31,8 @@ class DefaultMainBlockService(
     private val voteTransactionService: VoteTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
-    private val consensusProperties: ConsensusProperties
+    private val consensusProperties: ConsensusProperties,
+    @Lazy private val syncBlockHandler: DefaultSyncBlockHandler
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
 
     @Transactional(readOnly = true)
@@ -63,8 +67,10 @@ class DefaultMainBlockService(
 
         val block = MainBlock.of(message)
         if (!isValid(block, message.getAllTransactions())) {
-            //TODO call second synchronization
-            return
+            val previousBlock = repository.findOneByHash(block.previousHash)
+            if (previousBlock == null) {
+                synchronizeLastBlocks()
+            }
         }
 
         val savedBlock= super.save(block)
@@ -96,6 +102,20 @@ class DefaultMainBlockService(
         return isValidMerkleHash(block.payload.merkleHash, transactions) && super.isValid(block)
     }
 
+    private fun synchronizeLastBlocks() {
+        syncBlockHandler.synchronize()
+        while (syncBlockHandler.getSyncStatus() != SynchronizationStatus.SYNCHRONIZED) {
+            Thread.sleep(1000)
+        }
+    }
+
+    private fun isValidMerkleHash(merkleHash: String, transactions: List<String>): Boolean {
+        if (transactions.isEmpty()) {
+            return false
+        }
+        return merkleHash == calculateMerkleRoot(transactions.map { it })
+    }
+
     private fun calculateMerkleRoot(transactions: List<String>): String {
         if (transactions.isEmpty()) {
             throw InsufficientTransactionsException()
@@ -120,13 +140,6 @@ class DefaultMainBlockService(
             treeLayout = mutableListOf()
         }
         return ByteUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
-    }
-
-    private fun isValidMerkleHash(merkleHash: String, transactions: List<String>): Boolean {
-        if (transactions.isEmpty()) {
-            return false
-        }
-        return merkleHash == calculateMerkleRoot(transactions.map { it })
     }
 
 }
