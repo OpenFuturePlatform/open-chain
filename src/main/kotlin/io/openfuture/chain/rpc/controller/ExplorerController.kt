@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/rpc/explorer")
+@RequestMapping("/rpc/explorer/info")
 class ExplorerController(
     private val blockService: BlockService,
     private val epochService: EpochService,
