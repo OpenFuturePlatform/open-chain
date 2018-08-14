@@ -1,8 +1,7 @@
 package io.openfuture.chain.rpc.controller.transaction
 
 import io.openfuture.chain.core.service.VoteTransactionService
-import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionHashRequest
-import io.openfuture.chain.rpc.domain.transaction.request.vote.VoteTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.VoteTransactionResponse
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -15,9 +14,6 @@ import javax.validation.Valid
 class VoteTransactionController(
     private val transactionService: VoteTransactionService
 ) {
-
-    @PostMapping("/doGenerateHash")
-    fun getHash(@Valid @RequestBody request: VoteTransactionHashRequest): String = transactionService.generateHash(request)
 
     @PostMapping
     fun add(@Valid @RequestBody request: VoteTransactionRequest): VoteTransactionResponse {
