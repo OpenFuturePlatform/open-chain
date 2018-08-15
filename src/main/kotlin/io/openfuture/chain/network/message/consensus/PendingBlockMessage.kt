@@ -53,6 +53,7 @@ class PendingBlockMessage(
         super.read(buffer)
 
         merkleHash = buffer.readString()
+        rewardTransaction = RewardTransactionMessage::class.java.newInstance()
         rewardTransaction.read(buffer)
         voteTransactions = buffer.readStringList()
         delegateTransactions = buffer.readStringList()

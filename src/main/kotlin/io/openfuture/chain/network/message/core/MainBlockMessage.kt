@@ -50,6 +50,7 @@ class MainBlockMessage(
         super.read(buffer)
 
         merkleHash = buffer.readString()
+        rewardTransaction = RewardTransactionMessage::class.java.newInstance()
         rewardTransaction.read(buffer)
         voteTransactions = buffer.readList()
         delegateTransactions = buffer.readList()

@@ -3,6 +3,13 @@ package io.openfuture.chain.network.message.core
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.config.MessageTests
+import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
+import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.payload.RewardTransactionPayload
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -15,24 +22,17 @@ class MainBlockMessageTests : MessageTests() {
 
     @Before
     fun setup() {
-        buffer = createBuffer("0000000000000001000000087072657648617368000000000000000100000004686173680000000" +
-            "97369676e6174757265000000097075626c69634b65790000000a6d65726b6c6548617368000000010000000000000001000000000" +
-            "00000010000000d73656e6465724164647265737300000004686173680000000f73656e6465725369676e61747572650000000f736" +
-            "56e6465725075626c69634b6579000000010000000b64656c65676174654b657900000001000000000000000100000000000000010" +
-            "000000d73656e6465724164647265737300000004686173680000000f73656e6465725369676e61747572650000000f73656e6465" +
-            "725075626c69634b65790000000b64656c65676174654b657900000001000000000000000100000000000000010000000d73656e6" +
-            "465724164647265737300000004686173680000000f73656e6465725369676e61747572650000000f73656e6465725075626c69634" +
-            "b657900000000000000010000000b64656c65676174654b6579")
-        val voteTransactionMessage = listOf(VoteTransactionMessage(1L, 1L, "senderAddress", "hash", "senderSignature",
-            "senderPublicKey", 1, "delegateKey"))
-        val transferTransactionMessage = listOf(TransferTransactionMessage(1L, 1L, "senderAddress", "hash", "senderSignature",
-            "senderPublicKey", 1, "delegateKey"))
-        val delegateTransactionMessage = listOf(DelegateTransactionMessage(1L, 1L, "senderAddress", "hash", "senderSignature",
-            "senderPublicKey", "delegateKey"))
-
-        message = MainBlockMessage(1, "prevHash", 1, "hash", "signature",
-            "publicKey", "merkleHash", voteTransactionMessage, delegateTransactionMessage,
-            transferTransactionMessage)
+        buffer = createBuffer("00000000000000010000000c70726576696f7573486173680000000000bc614e0000000468617" +
+            "368000000097369676e6174757265000000097075626c69634b65790000000a6d65726b6c65486173680000000000bc614e00000" +
+            "000000000000000000d73656e6465724164647265737300000004686173680000000f73656e6465725369676e61747572650000000" +
+            "f73656e6465725075626c69634b6579000000000000000a00000010726563697069656e7441646472657373000000000000000000000000")
+        val voteTransactions = listOf<VoteTransaction>()
+        val transaferTransaction = listOf<TransferTransaction>()
+        val delegateTransactions = listOf<DelegateTransaction>()
+        val mainBlock = createMainBlock()
+        val rewardTransaction = createRewardTransaction(mainBlock)
+        message = MainBlockMessage(mainBlock, rewardTransaction, voteTransactions, delegateTransactions,
+            transaferTransaction)
     }
 
     @Test
@@ -52,5 +52,14 @@ class MainBlockMessageTests : MessageTests() {
 
         assertThat(actualMessage).isEqualToComparingFieldByFieldRecursively(message)
     }
+
+    private fun createMainBlock(): MainBlock =
+        MainBlock(12345678, 1, "previousHash", "hash", "signature",
+            "publicKey", MainBlockPayload("merkleHash"))
+
+    private fun createRewardTransaction(block: MainBlock): RewardTransaction =
+        RewardTransaction(12345678, 0, "senderAddress", "hash",
+            "senderSignature", "senderPublicKey", block,
+            RewardTransactionPayload(10, "recipientAddress"))
 
 }
