@@ -80,7 +80,7 @@ class DefaultRewardTransactionService(
         val bank = walletService.getBalanceByAddress(senderAddress)
         val rewardBlock = consensusProperties.rewardBlock!!
 
-        return reward == fees + if (rewardBlock > bank) bank else rewardBlock
+        return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)
     }
 
     private fun isValidHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload, hash: String): Boolean =
