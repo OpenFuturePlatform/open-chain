@@ -35,28 +35,18 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
     private lateinit var cryptoService: CryptoService
 
 
-    open fun add(utx: U): U {
-        if (!isValid(utx)) {
-            throw ValidationException("Transaction is invalid!")
-        }
+    protected fun toBlock(utx: U, tx: T): T {
+        unconfirmedRepository.delete(utx)
+        return save(tx)
+    }
+
+    open fun save(utx: U): U {
         return unconfirmedRepository.save(utx)
     }
 
-    open fun add(tx: T): T {
-        if (!isValid(tx)) {
-            throw ValidationException("Transaction is invalid!")
-        }
+    open fun save(tx: T): T {
         updateBalanceByFee(tx)
         return repository.save(tx)
-    }
-
-    abstract fun isValid(utx: U): Boolean
-
-    abstract fun isValid(tx: T): Boolean
-
-    protected fun toBlock(utx: U, tx: T): T {
-        unconfirmedRepository.delete(utx)
-        return add(tx)
     }
 
     protected fun isValidBase(tx: BaseTransaction): Boolean {

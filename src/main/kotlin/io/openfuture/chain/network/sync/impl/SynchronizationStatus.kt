@@ -1,4 +1,4 @@
-package io.openfuture.chain.network.sync
+package io.openfuture.chain.network.sync.impl
 
 enum class SynchronizationStatus {
     SYNCHRONIZED,

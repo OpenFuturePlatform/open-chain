@@ -115,7 +115,7 @@ interface VoteTransactionService {
 
     fun synchronize(message: VoteTransactionMessage, block: MainBlock)
 
-    fun toBlock(hash: String, block: MainBlock): VoteTransaction
+    fun toBlock(message: VoteTransactionMessage, block: MainBlock): VoteTransaction
 
 }
 

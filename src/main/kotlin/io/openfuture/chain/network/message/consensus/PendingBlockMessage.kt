@@ -2,15 +2,11 @@ package io.openfuture.chain.network.message.consensus
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
-import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
+import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.readString
-import io.openfuture.chain.network.extension.readStringList
+import io.openfuture.chain.network.extension.writeList
 import io.openfuture.chain.network.extension.writeString
-import io.openfuture.chain.network.extension.writeStringList
-import io.openfuture.chain.network.message.core.BlockMessage
+import io.openfuture.chain.network.message.core.*
 
 @NoArgConstructor
 class PendingBlockMessage(
@@ -22,12 +18,12 @@ class PendingBlockMessage(
     signature: String,
     publicKey: String,
     var merkleHash: String,
-    var voteTransactions: List<String>,
-    var delegateTransactions: List<String>,
-    var transferTransactions: List<String>
+    var voteTransactions: List<VoteTransactionMessage>,
+    var delegateTransactions: List<DelegateTransactionMessage>,
+    var transferTransactions: List<TransferTransactionMessage>
 ) : BlockMessage(height, previousHash, timestamp, reward, hash, signature, publicKey) {
 
-    fun getAllTransactions(): List<String> {
+    fun getAllTransactions(): List<TransactionMessage> {
         return voteTransactions + delegateTransactions + transferTransactions
     }
 
@@ -35,18 +31,18 @@ class PendingBlockMessage(
         super.read(buffer)
 
         merkleHash = buffer.readString()
-        voteTransactions = buffer.readStringList()
-        delegateTransactions = buffer.readStringList()
-        transferTransactions = buffer.readStringList()
+        voteTransactions = buffer.readList()
+        delegateTransactions = buffer.readList()
+        transferTransactions = buffer.readList()
     }
 
     override fun write(buffer: ByteBuf) {
         super.write(buffer)
 
         buffer.writeString(merkleHash)
-        buffer.writeStringList(voteTransactions)
-        buffer.writeStringList(delegateTransactions)
-        buffer.writeStringList(transferTransactions)
+        buffer.writeList(voteTransactions)
+        buffer.writeList(delegateTransactions)
+        buffer.writeList(transferTransactions)
     }
 
     override fun toString() = "PendingBlockMessage(hash=$hash)"

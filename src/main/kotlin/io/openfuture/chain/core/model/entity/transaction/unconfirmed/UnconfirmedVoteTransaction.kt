@@ -46,7 +46,7 @@ class UnconfirmedVoteTransaction(
 
     override fun getPayload(): TransactionPayload = payload
 
-    override fun toMessage(): TransactionMessage = VoteTransactionMessage(
+    override fun toMessage(): VoteTransactionMessage = VoteTransactionMessage(
         header.timestamp,
         header.fee,
         header.senderAddress,

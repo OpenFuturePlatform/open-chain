@@ -13,6 +13,9 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.MainBlockMessage
+import io.openfuture.chain.network.sync.SyncManager
+import io.openfuture.chain.network.sync.impl.SynchronizationStatus
+import io.openfuture.chain.network.sync.impl.SynchronizationStatus.*
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,7 +31,8 @@ class DefaultMainBlockService(
     private val voteTransactionService: VoteTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
-    private val consensusProperties: ConsensusProperties
+    private val consensusProperties: ConsensusProperties,
+    private val syncManager: SyncManager
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
 
     @Transactional(readOnly = true)
@@ -52,7 +56,7 @@ class DefaultMainBlockService(
         val publicKey = keyHolder.getPublicKey()
 
         return PendingBlockMessage(height, previousHash, timestamp, reward, ByteUtils.toHexString(hash), signature, publicKey,
-            merkleHash, voteTransactions.map { it.hash }, delegateTransactions.map { it.hash }, transferTransactions.map { it.hash })
+            merkleHash, voteTransactions.map { it.toMessage() }, delegateTransactions.map { it.toMessage() }, transferTransactions.map { it.toMessage() })
     }
 
     @Transactional
@@ -62,8 +66,9 @@ class DefaultMainBlockService(
         }
 
         val block = MainBlock.of(message)
-        if (!isValid(block, message.getAllTransactions())) {
-            //TODO call second synchronization
+
+        if (!isSync(block)) {
+            syncManager.setSyncStatus(NOT_SYNCHRONIZED)
             return
         }
 

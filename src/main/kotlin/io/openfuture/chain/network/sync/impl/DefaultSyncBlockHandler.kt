@@ -1,4 +1,4 @@
-package io.openfuture.chain.network.sync
+package io.openfuture.chain.network.sync.impl
 
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.core.service.BlockService
@@ -8,43 +8,31 @@ import io.openfuture.chain.network.handler.BaseConnectionHandler
 import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.service.NetworkApiService
-import io.openfuture.chain.network.sync.SynchronizationStatus.*
+import io.openfuture.chain.network.sync.SyncBlockHandler
+import io.openfuture.chain.network.sync.SyncManager
+import io.openfuture.chain.network.sync.impl.SynchronizationStatus.*
 import org.apache.commons.lang3.tuple.MutablePair
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.concurrent.locks.ReadWriteLock
-import java.util.concurrent.locks.ReentrantReadWriteLock
 
 @Service
 class DefaultSyncBlockHandler(
     private val blockService: BlockService,
     private val mainBlockService: MainBlockService,
     private val networkApiService: NetworkApiService,
-    private val genesisBlockService: GenesisBlockService
+    private val genesisBlockService: GenesisBlockService,
+    private val syncManager: SyncManager
 ) : SyncBlockHandler {
 
     @Volatile
-    private var syncStatus: SynchronizationStatus = NOT_SYNCHRONIZED
-
-    @Volatile
     private var expectedHashAndResponseTime: MutablePair<String, Long> = MutablePair()
-
-    private val lock: ReadWriteLock = ReentrantReadWriteLock()
 
     companion object {
         val log = LoggerFactory.getLogger(BaseConnectionHandler::class.java)
     }
 
 
-    override fun getSyncStatus(): SynchronizationStatus {
-        lock.readLock().lock()
-        try {
-            return syncStatus
-        } finally {
-            lock.readLock().unlock()
-        }
-    }
-
+    @Synchronized
     override fun getLastResponseTime(): Long = expectedHashAndResponseTime.right
 
     @Synchronized
@@ -106,22 +94,13 @@ class DefaultSyncBlockHandler(
     }
 
     private fun processing() {
-        changeSynchronizationStatus(PROCESSING)
-
+        syncManager.setSyncStatus(PROCESSING)
         expectedHashAndResponseTime.right = System.currentTimeMillis()
     }
 
     private fun unlock() {
-        changeSynchronizationStatus(SYNCHRONIZED)
+        syncManager.setSyncStatus(SYNCHRONIZED)
     }
 
-    private fun changeSynchronizationStatus(status: SynchronizationStatus) {
-        lock.writeLock().lock()
-        try {
-            syncStatus = status
-        } finally {
-            lock.writeLock().unlock()
-        }
-    }
 
 }

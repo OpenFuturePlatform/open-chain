@@ -1,9 +1,11 @@
-package io.openfuture.chain.network.sync
+package io.openfuture.chain.network.sync.impl
 
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.NetworkApiService
-import io.openfuture.chain.network.sync.SynchronizationStatus.NOT_SYNCHRONIZED
-import io.openfuture.chain.network.sync.SynchronizationStatus.PROCESSING
+import io.openfuture.chain.network.sync.SyncBlockHandler
+import io.openfuture.chain.network.sync.SyncManager
+import io.openfuture.chain.network.sync.impl.SynchronizationStatus.NOT_SYNCHRONIZED
+import io.openfuture.chain.network.sync.impl.SynchronizationStatus.PROCESSING
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Component
 class SyncBlockScheduler(
     private val nodeProperties: NodeProperties,
     private val syncBlockHandler: SyncBlockHandler,
+    private val syncManager: SyncManager,
     private val networkApiService: NetworkApiService
 ) {
 
@@ -20,7 +23,7 @@ class SyncBlockScheduler(
             return
         }
 
-        if (syncBlockHandler.getSyncStatus() == NOT_SYNCHRONIZED || (syncBlockHandler.getSyncStatus() == PROCESSING && isResponseTimeOut())) {
+        if (syncManager.getSyncStatus() == NOT_SYNCHRONIZED || (syncManager.getSyncStatus() == PROCESSING && isResponseTimeOut())) {
             syncBlockHandler.synchronize()
         }
     }

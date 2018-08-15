@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DelegateService
@@ -29,6 +30,11 @@ abstract class BaseBlockService<T : Block>(
             && isValidTimeStamp(block, lastBlock)
             && isValidHash(block)
             && isValidSignature(block.hash, block.signature, block.publicKey)
+    }
+
+    protected fun isSync(block: MainBlock): Boolean {
+        val lastBlock = blockService.getLast()
+        return isValidHeight(block, lastBlock)
     }
 
     private fun isValidPreviousHash(block: Block, lastBlock: Block): Boolean = block.previousHash == lastBlock.hash

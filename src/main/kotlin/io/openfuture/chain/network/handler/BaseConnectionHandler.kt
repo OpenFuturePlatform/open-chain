@@ -12,7 +12,7 @@ import io.openfuture.chain.network.service.ConsensusMessageService
 import io.openfuture.chain.network.service.CoreMessageService
 import io.openfuture.chain.network.service.NetworkInnerService
 import io.openfuture.chain.network.sync.SyncBlockHandler
-import io.openfuture.chain.network.sync.SynchronizationStatus.SYNCHRONIZED
+import io.openfuture.chain.network.sync.impl.SynchronizationStatus.SYNCHRONIZED
 import org.slf4j.LoggerFactory
 
 abstract class BaseConnectionHandler(
