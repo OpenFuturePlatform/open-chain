@@ -37,6 +37,14 @@ class DefaultSyncBlockHandler(
     override fun getLastResponseTime(): Long = expectedHashAndResponseTime.right
 
     @Synchronized
+    override fun onDelegateResponseMessage(ctx: ChannelHandlerContext, delegateResponseMessage: DelegateResponseMessage) {
+        val lastBlockHash = blockService.getLast().hash
+        val delegateNodeAddress = delegateResponseMessage.values.shuffled().first()
+
+        networkApiService.sendToAddress(HashBlockRequestMessage(lastBlockHash), delegateNodeAddress)
+    }
+
+    @Synchronized
     override fun onHashBlockRequestMessage(ctx: ChannelHandlerContext, message: HashBlockRequestMessage) {
         val lastBlock = blockService.getLast()
         send(ctx, HashBlockResponseMessage(lastBlock.hash))
@@ -82,14 +90,6 @@ class DefaultSyncBlockHandler(
             synchronize()
             log.error(e.message)
         }
-    }
-
-    @Synchronized
-    override fun onDelegateResponseMessage(ctx: ChannelHandlerContext, delegateResponseMessage: DelegateResponseMessage) {
-        val lastBlockHash = blockService.getLast().hash
-        val delegateNodeAddress = delegateResponseMessage.values.shuffled().first()
-
-        networkApiService.sendToAddress(HashBlockRequestMessage(lastBlockHash), delegateNodeAddress)
     }
 
     private fun send(ctx: ChannelHandlerContext, message: BaseMessage) = ctx.channel().writeAndFlush(message)

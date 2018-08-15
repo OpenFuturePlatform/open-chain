@@ -43,8 +43,8 @@ abstract class BaseConnectionHandler(
             FIND_ADDRESSES -> networkService.onFindAddresses(ctx, packet.data as FindAddressesMessage)
             TIME -> networkService.onTime(ctx, packet.data as TimeMessage)
             ASK_TIME -> networkService.onAskTime(ctx, packet.data as AskTimeMessage)
-            EXPLORER_ADDRESSES -> networkService.onExplorerAddresses(ctx, packet.data as ExplorerAddressesMessage)
             EXPLORER_FIND_ADDRESSES -> networkService.onExplorerFindAddresses(ctx, packet.data as ExplorerFindAddressesMessage)
+            EXPLORER_ADDRESSES -> networkService.onExplorerAddresses(ctx, packet.data as ExplorerAddressesMessage)
 
             DELEGATE_REQUEST -> coreService.onFindDelegates(ctx, packet.data as DelegateRequestMessage)
             DELEGATE_RESPONSE -> syncBlockHandler.onDelegateResponseMessage(ctx, packet.data as DelegateResponseMessage)

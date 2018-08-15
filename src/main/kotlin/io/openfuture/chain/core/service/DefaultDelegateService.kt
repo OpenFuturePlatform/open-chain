@@ -35,7 +35,14 @@ class DefaultDelegateService(
 
     @Transactional(readOnly = true)
     override fun getActiveDelegates(): List<Delegate> {
-        val sql = "select sum(wll.balance) rating, dg.public_key $PUBLIC_KEY, dg.address $ADDRESS, dg.id $ID " +
+        val sql =
+            "select " +
+                "sum(wll.balance) rating, " +
+                "dg.public_key $PUBLIC_KEY, " +
+                "dg.address $ADDRESS, " +
+                "dg.host $HOST, " +
+                "dg.port $PORT, " +
+                "dg.id $ID " +
             "from wallets2delegates as s2d\n" +
             "  join wallets as wll on wll.id = s2d.wallet_id\n" +
             "  join delegates as dg on dg.id = s2d.delegate_id\n" +

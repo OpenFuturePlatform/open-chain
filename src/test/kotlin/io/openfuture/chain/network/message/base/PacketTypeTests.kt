@@ -25,15 +25,18 @@ class PacketTypeTests {
         assertThat(PacketType.get(9)).isEqualTo(BLOCK_APPROVAL)
         assertThat(PacketType.get(10)).isEqualTo(PENDING_BLOCK)
 
-        assertThat(PacketType.get(11)).isEqualTo(MAIN_BLOCK)
-        assertThat(PacketType.get(12)).isEqualTo(GENESIS_BLOCK)
-        assertThat(PacketType.get(13)).isEqualTo(TRANSFER_TRANSACTION)
-        assertThat(PacketType.get(14)).isEqualTo(DELEGATE_TRANSACTION)
-        assertThat(PacketType.get(15)).isEqualTo(VOTE_TRANSACTION)
 
-        assertThat(PacketType.get(16)).isEqualTo(HASH_BLOCK_REQUEST)
-        assertThat(PacketType.get(17)).isEqualTo(HASH_BLOCK_RESPONSE)
-        assertThat(PacketType.get(18)).isEqualTo(SYNC_BLOCKS_REQUEST)
+        assertThat(PacketType.get(11)).isEqualTo(TRANSFER_TRANSACTION)
+        assertThat(PacketType.get(12)).isEqualTo(DELEGATE_TRANSACTION)
+        assertThat(PacketType.get(13)).isEqualTo(VOTE_TRANSACTION)
+
+        assertThat(PacketType.get(14)).isEqualTo(HASH_BLOCK_REQUEST)
+        assertThat(PacketType.get(15)).isEqualTo(HASH_BLOCK_RESPONSE)
+        assertThat(PacketType.get(16)).isEqualTo(SYNC_BLOCKS_REQUEST)
+        assertThat(PacketType.get(17)).isEqualTo(DELEGATE_REQUEST)
+        assertThat(PacketType.get(18)).isEqualTo(DELEGATE_RESPONSE)
+        assertThat(PacketType.get(19)).isEqualTo(MAIN_BLOCK)
+        assertThat(PacketType.get(20)).isEqualTo(GENESIS_BLOCK)
     }
 
     @Test(expected = NoSuchElementException::class)
@@ -49,18 +52,24 @@ class PacketTypeTests {
         assertThat(PacketType.get(HeartBeatMessage::class.java.newInstance())).isEqualTo(HEART_BEAT)
         assertThat(PacketType.get(AskTimeMessage::class.java.newInstance())).isEqualTo(ASK_TIME)
         assertThat(PacketType.get(TimeMessage::class.java.newInstance())).isEqualTo(TIME)
-        assertThat(PacketType.get(SyncBlockRequestMessage::class.java.newInstance())).isEqualTo(SYNC_BLOCKS_REQUEST)
-        assertThat(PacketType.get(MainBlockMessage::class.java.newInstance())).isEqualTo(MAIN_BLOCK)
-        assertThat(PacketType.get(GenesisBlockMessage::class.java.newInstance())).isEqualTo(GENESIS_BLOCK)
+        assertThat(PacketType.get(ExplorerFindAddressesMessage::class.java.newInstance())).isEqualTo(EXPLORER_FIND_ADDRESSES)
+        assertThat(PacketType.get(ExplorerAddressesMessage::class.java.newInstance())).isEqualTo(EXPLORER_ADDRESSES)
+
         assertThat(PacketType.get(BlockApprovalMessage::class.java.newInstance())).isEqualTo(BLOCK_APPROVAL)
         assertThat(PacketType.get(PendingBlockMessage::class.java.newInstance())).isEqualTo(PENDING_BLOCK)
+
         assertThat(PacketType.get(TransferTransactionMessage::class.java.newInstance())).isEqualTo(TRANSFER_TRANSACTION)
         assertThat(PacketType.get(DelegateTransactionMessage::class.java.newInstance())).isEqualTo(DELEGATE_TRANSACTION)
         assertThat(PacketType.get(VoteTransactionMessage::class.java.newInstance())).isEqualTo(VOTE_TRANSACTION)
-        assertThat(PacketType.get(ExplorerFindAddressesMessage::class.java.newInstance())).isEqualTo(EXPLORER_FIND_ADDRESSES)
-        assertThat(PacketType.get(ExplorerAddressesMessage::class.java.newInstance())).isEqualTo(EXPLORER_ADDRESSES)
+
         assertThat(PacketType.get(HashBlockRequestMessage::class.java.newInstance())).isEqualTo(HASH_BLOCK_REQUEST)
         assertThat(PacketType.get(HashBlockResponseMessage::class.java.newInstance())).isEqualTo(HASH_BLOCK_RESPONSE)
+        assertThat(PacketType.get(SyncBlockRequestMessage::class.java.newInstance())).isEqualTo(SYNC_BLOCKS_REQUEST)
+
+        assertThat(PacketType.get(DelegateRequestMessage::class.java.newInstance())).isEqualTo(DELEGATE_REQUEST)
+        assertThat(PacketType.get(DelegateResponseMessage::class.java.newInstance())).isEqualTo(DELEGATE_RESPONSE)
+        assertThat(PacketType.get(MainBlockMessage::class.java.newInstance())).isEqualTo(MAIN_BLOCK)
+        assertThat(PacketType.get(GenesisBlockMessage::class.java.newInstance())).isEqualTo(GENESIS_BLOCK)
     }
 
     @Test(expected = NoSuchElementException::class)
