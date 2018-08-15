@@ -35,9 +35,7 @@ class UnconfirmedDelegateTransaction(
         fun of(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
             TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
             TransactionUtils.generateHash(
-                request.timestamp!!,
-                request.fee!!,
-                request.senderAddress!!,
+                TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
                 DelegateTransactionPayload(request.delegateKey!!)
             ),
             request.senderSignature!!,

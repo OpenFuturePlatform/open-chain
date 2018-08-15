@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -61,7 +62,7 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
     protected fun isValidBase(tx: BaseTransaction): Boolean {
         return isValidAddress(tx.header.senderAddress, tx.senderPublicKey)
             && isValidFee(tx.header.senderAddress, tx.header.fee)
-            && isValidHash(tx.header.timestamp, tx.header.fee, tx.header.senderAddress, tx.getPayload(), tx.hash)
+            && isValidHash(tx.header, tx.getPayload(), tx.hash)
             && isValidSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
     }
 
@@ -85,8 +86,8 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return fee in 0..unspentBalance
     }
 
-    private fun isValidHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload, hash: String): Boolean {
-        return TransactionUtils.generateHash(timestamp, fee, senderAddress, payload) == hash
+    private fun isValidHash(header: TransactionHeader, payload: TransactionPayload, hash: String): Boolean {
+        return TransactionUtils.generateHash(header, payload) == hash
     }
 
     private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean {

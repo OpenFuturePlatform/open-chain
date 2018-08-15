@@ -36,9 +36,7 @@ class UnconfirmedVoteTransaction(
         fun of(request: VoteTransactionRequest): UnconfirmedVoteTransaction = UnconfirmedVoteTransaction(
             TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
             TransactionUtils.generateHash(
-                request.timestamp!!,
-                request.fee!!,
-                request.senderAddress!!,
+                TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
                 VoteTransactionPayload(request.voteType!!.getId(), request.delegateKey!!)),
             request.senderSignature!!,
             request.senderPublicKey!!,

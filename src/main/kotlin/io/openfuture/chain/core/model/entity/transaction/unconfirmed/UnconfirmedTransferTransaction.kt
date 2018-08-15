@@ -35,9 +35,7 @@ class UnconfirmedTransferTransaction(
         fun of(request: TransferTransactionRequest): UnconfirmedTransferTransaction = UnconfirmedTransferTransaction(
             TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
             TransactionUtils.generateHash(
-                request.timestamp!!,
-                request.fee!!,
-                request.senderAddress!!,
+                TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
                 TransferTransactionPayload(request.amount!!, request.recipientAddress!!)),
             request.senderSignature!!,
             request.senderPublicKey!!,
