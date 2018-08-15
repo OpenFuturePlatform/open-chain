@@ -13,10 +13,7 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.MainBlockMessage
-import io.openfuture.chain.network.sync.DefaultSyncBlockHandler
-import io.openfuture.chain.network.sync.SynchronizationStatus
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -31,8 +28,7 @@ class DefaultMainBlockService(
     private val voteTransactionService: VoteTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
-    private val consensusProperties: ConsensusProperties,
-    @Lazy private val syncBlockHandler: DefaultSyncBlockHandler
+    private val consensusProperties: ConsensusProperties
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
 
     @Transactional(readOnly = true)
@@ -47,7 +43,7 @@ class DefaultMainBlockService(
         val transferTransactions = transferTransactionService.getAllUnconfirmed()
         val transactions = voteTransactions + delegateTransactions + transferTransactions
 
-        val reward = transactions.map { it.fee }.sum() + consensusProperties.rewardBlock!!
+        val reward = transactions.map { it.header.fee }.sum() + consensusProperties.rewardBlock!!
         val merkleHash = calculateMerkleRoot(transactions.map { it.hash })
         val payload = MainBlockPayload(merkleHash)
 
@@ -67,10 +63,8 @@ class DefaultMainBlockService(
 
         val block = MainBlock.of(message)
         if (!isValid(block, message.getAllTransactions())) {
-            val previousBlock = repository.findOneByHash(block.previousHash)
-            if (previousBlock == null) {
-                synchronizeLastBlocks()
-            }
+            //TODO call second synchronization
+            return
         }
 
         val savedBlock= super.save(block)
@@ -100,13 +94,6 @@ class DefaultMainBlockService(
 
     private fun isValid(block: MainBlock, transactions: List<String>): Boolean {
         return isValidMerkleHash(block.payload.merkleHash, transactions) && super.isValid(block)
-    }
-
-    private fun synchronizeLastBlocks() {
-        syncBlockHandler.synchronize()
-        while (syncBlockHandler.getSyncStatus() != SynchronizationStatus.SYNCHRONIZED) {
-            Thread.sleep(1000)
-        }
     }
 
     private fun isValidMerkleHash(merkleHash: String, transactions: List<String>): Boolean {

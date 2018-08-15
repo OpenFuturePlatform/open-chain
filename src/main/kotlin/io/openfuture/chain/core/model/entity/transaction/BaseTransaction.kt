@@ -3,19 +3,14 @@ package io.openfuture.chain.core.model.entity.transaction
 import io.openfuture.chain.core.model.entity.base.BaseModel
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import javax.persistence.Column
+import javax.persistence.Embedded
 import javax.persistence.MappedSuperclass
 
 @MappedSuperclass
 abstract class BaseTransaction(
 
-    @Column(name = "timestamp", nullable = false)
-    var timestamp: Long,
-
-    @Column(name = "fee", nullable = false)
-    var fee: Long,
-
-    @Column(name = "sender_address", nullable = false)
-    var senderAddress: String,
+    @Embedded
+    val header: TransactionHeader,
 
     @Column(name = "hash", nullable = false, unique = true)
     var hash: String,

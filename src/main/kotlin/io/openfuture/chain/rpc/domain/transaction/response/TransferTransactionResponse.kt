@@ -13,9 +13,9 @@ class TransferTransactionResponse(
 ) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey) {
 
     constructor(tx: UnconfirmedTransferTransaction) : this(
-        tx.timestamp,
-        tx.fee,
-        tx.senderAddress,
+        tx.header.timestamp,
+        tx.header.fee,
+        tx.header.senderAddress,
         tx.senderSignature,
         tx.senderPublicKey,
         tx.payload.amount,

@@ -1,6 +1,7 @@
 package io.openfuture.chain.rpc.controller.transaction
 
 import io.openfuture.chain.config.ControllerTests
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.service.DelegateTransactionService
@@ -25,7 +26,7 @@ class DelegateTransactionControllerTests : ControllerTests() {
     fun addTransactionShouldReturnAddedTransaction() {
         val transactionRequest = DelegateTransactionRequest(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
             "delegateKey")
-        val unconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
+        val unconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(TransactionHeader(1L, 1L, "senderAddress"), "senderPublicKey", "senderSignature",
             "hash", DelegateTransactionPayload("delegateKey"))
         val expectedResponse = DelegateTransactionResponse(unconfirmedDelegateTransaction)
 

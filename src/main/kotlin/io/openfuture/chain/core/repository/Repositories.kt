@@ -42,7 +42,7 @@ interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 
     fun findOneByHash(hash: String): Entity?
 
-    fun findAllBySenderAddress(senderAddress: String): List<Entity>
+    fun findAllByHeaderSenderAddress(senderAddress: String): List<Entity>
 
 }
 
@@ -64,9 +64,9 @@ interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseReposit
 
     fun findOneByHash(hash: String): UEntity?
 
-    fun findAllByOrderByFeeDesc(): MutableList<UEntity>
+    fun findAllByOrderByHeaderFeeDesc(): MutableList<UEntity>
 
-    fun findAllBySenderAddress(address: String): List<UEntity>
+    fun findAllByHeaderSenderAddress(address: String): List<UEntity>
 
 }
 

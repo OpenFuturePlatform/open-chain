@@ -25,7 +25,7 @@ class DefaultDelegateTransactionService(
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(): MutableList<UnconfirmedDelegateTransaction> {
-        return unconfirmedRepository.findAllByOrderByFeeDesc()
+        return unconfirmedRepository.findAllByOrderByHeaderFeeDesc()
     }
 
     @Transactional(readOnly = true)
@@ -38,7 +38,7 @@ class DefaultDelegateTransactionService(
             return UnconfirmedDelegateTransaction.of(message)
         }
 
-        val savedUtx = this.save(UnconfirmedDelegateTransaction.of(message))
+        val savedUtx = this.add(UnconfirmedDelegateTransaction.of(message))
         networkService.broadcast(message)
         return savedUtx
     }
@@ -50,9 +50,15 @@ class DefaultDelegateTransactionService(
             return uTransaction
         }
 
-        val savedUtx = this.save(uTransaction)
+        val savedUtx = this.add(uTransaction)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
+    }
+
+    @Transactional
+    override fun add(tx: DelegateTransaction): DelegateTransaction {
+        delegateService.save(Delegate(tx.payload.delegateKey, tx.header.senderAddress))
+        return super.add(tx)
     }
 
     @Transactional
@@ -67,7 +73,7 @@ class DefaultDelegateTransactionService(
             toBlock(utx, DelegateTransaction.of(utx, block))
             return
         }
-        this.save(DelegateTransaction.of(message, block))
+        this.add(DelegateTransaction.of(message, block))
     }
 
     @Transactional
@@ -77,19 +83,13 @@ class DefaultDelegateTransactionService(
     }
 
     @Transactional
-    override fun save(tx: DelegateTransaction): DelegateTransaction {
-        delegateService.save(Delegate(tx.payload.delegateKey, tx.senderAddress))
-        return super.save(tx)
-    }
-
-    @Transactional
     override fun isValid(tx: DelegateTransaction): Boolean {
-        return isNotExistsByDelegatePublicKey(tx.payload.delegateKey) && super.isValid(tx)
+        return isNotExistsByDelegatePublicKey(tx.payload.delegateKey) && super.isValidBase(tx)
     }
 
     @Transactional
     override fun isValid(utx: UnconfirmedDelegateTransaction): Boolean {
-        return isNotExistsByDelegatePublicKey(utx.payload.delegateKey) && super.isValid(utx)
+        return isNotExistsByDelegatePublicKey(utx.payload.delegateKey) && super.isValidBase(utx)
     }
 
     private fun isNotExistsByDelegatePublicKey(key: String): Boolean {

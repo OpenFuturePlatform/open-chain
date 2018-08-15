@@ -1,7 +1,8 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -34,14 +35,14 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
     private lateinit var cryptoService: CryptoService
 
 
-    open fun save(utx: U): U {
+    open fun add(utx: U): U {
         if (!isValid(utx)) {
             throw ValidationException("Transaction is invalid!")
         }
         return unconfirmedRepository.save(utx)
     }
 
-    open fun save(tx: T): T {
+    open fun add(tx: T): T {
         if (!isValid(tx)) {
             throw ValidationException("Transaction is invalid!")
         }
@@ -49,9 +50,20 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return repository.save(tx)
     }
 
+    abstract fun isValid(utx: U): Boolean
+
+    abstract fun isValid(tx: T): Boolean
+
     protected fun toBlock(utx: U, tx: T): T {
         unconfirmedRepository.delete(utx)
-        return save(tx)
+        return add(tx)
+    }
+
+    protected fun isValidBase(tx: BaseTransaction): Boolean {
+        return isValidAddress(tx.header.senderAddress, tx.senderPublicKey)
+            && isValidFee(tx.header.senderAddress, tx.header.fee)
+            && isValidHash(tx.header, tx.getPayload(), tx.hash)
+            && isValidSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
     }
 
     protected fun isExists(hash: String): Boolean {
@@ -60,19 +72,8 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return null != persistUtx || null != persistTx
     }
 
-    open fun isValid(utx: U): Boolean = this.isValidBase(utx)
-
-    open fun isValid(tx: T): Boolean = this.isValidBase(tx)
-
-    private fun updateBalanceByFee(tx: io.openfuture.chain.core.model.entity.transaction.BaseTransaction) {
-        walletService.decreaseBalance(tx.senderAddress, tx.fee)
-    }
-
-    private fun isValidBase(tx: io.openfuture.chain.core.model.entity.transaction.BaseTransaction): Boolean {
-        return isValidAddress(tx.senderAddress, tx.senderPublicKey)
-            && isValidFee(tx.senderAddress, tx.fee)
-            && isValidHash(tx.timestamp, tx.fee, tx.senderAddress, tx.getPayload(), tx.hash)
-            && isValidSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
+    private fun updateBalanceByFee(tx: BaseTransaction) {
+        walletService.decreaseBalance(tx.header.senderAddress, tx.header.fee)
     }
 
     private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean {
@@ -81,13 +82,12 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
 
     private fun isValidFee(senderAddress: String, fee: Long): Boolean {
         val balance = walletService.getBalanceByAddress(senderAddress)
-        val unspentBalance = balance - baseService.getAllUnconfirmedByAddress(senderAddress).map { it.fee }.sum()
-
-        return unspentBalance >= fee
+        val unspentBalance = balance - baseService.getAllUnconfirmedByAddress(senderAddress).map { it.header.fee }.sum()
+        return fee in 0..unspentBalance
     }
 
-    private fun isValidHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload, hash: String): Boolean {
-        return TransactionUtils.generateHash(timestamp, fee, senderAddress, payload) == hash
+    private fun isValidHash(header: TransactionHeader, payload: TransactionPayload, hash: String): Boolean {
+        return TransactionUtils.generateHash(header, payload) == hash
     }
 
     private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean {

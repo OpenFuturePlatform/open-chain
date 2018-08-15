@@ -1,8 +1,11 @@
 package io.openfuture.chain.rpc.controller.transaction
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -30,7 +33,7 @@ class TransferTransactionControllerTests : ControllerTests() {
     fun addTransactionShouldReturnAddedTransaction() {
         val transactionRequest = TransferTransactionRequest(1L, 1L, "senderAddress",
             1, "recipientAddress", "senderSignature", "recipientAddress")
-        val unconfirmedTransferTransaction = UnconfirmedTransferTransaction(1L, 1L, "senderAddress",
+        val unconfirmedTransferTransaction = UnconfirmedTransferTransaction(TransactionHeader(1L, 1L, "senderAddress"),
             "hash", "senderSignature", "senderPublicKey", TransferTransactionPayload(1L, "delegateKey"))
         val expectedResponse = TransferTransactionResponse(unconfirmedTransferTransaction)
 
@@ -49,7 +52,7 @@ class TransferTransactionControllerTests : ControllerTests() {
     @Test
     fun getAllShouldReturnTransferTransactionsListTest() {
         val mainBlock = MainBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", MainBlockPayload("merkleHash"))
-        val pageTransferTransactions = PageImpl(listOf(TransferTransaction(1, 1, "senderAddress", "hash",
+        val pageTransferTransactions = PageImpl(listOf(TransferTransaction(TransactionHeader(1, 1, "senderAddress"), "hash",
             "senderSignature", "senderPublicKey", mainBlock, TransferTransactionPayload(1, "recipientAddress"))))
         val expectedPageResponse = PageResponse(pageTransferTransactions)
 
@@ -62,7 +65,7 @@ class TransferTransactionControllerTests : ControllerTests() {
             .returnResult().responseBody!!
 
         assertThat(actualPageResponse.totalCount).isEqualTo(expectedPageResponse.totalCount)
-        assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["senderAddress"]).isEqualTo(expectedPageResponse.list.first().senderAddress)
+        assertThat(((actualPageResponse.list.first() as LinkedHashMap<*, *>)["header"] as HashMap<*, *>)["senderAddress"]).isEqualTo(expectedPageResponse.list.first().header.senderAddress)
         assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["senderPublicKey"]).isEqualTo(expectedPageResponse.list.first().senderPublicKey)
     }
 
@@ -70,7 +73,7 @@ class TransferTransactionControllerTests : ControllerTests() {
     fun getTransactionsByAddressShouldReturnTransferTransactionsListTest() {
         val address = "address"
         val mainBlock = MainBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", MainBlockPayload("merkleHash"))
-        val expectedTransferTransactions = listOf(TransferTransaction(1, 1, "senderAddress", "hash",
+        val expectedTransferTransactions = listOf(TransferTransaction(TransactionHeader(1, 1, "senderAddress"), "hash",
             "senderSignature", "senderPublicKey", mainBlock, TransferTransactionPayload(1, "recipientAddress")))
 
         given(service.getByAddress(address)).willReturn(expectedTransferTransactions)
@@ -81,8 +84,8 @@ class TransferTransactionControllerTests : ControllerTests() {
             .expectBody(List::class.java)
             .returnResult().responseBody!!
 
-        assertThat((actualTransferTransactions.first() as LinkedHashMap<*, *>)["senderAddress"])
-            .isEqualTo(expectedTransferTransactions.first().senderAddress)
+        assertThat(((actualTransferTransactions.first() as LinkedHashMap<*, *>)["header"] as HashMap<*, *>)["senderAddress"])
+            .isEqualTo(expectedTransferTransactions.first().header.senderAddress)
         assertThat((actualTransferTransactions.first()  as LinkedHashMap<*, *>)["senderPublicKey"])
             .isEqualTo(expectedTransferTransactions.first().senderPublicKey)
     }
