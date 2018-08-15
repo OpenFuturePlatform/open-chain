@@ -41,7 +41,7 @@ class PacketTypeTests {
 
     @Test(expected = NoSuchElementException::class)
     fun getShouldThrowExceptionForUnknownId() {
-        PacketType.get(20)
+        PacketType.get(21)
     }
 
     @Test
