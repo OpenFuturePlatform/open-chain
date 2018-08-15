@@ -11,7 +11,7 @@ import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
-import io.openfuture.chain.network.message.core.MainBlockMessage
+import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.service.NetworkApiService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.junit.Before
@@ -51,7 +51,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
         val privateKey = "529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"
 
-        val pendingBlock = MainBlockMessage(2L, "previousHash", 1L, 2L,
+        val pendingBlock = PendingBlockMessage(2L, "previousHash", 1L, 2L,
             "hash", "signature", "publicKey", payload.merkleHash, listOf(), listOf(), listOf())
 
         given(keyHolder.getPrivateKey()).willReturn(
@@ -65,7 +65,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
         defaultPendingBlockHandler.addBlock(pendingBlock)
 
-        verify(networkService, times(1)).broadcast(any(MainBlockMessage::class.java))
+        verify(networkService, times(1)).broadcast(any(PendingBlockMessage::class.java))
         verify(networkService, times(1)).broadcast(any(BlockApprovalMessage::class.java))
     }
 
@@ -79,7 +79,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
             "merkleHash"
         )
 
-        val pendingBlock = MainBlockMessage(2L, "previousHash", 1L, 2L,
+        val pendingBlock = PendingBlockMessage(2L, "previousHash", 1L, 2L,
             hash, "signature", publicKey, payload.merkleHash, listOf(), listOf(), listOf())
 
         val message = BlockApprovalMessage(

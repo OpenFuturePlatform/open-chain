@@ -3,7 +3,7 @@ package io.openfuture.chain.network.message.base
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.network.message.base.PacketType.*
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
-import io.openfuture.chain.network.message.core.MainBlockMessage
+import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.network.*
 import org.assertj.core.api.Assertions.assertThat
@@ -19,18 +19,21 @@ class PacketTypeTests {
         assertThat(PacketType.get(4)).isEqualTo(HEART_BEAT)
         assertThat(PacketType.get(5)).isEqualTo(ASK_TIME)
         assertThat(PacketType.get(6)).isEqualTo(TIME)
-        assertThat(PacketType.get(7)).isEqualTo(SYNC_BLOCKS_REQUEST)
-        assertThat(PacketType.get(8)).isEqualTo(MAIN_BLOCK)
-        assertThat(PacketType.get(9)).isEqualTo(GENESIS_BLOCK)
-        assertThat(PacketType.get(10)).isEqualTo(BLOCK_APPROVAL)
-        assertThat(PacketType.get(11)).isEqualTo(PENDING_BLOCK)
-        assertThat(PacketType.get(12)).isEqualTo(TRANSFER_TRANSACTION)
-        assertThat(PacketType.get(13)).isEqualTo(DELEGATE_TRANSACTION)
-        assertThat(PacketType.get(14)).isEqualTo(VOTE_TRANSACTION)
-        assertThat(PacketType.get(15)).isEqualTo(EXPLORER_FIND_ADDRESSES)
-        assertThat(PacketType.get(16)).isEqualTo(EXPLORER_ADDRESSES)
-        assertThat(PacketType.get(17)).isEqualTo(HASH_BLOCK_REQUEST)
-        assertThat(PacketType.get(18)).isEqualTo(HASH_BLOCK_RESPONSE)
+        assertThat(PacketType.get(7)).isEqualTo(EXPLORER_FIND_ADDRESSES)
+        assertThat(PacketType.get(8)).isEqualTo(EXPLORER_ADDRESSES)
+
+        assertThat(PacketType.get(9)).isEqualTo(BLOCK_APPROVAL)
+        assertThat(PacketType.get(10)).isEqualTo(PENDING_BLOCK)
+
+        assertThat(PacketType.get(11)).isEqualTo(MAIN_BLOCK)
+        assertThat(PacketType.get(12)).isEqualTo(GENESIS_BLOCK)
+        assertThat(PacketType.get(13)).isEqualTo(TRANSFER_TRANSACTION)
+        assertThat(PacketType.get(14)).isEqualTo(DELEGATE_TRANSACTION)
+        assertThat(PacketType.get(15)).isEqualTo(VOTE_TRANSACTION)
+
+        assertThat(PacketType.get(16)).isEqualTo(HASH_BLOCK_REQUEST)
+        assertThat(PacketType.get(17)).isEqualTo(HASH_BLOCK_RESPONSE)
+        assertThat(PacketType.get(18)).isEqualTo(SYNC_BLOCKS_REQUEST)
     }
 
     @Test(expected = NoSuchElementException::class)
@@ -50,7 +53,7 @@ class PacketTypeTests {
         assertThat(PacketType.get(MainBlockMessage::class.java.newInstance())).isEqualTo(MAIN_BLOCK)
         assertThat(PacketType.get(GenesisBlockMessage::class.java.newInstance())).isEqualTo(GENESIS_BLOCK)
         assertThat(PacketType.get(BlockApprovalMessage::class.java.newInstance())).isEqualTo(BLOCK_APPROVAL)
-        assertThat(PacketType.get(MainBlockMessage::class.java.newInstance())).isEqualTo(PENDING_BLOCK)
+        assertThat(PacketType.get(PendingBlockMessage::class.java.newInstance())).isEqualTo(PENDING_BLOCK)
         assertThat(PacketType.get(TransferTransactionMessage::class.java.newInstance())).isEqualTo(TRANSFER_TRANSACTION)
         assertThat(PacketType.get(DelegateTransactionMessage::class.java.newInstance())).isEqualTo(DELEGATE_TRANSACTION)
         assertThat(PacketType.get(VoteTransactionMessage::class.java.newInstance())).isEqualTo(VOTE_TRANSACTION)

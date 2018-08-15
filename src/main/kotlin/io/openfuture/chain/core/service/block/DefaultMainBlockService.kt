@@ -11,6 +11,7 @@ import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
+import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
@@ -37,7 +38,7 @@ class DefaultMainBlockService(
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
 
     @Transactional(readOnly = true)
-    override fun create(): MainBlockMessage {
+    override fun create(): PendingBlockMessage {
         val timestamp = clock.networkTime()
         val lastBlock = blockService.getLast()
         val height = lastBlock.height + 1
@@ -56,10 +57,31 @@ class DefaultMainBlockService(
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKey()
 
-        return MainBlockMessage(height, previousHash, timestamp, reward, ByteUtils.toHexString(hash), signature, publicKey,
+        return PendingBlockMessage(height, previousHash, timestamp, reward, ByteUtils.toHexString(hash), signature, publicKey,
             merkleHash, voteTransactions.map { it.toMessage() }, delegateTransactions.map { it.toMessage() }, transferTransactions.map { it.toMessage() })
     }
 
+    @Transactional
+    override fun add(message: PendingBlockMessage) {
+        if (null != repository.findOneByHash(message.hash)) {
+            return
+        }
+
+        val block = MainBlock.of(message)
+
+        if (!isSync(block)) {
+            syncManager.setSyncStatus(NOT_SYNCHRONIZED)
+            return
+        }
+
+        val savedBlock = super.save(block)
+        message.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
+        message.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
+        message.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
+    }
+
+    // todo need to improve!
+    // todo this method is equal "override fun add(message: PendingBlockMessage)", this necessary because we can't to create PacketType with the same class inside
     @Transactional
     override fun add(message: MainBlockMessage) {
         if (null != repository.findOneByHash(message.hash)) {
@@ -80,7 +102,7 @@ class DefaultMainBlockService(
     }
 
     @Transactional(readOnly = true)
-    override fun isValid(message: MainBlockMessage): Boolean {
+    override fun isValid(message: PendingBlockMessage): Boolean {
         return isValidMerkleHash(message.merkleHash, message.getAllTransactions().map { it.hash }) &&
             isValidVoteTransactions(message.voteTransactions) &&
             isValidDelegateTransactions(message.delegateTransactions) &&
