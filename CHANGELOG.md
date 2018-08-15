@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- RPC: Get explorer info
 
 ## [0.5.0] - 2018-08-10
 ### Added
@@ -25,7 +26,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC: Get number of an epoch when the block was created
 - RPC: Import private key in hex format
 - RPC: Get transactions by wallet address
-- RPC: Get explorer info
 
 ### Changed
 - New file structure
