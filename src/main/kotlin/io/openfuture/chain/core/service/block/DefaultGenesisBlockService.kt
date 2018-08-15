@@ -9,7 +9,6 @@ import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DefaultDelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
-import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
@@ -22,11 +21,10 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultGenesisBlockService(
     blockService: BlockService,
     repository: GenesisBlockRepository,
-    walletService: WalletService,
     delegateService: DefaultDelegateService,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService
-) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService), GenesisBlockService {
+) : BaseBlockService<GenesisBlock>(repository, blockService, delegateService), GenesisBlockService {
 
     @Transactional(readOnly = true)
     override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()

@@ -5,10 +5,7 @@ import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -54,6 +51,15 @@ interface DelegateTransactionRepository : TransactionRepository<DelegateTransact
 interface TransferTransactionRepository : TransactionRepository<TransferTransaction> {
 
     fun findAllByPayloadRecipientAddress(payloadRecipientAddress: String): List<TransferTransaction>
+
+}
+
+@Repository
+interface RewardTransactionRepository : BaseRepository<RewardTransaction> {
+
+    fun findOneByHash(hash: String): RewardTransaction?
+
+    fun findAllByPayloadRecipientAddress(payloadRecipientAddress: String): List<RewardTransaction>
 
 }
 

@@ -6,6 +6,7 @@ import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
@@ -77,6 +78,8 @@ interface TransactionService {
 
     fun getAllUnconfirmedByAddress(address: String): List<UnconfirmedTransaction>
 
+    fun getUTransactionByHash(hash: String): UnconfirmedTransaction
+
 }
 
 interface TransferTransactionService {
@@ -96,6 +99,20 @@ interface TransferTransactionService {
     fun synchronize(message: TransferTransactionMessage, block: MainBlock)
 
     fun toBlock(hash: String, block: MainBlock): TransferTransaction
+
+}
+
+interface RewardTransactionService {
+
+    fun getAll(request: PageRequest): Page<RewardTransaction>
+
+    fun getByRecipientAddress(address: String): List<RewardTransaction>
+
+    fun toBlock(message: RewardTransactionMessage, block: MainBlock)
+
+    fun isValid(blockMessage: PendingBlockMessage): Boolean
+
+    fun isValid(blockMessage: MainBlockMessage): Boolean
 
 }
 

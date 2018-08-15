@@ -4,7 +4,6 @@ import io.openfuture.chain.core.model.entity.block.BaseBlock
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DelegateService
-import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -12,7 +11,6 @@ import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 abstract class BaseBlockService<T : BaseBlock>(
     protected val repository: BlockRepository<T>,
     protected val blockService: BlockService,
-    private val walletService: WalletService,
     protected val delegateService: DelegateService
 ) {
 

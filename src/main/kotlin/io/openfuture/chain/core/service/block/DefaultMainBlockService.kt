@@ -25,15 +25,16 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultMainBlockService(
     blockService: BlockService,
     repository: MainBlockRepository,
-    walletService: WalletService,
     delegateService: DelegateService,
     private val clock: NodeClock,
     private val keyHolder: NodeKeyHolder,
     private val voteTransactionService: VoteTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
-    private val consensusProperties: ConsensusProperties
-) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
+    private val rewardTransactionService: RewardTransactionService,
+    private val consensusProperties: ConsensusProperties,
+    private val walletService: WalletService
+) : BaseBlockService<MainBlock>(repository, blockService, delegateService), MainBlockService {
 
     @Transactional(readOnly = true)
     override fun create(): PendingBlockMessage {
@@ -67,12 +68,13 @@ class DefaultMainBlockService(
         }
 
         val block = MainBlock.of(message)
-        if (!isValid(block, message.getAllTransactions())) {
+        if (!isValid(block, message.getAllTransactions()) || !rewardTransactionService.isValid(message)) {
             //TODO call second synchronization
             return
         }
 
         val savedBlock = repository.save(block)
+        rewardTransactionService.toBlock(message.rewardTransaction, savedBlock)
         message.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
         message.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
         message.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
@@ -85,11 +87,12 @@ class DefaultMainBlockService(
         }
 
         val block = MainBlock.of(message)
-        if (!isValid(block, message.getAllTransactions().map { it.hash })) {
+        if (!isValid(block, message.getAllTransactions().map { it.hash }) || !rewardTransactionService.isValid(message)) {
             return
         }
 
         val savedBlock = repository.save(block)
+        rewardTransactionService.toBlock(message.rewardTransaction, savedBlock)
         message.voteTransactions.forEach { voteTransactionService.synchronize(it, savedBlock) }
         message.delegateTransactions.forEach { delegateTransactionService.synchronize(it, savedBlock) }
         message.transferTransactions.forEach { transferTransactionService.synchronize(it, savedBlock) }
@@ -136,9 +139,11 @@ class DefaultMainBlockService(
     }
 
     private fun createRewardTransaction(block: MainBlock, transactions: List<UnconfirmedTransaction>): RewardTransaction {
-        val reward = transactions.map { it.fee }.sum() + consensusProperties.rewardBlock!!
-        val fee = 0L
         val senderAddress = consensusProperties.genesisAddress!!
+        val rewardBlock = consensusProperties.rewardBlock!!
+        val bank = walletService.getBalanceByAddress(senderAddress)
+        val reward = transactions.map { it.fee }.sum() + if (rewardBlock > bank) bank else rewardBlock
+        val fee = 0L
         val publicKey = keyHolder.getPublicKey()
         val delegate = delegateService.getByPublicKey(publicKey)
 
@@ -148,11 +153,5 @@ class DefaultMainBlockService(
 
         return RewardTransaction(block.timestamp, fee, senderAddress, hash, signature, publicKey, block, payload)
     }
-
-//    private fun updateBalanceByReward(block: BaseBlock) {
-//        val delegate = delegateService.getByPublicKey(block.publicKey)
-//        val reward = transactions.map { it.fee }.sum() + consensusProperties.rewardBlock!!
-//        walletService.increaseBalance(delegate.address, block.reward)
-//    }
 
 }
