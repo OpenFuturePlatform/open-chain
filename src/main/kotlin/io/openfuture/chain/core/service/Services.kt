@@ -13,6 +13,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.node.*
+import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -62,11 +63,13 @@ interface GenesisBlockService {
 
 interface MainBlockService {
 
-    fun create(): MainBlockMessage
+    fun create(): PendingBlockMessage
+
+    fun add(message: PendingBlockMessage)
 
     fun add(message: MainBlockMessage)
 
-    fun isValid(message: MainBlockMessage): Boolean
+    fun isValid(message: PendingBlockMessage): Boolean
 
 }
 

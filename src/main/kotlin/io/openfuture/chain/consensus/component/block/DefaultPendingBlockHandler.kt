@@ -8,7 +8,7 @@ import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
-import io.openfuture.chain.network.message.core.MainBlockMessage
+import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.service.NetworkApiService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Component
@@ -21,17 +21,17 @@ class DefaultPendingBlockHandler(
     private val networkService: NetworkApiService
 ) : PendingBlockHandler {
 
-    private val pendingBlocks: MutableSet<MainBlockMessage> = mutableSetOf()
+    private val pendingBlocks: MutableSet<PendingBlockMessage> = mutableSetOf()
     private val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
     private val commits: MutableMap<String, MutableList<Delegate>> = mutableMapOf()
 
-    private var observable: MainBlockMessage? = null
+    private var observable: PendingBlockMessage? = null
     private var timeSlotNumber: Long = 0
     private var stage: BlockApprovalStage = IDLE
 
 
     @Synchronized
-    override fun addBlock(block: MainBlockMessage) {
+    override fun addBlock(block: PendingBlockMessage) {
         val blockSlotNumber = epochService.getSlotNumber(block.timestamp)
         if (blockSlotNumber > timeSlotNumber || epochService.isInIntermission(block.timestamp)) {
             this.reset()

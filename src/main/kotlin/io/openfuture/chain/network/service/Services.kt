@@ -4,6 +4,10 @@ import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
+import io.openfuture.chain.network.message.consensus.PendingBlockMessage
+import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.network.message.core.TransferTransactionMessage
+import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.network.*
 
@@ -79,6 +83,6 @@ interface ConsensusMessageService {
 
     fun onBlockApproval(ctx: ChannelHandlerContext, block: BlockApprovalMessage)
 
-    fun onPendingBlock(ctx: ChannelHandlerContext, block: MainBlockMessage)
+    fun onPendingBlock(ctx: ChannelHandlerContext, block: PendingBlockMessage)
 
 }
