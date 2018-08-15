@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -34,61 +35,63 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction {
-        if (isExists(message.hash)) {
-            return UnconfirmedDelegateTransaction.of(message)
+        val utx = UnconfirmedDelegateTransaction.of(message)
+        if (isExists(utx.hash)) {
+            return utx
         }
 
-        val savedUtx = this.add(UnconfirmedDelegateTransaction.of(message))
+        if (!isValid(utx)) {
+            throw ValidationException("Transaction is invalid!")
+        }
+
+        val savedUtx = this.save(utx)
         networkService.broadcast(message)
         return savedUtx
     }
 
     @Transactional
     override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction {
-        val uTransaction = UnconfirmedDelegateTransaction.of(request)
-        if (isExists(uTransaction.hash)) {
-            return uTransaction
+        val utx = UnconfirmedDelegateTransaction.of(request)
+        if (isExists(utx.hash)) {
+            return utx
         }
 
-        val savedUtx = this.add(uTransaction)
+        if (!isValid(utx)) {
+            throw ValidationException("Transaction is invalid!")
+        }
+
+        val savedUtx = this.save(utx)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
     }
 
     @Transactional
-    override fun add(tx: DelegateTransaction): DelegateTransaction {
+    override fun save(tx: DelegateTransaction): DelegateTransaction {
         delegateService.save(Delegate(tx.payload.delegateKey, tx.header.senderAddress))
-        return super.add(tx)
+        return super.save(tx)
     }
 
     @Transactional
-    override fun synchronize(message: DelegateTransactionMessage, block: MainBlock) {
+    override fun toBlock(message: DelegateTransactionMessage, block: MainBlock): DelegateTransaction {
         val tx = repository.findOneByHash(message.hash)
         if (null != tx) {
-            return
+            return tx
         }
 
         val utx = unconfirmedRepository.findOneByHash(message.hash)
         if (null != utx) {
-            toBlock(utx, DelegateTransaction.of(utx, block))
-            return
+            return confirm(utx, DelegateTransaction.of(utx, block))
         }
-        this.add(DelegateTransaction.of(message, block))
+
+        return this.save(DelegateTransaction.of(message, block))
     }
 
     @Transactional
-    override fun toBlock(hash: String, block: MainBlock): DelegateTransaction {
-        val utx = getUnconfirmedByHash(hash)
-        return toBlock(utx, DelegateTransaction.of(utx, block))
+    override fun isValid(message: DelegateTransactionMessage): Boolean {
+        return isValid(UnconfirmedDelegateTransaction.of(message))
     }
 
-    @Transactional
-    override fun isValid(tx: DelegateTransaction): Boolean {
-        return isNotExistsByDelegatePublicKey(tx.payload.delegateKey) && super.isValidBase(tx)
-    }
-
-    @Transactional
-    override fun isValid(utx: UnconfirmedDelegateTransaction): Boolean {
+    private fun isValid(utx: UnconfirmedDelegateTransaction): Boolean {
         return isNotExistsByDelegatePublicKey(utx.payload.delegateKey) && super.isValidBase(utx)
     }
 

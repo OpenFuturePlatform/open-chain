@@ -62,13 +62,13 @@ class DefaultSyncBlockHandler(
 
     @Synchronized
     override fun onMainBlockMessage(block: MainBlockMessage) {
-        mainBlockService.synchronize(block)
+        mainBlockService.add(block)
         unlockIfLastBLock(block)
     }
 
     @Synchronized
     override fun onGenesisBlockMessage(block: GenesisBlockMessage) {
-        genesisBlockService.synchronize(block)
+        genesisBlockService.add(block)
         unlockIfLastBLock(block)
     }
 

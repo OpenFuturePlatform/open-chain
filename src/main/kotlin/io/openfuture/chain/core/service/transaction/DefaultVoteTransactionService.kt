@@ -39,7 +39,7 @@ internal class DefaultVoteTransactionService(
     override fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction {
         val utx = UnconfirmedVoteTransaction.of(message)
 
-        if (isExists(message.hash)) {
+        if (isExists(utx.hash)) {
             return utx
         }
 
@@ -70,13 +70,6 @@ internal class DefaultVoteTransactionService(
     }
 
     @Transactional
-    override fun save(tx: VoteTransaction): VoteTransaction {
-        val type = tx.payload.getVoteType()
-        updateWalletVotes(tx.header.senderAddress, tx.payload.delegateKey, type)
-        return super.save(tx)
-    }
-
-    @Transactional
     override fun toBlock(message: VoteTransactionMessage, block: MainBlock): VoteTransaction {
         val tx = repository.findOneByHash(message.hash)
         if (null != tx) {
@@ -85,10 +78,22 @@ internal class DefaultVoteTransactionService(
 
         val utx = unconfirmedRepository.findOneByHash(message.hash)
         if (null != utx) {
-            return toBlock(utx, VoteTransaction.of(utx, block))
+            return confirm(utx, VoteTransaction.of(utx, block))
         }
 
         return this.save(VoteTransaction.of(message, block))
+    }
+
+    @Transactional
+    override fun save(tx: VoteTransaction): VoteTransaction {
+        val type = tx.payload.getVoteType()
+        updateWalletVotes(tx.header.senderAddress, tx.payload.delegateKey, type)
+        return super.save(tx)
+    }
+
+    @Transactional
+    override fun isValid(message: VoteTransactionMessage): Boolean {
+        return isValid(UnconfirmedVoteTransaction.of(message))
     }
 
     private fun isValid(utx: UnconfirmedVoteTransaction): Boolean = isValidLocal(utx.header, utx.payload) && super.isValidBase(utx)

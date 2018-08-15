@@ -6,6 +6,7 @@ import io.openfuture.chain.network.sync.SyncBlockHandler
 import io.openfuture.chain.network.service.ConsensusMessageService
 import io.openfuture.chain.network.service.CoreMessageService
 import io.openfuture.chain.network.service.NetworkInnerService
+import io.openfuture.chain.network.sync.SyncManager
 import org.springframework.stereotype.Component
 
 @Component
@@ -14,8 +15,9 @@ class ConnectionClientHandler(
     networkService: NetworkInnerService,
     coreService: CoreMessageService,
     consensusService: ConsensusMessageService,
+    syncManager: SyncManager,
     syncBlockHandler: SyncBlockHandler
-) : BaseConnectionHandler(coreService, syncBlockHandler, networkService, consensusService) {
+) : BaseConnectionHandler(coreService, syncManager, syncBlockHandler, networkService, consensusService) {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         super.channelActive(ctx)

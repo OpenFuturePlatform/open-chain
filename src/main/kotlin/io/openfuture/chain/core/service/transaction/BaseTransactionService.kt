@@ -35,11 +35,6 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
     private lateinit var cryptoService: CryptoService
 
 
-    protected fun toBlock(utx: U, tx: T): T {
-        unconfirmedRepository.delete(utx)
-        return save(tx)
-    }
-
     open fun save(utx: U): U {
         return unconfirmedRepository.save(utx)
     }
@@ -47,6 +42,11 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
     open fun save(tx: T): T {
         updateBalanceByFee(tx)
         return repository.save(tx)
+    }
+
+    protected fun confirm(utx: U, tx: T): T {
+        unconfirmedRepository.delete(utx)
+        return save(tx)
     }
 
     protected fun isValidBase(tx: BaseTransaction): Boolean {

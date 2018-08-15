@@ -3,13 +3,14 @@ package io.openfuture.chain.network.message.consensus
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.config.MessageTests
+import io.openfuture.chain.network.message.core.MainBlockMessage
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
 class PendingBlockMessageTests : MessageTests() {
 
-    private lateinit var message: PendingBlockMessage
+    private lateinit var message: MainBlockMessage
     private lateinit var buffer: ByteBuf
 
 
@@ -20,7 +21,7 @@ class PendingBlockMessageTests : MessageTests() {
             "00000010000000568617368310000000100000005686173683100000001000000056861736831")
 
         val transactions = mutableListOf("hash1")
-        message = PendingBlockMessage(1, "prevHash", 1, 10, "hash", "signature", "publicKey", "merkleHash", transactions,
+        message = MainBlockMessage(1, "prevHash", 1, 10, "hash", "signature", "publicKey", "merkleHash", transactions,
             transactions, transactions)
     }
 
@@ -35,7 +36,7 @@ class PendingBlockMessageTests : MessageTests() {
 
     @Test
     fun readShouldFillEntityWithExactValuesFromBuffer() {
-        val actualMessage = PendingBlockMessage::class.java.newInstance()
+        val actualMessage = MainBlockMessage::class.java.newInstance()
 
         actualMessage.read(buffer)
 

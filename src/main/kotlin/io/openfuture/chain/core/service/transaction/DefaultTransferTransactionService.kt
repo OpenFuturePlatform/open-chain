@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -42,61 +43,66 @@ class DefaultTransferTransactionService(
 
     @Transactional
     override fun add(message: TransferTransactionMessage): UnconfirmedTransferTransaction {
-        if (isExists(message.hash)) {
-            return UnconfirmedTransferTransaction.of(message)
+        val utx = UnconfirmedTransferTransaction.of(message)
+
+        if (isExists(utx.hash)) {
+            return utx
         }
 
-        val savedUtx = this.add(UnconfirmedTransferTransaction.of(message))
+        if (!isValid(utx)) {
+            throw ValidationException("Transaction is invalid!")
+        }
+
+        val savedUtx = this.save(utx)
         networkService.broadcast(message)
         return savedUtx
     }
 
     @Transactional
     override fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction {
-        val uTransaction = UnconfirmedTransferTransaction.of(request)
-        if (isExists(uTransaction.hash)) {
-            return uTransaction
+        val utx = UnconfirmedTransferTransaction.of(request)
+
+        if (isExists(utx.hash)) {
+            return utx
         }
 
-        val savedUtx = this.add(uTransaction)
+        if (!isValid(utx)) {
+            throw ValidationException("Transaction is invalid!")
+        }
+
+        val savedUtx = this.save(utx)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
     }
 
     @Transactional
-    override fun add(tx: TransferTransaction): TransferTransaction {
-        updateTransferBalance(tx.header.senderAddress, tx.payload.recipientAddress, tx.payload.amount)
-        return super.add(tx)
-    }
-
-    @Transactional
-    override fun synchronize(message: TransferTransactionMessage, block: MainBlock) {
+    override fun toBlock(message: TransferTransactionMessage, block: MainBlock): TransferTransaction {
         val tx = repository.findOneByHash(message.hash)
         if (null != tx) {
-            return
+            return tx
         }
 
         val utx = unconfirmedRepository.findOneByHash(message.hash)
         if (null != utx) {
-            toBlock(utx, TransferTransaction.of(utx, block))
-            return
+            return confirm(utx, TransferTransaction.of(utx, block))
         }
-        this.add(TransferTransaction.of(message, block))
+
+        return this.save(TransferTransaction.of(message, block))
     }
 
     @Transactional
-    override fun toBlock(hash: String, block: MainBlock): TransferTransaction {
-        val utx = getUnconfirmedByHash(hash)
-        return toBlock(utx, TransferTransaction.of(utx, block))
+    override fun save(tx: TransferTransaction): TransferTransaction {
+        updateTransferBalance(tx.header.senderAddress, tx.payload.recipientAddress, tx.payload.amount)
+        return super.save(tx)
     }
 
     @Transactional
-    override fun isValid(utx: UnconfirmedTransferTransaction): Boolean =
+    override fun isValid(message: TransferTransactionMessage): Boolean {
+        return isValid(UnconfirmedTransferTransaction.of(message))
+    }
+
+    private fun isValid(utx: UnconfirmedTransferTransaction): Boolean =
         isValidTransferBalance(utx.header.senderAddress, utx.payload.amount + utx.header.fee) && super.isValidBase(utx)
-
-    @Transactional
-    override fun isValid(tx: TransferTransaction): Boolean =
-        isValidTransferBalance(tx.header.senderAddress, tx.payload.amount + tx.header.fee) && super.isValidBase(tx)
 
     private fun updateTransferBalance(from: String, to: String, amount: Long) {
         walletService.increaseBalance(to, amount)

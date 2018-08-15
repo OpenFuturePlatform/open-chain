@@ -11,10 +11,11 @@ import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.MainBlockMessage
+import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.network.message.core.TransferTransactionMessage
+import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.network.sync.SyncManager
-import io.openfuture.chain.network.sync.impl.SynchronizationStatus
 import io.openfuture.chain.network.sync.impl.SynchronizationStatus.*
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
@@ -36,7 +37,7 @@ class DefaultMainBlockService(
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
 
     @Transactional(readOnly = true)
-    override fun create(): PendingBlockMessage {
+    override fun create(): MainBlockMessage {
         val timestamp = clock.networkTime()
         val lastBlock = blockService.getLast()
         val height = lastBlock.height + 1
@@ -55,12 +56,12 @@ class DefaultMainBlockService(
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKey()
 
-        return PendingBlockMessage(height, previousHash, timestamp, reward, ByteUtils.toHexString(hash), signature, publicKey,
+        return MainBlockMessage(height, previousHash, timestamp, reward, ByteUtils.toHexString(hash), signature, publicKey,
             merkleHash, voteTransactions.map { it.toMessage() }, delegateTransactions.map { it.toMessage() }, transferTransactions.map { it.toMessage() })
     }
 
     @Transactional
-    override fun add(message: PendingBlockMessage) {
+    override fun add(message: MainBlockMessage) {
         if (null != repository.findOneByHash(message.hash)) {
             return
         }
@@ -72,33 +73,31 @@ class DefaultMainBlockService(
             return
         }
 
-        val savedBlock= super.save(block)
+        val savedBlock = super.save(block)
         message.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
         message.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
         message.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
     }
 
-    @Transactional
-    override fun synchronize(message: MainBlockMessage) {
-        if (null != repository.findOneByHash(message.hash)) {
-            return
-        }
-
-        val block = MainBlock.of(message)
-        if (!isValid(block, message.getAllTransactions().map { it.hash })) {
-            return
-        }
-        val savedBlock = super.save(block)
-        message.voteTransactions.forEach { voteTransactionService.synchronize(it, savedBlock) }
-        message.delegateTransactions.forEach { delegateTransactionService.synchronize(it, savedBlock) }
-        message.transferTransactions.forEach { transferTransactionService.synchronize(it, savedBlock) }
+    @Transactional(readOnly = true)
+    override fun isValid(message: MainBlockMessage): Boolean {
+        return isValidMerkleHash(message.merkleHash, message.getAllTransactions().map { it.hash }) &&
+            isValidVoteTransactions(message.voteTransactions) &&
+            isValidDelegateTransactions(message.delegateTransactions) &&
+            isValidTransferTransactions(message.transferTransactions) &&
+            super.isValid(MainBlock.of(message))
     }
 
-    @Transactional(readOnly = true)
-    override fun isValid(message: PendingBlockMessage): Boolean = isValid(MainBlock.of(message), message.getAllTransactions())
+    private fun isValidVoteTransactions(transactions: List<VoteTransactionMessage>): Boolean {
+        return transactions.all { voteTransactionService.isValid(it) }
+    }
 
-    private fun isValid(block: MainBlock, transactions: List<String>): Boolean {
-        return isValidMerkleHash(block.payload.merkleHash, transactions) && super.isValid(block)
+    private fun isValidDelegateTransactions(transactions: List<DelegateTransactionMessage>): Boolean {
+        return transactions.all { delegateTransactionService.isValid(it) }
+    }
+
+    private fun isValidTransferTransactions(transactions: List<TransferTransactionMessage>): Boolean {
+        return transactions.all { transferTransactionService.isValid(it) }
     }
 
     private fun isValidMerkleHash(merkleHash: String, transactions: List<String>): Boolean {

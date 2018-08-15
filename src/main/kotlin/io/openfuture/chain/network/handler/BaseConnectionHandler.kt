@@ -5,18 +5,20 @@ import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.network.message.base.Packet
 import io.openfuture.chain.network.message.base.PacketType.*
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
-import io.openfuture.chain.network.message.consensus.PendingBlockMessage
+import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.network.*
 import io.openfuture.chain.network.service.ConsensusMessageService
 import io.openfuture.chain.network.service.CoreMessageService
 import io.openfuture.chain.network.service.NetworkInnerService
 import io.openfuture.chain.network.sync.SyncBlockHandler
+import io.openfuture.chain.network.sync.SyncManager
 import io.openfuture.chain.network.sync.impl.SynchronizationStatus.SYNCHRONIZED
 import org.slf4j.LoggerFactory
 
 abstract class BaseConnectionHandler(
     private var coreService: CoreMessageService,
+    private val syncManager: SyncManager,
     private val syncBlockHandler: SyncBlockHandler,
     protected var networkService: NetworkInnerService,
     private var consensusService: ConsensusMessageService
@@ -50,7 +52,7 @@ abstract class BaseConnectionHandler(
             GENESIS_BLOCK -> syncBlockHandler.onGenesisBlockMessage(packet.data as GenesisBlockMessage)
         }
 
-        if (syncBlockHandler.getSyncStatus() == SYNCHRONIZED) {
+        if (syncManager.getSyncStatus() == SYNCHRONIZED) {
             processAppMessages(ctx, packet)
         }
     }
@@ -61,7 +63,7 @@ abstract class BaseConnectionHandler(
             DELEGATE_TRANSACTION -> coreService.onDelegateTransaction(ctx, packet.data as DelegateTransactionMessage)
             VOTE_TRANSACTION -> coreService.onVoteTransaction(ctx, packet.data as VoteTransactionMessage)
             BLOCK_APPROVAL -> consensusService.onBlockApproval(ctx, packet.data as BlockApprovalMessage)
-            PENDING_BLOCK -> consensusService.onPendingBlock(ctx, packet.data as PendingBlockMessage)
+            PENDING_BLOCK -> consensusService.onPendingBlock(ctx, packet.data as MainBlockMessage)
         }
     }
 

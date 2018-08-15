@@ -32,7 +32,7 @@ abstract class BaseBlockService<T : Block>(
             && isValidSignature(block.hash, block.signature, block.publicKey)
     }
 
-    protected fun isSync(block: MainBlock): Boolean {
+    protected fun isSync(block: Block): Boolean {
         val lastBlock = blockService.getLast()
         return isValidHeight(block, lastBlock)
     }

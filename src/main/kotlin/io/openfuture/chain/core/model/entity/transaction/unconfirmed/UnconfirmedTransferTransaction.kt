@@ -24,12 +24,12 @@ class UnconfirmedTransferTransaction(
 ) : UnconfirmedTransaction(header, hash, senderSignature, senderPublicKey) {
 
     companion object {
-        fun of(dto: TransferTransactionMessage): UnconfirmedTransferTransaction = UnconfirmedTransferTransaction(
-            TransactionHeader(dto.timestamp, dto.fee, dto.senderAddress),
-            dto.hash,
-            dto.senderSignature,
-            dto.senderPublicKey,
-            TransferTransactionPayload(dto.amount, dto.recipientAddress)
+        fun of(message: TransferTransactionMessage): UnconfirmedTransferTransaction = UnconfirmedTransferTransaction(
+            TransactionHeader(message.timestamp, message.fee, message.senderAddress),
+            message.hash,
+            message.senderSignature,
+            message.senderPublicKey,
+            TransferTransactionPayload(message.amount, message.recipientAddress)
         )
 
         fun of(request: TransferTransactionRequest): UnconfirmedTransferTransaction = UnconfirmedTransferTransaction(

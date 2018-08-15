@@ -13,7 +13,8 @@ import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
-import io.openfuture.chain.network.service.NetworkApiService
+import io.openfuture.chain.network.sync.SyncManager
+import io.openfuture.chain.network.sync.impl.SynchronizationStatus
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,7 +26,7 @@ class DefaultGenesisBlockService(
     walletService: WalletService,
     delegateService: DefaultDelegateService,
     private val keyHolder: NodeKeyHolder,
-    private val networkService: NetworkApiService
+    private val syncManager: SyncManager
 ) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService), GenesisBlockService {
 
     @Transactional(readOnly = true)
@@ -54,24 +55,6 @@ class DefaultGenesisBlockService(
 
     @Transactional
     override fun add(message: GenesisBlockMessage) {
-        this.save(message)
-
-        networkService.broadcast(message)
-    }
-
-    @Transactional
-    override fun synchronize(message: GenesisBlockMessage) {
-        this.save(message)
-    }
-
-    @Transactional(readOnly = true)
-    override fun isValid(message: GenesisBlockMessage): Boolean {
-        val delegates = message.delegates.map { delegateService.getByPublicKey(it) }
-        val block = GenesisBlock.of(message, delegates)
-        return isValid(block)
-    }
-
-    private fun save(message: GenesisBlockMessage) {
         if (null != repository.findOneByHash(message.hash)) {
             return
         }
@@ -79,17 +62,22 @@ class DefaultGenesisBlockService(
         val delegates = message.delegates.map { delegateService.getByPublicKey(it) }
         val block = GenesisBlock.of(message, delegates)
 
-        if (!isValid(block)) {
+        if (!isSync(block)) {
+            syncManager.setSyncStatus(SynchronizationStatus.NOT_SYNCHRONIZED)
             return
         }
 
         super.save(block)
     }
 
-    private fun isValid(block: GenesisBlock): Boolean {
-        return isValidateActiveDelegates(block.payload.activeDelegates)
-            && isValidEpochIndex(this.getLast().payload.epochIndex, block.payload.epochIndex)
-            && super.isValid(block)
+    @Transactional(readOnly = true)
+    override fun isValid(message: GenesisBlockMessage): Boolean {
+        val delegates = message.delegates.map { delegateService.getByPublicKey(it) }
+        val block = GenesisBlock.of(message, delegates)
+
+        return isValidateActiveDelegates(block.payload.activeDelegates) &&
+            isValidEpochIndex(this.getLast().payload.epochIndex, block.payload.epochIndex) &&
+            super.isValid(block)
     }
 
     private fun isValidateActiveDelegates(delegates: List<Delegate>): Boolean {

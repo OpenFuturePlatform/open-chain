@@ -1,7 +1,7 @@
 package io.openfuture.chain.network.message.base
 
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
-import io.openfuture.chain.network.message.consensus.PendingBlockMessage
+import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.network.*
 import kotlin.reflect.KClass
@@ -21,7 +21,7 @@ enum class PacketType(
     MAIN_BLOCK(8, MainBlockMessage::class),
     GENESIS_BLOCK(9, GenesisBlockMessage::class),
     BLOCK_APPROVAL(10, BlockApprovalMessage::class),
-    PENDING_BLOCK(11, PendingBlockMessage::class),
+    PENDING_BLOCK(11, MainBlockMessage::class),
     TRANSFER_TRANSACTION(12, TransferTransactionMessage::class),
     DELEGATE_TRANSACTION(13, DelegateTransactionMessage::class),
     VOTE_TRANSACTION(14, VoteTransactionMessage::class),

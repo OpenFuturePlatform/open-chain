@@ -3,7 +3,7 @@ package io.openfuture.chain.network.message.base
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.network.message.base.PacketType.*
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
-import io.openfuture.chain.network.message.consensus.PendingBlockMessage
+import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.network.*
 import org.assertj.core.api.Assertions.assertThat
@@ -50,7 +50,7 @@ class PacketTypeTests {
         assertThat(PacketType.get(MainBlockMessage::class.java.newInstance())).isEqualTo(MAIN_BLOCK)
         assertThat(PacketType.get(GenesisBlockMessage::class.java.newInstance())).isEqualTo(GENESIS_BLOCK)
         assertThat(PacketType.get(BlockApprovalMessage::class.java.newInstance())).isEqualTo(BLOCK_APPROVAL)
-        assertThat(PacketType.get(PendingBlockMessage::class.java.newInstance())).isEqualTo(PENDING_BLOCK)
+        assertThat(PacketType.get(MainBlockMessage::class.java.newInstance())).isEqualTo(PENDING_BLOCK)
         assertThat(PacketType.get(TransferTransactionMessage::class.java.newInstance())).isEqualTo(TRANSFER_TRANSACTION)
         assertThat(PacketType.get(DelegateTransactionMessage::class.java.newInstance())).isEqualTo(DELEGATE_TRANSACTION)
         assertThat(PacketType.get(VoteTransactionMessage::class.java.newInstance())).isEqualTo(VOTE_TRANSACTION)
