@@ -13,7 +13,7 @@ class Application {
     @Bean
     fun flywayMigrationStrategy(): FlywayMigrationStrategy {
         return FlywayMigrationStrategy { flyway ->
-         //   flyway.clean()
+            flyway.clean()
             flyway.migrate()
         }
     }
