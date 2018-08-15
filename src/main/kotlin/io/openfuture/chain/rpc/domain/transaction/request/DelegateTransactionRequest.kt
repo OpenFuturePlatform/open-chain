@@ -9,6 +9,8 @@ data class DelegateTransactionRequest(
     @field:NotBlank var senderAddress: String? = null,
     @field:NotBlank var delegateKey: String? = null,
     @field:NotBlank var senderSignature: String? = null,
-    @field:NotBlank var senderPublicKey: String? = null
+    @field:NotBlank var senderPublicKey: String? = null,
+    @field:NotBlank var senderHost: String? = null,
+    @field:NotBlank var senderPort: Int? = null
 
 )

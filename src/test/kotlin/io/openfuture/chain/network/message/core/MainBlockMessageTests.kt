@@ -28,7 +28,7 @@ class MainBlockMessageTests : MessageTests() {
         val transferTransactionMessage = listOf(TransferTransactionMessage(1L, 1L, "senderAddress", "hash", "senderSignature",
             "senderPublicKey", 1, "delegateKey"))
         val delegateTransactionMessage = listOf(DelegateTransactionMessage(1L, 1L, "senderAddress", "hash", "senderSignature",
-            "senderPublicKey", "delegateKey"))
+            "senderPublicKey", "delegateKey", "host", 1))
 
         message = MainBlockMessage(1, "prevHash", 1, 10, "hash", "signature", "publicKey", "merkleHash",
             voteTransactionMessage, delegateTransactionMessage, transferTransactionMessage)

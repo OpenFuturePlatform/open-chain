@@ -2,8 +2,8 @@ package io.openfuture.chain.core.model.entity.transaction.confirmed
 
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
-import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
+import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import javax.persistence.Embedded
@@ -31,7 +31,7 @@ class DelegateTransaction(
             message.senderSignature,
             message.senderPublicKey,
             block,
-            DelegateTransactionPayload(message.delegateKey)
+            DelegateTransactionPayload(message.delegateKey, message.delegateHost, message.delegatePort)
         )
 
         fun of(utx: UnconfirmedDelegateTransaction, block: MainBlock): DelegateTransaction = DelegateTransaction(
@@ -53,7 +53,9 @@ class DelegateTransaction(
         hash,
         senderSignature,
         senderPublicKey,
-        payload.delegateKey
+        payload.delegateKey,
+        payload.delegateHost,
+        payload.delegatePort
     )
 
 }

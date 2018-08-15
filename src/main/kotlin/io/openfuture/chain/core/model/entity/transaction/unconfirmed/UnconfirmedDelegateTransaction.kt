@@ -29,18 +29,18 @@ class UnconfirmedDelegateTransaction(
             dto.hash,
             dto.senderSignature,
             dto.senderPublicKey,
-            DelegateTransactionPayload(dto.delegateKey)
+            DelegateTransactionPayload(dto.delegateKey, dto.delegateHost, dto.delegatePort)
         )
 
         fun of(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
             TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
             TransactionUtils.generateHash(
                 TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
-                DelegateTransactionPayload(request.delegateKey!!)
+                DelegateTransactionPayload(request.delegateKey!!, request.senderHost!!, request. senderPort!!)
             ),
             request.senderSignature!!,
             request.senderPublicKey!!,
-            DelegateTransactionPayload(request.delegateKey!!)
+            DelegateTransactionPayload(request.delegateKey!!, request.senderHost!!, request. senderPort!!)
         )
     }
 
@@ -53,7 +53,9 @@ class UnconfirmedDelegateTransaction(
         hash,
         senderSignature,
         senderPublicKey,
-        payload.delegateKey
+        payload.delegateKey,
+        payload.delegateHost,
+        payload.delegatePort
     )
 
 }

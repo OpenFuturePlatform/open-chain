@@ -5,7 +5,6 @@ import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.network.message.base.Packet
 import io.openfuture.chain.network.message.base.PacketType.*
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
-import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.network.*
 import io.openfuture.chain.network.service.ConsensusMessageService
@@ -45,6 +44,8 @@ abstract class BaseConnectionHandler(
             EXPLORER_ADDRESSES -> networkService.onExplorerAddresses(ctx, packet.data as ExplorerAddressesMessage)
             EXPLORER_FIND_ADDRESSES -> networkService.onExplorerFindAddresses(ctx, packet.data as ExplorerFindAddressesMessage)
 
+            DELEGATE_REQUEST -> coreService.onFindDelegates(ctx, packet.data as DelegateRequestMessage)
+            DELEGATE_RESPONSE -> syncBlockHandler.onDelegateResponseMessage(ctx, packet.data as DelegateResponseMessage)
             HASH_BLOCK_REQUEST -> syncBlockHandler.onHashBlockRequestMessage(ctx, packet.data as HashBlockRequestMessage)
             HASH_BLOCK_RESPONSE -> syncBlockHandler.onHashResponseMessage(ctx, packet.data as HashBlockResponseMessage)
             SYNC_BLOCKS_REQUEST -> syncBlockHandler.onSyncBlocRequestMessage(ctx, packet.data as SyncBlockRequestMessage)

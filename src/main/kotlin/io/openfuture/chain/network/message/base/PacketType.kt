@@ -1,7 +1,6 @@
 package io.openfuture.chain.network.message.base
 
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
-import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.network.*
 import kotlin.reflect.KClass
@@ -28,7 +27,9 @@ enum class PacketType(
     EXPLORER_FIND_ADDRESSES(15, ExplorerFindAddressesMessage::class),
     EXPLORER_ADDRESSES(16, ExplorerAddressesMessage::class),
     HASH_BLOCK_REQUEST(17, HashBlockRequestMessage::class),
-    HASH_BLOCK_RESPONSE(18, HashBlockResponseMessage::class);
+    HASH_BLOCK_RESPONSE(18, HashBlockResponseMessage::class),
+    DELEGATE_RESPONSE(19, DelegateResponseMessage::class),
+    DELEGATE_REQUEST(20, DelegateRequestMessage::class);
 
 
     companion object {

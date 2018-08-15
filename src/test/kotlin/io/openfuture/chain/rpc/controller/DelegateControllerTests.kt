@@ -22,7 +22,7 @@ class DelegateControllerTests : ControllerTests() {
 
     @Test
     fun getAllShouldReturnDelegatesListTest() {
-        val pageDelegates = PageImpl(listOf(Delegate("publicKey", "address")))
+        val pageDelegates = PageImpl(listOf(Delegate("publicKey", "address", "host", 1)))
         val expectedPageResponse = PageResponse(pageDelegates)
 
         given(delegateService.getAll(PageRequest())).willReturn(pageDelegates)

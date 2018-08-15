@@ -21,6 +21,8 @@ class DefaultDelegateService(
         const val ID = "id"
         const val PUBLIC_KEY = "public_key"
         const val ADDRESS = "address"
+        const val HOST = "host"
+        const val PORT = "port"
     }
 
 
@@ -42,7 +44,7 @@ class DefaultDelegateService(
             "limit ${consensusProperties.delegatesCount!!}"
 
         return jdbcTemplate.query(sql) { rs, rowNum ->
-            Delegate(rs.getString(PUBLIC_KEY), rs.getString(ADDRESS), rs.getInt(ID))
+            Delegate(rs.getString(PUBLIC_KEY), rs.getString(ADDRESS), rs.getString(HOST), rs.getInt(PORT), rs.getInt(ID))
         }
     }
 
