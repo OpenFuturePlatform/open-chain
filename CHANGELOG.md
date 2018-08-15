@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC: Get number of an epoch when the block was created
 - RPC: Import private key in hex format
 - RPC: Get transactions by wallet address
+- RPC: Get explorer info
 
 ### Changed
 - New file structure

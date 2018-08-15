@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/rpc/delegates")
 class DelegateController(
-    private val delegateService: DelegateService) {
+    private val delegateService: DelegateService
+) {
 
     @GetMapping
     fun getAll(request: PageRequest): PageResponse<Delegate> = PageResponse(delegateService.getAll(request))

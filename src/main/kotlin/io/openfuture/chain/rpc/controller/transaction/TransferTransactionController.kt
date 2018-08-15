@@ -13,7 +13,8 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/rpc/transactions/transfer")
 class TransferTransactionController(
-    private val transactionService: TransferTransactionService) {
+    private val transactionService: TransferTransactionService
+) {
 
     @GetMapping("/{address}")
     fun getTransactions(@PathVariable address: String): List<TransferTransaction> = transactionService.getByAddress(address)

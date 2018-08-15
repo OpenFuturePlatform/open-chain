@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/rpc/blocks/main")
 class MainBlockController(
-    private val blockService: MainBlockService) {
+    private val blockService: MainBlockService
+) {
 
     @GetMapping
     fun getAll(request: PageRequest): PageResponse<MainBlock> {

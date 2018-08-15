@@ -12,7 +12,8 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/rpc/transactions/delegates")
 class DelegateTransactionController(
-    private val transactionService: DelegateTransactionService) {
+    private val transactionService: DelegateTransactionService
+) {
 
     @PostMapping
     fun add(@Valid @RequestBody request: DelegateTransactionRequest): DelegateTransactionResponse {

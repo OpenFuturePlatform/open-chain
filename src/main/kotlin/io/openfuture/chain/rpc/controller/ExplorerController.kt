@@ -15,7 +15,8 @@ class ExplorerController(
     private val blockService: BlockService,
     private val epochService: EpochService,
     private val networkApiService: NetworkApiService,
-    private val transactionService: TransactionService) {
+    private val transactionService: TransactionService
+) {
 
     @GetMapping
     fun getExplorerInfo(): ExplorerResponse {

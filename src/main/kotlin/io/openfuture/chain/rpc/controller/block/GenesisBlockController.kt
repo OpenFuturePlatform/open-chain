@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/rpc/blocks/genesis")
 class GenesisBlockController(
-    private val blockService: GenesisBlockService) {
+    private val blockService: GenesisBlockService
+) {
 
     @GetMapping
     fun getAll(request: PageRequest): PageResponse<GenesisBlock> {

@@ -1,12 +1,12 @@
 package io.openfuture.chain.rpc.domain.explorer
 
-class ExplorerResponse(
-    var nodesCount: Int,
-    var blocksCount: Long,
-    var transactionsCount: Long,
-    var secondsPerBlock: Long,
-    var transactionsPerSecond: Long,
-    var currectEpochNumber: Long,
-    var currectEpochDate: Long,
-    var delegatesCount: Byte
+data class ExplorerResponse(
+        var nodesCount: Int? = null,
+        var blocksCount: Long? = null,
+        var transactionsCount: Long? = null,
+        var secondsPerBlock: Long? = null,
+        var transactionsPerSecond: Long? = null,
+        var currentEpochNumber: Long? = null,
+        var currentEpochDate: Long? = null,
+        var delegatesCount: Byte? = null
 )
