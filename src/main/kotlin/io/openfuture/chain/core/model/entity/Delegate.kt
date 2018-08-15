@@ -15,6 +15,12 @@ class Delegate(
     @Column(name = "address", nullable = false)
     var address: String,
 
+    @Column(name = "host", nullable = false)
+    var host: String,
+
+    @Column(name = "port", nullable = false)
+    var port: Int,
+
     id: Int = 0
 
 ) : BaseModel(id)

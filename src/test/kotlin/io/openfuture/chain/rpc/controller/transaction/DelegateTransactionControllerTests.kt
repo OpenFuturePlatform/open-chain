@@ -25,9 +25,9 @@ class DelegateTransactionControllerTests : ControllerTests() {
     @Test
     fun addTransactionShouldReturnAddedTransaction() {
         val transactionRequest = DelegateTransactionRequest(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
-            "delegateKey")
+            "delegateKey", "host", 1)
         val unconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(TransactionHeader(1L, 1L, "senderAddress"), "senderPublicKey", "senderSignature",
-            "hash", DelegateTransactionPayload("delegateKey"))
+            "hash", DelegateTransactionPayload("delegateKey", "host", 1))
         val expectedResponse = DelegateTransactionResponse(unconfirmedDelegateTransaction)
 
         given(service.add(transactionRequest)).willReturn(unconfirmedDelegateTransaction)

@@ -21,6 +21,8 @@ class DefaultDelegateService(
         const val ID = "id"
         const val PUBLIC_KEY = "public_key"
         const val ADDRESS = "address"
+        const val HOST = "host"
+        const val PORT = "port"
     }
 
 
@@ -33,7 +35,14 @@ class DefaultDelegateService(
 
     @Transactional(readOnly = true)
     override fun getActiveDelegates(): List<Delegate> {
-        val sql = "select sum(wll.balance) rating, dg.public_key $PUBLIC_KEY, dg.address $ADDRESS, dg.id $ID " +
+        val sql =
+            "select " +
+                "sum(wll.balance) rating, " +
+                "dg.public_key $PUBLIC_KEY, " +
+                "dg.address $ADDRESS, " +
+                "dg.host $HOST, " +
+                "dg.port $PORT, " +
+                "dg.id $ID " +
             "from wallets2delegates as s2d\n" +
             "  join wallets as wll on wll.id = s2d.wallet_id\n" +
             "  join delegates as dg on dg.id = s2d.delegate_id\n" +
@@ -42,7 +51,7 @@ class DefaultDelegateService(
             "limit ${consensusProperties.delegatesCount!!}"
 
         return jdbcTemplate.query(sql) { rs, rowNum ->
-            Delegate(rs.getString(PUBLIC_KEY), rs.getString(ADDRESS), rs.getInt(ID))
+            Delegate(rs.getString(PUBLIC_KEY), rs.getString(ADDRESS), rs.getString(HOST), rs.getInt(PORT), rs.getInt(ID))
         }
     }
 

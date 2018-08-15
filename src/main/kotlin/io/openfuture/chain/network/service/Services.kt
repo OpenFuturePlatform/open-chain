@@ -8,6 +8,7 @@ import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
+import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.network.*
 
 
@@ -16,6 +17,10 @@ interface NetworkApiService {
     fun broadcast(message: BaseMessage)
 
     fun send(message: BaseMessage)
+
+    fun sendToAddress(message: BaseMessage, addressMessage: NetworkAddressMessage)
+
+    fun sendToRootNode(message: BaseMessage)
 
     fun getNetworkSize(): Int
 
@@ -56,6 +61,10 @@ interface NetworkInnerService {
 
     fun onClientChannelInactive(ctx: ChannelHandlerContext)
 
+    fun sendToRoot(baseMessage: BaseMessage)
+
+    fun sendToAddress(baseMessage: BaseMessage, networkAddressMessage: NetworkAddressMessage)
+
 }
 
 interface CoreMessageService {
@@ -65,6 +74,8 @@ interface CoreMessageService {
     fun onDelegateTransaction(ctx: ChannelHandlerContext, tx: DelegateTransactionMessage)
 
     fun onVoteTransaction(ctx: ChannelHandlerContext, tx: VoteTransactionMessage)
+
+    fun onFindDelegates(ctx: ChannelHandlerContext, delegateRequestMessage: DelegateRequestMessage)
 
 }
 

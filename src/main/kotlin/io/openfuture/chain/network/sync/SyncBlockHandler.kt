@@ -19,4 +19,6 @@ interface SyncBlockHandler {
 
     fun onGenesisBlockMessage(block: GenesisBlockMessage)
 
+    fun onDelegateResponseMessage(ctx: ChannelHandlerContext, delegateResponseMessage: DelegateResponseMessage)
+
 }

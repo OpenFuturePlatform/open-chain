@@ -10,7 +10,8 @@ import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.network.sync.SyncBlockHandler
 import io.openfuture.chain.network.sync.SyncManager
-import io.openfuture.chain.network.sync.impl.SynchronizationStatus.*
+import io.openfuture.chain.network.sync.impl.SynchronizationStatus.PROCESSING
+import io.openfuture.chain.network.sync.impl.SynchronizationStatus.SYNCHRONIZED
 import org.apache.commons.lang3.tuple.MutablePair
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -34,6 +35,14 @@ class DefaultSyncBlockHandler(
 
     @Synchronized
     override fun getLastResponseTime(): Long = expectedHashAndResponseTime.right
+
+    @Synchronized
+    override fun onDelegateResponseMessage(ctx: ChannelHandlerContext, delegateResponseMessage: DelegateResponseMessage) {
+        val lastBlockHash = blockService.getLast().hash
+        val delegateNodeAddress = delegateResponseMessage.values.shuffled().first()
+
+        networkApiService.sendToAddress(HashBlockRequestMessage(lastBlockHash), delegateNodeAddress)
+    }
 
     @Synchronized
     override fun onHashBlockRequestMessage(ctx: ChannelHandlerContext, message: HashBlockRequestMessage) {
@@ -76,7 +85,7 @@ class DefaultSyncBlockHandler(
     override fun synchronize() {
         try {
             processing()
-            networkApiService.send(HashBlockRequestMessage(blockService.getLast().hash))
+            networkApiService.sendToRootNode(DelegateRequestMessage())
         } catch (e: Exception) {
             synchronize()
             log.error(e.message)

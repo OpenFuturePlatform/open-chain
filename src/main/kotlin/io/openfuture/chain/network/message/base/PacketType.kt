@@ -25,15 +25,17 @@ enum class PacketType(
     BLOCK_APPROVAL(9, BlockApprovalMessage::class),
     PENDING_BLOCK(10, PendingBlockMessage::class),
     // blockchain
-    MAIN_BLOCK(11, MainBlockMessage::class),
-    GENESIS_BLOCK(12, GenesisBlockMessage::class),
-    TRANSFER_TRANSACTION(13, TransferTransactionMessage::class),
-    DELEGATE_TRANSACTION(14, DelegateTransactionMessage::class),
-    VOTE_TRANSACTION(15, VoteTransactionMessage::class),
+    TRANSFER_TRANSACTION(11, TransferTransactionMessage::class),
+    DELEGATE_TRANSACTION(12, DelegateTransactionMessage::class),
+    VOTE_TRANSACTION(13, VoteTransactionMessage::class),
     // sync
-    HASH_BLOCK_REQUEST(16, HashBlockRequestMessage::class),
-    HASH_BLOCK_RESPONSE(17, HashBlockResponseMessage::class),
-    SYNC_BLOCKS_REQUEST(18, SyncBlockRequestMessage::class);
+    HASH_BLOCK_REQUEST(14, HashBlockRequestMessage::class),
+    HASH_BLOCK_RESPONSE(15, HashBlockResponseMessage::class),
+    SYNC_BLOCKS_REQUEST(16, SyncBlockRequestMessage::class),
+    DELEGATE_REQUEST(17, DelegateRequestMessage::class),
+    DELEGATE_RESPONSE(18, DelegateResponseMessage::class),
+    MAIN_BLOCK(19, MainBlockMessage::class),
+    GENESIS_BLOCK(20, GenesisBlockMessage::class);
 
 
     companion object {
