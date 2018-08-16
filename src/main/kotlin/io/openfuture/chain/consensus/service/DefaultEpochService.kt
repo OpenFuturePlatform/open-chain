@@ -2,6 +2,7 @@ package io.openfuture.chain.consensus.service
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.network.component.node.NodeClock
 import org.springframework.stereotype.Service
@@ -27,6 +28,9 @@ class DefaultEpochService(
         val random = Random(genesisBlock.height + getSlotNumber(clock.networkTime()))
         return genesisBlock.payload.activeDelegates.shuffled(random).first()
     }
+
+    override fun getEpochByBlock(block: MainBlock): Long =
+        genesisBlockService.getPreviousByHeight(block.height).payload.epochIndex
 
     override fun isInIntermission(time: Long): Boolean = (getTimeSlotFromStart(time) >= properties.timeSlotDuration!!)
 

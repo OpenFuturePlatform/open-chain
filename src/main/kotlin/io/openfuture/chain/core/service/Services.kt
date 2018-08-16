@@ -62,6 +62,8 @@ interface GenesisBlockService {
 
     fun isValid(message: GenesisBlockMessage): Boolean
 
+    fun getPreviousByHeight(height: Long): GenesisBlock
+
 }
 
 interface MainBlockService {

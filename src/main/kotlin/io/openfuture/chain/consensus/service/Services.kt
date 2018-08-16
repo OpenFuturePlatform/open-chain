@@ -1,6 +1,7 @@
 package io.openfuture.chain.consensus.service
 
 import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.model.entity.block.MainBlock
 
 interface EpochService {
 
@@ -22,4 +23,5 @@ interface EpochService {
 
     fun getEpochEndTime(): Long
 
+    fun getEpochByBlock(block: MainBlock): Long
 }

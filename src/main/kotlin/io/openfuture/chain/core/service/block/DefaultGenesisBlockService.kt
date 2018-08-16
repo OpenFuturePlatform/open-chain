@@ -24,13 +24,17 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultGenesisBlockService(
     blockService: BlockService,
-    repository: GenesisBlockRepository,
     walletService: WalletService,
     delegateService: DefaultDelegateService,
     capacityChecker: BlockCapacityChecker,
+    override val repository: GenesisBlockRepository,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService
 ) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService, capacityChecker), GenesisBlockService {
+
+    @Transactional(readOnly = true)
+    override fun getPreviousByHeight(height: Long): GenesisBlock = repository.findFirstByHeightLessThan(height)
+        ?: throw NotFoundException("Last block not found")
 
     @Transactional(readOnly = true)
     override fun getByHash(hash: String): GenesisBlock = repository.findOneByHash(hash)

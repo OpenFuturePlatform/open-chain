@@ -11,7 +11,7 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 
 abstract class BaseBlockService<T : BaseBlock>(
-    protected val repository: BlockRepository<T>,
+    open val repository: BlockRepository<T>,
     protected val blockService: BlockService,
     private val walletService: WalletService,
     protected val delegateService: DelegateService,

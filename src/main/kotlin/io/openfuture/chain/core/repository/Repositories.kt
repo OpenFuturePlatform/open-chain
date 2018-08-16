@@ -33,7 +33,11 @@ interface BlockRepository<Entity : BaseBlock> : BaseRepository<Entity> {
 interface MainBlockRepository : BlockRepository<MainBlock>
 
 @Repository
-interface GenesisBlockRepository : BlockRepository<GenesisBlock>
+interface GenesisBlockRepository : BlockRepository<GenesisBlock> {
+
+    fun findFirstByHeightLessThan(height: Long): GenesisBlock?
+
+}
 
 @Repository
 interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
