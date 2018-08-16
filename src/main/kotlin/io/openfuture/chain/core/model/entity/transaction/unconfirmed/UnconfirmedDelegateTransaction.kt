@@ -24,12 +24,12 @@ class UnconfirmedDelegateTransaction(
 ) : UnconfirmedTransaction(header, hash, senderSignature, senderPublicKey) {
 
     companion object {
-        fun of(dto: DelegateTransactionMessage): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
-            TransactionHeader(dto.timestamp, dto.fee, dto.senderAddress),
-            dto.hash,
-            dto.senderSignature,
-            dto.senderPublicKey,
-            DelegateTransactionPayload(dto.delegateKey, dto.delegateHost, dto.delegatePort)
+        fun of(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
+            TransactionHeader(message.timestamp, message.fee, message.senderAddress),
+            message.hash,
+            message.senderSignature,
+            message.senderPublicKey,
+            DelegateTransactionPayload(message.delegateKey, message.delegateHost, message.delegatePort)
         )
 
         fun of(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(

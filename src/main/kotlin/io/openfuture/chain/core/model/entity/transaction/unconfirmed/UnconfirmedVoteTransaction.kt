@@ -4,7 +4,6 @@ import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
 import io.openfuture.chain.core.util.TransactionUtils
-import io.openfuture.chain.network.message.core.TransactionMessage
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import javax.persistence.Embedded
@@ -25,12 +24,12 @@ class UnconfirmedVoteTransaction(
 ) : UnconfirmedTransaction(header, hash, senderSignature, senderPublicKey) {
 
     companion object {
-        fun of(dto: VoteTransactionMessage): UnconfirmedVoteTransaction = UnconfirmedVoteTransaction(
-            TransactionHeader(dto.timestamp, dto.fee, dto.senderAddress),
-            dto.hash,
-            dto.senderSignature,
-            dto.senderPublicKey,
-            VoteTransactionPayload(dto.voteTypeId, dto.delegateKey)
+        fun of(message: VoteTransactionMessage): UnconfirmedVoteTransaction = UnconfirmedVoteTransaction(
+            TransactionHeader(message.timestamp, message.fee, message.senderAddress),
+            message.hash,
+            message.senderSignature,
+            message.senderPublicKey,
+            VoteTransactionPayload(message.voteTypeId, message.delegateKey)
         )
 
         fun of(request: VoteTransactionRequest): UnconfirmedVoteTransaction = UnconfirmedVoteTransaction(
