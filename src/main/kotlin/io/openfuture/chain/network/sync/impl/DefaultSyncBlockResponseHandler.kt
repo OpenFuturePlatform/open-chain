@@ -52,7 +52,7 @@ class DefaultSyncBlockResponseHandler(
     override fun getLastResponseTime(): Long = lastResponseTime
 
     @Synchronized
-    override fun onDelegateResponseMessage(message: DelegateResponseMessage) {
+    override fun onDelegateResponseMessage(ctx: ChannelHandlerContext, message: DelegateResponseMessage) {
         if (message.synchronizationSessionId != synchronizationSessionId || !activeDelegateAddresses.isEmpty()) {
             return
         }

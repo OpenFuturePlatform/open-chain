@@ -9,7 +9,7 @@ interface SyncBlockResponseHandler {
 
     fun getLastResponseTime(): Long
 
-    fun onDelegateResponseMessage(message: DelegateResponseMessage)
+    fun onDelegateResponseMessage(ctx: ChannelHandlerContext, message: DelegateResponseMessage)
 
     fun onHashResponseMessage(ctx: ChannelHandlerContext, message: HashBlockResponseMessage)
 

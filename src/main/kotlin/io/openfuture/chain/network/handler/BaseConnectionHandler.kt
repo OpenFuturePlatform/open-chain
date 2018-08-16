@@ -49,7 +49,7 @@ abstract class BaseConnectionHandler(
             EXPLORER_ADDRESSES -> networkService.onExplorerAddresses(ctx, packet.data as ExplorerAddressesMessage)
 
             DELEGATE_REQUEST -> syncBlockRequestHandler.onDelegateRequestMessage(ctx, packet.data as DelegateRequestMessage)
-            DELEGATE_RESPONSE -> syncBlockResponseHandler.onDelegateResponseMessage(packet.data as DelegateResponseMessage)
+            DELEGATE_RESPONSE -> syncBlockResponseHandler.onDelegateResponseMessage(ctx, packet.data as DelegateResponseMessage)
             HASH_BLOCK_REQUEST -> syncBlockRequestHandler.onLastHashRequestMessage(ctx, packet.data as HashBlockRequestMessage)
             HASH_BLOCK_RESPONSE -> syncBlockResponseHandler.onHashResponseMessage(ctx, packet.data as HashBlockResponseMessage)
             SYNC_BLOCKS_REQUEST -> syncBlockRequestHandler.onSyncBlocRequestMessage(ctx, packet.data as SyncBlockRequestMessage)
