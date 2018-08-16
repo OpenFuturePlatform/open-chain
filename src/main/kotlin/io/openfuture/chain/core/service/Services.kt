@@ -72,6 +72,8 @@ interface MainBlockService {
 
     fun getByHash(hash: String): MainBlock
 
+    fun getByPreviousHash(previousHash: String): MainBlock
+
     fun getAll(request: PageRequest): Page<MainBlock>
 
     fun create(): PendingBlockMessage

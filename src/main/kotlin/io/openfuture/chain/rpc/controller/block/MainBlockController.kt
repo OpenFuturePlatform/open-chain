@@ -19,24 +19,17 @@ class MainBlockController(
 ) {
 
     @GetMapping("/{hash}")
-    fun get(@PathVariable hash: String): MainBlockResponse {
-        val block = blockService.getByHash(hash)
-        val epochIndex = epochService.getEpochByBlock(block)
+    fun get(@PathVariable hash: String): MainBlockResponse = getMainBlockResponse(blockService.getByHash(hash))
 
-        return MainBlockResponse(block, epochIndex)
-    }
-
-    @GetMapping("/{hash}")
-    fun getB(@PathVariable hash: String): MainBlockResponse {
-        val block = blockService.getByHash(hash)
-        val epochIndex = epochService.getEpochByBlock(block)
-
-        return MainBlockResponse(block, epochIndex)
-    }
+    @GetMapping("/previousHash/{previousHash}")
+    fun getByPreviousHash(@PathVariable previousHash: String): MainBlockResponse =
+        getMainBlockResponse(blockService.getByPreviousHash(previousHash))
 
     @GetMapping
     fun getAll(request: PageRequest): PageResponse<MainBlock> {
         return PageResponse(blockService.getAll(request))
     }
+
+    private fun getMainBlockResponse(block: MainBlock): MainBlockResponse = MainBlockResponse(block, epochService.getEpochByBlock(block))
 
 }
