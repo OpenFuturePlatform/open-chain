@@ -4,7 +4,9 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.repository.DelegateTransactionRepository
 import io.openfuture.chain.core.repository.UDelegateTransactionRepository
@@ -92,11 +94,21 @@ class DefaultDelegateTransactionService(
     }
 
     private fun isValid(utx: UnconfirmedDelegateTransaction): Boolean {
-        return isNotExistsByDelegatePublicKey(utx.payload.delegateKey) && super.isValidBase(utx)
+        return isValidLocal(utx.header, utx.payload) && super.isValidBase(utx)
+    }
+
+    private fun isValidLocal(header: TransactionHeader, payload: DelegateTransactionPayload): Boolean {
+        return isNotExistsByDelegatePublicKey(payload.delegateKey) && isValidFee(header.senderAddress, header.fee)
     }
 
     private fun isNotExistsByDelegatePublicKey(key: String): Boolean {
         return !delegateService.isExistsByPublicKey(key) && !unconfirmedRepository.findAll().any { it.payload.delegateKey == key }
+    }
+
+    private fun isValidFee(senderAddress: String, fee: Long): Boolean {
+        val balance = walletService.getBalanceByAddress(senderAddress)
+        val unspentBalance = balance - baseService.getAllUnconfirmedByAddress(senderAddress).map { it.header.fee }.sum()
+        return fee in 0..unspentBalance
     }
 
 }

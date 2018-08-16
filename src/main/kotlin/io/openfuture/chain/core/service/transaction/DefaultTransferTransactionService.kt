@@ -102,17 +102,24 @@ class DefaultTransferTransactionService(
     }
 
     private fun isValid(utx: UnconfirmedTransferTransaction): Boolean =
-        isValidTransferBalance(utx.header.senderAddress, utx.payload.amount + utx.header.fee) && super.isValidBase(utx)
+        isValidBalance(utx.header.senderAddress, utx.payload.amount, utx.header.fee) && super.isValidBase(utx)
 
     private fun updateTransferBalance(from: String, to: String, amount: Long) {
         walletService.increaseBalance(to, amount)
         walletService.decreaseBalance(from, amount)
     }
 
-    private fun isValidTransferBalance(address: String, amount: Long): Boolean {
+    private fun isValidBalance(address: String, amount: Long, fee: Long): Boolean {
+        if (amount < 0 || fee < 0) {
+            return false
+        }
+
         val balance = walletService.getBalanceByAddress(address)
-        val unspentBalance = balance - unconfirmedRepository.findAllByHeaderSenderAddress(address).map { it.payload.amount }.sum()
-        return unspentBalance >= amount
+        val unconfirmedFee = baseService.getAllUnconfirmedByAddress(address).map { it.header.fee }.sum()
+        val unconfirmedAmount = unconfirmedRepository.findAllByHeaderSenderAddress(address).map { it.payload.amount }.sum()
+        val unspentBalance = balance - (unconfirmedFee + unconfirmedAmount)
+
+        return unspentBalance >= amount + fee
     }
 
 }

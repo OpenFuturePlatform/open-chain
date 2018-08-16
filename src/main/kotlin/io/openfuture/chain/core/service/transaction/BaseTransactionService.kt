@@ -51,7 +51,6 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
 
     protected fun isValidBase(tx: BaseTransaction): Boolean {
         return isValidAddress(tx.header.senderAddress, tx.senderPublicKey)
-            && isValidFee(tx.header.senderAddress, tx.header.fee)
             && isValidHash(tx.header, tx.getPayload(), tx.hash)
             && isValidSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
     }
@@ -68,12 +67,6 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
 
     private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean {
         return cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
-    }
-
-    private fun isValidFee(senderAddress: String, fee: Long): Boolean {
-        val balance = walletService.getBalanceByAddress(senderAddress)
-        val unspentBalance = balance - baseService.getAllUnconfirmedByAddress(senderAddress).map { it.header.fee }.sum()
-        return fee in 0..unspentBalance
     }
 
     private fun isValidHash(header: TransactionHeader, payload: TransactionPayload, hash: String): Boolean {

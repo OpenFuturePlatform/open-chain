@@ -102,7 +102,8 @@ internal class DefaultVoteTransactionService(
         return isExistsDelegate(payload.delegateKey) &&
             isValidVoteCount(header.senderAddress) &&
             !isAlreadyVote(header.senderAddress, payload.delegateKey) &&
-            isExistsVoteType(payload.voteTypeId)
+            isExistsVoteType(payload.voteTypeId) &&
+            isValidFee(header.senderAddress, header.fee)
     }
 
     private fun updateWalletVotes(senderAddress: String, delegateKey: String, type: VoteType) {
@@ -138,6 +139,12 @@ internal class DefaultVoteTransactionService(
 
     private fun isExistsVoteType(typeId: Int): Boolean {
         return VoteType.values().any { it.getId() == typeId }
+    }
+
+    private fun isValidFee(senderAddress: String, fee: Long): Boolean {
+        val balance = walletService.getBalanceByAddress(senderAddress)
+        val unspentBalance = balance - baseService.getAllUnconfirmedByAddress(senderAddress).map { it.header.fee }.sum()
+        return fee in 0..unspentBalance
     }
 
 }
