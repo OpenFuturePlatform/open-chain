@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Core: Genesis blocks is not broadcasted after creation.
+- Core: Possible to create vote transaction on the nonexistent delegate.
+- Core: Impossible to create request of vote transaction with the nonexistent voteType.
+- Core: Impossible to create transactions with negative fee.
+- Core: Remove validation from main block add method.
+- Core: Remove validation from genesis block add method.
+- Core: Validation of fee and amount of transactions are same and wrong.
 
 ## [0.5.0] - 2018-08-10
 ### Added
