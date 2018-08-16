@@ -26,6 +26,14 @@ class MainBlockController(
         return MainBlockResponse(block, epochIndex)
     }
 
+    @GetMapping("/{hash}")
+    fun getB(@PathVariable hash: String): MainBlockResponse {
+        val block = blockService.getByHash(hash)
+        val epochIndex = epochService.getEpochByBlock(block)
+
+        return MainBlockResponse(block, epochIndex)
+    }
+
     @GetMapping
     fun getAll(request: PageRequest): PageResponse<MainBlock> {
         return PageResponse(blockService.getAll(request))

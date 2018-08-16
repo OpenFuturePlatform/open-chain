@@ -25,6 +25,8 @@ interface BlockRepository<Entity : BaseBlock> : BaseRepository<Entity> {
 
     fun findOneByHash(hash: String): Entity?
 
+    fun findOneByPreviousHash(hash: String): Entity?
+
     fun findFirstByOrderByHeightDesc(): Entity?
 
 }

@@ -52,6 +52,8 @@ interface GenesisBlockService {
 
     fun getByHash(hash: String): GenesisBlock
 
+    fun getByPreviousHash(previousHash: String): GenesisBlock
+
     fun getAll(request: PageRequest): Page<GenesisBlock>
 
     fun getLast(): GenesisBlock
