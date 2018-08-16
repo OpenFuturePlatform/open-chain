@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Core: Impossible to create transactions with negative fee.
 - Core: Remove validation from main block add method.
 - Core: Remove validation from genesis block add method.
-- Core: Validation of fee and amount of transactions are same and wrong.
+- Core: Improve validation fee and amount for transfer transaction.
 
 ## [0.5.0] - 2018-08-10
 ### Added
