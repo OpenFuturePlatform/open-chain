@@ -9,15 +9,15 @@ import io.openfuture.chain.network.message.network.NetworkAddressMessage
 
 @NoArgConstructor
 data class DelegateResponseMessage(
-    var values: List<NetworkAddressMessage>
+    var addresses: List<NetworkAddressMessage>
 ) : BaseMessage {
 
     override fun read(buffer: ByteBuf) {
-        values = buffer.readList()
+        addresses = buffer.readList()
     }
 
     override fun write(buffer: ByteBuf) {
-        buffer.writeList(values)
+        buffer.writeList(addresses)
     }
 
 }

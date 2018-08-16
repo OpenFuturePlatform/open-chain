@@ -15,6 +15,7 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
 import io.openfuture.chain.network.sync.SyncManager
 import io.openfuture.chain.network.sync.impl.SynchronizationStatus
+import io.openfuture.chain.network.sync.impl.SynchronizationStatus.*
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -63,7 +64,7 @@ class DefaultGenesisBlockService(
         val block = GenesisBlock.of(message, delegates)
 
         if (!isSync(block)) {
-            syncManager.setSyncStatus(SynchronizationStatus.NOT_SYNCHRONIZED)
+            syncManager.setSyncStatus(NOT_SYNCHRONIZED)
             return
         }
 
