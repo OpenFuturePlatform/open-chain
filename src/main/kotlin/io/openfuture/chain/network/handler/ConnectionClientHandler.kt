@@ -2,10 +2,11 @@ package io.openfuture.chain.network.handler
 
 import io.netty.channel.ChannelHandler
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.network.sync.SyncBlockHandler
+import io.openfuture.chain.network.sync.SyncBlockResponseHandler
 import io.openfuture.chain.network.service.ConsensusMessageService
 import io.openfuture.chain.network.service.CoreMessageService
 import io.openfuture.chain.network.service.NetworkInnerService
+import io.openfuture.chain.network.sync.SyncBlockRequestHandler
 import io.openfuture.chain.network.sync.SyncManager
 import org.springframework.stereotype.Component
 
@@ -16,8 +17,9 @@ class ConnectionClientHandler(
     coreService: CoreMessageService,
     consensusService: ConsensusMessageService,
     syncManager: SyncManager,
-    syncBlockHandler: SyncBlockHandler
-) : BaseConnectionHandler(coreService, syncManager, syncBlockHandler, networkService, consensusService) {
+    syncBlockRequestHandler: SyncBlockRequestHandler,
+    syncBlockResponseHandler: SyncBlockResponseHandler
+) : BaseConnectionHandler(coreService, syncManager, syncBlockRequestHandler, syncBlockResponseHandler, networkService, consensusService) {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         super.channelActive(ctx)

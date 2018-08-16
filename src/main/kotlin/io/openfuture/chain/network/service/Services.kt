@@ -69,13 +69,11 @@ interface NetworkInnerService {
 
 interface CoreMessageService {
 
-    fun onTransferTransaction(ctx: ChannelHandlerContext, tx: TransferTransactionMessage)
+    fun onTransferTransaction(ctx: ChannelHandlerContext, message: TransferTransactionMessage)
 
-    fun onDelegateTransaction(ctx: ChannelHandlerContext, tx: DelegateTransactionMessage)
+    fun onDelegateTransaction(ctx: ChannelHandlerContext, message: DelegateTransactionMessage)
 
-    fun onVoteTransaction(ctx: ChannelHandlerContext, tx: VoteTransactionMessage)
-
-    fun onFindDelegates(ctx: ChannelHandlerContext, delegateRequestMessage: DelegateRequestMessage)
+    fun onVoteTransaction(ctx: ChannelHandlerContext, message: VoteTransactionMessage)
 
 }
 

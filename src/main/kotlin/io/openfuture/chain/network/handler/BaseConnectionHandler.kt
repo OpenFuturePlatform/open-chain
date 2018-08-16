@@ -12,7 +12,8 @@ import io.openfuture.chain.network.message.network.*
 import io.openfuture.chain.network.service.ConsensusMessageService
 import io.openfuture.chain.network.service.CoreMessageService
 import io.openfuture.chain.network.service.NetworkInnerService
-import io.openfuture.chain.network.sync.SyncBlockHandler
+import io.openfuture.chain.network.sync.SyncBlockRequestHandler
+import io.openfuture.chain.network.sync.SyncBlockResponseHandler
 import io.openfuture.chain.network.sync.SyncManager
 import io.openfuture.chain.network.sync.impl.SynchronizationStatus.SYNCHRONIZED
 import org.slf4j.LoggerFactory
@@ -20,7 +21,8 @@ import org.slf4j.LoggerFactory
 abstract class BaseConnectionHandler(
     private var coreService: CoreMessageService,
     private val syncManager: SyncManager,
-    private val syncBlockHandler: SyncBlockHandler,
+    private val syncBlockRequestHandler: SyncBlockRequestHandler,
+    private val syncBlockResponseHandler: SyncBlockResponseHandler,
     protected var networkService: NetworkInnerService,
     private var consensusService: ConsensusMessageService
 ) : SimpleChannelInboundHandler<Packet>() {
@@ -46,13 +48,13 @@ abstract class BaseConnectionHandler(
             EXPLORER_FIND_ADDRESSES -> networkService.onExplorerFindAddresses(ctx, packet.data as ExplorerFindAddressesMessage)
             EXPLORER_ADDRESSES -> networkService.onExplorerAddresses(ctx, packet.data as ExplorerAddressesMessage)
 
-            DELEGATE_REQUEST -> coreService.onFindDelegates(ctx, packet.data as DelegateRequestMessage)
-            DELEGATE_RESPONSE -> syncBlockHandler.onDelegateResponseMessage(ctx, packet.data as DelegateResponseMessage)
-            HASH_BLOCK_REQUEST -> syncBlockHandler.onHashBlockRequestMessage(ctx, packet.data as HashBlockRequestMessage)
-            HASH_BLOCK_RESPONSE -> syncBlockHandler.onHashResponseMessage(ctx, packet.data as HashBlockResponseMessage)
-            SYNC_BLOCKS_REQUEST -> syncBlockHandler.onSyncBlocRequestMessage(ctx, packet.data as SyncBlockRequestMessage)
-            MAIN_BLOCK -> syncBlockHandler.onMainBlockMessage(packet.data as MainBlockMessage)
-            GENESIS_BLOCK -> syncBlockHandler.onGenesisBlockMessage(packet.data as GenesisBlockMessage)
+            DELEGATE_REQUEST -> syncBlockRequestHandler.onDelegateRequestMessage(ctx, packet.data as DelegateRequestMessage)
+            DELEGATE_RESPONSE -> syncBlockResponseHandler.onDelegateResponseMessage(packet.data as DelegateResponseMessage)
+            HASH_BLOCK_REQUEST -> syncBlockRequestHandler.onLastHashRequestMessage(ctx, packet.data as HashBlockRequestMessage)
+            HASH_BLOCK_RESPONSE -> syncBlockResponseHandler.onHashResponseMessage(ctx, packet.data as HashBlockResponseMessage)
+            SYNC_BLOCKS_REQUEST -> syncBlockRequestHandler.onSyncBlocRequestMessage(ctx, packet.data as SyncBlockRequestMessage)
+            MAIN_BLOCK -> syncBlockResponseHandler.onMainBlockMessage(packet.data as MainBlockMessage)
+            GENESIS_BLOCK -> syncBlockResponseHandler.onGenesisBlockMessage(packet.data as GenesisBlockMessage)
         }
 
         if (syncManager.getSyncStatus() == SYNCHRONIZED) {
