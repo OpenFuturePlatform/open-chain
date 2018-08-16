@@ -7,6 +7,7 @@ import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.network.handler.BaseConnectionHandler
 import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.core.*
+import io.openfuture.chain.network.message.network.NetworkAddressMessage
 import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.network.sync.SyncBlockHandler
 import io.openfuture.chain.network.sync.SyncManager
@@ -15,6 +16,11 @@ import io.openfuture.chain.network.sync.impl.SynchronizationStatus.SYNCHRONIZED
 import org.apache.commons.lang3.tuple.MutablePair
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.net.InetSocketAddress
+import java.util.*
+import java.util.function.Function
+import java.util.stream.Collectors
+
 
 @Service
 class DefaultSyncBlockHandler(
@@ -28,6 +34,9 @@ class DefaultSyncBlockHandler(
     @Volatile
     private var expectedHashAndResponseTime: MutablePair<String, Long> = MutablePair()
 
+    @Volatile
+    private lateinit var delegates: MutableMap<NetworkAddressMessage, String>
+
     companion object {
         val log = LoggerFactory.getLogger(BaseConnectionHandler::class.java)
     }
@@ -39,9 +48,8 @@ class DefaultSyncBlockHandler(
     @Synchronized
     override fun onDelegateResponseMessage(ctx: ChannelHandlerContext, message: DelegateResponseMessage) {
         val lastBlockHash = blockService.getLast().hash
-        val randomAddress = message.addresses.shuffled().first()
 
-        networkApiService.sendToAddress(HashBlockRequestMessage(lastBlockHash), randomAddress)
+        message.addresses.forEach { networkApiService.sendToAddress(HashBlockRequestMessage(lastBlockHash), it) }
     }
 
     @Synchronized
@@ -59,14 +67,24 @@ class DefaultSyncBlockHandler(
 
     @Synchronized
     override fun onHashResponseMessage(ctx: ChannelHandlerContext, message: HashBlockResponseMessage) {
-        val currentLastHash = blockService.getLast().hash
-        if (currentLastHash == message.hash) {
-            unlock()
-            return
-        } else {
-            expectedHashAndResponseTime.left = message.hash
+        val currentDelegate = getCurrentDelegate(ctx)
+        currentDelegate.setValue(message.hash)
+
+        val correctLastHash = getCorrectLastHash()
+
+        if (correctLastHash.isPresent) {
+            val currentLastHash = blockService.getLast().hash
+            if (currentLastHash == message.hash) {
+                unlock()
+                return
+            } else {
+                expectedHashAndResponseTime.left = message.hash
+            }
+
+            val delegateAddress = delegates.entries.first { it.value == correctLastHash.get().key }
+
+            networkApiService.sendToAddress(SyncBlockRequestMessage(blockService.getLast().hash), delegateAddress.key)
         }
-        send(ctx, SyncBlockRequestMessage(currentLastHash))
     }
 
     @Synchronized
@@ -93,6 +111,19 @@ class DefaultSyncBlockHandler(
     }
 
     private fun send(ctx: ChannelHandlerContext, message: BaseMessage) = ctx.channel().writeAndFlush(message)
+
+    private fun getCorrectLastHash(): Optional<MutableMap.MutableEntry<String, Long>> {
+        val uniqueLastHashes = delegates.values.stream()
+            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+
+        return uniqueLastHashes.entries.stream().filter { it.value > delegates.size * 2 / 3 }.findFirst()
+    }
+
+    private fun getCurrentDelegate(ctx: ChannelHandlerContext): MutableMap.MutableEntry<NetworkAddressMessage, String> {
+        val host = (ctx.channel().remoteAddress() as InetSocketAddress).address.hostAddress
+        val port = (ctx.channel().remoteAddress() as InetSocketAddress).port
+        return delegates.entries.first { it.key.host == host && it.key.port == port }
+    }
 
     private fun unlockIfLastBLock(block: BlockMessage) {
         if (expectedHashAndResponseTime.left == block.hash) {
