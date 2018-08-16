@@ -4,6 +4,7 @@ import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
+import io.openfuture.chain.rpc.domain.block.GenesisBlockResponse
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -16,7 +17,7 @@ class GenesisBlockController(
 ) {
 
     @GetMapping("/{hash}")
-    fun get(@PathVariable hash: String): GenesisBlock = blockService.getByHash(hash)
+    fun get(@PathVariable hash: String): GenesisBlockResponse = GenesisBlockResponse(blockService.getByHash(hash))
 
     @GetMapping
     fun getAll(request: PageRequest): PageResponse<GenesisBlock> {
