@@ -12,6 +12,7 @@ import io.openfuture.chain.network.sync.SyncBlockResponseHandler
 import io.openfuture.chain.network.sync.SyncManager
 import io.openfuture.chain.network.sync.impl.SynchronizationStatus.PROCESSING
 import io.openfuture.chain.network.sync.impl.SynchronizationStatus.SYNCHRONIZED
+import org.apache.commons.lang3.StringUtils.EMPTY
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.net.InetSocketAddress
@@ -28,19 +29,19 @@ class DefaultSyncBlockResponseHandler(
 ) : SyncBlockResponseHandler {
 
     @Volatile
-    private lateinit var synchronizationSessionId : String
+    private var synchronizationSessionId : String = System.currentTimeMillis().toString()
 
     @Volatile
-    private lateinit var activeDelegateAddresses: MutableList<NetworkAddressMessage>
+    private var activeDelegateAddresses: MutableList<NetworkAddressMessage> = mutableListOf()
 
     @Volatile
-    private lateinit var activeDelegatesLastHash: ConcurrentHashMap<String, MutableList<NetworkAddressMessage>>
+    private var activeDelegatesLastHash: ConcurrentHashMap<String, MutableList<NetworkAddressMessage>> = ConcurrentHashMap()
 
     @Volatile
-    private var expectedHash : String? = null
+    private var expectedHash : String = EMPTY
 
     @Volatile
-    private var lastResponseTime : Long = 0
+    private var lastResponseTime : Long = System.currentTimeMillis()
 
 
     companion object {
@@ -55,6 +56,7 @@ class DefaultSyncBlockResponseHandler(
         if (message.synchronizationSessionId != synchronizationSessionId || !activeDelegateAddresses.isEmpty()) {
             return
         }
+
         activeDelegateAddresses.addAll(message.addresses)
         activeDelegateAddresses.forEach { networkApiService.sendToAddress(HashBlockRequestMessage(synchronizationSessionId), it) }
     }
@@ -128,8 +130,8 @@ class DefaultSyncBlockResponseHandler(
     private fun reset() {
         activeDelegateAddresses.clear()
         activeDelegatesLastHash.clear()
-        lastResponseTime = 0
-        expectedHash = null
+        expectedHash = EMPTY
+        lastResponseTime = System.currentTimeMillis()
         synchronizationSessionId = System.currentTimeMillis().toString()
     }
 
