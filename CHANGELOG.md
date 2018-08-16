@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
-- Core: Genesis blocks is not broadcasted after creation.
+- Core: Genesis and Main blocks is not broadcasted after creation.
 - Core: Possible to create vote transaction on the nonexistent delegate.
 - Core: Impossible to create request of vote transaction with the nonexistent voteType.
 - Core: Impossible to create transactions with negative fee.
