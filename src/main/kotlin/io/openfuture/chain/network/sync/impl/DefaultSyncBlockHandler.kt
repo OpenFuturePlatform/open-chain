@@ -14,6 +14,7 @@ import io.openfuture.chain.network.sync.SyncManager
 import io.openfuture.chain.network.sync.impl.SynchronizationStatus.PROCESSING
 import io.openfuture.chain.network.sync.impl.SynchronizationStatus.SYNCHRONIZED
 import org.apache.commons.lang3.RandomStringUtils.random
+import org.apache.commons.lang3.StringUtils.EMPTY
 import org.apache.commons.lang3.tuple.MutablePair
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -58,7 +59,9 @@ class DefaultSyncBlockHandler(
 
         val lastBlockHash = blockService.getLast().hash
 
-        message.addresses.forEach { networkApiService.sendToAddress(HashBlockRequestMessage(lastBlockHash, synchronizationSessionId), it) }
+        message.addresses.forEach {
+            delegates[it] = EMPTY
+            networkApiService.sendToAddress(HashBlockRequestMessage(lastBlockHash, synchronizationSessionId), it) }
     }
 
     @Synchronized
