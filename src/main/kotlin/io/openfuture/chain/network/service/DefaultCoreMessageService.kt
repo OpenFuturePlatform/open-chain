@@ -35,7 +35,7 @@ class DefaultCoreMessageService(
         val delegates = delegateService.getAll(PageRequest())
         val delegateNodeAddresses = delegates.stream().map { NetworkAddressMessage(it.host, it.port) }.collect(Collectors.toList())
 
-        ctx.writeAndFlush(DelegateResponseMessage(delegateNodeAddresses))
+        ctx.writeAndFlush(DelegateResponseMessage(delegateNodeAddresses, delegateRequestMessage.synchronizationSessionId))
     }
 
 }
