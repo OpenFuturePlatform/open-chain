@@ -1,12 +1,10 @@
 package io.openfuture.chain.rpc.controller.transaction
 
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.VoteTransactionResponse
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
 @RestController
@@ -14,6 +12,9 @@ import javax.validation.Valid
 class VoteTransactionController(
     private val transactionService: VoteTransactionService
 ) {
+
+    @GetMapping("/{hash}")
+    fun get(@PathVariable hash: String): VoteTransaction = transactionService.getByHash(hash)
 
     @PostMapping
     fun add(@Valid @RequestBody request: VoteTransactionRequest): VoteTransactionResponse {

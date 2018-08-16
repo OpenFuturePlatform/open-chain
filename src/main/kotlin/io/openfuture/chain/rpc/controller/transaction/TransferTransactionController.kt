@@ -16,8 +16,11 @@ class TransferTransactionController(
     private val transactionService: TransferTransactionService
 ) {
 
-    @GetMapping("/{address}")
+    @GetMapping("/address/{address}")
     fun getTransactions(@PathVariable address: String): List<TransferTransaction> = transactionService.getByAddress(address)
+
+    @GetMapping("/{hash}")
+    fun get(@PathVariable hash: String): TransferTransaction = transactionService.getByHash(hash)
 
     @PostMapping
     fun add(@Valid @RequestBody request: TransferTransactionRequest): TransferTransactionResponse {

@@ -50,6 +50,8 @@ interface BlockService {
 
 interface GenesisBlockService {
 
+    fun getByHash(hash: String): GenesisBlock
+
     fun getAll(request: PageRequest): Page<GenesisBlock>
 
     fun getLast(): GenesisBlock
@@ -63,6 +65,8 @@ interface GenesisBlockService {
 }
 
 interface MainBlockService {
+
+    fun getByHash(hash: String): MainBlock
 
     fun getAll(request: PageRequest): Page<MainBlock>
 
@@ -89,6 +93,8 @@ interface TransactionService {
 
 interface TransferTransactionService {
 
+    fun getByHash(hash: String): TransferTransaction
+
     fun getAll(request: PageRequest): Page<TransferTransaction>
 
     fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction>
@@ -109,6 +115,8 @@ interface TransferTransactionService {
 
 interface VoteTransactionService {
 
+    fun getByHash(hash: String): VoteTransaction
+
     fun getAllUnconfirmed(): MutableList<UnconfirmedVoteTransaction>
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction
@@ -124,6 +132,8 @@ interface VoteTransactionService {
 }
 
 interface DelegateTransactionService {
+
+    fun getByHash(hash: String): DelegateTransaction
 
     fun getAllUnconfirmed(): MutableList<UnconfirmedDelegateTransaction>
 

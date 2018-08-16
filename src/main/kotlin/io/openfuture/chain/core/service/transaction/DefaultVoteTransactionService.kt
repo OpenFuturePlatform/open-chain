@@ -28,6 +28,10 @@ internal class DefaultVoteTransactionService(
 ) : BaseTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository, capacityChecker), VoteTransactionService {
 
     @Transactional(readOnly = true)
+    override fun getByHash(hash: String): VoteTransaction = repository.findOneByHash(hash)
+        ?: throw NotFoundException("Transaction with hash $hash not found")
+
+    @Transactional(readOnly = true)
     override fun getAllUnconfirmed(): MutableList<UnconfirmedVoteTransaction> = unconfirmedRepository.findAllByOrderByFeeDesc()
 
     @Transactional(readOnly = true)

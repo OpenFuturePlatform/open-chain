@@ -5,6 +5,7 @@ import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -13,6 +14,9 @@ import org.springframework.web.bind.annotation.RestController
 class MainBlockController(
     private val blockService: MainBlockService
 ) {
+
+    @GetMapping("/{hash}")
+    fun get(@PathVariable hash: String): MainBlock = blockService.getByHash(hash)
 
     @GetMapping
     fun getAll(request: PageRequest): PageResponse<MainBlock> {

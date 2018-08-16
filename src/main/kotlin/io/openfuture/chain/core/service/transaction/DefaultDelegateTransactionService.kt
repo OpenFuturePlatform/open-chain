@@ -26,6 +26,10 @@ class DefaultDelegateTransactionService(
 ) : BaseTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository, capacityChecker), DelegateTransactionService {
 
     @Transactional(readOnly = true)
+    override fun getByHash(hash: String): DelegateTransaction = repository.findOneByHash(hash)
+        ?: throw NotFoundException("Transaction with hash $hash not found")
+
+    @Transactional(readOnly = true)
     override fun getAllUnconfirmed(): MutableList<UnconfirmedDelegateTransaction> {
         return unconfirmedRepository.findAllByOrderByFeeDesc()
     }

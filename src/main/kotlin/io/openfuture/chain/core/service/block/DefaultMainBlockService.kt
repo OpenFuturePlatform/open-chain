@@ -4,6 +4,7 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.InsufficientTransactionsException
+import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.repository.MainBlockRepository
@@ -34,6 +35,10 @@ class DefaultMainBlockService(
     private val transferTransactionService: TransferTransactionService,
     private val consensusProperties: ConsensusProperties
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService, capacityChecker), MainBlockService {
+
+    @Transactional(readOnly = true)
+    override fun getByHash(hash: String): MainBlock = repository.findOneByHash(hash)
+        ?: throw NotFoundException("Last block not found")
 
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<MainBlock> = repository.findAll(request)

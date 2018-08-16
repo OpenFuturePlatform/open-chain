@@ -33,6 +33,10 @@ class DefaultGenesisBlockService(
 ) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService, capacityChecker), GenesisBlockService {
 
     @Transactional(readOnly = true)
+    override fun getByHash(hash: String): GenesisBlock = repository.findOneByHash(hash)
+        ?: throw NotFoundException("Last block not found")
+
+    @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<GenesisBlock> = repository.findAll(request)
 
     @Transactional(readOnly = true)

@@ -1,12 +1,10 @@
 package io.openfuture.chain.rpc.controller.transaction
 
+import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.DelegateTransactionResponse
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
 @RestController
@@ -14,6 +12,9 @@ import javax.validation.Valid
 class DelegateTransactionController(
     private val transactionService: DelegateTransactionService
 ) {
+
+    @GetMapping("/{hash}")
+    fun get(@PathVariable hash: String): DelegateTransaction = transactionService.getByHash(hash)
 
     @PostMapping
     fun add(@Valid @RequestBody request: DelegateTransactionRequest): DelegateTransactionResponse {
