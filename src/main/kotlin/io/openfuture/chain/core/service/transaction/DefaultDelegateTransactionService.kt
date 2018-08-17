@@ -78,15 +78,15 @@ class DefaultDelegateTransactionService(
     }
 
     @Transactional
-    override fun validate(tx: DelegateTransaction) {
-        validateSenderAddress(tx.senderAddress)
-        super.validate(tx)
+    override fun check(tx: DelegateTransaction) {
+        checkSenderAddress(tx.senderAddress)
+        super.check(tx)
     }
 
     @Transactional
-    override fun validate(utx: UnconfirmedDelegateTransaction) {
-        validateSenderAddress(utx.senderAddress)
-        super.validate(utx)
+    override fun check(utx: UnconfirmedDelegateTransaction) {
+        checkSenderAddress(utx.senderAddress)
+        super.check(utx)
     }
 
     private fun confirm(utx: UnconfirmedDelegateTransaction, block: MainBlock): DelegateTransaction {
@@ -94,7 +94,7 @@ class DefaultDelegateTransactionService(
         return super.confirmProcess(utx, DelegateTransaction.of(utx, block))
     }
 
-    private fun validateSenderAddress(key: String) {
+    private fun checkSenderAddress(key: String) {
         if (delegateService.isExists(key)) {
             throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "delegate with current sender address already exists")
         }

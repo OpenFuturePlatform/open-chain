@@ -85,17 +85,17 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun validate(utx: UnconfirmedTransferTransaction) {
-        validateTransferBalance(utx.senderAddress, utx.payload.amount + utx.fee)
+    override fun check(utx: UnconfirmedTransferTransaction) {
+        checkTransferBalance(utx.senderAddress, utx.payload.amount + utx.fee)
 
-        super.validate(utx)
+        super.check(utx)
     }
 
     @Transactional
-    override fun validate(tx: TransferTransaction) {
-        validateTransferBalance(tx.senderAddress, tx.payload.amount + tx.fee)
+    override fun check(tx: TransferTransaction) {
+        checkTransferBalance(tx.senderAddress, tx.payload.amount + tx.fee)
 
-        super.validate(tx)
+        super.check(tx)
     }
 
     private fun confirm(utx: UnconfirmedTransferTransaction, block: MainBlock): TransferTransaction {
@@ -108,7 +108,7 @@ class DefaultTransferTransactionService(
         walletService.decreaseBalance(from, amount)
     }
 
-    private fun validateTransferBalance(address: String, amount: Long) {
+    private fun checkTransferBalance(address: String, amount: Long) {
         val balance = walletService.getBalanceByAddress(address)
         val unspentBalance = balance - unconfirmedRepository.findAllBySenderAddress(address).map { it.payload.amount }.sum()
         if (unspentBalance < amount) {

@@ -22,10 +22,10 @@ object SignatureUtils {
      * @param signature Base64 encoded signature
      * @return True if valid signature. False otherwise
      */
-    fun verify(data: ByteArray, signature: String, publicKey: ByteArray): Boolean {
+    fun verify(hash: ByteArray, signature: String, publicKey: ByteArray): Boolean {
         val ecKey = ECKey(publicKey, false)
         val decodedSign = Base64.getDecoder().decode(signature)
-        return ecKey.verify(data, decodedSign)
+        return ecKey.verify(hash, decodedSign)
     }
 
 }

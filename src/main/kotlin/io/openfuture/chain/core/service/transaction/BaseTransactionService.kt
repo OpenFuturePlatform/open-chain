@@ -32,13 +32,13 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
 
 
     protected fun save(utx: U): U {
-        validate(utx)
+        check(utx)
 
         return unconfirmedRepository.save(utx)
     }
 
     protected fun save(tx: T): T {
-        validate(tx)
+        check(tx)
 
         updateBalanceByFee(tx)
         return repository.save(tx)
@@ -56,32 +56,32 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return null != persistUtx || null != persistTx
     }
 
-    open fun validate(utx: U) {
-        this.validateBase(utx)
+    open fun check(utx: U) {
+        this.baseCheck(utx)
     }
 
-    open fun validate(tx: T) {
-        this.validateBase(tx)
+    open fun check(tx: T) {
+        this.baseCheck(tx)
     }
 
     private fun updateBalanceByFee(tx: BaseTransaction) {
         walletService.decreaseBalance(tx.senderAddress, tx.fee)
     }
 
-    private fun validateBase(tx: BaseTransaction) {
-        validateAddress(tx.senderAddress, tx.senderPublicKey)
-        validateFee(tx.senderAddress, tx.fee)
-        validateHash(tx)
-        validateSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
+    private fun baseCheck(tx: BaseTransaction) {
+        checkAddress(tx.senderAddress, tx.senderPublicKey)
+        checkFee(tx.senderAddress, tx.fee)
+        checkHash(tx)
+        checkSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
     }
 
-    private fun validateAddress(senderAddress: String, senderPublicKey: String) {
+    private fun checkAddress(senderAddress: String, senderPublicKey: String) {
         if (!cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))) {
             throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "incorrect sender address by current public key")
         }
     }
 
-    private fun validateFee(senderAddress: String, fee: Long) {
+    private fun checkFee(senderAddress: String, fee: Long) {
         val balance = walletService.getBalanceByAddress(senderAddress)
         val unspentBalance = balance - baseService.getAllUnconfirmedByAddress(senderAddress).map { it.fee }.sum()
 
@@ -90,13 +90,13 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         }
     }
 
-    private fun validateHash(tx: BaseTransaction) {
+    private fun checkHash(tx: BaseTransaction) {
         if (BaseTransaction.generateHash(tx.timestamp, tx.fee, tx.senderAddress, tx.getPayload()) != tx.hash) {
             throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "incorrect hash by transaction fields")
         }
     }
 
-    private fun validateSignature(hash: String, signature: String, publicKey: String) {
+    private fun checkSignature(hash: String, signature: String, publicKey: String) {
         if (!SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))) {
             throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "incorrect signature by hash and public key")
         }

@@ -78,18 +78,18 @@ internal class DefaultVoteTransactionService(
     }
 
     @Transactional
-    override fun validate(tx: VoteTransaction) {
-        validateVoteCount(tx.senderAddress)
-        super.validate(tx)
+    override fun check(tx: VoteTransaction) {
+        checkVoteCount(tx.senderAddress)
+        super.check(tx)
     }
 
     @Transactional
-    override fun validate(utx: UnconfirmedVoteTransaction) {
-        validateVoteCount(utx.senderAddress)
-        super.validate(utx)
+    override fun check(utx: UnconfirmedVoteTransaction) {
+        checkVoteCount(utx.senderAddress)
+        super.check(utx)
     }
 
-    private fun updateWalletVotes(delegateKey: String, senderAddress: String, type: VoteType) {
+    private fun checkWalletVotes(delegateKey: String, senderAddress: String, type: VoteType) {
         val delegate = delegateService.getByPublicKey(delegateKey)
         val wallet = walletService.getByAddress(senderAddress)
 
@@ -106,11 +106,11 @@ internal class DefaultVoteTransactionService(
 
     private fun confirm(utx: UnconfirmedVoteTransaction, block: MainBlock): VoteTransaction {
         val type = utx.payload.getVoteType()
-        updateWalletVotes(utx.payload.delegateKey, utx.senderAddress, type)
+        checkWalletVotes(utx.payload.delegateKey, utx.senderAddress, type)
         return super.confirmProcess(utx, VoteTransaction.of(utx, block))
     }
 
-    private fun validateVoteCount(senderAddress: String) {
+    private fun checkVoteCount(senderAddress: String) {
         val confirmedVotes = walletService.getVotesByAddress(senderAddress).count()
         val unconfirmedForVotes = unconfirmedRepository.findAll()
             .filter { it.senderAddress == senderAddress && it.payload.getVoteType() == VoteType.FOR }
