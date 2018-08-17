@@ -27,7 +27,7 @@ interface BlockRepository<Entity : BaseBlock> : BaseRepository<Entity> {
 
     fun findFirstByOrderByHeightDesc(): Entity?
 
-    fun findFirstByHeightLessThan(height: Long): Entity?
+    fun findFirstByHeightLessThanOrderByHeightDesc(height: Long): Entity?
 
     fun findFirstByHeightGreaterThan(height: Long): Entity?
 

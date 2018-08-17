@@ -33,7 +33,7 @@ class DefaultGenesisBlockService(
 ) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService, capacityChecker), GenesisBlockService {
 
     @Transactional(readOnly = true)
-    override fun getPreviousByHeight(height: Long): GenesisBlock = repository.findFirstByHeightLessThan(height)
+    override fun getPreviousByHeight(height: Long): GenesisBlock = repository.findFirstByHeightLessThanOrderByHeightDesc(height)
         ?: throw NotFoundException("Previous block by height not found")
 
     @Transactional(readOnly = true)

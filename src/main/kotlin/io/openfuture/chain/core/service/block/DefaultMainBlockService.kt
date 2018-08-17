@@ -51,7 +51,7 @@ class DefaultMainBlockService(
     override fun getPreviousBlock(hash: String): MainBlock {
         val block = getByHash(hash)
 
-        return repository.findFirstByHeightLessThan(block.height) ?: throw NotFoundException("Previous block not found")
+        return repository.findFirstByHeightLessThanOrderByHeightDesc(block.height) ?: throw NotFoundException("Previous block not found")
     }
 
     @Transactional(readOnly = true)
