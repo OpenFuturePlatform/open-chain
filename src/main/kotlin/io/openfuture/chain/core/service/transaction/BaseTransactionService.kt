@@ -3,13 +3,11 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
-import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.service.WalletService
-import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
@@ -73,7 +71,7 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
     private fun validateBase(tx: BaseTransaction) {
         validateAddress(tx.senderAddress, tx.senderPublicKey)
         validateFee(tx.senderAddress, tx.fee)
-        validateHash(tx.timestamp, tx.fee, tx.senderAddress, tx.getPayload(), tx.hash)
+        validateHash(tx)
         validateSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
     }
 
@@ -92,9 +90,9 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         }
     }
 
-    private fun validateHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload, hash: String) {
-        if (TransactionUtils.generateHash(timestamp, fee, senderAddress, payload) != hash) {
-            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "incorrect hash by all transaction fields")
+    private fun validateHash(tx: BaseTransaction) {
+        if (BaseTransaction.generateHash(tx.timestamp, tx.fee, tx.senderAddress, tx.getPayload()) != tx.hash) {
+            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "incorrect hash by transaction fields")
         }
     }
 
