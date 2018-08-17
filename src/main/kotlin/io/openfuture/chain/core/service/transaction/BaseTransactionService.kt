@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.service.transaction
 
-import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
