@@ -27,7 +27,7 @@ abstract class BaseBlockService<T : Block>(
         val lastBlock = blockService.getLast()
 
         if (!isValidPreviousHash(block, lastBlock)) {
-            throw ValidationException("Invalid previous hash: ${block.previousHash}")
+            throw ValidationException("Invalid block previous hash: ${block.previousHash}")
         }
 
         if (!isValidHeight(block, lastBlock)) {
@@ -43,7 +43,7 @@ abstract class BaseBlockService<T : Block>(
         }
 
         if (!isValidSignature(block.hash, block.signature, block.publicKey)) {
-            throw ValidationException("Invalid signature: ${block.signature}")
+            throw ValidationException("Invalid block signature: ${block.signature}")
         }
     }
 
