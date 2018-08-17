@@ -23,7 +23,7 @@ class DelegateTransactionControllerTests : ControllerTests() {
 
     @Test
     fun addTransactionShouldReturnAddedTransaction() {
-        val transactionRequest = DelegateTransactionRequest(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
+        val transactionRequest = DelegateTransactionRequest(1L, 1L, "hash", "senderAddress", "senderPublicKey", "senderSignature",
             "delegateKey")
         val unconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
             "hash", DelegateTransactionPayload("delegateKey"))
