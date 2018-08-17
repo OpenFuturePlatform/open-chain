@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
@@ -14,9 +15,9 @@ import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
 import io.openfuture.chain.network.sync.SyncManager
-import io.openfuture.chain.network.sync.impl.SynchronizationStatus
-import io.openfuture.chain.network.sync.impl.SynchronizationStatus.*
+import io.openfuture.chain.network.sync.impl.SynchronizationStatus.NOT_SYNCHRONIZED
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -29,6 +30,11 @@ class DefaultGenesisBlockService(
     private val keyHolder: NodeKeyHolder,
     private val syncManager: SyncManager
 ) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService), GenesisBlockService {
+
+    companion object {
+        val log = LoggerFactory.getLogger(DefaultGenesisBlockService::class.java)
+    }
+
 
     @Transactional(readOnly = true)
     override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()
@@ -73,12 +79,31 @@ class DefaultGenesisBlockService(
 
     @Transactional(readOnly = true)
     override fun isValid(message: GenesisBlockMessage): Boolean {
+        return try {
+            validate(message)
+            true
+        } catch (e: ValidationException) {
+            log.warn(e.message)
+            false
+        }
+    }
+
+    private fun validate(message: GenesisBlockMessage) {
         val delegates = message.delegates.map { delegateService.getByPublicKey(it) }
         val block = GenesisBlock.of(message, delegates)
 
-        return isValidateActiveDelegates(block.payload.activeDelegates) &&
-            isValidEpochIndex(this.getLast().payload.epochIndex, block.payload.epochIndex) &&
-            super.isValid(block)
+        validateLocal(block)
+        super.validateBase(block)
+    }
+
+    private fun validateLocal(block: GenesisBlock) {
+        if (!isValidateActiveDelegates(block.payload.activeDelegates)) {
+            throw ValidationException("Invalid active delegates")
+        }
+
+        if (!isValidEpochIndex(this.getLast().payload.epochIndex, block.payload.epochIndex)) {
+            throw ValidationException("Invalid epoch index: ${block.payload.epochIndex}")
+        }
     }
 
     private fun isValidateActiveDelegates(delegates: List<Delegate>): Boolean {

@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.block
 
+import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.repository.BlockRepository
@@ -22,14 +23,28 @@ abstract class BaseBlockService<T : Block>(
         return repository.save(block)
     }
 
-    protected fun isValid(block: Block): Boolean {
+    protected fun validateBase(block: Block) {
         val lastBlock = blockService.getLast()
 
-        return isValidPreviousHash(block, lastBlock)
-            && isValidHeight(block, lastBlock)
-            && isValidTimeStamp(block, lastBlock)
-            && isValidHash(block)
-            && isValidSignature(block.hash, block.signature, block.publicKey)
+        if (!isValidPreviousHash(block, lastBlock)) {
+            throw ValidationException("Invalid previous hash: ${block.previousHash}")
+        }
+
+        if (!isValidHeight(block, lastBlock)) {
+            throw ValidationException("Invalid block height: ${block.height}")
+        }
+
+        if (!isValidTimeStamp(block, lastBlock)) {
+            throw ValidationException("Invalid block timestamp: ${block.timestamp}")
+        }
+
+        if (!isValidHash(block)) {
+            throw ValidationException("Invalid block hash: ${block.hash}")
+        }
+
+        if (!isValidSignature(block.hash, block.signature, block.publicKey)) {
+            throw ValidationException("Invalid signature: ${block.signature}")
+        }
     }
 
     protected fun isSync(block: Block): Boolean {

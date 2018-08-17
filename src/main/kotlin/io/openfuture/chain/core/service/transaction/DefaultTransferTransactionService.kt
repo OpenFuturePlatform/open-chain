@@ -3,7 +3,9 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.repository.TransferTransactionRepository
 import io.openfuture.chain.core.repository.UTransferTransactionRepository
@@ -12,6 +14,7 @@ import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -22,6 +25,11 @@ class DefaultTransferTransactionService(
     uRepository: UTransferTransactionRepository,
     private val networkService: NetworkApiService
 ) : BaseTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
+
+    companion object {
+        val log = LoggerFactory.getLogger(DefaultTransferTransactionService::class.java)
+    }
+
 
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<TransferTransaction> = repository.findAll(request)
@@ -44,13 +52,10 @@ class DefaultTransferTransactionService(
     @Transactional
     override fun add(message: TransferTransactionMessage): UnconfirmedTransferTransaction {
         val utx = UnconfirmedTransferTransaction.of(message)
+        validate(utx)
 
         if (isExists(utx.hash)) {
             return utx
-        }
-
-        if (!isValid(utx)) {
-            throw ValidationException("Transaction is invalid!")
         }
 
         val savedUtx = this.save(utx)
@@ -61,13 +66,10 @@ class DefaultTransferTransactionService(
     @Transactional
     override fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction {
         val utx = UnconfirmedTransferTransaction.of(request)
+        validate(utx)
 
         if (isExists(utx.hash)) {
             return utx
-        }
-
-        if (!isValid(utx)) {
-            throw ValidationException("Transaction is invalid!")
         }
 
         val savedUtx = this.save(utx)
@@ -98,11 +100,25 @@ class DefaultTransferTransactionService(
 
     @Transactional
     override fun isValid(message: TransferTransactionMessage): Boolean {
-        return isValid(UnconfirmedTransferTransaction.of(message))
+        return try {
+            validate(UnconfirmedTransferTransaction.of(message))
+            true
+        } catch (e: ValidationException) {
+            log.warn(e.message)
+            false
+        }
     }
 
-    private fun isValid(utx: UnconfirmedTransferTransaction): Boolean =
-        isValidBalance(utx.header.senderAddress, utx.payload.amount, utx.header.fee) && super.isValidBase(utx)
+    private fun validate(utx: UnconfirmedTransferTransaction) {
+        validateLocal(utx.header, utx.payload)
+        super.validateBase(utx)
+    }
+
+    private fun validateLocal(header: TransactionHeader, payload: TransferTransactionPayload) {
+        if (!isValidBalance(header.senderAddress, payload.amount, header.fee)) {
+            throw ValidationException("Invalid balance for transfer transaction")
+        }
+    }
 
     private fun updateTransferBalance(from: String, to: String, amount: Long) {
         walletService.increaseBalance(to, amount)

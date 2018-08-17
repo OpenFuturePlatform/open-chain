@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.transaction
 
+import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
@@ -48,10 +49,18 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return save(tx)
     }
 
-    protected fun isValidBase(tx: BaseTransaction): Boolean {
-        return isValidAddress(tx.header.senderAddress, tx.senderPublicKey)
-            && isValidHash(tx.header, tx.getPayload(), tx.hash)
-            && isValidSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
+    protected fun validateBase(tx: BaseTransaction) {
+        if (!isValidAddress(tx.header.senderAddress, tx.senderPublicKey)) {
+            throw ValidationException("Invalid transaction address: ${tx.header.senderAddress}")
+        }
+
+        if (!isValidHash(tx.header, tx.getPayload(), tx.hash)) {
+            throw ValidationException("Invalid transaction hash: ${tx.hash}")
+        }
+
+        if (!isValidSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)) {
+            throw ValidationException("Invalid transaction signature: ${tx.senderSignature}")
+        }
     }
 
     protected fun isExists(hash: String): Boolean {

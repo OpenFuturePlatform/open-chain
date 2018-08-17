@@ -15,6 +15,7 @@ import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -25,6 +26,11 @@ class DefaultDelegateTransactionService(
     private val delegateService: DelegateService,
     private val networkService: NetworkApiService
 ) : BaseTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository), DelegateTransactionService {
+
+    companion object {
+        val log = LoggerFactory.getLogger(DefaultDelegateTransactionService::class.java)
+    }
+
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(): MutableList<UnconfirmedDelegateTransaction> {
@@ -38,12 +44,10 @@ class DefaultDelegateTransactionService(
     @Transactional
     override fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction {
         val utx = UnconfirmedDelegateTransaction.of(message)
+        validate(utx)
+
         if (isExists(utx.hash)) {
             return utx
-        }
-
-        if (!isValid(utx)) {
-            throw ValidationException("Transaction is invalid!")
         }
 
         val savedUtx = this.save(utx)
@@ -54,12 +58,10 @@ class DefaultDelegateTransactionService(
     @Transactional
     override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction {
         val utx = UnconfirmedDelegateTransaction.of(request)
+        validate(utx)
+
         if (isExists(utx.hash)) {
             return utx
-        }
-
-        if (!isValid(utx)) {
-            throw ValidationException("Transaction is invalid!")
         }
 
         val savedUtx = this.save(utx)
@@ -90,15 +92,28 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun isValid(message: DelegateTransactionMessage): Boolean {
-        return isValid(UnconfirmedDelegateTransaction.of(message))
+        return try {
+            validate(UnconfirmedDelegateTransaction.of(message))
+            true
+        } catch (e: ValidationException) {
+            log.warn(e.message)
+            false
+        }
     }
 
-    private fun isValid(utx: UnconfirmedDelegateTransaction): Boolean {
-        return isValidLocal(utx.header, utx.payload) && super.isValidBase(utx)
+    private fun validate(utx: UnconfirmedDelegateTransaction) {
+        validateLocal(utx.header, utx.payload)
+        super.validateBase(utx)
     }
 
-    private fun isValidLocal(header: TransactionHeader, payload: DelegateTransactionPayload): Boolean {
-        return isNotExistsByDelegatePublicKey(payload.delegateKey) && isValidFee(header.senderAddress, header.fee)
+    private fun validateLocal(header: TransactionHeader, payload: DelegateTransactionPayload) {
+        if (!isNotExistsByDelegatePublicKey(payload.delegateKey)) {
+            throw ValidationException("Delegate with public key: ${payload.delegateKey} already exists")
+        }
+
+        if (!isValidFee(header.senderAddress, header.fee)) {
+            throw ValidationException("Invalid fee: ${header.fee} for address ${header.senderAddress}")
+        }
     }
 
     private fun isNotExistsByDelegatePublicKey(key: String): Boolean {

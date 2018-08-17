@@ -3,6 +3,7 @@ package io.openfuture.chain.core.service.block
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.InsufficientTransactionsException
+import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.repository.MainBlockRepository
@@ -12,13 +13,14 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.network.sync.SyncManager
-import io.openfuture.chain.network.sync.impl.SynchronizationStatus.*
+import io.openfuture.chain.network.sync.impl.SynchronizationStatus.NOT_SYNCHRONIZED
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -36,6 +38,11 @@ class DefaultMainBlockService(
     private val consensusProperties: ConsensusProperties,
     private val syncManager: SyncManager
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
+
+    companion object {
+        val log = LoggerFactory.getLogger(DefaultMainBlockService::class.java)
+    }
+
 
     @Transactional(readOnly = true)
     override fun create(): PendingBlockMessage {
@@ -103,11 +110,36 @@ class DefaultMainBlockService(
 
     @Transactional(readOnly = true)
     override fun isValid(message: PendingBlockMessage): Boolean {
-        return isValidMerkleHash(message.merkleHash, message.getAllTransactions().map { it.hash }) &&
-            isValidVoteTransactions(message.voteTransactions) &&
-            isValidDelegateTransactions(message.delegateTransactions) &&
-            isValidTransferTransactions(message.transferTransactions) &&
-            super.isValid(MainBlock.of(message))
+        return try {
+            validate(message)
+            true
+        } catch (e: ValidationException) {
+            log.warn(e.message)
+            false
+        }
+    }
+
+    private fun validate(message: PendingBlockMessage) {
+        validateLocal(message)
+        super.validateBase(MainBlock.of(message))
+    }
+
+    private fun validateLocal(message: PendingBlockMessage) {
+        if (!isValidMerkleHash(message.merkleHash, message.getAllTransactions().map { message.hash })) {
+            throw ValidationException("Invalid merkle hash: ${message.merkleHash}")
+        }
+
+        if (!isValidVoteTransactions(message.voteTransactions)) {
+            throw ValidationException("Invalid vote transactions")
+        }
+
+        if (!isValidDelegateTransactions(message.delegateTransactions)) {
+            throw ValidationException("Invalid delegate transactions")
+        }
+
+        if (!isValidTransferTransactions(message.transferTransactions)) {
+            throw ValidationException("Invalid transfer transactions")
+        }
     }
 
     private fun isValidVoteTransactions(transactions: List<VoteTransactionMessage>): Boolean {
