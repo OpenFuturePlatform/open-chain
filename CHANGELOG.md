@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Core: Remove validation from main block add method.
 - Core: Remove validation from genesis block add method.
 - Core: Improve validation fee and amount for transfer transaction.
+- Sync: Up node synchronization.
+- Sync: Application sync status.
+- Sync: Check app sync status and start sync if need.
 
 ## [0.5.0] - 2018-08-10
 ### Added
