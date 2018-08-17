@@ -6,16 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
-- Core: Genesis and Main blocks is not broadcasted after creation.
-- Core: Possible to create vote transaction on the nonexistent delegate.
-- Core: Impossible to create request of vote transaction with the nonexistent voteType.
-- Core: Impossible to create transactions with negative fee.
-- Core: Remove validation from main block add method.
-- Core: Remove validation from genesis block add method.
-- Core: Improve validation fee and amount for transfer transaction.
 - Sync: Up node synchronization.
 - Sync: Application sync status.
 - Sync: Check app sync status and start sync if need.
+
+### Changed
+- Core: Genesis and Main blocks are not broadcasted after creation.
+- Core validation: Impossible to create vote transaction on the nonexistent delegate.
+- Core validation: Impossible to create request of vote transaction with the nonexistent voteType.
+- Core validation: Impossible to create transactions with negative fee.
+- Core validation: Improve validation fee and amount for transfer transaction.
+- Core: Remove validation from main block service on add.
+- Core: Remove validation from genesis service on add.
 
 ## [0.5.0] - 2018-08-10
 ### Added
