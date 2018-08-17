@@ -21,30 +21,27 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
     protected val unconfirmedRepository: UTransactionRepository<U>
 ) {
 
-    @Autowired
-    protected lateinit var baseService: TransactionService
+    @Autowired protected lateinit var clock: NodeClock
 
-    @Autowired
-    protected lateinit var clock: NodeClock
+    @Autowired private lateinit var cryptoService: CryptoService
+    @Autowired protected lateinit var walletService: WalletService
+    @Autowired protected lateinit var baseService: TransactionService
+    @Autowired protected lateinit var transactionService: TransactionService
 
-    @Autowired
-    protected lateinit var walletService: WalletService
-
-    @Autowired
-    private lateinit var cryptoService: CryptoService
+    companion object {
+        const val TRANSACTION_EXCEPTION_MESSAGE: String = "Transaction is invalid : "
+    }
 
 
     protected fun save(utx: U): U {
-        if (!isValid(utx)) {
-            throw ValidationException("Transaction is invalid!")
-        }
+        validate(utx)
+
         return unconfirmedRepository.save(utx)
     }
 
     protected fun save(tx: T): T {
-        if (!isValid(tx)) {
-            throw ValidationException("Transaction is invalid!")
-        }
+        validate(tx)
+
         updateBalanceByFee(tx)
         return repository.save(tx)
     }
@@ -61,38 +58,50 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return null != persistUtx || null != persistTx
     }
 
-    open fun isValid(utx: U): Boolean = this.isValidBase(utx)
+    open fun validate(utx: U) {
+        this.validateBase(utx)
+    }
 
-    open fun isValid(tx: T): Boolean = this.isValidBase(tx)
+    open fun validate(tx: T) {
+        this.validateBase(tx)
+    }
 
     private fun updateBalanceByFee(tx: BaseTransaction) {
         walletService.decreaseBalance(tx.senderAddress, tx.fee)
     }
 
-    private fun isValidBase(tx: BaseTransaction): Boolean {
-        return isValidAddress(tx.senderAddress, tx.senderPublicKey)
-            && isValidFee(tx.senderAddress, tx.fee)
-            && isValidHash(tx.timestamp, tx.fee, tx.senderAddress, tx.getPayload(), tx.hash)
-            && isValidSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
+    private fun validateBase(tx: BaseTransaction) {
+        validateAddress(tx.senderAddress, tx.senderPublicKey)
+        validateFee(tx.senderAddress, tx.fee)
+        validateHash(tx.timestamp, tx.fee, tx.senderAddress, tx.getPayload(), tx.hash)
+        validateSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
     }
 
-    private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean {
-        return cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
+    private fun validateAddress(senderAddress: String, senderPublicKey: String) {
+        if (!cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))) {
+            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "incorrect sender address by current public key")
+        }
     }
 
-    private fun isValidFee(senderAddress: String, fee: Long): Boolean {
+    private fun validateFee(senderAddress: String, fee: Long) {
         val balance = walletService.getBalanceByAddress(senderAddress)
         val unspentBalance = balance - baseService.getAllUnconfirmedByAddress(senderAddress).map { it.fee }.sum()
 
-        return unspentBalance >= fee
+        if (unspentBalance < fee) {
+            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "actual balance is less then fee")
+        }
     }
 
-    private fun isValidHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload, hash: String): Boolean {
-        return TransactionUtils.generateHash(timestamp, fee, senderAddress, payload) == hash
+    private fun validateHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload, hash: String) {
+        if (TransactionUtils.generateHash(timestamp, fee, senderAddress, payload) != hash) {
+            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "incorrect hash by all transaction fields")
+        }
     }
 
-    private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean {
-        return SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
+    private fun validateSignature(hash: String, signature: String, publicKey: String) {
+        if (!SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))) {
+            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "incorrect signature by hash and public key")
+        }
     }
 
 }

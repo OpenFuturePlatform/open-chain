@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -84,12 +85,18 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun isValid(utx: UnconfirmedTransferTransaction): Boolean =
-        isValidTransferBalance(utx.senderAddress, utx.payload.amount + utx.fee) && super.isValid(utx)
+    override fun validate(utx: UnconfirmedTransferTransaction) {
+        validateTransferBalance(utx.senderAddress, utx.payload.amount + utx.fee)
+
+        super.validate(utx)
+    }
 
     @Transactional
-    override fun isValid(tx: TransferTransaction): Boolean =
-        isValidTransferBalance(tx.senderAddress, tx.payload.amount + tx.fee) && super.isValid(tx)
+    override fun validate(tx: TransferTransaction) {
+        validateTransferBalance(tx.senderAddress, tx.payload.amount + tx.fee)
+
+        super.validate(tx)
+    }
 
     private fun confirm(utx: UnconfirmedTransferTransaction, block: MainBlock): TransferTransaction {
         updateTransferBalance(utx.senderAddress, utx.payload.recipientAddress, utx.payload.amount)
@@ -101,10 +108,12 @@ class DefaultTransferTransactionService(
         walletService.decreaseBalance(from, amount)
     }
 
-    private fun isValidTransferBalance(address: String, amount: Long): Boolean {
+    private fun validateTransferBalance(address: String, amount: Long) {
         val balance = walletService.getBalanceByAddress(address)
         val unspentBalance = balance - unconfirmedRepository.findAllBySenderAddress(address).map { it.payload.amount }.sum()
-        return unspentBalance >= amount
+        if (unspentBalance < amount) {
+            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "actual balance is less then sum fee and amount")
+        }
     }
 
 }
