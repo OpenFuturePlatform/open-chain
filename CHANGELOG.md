@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 - RPC: Get explorer info
+- RPC: Get list of blocks 
+- RPC: Get list of transactions 
 
 ## [0.5.0] - 2018-08-10
 ### Added
