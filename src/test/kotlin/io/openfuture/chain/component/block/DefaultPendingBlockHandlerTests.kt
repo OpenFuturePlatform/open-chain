@@ -9,12 +9,11 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
-import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
-import io.openfuture.chain.core.model.entity.transaction.payload.RewardTransactionPayload
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
+import io.openfuture.chain.network.message.core.RewardTransactionMessage
 import io.openfuture.chain.network.service.NetworkApiService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.junit.Before
@@ -62,8 +61,8 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         )
         val privateKey = "529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"
         block.signature = SignatureUtils.sign(block.payload.getBytes(), ByteUtils.fromHexString(privateKey))
-        val rewardTransaction = createRewardTransaction(block)
-        val pendingBlock = PendingBlockMessage(block, rewardTransaction, listOf(), listOf(), listOf())
+        val rewardTransactionMessage = createRewardTransactionMessage(block.timestamp)
+        val pendingBlock = PendingBlockMessage(block, rewardTransactionMessage, listOf(), listOf(), listOf())
 
         given(keyHolder.getPrivateKey()).willReturn(
             ByteUtils.fromHexString(privateKey))
@@ -99,8 +98,8 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
             payload
         )
         block.signature = SignatureUtils.sign(block.payload.getBytes(), ByteUtils.fromHexString(privateKey))
-        val rewardTransaction = createRewardTransaction(block)
-        val pendingBlock = PendingBlockMessage(block, rewardTransaction, listOf(), listOf(), listOf())
+        val rewardTransactionMessage = createRewardTransactionMessage(block.timestamp)
+        val pendingBlock = PendingBlockMessage(block, rewardTransactionMessage, listOf(), listOf(), listOf())
 
         val message = BlockApprovalMessage(
             BlockApprovalStage.PREPARE.value,
@@ -177,9 +176,9 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         verify(networkService, times(2)).broadcast(any(BlockApprovalMessage::class.java))
     }
 
-    private fun createRewardTransaction(block: MainBlock): RewardTransaction =
-        RewardTransaction(12345678, 0, "senderAddress", "hash",
-            "senderSignature", "senderPublicKey", block,
-            RewardTransactionPayload(10, "recipientAddress"))
+    private fun createRewardTransactionMessage(timestamp: Long): RewardTransactionMessage =
+        RewardTransactionMessage(timestamp, 0, "senderAddress", "hash",
+            "senderSignature", "senderPublicKey", 10,
+            "recipientAddress")
 
 }

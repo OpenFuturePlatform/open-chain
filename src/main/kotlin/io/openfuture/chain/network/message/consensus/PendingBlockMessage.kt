@@ -3,7 +3,6 @@ package io.openfuture.chain.network.message.consensus
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
@@ -29,7 +28,7 @@ class PendingBlockMessage(
     var transferTransactions: List<String>
 ) : BlockMessage(height, previousHash, timestamp, hash, signature, publicKey) {
 
-    constructor(block: MainBlock, rewardTransaction: RewardTransaction, voteTransactions: List<UnconfirmedVoteTransaction>,
+    constructor(block: MainBlock, rewardTransaction: RewardTransactionMessage, voteTransactions: List<UnconfirmedVoteTransaction>,
                 delegateTransactions: List<UnconfirmedDelegateTransaction>,
                 transferTransactions: List<UnconfirmedTransferTransaction>) : this(
         block.height,
@@ -39,7 +38,7 @@ class PendingBlockMessage(
         block.signature,
         block.publicKey,
         block.payload.merkleHash,
-        RewardTransactionMessage(rewardTransaction),
+        rewardTransaction,
         voteTransactions.map { it.hash },
         delegateTransactions.map { it.hash },
         transferTransactions.map { it.hash }

@@ -2,10 +2,8 @@ package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.exception.InsufficientTransactionsException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
-import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.RewardTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.repository.MainBlockRepository
@@ -17,6 +15,7 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.MainBlockMessage
+import io.openfuture.chain.network.message.core.RewardTransactionMessage
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -44,21 +43,24 @@ class DefaultMainBlockService(
         val previousHash = lastBlock.hash
 
         // -- transactions by type
-        val voteTxs = voteTransactionService.getAllUnconfirmed()
-        val delegateTxs = delegateTransactionService.getAllUnconfirmed()
-        val transferTxs = transferTransactionService.getAllUnconfirmed()
-        val transactions = voteTxs + delegateTxs + transferTxs
+        val voteTransactions = voteTransactionService.getAllUnconfirmed()
+        val delegateTransactions = delegateTransactionService.getAllUnconfirmed()
+        val transferTransactions = transferTransactionService.getAllUnconfirmed()
+        val transactions = voteTransactions + delegateTransactions + transferTransactions
+        val rewardTransactionMessage = createRewardTransaction(timestamp, transactions)
 
-        val merkleHash = calculateMerkleRoot(transactions.map { it.hash })
+        val transactionHashes = transactions.map { it.hash } + rewardTransactionMessage.hash
+
+        val merkleHash = calculateMerkleRoot(transactionHashes)
         val payload = MainBlockPayload(merkleHash)
 
         val hash = BlockUtils.createHash(timestamp, height, previousHash, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKey()
 
-        val block = MainBlock(timestamp, height, previousHash, ByteUtils.toHexString(hash), signature, publicKey, payload)
-        val rewardTransaction = createRewardTransaction(block, transactions)
-        return PendingBlockMessage(block, rewardTransaction, voteTxs, delegateTxs, transferTxs)
+        return PendingBlockMessage(height, previousHash, timestamp, ByteUtils.toHexString(hash), signature, publicKey,
+            merkleHash, rewardTransactionMessage, voteTransactions.map { it.hash }, delegateTransactions.map { it.hash },
+            transferTransactions.map { it.hash })
     }
 
     @Transactional
@@ -86,7 +88,8 @@ class DefaultMainBlockService(
         }
 
         val block = MainBlock.of(message)
-        if (!isValid(block, message.getAllTransactions().map { it.hash }) || !rewardTransactionService.isValid(message)) {
+        val transactionHashes = message.getAllTransactions().map { it.hash } + message.rewardTransaction.hash
+        if (!isValid(block, transactionHashes) || !rewardTransactionService.isValid(message)) {
             return
         }
 
@@ -98,18 +101,16 @@ class DefaultMainBlockService(
     }
 
     @Transactional(readOnly = true)
-    override fun isValid(message: PendingBlockMessage): Boolean =
-        isValid(MainBlock.of(message), message.getAllTransactions()) && rewardTransactionService.isValid(message)
+    override fun isValid(message: PendingBlockMessage): Boolean {
+        val transactionHashes = message.getAllTransactions() + message.rewardTransaction.hash
+        return isValid(MainBlock.of(message), transactionHashes) && rewardTransactionService.isValid(message)
+    }
 
     private fun isValid(block: MainBlock, transactions: List<String>): Boolean {
         return isValidMerkleHash(block.payload.merkleHash, transactions) && super.isValid(block)
     }
 
     private fun calculateMerkleRoot(transactions: List<String>): String {
-        if (transactions.isEmpty()) {
-            throw InsufficientTransactionsException()
-        }
-
         if (transactions.size == 1) {
             return transactions.single()
         }
@@ -131,14 +132,10 @@ class DefaultMainBlockService(
         return ByteUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
     }
 
-    private fun isValidMerkleHash(merkleHash: String, transactions: List<String>): Boolean {
-        if (transactions.isEmpty()) {
-            return false
-        }
-        return merkleHash == calculateMerkleRoot(transactions.map { it })
-    }
+    private fun isValidMerkleHash(merkleHash: String, transactions: List<String>): Boolean =
+        merkleHash == calculateMerkleRoot(transactions)
 
-    private fun createRewardTransaction(block: MainBlock, transactions: List<UnconfirmedTransaction>): RewardTransaction {
+    private fun createRewardTransaction(timestamp: Long, transactions: List<UnconfirmedTransaction>): RewardTransactionMessage {
         val senderAddress = consensusProperties.genesisAddress!!
         val rewardBlock = consensusProperties.rewardBlock!!
         val bank = walletService.getBalanceByAddress(senderAddress)
@@ -148,10 +145,10 @@ class DefaultMainBlockService(
         val delegate = delegateService.getByPublicKey(publicKey)
 
         val payload = RewardTransactionPayload(reward, delegate.address)
-        val hash = TransactionUtils.generateHash(block.timestamp, fee, senderAddress, payload)
+        val hash = TransactionUtils.generateHash(timestamp, fee, senderAddress, payload)
         val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())
 
-        return RewardTransaction(block.timestamp, fee, senderAddress, hash, signature, publicKey, block, payload)
+        return RewardTransactionMessage(timestamp, fee, senderAddress, hash, signature, publicKey, reward, delegate.address)
     }
 
 }
