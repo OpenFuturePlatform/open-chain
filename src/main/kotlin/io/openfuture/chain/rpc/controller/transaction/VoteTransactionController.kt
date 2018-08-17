@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
 @RestController
-@RequestMapping("/rpc/transactions/votes")
+@RequestMapping("/rpc/transactions/vote")
 class VoteTransactionController(
     private val transactionService: VoteTransactionService
 ) {

@@ -6,7 +6,9 @@ import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
+import io.openfuture.chain.rpc.domain.block.GenesisBlockResponse
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
@@ -20,9 +22,13 @@ class GenesisBlockControllerTests : ControllerTests() {
     @MockBean
     private lateinit var service: GenesisBlockService
 
+    companion object {
+        private const val GENESIS_BLOCK_URL = "/rpc/blocks/genesis"
+    }
+
 
     @Test
-    fun getAllMainBlocksShouldReturnMainBlocksList() {
+    fun getAllGenesisBlocksShouldReturnGenesisBlocksList() {
         val pageGenesisBlocks = PageImpl(listOf(GenesisBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey",
             GenesisBlockPayload(1, listOf()))))
         val expectedPageResponse = PageResponse(pageGenesisBlocks)
@@ -35,10 +41,64 @@ class GenesisBlockControllerTests : ControllerTests() {
             .expectBody(PageResponse::class.java)
             .returnResult().responseBody!!
 
-        Assertions.assertThat(actualPageResponse.totalCount).isEqualTo(expectedPageResponse.totalCount)
-        Assertions.assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["publicKey"]).isEqualTo(expectedPageResponse.list.first().publicKey)
-        Assertions.assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["previousHash"]).isEqualTo(expectedPageResponse.list.first().previousHash)
+        assertThat(actualPageResponse.totalCount).isEqualTo(expectedPageResponse.totalCount)
+        assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["publicKey"]).isEqualTo(expectedPageResponse.list.first().publicKey)
+        assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["previousHash"]).isEqualTo(expectedPageResponse.list.first().previousHash)
     }
+
+    @Test
+    fun getGenesisBlockByHashShouldReturnGenesisBlockWithCurrentHash() {
+        val hash = "hash"
+        val genesisBlock = createGenesisBlock()
+        val expectedGenesisBlockResponse = GenesisBlockResponse(genesisBlock)
+
+        given(service.getByHash(hash)).willReturn(genesisBlock)
+
+        val actualGenesisBlockResponse = webClient.get().uri("$GENESIS_BLOCK_URL/$hash")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(GenesisBlockResponse::class.java)
+            .returnResult().responseBody!!
+
+        Assertions.assertThat(actualGenesisBlockResponse).isEqualToComparingFieldByField(expectedGenesisBlockResponse)
+    }
+
+    @Test
+    fun getNextGenesisBlockByHashShouldReturnGenesisBlockWithNextHash() {
+        val hash = "hash"
+        val genesisBlock = createGenesisBlock()
+        val expectedGenesisBlockResponse = GenesisBlockResponse(genesisBlock)
+
+        given(service.getNextBlock(hash)).willReturn(genesisBlock)
+
+        val actualGenesisBlockResponse = webClient.get().uri("$GENESIS_BLOCK_URL/$hash/next")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(GenesisBlockResponse::class.java)
+            .returnResult().responseBody!!
+
+        assertThat(actualGenesisBlockResponse).isEqualToComparingFieldByField(expectedGenesisBlockResponse)
+    }
+
+    @Test
+    fun getPreviousGenesisBlockByHashShouldReturnGenesisBlockWithPreviousHash() {
+        val hash = "hash"
+        val genesisBlock = createGenesisBlock()
+        val expectedGenesisBlockResponse = GenesisBlockResponse(genesisBlock)
+
+        given(service.getPreviousBlock(hash)).willReturn(genesisBlock)
+
+        val actualGenesisBlockResponse = webClient.get().uri("$GENESIS_BLOCK_URL/$hash/previous")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(GenesisBlockResponse::class.java)
+            .returnResult().responseBody!!
+
+        assertThat(actualGenesisBlockResponse).isEqualToComparingFieldByField(expectedGenesisBlockResponse)
+    }
+
+    private fun createGenesisBlock(): GenesisBlock =
+        GenesisBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", GenesisBlockPayload(1, listOf())).apply { id = 1 }
 
 }
 

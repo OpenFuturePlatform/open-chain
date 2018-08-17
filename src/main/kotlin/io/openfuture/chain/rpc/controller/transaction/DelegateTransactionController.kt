@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
 @RestController
-@RequestMapping("/rpc/transactions/delegates")
+@RequestMapping("/rpc/transactions/delegate")
 class DelegateTransactionController(
     private val transactionService: DelegateTransactionService
 ) {

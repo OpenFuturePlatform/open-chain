@@ -25,6 +25,10 @@ class TransferTransactionControllerTests : ControllerTests() {
     @MockBean
     private lateinit var service: TransferTransactionService
 
+    companion object {
+        private const val TRANSFER_TRANSACTION_URL = "/rpc/transactions/transfer"
+    }
+
 
     @Test
     fun addTransactionShouldReturnAddedTransaction() {
@@ -36,7 +40,7 @@ class TransferTransactionControllerTests : ControllerTests() {
 
         given(service.add(transactionRequest)).willReturn(unconfirmedTransferTransaction)
 
-        val actualResponse = webClient.post().uri("/rpc/transactions/transfer")
+        val actualResponse = webClient.post().uri(TRANSFER_TRANSACTION_URL)
             .body(Mono.just(transactionRequest), TransferTransactionRequest::class.java)
             .exchange()
             .expectStatus().isOk
@@ -48,14 +52,12 @@ class TransferTransactionControllerTests : ControllerTests() {
 
     @Test
     fun getAllShouldReturnTransferTransactionsListTest() {
-        val mainBlock = MainBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", MainBlockPayload("merkleHash"))
-        val pageTransferTransactions = PageImpl(listOf(TransferTransaction(1, 1, "senderAddress", "hash",
-            "senderSignature", "senderPublicKey", mainBlock, TransferTransactionPayload(1, "recipientAddress"))))
+        val pageTransferTransactions = PageImpl(listOf(createTransferTransaction()))
         val expectedPageResponse = PageResponse(pageTransferTransactions)
 
         given(service.getAll(PageRequest())).willReturn(pageTransferTransactions)
 
-        val actualPageResponse = webClient.get().uri("/rpc/transactions/transfer")
+        val actualPageResponse = webClient.get().uri(TRANSFER_TRANSACTION_URL)
             .exchange()
             .expectStatus().isOk
             .expectBody(PageResponse::class.java)
@@ -69,13 +71,11 @@ class TransferTransactionControllerTests : ControllerTests() {
     @Test
     fun getTransactionsByAddressShouldReturnTransferTransactionsListTest() {
         val address = "address"
-        val mainBlock = MainBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", MainBlockPayload("merkleHash"))
-        val expectedTransferTransactions = listOf(TransferTransaction(1, 1, "senderAddress", "hash",
-            "senderSignature", "senderPublicKey", mainBlock, TransferTransactionPayload(1, "recipientAddress")))
+        val expectedTransferTransactions = listOf(createTransferTransaction())
 
         given(service.getByAddress(address)).willReturn(expectedTransferTransactions)
 
-        val actualTransferTransactions = webClient.get().uri("/rpc/transactions/transfer/address/$address")
+        val actualTransferTransactions = webClient.get().uri("$TRANSFER_TRANSACTION_URL/address/$address")
             .exchange()
             .expectStatus().isOk
             .expectBody(List::class.java)
@@ -85,6 +85,28 @@ class TransferTransactionControllerTests : ControllerTests() {
             .isEqualTo(expectedTransferTransactions.first().senderAddress)
         assertThat((actualTransferTransactions.first()  as LinkedHashMap<*, *>)["senderPublicKey"])
             .isEqualTo(expectedTransferTransactions.first().senderPublicKey)
+    }
+
+    @Test
+    fun getTransactionByHashShouldReturnTransactionWithCurrentHash() {
+        val hash = "hash"
+        val expectedTransferTransaction = createTransferTransaction()
+
+        given(service.getByHash(hash)).willReturn(expectedTransferTransaction)
+
+        val actualTransaction = webClient.get().uri("$TRANSFER_TRANSACTION_URL/$hash")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(TransferTransaction::class.java)
+            .returnResult().responseBody!!
+
+        assertThat(actualTransaction).isEqualTo(expectedTransferTransaction)
+    }
+
+    private fun createTransferTransaction() : TransferTransaction {
+        val mainBlock = MainBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
+        return TransferTransaction(1L, 1L, "senderAddress", "hash", "senderSignature", "senderPublicKey", mainBlock,
+            TransferTransactionPayload(1, "recipientAddress")).apply { id = 1 }
     }
 
 }
