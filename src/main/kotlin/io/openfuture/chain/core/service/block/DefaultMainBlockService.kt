@@ -7,7 +7,6 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
-import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
@@ -48,7 +47,7 @@ class DefaultMainBlockService(
         val merkleHash = calculateMerkleRoot(transactions.map { it.hash })
         val payload = MainBlockPayload(merkleHash)
 
-        val hash = BlockUtils.createHash(timestamp, height, previousHash, reward, payload)
+        val hash = createHash(timestamp, height, previousHash, reward, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKey()
 

@@ -2,11 +2,6 @@ package io.openfuture.chain.core.model.entity.transaction
 
 import io.openfuture.chain.core.model.entity.base.BaseModel
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
-import io.openfuture.chain.core.util.ByteConstants
-import io.openfuture.chain.crypto.util.HashUtils
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets
 import javax.persistence.Column
 import javax.persistence.MappedSuperclass
 
@@ -32,22 +27,6 @@ abstract class BaseTransaction(
     var senderPublicKey: String
 
 ) : BaseModel() {
-
-    companion object {
-
-        fun generateHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload): String {
-            val bytes = ByteBuffer.allocate(ByteConstants.LONG_BYTES + ByteConstants.LONG_BYTES +
-                        senderAddress.toByteArray(StandardCharsets.UTF_8).size + payload.getBytes().size)
-                .putLong(timestamp)
-                .putLong(fee)
-                .put(senderAddress.toByteArray(StandardCharsets.UTF_8))
-                .put(payload.getBytes())
-                .array()
-
-            return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
-        }
-
-    }
 
     abstract fun getPayload(): TransactionPayload
 

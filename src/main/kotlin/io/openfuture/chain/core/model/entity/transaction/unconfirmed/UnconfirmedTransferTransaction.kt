@@ -38,11 +38,7 @@ class UnconfirmedTransferTransaction(
             request.timestamp!!,
             request.fee!!,
             request.senderAddress!!,
-            generateHash(
-                request.timestamp!!,
-                request.fee!!,
-                request.senderAddress!!,
-                TransferTransactionPayload(request.amount!!, request.recipientAddress!!)),
+            request.hash!!,
             request.senderSignature!!,
             request.senderPublicKey!!,
             TransferTransactionPayload(request.amount!!, request.recipientAddress!!)

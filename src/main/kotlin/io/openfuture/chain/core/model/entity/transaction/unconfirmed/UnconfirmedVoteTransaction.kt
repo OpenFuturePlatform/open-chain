@@ -38,11 +38,7 @@ class UnconfirmedVoteTransaction(
             request.timestamp!!,
             request.fee!!,
             request.senderAddress!!,
-            generateHash(
-                request.timestamp!!,
-                request.fee!!,
-                request.senderAddress!!,
-                VoteTransactionPayload(request.voteTypeId!!, request.delegateKey!!)),
+            request.hash!!,
             request.senderSignature!!,
             request.senderPublicKey!!,
             VoteTransactionPayload(request.voteTypeId!!, request.delegateKey!!)

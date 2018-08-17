@@ -22,7 +22,7 @@ class VoteTransactionControllerTests : ControllerTests() {
 
     @Test
     fun addTransactionShouldReturnAddedTransaction() {
-        val transactionRequest = VoteTransactionRequest(1L, 1L, "senderAddress", 1,
+        val transactionRequest = VoteTransactionRequest(1L, 1L,"hash", "senderAddress", 1,
             "delegateKey", "senderSignature", "senderPublicKey")
         val unconfirmedVoteTransaction = UnconfirmedVoteTransaction(1L, 1L, "senderAddress", "senderPublicKey", "senderSignature",
             "hash", VoteTransactionPayload(1, "delegateKey"))
