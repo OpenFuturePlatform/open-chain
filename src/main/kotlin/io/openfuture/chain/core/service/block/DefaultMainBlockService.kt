@@ -155,7 +155,7 @@ class DefaultMainBlockService(
         if (transactions.isEmpty()) {
             return false
         }
-        return merkleHash == calculateMerkleRoot(transactions.map { it })
+        return merkleHash == calculateMerkleRoot(transactions)
     }
 
     private fun calculateMerkleRoot(transactions: List<String>): String {
