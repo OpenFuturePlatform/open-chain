@@ -1,6 +1,7 @@
 package io.openfuture.chain.rpc.controller.block
 
 import io.openfuture.chain.config.ControllerTests
+import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.service.MainBlockService
@@ -18,6 +19,9 @@ class MainBlockControllerTests : ControllerTests() {
 
     @MockBean
     private lateinit var service: MainBlockService
+
+    @MockBean
+    private lateinit var epochService: EpochService
 
 
     @Test

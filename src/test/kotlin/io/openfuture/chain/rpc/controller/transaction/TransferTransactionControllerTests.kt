@@ -75,7 +75,7 @@ class TransferTransactionControllerTests : ControllerTests() {
 
         given(service.getByAddress(address)).willReturn(expectedTransferTransactions)
 
-        val actualTransferTransactions = webClient.get().uri("/rpc/transactions/transfer/$address")
+        val actualTransferTransactions = webClient.get().uri("/rpc/transactions/transfer/address/$address")
             .exchange()
             .expectStatus().isOk
             .expectBody(List::class.java)
