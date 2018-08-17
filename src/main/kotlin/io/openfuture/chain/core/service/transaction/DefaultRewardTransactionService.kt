@@ -48,34 +48,34 @@ class DefaultRewardTransactionService(
     }
 
     @Transactional(readOnly = true)
-    override fun isValid(blockMessage: PendingBlockMessage): Boolean {
+    override fun verify(blockMessage: PendingBlockMessage): Boolean {
         val uTransactions = blockMessage.getAllTransactions().map { transactionService.getUTransactionByHash(it) }
         val fees = uTransactions.map { it.fee }.sum()
 
-        return isValidBase(blockMessage.rewardTransaction, blockMessage, fees)
+        return verifyBase(blockMessage.rewardTransaction, blockMessage, fees)
     }
 
     @Transactional(readOnly = true)
-    override fun isValid(blockMessage: MainBlockMessage): Boolean {
+    override fun verify(blockMessage: MainBlockMessage): Boolean {
         val fees = blockMessage.getAllTransactions().map { it.fee }.sum()
 
-        return isValidBase(blockMessage.rewardTransaction, blockMessage, fees)
+        return verifyBase(blockMessage.rewardTransaction, blockMessage, fees)
     }
 
-    private fun isValidBase(rewardTransactionMessage: RewardTransactionMessage, blockMessage: BlockMessage, fees: Long): Boolean {
+    private fun verifyBase(rewardTransactionMessage: RewardTransactionMessage, blockMessage: BlockMessage, fees: Long): Boolean {
         val payload = RewardTransactionPayload(rewardTransactionMessage.reward, rewardTransactionMessage.recipientAddress)
 
-        return isValidTimestamp(rewardTransactionMessage.timestamp, blockMessage.timestamp)
-            && isValidReward(fees, rewardTransactionMessage.reward)
-            && isValidHash(rewardTransactionMessage.timestamp, rewardTransactionMessage.fee,
+        return verifyTimestamp(rewardTransactionMessage.timestamp, blockMessage.timestamp)
+            && verifyReward(fees, rewardTransactionMessage.reward)
+            && verifyHash(rewardTransactionMessage.timestamp, rewardTransactionMessage.fee,
             rewardTransactionMessage.senderAddress, payload, rewardTransactionMessage.hash)
-            && isValidSignature(rewardTransactionMessage.hash, rewardTransactionMessage.senderSignature,
+            && verifySignature(rewardTransactionMessage.hash, rewardTransactionMessage.senderSignature,
             rewardTransactionMessage.senderPublicKey)
     }
 
-    private fun isValidTimestamp(txTimestamp: Long, blockTimestamp: Long): Boolean = txTimestamp == blockTimestamp
+    private fun verifyTimestamp(txTimestamp: Long, blockTimestamp: Long): Boolean = txTimestamp == blockTimestamp
 
-    private fun isValidReward(fees: Long, reward: Long): Boolean {
+    private fun verifyReward(fees: Long, reward: Long): Boolean {
         val senderAddress = consensusProperties.genesisAddress!!
         val bank = walletService.getBalanceByAddress(senderAddress)
         val rewardBlock = consensusProperties.rewardBlock!!
@@ -83,10 +83,10 @@ class DefaultRewardTransactionService(
         return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)
     }
 
-    private fun isValidHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload, hash: String): Boolean =
+    private fun verifyHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload, hash: String): Boolean =
         TransactionUtils.generateHash(timestamp, fee, senderAddress, payload) == hash
 
-    private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean =
+    private fun verifySignature(hash: String, signature: String, publicKey: String): Boolean =
         SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
 
     private fun updateTransferBalance(to: String, amount: Long) {

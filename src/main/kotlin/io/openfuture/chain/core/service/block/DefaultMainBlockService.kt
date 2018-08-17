@@ -89,7 +89,7 @@ class DefaultMainBlockService(
 
         val block = MainBlock.of(message)
         val transactionHashes = message.getAllTransactions().map { it.hash } + message.rewardTransaction.hash
-        if (!isValid(block, transactionHashes) || !rewardTransactionService.isValid(message)) {
+        if (!isValid(block, transactionHashes) || !rewardTransactionService.verify(message)) {
             return
         }
 
@@ -103,7 +103,7 @@ class DefaultMainBlockService(
     @Transactional(readOnly = true)
     override fun isValid(message: PendingBlockMessage): Boolean {
         val transactionHashes = message.getAllTransactions() + message.rewardTransaction.hash
-        return isValid(MainBlock.of(message), transactionHashes) && rewardTransactionService.isValid(message)
+        return isValid(MainBlock.of(message), transactionHashes) && rewardTransactionService.verify(message)
     }
 
     private fun isValid(block: MainBlock, transactions: List<String>): Boolean {

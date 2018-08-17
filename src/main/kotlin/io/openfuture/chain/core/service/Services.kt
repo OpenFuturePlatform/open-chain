@@ -110,9 +110,9 @@ interface RewardTransactionService {
 
     fun toBlock(message: RewardTransactionMessage, block: MainBlock)
 
-    fun isValid(blockMessage: PendingBlockMessage): Boolean
+    fun verify(blockMessage: PendingBlockMessage): Boolean
 
-    fun isValid(blockMessage: MainBlockMessage): Boolean
+    fun verify(blockMessage: MainBlockMessage): Boolean
 
 }
 
