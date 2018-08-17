@@ -103,30 +103,27 @@ internal class DefaultVoteTransactionService(
     }
 
     private fun validate(utx: UnconfirmedVoteTransaction) {
-        validateLocal(utx.header, utx.payload)
+        if (!isExistsDelegate(utx.payload.delegateKey)) {
+            throw ValidationException("Delegate with key: ${utx.payload.delegateKey} is not exists!")
+        }
+
+        if (!isValidVoteCount(utx.header.senderAddress)) {
+            throw ValidationException("Address: ${utx.header.senderAddress} already spent all votes!")
+        }
+
+        if (!isAlreadyVote(utx.header.senderAddress, utx.payload.delegateKey)) {
+            throw ValidationException("Address: ${utx.header.senderAddress} already vote for delegate with key: ${utx.payload.delegateKey}")
+        }
+
+        if (!isExistsVoteType(utx.payload.voteTypeId)) {
+            throw ValidationException("Vote type with id: ${utx.payload.voteTypeId} is not exists")
+        }
+
+        if (!isValidFee(utx.header.senderAddress, utx.header.fee)) {
+            throw ValidationException("Invalid fee: ${utx.header.fee} for address ${utx.header.senderAddress}")
+        }
+
         super.validateBase(utx)
-    }
-
-    private fun validateLocal(header: TransactionHeader, payload: VoteTransactionPayload) {
-        if (!isExistsDelegate(payload.delegateKey)) {
-            throw ValidationException("Delegate with key: ${payload.delegateKey} is not exists!")
-        }
-
-        if (!isValidVoteCount(header.senderAddress)) {
-            throw ValidationException("Address: ${header.senderAddress} already spent all votes!")
-        }
-
-        if (!isAlreadyVote(header.senderAddress, payload.delegateKey)) {
-            throw ValidationException("Address: ${header.senderAddress} already vote for delegate with key: ${payload.delegateKey}")
-        }
-
-        if (!isExistsVoteType(payload.voteTypeId)) {
-            throw ValidationException("Vote type with id: ${payload.voteTypeId} is not exists")
-        }
-
-        if (!isValidFee(header.senderAddress, header.fee)) {
-            throw ValidationException("Invalid fee: ${header.fee} for address ${header.senderAddress}")
-        }
     }
 
     private fun updateWalletVotes(senderAddress: String, delegateKey: String, type: VoteType) {

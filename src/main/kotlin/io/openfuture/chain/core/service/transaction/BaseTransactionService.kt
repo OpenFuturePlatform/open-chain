@@ -49,17 +49,17 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return save(tx)
     }
 
-    protected fun validateBase(tx: BaseTransaction) {
-        if (!isValidAddress(tx.header.senderAddress, tx.senderPublicKey)) {
-            throw ValidationException("Invalid transaction address: ${tx.header.senderAddress}")
+    protected fun validateBase(utx: BaseTransaction) {
+        if (!isValidAddress(utx.header.senderAddress, utx.senderPublicKey)) {
+            throw ValidationException("Invalid transaction address: ${utx.header.senderAddress}")
         }
 
-        if (!isValidHash(tx.header, tx.getPayload(), tx.hash)) {
-            throw ValidationException("Invalid transaction hash: ${tx.hash}")
+        if (!isValidHash(utx.header, utx.getPayload(), utx.hash)) {
+            throw ValidationException("Invalid transaction hash: ${utx.hash}")
         }
 
-        if (!isValidSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)) {
-            throw ValidationException("Invalid transaction signature: ${tx.senderSignature}")
+        if (!isValidSignature(utx.hash, utx.senderSignature, utx.senderPublicKey)) {
+            throw ValidationException("Invalid transaction signature: ${utx.senderSignature}")
         }
     }
 

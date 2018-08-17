@@ -92,11 +92,6 @@ class DefaultGenesisBlockService(
         val delegates = message.delegates.map { delegateService.getByPublicKey(it) }
         val block = GenesisBlock.of(message, delegates)
 
-        validateLocal(block)
-        super.validateBase(block)
-    }
-
-    private fun validateLocal(block: GenesisBlock) {
         if (!isValidateActiveDelegates(block.payload.activeDelegates)) {
             throw ValidationException("Invalid active delegates")
         }
@@ -104,6 +99,8 @@ class DefaultGenesisBlockService(
         if (!isValidEpochIndex(this.getLast().payload.epochIndex, block.payload.epochIndex)) {
             throw ValidationException("Invalid epoch index: ${block.payload.epochIndex}")
         }
+
+        super.validateBase(block)
     }
 
     private fun isValidateActiveDelegates(delegates: List<Delegate>): Boolean {

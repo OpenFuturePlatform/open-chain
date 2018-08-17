@@ -4,9 +4,7 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.repository.DelegateTransactionRepository
 import io.openfuture.chain.core.repository.UDelegateTransactionRepository
@@ -102,18 +100,15 @@ class DefaultDelegateTransactionService(
     }
 
     private fun validate(utx: UnconfirmedDelegateTransaction) {
-        validateLocal(utx.header, utx.payload)
+        if (!isNotExistsByDelegatePublicKey(utx.payload.delegateKey)) {
+            throw ValidationException("Delegate with public key: ${utx.payload.delegateKey} already exists")
+        }
+
+        if (!isValidFee(utx.header.senderAddress, utx.header.fee)) {
+            throw ValidationException("Invalid fee: ${utx.header.fee} for address ${utx.header.senderAddress}")
+        }
+
         super.validateBase(utx)
-    }
-
-    private fun validateLocal(header: TransactionHeader, payload: DelegateTransactionPayload) {
-        if (!isNotExistsByDelegatePublicKey(payload.delegateKey)) {
-            throw ValidationException("Delegate with public key: ${payload.delegateKey} already exists")
-        }
-
-        if (!isValidFee(header.senderAddress, header.fee)) {
-            throw ValidationException("Invalid fee: ${header.fee} for address ${header.senderAddress}")
-        }
     }
 
     private fun isNotExistsByDelegatePublicKey(key: String): Boolean {

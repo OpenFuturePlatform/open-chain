@@ -120,11 +120,6 @@ class DefaultMainBlockService(
     }
 
     private fun validate(message: PendingBlockMessage) {
-        validateLocal(message)
-        super.validateBase(MainBlock.of(message))
-    }
-
-    private fun validateLocal(message: PendingBlockMessage) {
         if (!isValidMerkleHash(message.merkleHash, message.getAllTransactions().map { message.hash })) {
             throw ValidationException("Invalid merkle hash: ${message.merkleHash}")
         }
@@ -140,6 +135,8 @@ class DefaultMainBlockService(
         if (!isValidTransferTransactions(message.transferTransactions)) {
             throw ValidationException("Invalid transfer transactions")
         }
+
+        super.validateBase(MainBlock.of(message))
     }
 
     private fun isValidVoteTransactions(transactions: List<VoteTransactionMessage>): Boolean {

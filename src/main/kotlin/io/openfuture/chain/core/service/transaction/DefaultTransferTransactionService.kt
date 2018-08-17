@@ -110,14 +110,11 @@ class DefaultTransferTransactionService(
     }
 
     private fun validate(utx: UnconfirmedTransferTransaction) {
-        validateLocal(utx.header, utx.payload)
-        super.validateBase(utx)
-    }
-
-    private fun validateLocal(header: TransactionHeader, payload: TransferTransactionPayload) {
-        if (!isValidBalance(header.senderAddress, payload.amount, header.fee)) {
+        if (!isValidBalance(utx.header.senderAddress, utx.payload.amount, utx.header.fee)) {
             throw ValidationException("Invalid balance for transfer transaction")
         }
+
+        super.validateBase(utx)
     }
 
     private fun updateTransferBalance(from: String, to: String, amount: Long) {
