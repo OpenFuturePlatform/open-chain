@@ -120,7 +120,7 @@ class DefaultMainBlockService(
     }
 
     private fun validate(message: PendingBlockMessage) {
-        if (!isValidMerkleHash(message.merkleHash, message.getAllTransactions().map { message.hash })) {
+        if (!isValidMerkleHash(message.merkleHash, message.getAllTransactions().map { it.hash })) {
             throw ValidationException("Invalid merkle hash: ${message.merkleHash}")
         }
 
