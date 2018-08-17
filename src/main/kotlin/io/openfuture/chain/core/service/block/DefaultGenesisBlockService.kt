@@ -34,15 +34,25 @@ class DefaultGenesisBlockService(
 
     @Transactional(readOnly = true)
     override fun getPreviousByHeight(height: Long): GenesisBlock = repository.findFirstByHeightLessThan(height)
-        ?: throw NotFoundException("Last block not found")
+        ?: throw NotFoundException("Previous block by height not found")
 
     @Transactional(readOnly = true)
     override fun getByHash(hash: String): GenesisBlock = repository.findOneByHash(hash)
-        ?: throw NotFoundException("Last block not found")
+        ?: throw NotFoundException("Block by $hash not found")
 
     @Transactional(readOnly = true)
-    override fun getByPreviousHash(previousHash: String): GenesisBlock = repository.findOneByPreviousHash(previousHash)
-        ?: throw NotFoundException("Last block not found")
+    override fun getNextBlock(hash: String): GenesisBlock {
+        val block = getByHash(hash)
+
+        return repository.findFirstByHeightGreaterThan(block.height) ?: throw NotFoundException("Next block not found")
+    }
+
+    @Transactional(readOnly = true)
+    override fun getPreviousBlock(hash: String): GenesisBlock {
+        val block = getByHash(hash)
+
+        return getPreviousByHeight(block.height)
+    }
 
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<GenesisBlock> = repository.findAll(request)

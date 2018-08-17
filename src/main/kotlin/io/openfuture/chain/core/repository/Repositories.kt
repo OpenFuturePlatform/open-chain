@@ -25,9 +25,11 @@ interface BlockRepository<Entity : BaseBlock> : BaseRepository<Entity> {
 
     fun findOneByHash(hash: String): Entity?
 
-    fun findOneByPreviousHash(hash: String): Entity?
-
     fun findFirstByOrderByHeightDesc(): Entity?
+
+    fun findFirstByHeightLessThan(height: Long): Entity?
+
+    fun findFirstByHeightGreaterThan(height: Long): Entity?
 
 }
 
@@ -35,11 +37,7 @@ interface BlockRepository<Entity : BaseBlock> : BaseRepository<Entity> {
 interface MainBlockRepository : BlockRepository<MainBlock>
 
 @Repository
-interface GenesisBlockRepository : BlockRepository<GenesisBlock> {
-
-    fun findFirstByHeightLessThan(height: Long): GenesisBlock?
-
-}
+interface GenesisBlockRepository : BlockRepository<GenesisBlock>
 
 @Repository
 interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {

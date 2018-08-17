@@ -19,9 +19,13 @@ class GenesisBlockController(
     @GetMapping("/{hash}")
     fun get(@PathVariable hash: String): GenesisBlockResponse = GenesisBlockResponse(blockService.getByHash(hash))
 
-    @GetMapping("/previousHash/{previousHash}")
-    fun getByPreviousHash(@PathVariable previousHash: String): GenesisBlockResponse =
-        GenesisBlockResponse(blockService.getByPreviousHash(previousHash))
+    @GetMapping("/{hash}/previous")
+    fun getPreviousBlock(@PathVariable hash: String): GenesisBlockResponse? =
+        GenesisBlockResponse(blockService.getPreviousBlock(hash))
+
+    @GetMapping("/{hash}/next")
+    fun getNextBlock(@PathVariable hash: String): GenesisBlockResponse? =
+        GenesisBlockResponse(blockService.getNextBlock(hash))
 
     @GetMapping
     fun getAll(request: PageRequest): PageResponse<GenesisBlock> {

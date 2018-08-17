@@ -38,11 +38,21 @@ class DefaultMainBlockService(
 
     @Transactional(readOnly = true)
     override fun getByHash(hash: String): MainBlock = repository.findOneByHash(hash)
-        ?: throw NotFoundException("Last block not found")
+        ?: throw NotFoundException("Block by $hash not found")
 
     @Transactional(readOnly = true)
-    override fun getByPreviousHash(previousHash: String): MainBlock = repository.findOneByPreviousHash(previousHash)
-        ?: throw NotFoundException("Last block not found")
+    override fun getNextBlock(hash: String): MainBlock {
+        val block = getByHash(hash)
+
+        return repository.findFirstByHeightGreaterThan(block.height) ?: throw NotFoundException("Next block not found")
+    }
+
+    @Transactional(readOnly = true)
+    override fun getPreviousBlock(hash: String): MainBlock {
+        val block = getByHash(hash)
+
+        return repository.findFirstByHeightLessThan(block.height) ?: throw NotFoundException("Previous block not found")
+    }
 
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<MainBlock> = repository.findAll(request)

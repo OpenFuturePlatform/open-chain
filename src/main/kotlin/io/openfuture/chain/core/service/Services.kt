@@ -52,8 +52,6 @@ interface GenesisBlockService {
 
     fun getByHash(hash: String): GenesisBlock
 
-    fun getByPreviousHash(previousHash: String): GenesisBlock
-
     fun getAll(request: PageRequest): Page<GenesisBlock>
 
     fun getLast(): GenesisBlock
@@ -66,13 +64,15 @@ interface GenesisBlockService {
 
     fun getPreviousByHeight(height: Long): GenesisBlock
 
+    fun getNextBlock(hash: String): GenesisBlock
+
+    fun getPreviousBlock(hash: String): GenesisBlock
+
 }
 
 interface MainBlockService {
 
     fun getByHash(hash: String): MainBlock
-
-    fun getByPreviousHash(previousHash: String): MainBlock
 
     fun getAll(request: PageRequest): Page<MainBlock>
 
@@ -84,6 +84,9 @@ interface MainBlockService {
 
     fun synchronize(message: MainBlockMessage)
 
+    fun getPreviousBlock(hash: String): MainBlock
+
+    fun getNextBlock(hash: String): MainBlock
 }
 
 /** Common base transaction service */
