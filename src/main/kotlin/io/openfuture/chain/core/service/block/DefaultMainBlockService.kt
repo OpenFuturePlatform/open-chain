@@ -125,7 +125,7 @@ class DefaultMainBlockService(
     }
 
     private fun validateLocal(message: PendingBlockMessage) {
-        if (!isValidMerkleHash(message.merkleHash, message.getAllTransactions().map { message.hash })) {
+        if (!isValidMerkleHash(message.merkleHash, message.getAllTransactions().map { it.hash })) {
             throw ValidationException("Invalid merkle hash: ${message.merkleHash}")
         }
 
@@ -158,7 +158,7 @@ class DefaultMainBlockService(
         if (transactions.isEmpty()) {
             return false
         }
-        return merkleHash == calculateMerkleRoot(transactions.map { it })
+        return merkleHash == calculateMerkleRoot(transactions)
     }
 
     private fun calculateMerkleRoot(transactions: List<String>): String {

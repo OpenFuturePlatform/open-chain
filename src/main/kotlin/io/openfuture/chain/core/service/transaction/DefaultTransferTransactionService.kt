@@ -52,12 +52,12 @@ class DefaultTransferTransactionService(
     @Transactional
     override fun add(message: TransferTransactionMessage): UnconfirmedTransferTransaction {
         val utx = UnconfirmedTransferTransaction.of(message)
-        validate(utx)
 
         if (isExists(utx.hash)) {
             return utx
         }
 
+        validate(utx)
         val savedUtx = this.save(utx)
         networkService.broadcast(message)
         return savedUtx
@@ -66,12 +66,12 @@ class DefaultTransferTransactionService(
     @Transactional
     override fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction {
         val utx = UnconfirmedTransferTransaction.of(request)
-        validate(utx)
 
         if (isExists(utx.hash)) {
             return utx
         }
 
+        validate(utx)
         val savedUtx = this.save(utx)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
