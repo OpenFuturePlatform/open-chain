@@ -10,7 +10,7 @@ import io.openfuture.chain.core.repository.UTransferTransactionRepository
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.network.service.NetworkApiService
-import io.openfuture.chain.rpc.domain.ExceptionResponseField.BALANCE
+import io.openfuture.chain.core.exception.model.ExceptionField.BALANCE
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import org.springframework.data.domain.Page

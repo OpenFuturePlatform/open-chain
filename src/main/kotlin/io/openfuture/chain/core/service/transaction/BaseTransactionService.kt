@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.exception.model.ExceptionField.*
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
@@ -14,7 +15,6 @@ import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.rpc.domain.ExceptionResponseField.*
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.beans.factory.annotation.Autowired
 import java.nio.ByteBuffer

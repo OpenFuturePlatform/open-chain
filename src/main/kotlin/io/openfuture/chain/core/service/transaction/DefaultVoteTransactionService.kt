@@ -14,7 +14,7 @@ import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.network.service.NetworkApiService
-import io.openfuture.chain.rpc.domain.ExceptionResponseField.VOTES_COUNT
+import io.openfuture.chain.core.exception.model.ExceptionField.VOTES_COUNT
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

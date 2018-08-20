@@ -12,7 +12,7 @@ import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.network.service.NetworkApiService
-import io.openfuture.chain.rpc.domain.ExceptionResponseField.ADDRESS
+import io.openfuture.chain.core.exception.model.ExceptionField.ADDRESS
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
