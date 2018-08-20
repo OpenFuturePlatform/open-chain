@@ -43,7 +43,7 @@ class MainBlockMessage(
     )
 
     fun getAllTransactions(): List<BaseTransactionMessage> {
-        return listOf(rewardTransaction) + voteTransactions + delegateTransactions + transferTransactions
+        return voteTransactions + delegateTransactions + transferTransactions + rewardTransaction
     }
 
     override fun read(buffer: ByteBuf) {
