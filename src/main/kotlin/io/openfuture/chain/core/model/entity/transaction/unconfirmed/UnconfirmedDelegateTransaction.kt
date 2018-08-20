@@ -2,7 +2,6 @@ package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
-import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import javax.persistence.Embedded
@@ -39,12 +38,7 @@ class UnconfirmedDelegateTransaction(
             request.timestamp!!,
             request.fee!!,
             request.senderAddress!!,
-            TransactionUtils.generateHash(
-                request.timestamp!!,
-                request.fee!!,
-                request.senderAddress!!,
-                DelegateTransactionPayload(request.delegateKey!!)
-            ),
+            request.hash!!,
             request.senderSignature!!,
             request.senderPublicKey!!,
             DelegateTransactionPayload(request.delegateKey!!)

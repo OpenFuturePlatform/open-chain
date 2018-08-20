@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
@@ -77,10 +78,22 @@ internal class DefaultVoteTransactionService(
     }
 
     @Transactional
-    override fun isValid(tx: VoteTransaction): Boolean = isValidVoteCount(tx.senderAddress) && super.isValid(tx)
+    override fun check(tx: VoteTransaction) {
+        checkVoteCount(tx.senderAddress)
+        super.check(tx)
+    }
 
     @Transactional
-    override fun isValid(utx: UnconfirmedVoteTransaction): Boolean = isValidVoteCount(utx.senderAddress) && super.isValid(utx)
+    override fun check(utx: UnconfirmedVoteTransaction) {
+        checkVoteCount(utx.senderAddress)
+        super.check(utx)
+    }
+
+    private fun confirm(utx: UnconfirmedVoteTransaction, block: MainBlock): VoteTransaction {
+        val type = utx.payload.getVoteType()
+        updateWalletVotes(utx.payload.delegateKey, utx.senderAddress, type)
+        return super.confirmProcess(utx, VoteTransaction.of(utx, block))
+    }
 
     private fun updateWalletVotes(delegateKey: String, senderAddress: String, type: VoteType) {
         val delegate = delegateService.getByPublicKey(delegateKey)
@@ -97,19 +110,15 @@ internal class DefaultVoteTransactionService(
         walletService.save(wallet)
     }
 
-    private fun confirm(utx: UnconfirmedVoteTransaction, block: MainBlock): VoteTransaction {
-        val type = utx.payload.getVoteType()
-        updateWalletVotes(utx.payload.delegateKey, utx.senderAddress, type)
-        return super.confirmProcess(utx, VoteTransaction.of(utx, block))
-    }
-
-    private fun isValidVoteCount(senderAddress: String): Boolean {
+    private fun checkVoteCount(senderAddress: String) {
         val confirmedVotes = walletService.getVotesByAddress(senderAddress).count()
         val unconfirmedForVotes = unconfirmedRepository.findAll()
             .filter { it.senderAddress == senderAddress && it.payload.getVoteType() == VoteType.FOR }
             .count()
 
-        return consensusProperties.delegatesCount!! > confirmedVotes + unconfirmedForVotes
+        if (consensusProperties.delegatesCount!! <= confirmedVotes + unconfirmedForVotes) {
+            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "count of votes bigger than delegates count")
+        }
     }
 
 }
