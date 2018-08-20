@@ -1,11 +1,8 @@
 package io.openfuture.chain.core.service.block
 
-import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
-import io.openfuture.chain.core.model.entity.transaction.payload.RewardTransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.crypto.util.HashUtils
@@ -13,7 +10,6 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.MainBlockMessage
-import io.openfuture.chain.network.message.core.RewardTransactionMessage
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,9 +24,7 @@ class DefaultMainBlockService(
     private val voteTransactionService: VoteTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
-    private val rewardTransactionService: RewardTransactionService,
-    private val consensusProperties: ConsensusProperties,
-    private val walletService: WalletService
+    private val rewardTransactionService: RewardTransactionService
 ) : BaseBlockService<MainBlock>(repository, blockService, delegateService), MainBlockService {
 
     @Transactional(readOnly = true)
@@ -45,7 +39,7 @@ class DefaultMainBlockService(
         val delegateTransactions = delegateTransactionService.getAllUnconfirmed()
         val transferTransactions = transferTransactionService.getAllUnconfirmed()
         val transactions = voteTransactions + delegateTransactions + transferTransactions
-        val rewardTransactionMessage = createRewardTransaction(timestamp, transactions)
+        val rewardTransactionMessage = rewardTransactionService.create(timestamp, transactions)
 
         val transactionHashes = transactions.map { it.hash } + rewardTransactionMessage.hash
 
@@ -132,21 +126,5 @@ class DefaultMainBlockService(
 
     private fun isValidMerkleHash(merkleHash: String, transactions: List<String>): Boolean =
         merkleHash == calculateMerkleRoot(transactions)
-
-    private fun createRewardTransaction(timestamp: Long, transactions: List<UnconfirmedTransaction>): RewardTransactionMessage {
-        val senderAddress = consensusProperties.genesisAddress!!
-        val rewardBlock = consensusProperties.rewardBlock!!
-        val bank = walletService.getBalanceByAddress(senderAddress)
-        val reward = transactions.map { it.fee }.sum() + if (rewardBlock > bank) bank else rewardBlock
-        val fee = 0L
-        val publicKey = keyHolder.getPublicKey()
-        val delegate = delegateService.getByPublicKey(publicKey)
-
-        val payload = RewardTransactionPayload(reward, delegate.address)
-        val hash = TransactionUtils.generateHash(timestamp, fee, senderAddress, payload)
-        val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())
-
-        return RewardTransactionMessage(timestamp, fee, senderAddress, hash, signature, publicKey, reward, delegate.address)
-    }
 
 }
