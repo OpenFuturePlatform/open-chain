@@ -43,12 +43,12 @@ internal class DefaultVoteTransactionService(
     @Transactional
     override fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction {
         val utx = UnconfirmedVoteTransaction.of(message)
-        validate(utx)
 
         if (isExists(utx.hash)) {
             return utx
         }
 
+        validate(utx)
         val savedUtx = this.save(utx)
         networkService.broadcast(message)
         return savedUtx

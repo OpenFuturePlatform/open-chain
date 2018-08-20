@@ -2,14 +2,17 @@ package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.Block
-import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.WalletService
-import io.openfuture.chain.core.util.BlockUtils
+import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets.UTF_8
 
 abstract class BaseBlockService<T : Block>(
     protected val repository: BlockRepository<T>,
