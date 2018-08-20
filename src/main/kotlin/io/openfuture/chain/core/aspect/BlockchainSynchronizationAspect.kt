@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.aspect
 
+import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.network.sync.SyncManager
 import io.openfuture.chain.network.sync.impl.SynchronizationStatus
 import org.aspectj.lang.ProceedingJoinPoint
@@ -22,7 +23,7 @@ class BlockchainSynchronizationAspect(
 
 
     @Around("@annotation(annotation)")
-    fun annotated(joinPoint: ProceedingJoinPoint, annotation: io.openfuture.chain.core.annotation.BlockchainSynchronized): Any? {
+    fun annotated(joinPoint: ProceedingJoinPoint, annotation: BlockchainSynchronized): Any? {
         if (syncManager.getSyncStatus() != SynchronizationStatus.SYNCHRONIZED) {
             if (annotation.throwable) {
                 throw IllegalStateException(MESSAGE)
