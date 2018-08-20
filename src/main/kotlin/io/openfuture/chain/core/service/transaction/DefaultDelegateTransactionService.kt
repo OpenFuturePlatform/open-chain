@@ -2,7 +2,7 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_ADDRESS
+import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_DELEGATE_KEY
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -80,13 +80,13 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun check(tx: DelegateTransaction) {
-        checkSenderAddress(tx.senderAddress)
+        checkDelegateKey(tx.payload.delegateKey)
         super.check(tx)
     }
 
     @Transactional
     override fun check(utx: UnconfirmedDelegateTransaction) {
-        checkSenderAddress(utx.senderAddress)
+        checkDelegateKey(utx.payload.delegateKey)
         super.check(utx)
     }
 
@@ -95,9 +95,9 @@ class DefaultDelegateTransactionService(
         return super.confirmProcess(utx, DelegateTransaction.of(utx, block))
     }
 
-    private fun checkSenderAddress(publicKey: String) {
+    private fun checkDelegateKey(publicKey: String) {
         if (delegateService.isExists(publicKey)) {
-            throw ValidationException("Incorrect sender address", INCORRECT_ADDRESS)
+            throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
     }
 
