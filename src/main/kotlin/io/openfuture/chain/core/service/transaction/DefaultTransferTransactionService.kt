@@ -10,6 +10,7 @@ import io.openfuture.chain.core.repository.UTransferTransactionRepository
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.network.service.NetworkApiService
+import io.openfuture.chain.rpc.domain.ExceptionResponseField.BALANCE
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import org.springframework.data.domain.Page
@@ -110,7 +111,7 @@ class DefaultTransferTransactionService(
         val balance = walletService.getBalanceByAddress(address)
         val unspentBalance = balance - unconfirmedRepository.findAllBySenderAddress(address).map { it.payload.amount }.sum()
         if (unspentBalance < amount) {
-            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "actual balance is less then sum fee and amount")
+            throw ValidationException("Insufficient funds", BALANCE)
         }
     }
 

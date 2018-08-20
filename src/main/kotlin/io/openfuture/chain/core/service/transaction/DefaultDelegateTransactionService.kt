@@ -12,6 +12,7 @@ import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.network.service.NetworkApiService
+import io.openfuture.chain.rpc.domain.ExceptionResponseField.ADDRESS
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -79,13 +80,13 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun check(tx: DelegateTransaction) {
-        checkDelegateExists(tx.senderAddress)
+        checkSenderAddress(tx.senderAddress)
         super.check(tx)
     }
 
     @Transactional
     override fun check(utx: UnconfirmedDelegateTransaction) {
-        checkDelegateExists(utx.senderAddress)
+        checkSenderAddress(utx.senderAddress)
         super.check(utx)
     }
 
@@ -94,9 +95,9 @@ class DefaultDelegateTransactionService(
         return super.confirmProcess(utx, DelegateTransaction.of(utx, block))
     }
 
-    private fun checkDelegateExists(publicKey: String) {
+    private fun checkSenderAddress(publicKey: String) {
         if (delegateService.isExists(publicKey)) {
-            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "delegate with current public key already exists")
+            throw ValidationException("Incorrect sender address", ADDRESS)
         }
     }
 

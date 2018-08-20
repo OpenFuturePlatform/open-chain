@@ -1,3 +1,8 @@
 package io.openfuture.chain.core.exception
 
-class ValidationException(message: String?) : RuntimeException(message)
+import io.openfuture.chain.rpc.domain.ExceptionResponseField
+
+class ValidationException(
+    message: String?,
+    val field: ExceptionResponseField? = null
+) : RuntimeException(message)

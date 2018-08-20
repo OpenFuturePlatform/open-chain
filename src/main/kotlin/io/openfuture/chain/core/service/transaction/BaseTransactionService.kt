@@ -14,6 +14,7 @@ import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
+import io.openfuture.chain.rpc.domain.ExceptionResponseField.*
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.beans.factory.annotation.Autowired
 import java.nio.ByteBuffer
@@ -30,10 +31,6 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
     @Autowired protected lateinit var walletService: WalletService
     @Autowired protected lateinit var baseService: TransactionService
     @Autowired protected lateinit var transactionService: TransactionService
-
-    companion object {
-        const val TRANSACTION_EXCEPTION_MESSAGE: String = "Transaction is invalid : "
-    }
 
 
     protected fun save(utx: U): U {
@@ -82,7 +79,7 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
 
     private fun checkAddress(senderAddress: String, senderPublicKey: String) {
         if (!cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))) {
-            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "incorrect sender address by current public key")
+            throw ValidationException("Incorrect sender address", ADDRESS)
         }
     }
 
@@ -91,19 +88,19 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         val unspentBalance = balance - baseService.getAllUnconfirmedByAddress(senderAddress).map { it.fee }.sum()
 
         if (unspentBalance < fee) {
-            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "actual balance is less then fee")
+            throw ValidationException("Insufficient funds", FEE)
         }
     }
 
     private fun checkHash(tx: BaseTransaction) {
         if (createHash(tx.timestamp, tx.fee, tx.senderAddress, tx.getPayload()) != tx.hash) {
-            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "incorrect hash by transaction fields")
+            throw ValidationException("Incorrect hash", HASH)
         }
     }
 
     private fun checkSignature(hash: String, signature: String, publicKey: String) {
         if (!SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))) {
-            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "incorrect signature by hash and public key")
+            throw ValidationException("Incorrect signature", SIGNATURE)
         }
     }
 
