@@ -3,8 +3,10 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_VOTES_COUNT
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
+import io.openfuture.chain.core.model.entity.dictionary.VoteType.FOR
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.repository.UVoteTransactionRepository
@@ -113,11 +115,11 @@ internal class DefaultVoteTransactionService(
     private fun checkVoteCount(senderAddress: String) {
         val confirmedVotes = walletService.getVotesByAddress(senderAddress).count()
         val unconfirmedForVotes = unconfirmedRepository.findAll()
-            .filter { it.senderAddress == senderAddress && it.payload.getVoteType() == VoteType.FOR }
+            .filter { it.senderAddress == senderAddress && it.payload.getVoteType() == FOR }
             .count()
 
         if (consensusProperties.delegatesCount!! <= confirmedVotes + unconfirmedForVotes) {
-            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "count of votes bigger than delegates count")
+            throw ValidationException("Incorrect votes count", INCORRECT_VOTES_COUNT)
         }
     }
 
