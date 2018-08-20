@@ -68,12 +68,6 @@ class DefaultDelegateTransactionService(
     }
 
     @Transactional
-    override fun save(tx: DelegateTransaction): DelegateTransaction {
-        delegateService.save(Delegate(tx.payload.delegateKey, tx.header.senderAddress, tx.payload.delegateHost, tx.payload.delegatePort))
-        return super.save(tx)
-    }
-
-    @Transactional
     override fun toBlock(message: DelegateTransactionMessage, block: MainBlock): DelegateTransaction {
         val tx = repository.findOneByHash(message.hash)
         if (null != tx) {
@@ -97,6 +91,11 @@ class DefaultDelegateTransactionService(
             log.warn(e.message)
             false
         }
+    }
+
+    override fun save(tx: DelegateTransaction): DelegateTransaction {
+        delegateService.save(Delegate(tx.payload.delegateKey, tx.header.senderAddress, tx.payload.delegateHost, tx.payload.delegatePort))
+        return super.save(tx)
     }
 
     private fun validate(utx: UnconfirmedDelegateTransaction) {

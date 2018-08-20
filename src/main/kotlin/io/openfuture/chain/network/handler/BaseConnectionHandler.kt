@@ -39,6 +39,7 @@ abstract class BaseConnectionHandler(
 
     override fun channelRead0(ctx: ChannelHandlerContext, packet: Packet) {
         when (packet.type) {
+            // -- system messages
             HEART_BEAT -> networkService.onHeartBeat(ctx, packet.data as HeartBeatMessage)
             GREETING -> networkService.onGreeting(ctx, packet.data as GreetingMessage)
             ADDRESSES -> networkService.onAddresses(ctx, packet.data as AddressesMessage)
@@ -48,6 +49,7 @@ abstract class BaseConnectionHandler(
             EXPLORER_FIND_ADDRESSES -> networkService.onExplorerFindAddresses(ctx, packet.data as ExplorerFindAddressesMessage)
             EXPLORER_ADDRESSES -> networkService.onExplorerAddresses(ctx, packet.data as ExplorerAddressesMessage)
 
+            // -- sync messages
             DELEGATE_REQUEST -> syncBlockRequestHandler.onDelegateRequestMessage(ctx, packet.data as DelegateRequestMessage)
             DELEGATE_RESPONSE -> syncBlockResponseHandler.onDelegateResponseMessage(ctx, packet.data as DelegateResponseMessage)
             HASH_BLOCK_REQUEST -> syncBlockRequestHandler.onLastHashRequestMessage(ctx, packet.data as HashBlockRequestMessage)
@@ -55,15 +57,8 @@ abstract class BaseConnectionHandler(
             SYNC_BLOCKS_REQUEST -> syncBlockRequestHandler.onSyncBlocRequestMessage(ctx, packet.data as SyncBlockRequestMessage)
             MAIN_BLOCK -> syncBlockResponseHandler.onMainBlockMessage(packet.data as MainBlockMessage)
             GENESIS_BLOCK -> syncBlockResponseHandler.onGenesisBlockMessage(packet.data as GenesisBlockMessage)
-        }
 
-        if (syncManager.getSyncStatus() == SYNCHRONIZED) {
-            processAppMessages(ctx, packet)
-        }
-    }
-
-    private fun processAppMessages(ctx: ChannelHandlerContext, packet: Packet) {
-        when (packet.type) {
+            // -- blockchain messages
             TRANSFER_TRANSACTION -> coreService.onTransferTransaction(ctx, packet.data as TransferTransactionMessage)
             DELEGATE_TRANSACTION -> coreService.onDelegateTransaction(ctx, packet.data as DelegateTransactionMessage)
             VOTE_TRANSACTION -> coreService.onVoteTransaction(ctx, packet.data as VoteTransactionMessage)

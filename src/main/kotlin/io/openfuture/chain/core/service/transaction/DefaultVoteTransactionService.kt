@@ -5,9 +5,7 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.repository.UVoteTransactionRepository
 import io.openfuture.chain.core.repository.VoteTransactionRepository
@@ -85,13 +83,6 @@ internal class DefaultVoteTransactionService(
     }
 
     @Transactional
-    override fun save(tx: VoteTransaction): VoteTransaction {
-        val type = tx.payload.getVoteType()
-        updateWalletVotes(tx.header.senderAddress, tx.payload.delegateKey, type)
-        return super.save(tx)
-    }
-
-    @Transactional
     override fun isValid(message: VoteTransactionMessage): Boolean {
         return try {
             validate(UnconfirmedVoteTransaction.of(message))
@@ -100,6 +91,12 @@ internal class DefaultVoteTransactionService(
             log.warn(e.message)
             false
         }
+    }
+
+    override fun save(tx: VoteTransaction): VoteTransaction {
+        val type = tx.payload.getVoteType()
+        updateWalletVotes(tx.header.senderAddress, tx.payload.delegateKey, type)
+        return super.save(tx)
     }
 
     private fun validate(utx: UnconfirmedVoteTransaction) {

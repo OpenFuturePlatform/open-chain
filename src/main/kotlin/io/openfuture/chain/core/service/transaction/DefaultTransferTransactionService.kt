@@ -3,9 +3,7 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.repository.TransferTransactionRepository
 import io.openfuture.chain.core.repository.UTransferTransactionRepository
@@ -93,12 +91,6 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun save(tx: TransferTransaction): TransferTransaction {
-        updateTransferBalance(tx.header.senderAddress, tx.payload.recipientAddress, tx.payload.amount)
-        return super.save(tx)
-    }
-
-    @Transactional
     override fun isValid(message: TransferTransactionMessage): Boolean {
         return try {
             validate(UnconfirmedTransferTransaction.of(message))
@@ -107,6 +99,11 @@ class DefaultTransferTransactionService(
             log.warn(e.message)
             false
         }
+    }
+
+    override fun save(tx: TransferTransaction): TransferTransaction {
+        updateTransferBalance(tx.header.senderAddress, tx.payload.recipientAddress, tx.payload.amount)
+        return super.save(tx)
     }
 
     private fun validate(utx: UnconfirmedTransferTransaction) {

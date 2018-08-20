@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.block
 
+import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
@@ -40,6 +41,8 @@ class DefaultGenesisBlockService(
     override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()
         ?: throw NotFoundException("Last block not found")
 
+    @BlockchainSynchronized
+    @Transactional
     override fun create(timestamp: Long): GenesisBlockMessage {
         val lastBlock = blockService.getLast()
         val height = lastBlock.height + 1
@@ -52,12 +55,6 @@ class DefaultGenesisBlockService(
 
         return GenesisBlockMessage(height, previousHash, timestamp, reward, ByteUtils.toHexString(hash), signature,
             publicKey, payload.epochIndex, payload.activeDelegates.map { it.publicKey })
-    }
-
-    private fun createPayload(): GenesisBlockPayload {
-        val epochIndex = getLast().payload.epochIndex + 1
-        val delegates = delegateService.getActiveDelegates()
-        return GenesisBlockPayload(epochIndex, delegates)
     }
 
     @Transactional
@@ -86,6 +83,12 @@ class DefaultGenesisBlockService(
             log.warn(e.message)
             false
         }
+    }
+
+    private fun createPayload(): GenesisBlockPayload {
+        val epochIndex = getLast().payload.epochIndex + 1
+        val delegates = delegateService.getActiveDelegates()
+        return GenesisBlockPayload(epochIndex, delegates)
     }
 
     private fun validate(message: GenesisBlockMessage) {

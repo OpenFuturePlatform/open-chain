@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
+import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.InsufficientTransactionsException
 import io.openfuture.chain.core.exception.ValidationException
@@ -43,7 +44,7 @@ class DefaultMainBlockService(
         val log = LoggerFactory.getLogger(DefaultMainBlockService::class.java)
     }
 
-
+    @BlockchainSynchronized
     @Transactional(readOnly = true)
     override fun create(): PendingBlockMessage {
         val timestamp = clock.networkTime()

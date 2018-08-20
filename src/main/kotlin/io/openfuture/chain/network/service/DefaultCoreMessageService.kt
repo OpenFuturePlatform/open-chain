@@ -1,6 +1,7 @@
 package io.openfuture.chain.network.service
 
 import io.netty.channel.ChannelHandlerContext
+import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.core.service.VoteTransactionService
@@ -16,14 +17,17 @@ class DefaultCoreMessageService(
     private val transferTransactionService: TransferTransactionService
 ) : CoreMessageService {
 
+    @BlockchainSynchronized
     override fun onTransferTransaction(ctx: ChannelHandlerContext, message: TransferTransactionMessage) {
         transferTransactionService.add(message)
     }
 
+    @BlockchainSynchronized
     override fun onDelegateTransaction(ctx: ChannelHandlerContext, message: DelegateTransactionMessage) {
         delegateTransactionService.add(message)
     }
 
+    @BlockchainSynchronized
     override fun onVoteTransaction(ctx: ChannelHandlerContext, message: VoteTransactionMessage) {
         voteTransactionService.add(message)
     }

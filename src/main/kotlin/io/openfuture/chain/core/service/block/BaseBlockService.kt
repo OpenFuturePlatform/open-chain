@@ -49,7 +49,7 @@ abstract class BaseBlockService<T : Block>(
 
     protected fun isSync(block: Block): Boolean {
         val lastBlock = blockService.getLast()
-        return isValidHeight(block, lastBlock)
+        return isValidHeight(block, lastBlock) && isValidPreviousHash(block, lastBlock)
     }
 
     private fun isValidPreviousHash(block: Block, lastBlock: Block): Boolean = block.previousHash == lastBlock.hash
