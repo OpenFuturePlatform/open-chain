@@ -22,7 +22,7 @@ class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
     uRepository: UTransferTransactionRepository,
     private val networkService: NetworkApiService
-) : BaseTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
+) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
 
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<TransferTransaction> = repository.findAll(request)

@@ -9,7 +9,6 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTrans
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -80,8 +79,6 @@ interface TransactionService {
     fun getAllUnconfirmedByAddress(address: String): List<UnconfirmedTransaction>
 
     fun getUTransactionByHash(hash: String): UnconfirmedTransaction
-
-    fun createHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload): String
 
 }
 

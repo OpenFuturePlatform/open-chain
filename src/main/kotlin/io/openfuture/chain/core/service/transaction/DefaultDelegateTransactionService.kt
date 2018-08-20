@@ -23,7 +23,7 @@ class DefaultDelegateTransactionService(
     uRepository: UDelegateTransactionRepository,
     private val delegateService: DelegateService,
     private val networkService: NetworkApiService
-) : BaseTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository), DelegateTransactionService {
+) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository), DelegateTransactionService {
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(): MutableList<UnconfirmedDelegateTransaction> {

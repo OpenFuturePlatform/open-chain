@@ -26,7 +26,7 @@ internal class DefaultVoteTransactionService(
     private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties,
     private val networkService: NetworkApiService
-) : BaseTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository), VoteTransactionService {
+) : ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository), VoteTransactionService {
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(): MutableList<UnconfirmedVoteTransaction> = unconfirmedRepository.findAllByOrderByFeeDesc()

@@ -31,7 +31,7 @@ class DefaultRewardTransactionService(
     private val consensusProperties: ConsensusProperties,
     private val delegateService: DelegateService,
     private val keyHolder: NodeKeyHolder
-) : RewardTransactionService {
+) : BaseTransactionService(), RewardTransactionService {
 
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<RewardTransaction> = repository.findAll(request)
@@ -41,7 +41,7 @@ class DefaultRewardTransactionService(
         repository.findAllByPayloadRecipientAddress(address)
 
     @Transactional(readOnly = true)
-    override fun create(timestamp: Long, transactions:List<UnconfirmedTransaction>): RewardTransactionMessage {
+    override fun create(timestamp: Long, transactions: List<UnconfirmedTransaction>): RewardTransactionMessage {
         val senderAddress = consensusProperties.genesisAddress!!
         val rewardBlock = consensusProperties.rewardBlock!!
         val bank = walletService.getBalanceByAddress(senderAddress)
@@ -51,7 +51,7 @@ class DefaultRewardTransactionService(
         val delegate = delegateService.getByPublicKey(publicKey)
 
         val payload = RewardTransactionPayload(reward, delegate.address)
-        val hash = transactionService.createHash(timestamp, fee, senderAddress, payload)
+        val hash = createHash(timestamp, fee, senderAddress, payload)
         val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())
 
         return RewardTransactionMessage(timestamp, fee, senderAddress, hash, signature, publicKey, reward, delegate.address)
@@ -105,7 +105,7 @@ class DefaultRewardTransactionService(
     }
 
     private fun verifyHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload, hash: String): Boolean =
-        transactionService.createHash(timestamp, fee, senderAddress, payload) == hash
+        createHash(timestamp, fee, senderAddress, payload) == hash
 
     private fun verifySignature(hash: String, signature: String, publicKey: String): Boolean =
         SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
