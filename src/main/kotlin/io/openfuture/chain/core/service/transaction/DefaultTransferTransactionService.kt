@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.exception.model.ExceptionType.INSUFFICIENT_BALANCE
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -110,7 +111,7 @@ class DefaultTransferTransactionService(
         val balance = walletService.getBalanceByAddress(address)
         val unspentBalance = balance - unconfirmedRepository.findAllBySenderAddress(address).map { it.payload.amount }.sum()
         if (unspentBalance < amount) {
-            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "actual balance is less then sum fee and amount")
+            throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
         }
     }
 

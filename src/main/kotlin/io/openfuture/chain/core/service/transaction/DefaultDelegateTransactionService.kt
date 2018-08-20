@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_DELEGATE_KEY
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -79,13 +80,13 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun check(tx: DelegateTransaction) {
-        checkDelegateExists(tx.senderAddress)
+        checkDelegateKey(tx.payload.delegateKey)
         super.check(tx)
     }
 
     @Transactional
     override fun check(utx: UnconfirmedDelegateTransaction) {
-        checkDelegateExists(utx.senderAddress)
+        checkDelegateKey(utx.payload.delegateKey)
         super.check(utx)
     }
 
@@ -94,9 +95,9 @@ class DefaultDelegateTransactionService(
         return super.confirmProcess(utx, DelegateTransaction.of(utx, block))
     }
 
-    private fun checkDelegateExists(publicKey: String) {
+    private fun checkDelegateKey(publicKey: String) {
         if (delegateService.isExists(publicKey)) {
-            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "delegate with current public key already exists")
+            throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
     }
 
