@@ -87,14 +87,12 @@ class DefaultTransferTransactionService(
     @Transactional
     override fun check(utx: UnconfirmedTransferTransaction) {
         checkTransferBalance(utx.senderAddress, utx.payload.amount + utx.fee)
-
         super.check(utx)
     }
 
     @Transactional
     override fun check(tx: TransferTransaction) {
         checkTransferBalance(tx.senderAddress, tx.payload.amount + tx.fee)
-
         super.check(tx)
     }
 

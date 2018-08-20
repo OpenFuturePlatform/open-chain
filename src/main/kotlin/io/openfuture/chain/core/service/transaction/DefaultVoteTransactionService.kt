@@ -89,7 +89,13 @@ internal class DefaultVoteTransactionService(
         super.check(utx)
     }
 
-    private fun checkWalletVotes(delegateKey: String, senderAddress: String, type: VoteType) {
+    private fun confirm(utx: UnconfirmedVoteTransaction, block: MainBlock): VoteTransaction {
+        val type = utx.payload.getVoteType()
+        updateWalletVotes(utx.payload.delegateKey, utx.senderAddress, type)
+        return super.confirmProcess(utx, VoteTransaction.of(utx, block))
+    }
+
+    private fun updateWalletVotes(delegateKey: String, senderAddress: String, type: VoteType) {
         val delegate = delegateService.getByPublicKey(delegateKey)
         val wallet = walletService.getByAddress(senderAddress)
 
@@ -102,12 +108,6 @@ internal class DefaultVoteTransactionService(
             }
         }
         walletService.save(wallet)
-    }
-
-    private fun confirm(utx: UnconfirmedVoteTransaction, block: MainBlock): VoteTransaction {
-        val type = utx.payload.getVoteType()
-        checkWalletVotes(utx.payload.delegateKey, utx.senderAddress, type)
-        return super.confirmProcess(utx, VoteTransaction.of(utx, block))
     }
 
     private fun checkVoteCount(senderAddress: String) {

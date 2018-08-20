@@ -96,7 +96,7 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
     }
 
     private fun checkHash(tx: BaseTransaction) {
-        if (generateHash(tx.timestamp, tx.fee, tx.senderAddress, tx.getPayload()) != tx.hash) {
+        if (createHash(tx.timestamp, tx.fee, tx.senderAddress, tx.getPayload()) != tx.hash) {
             throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "incorrect hash by transaction fields")
         }
     }
@@ -107,7 +107,7 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         }
     }
 
-    private fun generateHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload): String {
+    private fun createHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload): String {
         val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + senderAddress.toByteArray(UTF_8).size + payload.getBytes().size)
             .putLong(timestamp)
             .putLong(fee)

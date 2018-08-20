@@ -79,13 +79,13 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun check(tx: DelegateTransaction) {
-        checkSenderAddress(tx.senderAddress)
+        checkPublicKey(tx.senderAddress)
         super.check(tx)
     }
 
     @Transactional
     override fun check(utx: UnconfirmedDelegateTransaction) {
-        checkSenderAddress(utx.senderAddress)
+        checkPublicKey(utx.senderAddress)
         super.check(utx)
     }
 
@@ -94,8 +94,8 @@ class DefaultDelegateTransactionService(
         return super.confirmProcess(utx, DelegateTransaction.of(utx, block))
     }
 
-    private fun checkSenderAddress(key: String) {
-        if (delegateService.isExists(key)) {
+    private fun checkPublicKey(publicKey: String) {
+        if (delegateService.isExists(publicKey)) {
             throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "delegate with current sender address already exists")
         }
     }
