@@ -8,7 +8,6 @@ import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
-import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.network.*
 
 
@@ -25,6 +24,7 @@ interface NetworkApiService {
     fun getNetworkSize(): Int
 
     fun isChannelsEmpty(): Boolean
+
 }
 
 interface NetworkInnerService {

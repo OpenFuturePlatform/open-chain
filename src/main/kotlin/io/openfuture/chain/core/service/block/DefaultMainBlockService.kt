@@ -43,6 +43,7 @@ class DefaultMainBlockService(
         val log = LoggerFactory.getLogger(DefaultMainBlockService::class.java)
     }
 
+
     @BlockchainSynchronized
     @Transactional(readOnly = true)
     override fun create(): PendingBlockMessage {
