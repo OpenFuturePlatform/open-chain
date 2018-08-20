@@ -86,7 +86,7 @@ internal class DefaultVoteTransactionService(
     }
 
     @Transactional
-    override fun isValid(message: VoteTransactionMessage): Boolean {
+    override fun verify(message: VoteTransactionMessage): Boolean {
         return try {
             validate(UnconfirmedVoteTransaction.of(message))
             true

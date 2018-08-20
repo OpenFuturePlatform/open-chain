@@ -94,7 +94,7 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun isValid(message: TransferTransactionMessage): Boolean {
+    override fun verify(message: TransferTransactionMessage): Boolean {
         return try {
             validate(UnconfirmedTransferTransaction.of(message))
             true

@@ -14,7 +14,6 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.node.*
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
@@ -57,7 +56,7 @@ interface GenesisBlockService {
 
     fun add(message: GenesisBlockMessage)
 
-    fun isValid(message: GenesisBlockMessage): Boolean
+    fun verify(message: GenesisBlockMessage): Boolean
 
 }
 
@@ -69,7 +68,7 @@ interface MainBlockService {
 
     fun add(message: MainBlockMessage)
 
-    fun isValid(message: PendingBlockMessage): Boolean
+    fun verify(message: PendingBlockMessage): Boolean
 
 }
 
@@ -98,7 +97,7 @@ interface TransferTransactionService {
 
     fun toBlock(message: TransferTransactionMessage, block: MainBlock): TransferTransaction
 
-    fun isValid(message: TransferTransactionMessage): Boolean
+    fun verify(message: TransferTransactionMessage): Boolean
 
 }
 
@@ -114,7 +113,7 @@ interface VoteTransactionService {
 
     fun toBlock(message: VoteTransactionMessage, block: MainBlock): VoteTransaction
 
-    fun isValid(message: VoteTransactionMessage): Boolean
+    fun verify(message: VoteTransactionMessage): Boolean
 
 }
 
@@ -130,7 +129,7 @@ interface DelegateTransactionService {
 
     fun toBlock(message: DelegateTransactionMessage, block: MainBlock): DelegateTransaction
 
-    fun isValid(message: DelegateTransactionMessage): Boolean
+    fun verify(message: DelegateTransactionMessage): Boolean
 
 }
 

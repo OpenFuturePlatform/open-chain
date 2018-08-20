@@ -74,7 +74,7 @@ class DefaultGenesisBlockService(
     }
 
     @Transactional(readOnly = true)
-    override fun isValid(message: GenesisBlockMessage): Boolean {
+    override fun verify(message: GenesisBlockMessage): Boolean {
         return try {
             validate(message)
             true

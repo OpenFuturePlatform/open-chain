@@ -110,7 +110,7 @@ class DefaultMainBlockService(
     }
 
     @Transactional(readOnly = true)
-    override fun isValid(message: PendingBlockMessage): Boolean {
+    override fun verify(message: PendingBlockMessage): Boolean {
         return try {
             validate(message)
             true
@@ -141,15 +141,15 @@ class DefaultMainBlockService(
     }
 
     private fun isValidVoteTransactions(transactions: List<VoteTransactionMessage>): Boolean {
-        return transactions.all { voteTransactionService.isValid(it) }
+        return transactions.all { voteTransactionService.verify(it) }
     }
 
     private fun isValidDelegateTransactions(transactions: List<DelegateTransactionMessage>): Boolean {
-        return transactions.all { delegateTransactionService.isValid(it) }
+        return transactions.all { delegateTransactionService.verify(it) }
     }
 
     private fun isValidTransferTransactions(transactions: List<TransferTransactionMessage>): Boolean {
-        return transactions.all { transferTransactionService.isValid(it) }
+        return transactions.all { transferTransactionService.verify(it) }
     }
 
     private fun isValidMerkleHash(merkleHash: String, transactions: List<String>): Boolean {

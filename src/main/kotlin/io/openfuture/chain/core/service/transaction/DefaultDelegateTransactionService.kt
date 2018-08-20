@@ -87,7 +87,7 @@ class DefaultDelegateTransactionService(
     }
 
     @Transactional
-    override fun isValid(message: DelegateTransactionMessage): Boolean {
+    override fun verify(message: DelegateTransactionMessage): Boolean {
         return try {
             validate(UnconfirmedDelegateTransaction.of(message))
             true
