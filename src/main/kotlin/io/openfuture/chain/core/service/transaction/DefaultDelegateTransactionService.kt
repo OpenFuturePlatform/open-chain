@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -83,13 +84,15 @@ class DefaultDelegateTransactionService(
     }
 
     @Transactional
-    override fun isValid(tx: DelegateTransaction): Boolean {
-        return isNotExistDelegate(tx.senderAddress) && super.isValid(tx)
+    override fun check(tx: DelegateTransaction) {
+        checkDelegateExists(tx.senderAddress)
+        super.check(tx)
     }
 
     @Transactional
-    override fun isValid(utx: UnconfirmedDelegateTransaction): Boolean {
-        return isNotExistDelegate(utx.senderAddress) && super.isValid(utx)
+    override fun check(utx: UnconfirmedDelegateTransaction) {
+        checkDelegateExists(utx.senderAddress)
+        super.check(utx)
     }
 
     private fun confirm(utx: UnconfirmedDelegateTransaction, block: MainBlock): DelegateTransaction {
@@ -97,6 +100,10 @@ class DefaultDelegateTransactionService(
         return super.confirmProcess(utx, DelegateTransaction.of(utx, block))
     }
 
-    private fun isNotExistDelegate(key: String): Boolean = !delegateService.isExists(key)
+    private fun checkDelegateExists(publicKey: String) {
+        if (delegateService.isExists(publicKey)) {
+            throw ValidationException(TRANSACTION_EXCEPTION_MESSAGE + "delegate with current public key already exists")
+        }
+    }
 
 }

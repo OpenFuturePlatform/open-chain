@@ -2,7 +2,8 @@ package io.openfuture.chain.core.model.entity.transaction
 
 import io.openfuture.chain.core.model.entity.base.BaseModel
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.MappedSuperclass
 
 @MappedSuperclass
 abstract class BaseTransaction(

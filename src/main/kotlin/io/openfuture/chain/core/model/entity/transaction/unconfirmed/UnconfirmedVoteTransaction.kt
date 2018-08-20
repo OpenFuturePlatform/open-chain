@@ -2,7 +2,6 @@ package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.vote.VoteTransactionPayload
-import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import javax.persistence.Embedded
@@ -39,11 +38,7 @@ class UnconfirmedVoteTransaction(
             request.timestamp!!,
             request.fee!!,
             request.senderAddress!!,
-            TransactionUtils.generateHash(
-                request.timestamp!!,
-                request.fee!!,
-                request.senderAddress!!,
-                VoteTransactionPayload(request.voteTypeId!!, request.delegateKey!!)),
+            request.hash!!,
             request.senderSignature!!,
             request.senderPublicKey!!,
             VoteTransactionPayload(request.voteTypeId!!, request.delegateKey!!)

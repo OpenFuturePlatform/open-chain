@@ -10,7 +10,7 @@ class SignatureUtilsTest {
     fun signShouldReturnBase64EncodedSignature() {
         val data = "hello".toByteArray()
         val privateKey = Base64.getDecoder().decode("SwPW/DQEVbNj9RAgrT7MpPCFAoDPQ2xwxyeSP220bD4=")
-        val expSign = "MEQCIEvAUWAsicWC7NNwkA6FS8FTUIV9P2WBxDS8JUzu3enjAiAftA9QcMFGBGZsyuUpXld9MPKw7jz3OweQnpa3G/WfuQ=="
+        val expSign = "MEYCIQDqdhtqX1Tp+QGqNmEVyVIweQRFBDMsjUV/xfqaJiMQFwIhAO83jH/g1dGHn/vb04wJVwa8q+5OVwkTKqj+yWptKFdm"
 
         val signature = SignatureUtils.sign(data, privateKey)
 
