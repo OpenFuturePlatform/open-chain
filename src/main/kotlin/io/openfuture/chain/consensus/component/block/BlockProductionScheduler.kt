@@ -44,7 +44,8 @@ class BlockProductionScheduler(
             try {
                 val slotOwner = epochService.getCurrentSlotOwner()
                 if (isGenesisBlockRequired()) {
-                    val genesisBlock = genesisBlockService.create()
+                    val timestamp = epochService.getEpochStart() + epochService.getEpochDuration()
+                    val genesisBlock = genesisBlockService.create(timestamp)
                     genesisBlockService.add(genesisBlock)
                     pendingBlockHandler.resetSlotNumber()
                 } else if (keyHolder.getPublicKey() == slotOwner.publicKey) {
