@@ -3,7 +3,6 @@ package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
-import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import javax.persistence.Embedded

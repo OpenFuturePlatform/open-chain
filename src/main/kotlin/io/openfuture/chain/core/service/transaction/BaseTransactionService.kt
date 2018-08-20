@@ -22,17 +22,16 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
     protected val unconfirmedRepository: UTransactionRepository<U>
 ) {
 
-    @Autowired
-    protected lateinit var baseService: TransactionService
+    @Autowired protected lateinit var clock: NodeClock
 
-    @Autowired
-    protected lateinit var clock: NodeClock
+    @Autowired private lateinit var cryptoService: CryptoService
+    @Autowired protected lateinit var walletService: WalletService
+    @Autowired protected lateinit var baseService: TransactionService
+    @Autowired protected lateinit var transactionService: TransactionService
 
-    @Autowired
-    protected lateinit var walletService: WalletService
-
-    @Autowired
-    private lateinit var cryptoService: CryptoService
+    companion object {
+        const val TRANSACTION_EXCEPTION_MESSAGE: String = "Transaction is invalid : "
+    }
 
 
     open fun save(utx: U): U {
@@ -78,11 +77,22 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
     }
 
     private fun isValidHash(header: TransactionHeader, payload: TransactionPayload, hash: String): Boolean {
-        return TransactionUtils.generateHash(header, payload) == hash
+        return createHash(header, payload) == hash
     }
 
     private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean {
         return SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
+    }
+
+    private fun createHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload): String {
+        val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + senderAddress.toByteArray(UTF_8).size + payload.getBytes().size)
+            .putLong(timestamp)
+            .putLong(fee)
+            .put(senderAddress.toByteArray(UTF_8))
+            .put(payload.getBytes())
+            .array()
+
+        return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
     }
 
 }

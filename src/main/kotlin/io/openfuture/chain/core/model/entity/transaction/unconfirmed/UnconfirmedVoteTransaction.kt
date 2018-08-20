@@ -4,6 +4,7 @@ import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
 import io.openfuture.chain.core.util.TransactionUtils
+import io.openfuture.chain.core.model.entity.transaction.vote.VoteTransactionPayload
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import javax.persistence.Embedded

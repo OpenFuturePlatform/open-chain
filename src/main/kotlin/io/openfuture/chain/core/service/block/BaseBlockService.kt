@@ -52,6 +52,17 @@ abstract class BaseBlockService<T : Block>(
         return isValidHeight(block, lastBlock) && isValidPreviousHash(block, lastBlock)
     }
 
+    protected fun createHash(timestamp: Long, height: Long, previousHash: String, reward: Long, payload: BlockPayload): ByteArray {
+        val bytes =  ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + previousHash.toByteArray(UTF_8).size + LONG_BYTES + payload.getBytes().size)
+            .putLong(timestamp).putLong(height)
+            .put(previousHash.toByteArray(UTF_8))
+            .putLong(reward)
+            .put(payload.getBytes())
+            .array()
+
+        return HashUtils.doubleSha256(bytes)
+    }
+
     private fun isValidPreviousHash(block: Block, lastBlock: Block): Boolean = block.previousHash == lastBlock.hash
 
     private fun isValidTimeStamp(block: Block, lastBlock: Block): Boolean = block.timestamp > lastBlock.timestamp
@@ -59,9 +70,9 @@ abstract class BaseBlockService<T : Block>(
     private fun isValidHeight(block: Block, lastBlock: Block): Boolean = block.height == lastBlock.height + 1
 
     private fun isValidHash(block: Block): Boolean {
-        val dataHash = BlockUtils.createHash(block.timestamp, block.height, block.previousHash, block.reward,
+        val hash = createHash(block.timestamp, block.height, block.previousHash, block.reward,
             block.getPayload())
-        return ByteUtils.toHexString(dataHash) == block.hash
+        return ByteUtils.toHexString(hash) == block.hash
     }
 
     private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean =
