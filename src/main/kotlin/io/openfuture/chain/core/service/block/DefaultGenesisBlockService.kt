@@ -9,7 +9,6 @@ import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DefaultDelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
-import io.openfuture.chain.core.util.BlockUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
 import io.openfuture.chain.network.service.NetworkApiService
@@ -35,7 +34,7 @@ class DefaultGenesisBlockService(
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
         val payload = createPayload()
-        val hash = BlockUtils.createHash(timestamp, height, previousHash, payload)
+        val hash = createHash(timestamp, height, previousHash, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKey()
 

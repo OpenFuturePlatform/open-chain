@@ -13,7 +13,7 @@ object SignatureUtils {
      * @return Base64 encoded signature
      */
     fun sign(data: ByteArray, privateKey: ByteArray): String =
-        Base64.getEncoder().encodeToString(ECKey(privateKey).sign(HashUtils.sha256(data)))
+        Base64.getEncoder().encodeToString(ECKey(privateKey).sign(data))
 
     /**
      * Verify ECDSA value
@@ -22,10 +22,10 @@ object SignatureUtils {
      * @param signature Base64 encoded signature
      * @return True if valid signature. False otherwise
      */
-    fun verify(data: ByteArray, signature: String, publicKey: ByteArray): Boolean {
+    fun verify(hash: ByteArray, signature: String, publicKey: ByteArray): Boolean {
         val ecKey = ECKey(publicKey, false)
         val decodedSign = Base64.getDecoder().decode(signature)
-        return ecKey.verify(HashUtils.sha256(data), decodedSign)
+        return ecKey.verify(hash, decodedSign)
     }
 
 }

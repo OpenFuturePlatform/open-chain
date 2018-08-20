@@ -8,8 +8,6 @@ import io.openfuture.chain.core.model.entity.transaction.payload.RewardTransacti
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
-import io.openfuture.chain.core.util.BlockUtils
-import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.node.NodeClock
@@ -54,7 +52,7 @@ class DefaultMainBlockService(
         val merkleHash = calculateMerkleRoot(transactionHashes)
         val payload = MainBlockPayload(merkleHash)
 
-        val hash = BlockUtils.createHash(timestamp, height, previousHash, payload)
+        val hash = createHash(timestamp, height, previousHash, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKey()
 

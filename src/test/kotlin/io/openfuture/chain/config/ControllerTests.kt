@@ -1,6 +1,5 @@
 package io.openfuture.chain.config
 
-import io.openfuture.chain.core.util.AppContextUtils
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.property.NodeProperties
 import org.junit.runner.RunWith
@@ -15,7 +14,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
  * <a href="https://docs.spring.io/spring-security/site/docs/current/reference/html/test-method.html">documentation</a>
  */
 @RunWith(SpringRunner::class)
-@Import(NodeProperties::class, AppContextUtils::class)
+@Import(NodeProperties::class)
 abstract class ControllerTests {
 
     @MockBean
