@@ -1,8 +1,8 @@
 package io.openfuture.chain.core.exception
 
-import io.openfuture.chain.core.exception.model.ExceptionField
+import io.openfuture.chain.core.exception.model.ExceptionType
 
 class ValidationException(
     message: String?,
-    val field: ExceptionField? = null
+    val type: ExceptionType? = null
 ) : RuntimeException(message)

@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.exception.model.ExceptionType.INSUFFICIENT_BALANCE
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -10,7 +11,6 @@ import io.openfuture.chain.core.repository.UTransferTransactionRepository
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.network.service.NetworkApiService
-import io.openfuture.chain.core.exception.model.ExceptionField.BALANCE
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import org.springframework.data.domain.Page
@@ -111,7 +111,7 @@ class DefaultTransferTransactionService(
         val balance = walletService.getBalanceByAddress(address)
         val unspentBalance = balance - unconfirmedRepository.findAllBySenderAddress(address).map { it.payload.amount }.sum()
         if (unspentBalance < amount) {
-            throw ValidationException("Insufficient funds", BALANCE)
+            throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
         }
     }
 

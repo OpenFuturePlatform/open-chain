@@ -21,7 +21,7 @@ class ExceptionRestControllerAdvice {
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(ValidationException::class)
     fun handleValidationException(ex: ValidationException): ExceptionResponse {
-        return ExceptionResponse(BAD_REQUEST.value(), ex.message, ex.field)
+        return ExceptionResponse(BAD_REQUEST.value(), ex.message, ex.type!!.name)
     }
 
 }

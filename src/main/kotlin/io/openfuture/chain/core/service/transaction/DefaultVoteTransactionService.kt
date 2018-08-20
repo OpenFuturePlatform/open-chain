@@ -3,6 +3,7 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_VOTES_COUNT
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.FOR
@@ -14,7 +15,6 @@ import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.network.service.NetworkApiService
-import io.openfuture.chain.core.exception.model.ExceptionField.VOTES_COUNT
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -119,7 +119,7 @@ internal class DefaultVoteTransactionService(
             .count()
 
         if (consensusProperties.delegatesCount!! <= confirmedVotes + unconfirmedForVotes) {
-            throw ValidationException("Incorrect votes count", VOTES_COUNT)
+            throw ValidationException("Incorrect votes count", INCORRECT_VOTES_COUNT)
         }
     }
 

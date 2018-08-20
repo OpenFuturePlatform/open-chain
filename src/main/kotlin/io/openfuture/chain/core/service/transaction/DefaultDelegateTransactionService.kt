@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_ADDRESS
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -12,7 +13,6 @@ import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.network.service.NetworkApiService
-import io.openfuture.chain.core.exception.model.ExceptionField.ADDRESS
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -97,7 +97,7 @@ class DefaultDelegateTransactionService(
 
     private fun checkSenderAddress(publicKey: String) {
         if (delegateService.isExists(publicKey)) {
-            throw ValidationException("Incorrect sender address", ADDRESS)
+            throw ValidationException("Incorrect sender address", INCORRECT_ADDRESS)
         }
     }
 
