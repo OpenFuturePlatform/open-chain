@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 @Component
 class BlockCapacityChecker(
-    private val nodeClock: NodeClock
+    nodeClock: NodeClock
 ) {
 
     private val lastBlockTime = AtomicLong(nodeClock.networkTime())
