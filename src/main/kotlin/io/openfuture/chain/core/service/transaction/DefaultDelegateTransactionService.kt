@@ -43,12 +43,12 @@ class DefaultDelegateTransactionService(
     @Transactional
     override fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction {
         val utx = UnconfirmedDelegateTransaction.of(message)
-        validate(utx)
 
         if (isExists(utx.hash)) {
             return utx
         }
 
+        validate(utx)
         val savedUtx = this.save(utx)
         networkService.broadcast(message)
         return savedUtx

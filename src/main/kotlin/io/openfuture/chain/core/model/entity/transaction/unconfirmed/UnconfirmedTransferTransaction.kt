@@ -3,7 +3,6 @@ package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
-import io.openfuture.chain.core.util.TransactionUtils
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import javax.persistence.Embedded
@@ -34,9 +33,7 @@ class UnconfirmedTransferTransaction(
 
         fun of(request: TransferTransactionRequest): UnconfirmedTransferTransaction = UnconfirmedTransferTransaction(
             TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
-            TransactionUtils.generateHash(
-                TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
-                TransferTransactionPayload(request.amount!!, request.recipientAddress!!)),
+            request.hash!!,
             request.senderSignature!!,
             request.senderPublicKey!!,
             TransferTransactionPayload(request.amount!!, request.recipientAddress!!)

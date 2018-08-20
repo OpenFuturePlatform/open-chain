@@ -70,7 +70,7 @@ class DefaultSyncBlockResponseHandler(
         val delegateAddresses = activeDelegatesLastHash[message.hash]
         val address = getNetworkAddress(ctx)
         if (null != delegateAddresses && !delegateAddresses.contains(address)) {
-            delegateAddresses.add(getNetworkAddress(ctx))
+            delegateAddresses.add(address)
             if (delegateAddresses.size > (activeDelegateAddresses.size - 1) / 3 * 2) {
                 val currentLastHash = blockService.getLast().hash
                 if (currentLastHash == message.hash) {
