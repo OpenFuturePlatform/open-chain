@@ -14,7 +14,6 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.node.*
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
@@ -53,7 +52,7 @@ interface GenesisBlockService {
 
     fun getLast(): GenesisBlock
 
-    fun create(timestamp: Long): GenesisBlockMessage
+    fun create(): GenesisBlockMessage
 
     fun add(message: GenesisBlockMessage)
 

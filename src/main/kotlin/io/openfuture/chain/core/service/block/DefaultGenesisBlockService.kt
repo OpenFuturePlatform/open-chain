@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.block
 
+import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
@@ -29,7 +30,8 @@ class DefaultGenesisBlockService(
     walletService: WalletService,
     delegateService: DefaultDelegateService,
     private val keyHolder: NodeKeyHolder,
-    private val syncManager: SyncManager
+    private val syncManager: SyncManager,
+    private val epochService: EpochService
 ) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService), GenesisBlockService {
 
     companion object {
@@ -43,12 +45,13 @@ class DefaultGenesisBlockService(
 
     @BlockchainSynchronized
     @Transactional
-    override fun create(timestamp: Long): GenesisBlockMessage {
+    override fun create(): GenesisBlockMessage {
         val lastBlock = blockService.getLast()
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
         val reward = 0L
         val payload = createPayload()
+        val timestamp = epochService.getEpochStart() + epochService.getEpochDuration()
         val hash = BlockUtils.createHash(timestamp, height, previousHash, reward, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKey()

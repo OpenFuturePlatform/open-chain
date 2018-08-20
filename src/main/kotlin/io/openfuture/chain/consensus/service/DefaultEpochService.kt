@@ -37,6 +37,9 @@ class DefaultEpochService(
     override fun getEpochEndTime(): Long =
         (getEpochStart() + getSlotNumber(clock.networkTime()) * fullTimeSlotDuration())
 
+    override fun getEpochDuration(): Long =
+        fullTimeSlotDuration() * genesisBlockService.getLast().payload.activeDelegates.size
+
     private fun getTimeSlotFromStart(time: Long): Long = (time - getEpochStart()) % fullTimeSlotDuration()
 
     private fun fullTimeSlotDuration(): Long = (properties.timeSlotDuration!! + properties.timeSlotInterval!!)
