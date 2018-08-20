@@ -4,8 +4,10 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_VOTES_COUNT
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
+import io.openfuture.chain.core.model.entity.dictionary.VoteType.FOR
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.repository.UVoteTransactionRepository
@@ -107,7 +109,7 @@ internal class DefaultVoteTransactionService(
         }
 
         if (!isValidVoteCount(utx.header.senderAddress)) {
-            throw ValidationException("Address: ${utx.header.senderAddress} already spent all votes!")
+            throw ValidationException("Incorrect votes count", INCORRECT_VOTES_COUNT)
         }
 
         if (!isAlreadyVote(utx.header.senderAddress, utx.payload.delegateKey)) {

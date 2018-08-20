@@ -13,5 +13,4 @@ data class DelegateTransactionRequest(
     @field:NotBlank var senderPublicKey: String? = null,
     @field:NotBlank var senderHost: String? = null,
     @field:NotNull var senderPort: Int? = null
-
 )

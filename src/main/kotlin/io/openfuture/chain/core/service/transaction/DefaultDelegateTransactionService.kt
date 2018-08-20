@@ -3,6 +3,7 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_DELEGATE_KEY
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -102,7 +103,7 @@ class DefaultDelegateTransactionService(
 
     private fun validate(utx: UnconfirmedDelegateTransaction) {
         if (!isNotExistsByDelegatePublicKey(utx.payload.delegateKey)) {
-            throw ValidationException("Delegate with public key: ${utx.payload.delegateKey} already exists")
+            throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
 
         if (!isValidFee(utx.header.senderAddress, utx.header.fee)) {

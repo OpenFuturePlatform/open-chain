@@ -1,7 +1,8 @@
 package io.openfuture.chain.rpc.controller.base
 
+import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.rpc.domain.ExceptionResponse
-import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -11,10 +12,16 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class ExceptionRestControllerAdvice {
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleException(ex: Exception): ExceptionResponse {
-        return ExceptionResponse(HttpStatus.BAD_REQUEST.value(), ex.message)
+        return ExceptionResponse(BAD_REQUEST.value(), ex.message)
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(ValidationException::class)
+    fun handleValidationException(ex: ValidationException): ExceptionResponse {
+        return ExceptionResponse(BAD_REQUEST.value(), ex.message, ex.type!!.name)
     }
 
 }
