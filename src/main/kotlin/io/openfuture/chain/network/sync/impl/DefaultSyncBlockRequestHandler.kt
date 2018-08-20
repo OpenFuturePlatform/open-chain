@@ -16,20 +16,17 @@ class DefaultSyncBlockRequestHandler(
     private val genesisBlockService: GenesisBlockService
 ): SyncBlockRequestHandler {
 
-    @BlockchainSynchronized
     override fun onDelegateRequestMessage(ctx: ChannelHandlerContext, message: DelegateRequestMessage) {
         val addresses = genesisBlockService.getLast().payload.activeDelegates
             .map { NetworkAddressMessage(it.host, it.port)  }
         send(ctx, DelegateResponseMessage(addresses, message.synchronizationSessionId))
     }
 
-    @BlockchainSynchronized
     override fun onLastHashRequestMessage(ctx: ChannelHandlerContext, message: HashBlockRequestMessage) {
         val lastBlock = blockService.getLast()
         send(ctx, HashBlockResponseMessage(lastBlock.hash, message.synchronizationSessionId))
     }
 
-    @BlockchainSynchronized
     override fun onSyncBlocRequestMessage(ctx: ChannelHandlerContext, message: SyncBlockRequestMessage) {
         blockService.getAfterCurrentHash(message.hash)
             .map { it.toMessage() }
