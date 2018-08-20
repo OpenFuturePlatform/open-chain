@@ -70,7 +70,8 @@ class DefaultRewardTransactionService(
 
     @Transactional(readOnly = true)
     override fun verify(blockMessage: PendingBlockMessage): Boolean {
-        val uTransactions = blockMessage.getAllTransactions().map { transactionService.getUTransactionByHash(it) }
+        val uTransactions = blockMessage.getAllTransactions()
+            .map { transactionService.getUnconfirmedTransactionByHash(it) }
         val fees = uTransactions.map { it.fee }.sum()
 
         return verifyBase(blockMessage.rewardTransaction, blockMessage, fees)

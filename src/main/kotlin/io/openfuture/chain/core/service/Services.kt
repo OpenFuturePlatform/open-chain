@@ -78,7 +78,7 @@ interface TransactionService {
 
     fun getAllUnconfirmedByAddress(address: String): List<UnconfirmedTransaction>
 
-    fun getUTransactionByHash(hash: String): UnconfirmedTransaction
+    fun getUnconfirmedTransactionByHash(hash: String): UnconfirmedTransaction
 
 }
 
