@@ -4,10 +4,9 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_VOTES_COUNT
+import io.openfuture.chain.core.exception.model.ExceptionType.*
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
-import io.openfuture.chain.core.model.entity.dictionary.VoteType.FOR
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.repository.UVoteTransactionRepository
@@ -105,7 +104,7 @@ internal class DefaultVoteTransactionService(
 
     private fun validate(utx: UnconfirmedVoteTransaction) {
         if (!isExistsDelegate(utx.payload.delegateKey)) {
-            throw ValidationException("Delegate with key: ${utx.payload.delegateKey} is not exists!")
+            throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
 
         if (!isValidVoteCount(utx.header.senderAddress)) {
@@ -121,7 +120,7 @@ internal class DefaultVoteTransactionService(
         }
 
         if (!isValidFee(utx.header.senderAddress, utx.header.fee)) {
-            throw ValidationException("Invalid fee: ${utx.header.fee} for address ${utx.header.senderAddress}")
+            throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
         }
 
         super.validateBase(utx)

@@ -4,6 +4,7 @@ import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_DELEGATE_KEY
+import io.openfuture.chain.core.exception.model.ExceptionType.INSUFFICIENT_BALANCE
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -107,7 +108,7 @@ class DefaultDelegateTransactionService(
         }
 
         if (!isValidFee(utx.header.senderAddress, utx.header.fee)) {
-            throw ValidationException("Invalid fee: ${utx.header.fee} for address ${utx.header.senderAddress}")
+            throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
         }
 
         super.validateBase(utx)
