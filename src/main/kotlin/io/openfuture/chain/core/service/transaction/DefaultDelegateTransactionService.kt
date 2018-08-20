@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.transaction
 
+import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.Delegate
@@ -53,6 +54,7 @@ class DefaultDelegateTransactionService(
         return savedUtx
     }
 
+    @BlockchainSynchronized(throwable = true)
     @Transactional
     override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction {
         val utx = UnconfirmedDelegateTransaction.of(request)

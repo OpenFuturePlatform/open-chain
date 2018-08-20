@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
+import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -53,6 +54,7 @@ internal class DefaultVoteTransactionService(
         return savedUtx
     }
 
+    @BlockchainSynchronized
     @Transactional
     override fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction {
         val utx = UnconfirmedVoteTransaction.of(request)

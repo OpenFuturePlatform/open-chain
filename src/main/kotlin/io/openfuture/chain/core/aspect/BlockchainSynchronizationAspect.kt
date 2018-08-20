@@ -17,13 +17,19 @@ class BlockchainSynchronizationAspect(
 
     companion object {
         val log = LoggerFactory.getLogger(BlockchainSynchronizationAspect::class.java)
+        private const val MESSAGE: String = "Application is not synchronized!"
     }
 
-    @Around("@annotation(io.openfuture.chain.core.annotation.BlockchainSynchronized)")
-    fun annotated(joinPoint: ProceedingJoinPoint): Any? {
+
+    @Around("@annotation(annotation)")
+    fun annotated(joinPoint: ProceedingJoinPoint, annotation: io.openfuture.chain.core.annotation.BlockchainSynchronized): Any? {
         if (syncManager.getSyncStatus() != SynchronizationStatus.SYNCHRONIZED) {
-           log.error("Application is not synchronized!")
-            return null
+            if (annotation.throwable) {
+                throw IllegalStateException(MESSAGE)
+            } else {
+                log.error(MESSAGE)
+                return null
+            }
         }
         return joinPoint.proceed()
     }
