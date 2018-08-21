@@ -4,7 +4,7 @@
   serial: "{{ count }}"
   gather_facts: False
   tasks:
-    - name: Re-create-openchain-container
+    - name: Re-create openchain container
       docker_container:
         name: openchain-{{ item.app_port }}
         image: openplatform/chain:{{ image_tag }}
@@ -13,7 +13,7 @@
           - "{{ item.app_port }}:8080"
           - "{{ item.api_port }}:9190"
         restart_policy: always
-      loop:
+      with_items:
         - { app_port: '9090', api_port: '9190' }
         - { app_port: '9091', api_port: '9191' }
         - { app_port: '9092', api_port: '9192' }
