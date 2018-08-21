@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.transaction
 
+import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
@@ -23,8 +24,13 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
     uRepository: UTransferTransactionRepository,
+    capacityChecker: TransactionCapacityChecker,
     private val networkService: NetworkApiService
-) : BaseTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
+) : BaseTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository, capacityChecker), TransferTransactionService {
+
+    @Transactional(readOnly = true)
+    override fun getByHash(hash: String): TransferTransaction = repository.findOneByHash(hash)
+        ?: throw NotFoundException("Transaction with hash $hash not found")
 
     companion object {
         val log = LoggerFactory.getLogger(DefaultTransferTransactionService::class.java)

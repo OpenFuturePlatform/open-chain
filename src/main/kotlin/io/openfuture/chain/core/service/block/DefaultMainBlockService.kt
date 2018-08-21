@@ -2,8 +2,10 @@ package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
+import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.InsufficientTransactionsException
+import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
@@ -19,8 +21,10 @@ import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.network.sync.SyncManager
 import io.openfuture.chain.network.sync.impl.SynchronizationStatus.NOT_SYNCHRONIZED
+import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -30,6 +34,7 @@ class DefaultMainBlockService(
     repository: MainBlockRepository,
     walletService: WalletService,
     delegateService: DelegateService,
+    capacityChecker: BlockCapacityChecker,
     private val clock: NodeClock,
     private val keyHolder: NodeKeyHolder,
     private val voteTransactionService: VoteTransactionService,
@@ -37,12 +42,35 @@ class DefaultMainBlockService(
     private val transferTransactionService: TransferTransactionService,
     private val consensusProperties: ConsensusProperties,
     private val syncManager: SyncManager
-) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
+) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService, capacityChecker), MainBlockService {
 
     companion object {
         val log = LoggerFactory.getLogger(DefaultMainBlockService::class.java)
     }
 
+
+    @Transactional(readOnly = true)
+    override fun getByHash(hash: String): MainBlock = repository.findOneByHash(hash)
+        ?: throw NotFoundException("Block by $hash not found")
+
+    @Transactional(readOnly = true)
+    override fun getNextBlock(hash: String): MainBlock {
+        val block = getByHash(hash)
+
+        return repository.findFirstByHeightGreaterThan(block.height) ?:
+        throw NotFoundException("Next block by hash $hash not found")
+    }
+
+    @Transactional(readOnly = true)
+    override fun getPreviousBlock(hash: String): MainBlock {
+        val block = getByHash(hash)
+
+        return repository.findFirstByHeightLessThanOrderByHeightDesc(block.height) ?:
+        throw NotFoundException("Previous block by hash $hash not found")
+    }
+
+    @Transactional(readOnly = true)
+    override fun getAll(request: PageRequest): Page<MainBlock> = repository.findAll(request)
 
     @BlockchainSynchronized
     @Transactional(readOnly = true)

@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
+import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
@@ -14,27 +15,57 @@ import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
+import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.network.sync.SyncManager
 import io.openfuture.chain.network.sync.impl.SynchronizationStatus.NOT_SYNCHRONIZED
+import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultGenesisBlockService(
     blockService: BlockService,
-    repository: GenesisBlockRepository,
     walletService: WalletService,
     delegateService: DefaultDelegateService,
+    capacityChecker: BlockCapacityChecker,
+    repository: GenesisBlockRepository,
     private val keyHolder: NodeKeyHolder,
+    private val networkService: NetworkApiService,
     private val syncManager: SyncManager
-) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService), GenesisBlockService {
+) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService, capacityChecker), GenesisBlockService {
 
     companion object {
         val log = LoggerFactory.getLogger(DefaultGenesisBlockService::class.java)
     }
 
+
+    @Transactional(readOnly = true)
+    override fun getPreviousByHeight(height: Long): GenesisBlock = repository.findFirstByHeightLessThanOrderByHeightDesc(height)
+        ?: throw NotFoundException("Previous block by height $height not found")
+
+    @Transactional(readOnly = true)
+    override fun getByHash(hash: String): GenesisBlock = repository.findOneByHash(hash)
+        ?: throw NotFoundException("Block by $hash not found")
+
+    @Transactional(readOnly = true)
+    override fun getNextBlock(hash: String): GenesisBlock {
+        val block = getByHash(hash)
+
+        return repository.findFirstByHeightGreaterThan(block.height) ?: throw NotFoundException("Next block by hash $hash not found")
+    }
+
+    @Transactional(readOnly = true)
+    override fun getPreviousBlock(hash: String): GenesisBlock {
+        val block = getByHash(hash)
+
+        return getPreviousByHeight(block.height)
+    }
+
+    @Transactional(readOnly = true)
+    override fun getAll(request: PageRequest): Page<GenesisBlock> = repository.findAll(request)
 
     @Transactional(readOnly = true)
     override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()

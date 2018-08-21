@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.model.entity.transaction.confirmed
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
@@ -16,7 +15,6 @@ abstract class Transaction(
     senderSignature: String,
     senderPublicKey: String,
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "block_id", nullable = false)
     var block: MainBlock

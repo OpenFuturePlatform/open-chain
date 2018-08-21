@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Sync: Up node synchronization.
 - Sync: Application sync status.
 - Sync: Check app sync status and start sync if need.
+- RPC: Get explorer info
+- RPC: Get list of blocks 
+- RPC: Get list of transactions 
+- RPC: Tests to main and genesis blocks endpoints
 
 ### Changed
 - Core: Genesis and Main blocks are not broadcasted after creation.

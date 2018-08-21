@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.transaction
 
+import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
@@ -11,7 +12,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultTransactionService(
     private val repository: TransactionRepository<Transaction>,
-    private val uRepository: UTransactionRepository<UnconfirmedTransaction>
+    private val uRepository: UTransactionRepository<UnconfirmedTransaction>,
+    private val capacityChecker: TransactionCapacityChecker
 ) : TransactionService {
 
     @Transactional(readOnly = true)
@@ -20,5 +22,9 @@ class DefaultTransactionService(
 
     @Transactional(readOnly = true)
     override fun getCount(): Long = repository.count()
+
+    override fun getProducingPerSecond(): Long {
+        return capacityChecker.getCountPerSecond()
+    }
 
 }

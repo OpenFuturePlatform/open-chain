@@ -46,9 +46,15 @@ interface BlockService {
 
     fun isExists(hash: String): Boolean
 
+    fun getAvgProductionTime(): Long
+
 }
 
 interface GenesisBlockService {
+
+    fun getByHash(hash: String): GenesisBlock
+
+    fun getAll(request: PageRequest): Page<GenesisBlock>
 
     fun getLast(): GenesisBlock
 
@@ -58,9 +64,19 @@ interface GenesisBlockService {
 
     fun verify(message: GenesisBlockMessage): Boolean
 
+    fun getPreviousByHeight(height: Long): GenesisBlock
+
+    fun getNextBlock(hash: String): GenesisBlock
+
+    fun getPreviousBlock(hash: String): GenesisBlock
+
 }
 
 interface MainBlockService {
+
+    fun getByHash(hash: String): MainBlock
+
+    fun getAll(request: PageRequest): Page<MainBlock>
 
     fun create(): PendingBlockMessage
 
@@ -70,6 +86,9 @@ interface MainBlockService {
 
     fun verify(message: PendingBlockMessage): Boolean
 
+    fun getPreviousBlock(hash: String): MainBlock
+
+    fun getNextBlock(hash: String): MainBlock
 }
 
 /** Common base transaction service */
@@ -79,9 +98,13 @@ interface TransactionService {
 
     fun getAllUnconfirmedByAddress(address: String): List<UnconfirmedTransaction>
 
+    fun getProducingPerSecond(): Long
+    
 }
 
 interface TransferTransactionService {
+
+    fun getByHash(hash: String): TransferTransaction
 
     fun getAll(request: PageRequest): Page<TransferTransaction>
 
@@ -103,6 +126,8 @@ interface TransferTransactionService {
 
 interface VoteTransactionService {
 
+    fun getByHash(hash: String): VoteTransaction
+
     fun getAllUnconfirmed(): MutableList<UnconfirmedVoteTransaction>
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction
@@ -118,6 +143,8 @@ interface VoteTransactionService {
 }
 
 interface DelegateTransactionService {
+
+    fun getByHash(hash: String): DelegateTransaction
 
     fun getAllUnconfirmed(): MutableList<UnconfirmedDelegateTransaction>
 

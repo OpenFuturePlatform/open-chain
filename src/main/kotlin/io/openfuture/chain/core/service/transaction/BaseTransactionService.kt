@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.transaction
 
+import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.*
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
@@ -23,7 +24,8 @@ import java.nio.charset.StandardCharsets.UTF_8
 
 abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransaction>(
     protected val repository: TransactionRepository<T>,
-    protected val unconfirmedRepository: UTransactionRepository<U>
+    protected val unconfirmedRepository: UTransactionRepository<U>,
+    private val capacityChecker: TransactionCapacityChecker
 ) {
 
     @Autowired protected lateinit var clock: NodeClock
@@ -39,6 +41,7 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
 
     open fun save(tx: T): T {
         updateBalanceByFee(tx)
+        capacityChecker.incrementCapacity()
         return repository.save(tx)
     }
 

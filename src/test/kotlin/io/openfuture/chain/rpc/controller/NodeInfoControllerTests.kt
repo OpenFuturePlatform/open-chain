@@ -18,6 +18,10 @@ class NodeInfoControllerTests : ControllerTests() {
     @MockBean
     private lateinit var hardwareInfoService: HardwareInfoService
 
+    companion object {
+        private const val NODE_INFO_URL = "/rpc/info"
+    }
+
 
     @Test
     fun getUptimeShouldReturnApplicationUptime() {
@@ -25,7 +29,7 @@ class NodeInfoControllerTests : ControllerTests() {
 
         given(nodeClock.nodeTime()).willReturn(expectedTimestamp)
 
-        val actualTimeStamp = webClient.get().uri("/rpc/info/getUptime")
+        val actualTimeStamp = webClient.get().uri("$NODE_INFO_URL/getUptime")
                 .exchange()
                 .expectStatus().isOk
                 .expectBody(Long::class.java)
@@ -45,7 +49,7 @@ class NodeInfoControllerTests : ControllerTests() {
 
         given(hardwareInfoService.getHardwareInfo()).willReturn(expectedHardwareInfo)
 
-        val actualHardwareInfo = webClient.get().uri("/rpc/info/getHardwareInfo")
+        val actualHardwareInfo = webClient.get().uri("$NODE_INFO_URL/getHardwareInfo")
                 .exchange()
                 .expectStatus().isOk
                 .expectBody(HardwareInfo::class.java)
