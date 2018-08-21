@@ -1,7 +1,9 @@
 CREATE TABLE delegates (
   id         INTEGER PRIMARY KEY,
   public_key VARCHAR UNIQUE NOT NULL,
-  address    VARCHAR NOT NULL
+  address    VARCHAR NOT NULL,
+  host       VARCHAR NOT NULL,
+  port       INTEGER NOT NULL
 );
 
 CREATE TABLE delegate2genesis (

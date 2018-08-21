@@ -145,26 +145,27 @@ class DefaultNetworkInnerService(
         heartBeatTasks.remove(ctx.channel())!!.cancel(true)
     }
 
-    private fun getConnectionAddresses(): Set<NetworkAddressMessage> = connections.values.toSet()
-
-    private fun connectionNeededNumber(): Int = max(properties.peersNumber!! - getInboundConnections().size, 0)
-
-    private fun getInboundConnections(): Map<Channel, NetworkAddressMessage> {
-        return connections.filter {
-            val socketAddress = it.key.remoteAddress() as InetSocketAddress
-            NetworkAddressMessage(socketAddress.hostName, socketAddress.port) == it.value
-        }
-    }
-
     private fun requestAddresses() {
         val address = getConnectionAddresses().shuffled(SecureRandom()).firstOrNull()
-            ?: properties.getRootAddresses()
-                .filter { it != NetworkAddressMessage(properties.host!!, properties.port!!) }
-                .shuffled()
-                .firstOrNull() ?: throw ValidationException("There are no available addresses")
+            ?: getRootNodeAddress()
 
         send(address, FindAddressesMessage(), false)
     }
+
+    override fun sendToAddress(baseMessage: BaseMessage, networkAddressMessage: NetworkAddressMessage) {
+        send(networkAddressMessage, baseMessage, false)
+    }
+
+    override fun sendToRoot(baseMessage: BaseMessage) {
+        val address = getRootNodeAddress()
+
+        send(address, baseMessage, false)
+    }
+
+    private fun getRootNodeAddress() = properties.getRootAddresses()
+        .filter { it != NetworkAddressMessage(properties.host!!, properties.port!!) }
+        .shuffled()
+        .firstOrNull() ?: throw ValidationException("There are no available addresses")
 
     private fun send(address: NetworkAddressMessage, message: BaseMessage, closeAfterSending: Boolean) {
         val channel = connections.filter { it.value == address }.map { it.key }.firstOrNull()
@@ -179,6 +180,17 @@ class DefaultNetworkInnerService(
                     log.warn("Can not connect to ${address.host}:${address.port}")
                 }
             }
+        }
+    }
+
+    private fun getConnectionAddresses(): Set<NetworkAddressMessage> = connections.values.toSet()
+
+    private fun connectionNeededNumber(): Int = max(properties.peersNumber!! - getInboundConnections().size, 0)
+
+    private fun getInboundConnections(): Map<Channel, NetworkAddressMessage> {
+        return connections.filter {
+            val socketAddress = it.key.remoteAddress() as InetSocketAddress
+            NetworkAddressMessage(socketAddress.hostName, socketAddress.port) == it.value
         }
     }
 

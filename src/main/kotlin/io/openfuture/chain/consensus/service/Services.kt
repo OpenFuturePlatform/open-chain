@@ -23,5 +23,8 @@ interface EpochService {
 
     fun getEpochEndTime(): Long
 
+    fun getFullTimeSlotDuration(): Long
+
     fun getEpochByBlock(block: MainBlock): Long
+
 }

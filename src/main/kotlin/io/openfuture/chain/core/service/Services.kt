@@ -2,7 +2,7 @@ package io.openfuture.chain.core.service
 
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.Wallet
-import io.openfuture.chain.core.model.entity.block.BaseBlock
+import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -40,7 +40,9 @@ interface BlockService {
 
     fun getCount(): Long
 
-    fun getLast(): BaseBlock
+    fun getLast(): Block
+
+    fun getAfterCurrentHash(hash: String): List<Block>
 
     fun isExists(hash: String): Boolean
 
@@ -60,7 +62,7 @@ interface GenesisBlockService {
 
     fun add(message: GenesisBlockMessage)
 
-    fun isValid(message: GenesisBlockMessage): Boolean
+    fun verify(message: GenesisBlockMessage): Boolean
 
     fun getPreviousByHeight(height: Long): GenesisBlock
 
@@ -80,9 +82,9 @@ interface MainBlockService {
 
     fun add(message: PendingBlockMessage)
 
-    fun isValid(message: PendingBlockMessage): Boolean
+    fun add(message: MainBlockMessage)
 
-    fun synchronize(message: MainBlockMessage)
+    fun verify(message: PendingBlockMessage): Boolean
 
     fun getPreviousBlock(hash: String): MainBlock
 
@@ -116,9 +118,9 @@ interface TransferTransactionService {
 
     fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction
 
-    fun synchronize(message: TransferTransactionMessage, block: MainBlock)
+    fun toBlock(message: TransferTransactionMessage, block: MainBlock): TransferTransaction
 
-    fun toBlock(hash: String, block: MainBlock): TransferTransaction
+    fun verify(message: TransferTransactionMessage): Boolean
 
 }
 
@@ -134,9 +136,9 @@ interface VoteTransactionService {
 
     fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction
 
-    fun synchronize(message: VoteTransactionMessage, block: MainBlock)
+    fun toBlock(message: VoteTransactionMessage, block: MainBlock): VoteTransaction
 
-    fun toBlock(hash: String, block: MainBlock): VoteTransaction
+    fun verify(message: VoteTransactionMessage): Boolean
 
 }
 
@@ -152,9 +154,9 @@ interface DelegateTransactionService {
 
     fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction
 
-    fun synchronize(message: DelegateTransactionMessage, block: MainBlock)
+    fun toBlock(message: DelegateTransactionMessage, block: MainBlock): DelegateTransaction
 
-    fun toBlock(hash: String, block: MainBlock): DelegateTransaction
+    fun verify(message: DelegateTransactionMessage): Boolean
 
 }
 
@@ -166,7 +168,7 @@ interface DelegateService {
 
     fun getActiveDelegates(): List<Delegate>
 
-    fun isExists(key: String): Boolean
+    fun isExistsByPublicKey(key: String): Boolean
 
     fun save(delegate: Delegate): Delegate
 
