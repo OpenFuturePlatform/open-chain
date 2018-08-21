@@ -1,7 +1,7 @@
 package io.openfuture.chain.core.service.block
 
-import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
+import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
@@ -15,9 +15,9 @@ import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.core.GenesisBlockMessage
+import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.network.sync.SyncManager
 import io.openfuture.chain.network.sync.impl.SynchronizationStatus.NOT_SYNCHRONIZED
-import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.LoggerFactory
@@ -44,7 +44,7 @@ class DefaultGenesisBlockService(
 
     @Transactional(readOnly = true)
     override fun getPreviousByHeight(height: Long): GenesisBlock = repository.findFirstByHeightLessThanOrderByHeightDesc(height)
-        ?: throw NotFoundException("Previous block by height not found")
+        ?: throw NotFoundException("Previous block by height $height not found")
 
     @Transactional(readOnly = true)
     override fun getByHash(hash: String): GenesisBlock = repository.findOneByHash(hash)
@@ -54,7 +54,7 @@ class DefaultGenesisBlockService(
     override fun getNextBlock(hash: String): GenesisBlock {
         val block = getByHash(hash)
 
-        return repository.findFirstByHeightGreaterThan(block.height) ?: throw NotFoundException("Next block not found")
+        return repository.findFirstByHeightGreaterThan(block.height) ?: throw NotFoundException("Next block by hash $hash not found")
     }
 
     @Transactional(readOnly = true)
