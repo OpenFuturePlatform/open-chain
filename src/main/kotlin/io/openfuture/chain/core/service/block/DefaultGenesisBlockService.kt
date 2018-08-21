@@ -26,7 +26,7 @@ class DefaultGenesisBlockService(
     walletService: WalletService,
     delegateService: DefaultDelegateService,
     capacityChecker: BlockCapacityChecker,
-    override val repository: GenesisBlockRepository,
+    repository: GenesisBlockRepository,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService
 ) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService, capacityChecker), GenesisBlockService {

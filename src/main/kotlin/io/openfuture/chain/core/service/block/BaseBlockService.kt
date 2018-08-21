@@ -15,7 +15,7 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets.UTF_8
 
 abstract class BaseBlockService<T : BaseBlock>(
-    open val repository: BlockRepository<T>,
+    protected val repository: BlockRepository<T>,
     protected val blockService: BlockService,
     private val walletService: WalletService,
     protected val delegateService: DelegateService,
