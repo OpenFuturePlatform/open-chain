@@ -2,11 +2,6 @@ package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
-import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeList
@@ -27,22 +22,7 @@ class MainBlockMessage(
     var transferTransactions: List<TransferTransactionMessage>
 ) : BlockMessage(height, previousHash, timestamp, hash, signature, publicKey) {
 
-    constructor(block: MainBlock, rewardTransaction: RewardTransaction, voteTransactions: List<VoteTransaction>,
-                delegateTransactions: List<DelegateTransaction>, transferTransactions: List<TransferTransaction>) : this(
-        block.height,
-        block.previousHash,
-        block.timestamp,
-        block.hash,
-        block.signature,
-        block.publicKey,
-        block.payload.merkleHash,
-        RewardTransactionMessage(rewardTransaction),
-        voteTransactions.map { VoteTransactionMessage(it) },
-        delegateTransactions.map { DelegateTransactionMessage(it) },
-        transferTransactions.map { TransferTransactionMessage(it) }
-    )
-
-    fun getAllTransactions(): List<BaseTransactionMessage> {
+    fun getAllTransactions(): List<TransactionMessage> {
         return voteTransactions + delegateTransactions + transferTransactions + rewardTransaction
     }
 
@@ -65,6 +45,44 @@ class MainBlockMessage(
         buffer.writeList(voteTransactions)
         buffer.writeList(delegateTransactions)
         buffer.writeList(transferTransactions)
+    }
+
+    override fun toString() = "MainBlockMessage(hash=$hash)"
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MainBlockMessage
+
+        if (hash != other.hash) return false
+        if (timestamp != other.timestamp) return false
+        if (signature != other.signature) return false
+        if (publicKey != other.publicKey) return false
+        if (height != other.height) return false
+        if (previousHash != other.previousHash) return false
+        if (reward != other.reward) return false
+        if (merkleHash != other.merkleHash) return false
+        if (voteTransactions != other.voteTransactions) return false
+        if (delegateTransactions != other.delegateTransactions) return false
+        if (transferTransactions != other.transferTransactions) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = hash.hashCode()
+        result = 31 * result + timestamp.hashCode()
+        result = 31 * result + signature.hashCode()
+        result = 31 * result + publicKey.hashCode()
+        result = 31 * result + height.hashCode()
+        result = 31 * result + previousHash.hashCode()
+        result = 31 * result + reward.hashCode()
+        result = 31 * result + merkleHash.hashCode()
+        result = 31 * result + voteTransactions.hashCode()
+        result = 31 * result + delegateTransactions.hashCode()
+        result = 31 * result + transferTransactions.hashCode()
+        return result
     }
 
 }

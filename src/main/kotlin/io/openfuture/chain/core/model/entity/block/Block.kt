@@ -2,12 +2,13 @@ package io.openfuture.chain.core.model.entity.block
 
 import io.openfuture.chain.core.model.entity.base.BaseModel
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
+import io.openfuture.chain.network.message.core.BlockMessage
 import javax.persistence.*
 
 @Entity
 @Table(name = "blocks")
 @Inheritance(strategy = InheritanceType.JOINED)
-abstract class BaseBlock(
+abstract class Block(
 
     @Column(name = "timestamp", nullable = false)
     var timestamp: Long,
@@ -30,5 +31,7 @@ abstract class BaseBlock(
 ) : BaseModel() {
 
     abstract fun getPayload(): BlockPayload
+
+    abstract fun toMessage(): BlockMessage
 
 }

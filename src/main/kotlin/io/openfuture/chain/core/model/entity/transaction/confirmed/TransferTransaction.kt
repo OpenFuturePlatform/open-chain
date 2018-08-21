@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.model.entity.transaction.confirmed
 
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -12,9 +13,7 @@ import javax.persistence.Table
 @Entity
 @Table(name = "transfer_transactions")
 class TransferTransaction(
-    timestamp: Long,
-    fee: Long,
-    senderAddress: String,
+    header: TransactionHeader,
     hash: String,
     senderSignature: String,
     senderPublicKey: String,
@@ -23,13 +22,11 @@ class TransferTransaction(
     @Embedded
     val payload: TransferTransactionPayload
 
-) : Transaction(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey, block) {
+) : Transaction(header, hash, senderSignature, senderPublicKey, block) {
 
     companion object {
         fun of(message: TransferTransactionMessage, block: MainBlock): TransferTransaction = TransferTransaction(
-            message.timestamp,
-            message.fee,
-            message.senderAddress,
+            TransactionHeader(message.timestamp, message.fee, message.senderAddress),
             message.hash,
             message.senderSignature,
             message.senderPublicKey,
@@ -38,9 +35,7 @@ class TransferTransaction(
         )
 
         fun of(utx: UnconfirmedTransferTransaction, block: MainBlock): TransferTransaction = TransferTransaction(
-            utx.timestamp,
-            utx.fee,
-            utx.senderAddress,
+            utx.header,
             utx.hash,
             utx.senderSignature,
             utx.senderPublicKey,
@@ -50,5 +45,16 @@ class TransferTransaction(
     }
 
     override fun getPayload(): TransactionPayload = payload
+
+    override fun toMessage(): TransferTransactionMessage = TransferTransactionMessage(
+        header.timestamp,
+        header.fee,
+        header.senderAddress,
+        hash,
+        senderSignature,
+        senderPublicKey,
+        payload.amount,
+        payload.recipientAddress
+    )
 
 }

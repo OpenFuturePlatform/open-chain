@@ -2,8 +2,6 @@ package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
-import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 
@@ -15,37 +13,23 @@ class DelegateTransactionMessage(
     hash: String,
     senderSignature: String,
     senderPublicKey: String,
-    var delegateKey: String
-) : BaseTransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
-
-    constructor(tx: DelegateTransaction) : this(
-        tx.timestamp,
-        tx.fee,
-        tx.senderAddress,
-        tx.hash,
-        tx.senderSignature,
-        tx.senderPublicKey,
-        tx.payload.delegateKey
-    )
-
-    constructor(utx: UnconfirmedDelegateTransaction) : this(
-        utx.timestamp,
-        utx.fee,
-        utx.senderAddress,
-        utx.hash,
-        utx.senderSignature,
-        utx.senderPublicKey,
-        utx.payload.delegateKey
-    )
+    var delegateKey: String,
+    var delegateHost: String,
+    var delegatePort: Int
+) : TransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)
         delegateKey = buffer.readString()
+        delegateHost = buffer.readString()
+        delegatePort = buffer.readInt()
     }
 
     override fun write(buffer: ByteBuf) {
         super.write(buffer)
         buffer.writeString(delegateKey)
+        buffer.writeString(delegateHost)
+        buffer.writeInt(delegatePort)
     }
 
 }

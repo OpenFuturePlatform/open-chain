@@ -2,6 +2,7 @@ package io.openfuture.chain.consensus.service
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.network.component.node.NodeClock
 import org.springframework.stereotype.Service
@@ -28,17 +29,20 @@ class DefaultEpochService(
         return genesisBlock.payload.activeDelegates.shuffled(random).first()
     }
 
+    override fun getEpochByBlock(block: MainBlock): Long =
+        genesisBlockService.getPreviousByHeight(block.height).payload.epochIndex
+
     override fun isInIntermission(time: Long): Boolean = (getTimeSlotFromStart(time) >= properties.timeSlotDuration!!)
 
-    override fun timeToNextTimeSlot(time: Long): Long = (fullTimeSlotDuration() - getTimeSlotFromStart(time))
+    override fun timeToNextTimeSlot(time: Long): Long = (getFullTimeSlotDuration() - getTimeSlotFromStart(time))
 
-    override fun getSlotNumber(time: Long): Long = ((time - getEpochStart()) / fullTimeSlotDuration())
+    override fun getSlotNumber(time: Long): Long = ((time - getEpochStart()) / getFullTimeSlotDuration())
 
     override fun getEpochEndTime(): Long =
-        (getEpochStart() + getSlotNumber(clock.networkTime()) * fullTimeSlotDuration())
+        (getEpochStart() + getSlotNumber(clock.networkTime()) * getFullTimeSlotDuration())
 
-    private fun getTimeSlotFromStart(time: Long): Long = (time - getEpochStart()) % fullTimeSlotDuration()
+    override fun getFullTimeSlotDuration(): Long = (properties.timeSlotDuration!! + properties.timeSlotInterval!!)
 
-    private fun fullTimeSlotDuration(): Long = (properties.timeSlotDuration!! + properties.timeSlotInterval!!)
+    private fun getTimeSlotFromStart(time: Long): Long = (time - getEpochStart()) % getFullTimeSlotDuration()
 
 }

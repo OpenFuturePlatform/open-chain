@@ -28,13 +28,17 @@ class AccountControllerTests : ControllerTests() {
     @MockBean
     private lateinit var walletService: WalletService
 
+    companion object {
+        private const val ACCOUNT_URL = "/rpc/accounts"
+    }
+
 
     @Test
     fun validateAddressShouldReturnAddressAndStatusOk() {
         val address = "0x5aF3B0FFB89C09D7A38Fd01E42E0A5e32011e36e"
         val request = ValidateAddressRequest(address)
 
-        webClient.post().uri("/rpc/accounts/wallets/validateAddress")
+        webClient.post().uri("$ACCOUNT_URL/wallets/validateAddress")
             .body(Mono.just(request), ValidateAddressRequest::class.java)
             .exchange()
             .expectStatus().isOk
@@ -46,7 +50,7 @@ class AccountControllerTests : ControllerTests() {
         val address = "0x5aF3B0FFB89C09D7A38Fd01E42E0A5e32011e36eaaaa"
         val request = ValidateAddressRequest(address)
 
-        webClient.post().uri("/rpc/accounts/wallets/validateAddress")
+        webClient.post().uri("$ACCOUNT_URL/wallets/validateAddress")
             .body(Mono.just(request), ValidateAddressRequest::class.java)
             .exchange()
             .expectStatus().isBadRequest
@@ -62,7 +66,7 @@ class AccountControllerTests : ControllerTests() {
         given(cryptoService.getMasterKey(expectedAccount.seedPhrase)).willReturn(masterKeys)
         given(cryptoService.getDefaultDerivationKey(masterKeys)).willReturn(defaultWalletKeys)
 
-        val actualAccount = webClient.post().uri("/rpc/accounts/doRestore")
+        val actualAccount = webClient.post().uri("$ACCOUNT_URL/doRestore")
             .body(Mono.just(RestoreRequest(expectedAccount.seedPhrase)), RestoreRequest::class.java)
             .exchange()
             .expectStatus().isOk
@@ -84,7 +88,7 @@ class AccountControllerTests : ControllerTests() {
         given(cryptoService.getMasterKey(seedPhrase)).willReturn(masterKeys)
         given(cryptoService.getDerivationKey(masterKeys, derivationPath)).willReturn(defaultWalletKeys)
 
-        val actualWalletDto = webClient.post().uri("/rpc/accounts/doDerive")
+        val actualWalletDto = webClient.post().uri("$ACCOUNT_URL/doDerive")
             .body(Mono.just(derivationKeyRequest), DerivationKeyRequest::class.java)
             .exchange()
             .expectStatus().isOk
@@ -101,7 +105,7 @@ class AccountControllerTests : ControllerTests() {
 
         given(walletService.getBalanceByAddress(address)).willReturn(expectedBalance)
 
-        val actualBalance = webClient.get().uri("/rpc/accounts/wallets/$address/balance")
+        val actualBalance = webClient.get().uri("$ACCOUNT_URL/wallets/$address/balance")
             .exchange()
             .expectStatus().isOk
             .expectBody(Long::class.java)
@@ -121,7 +125,7 @@ class AccountControllerTests : ControllerTests() {
         given(cryptoService.getMasterKey(seedPhrase)).willReturn(masterKeys)
         given(cryptoService.getDefaultDerivationKey(masterKeys)).willReturn(defaultDerivationKey)
 
-        val actualAccountDto = webClient.get().uri("/rpc/accounts/doGenerate")
+        val actualAccountDto = webClient.get().uri("$ACCOUNT_URL/doGenerate")
             .exchange()
             .expectStatus().isOk
             .expectBody(AccountDto::class.java)
@@ -143,7 +147,7 @@ class AccountControllerTests : ControllerTests() {
         given(cryptoService.serializePrivateKey(key)).willReturn(privateKey)
 
 
-        val actualWalletDto = webClient.post().uri("/rpc/accounts/keys/doExtendedImport")
+        val actualWalletDto = webClient.post().uri("$ACCOUNT_URL/keys/doExtendedImport")
             .body(Mono.just(importKeyRequest), ImportKeyRequest::class.java)
             .exchange()
             .expectStatus().isOk
@@ -161,7 +165,7 @@ class AccountControllerTests : ControllerTests() {
 
         given(cryptoService.importWifKey(importKeyRequest.decodedKey!!)).willReturn(ecKey)
 
-        val actualWalletDto = webClient.post().uri("/rpc/accounts/keys/doWifImport")
+        val actualWalletDto = webClient.post().uri("$ACCOUNT_URL/keys/doWifImport")
             .body(Mono.just(importKeyRequest), ImportKeyRequest::class.java)
             .exchange()
             .expectStatus().isOk
@@ -179,7 +183,7 @@ class AccountControllerTests : ControllerTests() {
 
         given(cryptoService.importPrivateKey(importKeyRequest.decodedKey!!)).willReturn(ecKey)
 
-        val actualWalletDto = webClient.post().uri("/rpc/accounts/keys/doPrivateImport")
+        val actualWalletDto = webClient.post().uri("$ACCOUNT_URL/keys/doPrivateImport")
             .body(Mono.just(importKeyRequest), ImportKeyRequest::class.java)
             .exchange()
             .expectStatus().isOk

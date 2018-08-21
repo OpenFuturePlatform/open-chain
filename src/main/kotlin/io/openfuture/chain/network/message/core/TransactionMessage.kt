@@ -7,7 +7,7 @@ import io.openfuture.chain.network.extension.writeString
 import io.openfuture.chain.network.message.base.BaseMessage
 
 @NoArgConstructor
-abstract class BaseTransactionMessage(
+abstract class TransactionMessage(
     var timestamp: Long,
     var fee: Long,
     var senderAddress: String,

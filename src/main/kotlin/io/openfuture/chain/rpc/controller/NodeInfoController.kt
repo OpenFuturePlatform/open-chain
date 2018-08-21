@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RestController
 class NodeInfoController(
     private val nodeClock: NodeClock,
     private val context: ApplicationContext,
-    private val hardwareInfoService: HardwareInfoService) {
+    private val hardwareInfoService: HardwareInfoService
+) {
 
     @GetMapping("/getVersion")
     fun getVersion() { }

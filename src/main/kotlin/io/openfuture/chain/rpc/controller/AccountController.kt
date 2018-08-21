@@ -16,7 +16,8 @@ import javax.validation.Valid
 @RequestMapping("/rpc/accounts")
 class AccountController(
     private val cryptoService: CryptoService,
-    private val walletService: WalletService) {
+    private val walletService: WalletService
+) {
 
     @GetMapping("/doGenerate")
     fun generateNewAccount(): AccountDto {

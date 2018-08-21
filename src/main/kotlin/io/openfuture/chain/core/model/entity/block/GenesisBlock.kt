@@ -36,6 +36,18 @@ class GenesisBlock(
         )
     }
 
-    override fun getPayload(): BlockPayload  = payload
+    override fun getPayload(): BlockPayload = payload
+
+    override fun toMessage(): GenesisBlockMessage = GenesisBlockMessage (
+        height,
+        previousHash,
+        timestamp,
+        reward,
+        hash,
+        signature,
+        publicKey,
+        payload.epochIndex,
+        payload.activeDelegates.map { it.publicKey }
+    )
 
 }

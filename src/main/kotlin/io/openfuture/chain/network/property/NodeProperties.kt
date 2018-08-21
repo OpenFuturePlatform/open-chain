@@ -62,7 +62,15 @@ class NodeProperties(
 
     /** Interval for triggering node explorer task in milliseconds */
     @field:NotNull
-    var explorerInterval: Long? = null
+    var explorerInterval: Long? = null,
+
+    /** Interval for synchronization blocks in milliseconds */
+    @field:NotNull
+    var synchronizationInterval: Long? = null,
+
+    /** Max synchronization response delay in milliseconds */
+    @field:NotNull
+    var synchronizationResponseDelay: Long? = null
 
 ) {
 

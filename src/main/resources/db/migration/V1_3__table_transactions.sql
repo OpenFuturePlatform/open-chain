@@ -23,7 +23,9 @@ CREATE TABLE reward_transactions (
 --
 CREATE TABLE delegate_transactions (
   id           INTEGER PRIMARY KEY REFERENCES transactions,
-  delegate_key VARCHAR UNIQUE NOT NULL
+  delegate_key VARCHAR UNIQUE NOT NULL,
+  delegate_host VARCHAR NOT NULL,
+  delegate_port INTEGER NOT NULL
 );
 --
 CREATE TABLE vote_types (
@@ -58,8 +60,10 @@ CREATE TABLE u_transfer_transactions (
 );
 --
 CREATE TABLE u_delegate_transactions (
-  id           INTEGER PRIMARY KEY REFERENCES u_transactions,
-  delegate_key VARCHAR NOT NULL UNIQUE
+  id            INTEGER PRIMARY KEY REFERENCES u_transactions,
+  delegate_key  VARCHAR NOT NULL UNIQUE,
+  delegate_host VARCHAR NOT NULL,
+  delegate_port INTEGER NOT NULL
 );
 --
 CREATE TABLE u_vote_transactions (
