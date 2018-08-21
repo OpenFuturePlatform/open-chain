@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultMainBlockService(
     blockService: BlockService,
     repository: MainBlockRepository,
+    walletService: WalletService,
     delegateService: DelegateService,
     capacityChecker: BlockCapacityChecker,
     private val clock: NodeClock,
@@ -85,7 +86,7 @@ class DefaultMainBlockService(
         val transferTransactions = transferTransactionService.getAllUnconfirmed()
         val transactions = voteTransactions + delegateTransactions + transferTransactions
 
-        val rewardTransactionMessage = rewardTransactionService.create(timestamp, transactions)
+        val rewardTransactionMessage = rewardTransactionService.create(timestamp, transactions.map { it.header.fee }.sum())
 
         val merkleHash = calculateMerkleRoot(transactions.map { it.hash } + rewardTransactionMessage.hash)
         val payload = MainBlockPayload(merkleHash)
@@ -152,6 +153,10 @@ class DefaultMainBlockService(
     }
 
     private fun validate(message: PendingBlockMessage) {
+        if (!isValidReward(message.getExternalTransactions().map { it.fee }.sum(), message.rewardTransaction.reward)) {
+            throw ValidationException("Invalid reward: ${message.rewardTransaction.reward}")
+        }
+
         if (!isValidMerkleHash(message.merkleHash, message.getAllTransactions().map { it.hash })) {
             throw ValidationException("Invalid merkle hash: ${message.merkleHash}")
         }
@@ -169,6 +174,14 @@ class DefaultMainBlockService(
         }
 
         super.validateBase(MainBlock.of(message))
+    }
+
+    private fun isValidReward(fees: Long, reward: Long): Boolean {
+        val senderAddress = consensusProperties.genesisAddress!!
+        val bank = walletService.getBalanceByAddress(senderAddress)
+        val rewardBlock = consensusProperties.rewardBlock!!
+
+        return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)
     }
 
     private fun isValidVoteTransactions(transactions: List<VoteTransactionMessage>): Boolean {

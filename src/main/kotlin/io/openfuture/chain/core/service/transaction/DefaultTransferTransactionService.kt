@@ -6,7 +6,10 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.INSUFFICIENT_BALANCE
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
+import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.repository.TransferTransactionRepository
 import io.openfuture.chain.core.repository.UTransferTransactionRepository
@@ -102,7 +105,9 @@ class DefaultTransferTransactionService(
     @Transactional
     override fun verify(message: TransferTransactionMessage): Boolean {
         return try {
-            validate(UnconfirmedTransferTransaction.of(message))
+            val header = TransactionHeader(message.timestamp, message.fee, message.senderAddress)
+            val payload = TransferTransactionPayload(message.amount, message.recipientAddress)
+            validate(header)
             true
         } catch (e: ValidationException) {
             log.warn(e.message)
@@ -115,12 +120,13 @@ class DefaultTransferTransactionService(
         return super.save(tx)
     }
 
-    private fun validate(utx: UnconfirmedTransferTransaction) {
-        if (!isValidBalance(utx.header.senderAddress, utx.payload.amount, utx.header.fee)) {
+    private fun validate(header: TransactionHeader, payload: TransferTransactionPayload, hash: String,
+                          senderPublicKey: String, senderSignature: String) {
+        if (!isValidBalance(header.senderAddress, payload.amount, header.fee)) {
             throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
         }
 
-        super.validateBase(utx)
+        super.validateExternal(header, payload, hash, senderPublicKey, senderSignature)
     }
 
     private fun updateTransferBalance(from: String, to: String, amount: Long) {

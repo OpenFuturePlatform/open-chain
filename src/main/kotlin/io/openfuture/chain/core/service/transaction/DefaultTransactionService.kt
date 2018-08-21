@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.component.TransactionCapacityChecker
+import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.repository.TransactionRepository

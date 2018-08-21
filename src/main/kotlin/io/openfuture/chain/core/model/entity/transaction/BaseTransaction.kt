@@ -1,7 +1,6 @@
 package io.openfuture.chain.core.model.entity.transaction
 
 import io.openfuture.chain.core.model.entity.base.BaseModel
-import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import javax.persistence.Column
 import javax.persistence.Embedded
 import javax.persistence.MappedSuperclass
@@ -21,8 +20,4 @@ abstract class BaseTransaction(
     @Column(name = "sender_key", nullable = false)
     var senderPublicKey: String
 
-) : BaseModel() {
-
-    abstract fun getPayload(): TransactionPayload
-
-}
+) : BaseModel()

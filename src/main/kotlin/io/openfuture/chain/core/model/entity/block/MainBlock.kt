@@ -51,11 +51,11 @@ class MainBlock(
         height,
         previousHash,
         timestamp,
-        reward,
         hash,
         signature,
         publicKey,
         payload.merkleHash,
+        payload.rewardTransaction!!.toMessage(),
         payload.voteTransactions.map { it.toMessage() },
         payload.delegateTransactions.map { it.toMessage() },
         payload.transferTransactions.map { it.toMessage() }

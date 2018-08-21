@@ -21,7 +21,7 @@ class GenesisBlock(
     @Embedded
     val payload: GenesisBlockPayload
 
-) : BaseBlock(timestamp, height, previousHash, hash, signature, publicKey) {
+) : Block(timestamp, height, previousHash, hash, signature, publicKey) {
 
 
     companion object {
@@ -42,7 +42,6 @@ class GenesisBlock(
         height,
         previousHash,
         timestamp,
-        reward,
         hash,
         signature,
         publicKey,

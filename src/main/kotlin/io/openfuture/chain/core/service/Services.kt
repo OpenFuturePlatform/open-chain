@@ -133,13 +133,11 @@ interface RewardTransactionService {
 
     fun getByRecipientAddress(address: String): List<RewardTransaction>
 
-    fun create(timestamp: Long, transactions: List<UnconfirmedTransaction>): RewardTransactionMessage
+    fun create(timestamp: Long, fees: Long): RewardTransactionMessage
 
     fun toBlock(message: RewardTransactionMessage, block: MainBlock)
 
-    fun verify(blockMessage: PendingBlockMessage): Boolean
-
-    fun verify(blockMessage: MainBlockMessage): Boolean
+    fun verify(message: RewardTransactionMessage): Boolean
 
 }
 

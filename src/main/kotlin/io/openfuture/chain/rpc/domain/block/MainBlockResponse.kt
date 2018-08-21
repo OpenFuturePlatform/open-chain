@@ -6,20 +6,18 @@ class MainBlockResponse(
     timestamp: Long,
     height: Long,
     previousHash: String,
-    reward: Long,
     hash: String,
     signature: String,
     publicKey: String,
     var merkleHash: String,
     var transactionsCount: Long,
     var epochIndex: Long
-) : BaseBlockResponse(timestamp, height, previousHash, reward, hash, signature, publicKey) {
+) : BaseBlockResponse(timestamp, height, previousHash, hash, signature, publicKey) {
 
     constructor(block: MainBlock, epochIndex: Long) : this(
         block.timestamp,
         block.height,
         block.previousHash,
-        block.reward,
         block.hash,
         block.signature,
         block.publicKey,

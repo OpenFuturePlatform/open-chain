@@ -16,18 +16,7 @@ class RewardTransactionMessage(
     senderPublicKey: String,
     var reward: Long,
     var recipientAddress: String
-) : BaseTransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
-
-    constructor(tx: RewardTransaction) : this(
-        tx.timestamp,
-        tx.fee,
-        tx.senderAddress,
-        tx.hash,
-        tx.senderSignature,
-        tx.senderPublicKey,
-        tx.payload.reward,
-        tx.payload.recipientAddress
-    )
+) : TransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)

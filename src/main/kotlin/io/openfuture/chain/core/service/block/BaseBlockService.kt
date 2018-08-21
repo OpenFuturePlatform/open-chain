@@ -18,13 +18,12 @@ import java.nio.charset.StandardCharsets.UTF_8
 abstract class BaseBlockService<T : Block>(
     protected val repository: BlockRepository<T>,
     protected val blockService: BlockService,
-    private val walletService: WalletService,
+    protected val walletService: WalletService,
     protected val delegateService: DelegateService,
     private val  capacityChecker: BlockCapacityChecker
 ) {
 
     protected fun save(block: T): T {
-        updateBalanceByReward(block)
         capacityChecker.incrementCapacity(block.timestamp)
         return repository.save(block)
     }
@@ -75,17 +74,11 @@ abstract class BaseBlockService<T : Block>(
     private fun isValidHeight(block: Block, lastBlock: Block): Boolean = block.height == lastBlock.height + 1
 
     private fun isValidHash(block: Block): Boolean {
-        val hash = createHash(block.timestamp, block.height, block.previousHash, block.reward,
-            block.getPayload())
+        val hash = createHash(block.timestamp, block.height, block.previousHash, block.getPayload())
         return ByteUtils.toHexString(hash) == block.hash
     }
 
     private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean =
         SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
-
-    private fun updateBalanceByReward(block: Block) {
-        val delegate = delegateService.getByPublicKey(block.publicKey)
-        walletService.increaseBalance(delegate.address, block.reward)
-    }
 
 }

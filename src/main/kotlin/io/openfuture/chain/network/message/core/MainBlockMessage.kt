@@ -61,7 +61,7 @@ class MainBlockMessage(
         if (publicKey != other.publicKey) return false
         if (height != other.height) return false
         if (previousHash != other.previousHash) return false
-        if (reward != other.reward) return false
+        if (rewardTransaction != other.rewardTransaction) return false
         if (merkleHash != other.merkleHash) return false
         if (voteTransactions != other.voteTransactions) return false
         if (delegateTransactions != other.delegateTransactions) return false
@@ -77,7 +77,7 @@ class MainBlockMessage(
         result = 31 * result + publicKey.hashCode()
         result = 31 * result + height.hashCode()
         result = 31 * result + previousHash.hashCode()
-        result = 31 * result + reward.hashCode()
+        result = 31 * result + rewardTransaction.hashCode()
         result = 31 * result + merkleHash.hashCode()
         result = 31 * result + voteTransactions.hashCode()
         result = 31 * result + delegateTransactions.hashCode()

@@ -2,11 +2,15 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
+import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.RewardTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.repository.RewardTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.RewardTransactionService
@@ -41,17 +45,15 @@ class DefaultRewardTransactionService(
         repository.findAllByPayloadRecipientAddress(address)
 
     @Transactional(readOnly = true)
-    override fun create(timestamp: Long, transactions: List<UnconfirmedTransaction>): RewardTransactionMessage {
+    override fun create(timestamp: Long, fees: Long): RewardTransactionMessage {
         val senderAddress = consensusProperties.genesisAddress!!
         val rewardBlock = consensusProperties.rewardBlock!!
         val bank = walletService.getBalanceByAddress(senderAddress)
-        val reward = transactions.map { it.fee }.sum() + if (rewardBlock > bank) bank else rewardBlock
+        val reward = fees + if (rewardBlock > bank) bank else rewardBlock
         val fee = 0L
         val publicKey = keyHolder.getPublicKey()
         val delegate = delegateService.getByPublicKey(publicKey)
-
-        val payload = RewardTransactionPayload(reward, delegate.address)
-        val hash = createHash(timestamp, fee, senderAddress, payload)
+        val hash = createHash(TransactionHeader(timestamp, fee, senderAddress), RewardTransactionPayload(reward, delegate.address))
         val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())
 
         return RewardTransactionMessage(timestamp, fee, senderAddress, hash, signature, publicKey, reward, delegate.address)
@@ -69,47 +71,17 @@ class DefaultRewardTransactionService(
     }
 
     @Transactional(readOnly = true)
-    override fun verify(blockMessage: PendingBlockMessage): Boolean {
-        val uTransactions = blockMessage.getAllTransactions()
-            .map { transactionService.getUnconfirmedTransactionByHash(it) }
-        val fees = uTransactions.map { it.fee }.sum()
-
-        return verifyBase(blockMessage.rewardTransaction, blockMessage, fees)
+    override fun verify(message: RewardTransactionMessage): Boolean {
+        return try {
+            val header = TransactionHeader(message.timestamp, message.fee, message.senderAddress)
+            val payload = RewardTransactionPayload(message.reward, message.recipientAddress)
+            super.validateBase(header, payload, message.hash, message.senderPublicKey, message.senderSignature)
+            true
+        } catch (e: ValidationException) {
+            DefaultTransferTransactionService.log.warn(e.message)
+            false
+        }
     }
-
-    @Transactional(readOnly = true)
-    override fun verify(blockMessage: MainBlockMessage): Boolean {
-        val fees = blockMessage.getAllTransactions().map { it.fee }.sum()
-
-        return verifyBase(blockMessage.rewardTransaction, blockMessage, fees)
-    }
-
-    private fun verifyBase(rewardTransactionMessage: RewardTransactionMessage, blockMessage: BlockMessage, fees: Long): Boolean {
-        val payload = RewardTransactionPayload(rewardTransactionMessage.reward, rewardTransactionMessage.recipientAddress)
-
-        return verifyTimestamp(rewardTransactionMessage.timestamp, blockMessage.timestamp)
-            && verifyReward(fees, rewardTransactionMessage.reward)
-            && verifyHash(rewardTransactionMessage.timestamp, rewardTransactionMessage.fee,
-            rewardTransactionMessage.senderAddress, payload, rewardTransactionMessage.hash)
-            && verifySignature(rewardTransactionMessage.hash, rewardTransactionMessage.senderSignature,
-            rewardTransactionMessage.senderPublicKey)
-    }
-
-    private fun verifyTimestamp(txTimestamp: Long, blockTimestamp: Long): Boolean = txTimestamp == blockTimestamp
-
-    private fun verifyReward(fees: Long, reward: Long): Boolean {
-        val senderAddress = consensusProperties.genesisAddress!!
-        val bank = walletService.getBalanceByAddress(senderAddress)
-        val rewardBlock = consensusProperties.rewardBlock!!
-
-        return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)
-    }
-
-    private fun verifyHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload, hash: String): Boolean =
-        createHash(timestamp, fee, senderAddress, payload) == hash
-
-    private fun verifySignature(hash: String, signature: String, publicKey: String): Boolean =
-        SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
 
     private fun updateTransferBalance(to: String, amount: Long) {
         walletService.increaseBalance(to, amount)

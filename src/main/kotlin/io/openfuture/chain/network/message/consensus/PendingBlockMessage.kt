@@ -21,10 +21,14 @@ class PendingBlockMessage(
     var voteTransactions: List<VoteTransactionMessage>,
     var delegateTransactions: List<DelegateTransactionMessage>,
     var transferTransactions: List<TransferTransactionMessage>
-) : BlockMessage(height, previousHash, timestamp, reward, hash, signature, publicKey) {
+) : BlockMessage(height, previousHash, timestamp, hash, signature, publicKey) {
 
     fun getAllTransactions(): List<TransactionMessage> {
         return voteTransactions + delegateTransactions + transferTransactions + rewardTransaction
+    }
+
+    fun getExternalTransactions(): List<TransactionMessage> {
+        return voteTransactions + delegateTransactions + transferTransactions
     }
 
     override fun read(buffer: ByteBuf) {
