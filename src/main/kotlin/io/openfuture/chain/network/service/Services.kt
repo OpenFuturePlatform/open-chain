@@ -5,7 +5,9 @@ import io.netty.channel.ChannelHandlerContext
 import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.*
+import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.network.message.core.TransferTransactionMessage
+import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.network.message.network.*
 
 
@@ -15,7 +17,13 @@ interface NetworkApiService {
 
     fun send(message: BaseMessage)
 
+    fun sendToAddress(message: BaseMessage, addressMessage: NetworkAddressMessage)
+
+    fun sendToRootNode(message: BaseMessage)
+
     fun getNetworkSize(): Int
+
+    fun isChannelsEmpty(): Boolean
 
 }
 
@@ -53,21 +61,19 @@ interface NetworkInnerService {
 
     fun onClientChannelInactive(ctx: ChannelHandlerContext)
 
+    fun sendToRoot(baseMessage: BaseMessage)
+
+    fun sendToAddress(baseMessage: BaseMessage, networkAddressMessage: NetworkAddressMessage)
+
 }
 
 interface CoreMessageService {
 
-    fun onNetworkBlockRequest(ctx: ChannelHandlerContext, request: SyncBlockRequestMessage)
+    fun onTransferTransaction(ctx: ChannelHandlerContext, message: TransferTransactionMessage)
 
-    fun onGenesisBlock(ctx: ChannelHandlerContext, block: GenesisBlockMessage)
+    fun onDelegateTransaction(ctx: ChannelHandlerContext, message: DelegateTransactionMessage)
 
-    fun onMainBlock(ctx: ChannelHandlerContext, block: MainBlockMessage)
-
-    fun onTransferTransaction(ctx: ChannelHandlerContext, tx: TransferTransactionMessage)
-
-    fun onDelegateTransaction(ctx: ChannelHandlerContext, tx: DelegateTransactionMessage)
-
-    fun onVoteTransaction(ctx: ChannelHandlerContext, tx: VoteTransactionMessage)
+    fun onVoteTransaction(ctx: ChannelHandlerContext, message: VoteTransactionMessage)
 
 }
 

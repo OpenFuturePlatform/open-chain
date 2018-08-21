@@ -42,7 +42,7 @@ class DefaultPendingBlockHandler(
         }
 
         val slotOwner = epochService.getCurrentSlotOwner()
-        if (slotOwner.publicKey == block.publicKey && mainBlockService.isValid(block)) {
+        if (slotOwner.publicKey == block.publicKey && mainBlockService.verify(block)) {
             networkService.broadcast(block)
             if (IDLE == stage && isActiveDelegate()) {
                 this.observable = block

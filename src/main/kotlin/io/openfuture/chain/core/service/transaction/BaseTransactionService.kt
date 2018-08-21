@@ -3,6 +3,7 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.*
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -26,30 +27,38 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
 ) {
 
     @Autowired protected lateinit var clock: NodeClock
-
-    @Autowired private lateinit var cryptoService: CryptoService
     @Autowired protected lateinit var walletService: WalletService
     @Autowired protected lateinit var baseService: TransactionService
     @Autowired protected lateinit var transactionService: TransactionService
+    @Autowired private lateinit var cryptoService: CryptoService
 
 
-    protected fun save(utx: U): U {
-        check(utx)
-
+    open fun save(utx: U): U {
         return unconfirmedRepository.save(utx)
     }
 
-    protected fun save(tx: T): T {
-        check(tx)
-
+    open fun save(tx: T): T {
         updateBalanceByFee(tx)
         return repository.save(tx)
     }
 
-    protected fun confirmProcess(utx: U, tx: T): T {
+    protected fun confirm(utx: U, tx: T): T {
         unconfirmedRepository.delete(utx)
-        updateBalanceByFee(tx)
-        return repository.save(tx)
+        return save(tx)
+    }
+
+    protected fun validateBase(utx: BaseTransaction) {
+        if (!isValidAddress(utx.header.senderAddress, utx.senderPublicKey)) {
+            throw ValidationException("Incorrect sender address", INCORRECT_ADDRESS)
+        }
+
+        if (!isValidHash(utx.header, utx.getPayload(), utx.hash)) {
+            throw ValidationException("Incorrect hash", INCORRECT_HASH)
+        }
+
+        if (!isValidSignature(utx.hash, utx.senderSignature, utx.senderPublicKey)) {
+            throw ValidationException("Incorrect signature", INCORRECT_SIGNATURE)
+        }
     }
 
     protected fun isExists(hash: String): Boolean {
@@ -58,57 +67,25 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return null != persistUtx || null != persistTx
     }
 
-    open fun check(utx: U) {
-        this.baseCheck(utx)
-    }
-
-    open fun check(tx: T) {
-        this.baseCheck(tx)
-    }
-
     private fun updateBalanceByFee(tx: BaseTransaction) {
-        walletService.decreaseBalance(tx.senderAddress, tx.fee)
+        walletService.decreaseBalance(tx.header.senderAddress, tx.header.fee)
     }
 
-    private fun baseCheck(tx: BaseTransaction) {
-        checkAddress(tx.senderAddress, tx.senderPublicKey)
-        checkFee(tx.senderAddress, tx.fee)
-        checkHash(tx)
-        checkSignature(tx.hash, tx.senderSignature, tx.senderPublicKey)
+    private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean {
+        return cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
     }
 
-    private fun checkAddress(senderAddress: String, senderPublicKey: String) {
-        if (!cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))) {
-            throw ValidationException("Incorrect sender address", INCORRECT_ADDRESS)
-        }
+    private fun isValidHash(header: TransactionHeader, payload: TransactionPayload, hash: String): Boolean {
+        return createHash(header, payload) == hash
     }
 
-    private fun checkFee(senderAddress: String, fee: Long) {
-        val balance = walletService.getBalanceByAddress(senderAddress)
-        val unspentBalance = balance - baseService.getAllUnconfirmedByAddress(senderAddress).map { it.fee }.sum()
-
-        if (unspentBalance < fee) {
-            throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
-        }
+    private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean {
+        return SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
     }
 
-    private fun checkHash(tx: BaseTransaction) {
-        if (createHash(tx.timestamp, tx.fee, tx.senderAddress, tx.getPayload()) != tx.hash) {
-            throw ValidationException("Incorrect hash", INCORRECT_HASH)
-        }
-    }
-
-    private fun checkSignature(hash: String, signature: String, publicKey: String) {
-        if (!SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))) {
-            throw ValidationException("Incorrect signature", INCORRECT_SIGNATURE)
-        }
-    }
-
-    private fun createHash(timestamp: Long, fee: Long, senderAddress: String, payload: TransactionPayload): String {
-        val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + senderAddress.toByteArray(UTF_8).size + payload.getBytes().size)
-            .putLong(timestamp)
-            .putLong(fee)
-            .put(senderAddress.toByteArray(UTF_8))
+    private fun createHash(header: TransactionHeader, payload: TransactionPayload): String {
+        val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + header.senderAddress.toByteArray(UTF_8).size + payload.getBytes().size)
+            .put(header.getBytes())
             .put(payload.getBytes())
             .array()
 

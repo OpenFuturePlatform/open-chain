@@ -12,7 +12,8 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/rpc/transactions/votes")
 class VoteTransactionController(
-    private val transactionService: VoteTransactionService) {
+    private val transactionService: VoteTransactionService
+) {
 
     @PostMapping
     fun add(@Valid @RequestBody request: VoteTransactionRequest): VoteTransactionResponse {
