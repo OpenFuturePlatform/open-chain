@@ -1,9 +1,9 @@
 package io.openfuture.chain.rpc.controller.transaction
 
 import io.openfuture.chain.config.ControllerTests
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
@@ -53,8 +53,8 @@ class DelegateTransactionControllerTests : ControllerTests() {
     fun getTransactionByHashShouldReturnTransaction() {
         val hash = "hash"
         val mainBlock = MainBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
-        val expectedTransaction = DelegateTransaction(1L, 1L, "senderAddress", "hash",
-            "senderSignature", "senderPublicKey", mainBlock, DelegateTransactionPayload("delegateKey")).apply { id = 1 }
+        val expectedTransaction = DelegateTransaction(TransactionHeader(1L, 1L, "senderAddress"), "hash",
+            "senderSignature", "senderPublicKey", mainBlock, DelegateTransactionPayload("delegateKey", "delegateHost", 8080)).apply { id = 1 }
 
         given(service.getByHash(hash)).willReturn(expectedTransaction)
 

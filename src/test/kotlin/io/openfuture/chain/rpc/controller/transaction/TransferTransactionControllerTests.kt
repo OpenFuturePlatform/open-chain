@@ -1,7 +1,5 @@
 package io.openfuture.chain.rpc.controller.transaction
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
@@ -55,7 +53,7 @@ class TransferTransactionControllerTests : ControllerTests() {
 
     @Test
     fun getAllShouldReturnTransferTransactionsListTest() {
-        val pageTransferTransactions = PageImpl(listOf(createTransactions())))
+        val pageTransferTransactions = PageImpl(listOf(createTransferTransaction()))
         val expectedPageResponse = PageResponse(pageTransferTransactions)
 
         given(service.getAll(PageRequest())).willReturn(pageTransferTransactions)
@@ -68,13 +66,13 @@ class TransferTransactionControllerTests : ControllerTests() {
 
         assertThat(actualPageResponse.totalCount).isEqualTo(expectedPageResponse.totalCount)
         assertThat(((actualPageResponse.list.first() as LinkedHashMap<*, *>)["header"] as HashMap<*, *>)["senderAddress"]).isEqualTo(expectedPageResponse.list.first().header.senderAddress)
-        assertThat((actualPageResponse.first() as LinkedHashMap<*, *>)["senderPublicKey"]).isEqualTo(expectedPageResponse.list.first().senderPublicKey)
+        assertThat((actualPageResponse.list.first() as LinkedHashMap<*, *>)["senderPublicKey"]).isEqualTo(expectedPageResponse.list.first().senderPublicKey)
     }
 
     @Test
     fun getTransactionsByAddressShouldReturnTransferTransactionsListTest() {
         val address = "address"
-        val expectedTransferTransactions = listof(createTransferTransaction())
+        val expectedTransferTransactions = listOf(createTransferTransaction())
         given(service.getByAddress(address)).willReturn(expectedTransferTransactions)
 
         val actualTransferTransactions = webClient.get().uri("$TRANSFER_TRANSACTION_URL/address/$address")
@@ -106,9 +104,9 @@ class TransferTransactionControllerTests : ControllerTests() {
     }
 
     private fun createTransferTransaction() : TransferTransaction {
-        val mainBlock = MainBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", MainBlockPayload("merkleHash"))
-        retrun TransferTransaction(TransactionHeader(1, 1, "senderAddress"), "hash",
-            "senderSignature", "senderPublicKey", mainBlock, TransferTransactionPayload(1, "recipientAddress"))
+        val mainBlock = MainBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
+        return TransferTransaction(TransactionHeader(1, 1, "senderAddress"), "hash",
+            "senderSignature", "senderPublicKey", mainBlock, TransferTransactionPayload(1, "recipientAddress")).apply { id = 1 }
 
     }
 

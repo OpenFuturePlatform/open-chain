@@ -1,14 +1,13 @@
 package io.openfuture.chain.rpc.controller.transaction
 
 import io.openfuture.chain.config.ControllerTests
-import io.openfuture.chain.core.model.entity.dictionary.VoteType
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
-import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
+import io.openfuture.chain.core.model.entity.dictionary.VoteType
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.VoteTransactionResponse
@@ -54,7 +53,7 @@ class VoteTransactionControllerTests : ControllerTests() {
     fun getTransactionByHashShouldReturnTransaction() {
         val hash = "hash"
         val mainBlock = MainBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
-        val expectedTransaction = VoteTransaction(1L, 1L, "senderAddress", "hash",
+        val expectedTransaction = VoteTransaction(TransactionHeader(1L, 1L, "senderAddress"), "hash",
             "senderSignature", "senderPublicKey", mainBlock, VoteTransactionPayload(1, "delegateKey")).apply { id = 1 }
 
         given(service.getByHash(hash)).willReturn(expectedTransaction)
