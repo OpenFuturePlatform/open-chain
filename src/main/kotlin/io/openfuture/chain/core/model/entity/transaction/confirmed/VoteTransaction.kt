@@ -2,9 +2,8 @@ package io.openfuture.chain.core.model.entity.transaction.confirmed
 
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
-import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import javax.persistence.Embedded
 import javax.persistence.Entity
@@ -43,8 +42,6 @@ class VoteTransaction(
             utx.payload
         )
     }
-
-    override fun getPayload(): TransactionPayload = payload
 
     override fun toMessage(): VoteTransactionMessage = VoteTransactionMessage (
         header.timestamp,

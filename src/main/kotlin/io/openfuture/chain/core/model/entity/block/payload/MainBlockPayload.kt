@@ -15,13 +15,13 @@ class MainBlockPayload(
     var merkleHash: String,
 
     @JsonIgnore
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "transactions",
         joinColumns = [JoinColumn(name = "block_id")],
         inverseJoinColumns = [JoinColumn(name = "id")]
     )
-    var rewardTransaction: RewardTransaction? = null,
+    var rewardTransaction: MutableList<RewardTransaction> = mutableListOf(),
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.EAGER)

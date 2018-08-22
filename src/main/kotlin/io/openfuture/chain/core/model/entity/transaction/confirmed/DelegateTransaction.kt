@@ -44,8 +44,6 @@ class DelegateTransaction(
         )
     }
 
-    override fun getPayload(): TransactionPayload = payload
-
     override fun toMessage(): DelegateTransactionMessage = DelegateTransactionMessage(
         header.timestamp,
         header.fee,

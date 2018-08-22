@@ -45,6 +45,10 @@ class MainBlock(
         )
     }
 
+    fun getTransactionsCount(): Int {
+        return payload.transferTransactions.size + payload.voteTransactions.size + payload.delegateTransactions.size + 1
+    }
+
     override fun getPayload(): BlockPayload = payload
 
     override fun toMessage(): MainBlockMessage = MainBlockMessage(
@@ -55,7 +59,7 @@ class MainBlock(
         signature,
         publicKey,
         payload.merkleHash,
-        payload.rewardTransaction!!.toMessage(),
+        payload.rewardTransaction.first().toMessage(),
         payload.voteTransactions.map { it.toMessage() },
         payload.delegateTransactions.map { it.toMessage() },
         payload.transferTransactions.map { it.toMessage() }

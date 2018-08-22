@@ -38,13 +38,13 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         return repository.save(tx)
     }
 
-    open fun validateExternal(header: TransactionHeader, payload: TransactionPayload, hash: String,
-                              senderPublicKey: String, senderSignature: String) {
+    protected fun validateExternal(header: TransactionHeader, payload: TransactionPayload, hash: String,
+                                   senderSignature: String, senderPublicKey: String) {
         if (!isValidAddress(header.senderAddress, senderPublicKey)) {
             throw ValidationException("Incorrect sender address", ExceptionType.INCORRECT_ADDRESS)
         }
 
-        super.validateBase(header, payload, hash, senderPublicKey, senderSignature)
+        super.validateBase(header, payload, hash, senderSignature, senderPublicKey)
     }
 
     protected fun confirm(utx: U, tx: T): T {

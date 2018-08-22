@@ -1,14 +1,16 @@
 package io.openfuture.chain.core.service.transaction
 
-import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
+import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_DELEGATE_KEY
 import io.openfuture.chain.core.exception.model.ExceptionType.INSUFFICIENT_BALANCE
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.repository.DelegateTransactionRepository
 import io.openfuture.chain.core.repository.UDelegateTransactionRepository
@@ -30,7 +32,6 @@ class DefaultDelegateTransactionService(
     private val networkService: NetworkApiService
 ) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository, capacityChecker), DelegateTransactionService {
 
-
     companion object {
         val log = LoggerFactory.getLogger(DefaultDelegateTransactionService::class.java)
     }
@@ -51,13 +52,17 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction {
-        val utx = UnconfirmedDelegateTransaction.of(message)
+        val persistUtx = unconfirmedRepository.findOneByHash(message.hash)
 
-        if (isExists(utx.hash)) {
-            return utx
+        if (null != persistUtx) {
+            return persistUtx
         }
 
-        validate(utx)
+        val header = TransactionHeader(message.timestamp, message.fee, message.senderAddress)
+        val payload = DelegateTransactionPayload(message.delegateKey, message.delegateHost, message.delegatePort)
+
+        validate(header, payload, message.hash, message.senderSignature, message.senderPublicKey)
+        val utx = UnconfirmedDelegateTransaction(header, message.hash, message.senderSignature, message.senderPublicKey, payload)
         val savedUtx = this.save(utx)
         networkService.broadcast(message)
         return savedUtx
@@ -66,13 +71,17 @@ class DefaultDelegateTransactionService(
     @BlockchainSynchronized(throwable = true)
     @Transactional
     override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction {
-        val utx = UnconfirmedDelegateTransaction.of(request)
-        validate(utx)
+        val persistUtx = unconfirmedRepository.findOneByHash(request.hash!!)
 
-        if (isExists(utx.hash)) {
-            return utx
+        if (null != persistUtx) {
+            return persistUtx
         }
 
+        val header = TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!)
+        val payload = DelegateTransactionPayload(request.delegateKey!!, request.senderHost!!, request.senderPort!!)
+
+        validate(header, payload, request.hash!!, request.senderSignature!!, request.senderPublicKey!!)
+        val utx = UnconfirmedDelegateTransaction(header, request.hash!!, request.senderSignature!!, request.senderPublicKey!!, payload)
         val savedUtx = this.save(utx)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
@@ -96,7 +105,9 @@ class DefaultDelegateTransactionService(
     @Transactional
     override fun verify(message: DelegateTransactionMessage): Boolean {
         return try {
-            validate(UnconfirmedDelegateTransaction.of(message))
+            val header = TransactionHeader(message.timestamp, message.fee, message.senderAddress)
+            val payload = DelegateTransactionPayload(message.delegateKey, message.delegateHost, message.delegatePort)
+            validate(header, payload, message.hash, message.senderSignature, message.senderPublicKey)
             true
         } catch (e: ValidationException) {
             log.warn(e.message)
@@ -109,16 +120,17 @@ class DefaultDelegateTransactionService(
         return super.save(tx)
     }
 
-    private fun validate(utx: UnconfirmedDelegateTransaction) {
-        if (!isNotExistsByDelegatePublicKey(utx.payload.delegateKey)) {
+    private fun validate(header: TransactionHeader, payload: DelegateTransactionPayload, hash: String,
+                         senderSignature: String, senderPublicKey: String) {
+        if (!isNotExistsByDelegatePublicKey(payload.delegateKey)) {
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
 
-        if (!isValidFee(utx.header.senderAddress, utx.header.fee)) {
+        if (!isValidFee(header.senderAddress, header.fee)) {
             throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
         }
 
-        super.validateBase(utx)
+        super.validateExternal(header, payload, hash, senderSignature, senderPublicKey)
     }
 
     private fun isNotExistsByDelegatePublicKey(key: String): Boolean {

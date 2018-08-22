@@ -10,7 +10,7 @@ class MainBlockResponse(
     signature: String,
     publicKey: String,
     var merkleHash: String,
-    var transactionsCount: Long,
+    var transactionsCount: Int,
     var epochIndex: Long
 ) : BaseBlockResponse(timestamp, height, previousHash, hash, signature, publicKey) {
 
@@ -22,7 +22,7 @@ class MainBlockResponse(
         block.signature,
         block.publicKey,
         block.payload.merkleHash,
-        (block.payload.transferTransactions.size + block.payload.voteTransactions.size + block.payload.delegateTransactions.size).toLong(),
+        block.getTransactionsCount(),
         epochIndex
     )
 

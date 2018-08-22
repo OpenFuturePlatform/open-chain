@@ -44,8 +44,6 @@ class TransferTransaction(
         )
     }
 
-    override fun getPayload(): TransactionPayload = payload
-
     override fun toMessage(): TransferTransactionMessage = TransferTransactionMessage(
         header.timestamp,
         header.fee,

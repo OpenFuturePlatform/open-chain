@@ -1,7 +1,6 @@
 package io.openfuture.chain.network.sync.impl
 
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.network.message.base.BaseMessage

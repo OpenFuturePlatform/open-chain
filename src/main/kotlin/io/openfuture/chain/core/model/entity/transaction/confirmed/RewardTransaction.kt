@@ -36,8 +36,6 @@ class RewardTransaction(
         )
     }
 
-    override fun getPayload(): TransactionPayload = payload
-
     override fun toMessage(): RewardTransactionMessage = RewardTransactionMessage(
         header.timestamp,
         header.fee,

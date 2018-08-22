@@ -31,14 +31,14 @@ class DefaultTransferTransactionService(
     private val networkService: NetworkApiService
 ) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository, capacityChecker), TransferTransactionService {
 
-    @Transactional(readOnly = true)
-    override fun getByHash(hash: String): TransferTransaction = repository.findOneByHash(hash)
-        ?: throw NotFoundException("Transaction with hash $hash not found")
-
     companion object {
         val log = LoggerFactory.getLogger(DefaultTransferTransactionService::class.java)
     }
 
+
+    @Transactional(readOnly = true)
+    override fun getByHash(hash: String): TransferTransaction = repository.findOneByHash(hash)
+        ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<TransferTransaction> = repository.findAll(request)
@@ -60,13 +60,17 @@ class DefaultTransferTransactionService(
 
     @Transactional
     override fun add(message: TransferTransactionMessage): UnconfirmedTransferTransaction {
-        val utx = UnconfirmedTransferTransaction.of(message)
+        val persistUtx = unconfirmedRepository.findOneByHash(message.hash)
 
-        if (isExists(utx.hash)) {
-            return utx
+        if (null != persistUtx) {
+            return persistUtx
         }
 
-        validate(utx)
+        val header = TransactionHeader(message.timestamp, message.fee, message.senderAddress)
+        val payload = TransferTransactionPayload(message.amount, message.recipientAddress)
+
+        validate(header, payload, message.hash, message.senderSignature, message.senderPublicKey)
+        val utx = UnconfirmedTransferTransaction(header, message.hash, message.senderSignature, message.senderPublicKey, payload)
         val savedUtx = this.save(utx)
         networkService.broadcast(message)
         return savedUtx
@@ -75,13 +79,17 @@ class DefaultTransferTransactionService(
     @BlockchainSynchronized(throwable = true)
     @Transactional
     override fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction {
-        val utx = UnconfirmedTransferTransaction.of(request)
+        val persistUtx = unconfirmedRepository.findOneByHash(request.hash!!)
 
-        if (isExists(utx.hash)) {
-            return utx
+        if (null != persistUtx) {
+            return persistUtx
         }
 
-        validate(utx)
+        val header = TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!)
+        val payload = TransferTransactionPayload(request.amount!!, request.recipientAddress!!)
+
+        validate(header, payload, request.hash!!, request.senderSignature!!, request.senderPublicKey!!)
+        val utx = UnconfirmedTransferTransaction(header, request.hash!!, request.senderSignature!!, request.senderPublicKey!!, payload)
         val savedUtx = this.save(utx)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
@@ -107,7 +115,7 @@ class DefaultTransferTransactionService(
         return try {
             val header = TransactionHeader(message.timestamp, message.fee, message.senderAddress)
             val payload = TransferTransactionPayload(message.amount, message.recipientAddress)
-            validate(header)
+            validate(header, payload, message.hash, message.senderSignature, message.senderPublicKey)
             true
         } catch (e: ValidationException) {
             log.warn(e.message)
@@ -115,18 +123,19 @@ class DefaultTransferTransactionService(
         }
     }
 
+    @Transactional
     override fun save(tx: TransferTransaction): TransferTransaction {
         updateTransferBalance(tx.header.senderAddress, tx.payload.recipientAddress, tx.payload.amount)
         return super.save(tx)
     }
 
     private fun validate(header: TransactionHeader, payload: TransferTransactionPayload, hash: String,
-                          senderPublicKey: String, senderSignature: String) {
+                         senderSignature: String, senderPublicKey: String) {
         if (!isValidBalance(header.senderAddress, payload.amount, header.fee)) {
             throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
         }
 
-        super.validateExternal(header, payload, hash, senderPublicKey, senderSignature)
+        super.validateExternal(header, payload, hash, senderSignature, senderPublicKey)
     }
 
     private fun updateTransferBalance(from: String, to: String, amount: Long) {

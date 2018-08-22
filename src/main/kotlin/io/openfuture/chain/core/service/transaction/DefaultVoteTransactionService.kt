@@ -1,14 +1,16 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
-import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
+import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.*
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.repository.UVoteTransactionRepository
 import io.openfuture.chain.core.repository.VoteTransactionRepository
@@ -31,14 +33,14 @@ internal class DefaultVoteTransactionService(
     private val networkService: NetworkApiService
 ) : ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository, capacityChecker), VoteTransactionService {
 
-    @Transactional(readOnly = true)
-    override fun getByHash(hash: String): VoteTransaction = repository.findOneByHash(hash)
-        ?: throw NotFoundException("Transaction with hash $hash not found")
-
     companion object {
         val log = LoggerFactory.getLogger(DefaultVoteTransactionService::class.java)
     }
 
+
+    @Transactional(readOnly = true)
+    override fun getByHash(hash: String): VoteTransaction = repository.findOneByHash(hash)
+        ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(): MutableList<UnconfirmedVoteTransaction> = unconfirmedRepository.findAllByOrderByHeaderFeeDesc()
@@ -49,13 +51,17 @@ internal class DefaultVoteTransactionService(
 
     @Transactional
     override fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction {
-        val utx = UnconfirmedVoteTransaction.of(message)
+        val persistUtx = unconfirmedRepository.findOneByHash(message.hash)
 
-        if (isExists(utx.hash)) {
-            return utx
+        if (null != persistUtx) {
+            return persistUtx
         }
 
-        validate(utx)
+        val header = TransactionHeader(message.timestamp, message.fee, message.senderAddress)
+        val payload = VoteTransactionPayload(message.voteTypeId, message.delegateKey)
+
+        validate(header, payload, message.hash, message.senderSignature, message.senderPublicKey)
+        val utx = UnconfirmedVoteTransaction(header, message.hash, message.senderSignature, message.senderPublicKey, payload)
         val savedUtx = this.save(utx)
         networkService.broadcast(message)
         return savedUtx
@@ -64,13 +70,17 @@ internal class DefaultVoteTransactionService(
     @BlockchainSynchronized
     @Transactional
     override fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction {
-        val utx = UnconfirmedVoteTransaction.of(request)
-        validate(utx)
+        val persistUtx = unconfirmedRepository.findOneByHash(request.hash!!)
 
-        if (isExists(utx.hash)) {
-            return utx
+        if (null != persistUtx) {
+            return persistUtx
         }
 
+        val header = TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!)
+        val payload = VoteTransactionPayload(request.voteType!!.getId(), request.delegateKey!!)
+
+        validate(header, payload, request.hash!!, request.senderSignature!!, request.senderPublicKey!!)
+        val utx = UnconfirmedVoteTransaction(header, request.hash!!, request.senderSignature!!, request.senderPublicKey!!, payload)
         val savedUtx = this.save(utx)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
@@ -94,42 +104,46 @@ internal class DefaultVoteTransactionService(
     @Transactional
     override fun verify(message: VoteTransactionMessage): Boolean {
         return try {
-            validate(UnconfirmedVoteTransaction.of(message))
+            val header = TransactionHeader(message.timestamp, message.fee, message.senderAddress)
+            val payload = VoteTransactionPayload(message.voteTypeId, message.delegateKey)
+            validate(header, payload, message.hash, message.senderSignature, message.senderPublicKey)
             true
         } catch (e: ValidationException) {
-            log.warn(e.message)
+            DefaultTransferTransactionService.log.warn(e.message)
             false
         }
     }
 
+    @Transactional
     override fun save(tx: VoteTransaction): VoteTransaction {
         val type = tx.payload.getVoteType()
         updateWalletVotes(tx.header.senderAddress, tx.payload.delegateKey, type)
         return super.save(tx)
     }
 
-    private fun validate(utx: UnconfirmedVoteTransaction) {
-        if (!isExistsDelegate(utx.payload.delegateKey)) {
+    private fun validate(header: TransactionHeader, payload: VoteTransactionPayload, hash: String,
+                         senderSignature: String, senderPublicKey: String) {
+        if (!isExistsDelegate(payload.delegateKey)) {
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
 
-        if (!isValidVoteCount(utx.header.senderAddress)) {
+        if (!isValidVoteCount(header.senderAddress)) {
             throw ValidationException("Incorrect votes count", INCORRECT_VOTES_COUNT)
         }
 
-        if (!isAlreadyVote(utx.header.senderAddress, utx.payload.delegateKey)) {
-            throw ValidationException("Address: ${utx.header.senderAddress} already vote for delegate with key: ${utx.payload.delegateKey}")
+        if (!isAlreadyVote(header.senderAddress, payload.delegateKey)) {
+            throw ValidationException("Address: ${header.senderAddress} already vote for delegate with key: ${payload.delegateKey}")
         }
 
-        if (!isExistsVoteType(utx.payload.voteTypeId)) {
-            throw ValidationException("Vote type with id: ${utx.payload.voteTypeId} is not exists")
+        if (!isExistsVoteType(payload.voteTypeId)) {
+            throw ValidationException("Vote type with id: ${payload.voteTypeId} is not exists")
         }
 
-        if (!isValidFee(utx.header.senderAddress, utx.header.fee)) {
+        if (!isValidFee(header.senderAddress, header.fee)) {
             throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
         }
 
-        super.validateBase(utx)
+        super.validateExternal(header, payload, hash, senderSignature, senderPublicKey)
     }
 
     private fun updateWalletVotes(senderAddress: String, delegateKey: String, type: VoteType) {

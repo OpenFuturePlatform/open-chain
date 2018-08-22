@@ -4,22 +4,14 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.RewardTransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.repository.RewardTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.RewardTransactionService
-import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.BlockMessage
-import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.message.core.RewardTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -30,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultRewardTransactionService(
     private val repository: RewardTransactionRepository,
-    private val transactionService: TransactionService,
     private val walletService: WalletService,
     private val consensusProperties: ConsensusProperties,
     private val delegateService: DelegateService,
@@ -75,7 +66,7 @@ class DefaultRewardTransactionService(
         return try {
             val header = TransactionHeader(message.timestamp, message.fee, message.senderAddress)
             val payload = RewardTransactionPayload(message.reward, message.recipientAddress)
-            super.validateBase(header, payload, message.hash, message.senderPublicKey, message.senderSignature)
+            super.validateBase(header, payload, message.hash, message.senderSignature, message.senderPublicKey)
             true
         } catch (e: ValidationException) {
             DefaultTransferTransactionService.log.warn(e.message)
