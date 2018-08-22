@@ -109,7 +109,7 @@ internal class DefaultVoteTransactionService(
             validate(header, payload, message.hash, message.senderSignature, message.senderPublicKey)
             true
         } catch (e: ValidationException) {
-            DefaultTransferTransactionService.log.warn(e.message)
+            log.warn(e.message)
             false
         }
     }

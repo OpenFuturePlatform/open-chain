@@ -5,6 +5,25 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Sync: Up node synchronization.
+- Sync: Application sync status.
+- Sync: Check app sync status and start sync if need.
+- RPC: Get explorer info
+- RPC: Get list of blocks 
+- RPC: Get list of transactions 
+- RPC: Tests to main and genesis blocks endpoints
+- Core: Reward transactions
+
+### Changed
+- Core: Genesis and Main blocks are not broadcasted after creation.
+- Core validation: Impossible to create vote transaction on the nonexistent delegate.
+- Core validation: Impossible to create request of vote transaction with the nonexistent voteType.
+- Core validation: Impossible to create transactions with negative fee.
+- Core validation: Improve validation fee and amount for transfer transaction.
+- Core: Remove validation from main block service on add.
+- Core: Remove validation from genesis service on add.
+- Core: Removed field 'reward' from blocks
 
 ## [0.5.0] - 2018-08-10
 ### Added
@@ -18,13 +37,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Wallet UI: Access wallet with file
 - Wallet UI: Restore wallet from a private key
 - Wallet UI: Restore wallet from the seed phrase
-- Sync: Up node synchronization.
-- Sync: Application sync status.
-- Sync: Check app sync status and start sync if need.
-- RPC: Get explorer info
-- RPC: Get list of blocks 
-- RPC: Get list of transactions 
-- RPC: Tests to main and genesis blocks endpoints
 - RPC: Total number of nodes connected to the network
 - RPC: Get number of current epoch
 - RPC: Get when the current epoch started
@@ -32,18 +44,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC: Get number of an epoch when the block was created
 - RPC: Import private key in hex format
 - RPC: Get transactions by wallet address
-- Core: Reward transactions
 
 ### Changed
 - New file structure
-- Core: Removed field 'reward' from blocks
-- Core: Genesis and Main blocks are not broadcasted after creation.
-- Core: validation: Impossible to create vote transaction on the nonexistent delegate.
-- Core: validation: Impossible to create request of vote transaction with the nonexistent voteType.
-- Core: validation: Impossible to create transactions with negative fee.
-- Core: validation: Improve validation fee and amount for transfer transaction.
-- Core: Remove validation from main block service on add.
-- Core: Remove validation from genesis service on add.
 
 ## [0.4.0] - 2018-07-27
 ### Added
