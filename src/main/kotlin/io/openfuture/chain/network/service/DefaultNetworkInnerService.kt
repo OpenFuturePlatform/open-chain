@@ -81,7 +81,7 @@ class DefaultNetworkInnerService(
         ?: throw NotFoundException("Not found address with such uid: $uid")
 
     override fun onChannelActive(ctx: ChannelHandlerContext) {
-        ctx.writeAndFlush(GreetingMessage())
+        ctx.writeAndFlush(GreetingMessage(NetworkAddressMessage(properties.host!!, properties.port!!)))
     }
 
     override fun onClientChannelActive(ctx: ChannelHandlerContext) {
@@ -132,9 +132,8 @@ class DefaultNetworkInnerService(
             }
     }
 
-    override fun onGreeting(ctx: ChannelHandlerContext, nodeUid: String) {
-        val socket = ctx.channel().remoteAddress() as InetSocketAddress
-        connections[ctx.channel()] = AddressMessage(nodeUid, NetworkAddressMessage(socket.address.hostName, socket.port))
+    override fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage, nodeUid: String) {
+        connections[ctx.channel()] = AddressMessage(nodeUid, NetworkAddressMessage(message.address.host, message.address.port))
     }
 
     override fun onAskTime(ctx: ChannelHandlerContext, askTime: AskTimeMessage) {
@@ -156,12 +155,12 @@ class DefaultNetworkInnerService(
     }
 
     override fun sendToAddress(message: BaseMessage, addressMessage: AddressMessage) {
-        send(addressMessage, message)
+        send(addressMessage, message, true)
     }
 
     override fun sendToRootNode(message: BaseMessage) {
         val address = getRootNodeAddress()
-        send(address, message)
+        send(address, message, true)
     }
 
     private fun requestAddresses() {
@@ -205,13 +204,35 @@ class DefaultNetworkInnerService(
 
     private fun connectionNeededNumber(): Int = max(properties.peersNumber!! - getInboundConnectionCount(), 0)
 
-    private fun getInboundConnectionCount(): Int = connections.filter { it.value.uid != keyHolder.getUid() }.size
+    private fun getInboundConnectionCount(): Int {
+        val inboundConnections = connections.filter {
+            val socketAddress = it.key.remoteAddress() as InetSocketAddress
+            NetworkAddressMessage(socketAddress.hostName, socketAddress.port) == it.value.address
 
-    fun getInboundConnection(): List<AddressMessage> =
-        connections.filter { it.value.uid != keyHolder.getUid() }.values.toList()
+        }
 
-    fun getOutboundConnection(): List<AddressMessage> =
-        connections.filter { it.value.uid == keyHolder.getUid() }.values.toList()
+        return inboundConnections.size
+    }
+
+    fun getInboundConnection(): List<AddressMessage> {
+        val inboundConnections = connections.filter {
+            val socketAddress = it.key.remoteAddress() as InetSocketAddress
+            NetworkAddressMessage(socketAddress.hostName, socketAddress.port) == it.value.address
+
+        }
+
+        return inboundConnections.values.toList()
+    }
+
+    fun getOutboundConnection(): List<AddressMessage> {
+        val outboundConnections = connections.filter {
+            val socketAddress = it.key.remoteAddress() as InetSocketAddress
+            NetworkAddressMessage(socketAddress.hostName, socketAddress.port) != it.value.address
+
+        }
+
+        return outboundConnections.values.toList()
+    }
 
 
     private fun sendAndCloseIfNeeded(channel: Channel, message: BaseMessage, close: Boolean) {

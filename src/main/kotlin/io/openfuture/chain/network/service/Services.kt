@@ -53,7 +53,7 @@ interface NetworkInnerService {
 
     fun onExplorerAddresses(ctx: ChannelHandlerContext, message: ExplorerAddressesMessage)
 
-    fun onGreeting(ctx: ChannelHandlerContext, nodeUid: String)
+    fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage, nodeUid: String)
 
     fun onAskTime(ctx: ChannelHandlerContext, askTime: AskTimeMessage)
 

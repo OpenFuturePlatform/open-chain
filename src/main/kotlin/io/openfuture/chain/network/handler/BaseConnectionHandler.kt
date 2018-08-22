@@ -39,7 +39,7 @@ abstract class BaseConnectionHandler(
         when (packet.type) {
             // -- system messages
             HEART_BEAT -> networkService.onHeartBeat(ctx, packet.data as HeartBeatMessage)
-            GREETING -> networkService.onGreeting(ctx, packet.uid)
+            GREETING -> networkService.onGreeting(ctx, packet.data as GreetingMessage, packet.uid)
             ADDRESSES -> networkService.onAddresses(ctx, packet.data as AddressesMessage)
             FIND_ADDRESSES -> networkService.onFindAddresses(ctx, packet.data as FindAddressesMessage)
             TIME -> networkService.onTime(ctx, packet.data as TimeMessage)
