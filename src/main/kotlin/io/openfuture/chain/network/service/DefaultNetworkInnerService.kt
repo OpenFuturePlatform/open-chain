@@ -214,27 +214,6 @@ class DefaultNetworkInnerService(
         return inboundConnections.size
     }
 
-    fun getInboundConnection(): List<AddressMessage> {
-        val inboundConnections = connections.filter {
-            val socketAddress = it.key.remoteAddress() as InetSocketAddress
-            NetworkAddressMessage(socketAddress.hostName, socketAddress.port) == it.value.address
-
-        }
-
-        return inboundConnections.values.toList()
-    }
-
-    fun getOutboundConnection(): List<AddressMessage> {
-        val outboundConnections = connections.filter {
-            val socketAddress = it.key.remoteAddress() as InetSocketAddress
-            NetworkAddressMessage(socketAddress.hostName, socketAddress.port) != it.value.address
-
-        }
-
-        return outboundConnections.values.toList()
-    }
-
-
     private fun sendAndCloseIfNeeded(channel: Channel, message: BaseMessage, close: Boolean) {
         channel.writeAndFlush(message)
         if (close) {
