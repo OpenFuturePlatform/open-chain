@@ -37,6 +37,8 @@ interface NetworkInnerService {
 
     fun getChannels(): Set<Channel>
 
+    fun getAddressMessage(uid: String): AddressMessage
+
     fun onChannelActive(ctx: ChannelHandlerContext)
 
     fun onClientChannelActive(ctx: ChannelHandlerContext)

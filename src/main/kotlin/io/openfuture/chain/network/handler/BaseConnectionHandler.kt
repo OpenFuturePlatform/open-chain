@@ -51,7 +51,8 @@ abstract class BaseConnectionHandler(
             DELEGATE_REQUEST -> syncBlockRequestHandler.onDelegateRequestMessage(ctx, packet.data as DelegateRequestMessage)
             DELEGATE_RESPONSE -> syncBlockResponseHandler.onDelegateResponseMessage(ctx, packet.data as DelegateResponseMessage)
             HASH_BLOCK_REQUEST -> syncBlockRequestHandler.onLastHashRequestMessage(ctx, packet.data as HashBlockRequestMessage)
-            HASH_BLOCK_RESPONSE -> syncBlockResponseHandler.onHashResponseMessage(ctx, packet.data as HashBlockResponseMessage)
+            HASH_BLOCK_RESPONSE -> syncBlockResponseHandler.onHashResponseMessage(ctx,
+                packet.data as HashBlockResponseMessage, networkService.getAddressMessage(packet.uid))
             SYNC_BLOCKS_REQUEST -> syncBlockRequestHandler.onSyncBlocRequestMessage(ctx, packet.data as SyncBlockRequestMessage)
             MAIN_BLOCK -> syncBlockResponseHandler.onMainBlockMessage(packet.data as MainBlockMessage)
             GENESIS_BLOCK -> syncBlockResponseHandler.onGenesisBlockMessage(packet.data as GenesisBlockMessage)

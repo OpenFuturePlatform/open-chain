@@ -77,8 +77,11 @@ class DefaultNetworkInnerService(
 
     override fun getChannels(): Set<Channel> = connections.keys
 
+    override fun getAddressMessage(uid: String): AddressMessage = getConnectionAddresses().firstOrNull { it.uid == uid }
+        ?: throw NotFoundException("Not found address with such uid: $uid")
+
     override fun onChannelActive(ctx: ChannelHandlerContext) {
-        ctx.writeAndFlush(GreetingMessage(NetworkAddressMessage(properties.host!!, properties.port!!)))
+        ctx.writeAndFlush(GreetingMessage())
     }
 
     override fun onClientChannelActive(ctx: ChannelHandlerContext) {
