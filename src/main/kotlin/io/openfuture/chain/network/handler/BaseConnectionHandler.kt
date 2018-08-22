@@ -6,7 +6,6 @@ import io.openfuture.chain.network.message.base.Packet
 import io.openfuture.chain.network.message.base.PacketType.*
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.network.*
 import io.openfuture.chain.network.service.ConsensusMessageService
@@ -15,7 +14,6 @@ import io.openfuture.chain.network.service.NetworkInnerService
 import io.openfuture.chain.network.sync.SyncBlockRequestHandler
 import io.openfuture.chain.network.sync.SyncBlockResponseHandler
 import io.openfuture.chain.network.sync.SyncManager
-import io.openfuture.chain.network.sync.impl.SynchronizationStatus.SYNCHRONIZED
 import org.slf4j.LoggerFactory
 
 abstract class BaseConnectionHandler(
@@ -41,7 +39,7 @@ abstract class BaseConnectionHandler(
         when (packet.type) {
             // -- system messages
             HEART_BEAT -> networkService.onHeartBeat(ctx, packet.data as HeartBeatMessage)
-            GREETING -> networkService.onGreeting(ctx, packet.data as GreetingMessage)
+            GREETING -> networkService.onGreeting(ctx, packet.uid)
             ADDRESSES -> networkService.onAddresses(ctx, packet.data as AddressesMessage)
             FIND_ADDRESSES -> networkService.onFindAddresses(ctx, packet.data as FindAddressesMessage)
             TIME -> networkService.onTime(ctx, packet.data as TimeMessage)
