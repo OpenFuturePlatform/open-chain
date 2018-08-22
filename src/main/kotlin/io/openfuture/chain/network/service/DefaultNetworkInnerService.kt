@@ -81,7 +81,7 @@ class DefaultNetworkInnerService(
         ?: throw NotFoundException("Not found address with such uid: $uid")
 
     override fun onChannelActive(ctx: ChannelHandlerContext) {
-        ctx.writeAndFlush(GreetingMessage(NetworkAddressMessage(properties.host!!, properties.port!!)))
+        ctx.writeAndFlush(GreetingMessage(properties.port!!))
     }
 
     override fun onClientChannelActive(ctx: ChannelHandlerContext) {
@@ -133,7 +133,8 @@ class DefaultNetworkInnerService(
     }
 
     override fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage, nodeUid: String) {
-        connections[ctx.channel()] = AddressMessage(nodeUid, NetworkAddressMessage(message.address.host, message.address.port))
+        val socket = ctx.channel().remoteAddress() as InetSocketAddress
+        connections[ctx.channel()] = AddressMessage(nodeUid, NetworkAddressMessage(socket.address.hostAddress, message.port))
     }
 
     override fun onAskTime(ctx: ChannelHandlerContext, askTime: AskTimeMessage) {
@@ -191,9 +192,8 @@ class DefaultNetworkInnerService(
 
     private fun send(networkAddressMessage: NetworkAddressMessage, message: BaseMessage, closeAfterSending: Boolean = false) {
         bootstrap.connect(networkAddressMessage.host, networkAddressMessage.port).addListener { future ->
-            future as ChannelFuture
             if (future.isSuccess) {
-                sendAndCloseIfNeeded(future.channel(), message, closeAfterSending)
+                sendAndCloseIfNeeded((future as ChannelFuture).channel(), message, closeAfterSending)
             } else {
                 log.warn("Can not connect to ${networkAddressMessage.host}:${networkAddressMessage.port}")
             }
@@ -205,13 +205,10 @@ class DefaultNetworkInnerService(
     private fun connectionNeededNumber(): Int = max(properties.peersNumber!! - getInboundConnectionCount(), 0)
 
     private fun getInboundConnectionCount(): Int {
-        val inboundConnections = connections.filter {
+        return connections.count {
             val socketAddress = it.key.remoteAddress() as InetSocketAddress
-            NetworkAddressMessage(socketAddress.hostName, socketAddress.port) == it.value.address
-
+            NetworkAddressMessage(socketAddress.address.hostAddress, socketAddress.port) == it.value.address
         }
-
-        return inboundConnections.size
     }
 
     private fun sendAndCloseIfNeeded(channel: Channel, message: BaseMessage, close: Boolean) {
