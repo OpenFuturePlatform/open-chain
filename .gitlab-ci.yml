@@ -105,4 +105,3 @@ deploy-production:
     - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -e "image_tag=${CI_COMMIT_REF_NAME}" -e "count=2" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.yml
   only:
     - tags
-    - master
