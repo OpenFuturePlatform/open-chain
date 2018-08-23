@@ -6,5 +6,6 @@ abstract class BaseTransactionResponse(
     val senderAddress: String,
     val senderSignature: String,
     val senderPublicKey: String,
+    val hash: String,
     val blockHash: String?
 )

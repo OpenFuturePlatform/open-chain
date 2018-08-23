@@ -9,9 +9,10 @@ class DelegateTransactionResponse(
     senderAddress: String,
     senderSignature: String,
     senderPublicKey: String,
+    hash: String,
     val delegateKey: String,
     blockHash: String? = null
-) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey, blockHash) {
+) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey, hash, blockHash) {
 
     constructor(tx: UnconfirmedDelegateTransaction) : this(
         tx.header.timestamp,
@@ -19,6 +20,7 @@ class DelegateTransactionResponse(
         tx.header.senderAddress,
         tx.senderSignature,
         tx.senderPublicKey,
+        tx.hash,
         tx.payload.delegateKey
     )
 
@@ -28,6 +30,7 @@ class DelegateTransactionResponse(
         tx.header.senderAddress,
         tx.senderSignature,
         tx.senderPublicKey,
+        tx.hash,
         tx.payload.delegateKey,
         tx.block.hash
     )

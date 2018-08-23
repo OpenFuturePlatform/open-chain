@@ -65,7 +65,7 @@ class TransferTransactionControllerTests : ControllerTests() {
             .returnResult().responseBody!!
 
         assertThat(actualPageResponse.totalCount).isEqualTo(expectedPageResponse.totalCount)
-        assertThat(((actualPageResponse.list.first() as LinkedHashMap<*, *>)["header"] as HashMap<*, *>)["senderAddress"]).isEqualTo(expectedPageResponse.list.first().header.senderAddress)
+        assertThat(((actualPageResponse.list.first() as HashMap<*, *>)["senderAddress"])).isEqualTo(expectedPageResponse.list.first().header.senderAddress)
         assertThat((actualPageResponse.list.first() as LinkedHashMap<*, *>)["senderPublicKey"]).isEqualTo(expectedPageResponse.list.first().senderPublicKey)
     }
 
