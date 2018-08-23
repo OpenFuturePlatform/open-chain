@@ -104,14 +104,14 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun verify(message: DelegateTransactionMessage): Boolean {
-        return try {
+        try {
             val header = TransactionHeader(message.timestamp, message.fee, message.senderAddress)
             val payload = DelegateTransactionPayload(message.delegateKey, message.delegateHost, message.delegatePort)
             validate(header, payload, message.hash, message.senderSignature, message.senderPublicKey)
-            true
+            return true
         } catch (e: ValidationException) {
             log.warn(e.message)
-            false
+            return false
         }
     }
 

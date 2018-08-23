@@ -63,14 +63,14 @@ class DefaultRewardTransactionService(
 
     @Transactional(readOnly = true)
     override fun verify(message: RewardTransactionMessage): Boolean {
-        return try {
+        try {
             val header = TransactionHeader(message.timestamp, message.fee, message.senderAddress)
             val payload = RewardTransactionPayload(message.reward, message.recipientAddress)
             super.validateBase(header, payload, message.hash, message.senderSignature, message.senderPublicKey)
-            true
+            return true
         } catch (e: ValidationException) {
             DefaultTransferTransactionService.log.warn(e.message)
-            false
+            return false
         }
     }
 

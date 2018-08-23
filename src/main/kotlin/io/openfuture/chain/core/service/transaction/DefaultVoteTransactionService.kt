@@ -103,14 +103,14 @@ internal class DefaultVoteTransactionService(
 
     @Transactional
     override fun verify(message: VoteTransactionMessage): Boolean {
-        return try {
+        try {
             val header = TransactionHeader(message.timestamp, message.fee, message.senderAddress)
             val payload = VoteTransactionPayload(message.voteTypeId, message.delegateKey)
             validate(header, payload, message.hash, message.senderSignature, message.senderPublicKey)
-            true
+            return true
         } catch (e: ValidationException) {
             log.warn(e.message)
-            false
+            return false
         }
     }
 
