@@ -17,10 +17,11 @@ class TransferTransactionController(
 ) {
 
     @GetMapping("/address/{address}")
-    fun getTransactions(@PathVariable address: String): List<TransferTransaction> = transactionService.getByAddress(address)
+    fun getTransactions(@PathVariable address: String): List<TransferTransactionResponse> =
+        transactionService.getByAddress(address).map { TransferTransactionResponse(it) }
 
     @GetMapping("/{hash}")
-    fun get(@PathVariable hash: String): TransferTransaction = transactionService.getByHash(hash)
+    fun get(@PathVariable hash: String): TransferTransactionResponse = TransferTransactionResponse(transactionService.getByHash(hash))
 
     @PostMapping
     fun add(@Valid @RequestBody request: TransferTransactionRequest): TransferTransactionResponse {
