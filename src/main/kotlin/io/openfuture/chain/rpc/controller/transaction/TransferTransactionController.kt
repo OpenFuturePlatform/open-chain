@@ -1,6 +1,5 @@
 package io.openfuture.chain.rpc.controller.transaction
 
-import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
@@ -30,7 +29,8 @@ class TransferTransactionController(
     }
 
     @GetMapping
-    fun getAll(request: PageRequest): PageResponse<TransferTransaction> = PageResponse(transactionService.getAll(request))
+    fun getAll(request: PageRequest): PageResponse<TransferTransactionResponse> =
+        PageResponse(transactionService.getAll(request).map { TransferTransactionResponse(it) })
 
 }
 

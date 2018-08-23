@@ -61,10 +61,10 @@ class VoteTransactionControllerTests : ControllerTests() {
         val actualTransaction = webClient.get().uri("$VOTE_TRANSACTION_URL/$hash")
             .exchange()
             .expectStatus().isOk
-            .expectBody(VoteTransaction::class.java)
+            .expectBody(VoteTransactionResponse::class.java)
             .returnResult().responseBody!!
 
-        assertThat(actualTransaction).isEqualTo(expectedTransaction)
+        assertThat(actualTransaction).isEqualToComparingFieldByField(expectedTransaction)
     }
 
 }

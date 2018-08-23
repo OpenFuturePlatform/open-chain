@@ -72,8 +72,9 @@ class TransferTransactionControllerTests : ControllerTests() {
     @Test
     fun getTransactionsByAddressShouldReturnTransferTransactionsListTest() {
         val address = "address"
-        val expectedTransferTransactions = listOf(createTransferTransaction())
-        given(service.getByAddress(address)).willReturn(expectedTransferTransactions)
+        val transferTransactions = listOf(createTransferTransaction())
+
+        given(service.getByAddress(address)).willReturn(transferTransactions)
 
         val actualTransferTransactions = webClient.get().uri("$TRANSFER_TRANSACTION_URL/address/$address")
             .exchange()
@@ -81,26 +82,27 @@ class TransferTransactionControllerTests : ControllerTests() {
             .expectBody(List::class.java)
             .returnResult().responseBody!!
 
-        assertThat(((actualTransferTransactions.first() as LinkedHashMap<*, *>)["header"] as HashMap<*, *>)["senderAddress"])
-            .isEqualTo(expectedTransferTransactions.first().header.senderAddress)
+        assertThat(((actualTransferTransactions.first() as HashMap<*, *>))["senderAddress"])
+            .isEqualTo(transferTransactions.first().header.senderAddress)
         assertThat((actualTransferTransactions.first()  as LinkedHashMap<*, *>)["senderPublicKey"])
-            .isEqualTo(expectedTransferTransactions.first().senderPublicKey)
+            .isEqualTo(transferTransactions.first().senderPublicKey)
     }
 
     @Test
     fun getTransactionByHashShouldReturnTransactionWithCurrentHash() {
         val hash = "hash"
-        val expectedTransferTransaction = createTransferTransaction()
+        val transferTransaction = createTransferTransaction()
+        val expectedResponse = TransferTransactionResponse(transferTransaction)
 
-        given(service.getByHash(hash)).willReturn(expectedTransferTransaction)
+        given(service.getByHash(hash)).willReturn(transferTransaction)
 
-        val actualTransaction = webClient.get().uri("$TRANSFER_TRANSACTION_URL/$hash")
+        val actualResponse = webClient.get().uri("$TRANSFER_TRANSACTION_URL/$hash")
             .exchange()
             .expectStatus().isOk
-            .expectBody(TransferTransaction::class.java)
+            .expectBody(TransferTransactionResponse::class.java)
             .returnResult().responseBody!!
 
-        assertThat(actualTransaction).isEqualTo(expectedTransferTransaction)
+        assertThat(actualResponse).isEqualToComparingFieldByField(expectedResponse)
     }
 
     private fun createTransferTransaction() : TransferTransaction {
