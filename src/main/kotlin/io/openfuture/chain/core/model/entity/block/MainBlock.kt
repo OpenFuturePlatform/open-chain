@@ -46,7 +46,8 @@ class MainBlock(
     }
 
     fun getTransactionsCount(): Int {
-        return payload.transferTransactions.size + payload.voteTransactions.size + payload.delegateTransactions.size + 1
+        return payload.transferTransactions.size + payload.voteTransactions.size + payload.delegateTransactions.size +
+            payload.rewardTransaction.size
     }
 
     override fun getPayload(): BlockPayload = payload

@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType
+import io.openfuture.chain.core.exception.model.ExceptionType.*
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.crypto.util.HashUtils
@@ -14,11 +15,11 @@ abstract class BaseTransactionService {
     protected fun validateBase(header: TransactionHeader, payload: TransactionPayload, hash: String,
                                senderSignature: String, senderPublicKey: String) {
         if (!isValidHash(header, payload, hash)) {
-            throw ValidationException("Incorrect hash", ExceptionType.INCORRECT_HASH)
+            throw ValidationException("Incorrect hash", INCORRECT_HASH)
         }
 
         if (!isValidSignature(hash, senderSignature, senderPublicKey)) {
-            throw ValidationException("Incorrect signature", ExceptionType.INCORRECT_SIGNATURE)
+            throw ValidationException("Incorrect signature", INCORRECT_SIGNATURE)
         }
     }
 

@@ -3,6 +3,7 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType
+import io.openfuture.chain.core.exception.model.ExceptionType.*
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
@@ -41,7 +42,7 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
     protected fun validateExternal(header: TransactionHeader, payload: TransactionPayload, hash: String,
                                    senderSignature: String, senderPublicKey: String) {
         if (!isValidAddress(header.senderAddress, senderPublicKey)) {
-            throw ValidationException("Incorrect sender address", ExceptionType.INCORRECT_ADDRESS)
+            throw ValidationException("Incorrect sender address", INCORRECT_ADDRESS)
         }
 
         super.validateBase(header, payload, hash, senderSignature, senderPublicKey)
