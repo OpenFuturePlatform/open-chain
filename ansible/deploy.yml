@@ -13,7 +13,7 @@
           - "{{ item.app_port }}:8080"
           - "{{ item.api_port }}:9190"
         restart_policy: always
-      loop:
+      with_items:
         - { app_port: '9090', api_port: '9190' }
         - { app_port: '9091', api_port: '9191' }
         - { app_port: '9092', api_port: '9192' }
