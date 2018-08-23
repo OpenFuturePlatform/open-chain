@@ -1,14 +1,13 @@
 package io.openfuture.chain.core.service.transaction
 
-import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
+import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.INSUFFICIENT_BALANCE
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.repository.TransferTransactionRepository
@@ -112,14 +111,14 @@ class DefaultTransferTransactionService(
 
     @Transactional
     override fun verify(message: TransferTransactionMessage): Boolean {
-        return try {
+        try {
             val header = TransactionHeader(message.timestamp, message.fee, message.senderAddress)
             val payload = TransferTransactionPayload(message.amount, message.recipientAddress)
             validate(header, payload, message.hash, message.senderSignature, message.senderPublicKey)
-            true
+            return true
         } catch (e: ValidationException) {
             log.warn(e.message)
-            false
+            return false
         }
     }
 
