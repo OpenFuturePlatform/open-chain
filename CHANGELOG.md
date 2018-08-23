@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC: Get list of blocks 
 - RPC: Get list of transactions 
 - RPC: Tests to main and genesis blocks endpoints
+- Network: Add an uid to nodes
 
 ### Changed
 - Core: Genesis and Main blocks are not broadcasted after creation.
