@@ -13,7 +13,8 @@ class DelegateTransactionController(
 ) {
 
     @GetMapping("/{hash}")
-    fun get(@PathVariable hash: String): DelegateTransactionResponse = DelegateTransactionResponse(transactionService.getByHash(hash))
+    fun get(@PathVariable hash: String): DelegateTransactionResponse =
+        DelegateTransactionResponse(transactionService.getByHash(hash))
 
     @PostMapping
     fun add(@Valid @RequestBody request: DelegateTransactionRequest): DelegateTransactionResponse {
@@ -22,4 +23,3 @@ class DelegateTransactionController(
     }
 
 }
-

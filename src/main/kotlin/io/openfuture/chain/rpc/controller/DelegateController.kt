@@ -9,6 +9,7 @@ import io.openfuture.chain.rpc.domain.base.PageResponse
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.util.stream.Collectors.toList
 
 @RestController
 @RequestMapping("/rpc/delegates")
@@ -18,7 +19,11 @@ class DelegateController(
 ) {
 
     @GetMapping("/active")
-    fun getAllActive(): List<DelegateResponse> = genesisBlockService.getLast().payload.activeDelegates.map { DelegateResponse(it) }
+    fun getAllActive(request: PageRequest): List<DelegateResponse> {
+        val activeDelegates = genesisBlockService.getLast().payload.activeDelegates.map { DelegateResponse(it) }
+
+        return activeDelegates.stream().skip(request.offset).limit(request.getLimit().toLong()).collect(toList())
+    }
 
     @GetMapping
     fun getAll(request: PageRequest): PageResponse<DelegateResponse> =
