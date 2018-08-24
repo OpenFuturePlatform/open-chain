@@ -6,7 +6,6 @@ import io.openfuture.chain.network.message.base.Packet
 import io.openfuture.chain.network.message.base.PacketType.*
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.network.*
 import io.openfuture.chain.network.service.ConsensusMessageService
@@ -15,7 +14,6 @@ import io.openfuture.chain.network.service.NetworkInnerService
 import io.openfuture.chain.network.sync.SyncBlockRequestHandler
 import io.openfuture.chain.network.sync.SyncBlockResponseHandler
 import io.openfuture.chain.network.sync.SyncManager
-import io.openfuture.chain.network.sync.impl.SynchronizationStatus.SYNCHRONIZED
 import org.slf4j.LoggerFactory
 
 abstract class BaseConnectionHandler(
@@ -41,7 +39,7 @@ abstract class BaseConnectionHandler(
         when (packet.type) {
             // -- system messages
             HEART_BEAT -> networkService.onHeartBeat(ctx, packet.data as HeartBeatMessage)
-            GREETING -> networkService.onGreeting(ctx, packet.data as GreetingMessage)
+            GREETING -> networkService.onGreeting(ctx, packet.data as GreetingMessage, packet.uid)
             ADDRESSES -> networkService.onAddresses(ctx, packet.data as AddressesMessage)
             FIND_ADDRESSES -> networkService.onFindAddresses(ctx, packet.data as FindAddressesMessage)
             TIME -> networkService.onTime(ctx, packet.data as TimeMessage)
@@ -53,7 +51,8 @@ abstract class BaseConnectionHandler(
             DELEGATE_REQUEST -> syncBlockRequestHandler.onDelegateRequestMessage(ctx, packet.data as DelegateRequestMessage)
             DELEGATE_RESPONSE -> syncBlockResponseHandler.onDelegateResponseMessage(ctx, packet.data as DelegateResponseMessage)
             HASH_BLOCK_REQUEST -> syncBlockRequestHandler.onLastHashRequestMessage(ctx, packet.data as HashBlockRequestMessage)
-            HASH_BLOCK_RESPONSE -> syncBlockResponseHandler.onHashResponseMessage(ctx, packet.data as HashBlockResponseMessage)
+            HASH_BLOCK_RESPONSE -> syncBlockResponseHandler.onHashResponseMessage(ctx,
+                packet.data as HashBlockResponseMessage, networkService.getAddressMessage(packet.uid))
             SYNC_BLOCKS_REQUEST -> syncBlockRequestHandler.onSyncBlocRequestMessage(ctx, packet.data as SyncBlockRequestMessage)
             MAIN_BLOCK -> syncBlockResponseHandler.onMainBlockMessage(packet.data as MainBlockMessage)
             GENESIS_BLOCK -> syncBlockResponseHandler.onGenesisBlockMessage(packet.data as GenesisBlockMessage)

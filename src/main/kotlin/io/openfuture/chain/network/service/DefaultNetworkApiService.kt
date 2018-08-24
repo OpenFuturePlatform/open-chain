@@ -1,7 +1,7 @@
 package io.openfuture.chain.network.service
 
 import io.openfuture.chain.network.message.base.BaseMessage
-import io.openfuture.chain.network.message.network.NetworkAddressMessage
+import io.openfuture.chain.network.message.network.AddressMessage
 import org.springframework.stereotype.Service
 
 @Service
@@ -19,12 +19,12 @@ class DefaultNetworkApiService(
         networkInnerService.getChannels().shuffled().firstOrNull()?.writeAndFlush(message)
     }
 
-    override fun sendToAddress(message: BaseMessage, addressMessage: NetworkAddressMessage) {
+    override fun sendToAddress(message: BaseMessage, addressMessage: AddressMessage) {
         networkInnerService.sendToAddress(message, addressMessage)
     }
 
     override fun sendToRootNode(message: BaseMessage) {
-        networkInnerService.sendToRoot(message)
+        networkInnerService.sendToRootNode(message)
     }
 
     override fun getNetworkSize(): Int = networkInnerService.getNetworkSize()
