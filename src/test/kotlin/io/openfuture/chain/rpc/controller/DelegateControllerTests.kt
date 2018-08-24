@@ -50,18 +50,19 @@ class DelegateControllerTests : ControllerTests() {
         val delegate = Delegate("publicKey", "address", "host", 1)
         val genesisBlock = GenesisBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey",
             GenesisBlockPayload(1, listOf(delegate)))
-        val expectedResponse = listOf(DelegateResponse(delegate))
+        val expectedPageResponse = PageResponse(PageImpl(listOf(DelegateResponse(delegate))))
 
         given(genesisBlockService.getLast()).willReturn(genesisBlock)
 
-        val actualResponse = webClient.get().uri("/rpc/delegates/active")
+        val actualPageResponse = webClient.get().uri("/rpc/delegates/active")
             .exchange()
             .expectStatus().isOk
-            .expectBody(List::class.java)
+            .expectBody(PageResponse::class.java)
             .returnResult().responseBody!!
 
-        assertThat((actualResponse[0] as LinkedHashMap<*, *>)["address"]).isEqualTo(expectedResponse.first().address)
-        assertThat((actualResponse[0] as LinkedHashMap<*, *>)["publicKey"]).isEqualTo(expectedResponse.first().publicKey)
+        assertThat(actualPageResponse.totalCount).isEqualTo(expectedPageResponse.totalCount)
+        assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["address"]).isEqualTo(expectedPageResponse.list.first().address)
+        assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["publicKey"]).isEqualTo(expectedPageResponse.list.first().publicKey)
     }
 
 }
