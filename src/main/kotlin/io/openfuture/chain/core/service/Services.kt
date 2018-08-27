@@ -188,4 +188,6 @@ interface WalletService {
 
     fun decreaseBalance(address: String, amount: Long)
 
+    fun increaseUnconfirmedOutput(address: String, amount: Long)
+
 }

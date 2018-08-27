@@ -49,28 +49,22 @@ internal class DefaultVoteTransactionService(
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional
-    override fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction {
-        val utx = UnconfirmedVoteTransaction.of(message)
-
-        if (isExists(utx.hash)) {
-            return utx
-        }
-
-        validate(utx)
-        val savedUtx = this.save(utx)
-        networkService.broadcast(message)
-        return savedUtx
-    }
+    override fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction =
+        add(UnconfirmedVoteTransaction.of(message))
 
     @BlockchainSynchronized
     @Transactional
-    override fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction {
-        val utx = UnconfirmedVoteTransaction.of(request)
+    override fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction =
+        add(UnconfirmedVoteTransaction.of(request))
+
+    private fun add(utx: UnconfirmedVoteTransaction): UnconfirmedVoteTransaction{
         validate(utx)
 
         if (isExists(utx.hash)) {
             return utx
         }
+
+        walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.header.fee)
 
         val savedUtx = this.save(utx)
         networkService.broadcast(savedUtx.toMessage())

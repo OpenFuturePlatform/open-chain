@@ -55,29 +55,23 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun add(message: TransferTransactionMessage): UnconfirmedTransferTransaction {
-        val utx = UnconfirmedTransferTransaction.of(message)
-
-        if (isExists(utx.hash)) {
-            return utx
-        }
-
-        validate(utx)
-        val savedUtx = this.save(utx)
-        networkService.broadcast(message)
-        return savedUtx
-    }
+    override fun add(message: TransferTransactionMessage): UnconfirmedTransferTransaction =
+        add(UnconfirmedTransferTransaction.of(message))
 
     @BlockchainSynchronized(throwable = true)
     @Transactional
-    override fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction {
-        val utx = UnconfirmedTransferTransaction.of(request)
+    override fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction =
+        add(UnconfirmedTransferTransaction.of(request))
 
+    private fun add(utx: UnconfirmedTransferTransaction): UnconfirmedTransferTransaction {
         if (isExists(utx.hash)) {
             return utx
         }
 
         validate(utx)
+
+        walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.header.fee + utx.payload.amount)
+
         val savedUtx = this.save(utx)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
@@ -89,6 +83,9 @@ class DefaultTransferTransactionService(
         if (null != tx) {
             return tx
         }
+
+        walletService.increaseBalance(tx!!.payload.recipientAddress, tx!!.payload.amount)
+        walletService.decreaseBalance(tx!!.header.senderAddress, tx!!.payload.amount)
 
         val utx = unconfirmedRepository.findOneByHash(message.hash)
         if (null != utx) {
@@ -109,18 +106,8 @@ class DefaultTransferTransactionService(
         }
     }
 
-    override fun save(tx: TransferTransaction): TransferTransaction {
-        updateTransferBalance(tx.header.senderAddress, tx.payload.recipientAddress, tx.payload.amount)
-        return super.save(tx)
-    }
-
     private fun validate(utx: UnconfirmedTransferTransaction) {
         super.validateBase(utx, utx.header.fee + utx.payload.amount)
-    }
-
-    private fun updateTransferBalance(from: String, to: String, amount: Long) {
-        walletService.increaseBalance(to, amount)
-        walletService.decreaseBalance(from, amount)
     }
 
 }

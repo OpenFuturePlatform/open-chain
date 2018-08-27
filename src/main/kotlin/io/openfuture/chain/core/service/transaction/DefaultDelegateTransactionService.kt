@@ -52,28 +52,23 @@ class DefaultDelegateTransactionService(
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional
-    override fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction {
-        val utx = UnconfirmedDelegateTransaction.of(message)
-
-        if (isExists(utx.hash)) {
-            return utx
-        }
-
-        validate(utx)
-        val savedUtx = this.save(utx)
-        networkService.broadcast(message)
-        return savedUtx
-    }
+    override fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction =
+        add(UnconfirmedDelegateTransaction.of(message))
 
     @BlockchainSynchronized(throwable = true)
     @Transactional
-    override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction {
-        val utx = UnconfirmedDelegateTransaction.of(request)
+    override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction =
+        add(UnconfirmedDelegateTransaction.of(request))
+
+
+    private fun add(utx: UnconfirmedDelegateTransaction): UnconfirmedDelegateTransaction {
         validate(utx)
 
         if (isExists(utx.hash)) {
             return utx
         }
+
+        walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.header.fee + utx.payload.amount)
 
         val savedUtx = this.save(utx)
         networkService.broadcast(savedUtx.toMessage())
@@ -86,6 +81,8 @@ class DefaultDelegateTransactionService(
         if (null != tx) {
             return tx
         }
+
+        walletService.decreaseBalance(tx!!.header.senderAddress, tx!!.payload.amount)
 
         val utx = unconfirmedRepository.findOneByHash(message.hash)
         if (null != utx) {
@@ -110,7 +107,6 @@ class DefaultDelegateTransactionService(
         delegateService.save(Delegate(tx.payload.delegateKey, tx.header.senderAddress,
             tx.payload.delegateHost, tx.payload.delegatePort))
 
-        updateBalance(tx.header.senderAddress, tx.payload.amount)
         return super.save(tx)
     }
 
@@ -133,10 +129,6 @@ class DefaultDelegateTransactionService(
         }
 
         return true
-    }
-
-    private fun updateBalance(from: String, amount: Long) {
-        walletService.decreaseBalance(from, amount)
     }
 
 }
