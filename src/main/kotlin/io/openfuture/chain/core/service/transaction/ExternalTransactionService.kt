@@ -46,8 +46,6 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
 
     abstract fun validate(utx: U)
 
-
-
     open fun save(utx: U): U {
         return unconfirmedRepository.save(utx)
     }
