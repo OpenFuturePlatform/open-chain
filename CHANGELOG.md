@@ -7,9 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - Possibility to define ports over a docker
-
-### Change
-- deploy.yml of ansible
+- Ports of node and rpc to env of docker over deploy.yml of ansible
 
 ## [0.6.0] - 2018-08-24
 ### Added
