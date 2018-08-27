@@ -9,8 +9,8 @@ class GenesisBlockResponse(
     hash: String,
     signature: String,
     publicKey: String,
-    var epochIndex: Long,
-    var delegatesCount: Int
+    val epochIndex: Long,
+    val delegatesCount: Int
 ) : BaseBlockResponse(timestamp, height, previousHash, hash, signature, publicKey) {
 
     constructor(block: GenesisBlock) : this(

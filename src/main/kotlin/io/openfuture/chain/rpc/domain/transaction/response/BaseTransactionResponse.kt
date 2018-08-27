@@ -5,5 +5,7 @@ abstract class BaseTransactionResponse(
     val fee: Long,
     val senderAddress: String,
     val senderSignature: String,
-    val senderPublicKey: String
+    val senderPublicKey: String,
+    val hash: String,
+    val blockHash: String?
 )

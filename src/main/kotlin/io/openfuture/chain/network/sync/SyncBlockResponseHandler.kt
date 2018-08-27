@@ -1,7 +1,11 @@
 package io.openfuture.chain.network.sync
 
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.network.message.core.*
+import io.openfuture.chain.network.message.core.DelegateResponseMessage
+import io.openfuture.chain.network.message.core.GenesisBlockMessage
+import io.openfuture.chain.network.message.core.HashBlockResponseMessage
+import io.openfuture.chain.network.message.core.MainBlockMessage
+import io.openfuture.chain.network.message.network.AddressMessage
 
 interface SyncBlockResponseHandler {
 
@@ -11,7 +15,7 @@ interface SyncBlockResponseHandler {
 
     fun onDelegateResponseMessage(ctx: ChannelHandlerContext, message: DelegateResponseMessage)
 
-    fun onHashResponseMessage(ctx: ChannelHandlerContext, message: HashBlockResponseMessage)
+    fun onHashResponseMessage(ctx: ChannelHandlerContext, message: HashBlockResponseMessage, addressMessage: AddressMessage)
 
     fun onMainBlockMessage(block: MainBlockMessage)
 

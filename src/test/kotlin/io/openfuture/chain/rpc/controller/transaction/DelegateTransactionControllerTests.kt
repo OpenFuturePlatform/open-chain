@@ -52,21 +52,20 @@ class DelegateTransactionControllerTests : ControllerTests() {
     @Test
     fun getTransactionByHashShouldReturnTransaction() {
         val hash = "hash"
-        val mainBlock = MainBlock(1, 1, "previousHash", "hash",
-            "signature", "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
-        val expectedTransaction = DelegateTransaction(TransactionHeader(1L, 1L, "senderAddress"), "hash",
-            "senderSignature", "senderPublicKey", mainBlock,
-            DelegateTransactionPayload("delegateKey", "delegateHost", 8080)).apply { id = 1 }
+        val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
+        val delegateTransaction = DelegateTransaction(TransactionHeader(1L, 1L, "senderAddress"), "hash",
+            "senderSignature", "senderPublicKey", mainBlock, DelegateTransactionPayload("delegateKey", "delegateHost", 8080)).apply { id = 1 }
+        val expectedResponse = DelegateTransactionResponse(delegateTransaction)
 
-        given(service.getByHash(hash)).willReturn(expectedTransaction)
+        given(service.getByHash(hash)).willReturn(delegateTransaction)
 
-        val actualTransaction = webClient.get().uri("$DELEGATE_TRANSACTION_URL/$hash")
+        val actualResponse = webClient.get().uri("$DELEGATE_TRANSACTION_URL/$hash")
             .exchange()
             .expectStatus().isOk
-            .expectBody(DelegateTransaction::class.java)
+            .expectBody(DelegateTransactionResponse::class.java)
             .returnResult().responseBody!!
 
-        assertThat(actualTransaction).isEqualTo(expectedTransaction)
+        assertThat(actualResponse).isEqualToComparingFieldByField(expectedResponse)
     }
 
 }

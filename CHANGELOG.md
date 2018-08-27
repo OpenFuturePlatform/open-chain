@@ -5,24 +5,29 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.6.0] - 2018-08-24
 ### Added
-- Sync: Up node synchronization.
-- Sync: Application sync status.
-- Sync: Check app sync status and start sync if need.
+- Network: A UID for nodes
+- Sync: Up node synchronization
+- Sync: Application synchronization status
+- Sync: Check application synchronization status and start synchronization if need
 - RPC: Get explorer info
-- RPC: Get list of blocks 
-- RPC: Get list of transactions 
-- RPC: Tests to main and genesis blocks endpoints
-- Core: Reward transactions
+- RPC: Get a list of blocks 
+- RPC: Get a list of transactions 
+- RPC: Main and genesis block endpoints unit tests
+- Wallet UI: Create a transaction
+- Wallet UI: Past transaction list
+- Core: Reward transaction
 
 ### Changed
-- Core: Genesis and Main blocks are not broadcasted after creation.
-- Core validation: Impossible to create vote transaction on the nonexistent delegate.
-- Core validation: Impossible to create request of vote transaction with the nonexistent voteType.
-- Core validation: Impossible to create transactions with negative fee.
-- Core validation: Improve validation fee and amount for transfer transaction.
-- Core: Remove validation from main block service on add.
-- Core: Remove validation from genesis service on add.
+- Core: Genesis and Main blocks are not broadcasted after creation, pending blocks are broadcasted instead
+- Core validation: Now it is impossible to create vote transaction on the nonexistent delegate
+- Core validation: Now it is impossible to generate a request of vote transaction with the nonexistent vote type
+- Core validation: Now it is impossible to create transactions with a negative fee
+- Core validation: Improved fee and amount validation for the transfer transaction
+- Core: Removed validation from main block service on adding a block
+- Core: Removed validation from genesis service on adding a block
 - Core: Removed field 'reward' from blocks
 
 ## [0.5.0] - 2018-08-10

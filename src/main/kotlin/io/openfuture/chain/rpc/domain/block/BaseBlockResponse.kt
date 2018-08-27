@@ -1,10 +1,10 @@
 package io.openfuture.chain.rpc.domain.block
 
 abstract class BaseBlockResponse(
-    var timestamp: Long,
-    var height: Long,
-    var previousHash: String,
-    var hash: String,
-    var signature: String,
-    var publicKey: String
+    val timestamp: Long,
+    val height: Long,
+    val previousHash: String,
+    val hash: String,
+    val signature: String,
+    val publicKey: String
 )
