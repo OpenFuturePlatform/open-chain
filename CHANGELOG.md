@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - RPC: Get delegates by wallet address
+- Consensus: Added amount field to delegate transaction
+
+### Changed
+- Wallet: Changed update balance logic
 
 ## [0.6.0] - 2018-08-24
 ### Added

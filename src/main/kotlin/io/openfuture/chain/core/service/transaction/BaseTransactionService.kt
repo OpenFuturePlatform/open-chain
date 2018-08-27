@@ -40,7 +40,6 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
     }
 
     open fun save(tx: T): T {
-        updateBalanceByFee(tx)
         capacityChecker.incrementCapacity()
         return repository.save(tx)
     }
@@ -72,10 +71,6 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         val persistUtx = unconfirmedRepository.findOneByHash(hash)
         val persistTx = repository.findOneByHash(hash)
         return null != persistUtx || null != persistTx
-    }
-
-    private fun updateBalanceByFee(tx: BaseTransaction) {
-        walletService.decreaseBalance(tx.header.senderAddress, tx.header.fee)
     }
 
     private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean {

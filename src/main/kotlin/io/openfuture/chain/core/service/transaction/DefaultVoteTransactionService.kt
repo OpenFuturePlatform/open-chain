@@ -78,6 +78,8 @@ internal class DefaultVoteTransactionService(
             return tx
         }
 
+        walletService.decreaseBalance(tx!!.header.senderAddress, tx!!.header.fee)
+
         val utx = unconfirmedRepository.findOneByHash(message.hash)
         if (null != utx) {
             return confirm(utx, VoteTransaction.of(utx, block))
