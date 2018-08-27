@@ -55,9 +55,9 @@ class VoteTransactionControllerTests : ControllerTests() {
         val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
         val expectedTransaction = VoteTransaction(TransactionHeader(1L, 1L, "senderAddress"), "hash",
             "senderSignature", "senderPublicKey", mainBlock, VoteTransactionPayload(1, "delegateKey")).apply { id = 1 }
-        val expectedResponse = VoteTransactionResponse(voteTransaction)
+        val expectedResponse = VoteTransactionResponse(expectedTransaction)
 
-        given(service.getByHash(hash)).willReturn(voteTransaction)
+        given(service.getByHash(hash)).willReturn(expectedTransaction)
 
         val actualResponse = webClient.get().uri("$VOTE_TRANSACTION_URL/$hash")
             .exchange()
