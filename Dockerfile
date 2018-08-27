@@ -4,7 +4,4 @@ WORKDIR root/
 
 ADD build/libs/*.jar ./application.jar
 
-EXPOSE 8080
-EXPOSE 9190
-
-CMD java -client -Xmx512M -jar /root/application.jar
+CMD java -client -Xmx512M -jar -Dspring.profiles.active=docker /root/application.jar

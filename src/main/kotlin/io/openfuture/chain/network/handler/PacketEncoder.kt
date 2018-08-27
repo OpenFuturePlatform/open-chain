@@ -2,6 +2,7 @@ package io.openfuture.chain.network.handler
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToMessageEncoder
+import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.message.base.BaseMessage
 import io.openfuture.chain.network.message.base.Packet
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component
 @Component
 @Scope(SCOPE_PROTOTYPE)
 class PacketEncoder(
+    private val keyHolder: NodeKeyHolder,
     private val properties: NodeProperties,
     private val clock: NodeClock
 ) : MessageToMessageEncoder<BaseMessage>() {
@@ -26,7 +28,7 @@ class PacketEncoder(
 
 
     override fun encode(ctx: ChannelHandlerContext, data: BaseMessage, out: MutableList<Any>) {
-        val packet = Packet(data, properties.version!!, clock.networkTime())
+        val packet = Packet(keyHolder.getUid(), data, properties.version!!, clock.networkTime())
 
         log.info("Encoding ${ToStringBuilder.reflectionToString(data, SHORT_PREFIX_STYLE)} " +
             "to ${ctx.channel().remoteAddress()}")

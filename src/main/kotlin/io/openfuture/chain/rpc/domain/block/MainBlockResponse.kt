@@ -10,9 +10,9 @@ class MainBlockResponse(
     hash: String,
     signature: String,
     publicKey: String,
-    var merkleHash: String,
-    var transactionsCount: Long,
-    var epochIndex: Long
+    val merkleHash: String,
+    val transactionsCount: Long,
+    val epochIndex: Long
 ) : BaseBlockResponse(timestamp, height, previousHash, reward, hash, signature, publicKey) {
 
     constructor(block: MainBlock, epochIndex: Long) : this(
