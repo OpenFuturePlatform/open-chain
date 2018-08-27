@@ -9,6 +9,9 @@
         name: openchain-{{ item.app_port }}
         image: openplatform/chain:{{ image_tag }}
         state: started
+        env:
+          RPC_PORT: "{{ item.app_port }}"
+          NODE_PORT: "{{ item.api_port }}"
         published_ports:
           - "{{ item.app_port }}:8080"
           - "{{ item.api_port }}:9190"
