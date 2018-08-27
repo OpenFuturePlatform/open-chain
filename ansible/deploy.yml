@@ -13,8 +13,8 @@
           RPC_PORT: "{{ item.app_port }}"
           NODE_PORT: "{{ item.api_port }}"
         published_ports:
-          - "{{ item.app_port }}:8080"
-          - "{{ item.api_port }}:9190"
+          - "{{ item.app_port }}:{{ item.app_port }}"
+          - "{{ item.api_port }}:{{ item.api_port }}"
         restart_policy: always
       with_items:
         - { app_port: '9090', api_port: '9190' }
