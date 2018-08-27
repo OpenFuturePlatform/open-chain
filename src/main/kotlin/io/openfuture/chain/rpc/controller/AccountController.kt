@@ -1,5 +1,6 @@
 package io.openfuture.chain.rpc.controller
 
+import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.rpc.domain.crypto.AccountDto
@@ -30,6 +31,9 @@ class AccountController(
 
     @GetMapping("/wallets/{address}/balance")
     fun getBalance(@PathVariable address: String): Long = walletService.getBalanceByAddress(address)
+
+    @GetMapping("/wallets/{address}/delegates")
+    fun getDelegates(@PathVariable address: String): Set<Delegate> = walletService.getVotesByAddress(address)
 
     @PostMapping("/wallets/validateAddress")
     fun validateAddress(@RequestBody @Valid request: ValidateAddressRequest): ValidateAddressRequest = request
