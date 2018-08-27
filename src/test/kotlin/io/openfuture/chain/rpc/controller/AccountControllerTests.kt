@@ -1,6 +1,7 @@
 package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
+import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
@@ -17,6 +18,8 @@ import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import reactor.core.publisher.Mono
 
 @WebFluxTest(AccountController::class)
@@ -113,6 +116,26 @@ class AccountControllerTests : ControllerTests() {
 
         assertThat(actualBalance).isEqualTo(expectedBalance)
     }
+
+    @Test
+    fun getDelegatesShouldReturnVotesDelegates() {
+        val address = "address"
+        val expectedDelegates = mutableSetOf(Delegate("publicKey", "address", "host", 8080))
+
+        given(walletService.getVotesByAddress(address)).willReturn(expectedDelegates)
+
+        val actualDelegates = webClient.get().uri("$ACCOUNT_URL/wallets/$address/delegates")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(List::class.java)
+            .returnResult().responseBody!!
+
+        assertThat((actualDelegates.first() as LinkedHashMap<*, *>)["address"]).isEqualTo(expectedDelegates.first().address)
+        assertThat((actualDelegates.first() as LinkedHashMap<*, *>)["publicKey"]).isEqualTo(expectedDelegates.first().publicKey)
+    }
+
+    @GetMapping("/wallets/{address}/delegates")
+    fun getDelegates(@PathVariable address: String): Set<Delegate> = walletService.getVotesByAddress(address)
 
     @Test
     fun doGenerateNewAccountShouldReturnGeneratedAccount() {
