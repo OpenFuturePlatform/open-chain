@@ -12,7 +12,7 @@ plugins {
 apply plugin: "io.spring.dependency-management"
 
 group = 'io.openfuture.chain'
-version = versionDetails().lastTag[1..-1] + (versionDetails().isCleanTag ? '' : '-DIRTY')
+version = versionDetails().lastTag[1..-1]
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
