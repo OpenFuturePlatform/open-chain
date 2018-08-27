@@ -1,8 +1,9 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.exception.model.ExceptionType
-import io.openfuture.chain.core.exception.model.ExceptionType.*
+import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_HASH
+import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_SIGNATURE
+import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.crypto.util.HashUtils
@@ -12,13 +13,12 @@ import java.nio.ByteBuffer
 
 abstract class BaseTransactionService {
 
-    protected fun validateBase(header: TransactionHeader, payload: TransactionPayload, hash: String,
-                               senderSignature: String, senderPublicKey: String) {
-        if (!isValidHash(header, payload, hash)) {
+    protected fun validateBase(header: TransactionHeader, payload: TransactionPayload, footer: TransactionFooter) {
+        if (!isValidHash(header, payload, footer.hash)) {
             throw ValidationException("Incorrect hash", INCORRECT_HASH)
         }
 
-        if (!isValidSignature(hash, senderSignature, senderPublicKey)) {
+        if (!isValidSignature(footer.hash, footer.senderSignature, footer.senderPublicKey)) {
             throw ValidationException("Incorrect signature", INCORRECT_SIGNATURE)
         }
     }

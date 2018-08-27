@@ -41,7 +41,7 @@ interface GenesisBlockRepository : BlockRepository<GenesisBlock>
 @Repository
 interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 
-    fun findOneByHash(hash: String): Entity?
+    fun findOneByFooterHash(hash: String): Entity?
 
     fun findAllByHeaderSenderAddress(senderAddress: String): List<Entity>
 
@@ -63,7 +63,7 @@ interface TransferTransactionRepository : TransactionRepository<TransferTransact
 @Repository
 interface RewardTransactionRepository : BaseRepository<RewardTransaction> {
 
-    fun findOneByHash(hash: String): RewardTransaction?
+    fun findOneByFooterHash(hash: String): RewardTransaction?
 
     fun findAllByPayloadRecipientAddress(payloadRecipientAddress: String): List<RewardTransaction>
 
@@ -72,7 +72,7 @@ interface RewardTransactionRepository : BaseRepository<RewardTransaction> {
 @Repository
 interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseRepository<UEntity> {
 
-    fun findOneByHash(hash: String): UEntity?
+    fun findOneByFooterHash(hash: String): UEntity?
 
     fun findAllByOrderByHeaderFeeDesc(): MutableList<UEntity>
 

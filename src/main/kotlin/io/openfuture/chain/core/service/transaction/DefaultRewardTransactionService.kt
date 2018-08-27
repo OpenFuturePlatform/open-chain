@@ -4,6 +4,7 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.RewardTransactionPayload
@@ -52,7 +53,7 @@ class DefaultRewardTransactionService(
 
     @Transactional
     override fun toBlock(message: RewardTransactionMessage, block: MainBlock) {
-        val transaction = repository.findOneByHash(message.hash)
+        val transaction = repository.findOneByFooterHash(message.hash)
         if (null != transaction) {
             return
         }
@@ -66,7 +67,8 @@ class DefaultRewardTransactionService(
         try {
             val header = TransactionHeader(message.timestamp, message.fee, message.senderAddress)
             val payload = RewardTransactionPayload(message.reward, message.recipientAddress)
-            super.validateBase(header, payload, message.hash, message.senderSignature, message.senderPublicKey)
+            val footer = TransactionFooter(message.hash, message.senderSignature, message.senderPublicKey)
+            super.validateBase(header, payload, footer)
             return true
         } catch (e: ValidationException) {
             DefaultTransferTransactionService.log.warn(e.message)

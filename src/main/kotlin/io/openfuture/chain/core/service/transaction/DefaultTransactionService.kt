@@ -25,7 +25,7 @@ class DefaultTransactionService(
     override fun getCount(): Long = repository.count()
 
     @Transactional(readOnly = true)
-    override fun getUnconfirmedTransactionByHash(hash: String): UnconfirmedTransaction = uRepository.findOneByHash(hash)
+    override fun getUnconfirmedTransactionByHash(hash: String): UnconfirmedTransaction = uRepository.findOneByFooterHash(hash)
         ?: throw NotFoundException("Unconfirmed transaction with hash $hash not found")
 
     override fun getProducingPerSecond(): Long {

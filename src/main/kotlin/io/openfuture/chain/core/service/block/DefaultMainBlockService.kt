@@ -88,7 +88,7 @@ class DefaultMainBlockService(
 
         val rewardTransactionMessage = rewardTransactionService.create(timestamp, transactions.map { it.header.fee }.sum())
 
-        val merkleHash = calculateMerkleRoot(transactions.map { it.hash } + rewardTransactionMessage.hash)
+        val merkleHash = calculateMerkleRoot(transactions.map { it.footer.hash } + rewardTransactionMessage.hash)
         val payload = MainBlockPayload(merkleHash)
 
         val hash = createHash(timestamp, height, previousHash, payload)
