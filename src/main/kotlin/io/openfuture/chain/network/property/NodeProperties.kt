@@ -14,10 +14,6 @@ import javax.validation.constraints.Size
 @ConfigurationProperties(value = "node")
 class NodeProperties(
 
-    /** Node server host */
-    @field:NotNull
-    var host: String? = null,
-
     /** Node server port */
     @field:NotNull
     var port: Int? = null,
@@ -62,7 +58,15 @@ class NodeProperties(
 
     /** Interval for triggering node explorer task in milliseconds */
     @field:NotNull
-    var explorerInterval: Long? = null
+    var explorerInterval: Long? = null,
+
+    /** Interval for synchronization blocks in milliseconds */
+    @field:NotNull
+    var synchronizationInterval: Long? = null,
+
+    /** Max synchronization response delay in milliseconds */
+    @field:NotNull
+    var synchronizationResponseDelay: Long? = null
 
 ) {
 

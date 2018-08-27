@@ -6,12 +6,24 @@
   tasks:
     - name: Re-create openchain container
       docker_container:
-        name: openchain
+        name: openchain-{{ item.app_port }}
         image: openplatform/chain:{{ image_tag }}
         state: started
         published_ports:
-          - 8080:8080
-          - 9190:9190
+          - "{{ item.app_port }}:8080"
+          - "{{ item.api_port }}:9190"
         restart_policy: always
+      with_items:
+        - { app_port: '9090', api_port: '9190' }
+        - { app_port: '9091', api_port: '9191' }
+        - { app_port: '9092', api_port: '9192' }
+        - { app_port: '9093', api_port: '9193' }
+        - { app_port: '9094', api_port: '9194' }
+        - { app_port: '9095', api_port: '9195' }
+        - { app_port: '9096', api_port: '9196' }
+        - { app_port: '9097', api_port: '9197' }
+        - { app_port: '9098', api_port: '9198' }
+        - { app_port: '9099', api_port: '9199' }
+        - { app_port: '9100', api_port: '9200' }
     - name: Delete old images
       shell: docker image prune -a --force --filter "until=24h"

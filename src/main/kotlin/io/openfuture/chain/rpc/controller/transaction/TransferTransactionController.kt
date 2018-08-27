@@ -1,6 +1,5 @@
 package io.openfuture.chain.rpc.controller.transaction
 
-import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
@@ -13,10 +12,15 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/rpc/transactions/transfer")
 class TransferTransactionController(
-    private val transactionService: TransferTransactionService) {
+    private val transactionService: TransferTransactionService
+) {
 
-    @GetMapping("/{address}")
-    fun getTransactions(@PathVariable address: String): List<TransferTransaction> = transactionService.getByAddress(address)
+    @GetMapping("/address/{address}")
+    fun getTransactions(@PathVariable address: String): List<TransferTransactionResponse> =
+        transactionService.getByAddress(address).map { TransferTransactionResponse(it) }
+
+    @GetMapping("/{hash}")
+    fun get(@PathVariable hash: String): TransferTransactionResponse = TransferTransactionResponse(transactionService.getByHash(hash))
 
     @PostMapping
     fun add(@Valid @RequestBody request: TransferTransactionRequest): TransferTransactionResponse {
@@ -25,7 +29,8 @@ class TransferTransactionController(
     }
 
     @GetMapping
-    fun getAll(request: PageRequest): PageResponse<TransferTransaction> = PageResponse(transactionService.getAll(request))
+    fun getAll(request: PageRequest): PageResponse<TransferTransactionResponse> =
+        PageResponse(transactionService.getAll(request).map { TransferTransactionResponse(it) })
 
 }
 

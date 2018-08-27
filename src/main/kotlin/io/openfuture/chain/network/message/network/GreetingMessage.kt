@@ -5,17 +5,16 @@ import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.network.message.base.BaseMessage
 
 @NoArgConstructor
-data class GreetingMessage(
-    var address: NetworkAddressMessage
+class GreetingMessage(
+    var port: Int
 ) : BaseMessage {
 
     override fun read(buffer: ByteBuf) {
-        address = NetworkAddressMessage::class.java.newInstance()
-        address.read(buffer)
+        port = buffer.readInt()
     }
 
     override fun write(buffer: ByteBuf) {
-        address.write(buffer)
+        buffer.writeInt(port)
     }
 
 }

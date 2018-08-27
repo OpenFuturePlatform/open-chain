@@ -6,6 +6,28 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.0] - 2018-08-24
+### Added
+- Network: A UID for nodes
+- Sync: Up node synchronization
+- Sync: Application synchronization status
+- Sync: Check application synchronization status and start synchronization if need
+- RPC: Get explorer info
+- RPC: Get a list of blocks 
+- RPC: Get a list of transactions 
+- RPC: Main and genesis block endpoints unit tests
+- Wallet UI: Create a transaction
+- Wallet UI: Past transaction list
+
+### Changed
+- Core: Genesis and Main blocks are not broadcasted after creation, pending blocks are broadcasted instead
+- Core validation: Now it is impossible to create vote transaction on the nonexistent delegate
+- Core validation: Now it is impossible to generate a request of vote transaction with the nonexistent vote type
+- Core validation: Now it is impossible to create transactions with a negative fee
+- Core validation: Improved fee and amount validation for the transfer transaction
+- Core: Removed validation from main block service on adding a block
+- Core: Removed validation from genesis service on adding a block
+
 ## [0.5.0] - 2018-08-10
 ### Added
 - Consensus: Intervals between time slots for synchronization

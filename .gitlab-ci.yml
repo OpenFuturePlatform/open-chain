@@ -102,6 +102,6 @@ deploy-production:
     - echo "${DEPLOY_KEY_PROD}" | tr -d '\r' > ansible/key.pem
     - chmod 600 ansible/key.pem
     - export ANSIBLE_HOST_KEY_CHECKING=False
-    - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -e "image_tag=${CI_COMMIT_REF_NAME}" -e "count=1" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.yml
+    - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -e "image_tag=${CI_COMMIT_REF_NAME}" -e "count=2" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.yml
   only:
     - tags
