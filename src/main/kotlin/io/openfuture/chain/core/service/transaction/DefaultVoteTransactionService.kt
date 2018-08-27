@@ -1,11 +1,12 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
-import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
+import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.exception.model.ExceptionType.*
+import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_DELEGATE_KEY
+import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_VOTES_COUNT
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
@@ -125,11 +126,7 @@ internal class DefaultVoteTransactionService(
             throw ValidationException("Vote type with id: ${utx.payload.voteTypeId} is not exists")
         }
 
-        if (!isValidFee(utx.header.senderAddress, utx.header.fee)) {
-            throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
-        }
-
-        super.validateBase(utx)
+        super.validateBase(utx, utx.header.fee)
     }
 
     private fun updateWalletVotes(senderAddress: String, delegateKey: String, type: VoteType) {
@@ -165,12 +162,6 @@ internal class DefaultVoteTransactionService(
 
     private fun isExistsVoteType(typeId: Int): Boolean {
         return VoteType.values().any { it.getId() == typeId }
-    }
-
-    private fun isValidFee(senderAddress: String, fee: Long): Boolean {
-        val balance = walletService.getBalanceByAddress(senderAddress)
-        val unspentBalance = balance - baseService.getAllUnconfirmedByAddress(senderAddress).map { it.header.fee }.sum()
-        return fee in 0..unspentBalance
     }
 
 }

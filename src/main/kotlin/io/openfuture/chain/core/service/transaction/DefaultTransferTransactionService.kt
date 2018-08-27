@@ -1,10 +1,9 @@
 package io.openfuture.chain.core.service.transaction
 
-import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
+import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.exception.model.ExceptionType.INSUFFICIENT_BALANCE
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -116,29 +115,12 @@ class DefaultTransferTransactionService(
     }
 
     private fun validate(utx: UnconfirmedTransferTransaction) {
-        if (!isValidBalance(utx.header.senderAddress, utx.payload.amount, utx.header.fee)) {
-            throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
-        }
-
-        super.validateBase(utx)
+        super.validateBase(utx, utx.header.fee + utx.payload.amount)
     }
 
     private fun updateTransferBalance(from: String, to: String, amount: Long) {
         walletService.increaseBalance(to, amount)
         walletService.decreaseBalance(from, amount)
-    }
-
-    private fun isValidBalance(address: String, amount: Long, fee: Long): Boolean {
-        if (amount < 0 || fee < 0) {
-            return false
-        }
-
-        val balance = walletService.getBalanceByAddress(address)
-        val unconfirmedFee = baseService.getAllUnconfirmedByAddress(address).map { it.header.fee }.sum()
-        val unconfirmedAmount = unconfirmedRepository.findAllByHeaderSenderAddress(address).map { it.payload.amount }.sum()
-        val unspentBalance = balance - (unconfirmedFee + unconfirmedAmount)
-
-        return unspentBalance >= amount + fee
     }
 
 }

@@ -31,10 +31,10 @@ class DelegateTransactionControllerTests : ControllerTests() {
 
     @Test
     fun addTransactionShouldReturnAddedTransaction() {
-        val transactionRequest = DelegateTransactionRequest(1L, 1L, "hash", "senderAddress", "senderPublicKey", "senderSignature",
-            "delegateKey", "host", 1)
-        val unconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(TransactionHeader(1L, 1L, "senderAddress"), "senderPublicKey", "senderSignature",
-            "hash", DelegateTransactionPayload("delegateKey", "host", 1))
+        val transactionRequest = DelegateTransactionRequest(1L, 1L, "hash", "senderAddress", "delegateKey", "senderSignature",
+            "delegateKey", 1)
+        val unconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(TransactionHeader(1L, 1L, "senderAddress"),
+            "senderPublicKey", "senderSignature", "hash", DelegateTransactionPayload("delegateKey", "host", 1, 1))
         val expectedResponse = DelegateTransactionResponse(unconfirmedDelegateTransaction)
 
         given(service.add(transactionRequest)).willReturn(unconfirmedDelegateTransaction)
@@ -54,7 +54,8 @@ class DelegateTransactionControllerTests : ControllerTests() {
         val hash = "hash"
         val mainBlock = MainBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
         val delegateTransaction = DelegateTransaction(TransactionHeader(1L, 1L, "senderAddress"), "hash",
-            "senderSignature", "senderPublicKey", mainBlock, DelegateTransactionPayload("delegateKey", "delegateHost", 8080)).apply { id = 1 }
+            "senderSignature", "senderPublicKey", mainBlock, DelegateTransactionPayload("delegateKey",
+            "delegateHost", 8080, 1)).apply { id = 1 }
         val expectedResponse = DelegateTransactionResponse(delegateTransaction)
 
         given(service.getByHash(hash)).willReturn(delegateTransaction)

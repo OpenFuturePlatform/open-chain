@@ -16,17 +16,21 @@ class DelegateTransactionPayload(
     var delegateHost: String,
 
     @Column(name = "delegate_port", nullable = false, unique = true)
-    var delegatePort: Int
+    var delegatePort: Int,
+
+    @Column(name = "amount", nullable = false)
+    var amount: Long
 
 ) : TransactionPayload {
 
     override fun getBytes(): ByteArray {
         val buffer = ByteBuffer.allocate(delegateKey.toByteArray(UTF_8).size +
-            delegateHost.toByteArray(UTF_8).size + ByteConstants.INT_BYTES)
+            delegateHost.toByteArray(UTF_8).size + ByteConstants.INT_BYTES + ByteConstants.LONG_BYTES)
 
         buffer.put(delegateKey.toByteArray(UTF_8))
         buffer.put(delegateHost.toByteArray(UTF_8))
         buffer.putInt(delegatePort)
+        buffer.putLong(amount)
         return buffer.array()
     }
 

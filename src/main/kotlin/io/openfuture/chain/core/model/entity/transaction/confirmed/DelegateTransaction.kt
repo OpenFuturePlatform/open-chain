@@ -31,7 +31,7 @@ class DelegateTransaction(
             message.senderSignature,
             message.senderPublicKey,
             block,
-            DelegateTransactionPayload(message.delegateKey, message.delegateHost, message.delegatePort)
+            DelegateTransactionPayload(message.delegateKey, message.delegateHost, message.delegatePort, message.amount)
         )
 
         fun of(utx: UnconfirmedDelegateTransaction, block: MainBlock): DelegateTransaction = DelegateTransaction(
@@ -55,7 +55,8 @@ class DelegateTransaction(
         senderPublicKey,
         payload.delegateKey,
         payload.delegateHost,
-        payload.delegatePort
+        payload.delegatePort,
+        payload.amount
     )
 
 }

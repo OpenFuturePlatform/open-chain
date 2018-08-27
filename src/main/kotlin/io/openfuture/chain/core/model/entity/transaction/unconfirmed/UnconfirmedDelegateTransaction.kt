@@ -28,7 +28,7 @@ class UnconfirmedDelegateTransaction(
             message.hash,
             message.senderSignature,
             message.senderPublicKey,
-            DelegateTransactionPayload(message.delegateKey, message.delegateHost, message.delegatePort)
+            DelegateTransactionPayload(message.delegateKey, message.delegateHost, message.delegatePort, message.amount)
         )
 
         fun of(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
@@ -36,7 +36,7 @@ class UnconfirmedDelegateTransaction(
             request.hash!!,
             request.senderSignature!!,
             request.senderPublicKey!!,
-            DelegateTransactionPayload(request.delegateKey!!, request.senderHost!!, request. senderPort!!)
+            DelegateTransactionPayload(request.delegateKey!!, "localhost", 8080, request.amount!!)
         )
     }
 
@@ -51,7 +51,8 @@ class UnconfirmedDelegateTransaction(
         senderPublicKey,
         payload.delegateKey,
         payload.delegateHost,
-        payload.delegatePort
+        payload.delegatePort,
+        payload.amount
     )
 
 }

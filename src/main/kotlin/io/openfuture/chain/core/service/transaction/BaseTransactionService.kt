@@ -50,7 +50,7 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
         return save(tx)
     }
 
-    protected fun validateBase(utx: BaseTransaction) {
+    protected fun validateBase(utx: BaseTransaction, amount: Long) {
         if (!isValidAddress(utx.header.senderAddress, utx.senderPublicKey)) {
             throw ValidationException("Incorrect sender address", INCORRECT_ADDRESS)
         }
@@ -61,6 +61,10 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
 
         if (!isValidSignature(utx.hash, utx.senderSignature, utx.senderPublicKey)) {
             throw ValidationException("Incorrect signature", INCORRECT_SIGNATURE)
+        }
+
+        if (!isValidBalance(utx.header.senderAddress, amount)) {
+            throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
         }
     }
 
@@ -85,6 +89,9 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
     private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean {
         return SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
     }
+
+    private fun isValidBalance(address: String, amount: Long): Boolean =
+        walletService.getBalanceByAddress(address) >= amount
 
     private fun createHash(header: TransactionHeader, payload: TransactionPayload): String {
         val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + header.senderAddress.toByteArray(UTF_8).size + payload.getBytes().size)
