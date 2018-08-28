@@ -7,11 +7,13 @@ import io.openfuture.chain.rpc.domain.DelegateResponse
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import org.springframework.data.domain.PageImpl
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.stream.Collectors
 
+@CrossOrigin
 @RestController
 @RequestMapping("/rpc/delegates")
 class DelegateController(
