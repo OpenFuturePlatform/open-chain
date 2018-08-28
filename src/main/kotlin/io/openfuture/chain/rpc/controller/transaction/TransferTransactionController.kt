@@ -28,6 +28,7 @@ class TransferTransactionController(
         return TransferTransactionResponse(tx)
     }
 
+    @CrossOrigin
     @GetMapping
     fun getAll(request: PageRequest): PageResponse<TransferTransaction> = PageResponse(transactionService.getAll(request))
 
