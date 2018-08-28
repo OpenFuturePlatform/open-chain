@@ -4,11 +4,13 @@ import io.openfuture.chain.core.model.node.HardwareInfo
 import io.openfuture.chain.core.service.HardwareInfoService
 import io.openfuture.chain.network.component.node.NodeClock
 import org.springframework.context.ApplicationContext
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 
+@CrossOrigin
 @RestController
 @RequestMapping("/rpc/info")
 class NodeInfoController(

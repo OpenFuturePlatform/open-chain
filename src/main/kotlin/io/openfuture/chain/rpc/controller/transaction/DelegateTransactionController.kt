@@ -12,6 +12,7 @@ class DelegateTransactionController(
     private val transactionService: DelegateTransactionService
 ) {
 
+    @CrossOrigin
     @GetMapping("/{hash}")
     fun get(@PathVariable hash: String): DelegateTransactionResponse =
         DelegateTransactionResponse(transactionService.getByHash(hash))
