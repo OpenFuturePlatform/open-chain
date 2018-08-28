@@ -16,9 +16,11 @@ class TransferTransactionController(
     private val transactionService: TransferTransactionService
 ) {
 
+    @CrossOrigin
     @GetMapping("/address/{address}")
     fun getTransactions(@PathVariable address: String): List<TransferTransaction> = transactionService.getByAddress(address)
 
+    @CrossOrigin
     @GetMapping("/{hash}")
     fun get(@PathVariable hash: String): TransferTransaction = transactionService.getByHash(hash)
 
