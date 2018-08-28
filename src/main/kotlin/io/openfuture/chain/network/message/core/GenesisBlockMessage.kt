@@ -10,13 +10,12 @@ class GenesisBlockMessage(
     height: Long,
     previousHash: String,
     timestamp: Long,
-    reward: Long,
     hash: String,
     signature: String,
     publicKey: String,
     var epochIndex: Long,
     var delegates: List<String>
-) : BlockMessage(height, previousHash, timestamp, reward, hash, signature, publicKey) {
+) : BlockMessage(height, previousHash, timestamp, hash, signature, publicKey) {
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)

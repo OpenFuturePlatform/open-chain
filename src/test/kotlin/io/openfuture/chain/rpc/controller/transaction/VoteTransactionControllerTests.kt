@@ -4,6 +4,7 @@ import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
+import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
@@ -33,8 +34,10 @@ class VoteTransactionControllerTests : ControllerTests() {
     fun addTransactionShouldReturnAddedTransaction() {
         val transactionRequest = VoteTransactionRequest(1L, 1L, "hash", "senderAddress", VoteType.FOR,
             "delegateKey", "senderSignature", "senderPublicKey")
-        val unconfirmedVoteTransaction = UnconfirmedVoteTransaction(TransactionHeader(1L, 1L, "senderAddress"), "senderPublicKey", "senderSignature",
-            "hash", VoteTransactionPayload(1, "delegateKey"))
+        val header = TransactionHeader(1L, 1L, "senderAddress")
+        val footer = TransactionFooter("senderPublicKey", "senderSignature", "hash")
+        val payload = VoteTransactionPayload(1, "delegateKey")
+        val unconfirmedVoteTransaction = UnconfirmedVoteTransaction(header, footer, payload)
         val expectedResponse = VoteTransactionResponse(unconfirmedVoteTransaction)
 
         given(service.add(transactionRequest)).willReturn(unconfirmedVoteTransaction)
@@ -52,12 +55,14 @@ class VoteTransactionControllerTests : ControllerTests() {
     @Test
     fun getTransactionByHashShouldReturnTransaction() {
         val hash = "hash"
-        val mainBlock = MainBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
-        val voteTransaction = VoteTransaction(TransactionHeader(1L, 1L, "senderAddress"), "hash",
-            "senderSignature", "senderPublicKey", mainBlock, VoteTransactionPayload(1, "delegateKey")).apply { id = 1 }
-        val expectedResponse = VoteTransactionResponse(voteTransaction)
+        val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
+        val header = TransactionHeader(1L, 1L, "senderAddress")
+        val footer = TransactionFooter("hash", "senderSignature", "senderPublicKey")
+        val payload = VoteTransactionPayload(1, "delegateKey")
+        val expectedTransaction = VoteTransaction(header, footer, mainBlock, payload).apply { id = 1 }
+        val expectedResponse = VoteTransactionResponse(expectedTransaction)
 
-        given(service.getByHash(hash)).willReturn(voteTransaction)
+        given(service.getByHash(hash)).willReturn(expectedTransaction)
 
         val actualResponse = webClient.get().uri("$VOTE_TRANSACTION_URL/$hash")
             .exchange()

@@ -19,9 +19,6 @@ abstract class Block(
     @Column(name = "previous_hash", nullable = false)
     var previousHash: String,
 
-    @Column(name = "reward", nullable = false)
-    var reward: Long,
-
     @Column(name = "hash", nullable = false, unique = true)
     var hash: String,
 

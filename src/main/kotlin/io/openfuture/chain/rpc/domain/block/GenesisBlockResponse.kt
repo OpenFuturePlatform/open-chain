@@ -6,19 +6,17 @@ class GenesisBlockResponse(
     timestamp: Long,
     height: Long,
     previousHash: String,
-    reward: Long,
     hash: String,
     signature: String,
     publicKey: String,
     val epochIndex: Long,
     val delegatesCount: Int
-) : BaseBlockResponse(timestamp, height, previousHash, reward, hash, signature, publicKey) {
+) : BaseBlockResponse(timestamp, height, previousHash, hash, signature, publicKey) {
 
     constructor(block: GenesisBlock) : this(
         block.timestamp,
         block.height,
         block.previousHash,
-        block.reward,
         block.hash,
         block.signature,
         block.publicKey,

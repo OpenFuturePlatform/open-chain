@@ -11,7 +11,6 @@ abstract class BlockMessage(
     var height: Long,
     var previousHash: String,
     var timestamp: Long,
-    var reward: Long,
     var hash: String,
     var signature: String,
     var publicKey: String
@@ -21,7 +20,6 @@ abstract class BlockMessage(
         height = buffer.readLong()
         previousHash = buffer.readString()
         timestamp = buffer.readLong()
-        reward = buffer.readLong()
         hash = buffer.readString()
         signature = buffer.readString()
         publicKey = buffer.readString()
@@ -31,7 +29,6 @@ abstract class BlockMessage(
         buffer.writeLong(height)
         buffer.writeString(previousHash)
         buffer.writeLong(timestamp)
-        buffer.writeLong(reward)
         buffer.writeString(hash)
         buffer.writeString(signature)
         buffer.writeString(publicKey)

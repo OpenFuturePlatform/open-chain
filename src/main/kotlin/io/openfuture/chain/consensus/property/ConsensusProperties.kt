@@ -37,6 +37,12 @@ class ConsensusProperties(
     var timeSlotInterval: Long? =null,
 
     /**
+     * Genesis address of blockchain
+     */
+    @field:NotNull
+    var genesisAddress: String? = null,
+
+    /**
      * Reward for block
      */
     @field:NotNull

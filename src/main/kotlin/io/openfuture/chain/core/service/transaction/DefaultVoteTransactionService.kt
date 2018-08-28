@@ -16,7 +16,6 @@ import io.openfuture.chain.core.repository.VoteTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
-import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -28,13 +27,8 @@ internal class DefaultVoteTransactionService(
     uRepository: UVoteTransactionRepository,
     capacityChecker: TransactionCapacityChecker,
     private val delegateService: DelegateService,
-    private val consensusProperties: ConsensusProperties,
-    private val networkService: NetworkApiService
-) : BaseTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository, capacityChecker), VoteTransactionService {
-
-    @Transactional(readOnly = true)
-    override fun getByHash(hash: String): VoteTransaction = repository.findOneByHash(hash)
-        ?: throw NotFoundException("Transaction with hash $hash not found")
+    private val consensusProperties: ConsensusProperties
+) : ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository, capacityChecker), VoteTransactionService {
 
     companion object {
         val log = LoggerFactory.getLogger(DefaultVoteTransactionService::class.java)
@@ -42,43 +36,37 @@ internal class DefaultVoteTransactionService(
 
 
     @Transactional(readOnly = true)
+    override fun getByHash(hash: String): VoteTransaction = repository.findOneByFooterHash(hash)
+        ?: throw NotFoundException("Transaction with hash $hash not found")
+
+    @Transactional(readOnly = true)
     override fun getAllUnconfirmed(): MutableList<UnconfirmedVoteTransaction> = unconfirmedRepository.findAllByOrderByHeaderFeeDesc()
 
     @Transactional(readOnly = true)
-    override fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction = unconfirmedRepository.findOneByHash(hash)
+    override fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction = unconfirmedRepository.findOneByFooterHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional
-    override fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction =
-        add(UnconfirmedVoteTransaction.of(message))
+    override fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction {
+        return super.add(UnconfirmedVoteTransaction.of(message))
+    }
 
     @BlockchainSynchronized
     @Transactional
-    override fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction =
-        add(UnconfirmedVoteTransaction.of(request))
-
-    private fun add(utx: UnconfirmedVoteTransaction): UnconfirmedVoteTransaction{
-        validate(utx)
-
-        if (isExists(utx.hash)) {
-            return utx
-        }
-
-        walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.header.fee)
-
-        val savedUtx = this.save(utx)
-        networkService.broadcast(savedUtx.toMessage())
-        return savedUtx
+    override fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction {
+        return super.add(UnconfirmedVoteTransaction.of(request))
     }
 
     @Transactional
     override fun toBlock(message: VoteTransactionMessage, block: MainBlock): VoteTransaction {
-        val tx = repository.findOneByHash(message.hash)
+        val tx = repository.findOneByFooterHash(message.hash)
         if (null != tx) {
             return tx
         }
 
         walletService.decreaseBalance(tx!!.header.senderAddress, tx!!.header.fee)
+
+        val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
 
         val utx = unconfirmedRepository.findOneByHash(message.hash)
         if (null != utx) {
@@ -90,22 +78,24 @@ internal class DefaultVoteTransactionService(
 
     @Transactional
     override fun verify(message: VoteTransactionMessage): Boolean {
-        return try {
+        try {
             validate(UnconfirmedVoteTransaction.of(message))
-            true
+            return true
         } catch (e: ValidationException) {
             log.warn(e.message)
-            false
+            return false
         }
     }
 
+    @Transactional
     override fun save(tx: VoteTransaction): VoteTransaction {
         val type = tx.payload.getVoteType()
         updateWalletVotes(tx.header.senderAddress, tx.payload.delegateKey, type)
         return super.save(tx)
     }
 
-    private fun validate(utx: UnconfirmedVoteTransaction) {
+    @Transactional
+    override fun validate(utx: UnconfirmedVoteTransaction) {
         if (!isExistsDelegate(utx.payload.delegateKey)) {
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
@@ -122,7 +112,11 @@ internal class DefaultVoteTransactionService(
             throw ValidationException("Vote type with id: ${utx.payload.voteTypeId} is not exists")
         }
 
-        super.validateBase(utx, utx.header.fee)
+        if (!isValidFee(utx.header.senderAddress, utx.header.fee)) {
+            throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
+        }
+
+        super.validateExternal(utx.header, utx.payload, utx.footer)
     }
 
     private fun updateWalletVotes(senderAddress: String, delegateKey: String, type: VoteType) {

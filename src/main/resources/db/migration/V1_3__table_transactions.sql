@@ -15,6 +15,12 @@ CREATE TABLE transfer_transactions (
   recipient_address VARCHAR NOT NULL
 );
 --
+CREATE TABLE reward_transactions (
+  id                INTEGER PRIMARY KEY REFERENCES transactions,
+  reward            BIGINT  NOT NULL,
+  recipient_address VARCHAR NOT NULL
+);
+--
 CREATE TABLE delegate_transactions (
   id            INTEGER PRIMARY KEY REFERENCES transactions,
   delegate_key  VARCHAR UNIQUE NOT NULL,

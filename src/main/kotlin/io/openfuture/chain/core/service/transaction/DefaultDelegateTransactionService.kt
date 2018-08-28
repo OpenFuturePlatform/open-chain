@@ -3,6 +3,7 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.component.TransactionCapacityChecker
+import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_DELEGATE_KEY
@@ -15,7 +16,6 @@ import io.openfuture.chain.core.repository.UDelegateTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
-import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.LoggerFactory
@@ -27,11 +27,8 @@ class DefaultDelegateTransactionService(
     repository: DelegateTransactionRepository,
     uRepository: UDelegateTransactionRepository,
     capacityChecker: TransactionCapacityChecker,
-    private val delegateService: DelegateService,
-    private val networkService: NetworkApiService,
-    private val nodeKeyHolder: NodeKeyHolder
-) : BaseTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository, capacityChecker), DelegateTransactionService {
-
+    private val delegateService: DelegateService
+) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository, capacityChecker), DelegateTransactionService {
 
     companion object {
         val log = LoggerFactory.getLogger(DefaultDelegateTransactionService::class.java)
@@ -39,7 +36,7 @@ class DefaultDelegateTransactionService(
 
 
     @Transactional(readOnly = true)
-    override fun getByHash(hash: String): DelegateTransaction = repository.findOneByHash(hash)
+    override fun getByHash(hash: String): DelegateTransaction = repository.findOneByFooterHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional(readOnly = true)
@@ -48,43 +45,30 @@ class DefaultDelegateTransactionService(
     }
 
     @Transactional(readOnly = true)
-    override fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction = unconfirmedRepository.findOneByHash(hash)
+    override fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction = unconfirmedRepository.findOneByFooterHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional
-    override fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction =
-        add(UnconfirmedDelegateTransaction.of(message))
+    override fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction {
+        return super.add(UnconfirmedDelegateTransaction.of(message))
+    }
 
-    @BlockchainSynchronized(throwable = true)
+    @BlockchainSynchronized
     @Transactional
-    override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction =
-        add(UnconfirmedDelegateTransaction.of(request))
-
-
-    private fun add(utx: UnconfirmedDelegateTransaction): UnconfirmedDelegateTransaction {
-        validate(utx)
-
-        if (isExists(utx.hash)) {
-            return utx
-        }
-
-        walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.header.fee + utx.payload.amount)
-
-        val savedUtx = this.save(utx)
-        networkService.broadcast(savedUtx.toMessage())
-        return savedUtx
+    override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction {
+        return super.add(UnconfirmedDelegateTransaction.of(request))
     }
 
     @Transactional
     override fun toBlock(message: DelegateTransactionMessage, block: MainBlock): DelegateTransaction {
-        val tx = repository.findOneByHash(message.hash)
+        val tx = repository.findOneByFooterHash(message.hash)
         if (null != tx) {
             return tx
         }
 
         walletService.decreaseBalance(tx!!.header.senderAddress, tx!!.payload.amount)
 
-        val utx = unconfirmedRepository.findOneByHash(message.hash)
+        val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
         if (null != utx) {
             return confirm(utx, DelegateTransaction.of(utx, block))
         }
@@ -94,15 +78,16 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun verify(message: DelegateTransactionMessage): Boolean {
-        return try {
+        try {
             validate(UnconfirmedDelegateTransaction.of(message))
-            true
+            return true
         } catch (e: ValidationException) {
             log.warn(e.message)
-            false
+            return false
         }
     }
 
+    @Transactional
     override fun save(tx: DelegateTransaction): DelegateTransaction {
         delegateService.save(Delegate(tx.payload.delegateKey, tx.header.senderAddress,
             tx.payload.delegateHost, tx.payload.delegatePort))
@@ -110,12 +95,13 @@ class DefaultDelegateTransactionService(
         return super.save(tx)
     }
 
-    private fun validate(utx: UnconfirmedDelegateTransaction) {
+    @Transactional
+    override fun validate(utx: UnconfirmedDelegateTransaction) {
         if (!isValidDelegateKey(utx.payload.delegateKey, utx.senderPublicKey)) {
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
 
-        super.validateBase(utx, utx.header.fee + utx.payload.amount)
+        super.validateExternal(utx.header, utx.payload, utx.footer)
     }
 
     private fun isValidDelegateKey(delegateKey: String, publicKey: String): Boolean {
