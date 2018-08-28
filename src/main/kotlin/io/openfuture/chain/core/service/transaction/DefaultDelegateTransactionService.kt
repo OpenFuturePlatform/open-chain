@@ -78,12 +78,12 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun verify(message: DelegateTransactionMessage): Boolean {
-        return try {
+        try {
             validate(UnconfirmedDelegateTransaction.of(message))
-            true
+            return true
         } catch (e: ValidationException) {
             log.warn(e.message)
-            false
+            return false
         }
     }
 
