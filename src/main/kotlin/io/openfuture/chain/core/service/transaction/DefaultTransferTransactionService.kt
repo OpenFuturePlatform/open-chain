@@ -58,7 +58,7 @@ class DefaultTransferTransactionService(
         return super.add(UnconfirmedTransferTransaction.of(message))
     }
 
-    @BlockchainSynchronized(throwable = true)
+    @BlockchainSynchronized
     @Transactional
     override fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction {
         return super.add(UnconfirmedTransferTransaction.of(request))

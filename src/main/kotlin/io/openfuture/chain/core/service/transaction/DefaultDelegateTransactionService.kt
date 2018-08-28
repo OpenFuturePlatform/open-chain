@@ -51,7 +51,7 @@ class DefaultDelegateTransactionService(
         return super.add(UnconfirmedDelegateTransaction.of(message))
     }
 
-    @BlockchainSynchronized(throwable = true)
+    @BlockchainSynchronized
     @Transactional
     override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction {
         return super.add(UnconfirmedDelegateTransaction.of(request))

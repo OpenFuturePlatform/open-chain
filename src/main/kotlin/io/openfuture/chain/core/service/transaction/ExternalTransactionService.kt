@@ -56,6 +56,11 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         return repository.save(tx)
     }
 
+    protected fun confirm(utx: U, tx: T): T {
+        unconfirmedRepository.delete(utx)
+        return save(tx)
+    }
+
     protected fun validateExternal(header: TransactionHeader, payload: TransactionPayload, footer: TransactionFooter) {
         if (!isValidAddress(header.senderAddress, footer.senderPublicKey)) {
             throw ValidationException("Incorrect sender address", INCORRECT_ADDRESS)
@@ -64,23 +69,12 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         super.validateBase(header, payload, footer)
     }
 
-    protected fun confirm(utx: U, tx: T): T {
-        unconfirmedRepository.delete(utx)
-        return save(tx)
-    }
-
-    protected fun isExists(hash: String): Boolean {
-        val persistUtx = unconfirmedRepository.findOneByFooterHash(hash)
-        val persistTx = repository.findOneByFooterHash(hash)
-        return null != persistUtx || null != persistTx
+    private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean {
+        return cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
     }
 
     private fun updateBalanceByFee(tx: BaseTransaction) {
         walletService.decreaseBalance(tx.header.senderAddress, tx.header.fee)
-    }
-
-    private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean {
-        return cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
     }
 
 }
