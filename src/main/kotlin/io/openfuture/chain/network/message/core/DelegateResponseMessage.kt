@@ -7,11 +7,11 @@ import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeList
 import io.openfuture.chain.network.extension.writeString
 import io.openfuture.chain.network.message.base.BaseMessage
-import io.openfuture.chain.network.message.network.NetworkAddressMessage
+import io.openfuture.chain.network.message.network.AddressMessage
 
 @NoArgConstructor
 data class DelegateResponseMessage(
-    var addresses: List<NetworkAddressMessage>,
+    var addresses: List<AddressMessage>,
     var synchronizationSessionId: String
 ) : BaseMessage {
 

@@ -3,6 +3,7 @@ package io.openfuture.chain.rpc.controller.transaction
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
+import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
@@ -33,8 +34,10 @@ class DelegateTransactionControllerTests : ControllerTests() {
     fun addTransactionShouldReturnAddedTransaction() {
         val transactionRequest = DelegateTransactionRequest(1L, 1L, "hash", "senderAddress", "senderPublicKey", "senderSignature",
             "delegateKey", "host", 1)
-        val unconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(TransactionHeader(1L, 1L, "senderAddress"), "senderPublicKey", "senderSignature",
-            "hash", DelegateTransactionPayload("delegateKey", "host", 1))
+        val header = TransactionHeader(1L, 1L, "senderAddress")
+        val footer = TransactionFooter("senderPublicKey", "senderSignature", "hash")
+        val payload = DelegateTransactionPayload("delegateKey", "host", 1)
+        val unconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(header, footer, payload)
         val expectedResponse = DelegateTransactionResponse(unconfirmedDelegateTransaction)
 
         given(service.add(transactionRequest)).willReturn(unconfirmedDelegateTransaction)
@@ -52,19 +55,22 @@ class DelegateTransactionControllerTests : ControllerTests() {
     @Test
     fun getTransactionByHashShouldReturnTransaction() {
         val hash = "hash"
-        val mainBlock = MainBlock(1, 1, "previousHash", 1, "hash", "signature", "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
-        val expectedTransaction = DelegateTransaction(TransactionHeader(1L, 1L, "senderAddress"), "hash",
-            "senderSignature", "senderPublicKey", mainBlock, DelegateTransactionPayload("delegateKey", "delegateHost", 8080)).apply { id = 1 }
+        val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
+        val header = TransactionHeader(1L, 1L, "senderAddress")
+        val footer = TransactionFooter("senderPublicKey", "senderSignature", "hash")
+        val payload = DelegateTransactionPayload("delegateKey", "delegateHost", 8080)
+        val delegateTransaction = DelegateTransaction(header, footer, mainBlock, payload).apply { id = 1 }
+        val expectedResponse = DelegateTransactionResponse(delegateTransaction)
 
-        given(service.getByHash(hash)).willReturn(expectedTransaction)
+        given(service.getByHash(hash)).willReturn(delegateTransaction)
 
-        val actualTransaction = webClient.get().uri("$DELEGATE_TRANSACTION_URL/$hash")
+        val actualResponse = webClient.get().uri("$DELEGATE_TRANSACTION_URL/$hash")
             .exchange()
             .expectStatus().isOk
-            .expectBody(DelegateTransaction::class.java)
+            .expectBody(DelegateTransactionResponse::class.java)
             .returnResult().responseBody!!
 
-        assertThat(actualTransaction).isEqualTo(expectedTransaction)
+        assertThat(actualResponse).isEqualToComparingFieldByField(expectedResponse)
     }
 
 }

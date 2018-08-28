@@ -3,7 +3,6 @@ package io.openfuture.chain.consensus.component.block
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.exception.InsufficientTransactionsException
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
@@ -55,9 +54,7 @@ class BlockProductionScheduler(
                     pendingBlockHandler.addBlock(block)
                 }
             } catch (ex: Exception) {
-                if (ex !is InsufficientTransactionsException) {
-                    log.error("Block creation failure inbound: ${ex.message}")
-                }
+                log.error("Block creation failure inbound: ${ex.message}")
             } finally {
                 Thread.sleep(epochService.timeToNextTimeSlot(clock.networkTime()))
             }

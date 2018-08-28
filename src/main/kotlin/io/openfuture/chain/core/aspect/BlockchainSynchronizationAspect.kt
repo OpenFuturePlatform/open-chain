@@ -1,12 +1,11 @@
 package io.openfuture.chain.core.aspect
 
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
+import io.openfuture.chain.core.exception.SynchronizationException
 import io.openfuture.chain.network.sync.SyncManager
 import io.openfuture.chain.network.sync.impl.SynchronizationStatus
-import org.aspectj.lang.ProceedingJoinPoint
-import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
-import org.slf4j.LoggerFactory
+import org.aspectj.lang.annotation.Before
 import org.springframework.stereotype.Component
 
 
@@ -16,23 +15,11 @@ class BlockchainSynchronizationAspect(
     private val syncManager: SyncManager
 ) {
 
-    companion object {
-        val log = LoggerFactory.getLogger(BlockchainSynchronizationAspect::class.java)
-        private const val MESSAGE: String = "Application is not synchronized!"
-    }
-
-
-    @Around("@annotation(annotation)")
-    fun annotated(joinPoint: ProceedingJoinPoint, annotation: BlockchainSynchronized): Any? {
+    @Before("@annotation(annotation)")
+    fun annotated(annotation: BlockchainSynchronized) {
         if (syncManager.getSyncStatus() != SynchronizationStatus.SYNCHRONIZED) {
-            if (annotation.throwable) {
-                throw IllegalStateException(MESSAGE)
-            } else {
-                log.error(MESSAGE)
-                return null
-            }
+            throw SynchronizationException("Application is not synchronized! Current sync status: ${syncManager.getSyncStatus()}!")
         }
-        return joinPoint.proceed()
     }
 
 }

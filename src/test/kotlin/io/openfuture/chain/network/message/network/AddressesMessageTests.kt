@@ -15,10 +15,12 @@ class AddressesMessageTests : MessageTests() {
 
     @Before
     fun setup() {
-        buffer = createBuffer("00000002000000093132372e302e302e3100002382000000093132372e302e302e3100002383")
+        buffer = createBuffer("0000000200000003756964000000093132372e302e302e31000023820000000375696400000009" +
+            "3132372e302e302e3100002383")
         message = AddressesMessage(listOf(
-            NetworkAddressMessage("127.0.0.1", 9090),
-            NetworkAddressMessage("127.0.0.1", 9091)))
+            AddressMessage("uid", NetworkAddressMessage("127.0.0.1", 9090)),
+            AddressMessage("uid", NetworkAddressMessage("127.0.0.1", 9091))
+        ))
     }
 
     @Test

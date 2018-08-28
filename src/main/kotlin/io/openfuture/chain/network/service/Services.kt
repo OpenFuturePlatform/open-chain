@@ -17,7 +17,7 @@ interface NetworkApiService {
 
     fun send(message: BaseMessage)
 
-    fun sendToAddress(message: BaseMessage, addressMessage: NetworkAddressMessage)
+    fun sendToAddress(message: BaseMessage, addressMessage: AddressMessage)
 
     fun sendToRootNode(message: BaseMessage)
 
@@ -37,6 +37,8 @@ interface NetworkInnerService {
 
     fun getChannels(): Set<Channel>
 
+    fun getAddressMessage(uid: String): AddressMessage
+
     fun onChannelActive(ctx: ChannelHandlerContext)
 
     fun onClientChannelActive(ctx: ChannelHandlerContext)
@@ -51,7 +53,7 @@ interface NetworkInnerService {
 
     fun onExplorerAddresses(ctx: ChannelHandlerContext, message: ExplorerAddressesMessage)
 
-    fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage)
+    fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage, nodeUid: String)
 
     fun onAskTime(ctx: ChannelHandlerContext, askTime: AskTimeMessage)
 
@@ -61,9 +63,9 @@ interface NetworkInnerService {
 
     fun onClientChannelInactive(ctx: ChannelHandlerContext)
 
-    fun sendToRoot(baseMessage: BaseMessage)
+    fun sendToAddress(message: BaseMessage, addressMessage: AddressMessage)
 
-    fun sendToAddress(baseMessage: BaseMessage, networkAddressMessage: NetworkAddressMessage)
+    fun sendToRootNode(message: BaseMessage)
 
 }
 

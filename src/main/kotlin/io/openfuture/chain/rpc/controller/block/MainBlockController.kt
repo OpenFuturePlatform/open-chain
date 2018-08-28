@@ -28,9 +28,8 @@ class MainBlockController(
         getMainBlockResponse(blockService.getNextBlock(hash))
 
     @GetMapping
-    fun getAll(request: PageRequest): PageResponse<MainBlock> {
-        return PageResponse(blockService.getAll(request))
-    }
+    fun getAll(request: PageRequest): PageResponse<MainBlockResponse> =
+        PageResponse(blockService.getAll(request).map { getMainBlockResponse(it) })
 
     private fun getMainBlockResponse(block: MainBlock): MainBlockResponse = MainBlockResponse(block, epochService.getEpochByBlock(block))
 

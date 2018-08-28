@@ -8,7 +8,7 @@ import io.openfuture.chain.network.message.base.BaseMessage
 
 @NoArgConstructor
 data class ExplorerAddressesMessage(
-    var values: List<NetworkAddressMessage>
+    var values: List<AddressMessage>
 ) : BaseMessage {
 
     override fun read(buffer: ByteBuf) {

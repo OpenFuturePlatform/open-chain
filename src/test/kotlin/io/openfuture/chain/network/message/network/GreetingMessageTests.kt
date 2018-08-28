@@ -15,8 +15,8 @@ class GreetingMessageTests : MessageTests() {
 
     @Before
     fun setup() {
-        buffer = createBuffer("000000093132372e302e302e3100002382")
-        message = GreetingMessage(NetworkAddressMessage("127.0.0.1", 9090))
+        buffer = createBuffer("00002382")
+        message = GreetingMessage(9090)
     }
 
     @Test

@@ -1,6 +1,5 @@
 package io.openfuture.chain.rpc.controller.transaction
 
-import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
@@ -18,11 +17,12 @@ class TransferTransactionController(
 
     @CrossOrigin
     @GetMapping("/address/{address}")
-    fun getTransactions(@PathVariable address: String): List<TransferTransaction> = transactionService.getByAddress(address)
+    fun getTransactions(@PathVariable address: String): List<TransferTransactionResponse> =
+        transactionService.getByAddress(address).map { TransferTransactionResponse(it) }
 
     @CrossOrigin
     @GetMapping("/{hash}")
-    fun get(@PathVariable hash: String): TransferTransaction = transactionService.getByHash(hash)
+    fun get(@PathVariable hash: String): TransferTransactionResponse = TransferTransactionResponse(transactionService.getByHash(hash))
 
     @PostMapping
     fun add(@Valid @RequestBody request: TransferTransactionRequest): TransferTransactionResponse {
@@ -32,7 +32,8 @@ class TransferTransactionController(
 
     @CrossOrigin
     @GetMapping
-    fun getAll(request: PageRequest): PageResponse<TransferTransaction> = PageResponse(transactionService.getAll(request))
+    fun getAll(request: PageRequest): PageResponse<TransferTransactionResponse> =
+        PageResponse(transactionService.getAll(request).map { TransferTransactionResponse(it) })
 
 }
 

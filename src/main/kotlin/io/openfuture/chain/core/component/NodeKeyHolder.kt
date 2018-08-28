@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.component
 
 import io.openfuture.chain.crypto.service.CryptoService
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.property.NodeProperties
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Component
@@ -15,7 +16,7 @@ class NodeKeyHolder(
 ) {
 
     private var privateKey: ByteArray? = null
-    private var publicKey: String? = null
+    private var publicKey: ByteArray? = null
 
 
     @PostConstruct
@@ -23,12 +24,14 @@ class NodeKeyHolder(
         generatePrivatePublicKeysIfNotExist()
 
         privateKey = ByteUtils.fromHexString(File(properties.privateKeyPath).readText(UTF_8))
-        publicKey = File(properties.publicKeyPath).readText(UTF_8)
+        publicKey = ByteUtils.fromHexString(File(properties.publicKeyPath).readText(UTF_8))
     }
 
     fun getPrivateKey(): ByteArray = privateKey!!
 
-    fun getPublicKey(): String = publicKey!!
+    fun getPublicKey(): String = ByteUtils.toHexString(publicKey!!)
+
+    fun getUid(key: ByteArray = publicKey!!): String = ByteUtils.toHexString(HashUtils.sha256(key))
 
     private fun generatePrivatePublicKeysIfNotExist() {
         val privateKeyFile = File(properties.privateKeyPath)

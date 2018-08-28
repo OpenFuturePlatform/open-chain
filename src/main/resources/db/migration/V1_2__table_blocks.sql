@@ -3,7 +3,6 @@ CREATE TABLE blocks (
   timestamp  BIGINT       NOT NULL,
   height     BIGINT       NOT NULL,
   previous_hash VARCHAR NOT NULL,
-  reward        BIGINT  NOT NULL DEFAULT 0,
   hash       bytea UNIQUE NOT NULL,
   signature  VARCHAR      NOT NULL,
   public_key VARCHAR      NOT NULL

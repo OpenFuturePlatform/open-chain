@@ -1,81 +1,35 @@
 package io.openfuture.chain.core.service.transaction
 
-import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.exception.model.ExceptionType.*
-import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
+import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_HASH
+import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_SIGNATURE
+import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
-import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
-import io.openfuture.chain.core.repository.TransactionRepository
-import io.openfuture.chain.core.repository.UTransactionRepository
-import io.openfuture.chain.core.service.TransactionService
-import io.openfuture.chain.core.service.WalletService
-import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
-import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.component.node.NodeClock
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import org.springframework.beans.factory.annotation.Autowired
 import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets.UTF_8
 
-abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransaction>(
-    protected val repository: TransactionRepository<T>,
-    protected val unconfirmedRepository: UTransactionRepository<U>,
-    private val capacityChecker: TransactionCapacityChecker
-) {
+abstract class BaseTransactionService {
 
-    @Autowired protected lateinit var clock: NodeClock
-    @Autowired protected lateinit var walletService: WalletService
-    @Autowired protected lateinit var baseService: TransactionService
-    @Autowired protected lateinit var transactionService: TransactionService
-    @Autowired private lateinit var cryptoService: CryptoService
-
-
-    open fun save(utx: U): U {
-        return unconfirmedRepository.save(utx)
-    }
-
-    open fun save(tx: T): T {
-        updateBalanceByFee(tx)
-        capacityChecker.incrementCapacity()
-        return repository.save(tx)
-    }
-
-    protected fun confirm(utx: U, tx: T): T {
-        unconfirmedRepository.delete(utx)
-        return save(tx)
-    }
-
-    protected fun validateBase(utx: BaseTransaction) {
-        if (!isValidAddress(utx.header.senderAddress, utx.senderPublicKey)) {
-            throw ValidationException("Incorrect sender address", INCORRECT_ADDRESS)
-        }
-
-        if (!isValidHash(utx.header, utx.getPayload(), utx.hash)) {
+    protected fun validateBase(header: TransactionHeader, payload: TransactionPayload, footer: TransactionFooter) {
+        if (!isValidHash(header, payload, footer.hash)) {
             throw ValidationException("Incorrect hash", INCORRECT_HASH)
         }
 
-        if (!isValidSignature(utx.hash, utx.senderSignature, utx.senderPublicKey)) {
+        if (!isValidSignature(footer.hash, footer.senderSignature, footer.senderPublicKey)) {
             throw ValidationException("Incorrect signature", INCORRECT_SIGNATURE)
         }
     }
 
-    protected fun isExists(hash: String): Boolean {
-        val persistUtx = unconfirmedRepository.findOneByHash(hash)
-        val persistTx = repository.findOneByHash(hash)
-        return null != persistUtx || null != persistTx
-    }
+    protected fun createHash(header: TransactionHeader, payload: TransactionPayload): String {
+        val bytes = ByteBuffer.allocate(header.getBytes().size + payload.getBytes().size)
+            .put(header.getBytes())
+            .put(payload.getBytes())
+            .array()
 
-    private fun updateBalanceByFee(tx: BaseTransaction) {
-        walletService.decreaseBalance(tx.header.senderAddress, tx.header.fee)
-    }
-
-    private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean {
-        return cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
+        return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
     }
 
     private fun isValidHash(header: TransactionHeader, payload: TransactionPayload, hash: String): Boolean {
@@ -84,15 +38,6 @@ abstract class BaseTransactionService<T : Transaction, U : UnconfirmedTransactio
 
     private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean {
         return SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
-    }
-
-    private fun createHash(header: TransactionHeader, payload: TransactionPayload): String {
-        val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + header.senderAddress.toByteArray(UTF_8).size + payload.getBytes().size)
-            .put(header.getBytes())
-            .put(payload.getBytes())
-            .array()
-
-        return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
     }
 
 }

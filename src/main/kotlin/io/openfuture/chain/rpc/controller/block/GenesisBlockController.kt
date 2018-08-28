@@ -1,6 +1,5 @@
 package io.openfuture.chain.rpc.controller.block
 
-import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
@@ -26,8 +25,7 @@ class GenesisBlockController(
         GenesisBlockResponse(blockService.getNextBlock(hash))
 
     @GetMapping
-    fun getAll(request: PageRequest): PageResponse<GenesisBlock> {
-        return PageResponse(blockService.getAll(request))
-    }
+    fun getAll(request: PageRequest): PageResponse<GenesisBlockResponse> =
+        PageResponse(blockService.getAll(request).map { GenesisBlockResponse(it) })
 
 }
