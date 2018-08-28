@@ -12,6 +12,7 @@ class VoteTransactionController(
     private val transactionService: VoteTransactionService
 ) {
 
+    @CrossOrigin
     @GetMapping("/{hash}")
     fun get(@PathVariable hash: String): VoteTransactionResponse = VoteTransactionResponse(transactionService.getByHash(hash))
 
