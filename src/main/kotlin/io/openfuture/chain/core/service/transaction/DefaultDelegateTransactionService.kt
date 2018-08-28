@@ -3,7 +3,6 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.component.TransactionCapacityChecker
-import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_DELEGATE_KEY
@@ -27,7 +26,8 @@ class DefaultDelegateTransactionService(
     repository: DelegateTransactionRepository,
     uRepository: UDelegateTransactionRepository,
     capacityChecker: TransactionCapacityChecker,
-    private val delegateService: DelegateService
+    private val delegateService: DelegateService,
+    private val nodeKeyHolder: NodeKeyHolder
 ) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository, capacityChecker), DelegateTransactionService {
 
     companion object {
@@ -97,11 +97,11 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun validate(utx: UnconfirmedDelegateTransaction) {
-        if (!isValidDelegateKey(utx.payload.delegateKey, utx.senderPublicKey)) {
+        if (!isValidDelegateKey(utx.payload.delegateKey, utx.footer.senderPublicKey)) {
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
 
-        super.validateExternal(utx.header, utx.payload, utx.footer)
+        super.validateExternal(utx.header, utx.payload, utx.footer, utx.payload.amount + utx.header.fee)
     }
 
     private fun isValidDelegateKey(delegateKey: String, publicKey: String): Boolean {

@@ -83,12 +83,12 @@ class DefaultTransferTransactionService(
 
     @Transactional
     override fun verify(message: TransferTransactionMessage): Boolean {
-        try {
+        return try {
             validate(UnconfirmedTransferTransaction.of(message))
-            return true
+            true
         } catch (e: ValidationException) {
             log.warn(e.message)
-            return false
+            false
         }
     }
 
@@ -100,31 +100,12 @@ class DefaultTransferTransactionService(
 
     @Transactional
     override fun validate(utx: UnconfirmedTransferTransaction) {
-        if (!isValidBalance(utx.header.senderAddress, utx.payload.amount, utx.header.fee)) {
-            throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
-        }
-
-        super.validateExternal(utx.header, utx.payload, utx.footer)
+        super.validateExternal(utx.header, utx.payload, utx.footer, utx.payload.amount + utx.header.fee)
     }
 
     private fun updateTransferBalance(from: String, to: String, amount: Long) {
         walletService.increaseBalance(to, amount)
         walletService.decreaseBalance(from, amount)
-    }
-
-    private fun isValidBalance(address: String, amount: Long, fee: Long): Boolean {
-        if (amount < 0 || fee < 0) {
-            return false
-        }
-
-        val balance = walletService.getBalanceByAddress(address)
-        val unconfirmedFee = baseService.getAllUnconfirmedByAddress(address).map { it.header.fee }.sum()
-        val unconfirmedAmount = unconfirmedRepository.findAllByHeaderSenderAddress(address).map { it.payload.amount }.sum()
-        val unspentBalance = balance - (unconfirmedFee + unconfirmedAmount)
-
-        return unspentBalance >= amount + fee
-    private fun validate(utx: UnconfirmedTransferTransaction) {
-        super.validateBase(utx, utx.header.fee + utx.payload.amount)
     }
 
 }

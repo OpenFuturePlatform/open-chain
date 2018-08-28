@@ -68,7 +68,6 @@ internal class DefaultVoteTransactionService(
 
         val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
 
-        val utx = unconfirmedRepository.findOneByHash(message.hash)
         if (null != utx) {
             return confirm(utx, VoteTransaction.of(utx, block))
         }
@@ -78,12 +77,12 @@ internal class DefaultVoteTransactionService(
 
     @Transactional
     override fun verify(message: VoteTransactionMessage): Boolean {
-        try {
+        return try {
             validate(UnconfirmedVoteTransaction.of(message))
-            return true
+            true
         } catch (e: ValidationException) {
             log.warn(e.message)
-            return false
+            false
         }
     }
 
@@ -112,11 +111,7 @@ internal class DefaultVoteTransactionService(
             throw ValidationException("Vote type with id: ${utx.payload.voteTypeId} is not exists")
         }
 
-        if (!isValidFee(utx.header.senderAddress, utx.header.fee)) {
-            throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
-        }
-
-        super.validateExternal(utx.header, utx.payload, utx.footer)
+        super.validateExternal(utx.header, utx.payload, utx.footer, utx.header.fee)
     }
 
     private fun updateWalletVotes(senderAddress: String, delegateKey: String, type: VoteType) {

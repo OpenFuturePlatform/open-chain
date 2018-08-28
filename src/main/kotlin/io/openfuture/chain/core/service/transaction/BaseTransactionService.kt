@@ -21,10 +21,6 @@ abstract class BaseTransactionService {
         if (!isValidSignature(footer.hash, footer.senderSignature, footer.senderPublicKey)) {
             throw ValidationException("Incorrect signature", INCORRECT_SIGNATURE)
         }
-
-        if (!isValidBalance(utx.header.senderAddress, amount)) {
-            throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
-        }
     }
 
     protected fun createHash(header: TransactionHeader, payload: TransactionPayload): String {
@@ -43,8 +39,5 @@ abstract class BaseTransactionService {
     private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean {
         return SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
     }
-
-    private fun isValidBalance(address: String, amount: Long): Boolean =
-        walletService.getBalanceByAddress(address) >= amount
 
 }

@@ -2,8 +2,8 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.exception.model.ExceptionType.*
-import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
+import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_ADDRESS
+import io.openfuture.chain.core.exception.model.ExceptionType.INSUFFICIENT_BALANCE
 import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
@@ -38,6 +38,8 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
             return persistUtx
         }
 
+        walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.header.fee)
+
         validate(utx)
         val savedUtx = save(utx)
         networkService.broadcast(savedUtx.toMessage())
@@ -51,7 +53,6 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
     }
 
     open fun save(tx: T): T {
-        updateBalanceByFee(tx)
         capacityChecker.incrementCapacity()
         return repository.save(tx)
     }
@@ -61,9 +62,13 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         return save(tx)
     }
 
-    protected fun validateExternal(header: TransactionHeader, payload: TransactionPayload, footer: TransactionFooter) {
+    protected fun validateExternal(header: TransactionHeader, payload: TransactionPayload, footer: TransactionFooter, amount: Long) {
         if (!isValidAddress(header.senderAddress, footer.senderPublicKey)) {
             throw ValidationException("Incorrect sender address", INCORRECT_ADDRESS)
+        }
+
+        if (!isValidBalance(header.senderAddress, amount)) {
+            throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
         }
 
         super.validateBase(header, payload, footer)
@@ -73,8 +78,7 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         return cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
     }
 
-    private fun updateBalanceByFee(tx: BaseTransaction) {
-        walletService.decreaseBalance(tx.header.senderAddress, tx.header.fee)
-    }
+    private fun isValidBalance(address: String, amount: Long): Boolean =
+        walletService.getBalanceByAddress(address) >= amount
 
 }
