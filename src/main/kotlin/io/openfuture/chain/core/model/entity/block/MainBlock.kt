@@ -14,7 +14,6 @@ class MainBlock(
     timestamp: Long,
     height: Long,
     previousHash: String,
-    reward: Long,
     hash: String,
     signature: String,
     publicKey: String,
@@ -22,14 +21,13 @@ class MainBlock(
     @Embedded
     var payload: MainBlockPayload
 
-) : Block(timestamp, height, previousHash, reward, hash, signature, publicKey) {
+) : Block(timestamp, height, previousHash, hash, signature, publicKey) {
 
     companion object {
         fun of(message: PendingBlockMessage): MainBlock = MainBlock(
             message.timestamp,
             message.height,
             message.previousHash,
-            message.reward,
             message.hash,
             message.signature,
             message.publicKey,
@@ -40,12 +38,16 @@ class MainBlock(
             message.timestamp,
             message.height,
             message.previousHash,
-            message.reward,
             message.hash,
             message.signature,
             message.publicKey,
             MainBlockPayload(message.merkleHash)
         )
+    }
+
+    fun getTransactionsCount(): Int {
+        return payload.transferTransactions.size + payload.voteTransactions.size + payload.delegateTransactions.size +
+            payload.rewardTransaction.size
     }
 
     override fun getPayload(): BlockPayload = payload
@@ -54,11 +56,11 @@ class MainBlock(
         height,
         previousHash,
         timestamp,
-        reward,
         hash,
         signature,
         publicKey,
         payload.merkleHash,
+        payload.rewardTransaction.first().toMessage(),
         payload.voteTransactions.map { it.toMessage() },
         payload.delegateTransactions.map { it.toMessage() },
         payload.transferTransactions.map { it.toMessage() }

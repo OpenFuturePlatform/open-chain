@@ -19,9 +19,9 @@ class TransferTransactionResponse(
         tx.header.timestamp,
         tx.header.fee,
         tx.header.senderAddress,
-        tx.senderSignature,
-        tx.senderPublicKey,
-        tx.hash,
+        tx.footer.senderSignature,
+        tx.footer.senderPublicKey,
+        tx.footer.hash,
         tx.payload.amount,
         tx.payload.recipientAddress
     )
@@ -30,9 +30,9 @@ class TransferTransactionResponse(
         tx.header.timestamp,
         tx.header.fee,
         tx.header.senderAddress,
-        tx.senderSignature,
-        tx.senderPublicKey,
-        tx.hash,
+        tx.footer.senderSignature,
+        tx.footer.senderPublicKey,
+        tx.footer.hash,
         tx.payload.amount,
         tx.payload.recipientAddress,
         tx.block.hash

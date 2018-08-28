@@ -5,10 +5,7 @@ import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -44,7 +41,7 @@ interface GenesisBlockRepository : BlockRepository<GenesisBlock>
 @Repository
 interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 
-    fun findOneByHash(hash: String): Entity?
+    fun findOneByFooterHash(hash: String): Entity?
 
     fun findAllByHeaderSenderAddress(senderAddress: String): List<Entity>
 
@@ -64,9 +61,18 @@ interface TransferTransactionRepository : TransactionRepository<TransferTransact
 }
 
 @Repository
+interface RewardTransactionRepository : BaseRepository<RewardTransaction> {
+
+    fun findOneByFooterHash(hash: String): RewardTransaction?
+
+    fun findAllByPayloadRecipientAddress(payloadRecipientAddress: String): List<RewardTransaction>
+
+}
+
+@Repository
 interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseRepository<UEntity> {
 
-    fun findOneByHash(hash: String): UEntity?
+    fun findOneByFooterHash(hash: String): UEntity?
 
     fun findAllByOrderByHeaderFeeDesc(): MutableList<UEntity>
 

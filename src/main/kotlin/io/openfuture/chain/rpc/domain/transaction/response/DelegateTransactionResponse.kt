@@ -18,9 +18,9 @@ class DelegateTransactionResponse(
         tx.header.timestamp,
         tx.header.fee,
         tx.header.senderAddress,
-        tx.senderSignature,
-        tx.senderPublicKey,
-        tx.hash,
+        tx.footer.senderSignature,
+        tx.footer.senderPublicKey,
+        tx.footer.hash,
         tx.payload.delegateKey
     )
 
@@ -28,9 +28,9 @@ class DelegateTransactionResponse(
         tx.header.timestamp,
         tx.header.fee,
         tx.header.senderAddress,
-        tx.senderSignature,
-        tx.senderPublicKey,
-        tx.hash,
+        tx.footer.senderSignature,
+        tx.footer.senderPublicKey,
+        tx.footer.hash,
         tx.payload.delegateKey,
         tx.block.hash
     )
