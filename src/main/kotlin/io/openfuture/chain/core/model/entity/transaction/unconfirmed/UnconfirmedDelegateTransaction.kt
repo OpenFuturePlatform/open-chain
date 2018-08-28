@@ -36,7 +36,7 @@ class UnconfirmedDelegateTransaction(
             request.hash!!,
             request.senderSignature!!,
             request.senderPublicKey!!,
-            DelegateTransactionPayload(request.delegateKey!!, "localhost", 8080, request.amount!!)
+            DelegateTransactionPayload(request.delegateKey!!, request.senderHost!!, request.senderPort!!, request.amount!!)
         )
     }
 
