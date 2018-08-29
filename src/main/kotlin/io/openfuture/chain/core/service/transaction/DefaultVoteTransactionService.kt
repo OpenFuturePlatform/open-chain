@@ -129,7 +129,7 @@ internal class DefaultVoteTransactionService(
         walletService.save(wallet)
     }
 
-    private fun isExistsDelegate(key: String): Boolean = delegateService.isExistsByPublicKey(key)
+    private fun isExistsDelegate(address: String): Boolean = delegateService.isExistsByAddress(address)
 
     private fun isValidVoteCount(senderAddress: String): Boolean {
         val confirmedVotes = walletService.getVotesByAddress(senderAddress).count()

@@ -188,6 +188,8 @@ interface DelegateService {
 
     fun isExistsByPublicKey(key: String): Boolean
 
+    fun isExistsByAddress(address: String): Boolean
+
     fun save(delegate: Delegate): Delegate
 
     fun getAllViews(request: PageRequest): Page<ViewDelegate>
