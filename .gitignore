@@ -5,3 +5,4 @@ out/
 *.iml
 *.db
 *.txt
+!/src/main/resources/banner.txt
