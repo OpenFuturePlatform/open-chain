@@ -1,7 +1,7 @@
 package io.openfuture.chain.core.model.domain.block
 
 data class BlockTransactionsRequest(
-    var votesCount: Long = 0,
-    var delegatesCount: Long = 0,
-    var transferCount: Long = 0
+    var voteTransactionsCount: Int = 0,
+    var delegateTransactionsCount: Int = 0,
+    var transferTransactionsCount: Int = 0
 )

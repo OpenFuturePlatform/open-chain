@@ -15,6 +15,7 @@ import io.openfuture.chain.core.repository.UDelegateTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -42,9 +43,8 @@ class DefaultDelegateTransactionService(
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional(readOnly = true)
-    override fun getAllUnconfirmed(): MutableList<UnconfirmedDelegateTransaction> {
-        return unconfirmedRepository.findAllByOrderByHeaderFeeDesc()
-    }
+    override fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedDelegateTransaction> =
+        unconfirmedRepository.findAllByOrderByHeaderFeeDesc(request)
 
     @Transactional(readOnly = true)
     override fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction = unconfirmedRepository.findOneByFooterHash(hash)

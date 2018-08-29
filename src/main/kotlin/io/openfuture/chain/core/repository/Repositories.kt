@@ -11,6 +11,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.stereotype.Repository
@@ -75,7 +76,7 @@ interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseReposit
 
     fun findOneByFooterHash(hash: String): UEntity?
 
-    fun findAllByOrderByHeaderFeeDesc(): MutableList<UEntity>
+    fun findAllByOrderByHeaderFeeDesc(request: Pageable): MutableList<UEntity>
 
     fun findAllByHeaderSenderAddress(address: String): List<UEntity>
 

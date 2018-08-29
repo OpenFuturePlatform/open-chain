@@ -10,6 +10,7 @@ import io.openfuture.chain.core.model.domain.block.BlockTransactionsRequest
 import io.openfuture.chain.core.model.domain.block.BlockTransactionsResponse
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
+import io.openfuture.chain.core.property.CoreProperties
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.crypto.util.HashUtils
@@ -43,6 +44,7 @@ class DefaultMainBlockService(
     private val transferTransactionService: TransferTransactionService,
     private val rewardTransactionService: RewardTransactionService,
     private val consensusProperties: ConsensusProperties,
+    private val coreProperties: CoreProperties,
     private val syncManager: SyncManager
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService, capacityChecker), MainBlockService {
 
@@ -59,16 +61,16 @@ class DefaultMainBlockService(
     override fun getNextBlock(hash: String): MainBlock {
         val block = getByHash(hash)
 
-        return repository.findFirstByHeightGreaterThan(block.height) ?:
-        throw NotFoundException("Next block by hash $hash not found")
+        return repository.findFirstByHeightGreaterThan(block.height)
+            ?: throw NotFoundException("Next block by hash $hash not found")
     }
 
     @Transactional(readOnly = true)
     override fun getPreviousBlock(hash: String): MainBlock {
         val block = getByHash(hash)
 
-        return repository.findFirstByHeightLessThanOrderByHeightDesc(block.height) ?:
-        throw NotFoundException("Previous block by hash $hash not found")
+        return repository.findFirstByHeightLessThanOrderByHeightDesc(block.height)
+            ?: throw NotFoundException("Previous block by hash $hash not found")
     }
 
     @Transactional(readOnly = true)
@@ -82,15 +84,11 @@ class DefaultMainBlockService(
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
 
-        voteTransactionService.getUnconfirmedCount()
-        val voteTransactions = voteTransactionService.getAllUnconfirmed()
-        val delegateTransactions = delegateTransactionService.getAllUnconfirmed()
-        val transferTransactions = transferTransactionService.getAllUnconfirmed()
-        val transactions = voteTransactions + delegateTransactions + transferTransactions
+        val transactionsForBlock = getTransactions()
+        val fees = transactionsForBlock.getAll().map { it.header.fee }.sum()
+        val rewardTransactionMessage = rewardTransactionService.create(timestamp, fees)
 
-        val rewardTransactionMessage = rewardTransactionService.create(timestamp, transactions.map { it.header.fee }.sum())
-
-        val merkleHash = calculateMerkleRoot(transactions.map { it.footer.hash } + rewardTransactionMessage.hash)
+        val merkleHash = calculateMerkleRoot(transactionsForBlock.getAll().map { it.footer.hash } + rewardTransactionMessage.hash)
         val payload = MainBlockPayload(merkleHash)
 
         val hash = createHash(timestamp, height, previousHash, payload)
@@ -98,61 +96,8 @@ class DefaultMainBlockService(
         val publicKey = keyHolder.getPublicKey()
 
         return PendingBlockMessage(height, previousHash, timestamp, ByteUtils.toHexString(hash), signature, publicKey,
-            merkleHash, rewardTransactionMessage, voteTransactions.map { it.toMessage() }, delegateTransactions.map { it.toMessage() }, transferTransactions.map { it.toMessage() })
-    }
-
-    private fun createBlockTranRequest(): BlockTransactionsRequest {
-        val request = BlockTransactionsRequest()
-
-        val votesCount = voteTransactionService.getUnconfirmedCount()
-        val delegatesCount = delegateTransactionService.getUnconfirmedCount()
-        val transfersCount = transferTransactionService.getUnconfirmedCount()
-
-        if (votesCount + delegatesCount + transfersCount <= 1000) {
-            request.votesCount = votesCount
-            request.delegatesCount = delegatesCount
-            request.transferCount = transfersCount
-        } else if (transfersCount <= 500) {
-            request.transferCount = transfersCount
-
-            if (votesCount <= (1000 - transfersCount) / 2) {
-                request.votesCount = votesCount
-                request.delegatesCount =  1000 - transfersCount - votesCount
-            } else if (delegatesCount <= (1000 - transfersCount) / 2) {
-                request.delegatesCount = delegatesCount
-                request.votesCount =  1000 - transfersCount - delegatesCount
-            } else {
-                request.votesCount = (1000 - transfersCount) / 2
-                request.delegatesCount = (1000 - transfersCount) / 2
-            }
-        }
-
-
-
-
-
-
-
-
-        if (delegatesCount + votesCount <= 500) {
-            request.votesCount = votesCount
-            request.delegatesCount = delegatesCount
-        } else {
-            if (votesCount <= 250) {
-                request.votesCount = votesCount
-                request.delegatesCount =  500 - votesCount
-            } else if (delegatesCount <= 250) {
-                request.delegatesCount = delegatesCount
-                request.votesCount =  500 - delegatesCount
-            } else {
-                request.votesCount = 250
-                request.delegatesCount = 250
-            }
-        }
-
-        request.transferCount = 1000 - (request.delegatesCount + request.votesCount)
-
-        return request
+            merkleHash, rewardTransactionMessage, transactionsForBlock.voteTransactions.map { it.toMessage() },
+            transactionsForBlock.delegateTransactions.map { it.toMessage() }, transactionsForBlock.transferTransactions.map { it.toMessage() })
     }
 
     @Transactional
@@ -279,6 +224,69 @@ class DefaultMainBlockService(
             treeLayout = mutableListOf()
         }
         return ByteUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
+    }
+
+    private fun getTransactions(): BlockTransactionsResponse {
+        val request = createBlockTransactionsRequest()
+
+        val voteTransactions =
+            voteTransactionService.getAllUnconfirmed(PageRequest(0, request.voteTransactionsCount))
+
+        val delegateTransactions =
+            delegateTransactionService.getAllUnconfirmed(PageRequest(0, request.delegateTransactionsCount))
+
+        val transferTransactions =
+            transferTransactionService.getAllUnconfirmed(PageRequest(0, request.transferTransactionsCount))
+
+        return BlockTransactionsResponse(voteTransactions, delegateTransactions, transferTransactions)
+    }
+
+    private fun createBlockTransactionsRequest(): BlockTransactionsRequest {
+        val votesCountTotal = voteTransactionService.getUnconfirmedCount()
+        val delegatesCountTotal = delegateTransactionService.getUnconfirmedCount()
+        val transfersCountTotal = transferTransactionService.getUnconfirmedCount()
+
+        val votesCountResult: Int
+        val delegatesCountResult: Int
+        val transferCountResult: Int
+
+        if (votesCountTotal + delegatesCountTotal + transfersCountTotal <= coreProperties.blockTransactionsCount!!) {
+            votesCountResult = votesCountTotal.toInt()
+            delegatesCountResult = delegatesCountTotal.toInt()
+            transferCountResult = transfersCountTotal.toInt()
+        } else {
+            if (transfersCountTotal <= coreProperties.blockTransactionsCount!! / 2) {
+                transferCountResult = transfersCountTotal.toInt()
+
+                if (votesCountTotal <= (coreProperties.blockTransactionsCount!! - transfersCountTotal) / 2) {
+                    votesCountResult = votesCountTotal.toInt()
+                    delegatesCountResult = coreProperties.blockTransactionsCount!! - (transfersCountTotal + votesCountTotal).toInt()
+                } else if (delegatesCountTotal <= (coreProperties.blockTransactionsCount!! - transfersCountTotal) / 2) {
+                    votesCountResult = coreProperties.blockTransactionsCount!! - (transfersCountTotal + delegatesCountTotal).toInt()
+                    delegatesCountResult = delegatesCountTotal.toInt()
+                } else {
+                    votesCountResult = (coreProperties.blockTransactionsCount!! - transfersCountTotal).toInt() / 2
+                    delegatesCountResult = (coreProperties.blockTransactionsCount!! - transfersCountTotal).toInt() / 2
+                }
+            } else {
+                if (delegatesCountTotal + votesCountTotal <= coreProperties.blockTransactionsCount!! / 2) {
+                    votesCountResult = votesCountTotal.toInt()
+                    delegatesCountResult = delegatesCountTotal.toInt()
+                } else if (votesCountTotal <= coreProperties.blockTransactionsCount!! / 2 / 2) {
+                    votesCountResult = votesCountTotal.toInt()
+                    delegatesCountResult = coreProperties.blockTransactionsCount!! / 2 - votesCountTotal.toInt()
+                } else if (delegatesCountTotal <= coreProperties.blockTransactionsCount!! / 2 / 2) {
+                    votesCountResult = coreProperties.blockTransactionsCount!! / 2 - delegatesCountTotal.toInt()
+                    delegatesCountResult = delegatesCountTotal.toInt()
+                } else {
+                    votesCountResult = coreProperties.blockTransactionsCount!! / 2 / 2
+                    delegatesCountResult = coreProperties.blockTransactionsCount!! / 2 / 2
+                }
+                transferCountResult = coreProperties.blockTransactionsCount!! - (votesCountResult + delegatesCountResult)
+            }
+
+        }
+        return BlockTransactionsRequest(votesCountResult, delegatesCountResult, transferCountResult)
     }
 
 }

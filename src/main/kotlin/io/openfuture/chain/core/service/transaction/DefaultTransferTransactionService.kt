@@ -44,7 +44,8 @@ class DefaultTransferTransactionService(
     override fun getAll(request: PageRequest): Page<TransferTransaction> = repository.findAll(request)
 
     @Transactional(readOnly = true)
-    override fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction> = unconfirmedRepository.findAllByOrderByHeaderFeeDesc()
+    override fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedTransferTransaction> =
+        unconfirmedRepository.findAllByOrderByHeaderFeeDesc(request)
 
     @Transactional(readOnly = true)
     override fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction = unconfirmedRepository.findOneByFooterHash(hash)
