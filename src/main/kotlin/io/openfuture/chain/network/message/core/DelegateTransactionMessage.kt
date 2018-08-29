@@ -13,7 +13,7 @@ class DelegateTransactionMessage(
     hash: String,
     senderSignature: String,
     senderPublicKey: String,
-    var delegateKey: String,
+    var nodeId: String,
     var delegateHost: String,
     var delegatePort: Int,
     var amount: Long
@@ -21,7 +21,7 @@ class DelegateTransactionMessage(
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)
-        delegateKey = buffer.readString()
+        nodeId = buffer.readString()
         delegateHost = buffer.readString()
         delegatePort = buffer.readInt()
         amount = buffer.readLong()
@@ -29,7 +29,7 @@ class DelegateTransactionMessage(
 
     override fun write(buffer: ByteBuf) {
         super.write(buffer)
-        buffer.writeString(delegateKey)
+        buffer.writeString(nodeId)
         buffer.writeString(delegateHost)
         buffer.writeInt(delegatePort)
         buffer.writeLong(amount)

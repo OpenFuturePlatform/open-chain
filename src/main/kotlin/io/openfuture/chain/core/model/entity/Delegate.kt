@@ -12,6 +12,9 @@ class Delegate(
     @Column(name = "public_key", nullable = false, unique = true)
     var publicKey: String,
 
+    @Column(name = "node_id", nullable = false, unique = true)
+    var nodeId: String,
+
     @Column(name = "address", nullable = false)
     var address: String,
 

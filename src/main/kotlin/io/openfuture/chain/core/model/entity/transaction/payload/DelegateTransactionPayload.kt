@@ -10,8 +10,8 @@ import javax.persistence.Embeddable
 @Embeddable
 class DelegateTransactionPayload(
 
-    @Column(name = "delegate_key", nullable = false, unique = true)
-    var delegateKey: String,
+    @Column(name = "node_id", nullable = false, unique = true)
+    var nodeId: String,
 
     @Column(name = "delegate_host", nullable = false, unique = true)
     var delegateHost: String,
@@ -25,10 +25,10 @@ class DelegateTransactionPayload(
 ) : TransactionPayload {
 
     override fun getBytes(): ByteArray {
-        val buffer = ByteBuffer.allocate(delegateKey.toByteArray(UTF_8).size +
+        val buffer = ByteBuffer.allocate(nodeId.toByteArray(UTF_8).size +
             delegateHost.toByteArray(UTF_8).size + INT_BYTES + LONG_BYTES)
 
-        buffer.put(delegateKey.toByteArray(UTF_8))
+        buffer.put(nodeId.toByteArray(UTF_8))
         buffer.put(delegateHost.toByteArray(UTF_8))
         buffer.putInt(delegatePort)
         buffer.putLong(amount)

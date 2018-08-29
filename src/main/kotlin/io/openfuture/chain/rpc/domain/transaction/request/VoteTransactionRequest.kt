@@ -10,7 +10,7 @@ data class VoteTransactionRequest(
     @field:NotBlank var hash: String? = null,
     @field:NotBlank var senderAddress: String? = null,
     @field:NotNull var voteType: VoteType? = null,
-    @field:NotBlank var delegateKey: String? = null,
+    @field:NotBlank var nodeId: String? = null,
     @field:NotBlank var senderSignature: String? = null,
     @field:NotBlank var senderPublicKey: String? = null
 )

@@ -34,7 +34,7 @@ class DefaultDelegateService(
         val sortFields = arrayOf("rating", "registrationDate")
         val pageRequest = PageRequest(0, consensusProperties.delegatesCount!!, sortFields, Sort.Direction.DESC)
         return viewRepository.findAll(pageRequest)
-            .map { Delegate(it.publicKey, it.address, it.host, it.port, it.registrationDate, it.id) }
+            .map { Delegate(it.publicKey, it.nodeId, it.address, it.host, it.port, it.registrationDate, it.id) }
             .toList()
     }
 

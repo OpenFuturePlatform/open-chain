@@ -14,17 +14,17 @@ class VoteTransactionPayload(
     @Column(name = "vote_type_id", nullable = false)
     var voteTypeId: Int,
 
-    @Column(name = "delegate_key", nullable = false)
-    var delegateKey: String
+    @Column(name = "node_id", nullable = false)
+    var nodeId: String
 
 ) : TransactionPayload {
 
     fun getVoteType(): VoteType = DictionaryUtils.valueOf(VoteType::class.java, voteTypeId)
 
     override fun getBytes(): ByteArray {
-        val buffer = ByteBuffer.allocate(ByteConstants.INT_BYTES + delegateKey.toByteArray(StandardCharsets.UTF_8).size)
+        val buffer = ByteBuffer.allocate(ByteConstants.INT_BYTES + nodeId.toByteArray(StandardCharsets.UTF_8).size)
         buffer.putInt(voteTypeId)
-        buffer.put(delegateKey.toByteArray(StandardCharsets.UTF_8))
+        buffer.put(nodeId.toByteArray(StandardCharsets.UTF_8))
         return buffer.array()
     }
 

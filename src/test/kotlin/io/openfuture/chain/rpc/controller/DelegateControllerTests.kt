@@ -30,7 +30,7 @@ class DelegateControllerTests : ControllerTests() {
 
     @Test
     fun getAllShouldReturnDelegatesListTest() {
-        val pageDelegates = PageImpl(listOf(Delegate("publicKey", "address", "host", 1, 1)))
+        val pageDelegates = PageImpl(listOf(Delegate("publicKey", "nodeId", "address", "host", 1, 1)))
         val expectedPageResponse = PageResponse(pageDelegates)
 
         given(delegateService.getAll(PageRequest())).willReturn(pageDelegates)
@@ -48,7 +48,7 @@ class DelegateControllerTests : ControllerTests() {
 
     @Test
     fun getAllViewsShouldReturnDelegateViewsListTest() {
-        val pageDelegates = PageImpl(listOf(ViewDelegate(1, "publicKey", "address", "host", 1, 1, 1, 1)))
+        val pageDelegates = PageImpl(listOf(ViewDelegate(1, "publicKey", "nodeId", "address", "host", 1, 1, 1, 1)))
         val expectedPageResponse = PageResponse(pageDelegates)
 
         given(delegateService.getAllViews(PageRequest())).willReturn(pageDelegates)
@@ -67,7 +67,7 @@ class DelegateControllerTests : ControllerTests() {
 
     @Test
     fun getAllActiveShouldReturnActiveDelegatesListTest() {
-        val delegate = Delegate("publicKey", "address", "host", 1, 1)
+        val delegate = Delegate("publicKey", "nodeId", "address", "host", 1, 1)
         val genesisBlock = GenesisBlock(1, 1,   "previousHash", "hash", "signature", "publicKey",
             GenesisBlockPayload(1, listOf(delegate)))
         val expectedPageResponse = PageResponse(PageImpl(listOf(DelegateResponse(delegate))))

@@ -14,19 +14,19 @@ class VoteTransactionMessage(
     senderSignature: String,
     senderPublicKey: String,
     var voteTypeId: Int,
-    var delegateKey: String
+    var nodeId: String
 ) : TransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)
         voteTypeId = buffer.readInt()
-        delegateKey = buffer.readString()
+        nodeId = buffer.readString()
     }
 
     override fun write(buffer: ByteBuf) {
         super.write(buffer)
         buffer.writeInt(voteTypeId)
-        buffer.writeString(delegateKey)
+        buffer.writeString(nodeId)
     }
 
 }

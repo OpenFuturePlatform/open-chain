@@ -89,13 +89,13 @@ internal class DefaultVoteTransactionService(
     @Transactional
     override fun save(tx: VoteTransaction): VoteTransaction {
         val type = tx.payload.getVoteType()
-        updateWalletVotes(tx.header.senderAddress, tx.payload.delegateKey, type)
+        updateWalletVotes(tx.header.senderAddress, tx.payload.nodeId, type)
         return super.save(tx)
     }
 
     @Transactional
     override fun validate(utx: UnconfirmedVoteTransaction) {
-        if (!isExistsDelegate(utx.payload.delegateKey)) {
+        if (!isExistsDelegate(utx.payload.nodeId)) {
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
 
@@ -103,8 +103,8 @@ internal class DefaultVoteTransactionService(
             throw ValidationException("Incorrect votes count", INCORRECT_VOTES_COUNT)
         }
 
-        if (!isAlreadyVote(utx.header.senderAddress, utx.payload.delegateKey)) {
-            throw ValidationException("Address: ${utx.header.senderAddress} already vote for delegate with key: ${utx.payload.delegateKey}")
+        if (!isAlreadyVote(utx.header.senderAddress, utx.payload.nodeId)) {
+            throw ValidationException("Address: ${utx.header.senderAddress} already vote for delegate with key: ${utx.payload.nodeId}")
         }
 
         if (!isExistsVoteType(utx.payload.voteTypeId)) {
@@ -114,8 +114,8 @@ internal class DefaultVoteTransactionService(
         super.validateExternal(utx.header, utx.payload, utx.footer, utx.header.fee)
     }
 
-    private fun updateWalletVotes(senderAddress: String, delegateKey: String, type: VoteType) {
-        val delegate = delegateService.getByPublicKey(delegateKey)
+    private fun updateWalletVotes(senderAddress: String, nodeId: String, type: VoteType) {
+        val delegate = delegateService.getByPublicKey(nodeId)
         val wallet = walletService.getByAddress(senderAddress)
 
         when (type) {
@@ -140,9 +140,9 @@ internal class DefaultVoteTransactionService(
         return consensusProperties.delegatesCount!! > confirmedVotes + unconfirmedForVotes
     }
 
-    private fun isAlreadyVote(senderAddress: String, delegateKey: String): Boolean {
+    private fun isAlreadyVote(senderAddress: String, nodeId: String): Boolean {
         val delegates = walletService.getVotesByAddress(senderAddress)
-        return delegates.any { it.publicKey == delegateKey }
+        return delegates.any { it.nodeId == nodeId }
     }
 
     private fun isExistsVoteType(typeId: Int): Boolean {

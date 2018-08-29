@@ -120,7 +120,7 @@ class AccountControllerTests : ControllerTests() {
     @Test
     fun getDelegatesShouldReturnVotesDelegates() {
         val address = "address"
-        val expectedDelegates = mutableSetOf(Delegate("publicKey", "address", "host", 8080, 1))
+        val expectedDelegates = mutableSetOf(Delegate("publicKey", "nodeId", "address", "host", 8080, 1))
 
         given(walletService.getVotesByAddress(address)).willReturn(expectedDelegates)
 

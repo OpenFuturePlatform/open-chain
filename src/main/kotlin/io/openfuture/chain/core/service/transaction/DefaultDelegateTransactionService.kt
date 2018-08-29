@@ -89,27 +89,27 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun save(tx: DelegateTransaction): DelegateTransaction {
-        delegateService.save(Delegate(tx.payload.delegateKey, tx.header.senderAddress, tx.payload.delegateHost,
-            tx.payload.delegatePort, tx.header.timestamp))
+        delegateService.save(Delegate(tx.footer.senderPublicKey, tx.payload.nodeId, tx.header.senderAddress,
+            tx.payload.delegateHost, tx.payload.delegatePort, tx.header.timestamp))
         return super.save(tx)
     }
 
     @Transactional
     override fun validate(utx: UnconfirmedDelegateTransaction) {
-        if (!isValidDelegateKey(utx.payload.delegateKey, utx.footer.senderPublicKey)) {
+        if (!isValidNodeId(utx.payload.nodeId, utx.footer.senderPublicKey)) {
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
 
         super.validateExternal(utx.header, utx.payload, utx.footer, utx.payload.amount + utx.header.fee)
     }
 
-    private fun isValidDelegateKey(delegateKey: String, publicKey: String): Boolean {
-        if(delegateKey != nodeKeyHolder.getUid(ByteUtils.fromHexString(publicKey))) {
+    private fun isValidNodeId(nodeId: String, publicKey: String): Boolean {
+        if(nodeId != nodeKeyHolder.getUid(ByteUtils.fromHexString(publicKey))) {
             return false
         }
 
         if(delegateService.isExistsByPublicKey(publicKey) &&
-            unconfirmedRepository.findAll().any { it.payload.delegateKey == delegateKey }) {
+            unconfirmedRepository.findAll().any { it.payload.nodeId == nodeId }) {
             return false
         }
 
