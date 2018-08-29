@@ -33,6 +33,10 @@ internal class DefaultVoteTransactionService(
         val log = LoggerFactory.getLogger(DefaultVoteTransactionService::class.java)
     }
 
+    @Transactional(readOnly = true)
+    override fun getUnconfirmedCount(): Long {
+        return unconfirmedRepository.count()
+    }
 
     @Transactional(readOnly = true)
     override fun getByHash(hash: String): VoteTransaction = repository.findOneByFooterHash(hash)

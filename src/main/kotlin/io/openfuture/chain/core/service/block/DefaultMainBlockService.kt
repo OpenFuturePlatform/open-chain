@@ -4,9 +4,10 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.exception.InsufficientTransactionsException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.model.domain.block.BlockTransactionsRequest
+import io.openfuture.chain.core.model.domain.block.BlockTransactionsResponse
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.repository.MainBlockRepository
@@ -81,6 +82,7 @@ class DefaultMainBlockService(
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
 
+        voteTransactionService.getUnconfirmedCount()
         val voteTransactions = voteTransactionService.getAllUnconfirmed()
         val delegateTransactions = delegateTransactionService.getAllUnconfirmed()
         val transferTransactions = transferTransactionService.getAllUnconfirmed()
@@ -97,6 +99,60 @@ class DefaultMainBlockService(
 
         return PendingBlockMessage(height, previousHash, timestamp, ByteUtils.toHexString(hash), signature, publicKey,
             merkleHash, rewardTransactionMessage, voteTransactions.map { it.toMessage() }, delegateTransactions.map { it.toMessage() }, transferTransactions.map { it.toMessage() })
+    }
+
+    private fun createBlockTranRequest(): BlockTransactionsRequest {
+        val request = BlockTransactionsRequest()
+
+        val votesCount = voteTransactionService.getUnconfirmedCount()
+        val delegatesCount = delegateTransactionService.getUnconfirmedCount()
+        val transfersCount = transferTransactionService.getUnconfirmedCount()
+
+        if (votesCount + delegatesCount + transfersCount <= 1000) {
+            request.votesCount = votesCount
+            request.delegatesCount = delegatesCount
+            request.transferCount = transfersCount
+        } else if (transfersCount <= 500) {
+            request.transferCount = transfersCount
+
+            if (votesCount <= (1000 - transfersCount) / 2) {
+                request.votesCount = votesCount
+                request.delegatesCount =  1000 - transfersCount - votesCount
+            } else if (delegatesCount <= (1000 - transfersCount) / 2) {
+                request.delegatesCount = delegatesCount
+                request.votesCount =  1000 - transfersCount - delegatesCount
+            } else {
+                request.votesCount = (1000 - transfersCount) / 2
+                request.delegatesCount = (1000 - transfersCount) / 2
+            }
+        }
+
+
+
+
+
+
+
+
+        if (delegatesCount + votesCount <= 500) {
+            request.votesCount = votesCount
+            request.delegatesCount = delegatesCount
+        } else {
+            if (votesCount <= 250) {
+                request.votesCount = votesCount
+                request.delegatesCount =  500 - votesCount
+            } else if (delegatesCount <= 250) {
+                request.delegatesCount = delegatesCount
+                request.votesCount =  500 - delegatesCount
+            } else {
+                request.votesCount = 250
+                request.delegatesCount = 250
+            }
+        }
+
+        request.transferCount = 1000 - (request.delegatesCount + request.votesCount)
+
+        return request
     }
 
     @Transactional

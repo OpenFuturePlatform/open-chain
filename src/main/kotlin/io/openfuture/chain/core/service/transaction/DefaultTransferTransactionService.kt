@@ -32,6 +32,11 @@ class DefaultTransferTransactionService(
 
 
     @Transactional(readOnly = true)
+    override fun getUnconfirmedCount(): Long {
+        return unconfirmedRepository.count()
+    }
+
+    @Transactional(readOnly = true)
     override fun getByHash(hash: String): TransferTransaction = repository.findOneByFooterHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 

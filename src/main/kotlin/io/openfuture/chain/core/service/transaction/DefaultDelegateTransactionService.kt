@@ -32,6 +32,10 @@ class DefaultDelegateTransactionService(
         val log = LoggerFactory.getLogger(DefaultDelegateTransactionService::class.java)
     }
 
+    @Transactional(readOnly = true)
+    override fun getUnconfirmedCount(): Long {
+        return unconfirmedRepository.count()
+    }
 
     @Transactional(readOnly = true)
     override fun getByHash(hash: String): DelegateTransaction = repository.findOneByFooterHash(hash)
