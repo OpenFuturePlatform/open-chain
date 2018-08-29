@@ -48,13 +48,9 @@ class NodeProperties(
     @field:Min(5)
     var peersNumber: Int? = null,
 
-    /** Private key path */
+    /** Config path */
     @field:NotNull
-    var privateKeyPath: String? = null,
-
-    /** Public key path */
-    @field:NotNull
-    var publicKeyPath: String? = null,
+    var configPath: String? = null,
 
     /** Interval for triggering node explorer task in milliseconds */
     @field:NotNull
