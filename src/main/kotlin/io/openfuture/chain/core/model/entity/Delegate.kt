@@ -21,6 +21,9 @@ class Delegate(
     @Column(name = "port", nullable = false)
     var port: Int,
 
+    @Column(name = "registration_date", nullable = false)
+    var registrationDate: Long,
+
     id: Int = 0
 
 ) : BaseModel(id)
