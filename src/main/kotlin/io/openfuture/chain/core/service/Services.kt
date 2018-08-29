@@ -5,6 +5,7 @@ import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -188,6 +189,8 @@ interface DelegateService {
     fun isExistsByPublicKey(key: String): Boolean
 
     fun save(delegate: Delegate): Delegate
+
+    fun getAllViews(request: PageRequest): Page<ViewDelegate>
 
 }
 

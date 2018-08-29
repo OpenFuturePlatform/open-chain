@@ -6,6 +6,7 @@ import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.rpc.domain.DelegateResponse
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
+import io.openfuture.chain.rpc.domain.view.ViewDelegateResponse
 import org.springframework.data.domain.PageImpl
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -22,10 +23,12 @@ class DelegateController(
 ) {
 
     @GetMapping
-    fun getAll(request: PageRequest): PageResponse<DelegateResponse> {
-        val map = delegateService.getAll(request).map { DelegateResponse(it) }
-        return PageResponse(map)
-    }
+    fun getAll(request: PageRequest): PageResponse<DelegateResponse> =
+        PageResponse(delegateService.getAll(request).map { DelegateResponse(it) })
+
+    @GetMapping("/view")
+    fun getAllViews(request: PageRequest): PageResponse<ViewDelegateResponse> =
+        PageResponse(delegateService.getAllViews(request).map { ViewDelegateResponse(it) })
 
     @GetMapping("/active")
     fun getAllActive(request: PageRequest): PageResponse<DelegateResponse> {
