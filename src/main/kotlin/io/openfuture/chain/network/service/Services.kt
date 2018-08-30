@@ -55,6 +55,8 @@ interface NetworkInnerService {
 
     fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage, nodeUid: String)
 
+    fun onGreetingResponse(ctx: ChannelHandlerContext, message: GreetingResponseMessage)
+
     fun onAskTime(ctx: ChannelHandlerContext, askTime: AskTimeMessage)
 
     fun onTime(ctx: ChannelHandlerContext, message: TimeMessage)
