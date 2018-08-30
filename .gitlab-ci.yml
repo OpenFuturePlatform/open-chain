@@ -17,7 +17,7 @@ variables:
 ###########################
 # Tests
 ###########################
-.unit-tests:
+unit-tests:
   stage: test
   image: openjdk:8-jdk
   before_script:
@@ -40,7 +40,7 @@ variables:
 ###########################
 # Building
 ###########################
-.build-jar:
+build-jar:
   stage: build
   image: openjdk:8-jdk
   dependencies: []
@@ -60,12 +60,11 @@ variables:
     - sprint
     - master
     - tags
-    - add_nodes_keys
 
 ###########################
 # Packaging
 ###########################
-.package-docker:
+package-docker:
   stage: package
   dependencies:
     - build-jar
@@ -78,9 +77,8 @@ variables:
     - sprint
     - master
     - tags
-    - add_nodes_keys
 
-.package-native:
+package-native:
   stage: package
   dependencies:
     - build-jar
@@ -146,7 +144,6 @@ deploy-production:
       '${server2_key7}','${server2_key8}','${server2_key9}',\
       '${server2_key10}','${server2_key11}' \
       < ansible/host_vars/35.199.41.146.template > ansible/host_vars/35.199.41.146
-    - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -e "image_tag=add_nodes_keys" -e "count=1" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.1.yml
+    - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -e "image_tag=${CI_COMMIT_REF_NAME}" -e "count=1" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.yml
   only:
     - tags
-    - add_nodes_keys
