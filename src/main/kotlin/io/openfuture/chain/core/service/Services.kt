@@ -188,7 +188,7 @@ interface DelegateService {
 
     fun isExistsByPublicKey(key: String): Boolean
 
-    fun isExistsByNodeId(address: String): Boolean
+    fun isExistsByNodeId(nodeId: String): Boolean
 
     fun save(delegate: Delegate): Delegate
 
