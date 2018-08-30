@@ -163,12 +163,12 @@ class DefaultNetworkInnerService(
     }
 
     override fun sendToAddress(message: BaseMessage, addressMessage: AddressMessage) {
-        send(addressMessage, message, true)
+        send(addressMessage, message)
     }
 
     override fun sendToRootNode(message: BaseMessage) {
         val address = getRootNodeAddress()
-        send(address, message, true)
+        send(address, message)
     }
 
     private fun requestAddresses() {
@@ -189,20 +189,20 @@ class DefaultNetworkInnerService(
             return
         }
 
-        val channel = connections.filter { it.value.uid == addressMessage.uid }.map { it.key }.firstOrNull()
-        if (channel != null) {
-            sendAndCloseIfNeeded(channel, message, closeAfterSending)
-        } else {
-            send(addressMessage.address, message, closeAfterSending)
-        }
+        send(addressMessage.address, message, closeAfterSending)
     }
 
     private fun send(networkAddressMessage: NetworkAddressMessage, message: BaseMessage, closeAfterSending: Boolean = false) {
-        bootstrap.connect(networkAddressMessage.host, networkAddressMessage.port).addListener { future ->
-            if (future.isSuccess) {
-                sendAndCloseIfNeeded((future as ChannelFuture).channel(), message, closeAfterSending)
-            } else {
-                log.warn("Can not connect to ${networkAddressMessage.host}:${networkAddressMessage.port}")
+        val channel = connections.filter { it.value.address == networkAddressMessage }.map { it.key }.firstOrNull()
+        if (channel != null) {
+            sendAndCloseIfNeeded(channel, message, closeAfterSending)
+        } else {
+            bootstrap.connect(networkAddressMessage.host, networkAddressMessage.port).addListener { future ->
+                if (future.isSuccess) {
+                    sendAndCloseIfNeeded((future as ChannelFuture).channel(), message, closeAfterSending)
+                } else {
+                    log.warn("Can not connect to ${networkAddressMessage.host}:${networkAddressMessage.port}")
+                }
             }
         }
     }
