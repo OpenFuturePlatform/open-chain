@@ -31,7 +31,7 @@ abstract class BaseConnectionHandler(
 
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        log.info("Connection with ${ctx.channel().remoteAddress()} established")
+        log.debug("Connection with ${ctx.channel().remoteAddress()} established")
         networkService.onChannelActive(ctx)
     }
 
@@ -40,6 +40,7 @@ abstract class BaseConnectionHandler(
             // -- system messages
             HEART_BEAT -> networkService.onHeartBeat(ctx, packet.data as HeartBeatMessage)
             GREETING -> networkService.onGreeting(ctx, packet.data as GreetingMessage, packet.uid)
+            GREETING_RESPONSE -> networkService.onGreetingResponse(ctx, packet.data as GreetingResponseMessage)
             ADDRESSES -> networkService.onAddresses(ctx, packet.data as AddressesMessage)
             FIND_ADDRESSES -> networkService.onFindAddresses(ctx, packet.data as FindAddressesMessage)
             TIME -> networkService.onTime(ctx, packet.data as TimeMessage)
@@ -67,7 +68,7 @@ abstract class BaseConnectionHandler(
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        log.info("Connection with ${ctx.channel().remoteAddress()} closed")
+        log.debug("Connection with ${ctx.channel().remoteAddress()} closed")
         networkService.onChannelInactive(ctx)
     }
 

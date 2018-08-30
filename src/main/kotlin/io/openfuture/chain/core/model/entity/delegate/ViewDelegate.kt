@@ -37,5 +37,3 @@ class ViewDelegate(
     var votesCount: Long
 
 )
-
-
