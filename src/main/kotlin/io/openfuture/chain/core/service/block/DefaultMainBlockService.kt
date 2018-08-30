@@ -6,8 +6,8 @@ import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.model.domain.block.BlockTransactionsRequest
-import io.openfuture.chain.core.model.domain.block.BlockTransactionsResponse
+import io.openfuture.chain.core.model.domain.block.TransactionSelectionRequest
+import io.openfuture.chain.core.model.domain.block.TransactionSelectionResponse
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.property.CoreProperties
@@ -226,7 +226,7 @@ class DefaultMainBlockService(
         return ByteUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
     }
 
-    private fun getTransactions(): BlockTransactionsResponse {
+    private fun getTransactions(): TransactionSelectionResponse {
         val request = createBlockTransactionsRequest()
 
         val voteTransactions =
@@ -238,10 +238,10 @@ class DefaultMainBlockService(
         val transferTransactions =
             transferTransactionService.getAllUnconfirmed(PageRequest(0, request.transferTransactionsCount))
 
-        return BlockTransactionsResponse(voteTransactions, delegateTransactions, transferTransactions)
+        return TransactionSelectionResponse(voteTransactions, delegateTransactions, transferTransactions)
     }
 
-    private fun createBlockTransactionsRequest(): BlockTransactionsRequest {
+    private fun createBlockTransactionsRequest(): TransactionSelectionRequest {
         val votesCountTotal = voteTransactionService.getUnconfirmedCount()
         val delegatesCountTotal = delegateTransactionService.getUnconfirmedCount()
         val transfersCountTotal = transferTransactionService.getUnconfirmedCount()
@@ -286,7 +286,7 @@ class DefaultMainBlockService(
             }
 
         }
-        return BlockTransactionsRequest(votesCountResult, delegatesCountResult, transferCountResult)
+        return TransactionSelectionRequest(votesCountResult, delegatesCountResult, transferCountResult)
     }
 
 }
