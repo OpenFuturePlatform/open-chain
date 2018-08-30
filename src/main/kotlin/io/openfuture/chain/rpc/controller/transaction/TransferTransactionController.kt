@@ -15,10 +15,12 @@ class TransferTransactionController(
     private val transactionService: TransferTransactionService
 ) {
 
+    @CrossOrigin
     @GetMapping("/address/{address}")
     fun getTransactions(@PathVariable address: String): List<TransferTransactionResponse> =
         transactionService.getByAddress(address).map { TransferTransactionResponse(it) }
 
+    @CrossOrigin
     @GetMapping("/{hash}")
     fun get(@PathVariable hash: String): TransferTransactionResponse = TransferTransactionResponse(transactionService.getByHash(hash))
 
@@ -28,6 +30,7 @@ class TransferTransactionController(
         return TransferTransactionResponse(tx)
     }
 
+    @CrossOrigin
     @GetMapping
     fun getAll(request: PageRequest): PageResponse<TransferTransactionResponse> =
         PageResponse(transactionService.getAll(request).map { TransferTransactionResponse(it) })

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.1] - 2018-08-27
+### Added
+- Application properties for docker
+
 ## [0.6.0] - 2018-08-24
 ### Added
 - Network: A UID for nodes
@@ -18,6 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC: Main and genesis block endpoints unit tests
 - Wallet UI: Create a transaction
 - Wallet UI: Past transaction list
+- Core: Reward transaction
 
 ### Changed
 - Core: Genesis and Main blocks are not broadcasted after creation, pending blocks are broadcasted instead
@@ -27,6 +32,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Core validation: Improved fee and amount validation for the transfer transaction
 - Core: Removed validation from main block service on adding a block
 - Core: Removed validation from genesis service on adding a block
+- Core: Removed field 'reward' from blocks
 
 ## [0.5.0] - 2018-08-10
 ### Added
@@ -163,6 +169,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[0.6.1]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.6.0...v0.6.1
+[0.6.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.2.0...v0.3.0

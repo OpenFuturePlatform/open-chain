@@ -2,6 +2,7 @@ plugins {
     id 'jacoco'
     id 'idea'
     id 'org.jetbrains.kotlin.jvm' version '1.2.60'
+    id 'org.jetbrains.kotlin.kapt' version '1.2.60'
     id 'org.jetbrains.kotlin.plugin.spring' version '1.2.60'
     id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.60'
     id 'org.springframework.boot' version '2.0.4.RELEASE'
@@ -11,7 +12,7 @@ plugins {
 apply plugin: "io.spring.dependency-management"
 
 group = 'io.openfuture.chain'
-version = versionDetails().lastTag[1..-1] + (versionDetails().isCleanTag ? '' : '-DIRTY')
+version = versionDetails().lastTag[1..-1]
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -46,7 +47,7 @@ dependencies {
 
     // DevTools
     runtime('org.springframework.boot:spring-boot-devtools')
-    compileOnly('org.springframework.boot:spring-boot-configuration-processor')
+    kapt('org.springframework.boot:spring-boot-configuration-processor')
 
     //Cryptography
     compile("org.bouncycastle:bcprov-jdk15on:1.59")
@@ -87,6 +88,15 @@ noArg {
     annotations("javax.persistence.MappedSuperclass",
                 "javax.persistence.Entity",
                 "io.openfuture.chain.core.annotation.NoArgConstructor")
+}
+
+// IDEA
+idea {
+    module {
+        def kaptMain = file('build/generated/source/kapt/main')
+        sourceDirs += kaptMain
+        generatedSourceDirs += kaptMain
+    }
 }
 
 // Jacoco

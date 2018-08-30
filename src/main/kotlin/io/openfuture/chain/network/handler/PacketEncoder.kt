@@ -30,7 +30,7 @@ class PacketEncoder(
     override fun encode(ctx: ChannelHandlerContext, data: BaseMessage, out: MutableList<Any>) {
         val packet = Packet(keyHolder.getUid(), data, properties.version!!, clock.networkTime())
 
-        log.info("Encoding ${ToStringBuilder.reflectionToString(data, SHORT_PREFIX_STYLE)} " +
+        log.debug("Encoding ${ToStringBuilder.reflectionToString(data, SHORT_PREFIX_STYLE)} " +
             "to ${ctx.channel().remoteAddress()}")
 
         val buffer = ctx.alloc().buffer()

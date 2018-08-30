@@ -14,7 +14,6 @@ class GenesisBlock(
     timestamp: Long,
     height: Long,
     previousHash: String,
-    reward: Long,
     hash: String,
     signature: String,
     publicKey: String,
@@ -22,18 +21,17 @@ class GenesisBlock(
     @Embedded
     val payload: GenesisBlockPayload
 
-) : Block(timestamp, height, previousHash, reward, hash, signature, publicKey) {
+) : Block(timestamp, height, previousHash, hash, signature, publicKey) {
 
     companion object {
-        fun of(dto: GenesisBlockMessage, delegates: List<Delegate>): GenesisBlock = GenesisBlock(
-            dto.timestamp,
-            dto.height,
-            dto.previousHash,
-            dto.reward,
-            dto.hash,
-            dto.signature,
-            dto.publicKey,
-            GenesisBlockPayload(dto.epochIndex, delegates)
+        fun of(message: GenesisBlockMessage, delegates: List<Delegate>): GenesisBlock = GenesisBlock(
+            message.timestamp,
+            message.height,
+            message.previousHash,
+            message.hash,
+            message.signature,
+            message.publicKey,
+            GenesisBlockPayload(message.epochIndex, delegates)
         )
     }
 
@@ -43,7 +41,6 @@ class GenesisBlock(
         height,
         previousHash,
         timestamp,
-        reward,
         hash,
         signature,
         publicKey,

@@ -24,7 +24,7 @@ class PacketDecoder : ReplayingDecoder<ByteBuf>() {
         val packet = Packet::class.java.newInstance()
         packet.read(bytes)
 
-        log.info("Decoded ${ToStringBuilder.reflectionToString(packet.data, SHORT_PREFIX_STYLE)} " +
+        log.debug("Decoded ${ToStringBuilder.reflectionToString(packet.data, SHORT_PREFIX_STYLE)} " +
             "from ${ctx.channel().remoteAddress()}")
 
         out.add(packet)

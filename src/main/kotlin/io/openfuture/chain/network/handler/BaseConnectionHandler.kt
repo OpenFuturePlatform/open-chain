@@ -31,7 +31,7 @@ abstract class BaseConnectionHandler(
 
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        log.info("Connection with ${ctx.channel().remoteAddress()} established")
+        log.debug("Connection with ${ctx.channel().remoteAddress()} established")
         networkService.onChannelActive(ctx)
     }
 
@@ -67,7 +67,7 @@ abstract class BaseConnectionHandler(
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        log.info("Connection with ${ctx.channel().remoteAddress()} closed")
+        log.debug("Connection with ${ctx.channel().remoteAddress()} closed")
         networkService.onChannelInactive(ctx)
     }
 

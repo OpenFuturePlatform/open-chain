@@ -40,6 +40,7 @@ class DefaultMainBlockService(
     private val voteTransactionService: VoteTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
+    private val rewardTransactionService: RewardTransactionService,
     private val consensusProperties: ConsensusProperties,
     private val syncManager: SyncManager
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService, capacityChecker), MainBlockService {
@@ -85,16 +86,17 @@ class DefaultMainBlockService(
         val transferTransactions = transferTransactionService.getAllUnconfirmed()
         val transactions = voteTransactions + delegateTransactions + transferTransactions
 
-        val reward = transactions.map { it.header.fee }.sum() + consensusProperties.rewardBlock!!
-        val merkleHash = calculateMerkleRoot(transactions.map { it.hash })
+        val rewardTransactionMessage = rewardTransactionService.create(timestamp, transactions.map { it.header.fee }.sum())
+
+        val merkleHash = calculateMerkleRoot(transactions.map { it.footer.hash } + rewardTransactionMessage.hash)
         val payload = MainBlockPayload(merkleHash)
 
-        val hash = createHash(timestamp, height, previousHash, reward, payload)
+        val hash = createHash(timestamp, height, previousHash, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKey()
 
-        return PendingBlockMessage(height, previousHash, timestamp, reward, ByteUtils.toHexString(hash), signature, publicKey,
-            merkleHash, voteTransactions.map { it.toMessage() }, delegateTransactions.map { it.toMessage() }, transferTransactions.map { it.toMessage() })
+        return PendingBlockMessage(height, previousHash, timestamp, ByteUtils.toHexString(hash), signature, publicKey,
+            merkleHash, rewardTransactionMessage, voteTransactions.map { it.toMessage() }, delegateTransactions.map { it.toMessage() }, transferTransactions.map { it.toMessage() })
     }
 
     @Transactional
@@ -111,6 +113,7 @@ class DefaultMainBlockService(
         }
 
         val savedBlock = super.save(block)
+        rewardTransactionService.toBlock(message.rewardTransaction, savedBlock)
         message.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
         message.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
         message.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
@@ -132,6 +135,7 @@ class DefaultMainBlockService(
         }
 
         val savedBlock = super.save(block)
+        rewardTransactionService.toBlock(message.rewardTransaction, savedBlock)
         message.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
         message.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
         message.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
@@ -149,6 +153,10 @@ class DefaultMainBlockService(
     }
 
     private fun validate(message: PendingBlockMessage) {
+        if (!isValidReward(message.getExternalTransactions().map { it.fee }.sum(), message.rewardTransaction.reward)) {
+            throw ValidationException("Invalid reward: ${message.rewardTransaction.reward}")
+        }
+
         if (!isValidMerkleHash(message.merkleHash, message.getAllTransactions().map { it.hash })) {
             throw ValidationException("Invalid merkle hash: ${message.merkleHash}")
         }
@@ -166,6 +174,14 @@ class DefaultMainBlockService(
         }
 
         super.validateBase(MainBlock.of(message))
+    }
+
+    private fun isValidReward(fees: Long, reward: Long): Boolean {
+        val senderAddress = consensusProperties.genesisAddress!!
+        val bank = walletService.getBalanceByAddress(senderAddress)
+        val rewardBlock = consensusProperties.rewardBlock!!
+
+        return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)
     }
 
     private fun isValidVoteTransactions(transactions: List<VoteTransactionMessage>): Boolean {
@@ -188,10 +204,6 @@ class DefaultMainBlockService(
     }
 
     private fun calculateMerkleRoot(transactions: List<String>): String {
-        if (transactions.isEmpty()) {
-            throw InsufficientTransactionsException()
-        }
-
         if (transactions.size == 1) {
             return transactions.single()
         }

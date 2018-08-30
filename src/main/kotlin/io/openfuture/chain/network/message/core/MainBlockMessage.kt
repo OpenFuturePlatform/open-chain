@@ -12,24 +12,26 @@ class MainBlockMessage(
     height: Long,
     previousHash: String,
     timestamp: Long,
-    reward: Long,
     hash: String,
     signature: String,
     publicKey: String,
     var merkleHash: String,
+    var rewardTransaction: RewardTransactionMessage,
     var voteTransactions: List<VoteTransactionMessage>,
     var delegateTransactions: List<DelegateTransactionMessage>,
     var transferTransactions: List<TransferTransactionMessage>
-) : BlockMessage(height, previousHash, timestamp, reward, hash, signature, publicKey) {
+) : BlockMessage(height, previousHash, timestamp, hash, signature, publicKey) {
 
     fun getAllTransactions(): List<TransactionMessage> {
-        return voteTransactions + delegateTransactions + transferTransactions
+        return voteTransactions + delegateTransactions + transferTransactions + rewardTransaction
     }
 
     override fun read(buffer: ByteBuf) {
         super.read(buffer)
 
         merkleHash = buffer.readString()
+        rewardTransaction = RewardTransactionMessage::class.java.newInstance()
+        rewardTransaction.read(buffer)
         voteTransactions = buffer.readList()
         delegateTransactions = buffer.readList()
         transferTransactions = buffer.readList()
@@ -39,6 +41,7 @@ class MainBlockMessage(
         super.write(buffer)
 
         buffer.writeString(merkleHash)
+        rewardTransaction.write(buffer)
         buffer.writeList(voteTransactions)
         buffer.writeList(delegateTransactions)
         buffer.writeList(transferTransactions)
@@ -58,7 +61,7 @@ class MainBlockMessage(
         if (publicKey != other.publicKey) return false
         if (height != other.height) return false
         if (previousHash != other.previousHash) return false
-        if (reward != other.reward) return false
+        if (rewardTransaction != other.rewardTransaction) return false
         if (merkleHash != other.merkleHash) return false
         if (voteTransactions != other.voteTransactions) return false
         if (delegateTransactions != other.delegateTransactions) return false
@@ -74,7 +77,7 @@ class MainBlockMessage(
         result = 31 * result + publicKey.hashCode()
         result = 31 * result + height.hashCode()
         result = 31 * result + previousHash.hashCode()
-        result = 31 * result + reward.hashCode()
+        result = 31 * result + rewardTransaction.hashCode()
         result = 31 * result + merkleHash.hashCode()
         result = 31 * result + voteTransactions.hashCode()
         result = 31 * result + delegateTransactions.hashCode()

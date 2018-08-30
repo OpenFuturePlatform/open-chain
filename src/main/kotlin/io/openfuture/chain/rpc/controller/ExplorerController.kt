@@ -5,10 +5,12 @@ import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.explorer.ExplorerResponse
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+@CrossOrigin
 @RestController
 @RequestMapping("/rpc/explorer/info")
 class ExplorerController(

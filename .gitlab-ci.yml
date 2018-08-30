@@ -37,13 +37,13 @@ unit-tests:
       - build/reports/
     expire_in: 1 day
 
-
 ###########################
 # Building
 ###########################
 build-jar:
   stage: build
   image: openjdk:8-jdk
+  dependencies: []
   before_script:
     - export GRADLE_USER_HOME=`pwd`/.gradle
   script:
@@ -66,6 +66,8 @@ build-jar:
 ###########################
 package-docker:
   stage: package
+  dependencies:
+    - build-jar
   script:
     - if [[ ${CI_COMMIT_REF_NAME} == master ]]; then export IMAGE_TAG=latest; else export IMAGE_TAG=${CI_COMMIT_REF_NAME}; fi;
     - docker login -u ${DOCKER_LOGIN} -p ${DOCKER_PASS}
@@ -78,6 +80,8 @@ package-docker:
 
 package-native:
   stage: package
+  dependencies:
+    - build-jar
   script:
     - mv build/libs/open-chain-*.jar build/libs/open-chain.jar
     - |
@@ -91,17 +95,17 @@ package-native:
   only:
     - tags
 
-
 ###########################
 # Deploy
 ###########################
 deploy-production:
   stage: deploy
   image: openplatform/ansible
+  dependencies: []
   script:
     - echo "${DEPLOY_KEY_PROD}" | tr -d '\r' > ansible/key.pem
     - chmod 600 ansible/key.pem
     - export ANSIBLE_HOST_KEY_CHECKING=False
-    - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -e "image_tag=${CI_COMMIT_REF_NAME}" -e "count=2" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.yml
+    - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -e "image_tag=${CI_COMMIT_REF_NAME}" -e "count=1" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.yml
   only:
     - tags
