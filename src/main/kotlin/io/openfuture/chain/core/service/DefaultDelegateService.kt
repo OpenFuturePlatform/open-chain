@@ -42,7 +42,7 @@ class DefaultDelegateService(
     override fun isExistsByPublicKey(key: String): Boolean = repository.existsByPublicKey(key)
 
     @Transactional(readOnly = true)
-    override fun isExistsByAddress(address: String): Boolean = repository.existsByAddress(address)
+    override fun isExistsByNodeId(nodeId: String): Boolean = repository.existsByNodeId(nodeId)
 
     @Transactional
     override fun save(delegate: Delegate): Delegate = repository.save(delegate)

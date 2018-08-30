@@ -97,7 +97,7 @@ interface DelegateRepository : BaseRepository<Delegate> {
 
     fun existsByPublicKey(key: String): Boolean
 
-    fun existsByAddress(address: String): Boolean
+    fun existsByNodeId(nodeId: String): Boolean
 
 }
 
