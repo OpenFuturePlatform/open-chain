@@ -103,7 +103,7 @@ internal class DefaultVoteTransactionService(
             throw ValidationException("Incorrect votes count", INCORRECT_VOTES_COUNT)
         }
 
-        if (!isAlreadyVote(utx.header.senderAddress, utx.payload.nodeId)) {
+        if (isAlreadyVote(utx.header.senderAddress, utx.payload.nodeId)) {
             throw ValidationException("Address: ${utx.header.senderAddress} already vote for delegate with key: ${utx.payload.nodeId}")
         }
 

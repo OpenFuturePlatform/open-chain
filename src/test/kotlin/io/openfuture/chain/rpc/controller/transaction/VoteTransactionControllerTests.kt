@@ -3,7 +3,6 @@ package io.openfuture.chain.rpc.controller.transaction
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
-import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
@@ -32,7 +31,7 @@ class VoteTransactionControllerTests : ControllerTests() {
 
     @Test
     fun addTransactionShouldReturnAddedTransaction() {
-        val transactionRequest = VoteTransactionRequest(1L, 1L, "hash", "senderAddress", VoteType.FOR,
+        val transactionRequest = VoteTransactionRequest(1L, 1L, "hash", "senderAddress", 1,
             "delegateKey", "senderSignature", "senderPublicKey")
         val header = TransactionHeader(1L, 1L, "senderAddress")
         val footer = TransactionFooter("senderPublicKey", "senderSignature", "hash")
