@@ -62,7 +62,7 @@ class NodeClock {
             val offsetList = ArrayList(networkTimeOffsets.values)
             offsetList.sort()
             adjustment = offsetList[networkTimeOffsets.size / 2]
-            log.info("Time adjustment was changed: $adjustment")
+            log.debug("Time adjustment was changed: $adjustment")
         }
     }
 

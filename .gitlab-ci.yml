@@ -102,10 +102,48 @@ deploy-production:
   stage: deploy
   image: openplatform/ansible
   dependencies: []
+  variables:
+    server1_key1: $SERVER1_KEY1
+    server1_key2: $SERVER1_KEY2
+    server1_key3: $SERVER1_KEY3
+    server1_key4: $SERVER1_KEY4
+    server1_key5: $SERVER1_KEY5
+    server1_key6: $SERVER1_KEY6
+    server1_key7: $SERVER1_KEY7
+    server1_key8: $SERVER1_KEY8
+    server1_key9: $SERVER1_KEY9
+    server1_key10: $SERVER1_KEY10
+    server1_key11: $SERVER1_KEY11
+    server2_key1: $SERVER2_KEY1
+    server2_key2: $SERVER2_KEY2
+    server2_key3: $SERVER2_KEY3
+    server2_key4: $SERVER2_KEY4
+    server2_key5: $SERVER2_KEY5
+    server2_key6: $SERVER2_KEY6
+    server2_key7: $SERVER2_KEY7
+    server2_key8: $SERVER2_KEY8
+    server2_key9: $SERVER2_KEY9
+    server2_key10: $SERVER2_KEY10
+    server2_key11: $SERVER2_KEY11
   script:
     - echo "${DEPLOY_KEY_PROD}" | tr -d '\r' > ansible/key.pem
     - chmod 600 ansible/key.pem
     - export ANSIBLE_HOST_KEY_CHECKING=False
+    - apk add --no-cache gettext
+    - |
+      envsubst \
+      '${server1_key1}','${server1_key2}','${server1_key3}',\
+      '${server1_key4}','${server1_key5}','${server1_key6}',\
+      '${server1_key7}','${server1_key8}','${server1_key9}',\
+      '${server1_key10}','${server1_key11}' \
+      < ansible/host_vars/35.194.73.134.template > ansible/host_vars/35.194.73.134
+    - |
+      envsubst \
+      '${server2_key1}','${server2_key2}','${server2_key3}',\
+      '${server2_key4}','${server2_key5}','${server2_key6}',\
+      '${server2_key7}','${server2_key8}','${server2_key9}',\
+      '${server2_key10}','${server2_key11}' \
+      < ansible/host_vars/35.199.41.146.template > ansible/host_vars/35.199.41.146
     - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -e "image_tag=${CI_COMMIT_REF_NAME}" -e "count=1" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.yml
   only:
     - tags
