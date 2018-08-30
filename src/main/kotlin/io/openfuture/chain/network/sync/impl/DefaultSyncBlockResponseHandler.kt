@@ -104,7 +104,7 @@ class DefaultSyncBlockResponseHandler(
             networkApiService.sendToRootNode(DelegateRequestMessage(synchronizationSessionId))
         } catch (e: Exception) {
             synchronize()
-            log.error(e.message)
+            log.warn(e.message)
         }
     }
 
