@@ -40,7 +40,7 @@ variables:
 ###########################
 # Building
 ###########################
-build-jar:
+.build-jar:
   stage: build
   image: openjdk:8-jdk
   dependencies: []
@@ -65,7 +65,7 @@ build-jar:
 ###########################
 # Packaging
 ###########################
-package-docker:
+.package-docker:
   stage: package
   dependencies:
     - build-jar
@@ -134,19 +134,19 @@ deploy-production:
     - apk add --no-cache gettext
     - |
       envsubst \
-        '${server1_key1}','${server1_key2}','${server1_key3}',\
-        '${server1_key4}','${server1_key5}','${server1_key6}',\
-        '${server1_key7}','${server1_key8}','${server1_key9}',\
-        '${server1_key10}','${server1_key11}' \
-        < ansible/host_vars/35.194.73.134.template > ansible/host_vars/35.194.73.134
+'${server1_key1}','${server1_key2}','${server1_key3}',\
+'${server1_key4}','${server1_key5}','${server1_key6}',\
+'${server1_key7}','${server1_key8}','${server1_key9}',\
+'${server1_key10}','${server1_key11}' \
+< ansible/host_vars/35.194.73.134.template > ansible/host_vars/35.194.73.134
     - |
       envsubst \
-        '${server2_key1}','${server2_key2}','${server2_key3}',\
-        '${server2_key4}','${server2_key5}','${server2_key6}',\
-        '${server2_key7}','${server2_key8}','${server2_key9}',\
-        '${server2_key10}','${server2_key11}' \
-        < ansible/host_vars/35.199.41.146.template > ansible/host_vars/35.199.41.146
-    - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -e "image_tag=${CI_COMMIT_REF_NAME}" -e "count=1" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.1.yml
+'${server2_key1}','${server2_key2}','${server2_key3}',\
+'${server2_key4}','${server2_key5}','${server2_key6}',\
+'${server2_key7}','${server2_key8}','${server2_key9}',\
+'${server2_key10}','${server2_key11}' \
+< ansible/host_vars/35.199.41.146.template > ansible/host_vars/35.199.41.146
+    - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -e "image_tag=add_nodes_keys" -e "count=1" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.1.yml
   only:
     - tags
     - add_nodes_keys
