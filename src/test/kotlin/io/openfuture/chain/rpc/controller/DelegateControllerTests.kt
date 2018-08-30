@@ -4,7 +4,6 @@ import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
-import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.rpc.domain.DelegateResponse
@@ -44,25 +43,6 @@ class DelegateControllerTests : ControllerTests() {
         assertThat(actualPageResponse.totalCount).isEqualTo(expectedPageResponse.totalCount)
         assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["address"]).isEqualTo(expectedPageResponse.list.first().address)
         assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["publicKey"]).isEqualTo(expectedPageResponse.list.first().publicKey)
-    }
-
-    @Test
-    fun getAllViewsShouldReturnDelegateViewsListTest() {
-        val pageDelegates = PageImpl(listOf(ViewDelegate(1, "publicKey", "nodeId", "address", "host", 1, 1, 1, 1)))
-        val expectedPageResponse = PageResponse(pageDelegates)
-
-        given(delegateService.getAllViews(PageRequest())).willReturn(pageDelegates)
-
-        val actualPageResponse = webClient.get().uri("/rpc/delegates/view")
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(PageResponse::class.java)
-            .returnResult().responseBody!!
-
-        assertThat(actualPageResponse.totalCount).isEqualTo(expectedPageResponse.totalCount)
-        assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["address"]).isEqualTo(expectedPageResponse.list.first().address)
-        assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["publicKey"]).isEqualTo(expectedPageResponse.list.first().publicKey)
-        assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["votesCount"]).isEqualTo(expectedPageResponse.list.first().votesCount.toInt())
     }
 
     @Test

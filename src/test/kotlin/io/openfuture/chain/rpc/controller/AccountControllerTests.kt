@@ -2,6 +2,7 @@ package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.service.ViewDelegateService
 import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
@@ -30,6 +31,9 @@ class AccountControllerTests : ControllerTests() {
 
     @MockBean
     private lateinit var walletService: WalletService
+
+    @MockBean
+    private lateinit var viewDelegateService: ViewDelegateService
 
     companion object {
         private const val ACCOUNT_URL = "/rpc/accounts"
@@ -115,23 +119,6 @@ class AccountControllerTests : ControllerTests() {
             .returnResult().responseBody!!
 
         assertThat(actualBalance).isEqualTo(expectedBalance)
-    }
-
-    @Test
-    fun getDelegatesShouldReturnVotesDelegates() {
-        val address = "address"
-        val expectedDelegates = mutableSetOf(Delegate("publicKey", "nodeId", "address", "host", 8080, 1))
-
-        given(walletService.getVotesByAddress(address)).willReturn(expectedDelegates)
-
-        val actualDelegates = webClient.get().uri("$ACCOUNT_URL/wallets/$address/delegates")
-            .exchange()
-            .expectStatus().isOk
-            .expectBody(List::class.java)
-            .returnResult().responseBody!!
-
-        assertThat((actualDelegates.first() as LinkedHashMap<*, *>)["address"]).isEqualTo(expectedDelegates.first().address)
-        assertThat((actualDelegates.first() as LinkedHashMap<*, *>)["publicKey"]).isEqualTo(expectedDelegates.first().publicKey)
     }
 
     @GetMapping("/wallets/{address}/delegates")

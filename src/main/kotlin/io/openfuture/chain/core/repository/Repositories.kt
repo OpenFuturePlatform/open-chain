@@ -102,7 +102,11 @@ interface DelegateRepository : BaseRepository<Delegate> {
 }
 
 @Repository
-interface ViewDelegateRepository : BaseRepository<ViewDelegate>
+interface ViewDelegateRepository : BaseRepository<ViewDelegate> {
+
+    fun findOneByNodeId(nodeId: String): ViewDelegate?
+
+}
 
 @Repository
 interface WalletRepository : BaseRepository<Wallet> {

@@ -23,9 +23,6 @@ class DefaultDelegateService(
     override fun getAll(request: PageRequest): Page<Delegate> = repository.findAll(request)
 
     @Transactional(readOnly = true)
-    override fun getAllViews(request: PageRequest): Page<ViewDelegate> = viewRepository.findAll(request)
-
-    @Transactional(readOnly = true)
     override fun getByPublicKey(key: String): Delegate = repository.findOneByPublicKey(key)
         ?: throw NotFoundException("Delegate with key: $key not exist!")
 

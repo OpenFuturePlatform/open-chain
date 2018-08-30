@@ -192,7 +192,13 @@ interface DelegateService {
 
     fun save(delegate: Delegate): Delegate
 
-    fun getAllViews(request: PageRequest): Page<ViewDelegate>
+}
+
+interface ViewDelegateService {
+
+    fun getAll(request: PageRequest): Page<ViewDelegate>
+
+    fun getByNodeId(nodeId: String): ViewDelegate
 
 }
 
