@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## Added
+- Initiation of master nodes as active delegates on chain start
+- Configuration file
+- Network: Greeting response message with node's external host
+
+## Changed
+- Node private key moved from separate file to configuration file
+- Network: Improved connection to active delegates
+- Core: Improved vote transaction validation when wallet already voted
 
 ## [0.6.1] - 2018-08-27
 ### Added
