@@ -5,7 +5,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 
-data class BlockTransactionsResponse(
+data class TransactionSelectionResponse(
     val voteTransactions: List<UnconfirmedVoteTransaction>,
     val delegateTransactions: List<UnconfirmedDelegateTransaction>,
     val transferTransactions: List<UnconfirmedTransferTransaction>
