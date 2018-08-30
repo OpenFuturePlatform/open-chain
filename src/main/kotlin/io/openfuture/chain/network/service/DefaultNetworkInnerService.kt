@@ -4,6 +4,7 @@ import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelHandlerContext
+import io.openfuture.chain.core.component.NodeConfigurator
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
@@ -32,6 +33,7 @@ import java.util.concurrent.TimeUnit.SECONDS
 class DefaultNetworkInnerService(
     private val keyHolder: NodeKeyHolder,
     private val properties: NodeProperties,
+    private val config: NodeConfigurator,
     private val clock: NodeClock,
     private val bootstrap: Bootstrap,
     private val tcpServer: TcpServer
@@ -81,7 +83,7 @@ class DefaultNetworkInnerService(
         ?: throw NotFoundException("Not found address with such uid: $uid")
 
     override fun onChannelActive(ctx: ChannelHandlerContext) {
-        ctx.writeAndFlush(GreetingMessage(properties.port!!))
+        ctx.writeAndFlush(GreetingMessage(config.getConfig().externalPort))
     }
 
     override fun onClientChannelActive(ctx: ChannelHandlerContext) {
@@ -135,6 +137,11 @@ class DefaultNetworkInnerService(
     override fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage, nodeUid: String) {
         val socket = ctx.channel().remoteAddress() as InetSocketAddress
         connections[ctx.channel()] = AddressMessage(nodeUid, NetworkAddressMessage(socket.address.hostAddress, message.port))
+        ctx.writeAndFlush(GreetingResponseMessage(socket.address.hostAddress))
+    }
+
+    override fun onGreetingResponse(ctx: ChannelHandlerContext, message: GreetingResponseMessage) {
+        config.getConfig().externalHost = message.externalHost
     }
 
     override fun onAskTime(ctx: ChannelHandlerContext, askTime: AskTimeMessage) {

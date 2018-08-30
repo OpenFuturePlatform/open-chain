@@ -40,6 +40,7 @@ abstract class BaseConnectionHandler(
             // -- system messages
             HEART_BEAT -> networkService.onHeartBeat(ctx, packet.data as HeartBeatMessage)
             GREETING -> networkService.onGreeting(ctx, packet.data as GreetingMessage, packet.uid)
+            GREETING_RESPONSE -> networkService.onGreetingResponse(ctx, packet.data as GreetingResponseMessage)
             ADDRESSES -> networkService.onAddresses(ctx, packet.data as AddressesMessage)
             FIND_ADDRESSES -> networkService.onFindAddresses(ctx, packet.data as FindAddressesMessage)
             TIME -> networkService.onTime(ctx, packet.data as TimeMessage)

@@ -47,5 +47,6 @@ class NodeConfigurator(
         var externalHost: String = "",
         var secret: String = ""
     )
+
 }
 
