@@ -10,7 +10,6 @@ import io.openfuture.chain.core.model.domain.block.TransactionSelectionRequest
 import io.openfuture.chain.core.model.domain.block.TransactionSelectionResponse
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
-import io.openfuture.chain.core.property.CoreProperties
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.crypto.util.HashUtils
@@ -241,51 +240,54 @@ class DefaultMainBlockService(
     }
 
     private fun createBlockTransactionsRequest(): TransactionSelectionRequest {
-        val votesCountTotal = voteTransactionService.getUnconfirmedCount()
-        val delegatesCountTotal = delegateTransactionService.getUnconfirmedCount()
-        val transfersCountTotal = transferTransactionService.getUnconfirmedCount()
-
-        val votesCountResult: Int
-        val delegatesCountResult: Int
-        val transferCountResult: Int
+        val votesCountTotal = voteTransactionService.getUnconfirmedCount().toInt()
+        val delegatesCountTotal = delegateTransactionService.getUnconfirmedCount().toInt()
+        val transfersCountTotal = transferTransactionService.getUnconfirmedCount().toInt()
 
         if (votesCountTotal + delegatesCountTotal + transfersCountTotal <= consensusProperties.blockCapacity!!) {
-            votesCountResult = votesCountTotal.toInt()
-            delegatesCountResult = delegatesCountTotal.toInt()
-            transferCountResult = transfersCountTotal.toInt()
-        } else {
-            if (transfersCountTotal <= consensusProperties.blockCapacity!! / 2) {
-                transferCountResult = transfersCountTotal.toInt()
-
-                if (votesCountTotal <= (consensusProperties.blockCapacity!! - transfersCountTotal) / 2) {
-                    votesCountResult = votesCountTotal.toInt()
-                    delegatesCountResult = consensusProperties.blockCapacity!! - (transfersCountTotal + votesCountTotal).toInt()
-                } else if (delegatesCountTotal <= (consensusProperties.blockCapacity!! - transfersCountTotal) / 2) {
-                    votesCountResult = consensusProperties.blockCapacity!! - (transfersCountTotal + delegatesCountTotal).toInt()
-                    delegatesCountResult = delegatesCountTotal.toInt()
-                } else {
-                    votesCountResult = (consensusProperties.blockCapacity!! - transfersCountTotal).toInt() / 2
-                    delegatesCountResult = (consensusProperties.blockCapacity!! - transfersCountTotal).toInt() / 2
-                }
-            } else {
-                if (delegatesCountTotal + votesCountTotal <= consensusProperties.blockCapacity!! / 2) {
-                    votesCountResult = votesCountTotal.toInt()
-                    delegatesCountResult = delegatesCountTotal.toInt()
-                } else if (votesCountTotal <= consensusProperties.blockCapacity!! / 2 / 2) {
-                    votesCountResult = votesCountTotal.toInt()
-                    delegatesCountResult = consensusProperties.blockCapacity!! / 2 - votesCountTotal.toInt()
-                } else if (delegatesCountTotal <= consensusProperties.blockCapacity!! / 2 / 2) {
-                    votesCountResult = consensusProperties.blockCapacity!! / 2 - delegatesCountTotal.toInt()
-                    delegatesCountResult = delegatesCountTotal.toInt()
-                } else {
-                    votesCountResult = consensusProperties.blockCapacity!! / 2 / 2
-                    delegatesCountResult = consensusProperties.blockCapacity!! / 2 / 2
-                }
-                transferCountResult = consensusProperties.blockCapacity!! - (votesCountResult + delegatesCountResult)
-            }
-
+            return TransactionSelectionRequest(votesCountTotal, delegatesCountTotal, transfersCountTotal)
         }
-        return TransactionSelectionRequest(votesCountResult, delegatesCountResult, transferCountResult)
+
+        if (transfersCountTotal <= consensusProperties.blockCapacity!! / 2) {
+            return when {
+                votesCountTotal <= (consensusProperties.blockCapacity!! - transfersCountTotal) / 2 -> {
+                    val delegatesCount = consensusProperties.blockCapacity!! - (transfersCountTotal + votesCountTotal)
+                    TransactionSelectionRequest(votesCountTotal, delegatesCount, transfersCountTotal)
+                }
+                delegatesCountTotal <= (consensusProperties.blockCapacity!! - transfersCountTotal) / 2 -> {
+                    val votesCount = consensusProperties.blockCapacity!! - (transfersCountTotal + delegatesCountTotal)
+                    TransactionSelectionRequest(votesCount, delegatesCountTotal, transfersCountTotal)
+                }
+                else -> {
+                    val votesCount = (consensusProperties.blockCapacity!! - transfersCountTotal) / 2
+                    val delegatesCount = (consensusProperties.blockCapacity!! - transfersCountTotal) / 2
+                    TransactionSelectionRequest(votesCount, delegatesCount, transfersCountTotal)
+                }
+            }
+        } else {
+            return when {
+                delegatesCountTotal + votesCountTotal <= consensusProperties.blockCapacity!! / 2 -> {
+                    val transferCount = consensusProperties.blockCapacity!! - (votesCountTotal + delegatesCountTotal)
+                    TransactionSelectionRequest(votesCountTotal, delegatesCountTotal, transferCount)
+                }
+                votesCountTotal <= consensusProperties.blockCapacity!! / 2 / 2 -> {
+                    val delegatesCount = consensusProperties.blockCapacity!! / 2 - votesCountTotal
+                    val transferCount = consensusProperties.blockCapacity!! - (votesCountTotal + delegatesCountTotal)
+                    TransactionSelectionRequest(votesCountTotal, delegatesCount, transferCount)
+                }
+                delegatesCountTotal <= consensusProperties.blockCapacity!! / 2 / 2 -> {
+                    val votesCount = consensusProperties.blockCapacity!! / 2 - delegatesCountTotal
+                    val transferCount = consensusProperties.blockCapacity!! - (votesCountTotal + delegatesCountTotal)
+                    TransactionSelectionRequest(votesCount, delegatesCountTotal, transferCount)
+                }
+                else -> {
+                    val votesCount = consensusProperties.blockCapacity!! / 2 / 2
+                    val delegatesCount = consensusProperties.blockCapacity!! / 2 / 2
+                    val transferCount = consensusProperties.blockCapacity!! - (votesCountTotal + delegatesCountTotal)
+                    TransactionSelectionRequest(votesCount, delegatesCount, transferCount)
+                }
+            }
+        }
     }
 
 }
