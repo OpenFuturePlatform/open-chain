@@ -103,7 +103,7 @@ internal class DefaultVoteTransactionService(
             throw ValidationException("Incorrect votes count", INCORRECT_VOTES_COUNT)
         }
 
-        if (isAlreadyVote(utx.header.senderAddress, utx.payload.nodeId)) {
+        if (isAlreadyVote(utx.header.senderAddress, utx.payload.nodeId, utx.payload.voteTypeId)) {
             throw ValidationException("Address: ${utx.header.senderAddress} already vote for delegate with key: ${utx.payload.nodeId}")
         }
 
@@ -140,9 +140,9 @@ internal class DefaultVoteTransactionService(
         return consensusProperties.delegatesCount!! > confirmedVotes + unconfirmedForVotes
     }
 
-    private fun isAlreadyVote(senderAddress: String, nodeId: String): Boolean {
-        val delegates = walletService.getVotesByAddress(senderAddress)
-        return delegates.any { it.nodeId == nodeId }
+    private fun isAlreadyVote(senderAddress: String, nodeId: String, voteTypeId: Int): Boolean {
+        val voteTransactions = repository.findAllByHeaderSenderAddress(senderAddress)
+        return voteTransactions.any { it.payload.nodeId == nodeId && it.payload.voteTypeId == voteTypeId }
     }
 
     private fun isExistsVoteType(typeId: Int): Boolean {
