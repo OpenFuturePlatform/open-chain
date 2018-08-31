@@ -85,7 +85,8 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun save(tx: DelegateTransaction): DelegateTransaction {
-        delegateService.save(Delegate(tx.payload.delegateKey, tx.header.senderAddress, tx.payload.delegateHost, tx.payload.delegatePort))
+        delegateService.save(Delegate(tx.payload.delegateKey, tx.header.senderAddress, tx.payload.delegateHost,
+            tx.payload.delegatePort, tx.header.timestamp))
         return super.save(tx)
     }
 
