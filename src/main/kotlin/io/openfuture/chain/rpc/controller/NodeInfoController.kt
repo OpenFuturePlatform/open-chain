@@ -1,12 +1,12 @@
 package io.openfuture.chain.rpc.controller
 
+import io.openfuture.chain.core.component.NodeConfigurator
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.node.HardwareInfo
 import io.openfuture.chain.core.service.HardwareInfoService
 import io.openfuture.chain.network.component.node.NodeClock
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.rpc.domain.NodeInfoResponse
-import org.apache.commons.lang3.StringUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.context.ApplicationContext
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -23,12 +23,14 @@ class NodeInfoController(
     private val properties: NodeProperties,
     private val context: ApplicationContext,
     private val nodeKeyHolder: NodeKeyHolder,
+    private val nodeConfigurator: NodeConfigurator,
     private val hardwareInfoService: HardwareInfoService
 ) {
 
     @GetMapping
     fun getInfo(): NodeInfoResponse = NodeInfoResponse(nodeKeyHolder.getPublicKey(),
-        nodeKeyHolder.getUid(ByteUtils.fromHexString(nodeKeyHolder.getPublicKey())), StringUtils.EMPTY, properties.port!!)
+        nodeKeyHolder.getUid(ByteUtils.fromHexString(nodeKeyHolder.getPublicKey())),
+        nodeConfigurator.getConfig().externalHost, nodeConfigurator.getConfig().externalPort)
 
     @GetMapping("/getVersion")
     fun getVersion() { }

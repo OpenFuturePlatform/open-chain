@@ -64,7 +64,7 @@ internal class DefaultVoteTransactionService(
             return tx
         }
 
-        walletService.decreaseBalance(tx!!.header.senderAddress, tx!!.header.fee)
+        walletService.decreaseBalance(message.senderAddress, message.fee)
 
         val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
 

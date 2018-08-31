@@ -66,7 +66,7 @@ class DefaultDelegateTransactionService(
             return tx
         }
 
-        walletService.decreaseBalance(tx!!.header.senderAddress, tx!!.payload.amount)
+        walletService.decreaseBalance(message.senderAddress, message.amount)
 
         val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
         if (null != utx) {
@@ -78,12 +78,12 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun verify(message: DelegateTransactionMessage): Boolean {
-        try {
+        return try {
             validate(UnconfirmedDelegateTransaction.of(message))
-            return true
+            true
         } catch (e: ValidationException) {
             log.warn(e.message)
-            return false
+            false
         }
     }
 
