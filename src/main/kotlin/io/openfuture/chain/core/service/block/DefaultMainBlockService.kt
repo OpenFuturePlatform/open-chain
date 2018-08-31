@@ -44,7 +44,6 @@ class DefaultMainBlockService(
     private val transferTransactionService: TransferTransactionService,
     private val rewardTransactionService: RewardTransactionService,
     private val consensusProperties: ConsensusProperties,
-    private val coreProperties: CoreProperties,
     private val syncManager: SyncManager
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService, capacityChecker), MainBlockService {
 
@@ -250,39 +249,39 @@ class DefaultMainBlockService(
         val delegatesCountResult: Int
         val transferCountResult: Int
 
-        if (votesCountTotal + delegatesCountTotal + transfersCountTotal <= coreProperties.blockTransactionsCount!!) {
+        if (votesCountTotal + delegatesCountTotal + transfersCountTotal <= consensusProperties.blockCapacity!!) {
             votesCountResult = votesCountTotal.toInt()
             delegatesCountResult = delegatesCountTotal.toInt()
             transferCountResult = transfersCountTotal.toInt()
         } else {
-            if (transfersCountTotal <= coreProperties.blockTransactionsCount!! / 2) {
+            if (transfersCountTotal <= consensusProperties.blockCapacity!! / 2) {
                 transferCountResult = transfersCountTotal.toInt()
 
-                if (votesCountTotal <= (coreProperties.blockTransactionsCount!! - transfersCountTotal) / 2) {
+                if (votesCountTotal <= (consensusProperties.blockCapacity!! - transfersCountTotal) / 2) {
                     votesCountResult = votesCountTotal.toInt()
-                    delegatesCountResult = coreProperties.blockTransactionsCount!! - (transfersCountTotal + votesCountTotal).toInt()
-                } else if (delegatesCountTotal <= (coreProperties.blockTransactionsCount!! - transfersCountTotal) / 2) {
-                    votesCountResult = coreProperties.blockTransactionsCount!! - (transfersCountTotal + delegatesCountTotal).toInt()
+                    delegatesCountResult = consensusProperties.blockCapacity!! - (transfersCountTotal + votesCountTotal).toInt()
+                } else if (delegatesCountTotal <= (consensusProperties.blockCapacity!! - transfersCountTotal) / 2) {
+                    votesCountResult = consensusProperties.blockCapacity!! - (transfersCountTotal + delegatesCountTotal).toInt()
                     delegatesCountResult = delegatesCountTotal.toInt()
                 } else {
-                    votesCountResult = (coreProperties.blockTransactionsCount!! - transfersCountTotal).toInt() / 2
-                    delegatesCountResult = (coreProperties.blockTransactionsCount!! - transfersCountTotal).toInt() / 2
+                    votesCountResult = (consensusProperties.blockCapacity!! - transfersCountTotal).toInt() / 2
+                    delegatesCountResult = (consensusProperties.blockCapacity!! - transfersCountTotal).toInt() / 2
                 }
             } else {
-                if (delegatesCountTotal + votesCountTotal <= coreProperties.blockTransactionsCount!! / 2) {
+                if (delegatesCountTotal + votesCountTotal <= consensusProperties.blockCapacity!! / 2) {
                     votesCountResult = votesCountTotal.toInt()
                     delegatesCountResult = delegatesCountTotal.toInt()
-                } else if (votesCountTotal <= coreProperties.blockTransactionsCount!! / 2 / 2) {
+                } else if (votesCountTotal <= consensusProperties.blockCapacity!! / 2 / 2) {
                     votesCountResult = votesCountTotal.toInt()
-                    delegatesCountResult = coreProperties.blockTransactionsCount!! / 2 - votesCountTotal.toInt()
-                } else if (delegatesCountTotal <= coreProperties.blockTransactionsCount!! / 2 / 2) {
-                    votesCountResult = coreProperties.blockTransactionsCount!! / 2 - delegatesCountTotal.toInt()
+                    delegatesCountResult = consensusProperties.blockCapacity!! / 2 - votesCountTotal.toInt()
+                } else if (delegatesCountTotal <= consensusProperties.blockCapacity!! / 2 / 2) {
+                    votesCountResult = consensusProperties.blockCapacity!! / 2 - delegatesCountTotal.toInt()
                     delegatesCountResult = delegatesCountTotal.toInt()
                 } else {
-                    votesCountResult = coreProperties.blockTransactionsCount!! / 2 / 2
-                    delegatesCountResult = coreProperties.blockTransactionsCount!! / 2 / 2
+                    votesCountResult = consensusProperties.blockCapacity!! / 2 / 2
+                    delegatesCountResult = consensusProperties.blockCapacity!! / 2 / 2
                 }
-                transferCountResult = coreProperties.blockTransactionsCount!! - (votesCountResult + delegatesCountResult)
+                transferCountResult = consensusProperties.blockCapacity!! - (votesCountResult + delegatesCountResult)
             }
 
         }
