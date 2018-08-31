@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Node private key moved from separate file to configuration file
 - Network: Improved connection to active delegates
 - Core: Improved vote transaction validation when wallet already voted
+- Core: Empty block creation allowed
 
 ## [0.6.1] - 2018-08-27
 ### Added
