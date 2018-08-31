@@ -1,10 +1,10 @@
 package io.openfuture.chain.core.model.entity.transaction.payload
 
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
-import io.openfuture.chain.core.util.ByteConstants
+import io.openfuture.chain.core.util.ByteConstants.INT_BYTES
 import io.openfuture.chain.core.util.DictionaryUtils
 import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets
+import java.nio.charset.StandardCharsets.UTF_8
 import javax.persistence.Column
 import javax.persistence.Embeddable
 
@@ -22,9 +22,9 @@ class VoteTransactionPayload(
     fun getVoteType(): VoteType = DictionaryUtils.valueOf(VoteType::class.java, voteTypeId)
 
     override fun getBytes(): ByteArray {
-        val buffer = ByteBuffer.allocate(ByteConstants.INT_BYTES + nodeId.toByteArray(StandardCharsets.UTF_8).size)
+        val buffer = ByteBuffer.allocate(INT_BYTES + nodeId.toByteArray(UTF_8).size)
         buffer.putInt(voteTypeId)
-        buffer.put(nodeId.toByteArray(StandardCharsets.UTF_8))
+        buffer.put(nodeId.toByteArray(UTF_8))
         return buffer.array()
     }
 
