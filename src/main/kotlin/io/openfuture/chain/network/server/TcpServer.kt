@@ -13,15 +13,7 @@ class TcpServer(
 
     companion object {
         private val log = LoggerFactory.getLogger(TcpServer::class.java)
-    }
-
-
-    override fun run() {
-        try {
-            val future = bootstrap.bind(properties.port!!)
-            log.info("Netty started on port: ${properties.port}")
-
-            log.info("""
+        private const val LOGO = """
 
               ______                                      _                       _  _                             _____    ______   _____    ______      _
              / _____)                _                   | |                     | || |                  _        / ___ \  / __   | / ___ \  / __   |    | |
@@ -31,7 +23,15 @@ class TcpServer(
              \_____/  \___/          \___) \___/         |_| \___/  \____) \_||_||_||_| |_| \___/ (___/  \___)(_) \_____/  \_____/  \_____/  \_____/ |_|
 
 
-            """)
+            """
+    }
+
+
+    override fun run() {
+        try {
+            val future = bootstrap.bind(properties.port!!)
+            log.info("Netty started on port: ${properties.port}")
+            log.info(LOGO)
 
             future.sync()
             future.channel().closeFuture().sync()
