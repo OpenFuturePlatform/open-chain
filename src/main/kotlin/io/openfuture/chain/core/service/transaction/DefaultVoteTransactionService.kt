@@ -115,7 +115,7 @@ internal class DefaultVoteTransactionService(
     }
 
     private fun updateWalletVotes(senderAddress: String, nodeId: String, type: VoteType) {
-        val delegate = delegateService.getByPublicKey(nodeId)
+        val delegate = delegateService.getByNodeId(nodeId)
         val wallet = walletService.getByAddress(senderAddress)
 
         when (type) {

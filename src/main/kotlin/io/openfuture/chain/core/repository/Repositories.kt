@@ -95,6 +95,8 @@ interface DelegateRepository : BaseRepository<Delegate> {
 
     fun findOneByPublicKey(key: String): Delegate?
 
+    fun findOneByNodeId(nodeId: String): Delegate?
+
     fun existsByPublicKey(key: String): Boolean
 
     fun existsByNodeId(nodeId: String): Boolean
