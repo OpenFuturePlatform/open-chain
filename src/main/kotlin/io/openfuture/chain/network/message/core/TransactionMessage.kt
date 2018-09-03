@@ -34,4 +34,29 @@ abstract class TransactionMessage(
         buffer.writeString(senderPublicKey)
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is TransactionMessage) return false
+
+        if (timestamp != other.timestamp) return false
+        if (fee != other.fee) return false
+        if (senderAddress != other.senderAddress) return false
+        if (hash != other.hash) return false
+        if (senderSignature != other.senderSignature) return false
+        if (senderPublicKey != other.senderPublicKey) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = timestamp.hashCode()
+        result = 31 * result + fee.hashCode()
+        result = 31 * result + senderAddress.hashCode()
+        result = 31 * result + hash.hashCode()
+        result = 31 * result + senderSignature.hashCode()
+        result = 31 * result + senderPublicKey.hashCode()
+        return result
+    }
+
+
 }
