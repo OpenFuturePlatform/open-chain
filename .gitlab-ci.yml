@@ -17,7 +17,7 @@ variables:
 ###########################
 # Tests
 ###########################
-unit-tests:
+.unit-tests:
   stage: test
   image: openjdk:8-jdk
   before_script:
@@ -56,10 +56,7 @@ build-jar:
     paths:
       - build/libs/*.jar
     expire_in: 1 day
-  only:
-    - sprint
-    - master
-    - tags
+
 
 ###########################
 # Packaging
@@ -73,12 +70,9 @@ package-docker:
     - docker login -u ${DOCKER_LOGIN} -p ${DOCKER_PASS}
     - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
     - docker push ${IMAGE_NAME}:${IMAGE_TAG}
-  only:
-    - sprint
-    - master
-    - tags
 
-package-native:
+
+.package-native:
   stage: package
   dependencies:
     - build-jar
@@ -111,6 +105,5 @@ deploy-production:
       for i in `seq 1 11`; do eval echo "key$i: \$SERVER1_KEY${i}" >> ansible/host_vars/35.194.73.134; done
     - |
       for i in `seq 1 11`; do eval echo "key$i: \$SERVER2_KEY${i}" >> ansible/host_vars/35.199.41.146; done
-    - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -e "image_tag=${CI_COMMIT_REF_NAME}" -e "count=1" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.yml
-  only:
-    - tags
+    - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -e "image_tag=pipeline_refactoring" -e "count=1" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.1.yml
+
