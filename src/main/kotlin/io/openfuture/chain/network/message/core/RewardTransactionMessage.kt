@@ -2,7 +2,6 @@ package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
-import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 
@@ -18,16 +17,16 @@ class RewardTransactionMessage(
     var recipientAddress: String
 ) : TransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
-    override fun read(buffer: ByteBuf) {
-        super.read(buffer)
-        reward = buffer.readLong()
-        recipientAddress = buffer.readString()
+    override fun read(buf: ByteBuf) {
+        super.read(buf)
+        reward = buf.readLong()
+        recipientAddress = buf.readString()
     }
 
-    override fun write(buffer: ByteBuf) {
-        super.write(buffer)
-        buffer.writeLong(reward)
-        buffer.writeString(recipientAddress)
+    override fun write(buf: ByteBuf) {
+        super.write(buf)
+        buf.writeLong(reward)
+        buf.writeString(recipientAddress)
     }
 
     override fun equals(other: Any?): Boolean {

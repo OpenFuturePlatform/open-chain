@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
-import io.openfuture.chain.network.message.base.BaseMessage
+import io.openfuture.chain.network.serialization.Serializable
 
 @NoArgConstructor
 abstract class TransactionMessage(
@@ -14,24 +14,24 @@ abstract class TransactionMessage(
     var hash: String,
     var senderSignature: String,
     var senderPublicKey: String
-) : BaseMessage {
+) : Serializable {
 
-    override fun read(buffer: ByteBuf) {
-        timestamp = buffer.readLong()
-        fee = buffer.readLong()
-        senderAddress = buffer.readString()
-        hash = buffer.readString()
-        senderSignature = buffer.readString()
-        senderPublicKey = buffer.readString()
+    override fun read(buf: ByteBuf) {
+        timestamp = buf.readLong()
+        fee = buf.readLong()
+        senderAddress = buf.readString()
+        hash = buf.readString()
+        senderSignature = buf.readString()
+        senderPublicKey = buf.readString()
     }
 
-    override fun write(buffer: ByteBuf) {
-        buffer.writeLong(timestamp)
-        buffer.writeLong(fee)
-        buffer.writeString(senderAddress)
-        buffer.writeString(hash)
-        buffer.writeString(senderSignature)
-        buffer.writeString(senderPublicKey)
+    override fun write(buf: ByteBuf) {
+        buf.writeLong(timestamp)
+        buf.writeLong(fee)
+        buf.writeString(senderAddress)
+        buf.writeString(hash)
+        buf.writeString(senderSignature)
+        buf.writeString(senderPublicKey)
     }
 
 }

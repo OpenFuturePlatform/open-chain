@@ -1,6 +1,6 @@
 package io.openfuture.chain.network.property
 
-import io.openfuture.chain.network.message.network.NetworkAddressMessage
+import io.openfuture.chain.network.entity.NetworkAddress
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
@@ -43,6 +43,10 @@ class NodeProperties(
     @field:NotNull
     var connectionTimeout: Int? = null,
 
+    /** Interval of ping pong*/
+    @field:NotNull
+    var heartBeatInterval: Int? = null,
+
     /** Inbound connections number */
     @field:NotNull
     @field:Min(5)
@@ -66,9 +70,9 @@ class NodeProperties(
 
 ) {
 
-    fun getRootAddresses(): List<NetworkAddressMessage> = rootNodes.map {
+    fun getRootAddresses(): List<NetworkAddress> = rootNodes.map {
         val addressParts = it.split(':')
-        NetworkAddressMessage(addressParts[0], addressParts[1].toInt())
+        NetworkAddress(addressParts[0], addressParts[1].toInt())
     }
 
 }

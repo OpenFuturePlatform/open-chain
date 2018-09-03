@@ -2,28 +2,25 @@ package io.openfuture.chain.network.service
 
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
-import io.openfuture.chain.network.message.base.BaseMessage
-import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
-import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.DelegateTransactionMessage
-import io.openfuture.chain.network.message.core.TransferTransactionMessage
-import io.openfuture.chain.network.message.core.VoteTransactionMessage
-import io.openfuture.chain.network.message.network.*
+import io.openfuture.chain.network.entity.NetworkAddress
+import io.openfuture.chain.network.message.network.ExplorerFindNodesMessage
+import io.openfuture.chain.network.message.network.ExplorerNodesMessage
+import io.openfuture.chain.network.serialization.Serializable
 
 
 interface NetworkApiService {
 
-    fun broadcast(message: BaseMessage)
-
-    fun send(message: BaseMessage)
-
-    fun sendToAddress(message: BaseMessage, addressMessage: AddressMessage)
-
-    fun sendToRootNode(message: BaseMessage)
-
-    fun getNetworkSize(): Int
+    fun broadcast(message: Serializable)
 
     fun isChannelsEmpty(): Boolean
+
+    fun getConnectionSize(): Int
+
+    fun send(message: Serializable)
+
+    fun sendToAddress(message: Serializable, address: NetworkAddress)
+
+    fun getNetworkSize(): Int
 
 }
 
@@ -37,54 +34,18 @@ interface NetworkInnerService {
 
     fun getChannels(): Set<Channel>
 
-    fun getAddressMessage(uid: String): AddressMessage
+    fun onExplorerFindAddresses(ctx: ChannelHandlerContext, message: ExplorerFindNodesMessage)
 
-    fun onChannelActive(ctx: ChannelHandlerContext)
+    fun onExplorerAddresses(ctx: ChannelHandlerContext, message: ExplorerNodesMessage)
 
-    fun onClientChannelActive(ctx: ChannelHandlerContext)
+    fun sendToAddress(message: Serializable, addressMessage: NetworkAddress)
 
-    fun onHeartBeat(ctx: ChannelHandlerContext, heartBeat: HeartBeatMessage)
-
-    fun onFindAddresses(ctx: ChannelHandlerContext, message: FindAddressesMessage)
-
-    fun onAddresses(ctx: ChannelHandlerContext, message: AddressesMessage)
-
-    fun onExplorerFindAddresses(ctx: ChannelHandlerContext, message: ExplorerFindAddressesMessage)
-
-    fun onExplorerAddresses(ctx: ChannelHandlerContext, message: ExplorerAddressesMessage)
-
-    fun onGreeting(ctx: ChannelHandlerContext, message: GreetingMessage, nodeUid: String)
-
-    fun onGreetingResponse(ctx: ChannelHandlerContext, message: GreetingResponseMessage)
-
-    fun onAskTime(ctx: ChannelHandlerContext, askTime: AskTimeMessage)
-
-    fun onTime(ctx: ChannelHandlerContext, message: TimeMessage)
-
-    fun onChannelInactive(ctx: ChannelHandlerContext)
-
-    fun onClientChannelInactive(ctx: ChannelHandlerContext)
-
-    fun sendToAddress(message: BaseMessage, addressMessage: AddressMessage)
-
-    fun sendToRootNode(message: BaseMessage)
+    fun sendToRootNode(message: Serializable)
 
 }
 
-interface CoreMessageService {
+interface ConnectionService {
 
-    fun onTransferTransaction(ctx: ChannelHandlerContext, message: TransferTransactionMessage)
-
-    fun onDelegateTransaction(ctx: ChannelHandlerContext, message: DelegateTransactionMessage)
-
-    fun onVoteTransaction(ctx: ChannelHandlerContext, message: VoteTransactionMessage)
-
-}
-
-interface ConsensusMessageService {
-
-    fun onBlockApproval(ctx: ChannelHandlerContext, block: BlockApprovalMessage)
-
-    fun onPendingBlock(ctx: ChannelHandlerContext, block: PendingBlockMessage)
+    fun connect(networkAddress: NetworkAddress)
 
 }

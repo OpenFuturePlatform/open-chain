@@ -2,6 +2,7 @@ package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.consensus.component.block.BlockApprovalStage.*
 import io.openfuture.chain.consensus.service.EpochService
+import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.service.MainBlockService
@@ -30,6 +31,7 @@ class DefaultPendingBlockHandler(
     private var stage: BlockApprovalStage = IDLE
 
 
+    @BlockchainSynchronized
     @Synchronized
     override fun addBlock(block: PendingBlockMessage) {
         val blockSlotNumber = epochService.getSlotNumber(block.timestamp)
@@ -55,6 +57,7 @@ class DefaultPendingBlockHandler(
         }
     }
 
+    @BlockchainSynchronized
     @Synchronized
     override fun handleApproveMessage(message: BlockApprovalMessage) {
         when (DictionaryUtils.valueOf(BlockApprovalStage::class.java, message.stageId)) {

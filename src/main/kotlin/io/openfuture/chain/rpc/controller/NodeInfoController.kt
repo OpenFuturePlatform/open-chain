@@ -4,7 +4,7 @@ import io.openfuture.chain.core.component.NodeConfigurator
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.node.HardwareInfo
 import io.openfuture.chain.core.service.HardwareInfoService
-import io.openfuture.chain.network.component.node.NodeClock
+import io.openfuture.chain.network.component.NodeClock
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.rpc.domain.NodeInfoResponse
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils

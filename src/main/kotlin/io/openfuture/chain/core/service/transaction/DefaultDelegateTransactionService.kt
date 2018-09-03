@@ -48,6 +48,7 @@ class DefaultDelegateTransactionService(
     override fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction = unconfirmedRepository.findOneByFooterHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
+    @BlockchainSynchronized
     @Transactional
     override fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction {
         return super.add(UnconfirmedDelegateTransaction.of(message))

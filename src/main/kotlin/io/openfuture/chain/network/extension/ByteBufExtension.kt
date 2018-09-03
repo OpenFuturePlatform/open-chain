@@ -1,7 +1,7 @@
 package io.openfuture.chain.network.extension
 
 import io.netty.buffer.ByteBuf
-import io.openfuture.chain.network.message.base.BaseMessage
+import io.openfuture.chain.network.serialization.Serializable
 import java.nio.charset.StandardCharsets.UTF_8
 
 fun ByteBuf.writeString(string: String) {
@@ -11,7 +11,7 @@ fun ByteBuf.writeString(string: String) {
 
 fun ByteBuf.readString(): String = this.readCharSequence(this.readInt(), UTF_8).toString()
 
-fun ByteBuf.readStringList() : List<String>{
+fun ByteBuf.readStringList(): List<String> {
     val size = this.readInt()
     val list = mutableListOf<String>()
     for (index in 1..size) {
@@ -25,7 +25,7 @@ fun ByteBuf.writeStringList(list: List<String>) {
     list.forEach { this.writeString(it) }
 }
 
-inline fun <reified T : BaseMessage> ByteBuf.readList(): MutableList<T> {
+inline fun <reified T : Serializable> ByteBuf.readList(): MutableList<T> {
     val size = this.readInt()
     val list = mutableListOf<T>()
     for (index in 1..size) {
@@ -36,7 +36,23 @@ inline fun <reified T : BaseMessage> ByteBuf.readList(): MutableList<T> {
     return list
 }
 
-fun <T : BaseMessage> ByteBuf.writeList(list: List<T>) {
+fun <T : Serializable> ByteBuf.writeList(list: List<T>) {
     this.writeInt(list.size)
     list.forEach { it.write(this) }
+}
+
+inline fun <reified T : Serializable> ByteBuf.readSet(): MutableSet<T> {
+    val size = this.readInt()
+    val set = mutableSetOf<T>()
+    for (index in 1..size) {
+        val instance = T::class.java.newInstance()
+        instance.read(this)
+        set.add(instance)
+    }
+    return set
+}
+
+fun <T : Serializable> ByteBuf.writeSet(set: Set<T>) {
+    this.writeInt(set.size)
+    set.forEach { it.write(this) }
 }
