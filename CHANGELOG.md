@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [0.7.1] - 2018-09-03
+## [0.8.0] - 2018-09-03
 ## Added
 - Consensus: Delegate public key field to delegate transaction
 - RPC: Delegate public key parameter to delegate transaction request
@@ -192,7 +192,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
-[0.7.1]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.7.0...v0.7.1
+[0.8.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.5.0...v0.6.0
