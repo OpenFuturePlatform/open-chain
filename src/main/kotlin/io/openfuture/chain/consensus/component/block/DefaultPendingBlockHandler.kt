@@ -73,7 +73,7 @@ class DefaultPendingBlockHandler(
         val delegates = epochService.getDelegates()
         val delegate = delegates.find { message.publicKey == it.publicKey }
 
-        if (null == delegate || message.hash != observable!!.hash || !isActiveDelegate()) {
+        if (null == delegate || null == observable || message.hash != observable!!.hash || !isActiveDelegate()) {
             return
         }
 

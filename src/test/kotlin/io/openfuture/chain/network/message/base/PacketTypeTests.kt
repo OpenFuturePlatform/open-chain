@@ -16,32 +16,33 @@ class PacketTypeTests {
         assertThat(PacketType.get(1)).isEqualTo(ADDRESSES)
         assertThat(PacketType.get(2)).isEqualTo(FIND_ADDRESSES)
         assertThat(PacketType.get(3)).isEqualTo(GREETING)
-        assertThat(PacketType.get(4)).isEqualTo(HEART_BEAT)
-        assertThat(PacketType.get(5)).isEqualTo(ASK_TIME)
-        assertThat(PacketType.get(6)).isEqualTo(TIME)
-        assertThat(PacketType.get(7)).isEqualTo(EXPLORER_FIND_ADDRESSES)
-        assertThat(PacketType.get(8)).isEqualTo(EXPLORER_ADDRESSES)
+        assertThat(PacketType.get(4)).isEqualTo(GREETING_RESPONSE)
+        assertThat(PacketType.get(5)).isEqualTo(HEART_BEAT)
+        assertThat(PacketType.get(6)).isEqualTo(ASK_TIME)
+        assertThat(PacketType.get(7)).isEqualTo(TIME)
+        assertThat(PacketType.get(8)).isEqualTo(EXPLORER_FIND_ADDRESSES)
+        assertThat(PacketType.get(9)).isEqualTo(EXPLORER_ADDRESSES)
 
-        assertThat(PacketType.get(9)).isEqualTo(BLOCK_APPROVAL)
-        assertThat(PacketType.get(10)).isEqualTo(PENDING_BLOCK)
+        assertThat(PacketType.get(10)).isEqualTo(BLOCK_APPROVAL)
+        assertThat(PacketType.get(11)).isEqualTo(PENDING_BLOCK)
 
 
-        assertThat(PacketType.get(11)).isEqualTo(TRANSFER_TRANSACTION)
-        assertThat(PacketType.get(12)).isEqualTo(DELEGATE_TRANSACTION)
-        assertThat(PacketType.get(13)).isEqualTo(VOTE_TRANSACTION)
+        assertThat(PacketType.get(12)).isEqualTo(TRANSFER_TRANSACTION)
+        assertThat(PacketType.get(13)).isEqualTo(DELEGATE_TRANSACTION)
+        assertThat(PacketType.get(14)).isEqualTo(VOTE_TRANSACTION)
 
-        assertThat(PacketType.get(14)).isEqualTo(HASH_BLOCK_REQUEST)
-        assertThat(PacketType.get(15)).isEqualTo(HASH_BLOCK_RESPONSE)
-        assertThat(PacketType.get(16)).isEqualTo(SYNC_BLOCKS_REQUEST)
-        assertThat(PacketType.get(17)).isEqualTo(DELEGATE_REQUEST)
-        assertThat(PacketType.get(18)).isEqualTo(DELEGATE_RESPONSE)
-        assertThat(PacketType.get(19)).isEqualTo(MAIN_BLOCK)
-        assertThat(PacketType.get(20)).isEqualTo(GENESIS_BLOCK)
+        assertThat(PacketType.get(15)).isEqualTo(HASH_BLOCK_REQUEST)
+        assertThat(PacketType.get(16)).isEqualTo(HASH_BLOCK_RESPONSE)
+        assertThat(PacketType.get(17)).isEqualTo(SYNC_BLOCKS_REQUEST)
+        assertThat(PacketType.get(18)).isEqualTo(DELEGATE_REQUEST)
+        assertThat(PacketType.get(19)).isEqualTo(DELEGATE_RESPONSE)
+        assertThat(PacketType.get(20)).isEqualTo(MAIN_BLOCK)
+        assertThat(PacketType.get(21)).isEqualTo(GENESIS_BLOCK)
     }
 
     @Test(expected = NoSuchElementException::class)
     fun getShouldThrowExceptionForUnknownId() {
-        PacketType.get(21)
+        PacketType.get(22)
     }
 
     @Test
