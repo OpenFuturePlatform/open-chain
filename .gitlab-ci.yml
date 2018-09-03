@@ -106,8 +106,10 @@ deploy-production:
     - echo "${DEPLOY_KEY_PROD}" | tr -d '\r' > ansible/key.pem
     - chmod 600 ansible/key.pem
     - export ANSIBLE_HOST_KEY_CHECKING=False
-    - for i in `seq 1 11`; do echo "key${i}: $SERVER1_KEY${i}" >> ansible/host_vars/35.194.73.134
-    - for i in `seq 1 11`; do echo "key${i}: $SERVER2_KEY${i}" >> ansible/host_vars/35.199.41.146
+    - |
+      for i in `seq 1 11`; do echo "key${i}: $SERVER1_KEY${i}" >> ansible/host_vars/35.194.73.134; done
+    - |
+      for i in `seq 1 11`; do echo "key${i}: $SERVER2_KEY${i}" >> ansible/host_vars/35.199.41.146; done
     - cat ansible/host_vars/35.194.73.134
     - cat ansible/host_vars/35.199.41.146
     - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -e "image_tag=latest" -e "count=2" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.1.yml
