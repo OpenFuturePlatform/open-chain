@@ -111,7 +111,7 @@ class DefaultDelegateTransactionService(
             return false
         }
 
-        if (delegateService.isExistsByNodeId(nodeId) ||
+        if (delegateService.isExistsByNodeId(nodeId) &&
             unconfirmedRepository.findAll().any { it.payload.nodeId == nodeId }) {
             return false
         }
