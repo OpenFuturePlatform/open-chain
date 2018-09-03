@@ -5,9 +5,7 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.node.HardwareInfo
 import io.openfuture.chain.core.service.HardwareInfoService
 import io.openfuture.chain.network.component.node.NodeClock
-import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.rpc.domain.NodeInfoResponse
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.context.ApplicationContext
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/rpc/info")
 class NodeInfoController(
     private val nodeClock: NodeClock,
-    private val properties: NodeProperties,
     private val context: ApplicationContext,
     private val nodeKeyHolder: NodeKeyHolder,
     private val nodeConfigurator: NodeConfigurator,
@@ -28,9 +25,12 @@ class NodeInfoController(
 ) {
 
     @GetMapping
-    fun getInfo(): NodeInfoResponse = NodeInfoResponse(nodeKeyHolder.getPublicKey(),
-        nodeKeyHolder.getUid(ByteUtils.fromHexString(nodeKeyHolder.getPublicKey())),
-        nodeConfigurator.getConfig().externalHost, nodeConfigurator.getConfig().externalPort)
+    fun getInfo(): NodeInfoResponse = NodeInfoResponse(
+        nodeKeyHolder.getPublicKey(),
+        nodeKeyHolder.getUid(),
+        nodeConfigurator.getConfig().externalHost,
+        nodeConfigurator.getConfig().externalPort
+    )
 
     @GetMapping("/getVersion")
     fun getVersion() { }
