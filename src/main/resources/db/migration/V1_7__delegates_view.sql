@@ -3,6 +3,7 @@ CREATE VIEW IF NOT EXISTS delegates_view AS
   select
     d.id                as id,
     d.public_key        as public_key,
+    d.node_id           as node_id,
     d.address           as address,
     d.host              as host,
     d.port              as port,

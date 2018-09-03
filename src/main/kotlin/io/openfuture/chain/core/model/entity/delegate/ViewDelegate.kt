@@ -15,6 +15,9 @@ class ViewDelegate(
     @Column(name = "public_key")
     var publicKey: String,
 
+    @Column(name = "node_id")
+    var nodeId: String,
+
     @Column(name = "address")
     var address: String,
 

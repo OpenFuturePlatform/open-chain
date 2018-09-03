@@ -15,11 +15,11 @@ class DelegateTransactionMessageTests : MessageTests() {
 
     @Before
     fun setup() {
-        buffer = createBuffer("000000000001e0f300000000000000010000000d73656e646572416464726573730000000468617" +
-            "3680000000f73656e6465725369676e61747572650000000f73656e6465725075626c69634b65790000000b64656c65676174654b6" +
-            "57900000004686f737400000001")
+        buffer = createBuffer("000000000001e0f300000000000000010000000d73656e646572416464726573730000000468" +
+            "6173680000000f73656e6465725369676e61747572650000000f73656e6465725075626c69634b657900" +
+            "00000b64656c65676174654b657900000004686f7374000000010000000000000001")
         message = DelegateTransactionMessage(123123, 1, "senderAddress", "hash",
-            "senderSignature", "senderPublicKey", "delegateKey", "host", 1)
+            "senderSignature", "senderPublicKey", "delegateKey", "host", 1, 1)
     }
 
     @Test

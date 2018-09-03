@@ -11,7 +11,7 @@ class VoteTransactionResponse(
     senderPublicKey: String,
     hash: String,
     val voteTypeId: Int,
-    val delegateKey: String,
+    val nodeId: String,
     blockHash: String? = null
 ) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey, hash, blockHash) {
 
@@ -23,7 +23,7 @@ class VoteTransactionResponse(
         tx.footer.senderPublicKey,
         tx.footer.hash,
         tx.payload.voteTypeId,
-        tx.payload.delegateKey
+        tx.payload.nodeId
     )
 
     constructor(tx: VoteTransaction) : this(
@@ -34,7 +34,7 @@ class VoteTransactionResponse(
         tx.footer.senderPublicKey,
         tx.footer.hash,
         tx.payload.voteTypeId,
-        tx.payload.delegateKey,
+        tx.payload.nodeId,
         tx.block.hash
     )
 

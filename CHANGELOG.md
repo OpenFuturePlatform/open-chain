@@ -11,12 +11,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Master nodes initiation as active delegates on chain start
 - Configuration file
 - Network: Greeting response message contains node's external host
+- RPC: Get delegates by wallet address
+- Consensus: Added amount field to delegate transaction
 
 ## Changed
 - Node private key moved from a separate file to a configuration file
 - Network: Improved connection to active delegates
 - Core: Improved vote transaction validation when a wallet had already voted
 - Core: Empty block creation is allowed
+- Wallet: Changed update balance logic
 
 ## [0.6.1] - 2018-08-27
 ### Added

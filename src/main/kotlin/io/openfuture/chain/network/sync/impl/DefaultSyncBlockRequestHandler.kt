@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class DefaultSyncBlockRequestHandler(
-    private val keyHolder: NodeKeyHolder,
     private val blockService: BlockService,
     private val genesisBlockService: GenesisBlockService
 ) : SyncBlockRequestHandler {
@@ -22,8 +21,7 @@ class DefaultSyncBlockRequestHandler(
     override fun onDelegateRequestMessage(ctx: ChannelHandlerContext, message: DelegateRequestMessage) {
         val addresses = genesisBlockService.getLast().payload.activeDelegates
             .map {
-                val uid = keyHolder.getUid(ByteUtils.fromHexString(it.publicKey))
-                AddressMessage(uid, NetworkAddressMessage(it.host, it.port))
+                AddressMessage(it.nodeId, NetworkAddressMessage(it.host, it.port))
             }
         send(ctx, DelegateResponseMessage(addresses, message.synchronizationSessionId))
     }

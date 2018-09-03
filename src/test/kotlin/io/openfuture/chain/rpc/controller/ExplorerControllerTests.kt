@@ -49,7 +49,7 @@ class ExplorerControllerTests : ControllerTests() {
         given(transactionService.getCount()).willReturn(transactionsCount)
         given(blockService.getAvgProductionTime()).willReturn(secondsPerBlock)
         given(transactionService.getProducingPerSecond()).willReturn(transactionsPerSecond)
-        given(epochService.getDelegates()).willReturn(listOf(Delegate("publicKey", "address", "host", 1000, 1)))
+        given(epochService.getDelegates()).willReturn(listOf(Delegate("publicKey", "nodeId", "address", "host", 1000, 1)))
 
         val actualResponse = webClient.get().uri("/rpc/explorer/info")
             .exchange()

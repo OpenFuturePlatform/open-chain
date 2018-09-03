@@ -5,6 +5,7 @@ import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -183,11 +184,23 @@ interface DelegateService {
 
     fun getByPublicKey(key: String): Delegate
 
+    fun getByNodeId(key: String): Delegate
+
     fun getActiveDelegates(): List<Delegate>
 
     fun isExistsByPublicKey(key: String): Boolean
 
+    fun isExistsByNodeId(nodeId: String): Boolean
+
     fun save(delegate: Delegate): Delegate
+
+}
+
+interface ViewDelegateService {
+
+    fun getAll(request: PageRequest): Page<ViewDelegate>
+
+    fun getByNodeId(nodeId: String): ViewDelegate
 
 }
 
@@ -204,5 +217,7 @@ interface WalletService {
     fun increaseBalance(address: String, amount: Long)
 
     fun decreaseBalance(address: String, amount: Long)
+
+    fun increaseUnconfirmedOutput(address: String, amount: Long)
 
 }

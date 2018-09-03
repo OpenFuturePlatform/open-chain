@@ -8,9 +8,10 @@ data class DelegateTransactionRequest(
     @field:NotNull var fee: Long? = null,
     @field:NotBlank var hash: String? = null,
     @field:NotBlank var senderAddress: String? = null,
-    @field:NotBlank var delegateKey: String? = null,
+    @field:NotBlank var nodeId: String? = null,
     @field:NotBlank var senderSignature: String? = null,
     @field:NotBlank var senderPublicKey: String? = null,
     @field:NotBlank var senderHost: String? = null,
-    @field:NotNull var senderPort: Int? = null
+    @field:NotNull var senderPort: Int? = null,
+    @field:NotNull var amount: Long? = null
 )

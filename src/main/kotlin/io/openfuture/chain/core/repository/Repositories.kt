@@ -95,10 +95,20 @@ interface DelegateRepository : BaseRepository<Delegate> {
 
     fun findOneByPublicKey(key: String): Delegate?
 
+    fun findOneByNodeId(nodeId: String): Delegate?
+
+    fun existsByPublicKey(key: String): Boolean
+
+    fun existsByNodeId(nodeId: String): Boolean
+
 }
 
 @Repository
-interface ViewDelegateRepository : BaseRepository<ViewDelegate>
+interface ViewDelegateRepository : BaseRepository<ViewDelegate> {
+
+    fun findOneByNodeId(nodeId: String): ViewDelegate?
+
+}
 
 @Repository
 interface WalletRepository : BaseRepository<Wallet> {

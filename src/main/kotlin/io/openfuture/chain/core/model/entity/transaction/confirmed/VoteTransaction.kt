@@ -27,7 +27,7 @@ class VoteTransaction(
             TransactionHeader(message.timestamp, message.fee, message.senderAddress),
             TransactionFooter(message.hash, message.senderSignature, message.senderPublicKey),
             block,
-            VoteTransactionPayload(message.voteTypeId, message.delegateKey)
+            VoteTransactionPayload(message.voteTypeId, message.nodeId)
         )
 
         fun of(utx: UnconfirmedVoteTransaction, block: MainBlock): VoteTransaction = VoteTransaction(
@@ -46,7 +46,7 @@ class VoteTransaction(
         footer.senderSignature,
         footer.senderPublicKey,
         payload.voteTypeId,
-        payload.delegateKey
+        payload.nodeId
     )
 
 }
