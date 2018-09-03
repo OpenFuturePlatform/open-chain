@@ -17,6 +17,7 @@ import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -91,26 +92,26 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun save(tx: DelegateTransaction): DelegateTransaction {
-        delegateService.save(Delegate(tx.footer.senderPublicKey, tx.payload.nodeId, tx.header.senderAddress,
+        delegateService.save(Delegate(tx.payload.delegateKey, tx.payload.nodeId, tx.header.senderAddress,
             tx.payload.delegateHost, tx.payload.delegatePort, tx.header.timestamp))
         return super.save(tx)
     }
 
     @Transactional
     override fun validate(utx: UnconfirmedDelegateTransaction) {
-        if (!isValidNodeId(utx.payload.nodeId)) {
+        if (!isValidNodeId(utx.payload.nodeId, utx.payload.delegateKey)) {
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
 
         super.validateExternal(utx.header, utx.payload, utx.footer, utx.payload.amount + utx.header.fee)
     }
 
-    private fun isValidNodeId(nodeId: String): Boolean {
-        if (nodeId != nodeKeyHolder.getUid()) {
+    private fun isValidNodeId(nodeId: String, publicKey: String): Boolean {
+        if (nodeId != nodeKeyHolder.getUid(ByteUtils.fromHexString(publicKey))) {
             return false
         }
 
-        if (delegateService.isExistsByNodeId(nodeId) &&
+        if (delegateService.isExistsByNodeId(nodeId) ||
             unconfirmedRepository.findAll().any { it.payload.nodeId == nodeId }) {
             return false
         }
