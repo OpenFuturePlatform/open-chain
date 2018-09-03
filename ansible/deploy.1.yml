@@ -17,5 +17,6 @@
       with_items:
         - { app_port: '9090', api_port: '9190', secret_key: '{{ key1 }}' }
         - { app_port: '9091', api_port: '9191', secret_key: '{{ key2 }}' }
+      no_log: True
     - name: Delete old images
       shell: docker image prune -a --force --filter "until=24h"
