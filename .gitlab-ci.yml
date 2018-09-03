@@ -106,6 +106,7 @@ deploy-production:
     - echo "${DEPLOY_KEY_PROD}" | tr -d '\r' > ansible/key.pem
     - chmod 600 ansible/key.pem
     - export ANSIBLE_HOST_KEY_CHECKING=False
+    - mkdir ansible/host_vars
     - |
       for i in `seq 1 11`; do eval echo "key$i: \$SERVER1_KEY${i}" >> ansible/host_vars/35.194.73.134; done
     - |
