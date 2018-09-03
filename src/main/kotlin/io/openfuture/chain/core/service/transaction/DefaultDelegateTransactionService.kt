@@ -98,19 +98,19 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun validate(utx: UnconfirmedDelegateTransaction) {
-        if (!isValidNodeId(utx.payload.nodeId, nodeKeyHolder.getPublicKey())) {
+        if (!isValidNodeId(utx.payload.nodeId)) {
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
 
         super.validateExternal(utx.header, utx.payload, utx.footer, utx.payload.amount + utx.header.fee)
     }
 
-    private fun isValidNodeId(nodeId: String, publicKey: String): Boolean {
+    private fun isValidNodeId(nodeId: String): Boolean {
         if (nodeId != nodeKeyHolder.getUid()) {
             return false
         }
 
-        if (delegateService.isExistsByPublicKey(publicKey) &&
+        if (delegateService.isExistsByNodeId(nodeId) &&
             unconfirmedRepository.findAll().any { it.payload.nodeId == nodeId }) {
             return false
         }
