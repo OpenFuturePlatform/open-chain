@@ -184,7 +184,7 @@ interface DelegateService {
 
     fun getByPublicKey(key: String): Delegate
 
-    fun getByNodeId(key: String): Delegate
+    fun getByNodeId(nodeId: String): Delegate
 
     fun getActiveDelegates(): List<Delegate>
 

@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.transaction
 
+import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.component.TransactionCapacityChecker
@@ -27,7 +28,8 @@ class DefaultDelegateTransactionService(
     uRepository: UDelegateTransactionRepository,
     capacityChecker: TransactionCapacityChecker,
     private val delegateService: DelegateService,
-    private val nodeKeyHolder: NodeKeyHolder
+    private val nodeKeyHolder: NodeKeyHolder,
+    private val consensusProperties: ConsensusProperties
 ) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository, capacityChecker), DelegateTransactionService {
 
     companion object {
@@ -67,6 +69,7 @@ class DefaultDelegateTransactionService(
         }
 
         walletService.decreaseBalance(message.senderAddress, message.amount)
+        walletService.increaseBalance(consensusProperties.genesisAddress!!, message.amount)
 
         val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
         if (null != utx) {
@@ -89,14 +92,14 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun save(tx: DelegateTransaction): DelegateTransaction {
-        delegateService.save(Delegate(tx.footer.senderPublicKey, tx.payload.nodeId, tx.header.senderAddress,
+        delegateService.save(Delegate(tx.payload.delegateKey, tx.payload.nodeId, tx.header.senderAddress,
             tx.payload.delegateHost, tx.payload.delegatePort, tx.header.timestamp))
         return super.save(tx)
     }
 
     @Transactional
     override fun validate(utx: UnconfirmedDelegateTransaction) {
-        if (!isValidNodeId(utx.payload.nodeId, utx.footer.senderPublicKey)) {
+        if (!isValidNodeId(utx.payload.nodeId, utx.payload.delegateKey)) {
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
 
@@ -104,11 +107,11 @@ class DefaultDelegateTransactionService(
     }
 
     private fun isValidNodeId(nodeId: String, publicKey: String): Boolean {
-        if(nodeId != nodeKeyHolder.getUid(ByteUtils.fromHexString(publicKey))) {
+        if (nodeId != nodeKeyHolder.getUid(ByteUtils.fromHexString(publicKey))) {
             return false
         }
 
-        if(delegateService.isExistsByPublicKey(publicKey) &&
+        if (delegateService.isExistsByNodeId(nodeId) &&
             unconfirmedRepository.findAll().any { it.payload.nodeId == nodeId }) {
             return false
         }

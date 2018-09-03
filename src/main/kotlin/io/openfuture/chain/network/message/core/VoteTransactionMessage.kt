@@ -29,4 +29,22 @@ class VoteTransactionMessage(
         buffer.writeString(nodeId)
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is VoteTransactionMessage) return false
+        if (!super.equals(other)) return false
+
+        if (voteTypeId != other.voteTypeId) return false
+        if (nodeId != other.nodeId) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + voteTypeId
+        result = 31 * result + nodeId.hashCode()
+        return result
+    }
+
 }
