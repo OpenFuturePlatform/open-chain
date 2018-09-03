@@ -29,4 +29,22 @@ class TransferTransactionMessage(
         buf.writeString(recipientAddress)
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is TransferTransactionMessage) return false
+        if (!super.equals(other)) return false
+
+        if (amount != other.amount) return false
+        if (recipientAddress != other.recipientAddress) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + amount.hashCode()
+        result = 31 * result + recipientAddress.hashCode()
+        return result
+    }
+
 }

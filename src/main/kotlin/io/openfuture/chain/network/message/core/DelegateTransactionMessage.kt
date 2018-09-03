@@ -14,6 +14,7 @@ class DelegateTransactionMessage(
     senderSignature: String,
     senderPublicKey: String,
     var nodeId: String,
+    var delegateKey: String,
     var delegateHost: String,
     var delegatePort: Int,
     var amount: Long
@@ -22,6 +23,7 @@ class DelegateTransactionMessage(
     override fun read(buf: ByteBuf) {
         super.read(buf)
         nodeId = buf.readString()
+        delegateKey = buf.readString()
         delegateHost = buf.readString()
         delegatePort = buf.readInt()
         amount = buf.readLong()
@@ -30,9 +32,34 @@ class DelegateTransactionMessage(
     override fun write(buf: ByteBuf) {
         super.write(buf)
         buf.writeString(nodeId)
+        buf.writeString(delegateKey)
         buf.writeString(delegateHost)
         buf.writeInt(delegatePort)
         buf.writeLong(amount)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is DelegateTransactionMessage) return false
+        if (!super.equals(other)) return false
+
+        if (nodeId != other.nodeId) return false
+        if (delegateKey != other.delegateKey) return false
+        if (delegateHost != other.delegateHost) return false
+        if (delegatePort != other.delegatePort) return false
+        if (amount != other.amount) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + nodeId.hashCode()
+        result = 31 * result + delegateKey.hashCode()
+        result = 31 * result + delegateHost.hashCode()
+        result = 31 * result + delegatePort
+        result = 31 * result + amount.hashCode()
+        return result
     }
 
 }

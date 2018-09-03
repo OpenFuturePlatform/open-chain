@@ -31,16 +31,9 @@ class RewardTransactionMessage(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+        if (other !is RewardTransactionMessage) return false
+        if (!super.equals(other)) return false
 
-        other as RewardTransactionMessage
-
-        if (timestamp != other.timestamp) return false
-        if (fee != other.fee) return false
-        if (senderAddress != other.senderAddress) return false
-        if (hash != other.hash) return false
-        if (senderSignature != other.senderSignature) return false
-        if (senderPublicKey != other.senderPublicKey) return false
         if (reward != other.reward) return false
         if (recipientAddress != other.recipientAddress) return false
 
@@ -48,12 +41,7 @@ class RewardTransactionMessage(
     }
 
     override fun hashCode(): Int {
-        var result = timestamp.hashCode()
-        result = 31 * result + fee.hashCode()
-        result = 31 * result + senderAddress.hashCode()
-        result = 31 * result + hash.hashCode()
-        result = 31 * result + senderSignature.hashCode()
-        result = 31 * result + senderPublicKey.hashCode()
+        var result = super.hashCode()
         result = 31 * result + reward.hashCode()
         result = 31 * result + recipientAddress.hashCode()
         return result
