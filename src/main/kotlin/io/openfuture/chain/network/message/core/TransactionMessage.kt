@@ -58,5 +58,4 @@ abstract class TransactionMessage(
         return result
     }
 
-
 }

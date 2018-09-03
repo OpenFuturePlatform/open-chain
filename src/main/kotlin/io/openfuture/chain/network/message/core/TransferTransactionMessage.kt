@@ -47,5 +47,4 @@ class TransferTransactionMessage(
         return result
     }
 
-
 }

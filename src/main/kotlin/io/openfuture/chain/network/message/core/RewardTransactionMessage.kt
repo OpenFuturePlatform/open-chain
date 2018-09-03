@@ -47,5 +47,4 @@ class RewardTransactionMessage(
         return result
     }
 
-
 }

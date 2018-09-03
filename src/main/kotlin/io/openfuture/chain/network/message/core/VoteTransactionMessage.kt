@@ -47,5 +47,4 @@ class VoteTransactionMessage(
         return result
     }
 
-
 }
