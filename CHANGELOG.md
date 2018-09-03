@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ## [0.7.1] - 2018-09-03
+## Added
+- Consensus: Delegate public key field to delegate transaction
+- RPC: Delegate public key parameter to delegate transaction request
+
 ## Changed
 - Ansible deploy script
 
