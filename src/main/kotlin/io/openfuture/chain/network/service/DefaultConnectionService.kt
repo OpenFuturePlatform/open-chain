@@ -56,6 +56,10 @@ class DefaultConnectionService(
             val addresses = explorerAddressesHolder.getAddresses().toMutableSet()
                 .minus(channelHolder.getAddresses())
 
+            if (addresses.isEmpty()) {
+                return
+            }
+
             for (i in 1..neededPeers) {
                 connect(addresses.shuffled().first())
             }
