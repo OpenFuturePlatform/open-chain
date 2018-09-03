@@ -85,7 +85,7 @@ class SyncManager(
     fun synchronize() {
         try {
             processing()
-            networkApiService.send(DelegateRequestMessage(synchronizationSessionId))
+            networkApiService.sendRandom(DelegateRequestMessage(synchronizationSessionId))
         } catch (e: Exception) {
             synchronize()
             log.warn(e.message)

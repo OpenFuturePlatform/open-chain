@@ -16,7 +16,7 @@ class HashBlockResponseHandler(
 ) : SimpleChannelInboundHandler<HashBlockResponseMessage>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: HashBlockResponseMessage) {
-        syncManager.onHashResponseMessage(msg, channelsHolder.getAddressByChannelId(ctx.channel().id()))
+        syncManager.onHashResponseMessage(msg, channelsHolder.getAddressByChannelId(ctx.channel().id())!!)
     }
 
 }

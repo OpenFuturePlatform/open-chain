@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.component.ChannelsHolder
+import io.openfuture.chain.network.component.ExplorerAddressesHolder
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.message.network.GreetingResponseMessage
@@ -15,7 +16,8 @@ import java.net.InetSocketAddress
 @Sharable
 class GreetingHandler(
     private val nodeKeyHolder: NodeKeyHolder,
-    private val channelHolder: ChannelsHolder
+    private val channelHolder: ChannelsHolder,
+    private val explorerAddressesHolder: ExplorerAddressesHolder
 ) : SimpleChannelInboundHandler<GreetingMessage>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: GreetingMessage) {
@@ -23,12 +25,13 @@ class GreetingHandler(
         val hostAddress = (channel.remoteAddress() as InetSocketAddress).address.hostAddress
         val address = NetworkAddress(hostAddress, msg.externalPort)
 
-        if (nodeKeyHolder.getUid() == msg.uid || channelHolder.getAllAddresses().any { it == address }) {
+        if (nodeKeyHolder.getUid() == msg.uid || channelHolder.getAddresses().any { it == address }) {
             ctx.close()
             return
         }
 
-        channelHolder.addClient(channel, address)
+        channelHolder.addChannel(channel, address)
+        explorerAddressesHolder.addAddress(address)
 
         ctx.writeAndFlush(GreetingResponseMessage(hostAddress))
     }

@@ -3,48 +3,38 @@ package io.openfuture.chain.network.handler.network.initializer
 import io.netty.channel.Channel
 import io.netty.channel.ChannelInitializer
 import io.netty.handler.timeout.IdleStateHandler
-import io.netty.util.AttributeKey
 import io.openfuture.chain.network.handler.consensus.BlockApprovalHandler
 import io.openfuture.chain.network.handler.consensus.PendingBlockNetworkHandler
 import io.openfuture.chain.network.handler.core.DelegateTransactionHandler
 import io.openfuture.chain.network.handler.core.TransferTransactionHandler
 import io.openfuture.chain.network.handler.core.VoteTransactionHandler
 import io.openfuture.chain.network.handler.network.HeartBeatHandler
-import io.openfuture.chain.network.handler.network.RequestPeersHandler
-import io.openfuture.chain.network.handler.network.ResponsePeersHandler
 import io.openfuture.chain.network.handler.network.client.GreetingResponseHandler
 import io.openfuture.chain.network.handler.network.client.ResponseTimeHandler
 import io.openfuture.chain.network.handler.network.codec.MessageCodec
 import io.openfuture.chain.network.handler.sync.*
+import io.openfuture.chain.network.property.NodeProperties
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 
 @Component
 class ClientChannelInitializer(
+    private val nodeProperties: NodeProperties,
     private val applicationContext: ApplicationContext
 ) : ChannelInitializer<Channel>() {
 
-    companion object {
-        private val heartBeatIntervalKey = AttributeKey.valueOf<Long>("heart-beat-interval")
-        private val connectionTimeoutKey = AttributeKey.valueOf<Long>("connection-timeout")
-    }
-
-
     override fun initChannel(channel: Channel) {
-        val heartBeatIntervalValue = channel.attr(heartBeatIntervalKey).get()
-        val connectionTimeoutValue = channel.attr(connectionTimeoutKey).get()
+        val readIdleTime = (nodeProperties.heartBeatInterval!! + nodeProperties.connectionTimeout!!).toLong()
+        val writeIdleTime = nodeProperties.heartBeatInterval!!.toLong()
 
         val pipeline = channel.pipeline()
 
         pipeline.addLast(applicationContext.getBean(MessageCodec::class.java))
-        pipeline.addLast(IdleStateHandler(heartBeatIntervalValue + connectionTimeoutValue,
-            heartBeatIntervalValue, 0, TimeUnit.MILLISECONDS))
+        pipeline.addLast(IdleStateHandler(readIdleTime, writeIdleTime, 0, TimeUnit.MILLISECONDS))
         pipeline.addLast(applicationContext.getBean(HeartBeatHandler::class.java))
         pipeline.addLast(applicationContext.getBean(ResponseTimeHandler::class.java))
         pipeline.addLast(applicationContext.getBean(GreetingResponseHandler::class.java))
-        pipeline.addLast(applicationContext.getBean(RequestPeersHandler::class.java))
-        pipeline.addLast(applicationContext.getBean(ResponsePeersHandler::class.java))
         //        core
         pipeline.addLast(applicationContext.getBean(TransferTransactionHandler::class.java))
         pipeline.addLast(applicationContext.getBean(DelegateTransactionHandler::class.java))

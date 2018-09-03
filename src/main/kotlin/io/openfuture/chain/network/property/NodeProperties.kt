@@ -70,9 +70,9 @@ class NodeProperties(
 
 ) {
 
-    fun getRootAddresses(): List<NetworkAddress> = rootNodes.map {
+    fun getRootAddresses(): Set<NetworkAddress> = rootNodes.map {
         val addressParts = it.split(':')
         NetworkAddress(addressParts[0], addressParts[1].toInt())
-    }
+    }.toSet()
 
 }

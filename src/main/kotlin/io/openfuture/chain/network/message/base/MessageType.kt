@@ -20,25 +20,22 @@ enum class MessageType(
     REQUEST_TIME(2, RequestTimeMessage::class),
     RESPONSE_TIME(3, ResponseTimeMessage::class),
     GREETING(4, GreetingMessage::class),
-    REQUEST_PEERS(5, RequestPeersMessage::class),
-    RESPONSE_PEERS(6, ResponsePeersMessage::class),
-    EXPLORER_FIND_NODES(8, ExplorerFindNodesMessage::class),
-    EXPLORER_NODES(9, ExplorerNodesMessage::class),
+    GREETING_RESPONSE(5, GreetingResponseMessage::class),
     // core
-    TRANSFER_TRANSACTION(10, TransferTransactionMessage::class),
-    DELEGATE_TRANSACTION(11, DelegateTransactionMessage::class),
-    VOTE_TRANSACTION(12, VoteTransactionMessage::class),
+    TRANSFER_TRANSACTION(6, TransferTransactionMessage::class),
+    DELEGATE_TRANSACTION(7, DelegateTransactionMessage::class),
+    VOTE_TRANSACTION(8, VoteTransactionMessage::class),
     // consensus
-    BLOCK_APPROVAL(13, BlockApprovalMessage::class),
-    PENDING_BLOCK(14, PendingBlockMessage::class),
+    BLOCK_APPROVAL(9, BlockApprovalMessage::class),
+    PENDING_BLOCK(10, PendingBlockMessage::class),
     // sync
-    HASH_BLOCK_REQUEST(15, HashBlockRequestMessage::class),
-    HASH_BLOCK_RESPONSE(16, HashBlockResponseMessage::class),
-    SYNC_BLOCKS_REQUEST(17, SyncBlockRequestMessage::class),
-    DELEGATE_REQUEST(18, DelegateRequestMessage::class),
-    DELEGATE_RESPONSE(19, DelegateResponseMessage::class),
-    MAIN_BLOCK(20, MainBlockMessage::class),
-    GENESIS_BLOCK(21, GenesisBlockMessage::class);
+    HASH_BLOCK_REQUEST(11, HashBlockRequestMessage::class),
+    HASH_BLOCK_RESPONSE(12, HashBlockResponseMessage::class),
+    SYNC_BLOCKS_REQUEST(13, SyncBlockRequestMessage::class),
+    DELEGATE_REQUEST(14, DelegateRequestMessage::class),
+    DELEGATE_RESPONSE(15, DelegateResponseMessage::class),
+    MAIN_BLOCK(16, MainBlockMessage::class),
+    GENESIS_BLOCK(17, GenesisBlockMessage::class);
 
 
     companion object {

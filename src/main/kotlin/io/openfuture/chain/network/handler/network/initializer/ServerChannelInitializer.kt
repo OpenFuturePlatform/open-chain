@@ -8,8 +8,6 @@ import io.openfuture.chain.network.handler.core.DelegateTransactionHandler
 import io.openfuture.chain.network.handler.core.TransferTransactionHandler
 import io.openfuture.chain.network.handler.core.VoteTransactionHandler
 import io.openfuture.chain.network.handler.network.HeartBeatHandler
-import io.openfuture.chain.network.handler.network.RequestPeersHandler
-import io.openfuture.chain.network.handler.network.ResponsePeersHandler
 import io.openfuture.chain.network.handler.network.codec.MessageCodec
 import io.openfuture.chain.network.handler.network.server.GreetingHandler
 import io.openfuture.chain.network.handler.network.server.RequestTimeHandler
@@ -29,8 +27,6 @@ class ServerChannelInitializer(
         pipeline.addLast(applicationContext.getBean(HeartBeatHandler::class.java))
         pipeline.addLast(applicationContext.getBean(RequestTimeHandler::class.java))
         pipeline.addLast(applicationContext.getBean(GreetingHandler::class.java))
-        pipeline.addLast(applicationContext.getBean(RequestPeersHandler::class.java))
-        pipeline.addLast(applicationContext.getBean(ResponsePeersHandler::class.java))
         //        core
         pipeline.addLast(applicationContext.getBean(TransferTransactionHandler::class.java))
         pipeline.addLast(applicationContext.getBean(DelegateTransactionHandler::class.java))
