@@ -10,6 +10,7 @@ import io.openfuture.chain.network.handler.core.TransferTransactionHandler
 import io.openfuture.chain.network.handler.core.VoteTransactionHandler
 import io.openfuture.chain.network.handler.network.ConnectionHandler
 import io.openfuture.chain.network.handler.network.HeartBeatHandler
+import io.openfuture.chain.network.handler.network.NetworkStatusHandler
 import io.openfuture.chain.network.handler.network.codec.MessageCodec
 import io.openfuture.chain.network.handler.network.server.GreetingHandler
 import io.openfuture.chain.network.handler.network.server.RequestTimeHandler
@@ -38,13 +39,7 @@ class ServerChannelInitializer(
             applicationContext.getBean(HeartBeatHandler::class.java),
             applicationContext.getBean(RequestTimeHandler::class.java),
             applicationContext.getBean(GreetingHandler::class.java),
-            //        core
-            applicationContext.getBean(TransferTransactionHandler::class.java),
-            applicationContext.getBean(DelegateTransactionHandler::class.java),
-            applicationContext.getBean(VoteTransactionHandler::class.java),
-            //        consensus
-            applicationContext.getBean(PendingBlockNetworkHandler::class.java),
-            applicationContext.getBean(BlockApprovalHandler::class.java),
+            applicationContext.getBean(NetworkStatusHandler::class.java),
             //        sync
             applicationContext.getBean(DelegateRequestHandler::class.java),
             applicationContext.getBean(DelegateResponseHandler::class.java),
@@ -52,7 +47,15 @@ class ServerChannelInitializer(
             applicationContext.getBean(HashBlockResponseHandler::class.java),
             applicationContext.getBean(SyncBlockRequestHandler::class.java),
             applicationContext.getBean(MainBlockHandler::class.java),
-            applicationContext.getBean(GenesisBlockHandler::class.java)
+            applicationContext.getBean(GenesisBlockHandler::class.java),
+            applicationContext.getBean(SyncStatusHandler::class.java),
+            //        core
+            applicationContext.getBean(TransferTransactionHandler::class.java),
+            applicationContext.getBean(DelegateTransactionHandler::class.java),
+            applicationContext.getBean(VoteTransactionHandler::class.java),
+            //        consensus
+            applicationContext.getBean(PendingBlockNetworkHandler::class.java),
+            applicationContext.getBean(BlockApprovalHandler::class.java)
         )
     }
 
