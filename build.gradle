@@ -1,10 +1,10 @@
 plugins {
     id 'jacoco'
     id 'idea'
-    id 'org.jetbrains.kotlin.jvm' version '1.2.60'
-    id 'org.jetbrains.kotlin.kapt' version '1.2.60'
-    id 'org.jetbrains.kotlin.plugin.spring' version '1.2.60'
-    id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.60'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.61'
+    id 'org.jetbrains.kotlin.kapt' version '1.2.61'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.2.61'
+    id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.61'
     id 'org.springframework.boot' version '2.0.4.RELEASE'
     id 'com.palantir.git-version' version '0.12.0-rc2'
 }
@@ -20,7 +20,7 @@ repositories {
 }
 
 ext {
-    kotlinVersion = '1.2.60'
+    kotlinVersion = '1.2.61'
 }
 
 dependencies {
