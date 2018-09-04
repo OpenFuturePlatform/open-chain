@@ -29,5 +29,6 @@
         - { app_port: 9098, api_port: 9198, secret_key: "{{ key9 }}" }
         - { app_port: 9099, api_port: 9199, secret_key: "{{ key10 }}" }
         - { app_port: 9100, api_port: 9200, secret_key: "{{ key11 }}" }
+      no_log: True
     - name: Delete old images
       shell: docker image prune -a --force --filter "until=24h"
