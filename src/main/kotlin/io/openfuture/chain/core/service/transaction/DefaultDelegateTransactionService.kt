@@ -15,6 +15,7 @@ import io.openfuture.chain.core.repository.DelegateTransactionRepository
 import io.openfuture.chain.core.repository.UDelegateTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateTransactionService
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -108,7 +109,7 @@ class DefaultDelegateTransactionService(
     }
 
     private fun isValidNodeId(nodeId: String, publicKey: String): Boolean {
-        if (nodeId != nodeKeyHolder.getUid(ByteUtils.fromHexString(publicKey))) {
+        if (nodeId != ByteUtils.toHexString(HashUtils.sha256(ByteUtils.fromHexString(publicKey)))) {
             return false
         }
 
