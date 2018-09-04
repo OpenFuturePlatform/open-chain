@@ -49,7 +49,7 @@ class BlockProductionScheduler(
                     val genesisBlock = genesisBlockService.create(timestamp)
                     genesisBlockService.add(genesisBlock)
                     pendingBlockHandler.resetSlotNumber()
-                } else if (keyHolder.getPublicKey() == slotOwner.publicKey) {
+                } else if (keyHolder.getPublicKeyAsHexString() == slotOwner.publicKey) {
                     val block = mainBlockService.create()
                     pendingBlockHandler.addBlock(block)
                 }

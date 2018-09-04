@@ -50,7 +50,7 @@ class DefaultPendingBlockHandler(
                 this.observable = block
                 this.stage = PREPARE
                 this.timeSlotNumber = blockSlotNumber
-                val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKey())
+                val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKeyAsHexString())
                 vote.signature = SignatureUtils.sign(vote.getBytes(), keyHolder.getPrivateKey())
                 networkService.broadcast(vote)
             }
@@ -85,7 +85,7 @@ class DefaultPendingBlockHandler(
             networkService.broadcast(message)
             if (prepareVotes.size > (delegates.size - 1) / 3) {
                 this.stage = COMMIT
-                val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKey())
+                val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKeyAsHexString())
                 commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())
                 networkService.broadcast(commit)
             }
@@ -121,6 +121,6 @@ class DefaultPendingBlockHandler(
         SignatureUtils.verify(message.getBytes(), message.signature!!, ByteUtils.fromHexString(message.publicKey))
 
     private fun isActiveDelegate(): Boolean =
-        epochService.getDelegates().any { it.publicKey == keyHolder.getPublicKey() }
+        epochService.getDelegates().any { it.publicKey == keyHolder.getPublicKeyAsHexString() }
 
 }

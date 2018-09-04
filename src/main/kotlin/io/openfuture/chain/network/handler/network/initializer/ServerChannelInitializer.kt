@@ -7,6 +7,7 @@ import io.openfuture.chain.network.handler.consensus.PendingBlockNetworkHandler
 import io.openfuture.chain.network.handler.core.DelegateTransactionHandler
 import io.openfuture.chain.network.handler.core.TransferTransactionHandler
 import io.openfuture.chain.network.handler.core.VoteTransactionHandler
+import io.openfuture.chain.network.handler.network.ConnectionHandler
 import io.openfuture.chain.network.handler.network.HeartBeatHandler
 import io.openfuture.chain.network.handler.network.codec.MessageCodec
 import io.openfuture.chain.network.handler.network.server.GreetingHandler
@@ -24,6 +25,7 @@ class ServerChannelInitializer(
         val pipeline = ch.pipeline()
 
         pipeline.addLast(applicationContext.getBean(MessageCodec::class.java))
+        pipeline.addLast(applicationContext.getBean(ConnectionHandler::class.java))
         pipeline.addLast(applicationContext.getBean(HeartBeatHandler::class.java))
         pipeline.addLast(applicationContext.getBean(RequestTimeHandler::class.java))
         pipeline.addLast(applicationContext.getBean(GreetingHandler::class.java))

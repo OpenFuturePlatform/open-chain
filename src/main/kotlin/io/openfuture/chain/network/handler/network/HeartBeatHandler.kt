@@ -4,8 +4,7 @@ import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
-import io.netty.handler.timeout.IdleState.READER_IDLE
-import io.netty.handler.timeout.IdleState.WRITER_IDLE
+import io.netty.handler.timeout.IdleState.*
 import io.netty.handler.timeout.IdleStateEvent
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.component.ExplorerAddressesHolder
@@ -31,19 +30,19 @@ class HeartBeatHandler(
     }
 
     override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
-        if (evt is IdleStateEvent) {
-            when (evt.state()) {
-                READER_IDLE -> {
-                    explorerAddressesHolder.removeAddress(channelsHolder.getAddressByChannelId(ctx.channel().id())!!)
-                    channelsHolder.removeChannel(ctx.channel())
-                    ctx.close()
-                }
-                WRITER_IDLE -> ctx.writeAndFlush(HeartBeatMessage(explorerAddressesHolder.getAddresses()))
-                    .addListener(ChannelFutureListener.CLOSE_ON_FAILURE)
-                else -> throw IllegalStateException("Not processing this type")
-            }
-        } else {
+        if (evt !is IdleStateEvent) {
             super.userEventTriggered(ctx, evt)
+        }
+
+        when ((evt as IdleStateEvent).state()) {
+            READER_IDLE -> {
+                explorerAddressesHolder.removeAddress(channelsHolder.getAddressByChannelId(ctx.channel().id())!!)
+                channelsHolder.removeChannel(ctx.channel())
+                ctx.close()
+            }
+            WRITER_IDLE -> ctx.writeAndFlush(HeartBeatMessage(explorerAddressesHolder.getAddresses()))
+                    .addListener(ChannelFutureListener.CLOSE_ON_FAILURE)
+            else -> {}
         }
     }
 

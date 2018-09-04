@@ -43,7 +43,7 @@ class DefaultRewardTransactionService(
         val bank = walletService.getBalanceByAddress(senderAddress)
         val reward = fees + if (rewardBlock > bank) bank else rewardBlock
         val fee = 0L
-        val publicKey = keyHolder.getPublicKey()
+        val publicKey = keyHolder.getPublicKeyAsHexString()
         val delegate = delegateService.getByPublicKey(publicKey)
         val hash = createHash(TransactionHeader(timestamp, fee, senderAddress), RewardTransactionPayload(reward, delegate.address))
         val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())

@@ -13,8 +13,9 @@ class NodeKeyHolder(
     private val cryptoService: CryptoService
 ) {
 
-    private var privateKey: ByteArray? = null
-    private var publicKey: ByteArray? = null
+    private lateinit var privateKey: ByteArray
+    private lateinit var publicKey: ByteArray
+    private lateinit var uid: String
 
 
     @PostConstruct
@@ -22,14 +23,15 @@ class NodeKeyHolder(
         generateKeysIfNotExist()
 
         privateKey = ByteUtils.fromHexString(config.getConfig().secret)
-        publicKey = ECKey(privateKey!!, true).public
+        publicKey = ECKey(privateKey, true).public
+        uid = ByteUtils.toHexString(HashUtils.sha256(publicKey))
     }
 
-    fun getPrivateKey(): ByteArray = privateKey!!
+    fun getPrivateKey(): ByteArray = privateKey
 
-    fun getPublicKey(): String = ByteUtils.toHexString(publicKey!!)
+    fun getPublicKeyAsHexString(): String = ByteUtils.toHexString(publicKey)
 
-    fun getUid(key: ByteArray = publicKey!!): String = ByteUtils.toHexString(HashUtils.sha256(key))
+    fun getUid(): String = uid
 
     private fun generateKeysIfNotExist() {
         if (config.getConfig().secret.isEmpty()) {

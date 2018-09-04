@@ -92,7 +92,7 @@ class DefaultMainBlockService(
 
         val hash = createHash(timestamp, height, previousHash, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
-        val publicKey = keyHolder.getPublicKey()
+        val publicKey = keyHolder.getPublicKeyAsHexString()
 
         return PendingBlockMessage(height, previousHash, timestamp, ByteUtils.toHexString(hash), signature, publicKey,
             merkleHash, rewardTransactionMessage, voteTransactions.map { it.toMessage() }, delegateTransactions.map { it.toMessage() }, transferTransactions.map { it.toMessage() })
