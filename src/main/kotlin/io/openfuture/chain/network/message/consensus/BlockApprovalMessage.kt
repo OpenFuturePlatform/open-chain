@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
-import io.openfuture.chain.network.message.base.BaseMessage
+import io.openfuture.chain.network.serialization.Serializable
 
 @NoArgConstructor
 data class BlockApprovalMessage(
@@ -12,20 +12,20 @@ data class BlockApprovalMessage(
     var hash: String,
     var publicKey: String,
     var signature: String? = null
-) : BaseMessage {
+) : Serializable {
 
-    override fun read(buffer: ByteBuf) {
-        stageId = buffer.readInt()
-        hash = buffer.readString()
-        publicKey = buffer.readString()
-        signature = buffer.readString()
+    override fun read(buf: ByteBuf) {
+        stageId = buf.readInt()
+        hash = buf.readString()
+        publicKey = buf.readString()
+        signature = buf.readString()
     }
 
-    override fun write(buffer: ByteBuf) {
-        buffer.writeInt(stageId)
-        buffer.writeString(hash)
-        buffer.writeString(publicKey)
-        buffer.writeString(signature!!)
+    override fun write(buf: ByteBuf) {
+        buf.writeInt(stageId)
+        buf.writeString(hash)
+        buf.writeString(publicKey)
+        buf.writeString(signature!!)
     }
 
     fun getBytes(): ByteArray = StringBuilder()

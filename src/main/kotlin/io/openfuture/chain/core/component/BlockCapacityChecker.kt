@@ -1,6 +1,6 @@
 package io.openfuture.chain.core.component
 
-import io.openfuture.chain.network.component.node.NodeClock
+import io.openfuture.chain.network.component.NodeClock
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.util.concurrent.atomic.AtomicLong

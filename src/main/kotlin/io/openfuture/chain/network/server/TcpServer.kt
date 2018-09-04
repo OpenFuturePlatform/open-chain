@@ -3,13 +3,15 @@ package io.openfuture.chain.network.server
 import io.netty.bootstrap.ServerBootstrap
 import io.openfuture.chain.network.property.NodeProperties
 import org.slf4j.LoggerFactory
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Component
 
 @Component
 class TcpServer(
     private val bootstrap: ServerBootstrap,
     private val properties: NodeProperties
-) : Runnable {
+) : ApplicationListener<ApplicationReadyEvent> {
 
     companion object {
         private val log = LoggerFactory.getLogger(TcpServer::class.java)
@@ -27,14 +29,13 @@ class TcpServer(
     }
 
 
-    override fun run() {
+    override fun onApplicationEvent(event: ApplicationReadyEvent) {
         try {
-            val future = bootstrap.bind(properties.port!!)
+            val channelFuture = bootstrap.bind(properties.port!!).sync()
             log.info("Netty started on port: ${properties.port}")
             log.info(LOGO)
 
-            future.sync()
-            future.channel().closeFuture().sync()
+            channelFuture.channel().closeFuture().sync()
         } catch (e: InterruptedException) {
             log.error("Server in trouble", e)
         }

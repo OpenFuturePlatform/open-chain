@@ -1,6 +1,6 @@
 package io.openfuture.chain.rpc.controller.base
 
-import io.openfuture.chain.network.component.node.NodeClock
+import io.openfuture.chain.network.component.NodeClock
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.rpc.domain.RestResponse
 import org.springframework.core.MethodParameter

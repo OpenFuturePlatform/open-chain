@@ -4,23 +4,22 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.exception.InsufficientTransactionsException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
+import io.openfuture.chain.core.sync.SyncStatus
+import io.openfuture.chain.core.sync.SyncStatus.SyncStatusType.NOT_SYNCHRONIZED
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.component.node.NodeClock
+import io.openfuture.chain.network.component.NodeClock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
-import io.openfuture.chain.network.message.core.MainBlockMessage
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
-import io.openfuture.chain.network.sync.SyncManager
-import io.openfuture.chain.network.sync.impl.SynchronizationStatus.NOT_SYNCHRONIZED
+import io.openfuture.chain.network.message.sync.MainBlockMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.LoggerFactory
@@ -42,7 +41,7 @@ class DefaultMainBlockService(
     private val transferTransactionService: TransferTransactionService,
     private val rewardTransactionService: RewardTransactionService,
     private val consensusProperties: ConsensusProperties,
-    private val syncManager: SyncManager
+    private val syncStatus: SyncStatus
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService, capacityChecker), MainBlockService {
 
     companion object {
@@ -58,16 +57,16 @@ class DefaultMainBlockService(
     override fun getNextBlock(hash: String): MainBlock {
         val block = getByHash(hash)
 
-        return repository.findFirstByHeightGreaterThan(block.height) ?:
-        throw NotFoundException("Next block by hash $hash not found")
+        return repository.findFirstByHeightGreaterThan(block.height)
+            ?: throw NotFoundException("Next block by hash $hash not found")
     }
 
     @Transactional(readOnly = true)
     override fun getPreviousBlock(hash: String): MainBlock {
         val block = getByHash(hash)
 
-        return repository.findFirstByHeightLessThanOrderByHeightDesc(block.height) ?:
-        throw NotFoundException("Previous block by hash $hash not found")
+        return repository.findFirstByHeightLessThanOrderByHeightDesc(block.height)
+            ?: throw NotFoundException("Previous block by hash $hash not found")
     }
 
     @Transactional(readOnly = true)
@@ -93,7 +92,7 @@ class DefaultMainBlockService(
 
         val hash = createHash(timestamp, height, previousHash, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
-        val publicKey = keyHolder.getPublicKey()
+        val publicKey = keyHolder.getPublicKeyAsHexString()
 
         return PendingBlockMessage(height, previousHash, timestamp, ByteUtils.toHexString(hash), signature, publicKey,
             merkleHash, rewardTransactionMessage, voteTransactions.map { it.toMessage() }, delegateTransactions.map { it.toMessage() }, transferTransactions.map { it.toMessage() })
@@ -108,7 +107,7 @@ class DefaultMainBlockService(
         val block = MainBlock.of(message)
 
         if (!isSync(block)) {
-            syncManager.setSyncStatus(NOT_SYNCHRONIZED)
+            syncStatus.setSyncStatus(NOT_SYNCHRONIZED)
             return
         }
 
@@ -130,7 +129,7 @@ class DefaultMainBlockService(
         val block = MainBlock.of(message)
 
         if (!isSync(block)) {
-            syncManager.setSyncStatus(NOT_SYNCHRONIZED)
+            syncStatus.setSyncStatus(NOT_SYNCHRONIZED)
             return
         }
 

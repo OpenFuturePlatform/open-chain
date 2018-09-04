@@ -52,6 +52,7 @@ class DefaultTransferTransactionService(
         return senderTransactions + recipientTransactions
     }
 
+    @BlockchainSynchronized
     @Transactional
     override fun add(message: TransferTransactionMessage): UnconfirmedTransferTransaction {
         return super.add(UnconfirmedTransferTransaction.of(message))

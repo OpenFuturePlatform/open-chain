@@ -17,16 +17,16 @@ class VoteTransactionMessage(
     var nodeId: String
 ) : TransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
-    override fun read(buffer: ByteBuf) {
-        super.read(buffer)
-        voteTypeId = buffer.readInt()
-        nodeId = buffer.readString()
+    override fun read(buf: ByteBuf) {
+        super.read(buf)
+        voteTypeId = buf.readInt()
+        nodeId = buf.readString()
     }
 
-    override fun write(buffer: ByteBuf) {
-        super.write(buffer)
-        buffer.writeInt(voteTypeId)
-        buffer.writeString(nodeId)
+    override fun write(buf: ByteBuf) {
+        super.write(buf)
+        buf.writeInt(voteTypeId)
+        buf.writeString(nodeId)
     }
 
     override fun equals(other: Any?): Boolean {

@@ -6,7 +6,7 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
-import io.openfuture.chain.network.component.node.NodeClock
+import io.openfuture.chain.network.component.NodeClock
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -49,7 +49,7 @@ class BlockProductionScheduler(
                     val genesisBlock = genesisBlockService.create(timestamp)
                     genesisBlockService.add(genesisBlock)
                     pendingBlockHandler.resetSlotNumber()
-                } else if (keyHolder.getPublicKey() == slotOwner.publicKey) {
+                } else if (keyHolder.getPublicKeyAsHexString() == slotOwner.publicKey) {
                     val block = mainBlockService.create()
                     pendingBlockHandler.addBlock(block)
                 }

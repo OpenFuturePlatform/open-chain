@@ -20,22 +20,22 @@ class DelegateTransactionMessage(
     var amount: Long
 ) : TransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
-    override fun read(buffer: ByteBuf) {
-        super.read(buffer)
-        nodeId = buffer.readString()
-        delegateKey = buffer.readString()
-        delegateHost = buffer.readString()
-        delegatePort = buffer.readInt()
-        amount = buffer.readLong()
+    override fun read(buf: ByteBuf) {
+        super.read(buf)
+        nodeId = buf.readString()
+        delegateKey = buf.readString()
+        delegateHost = buf.readString()
+        delegatePort = buf.readInt()
+        amount = buf.readLong()
     }
 
-    override fun write(buffer: ByteBuf) {
-        super.write(buffer)
-        buffer.writeString(nodeId)
-        buffer.writeString(delegateKey)
-        buffer.writeString(delegateHost)
-        buffer.writeInt(delegatePort)
-        buffer.writeLong(amount)
+    override fun write(buf: ByteBuf) {
+        super.write(buf)
+        buf.writeString(nodeId)
+        buf.writeString(delegateKey)
+        buf.writeString(delegateHost)
+        buf.writeInt(delegatePort)
+        buf.writeLong(amount)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -61,5 +61,5 @@ class DelegateTransactionMessage(
         result = 31 * result + amount.hashCode()
         return result
     }
-    
+
 }

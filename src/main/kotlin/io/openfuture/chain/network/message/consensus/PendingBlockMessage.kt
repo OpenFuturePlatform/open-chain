@@ -31,25 +31,25 @@ class PendingBlockMessage(
         return voteTransactions + delegateTransactions + transferTransactions
     }
 
-    override fun read(buffer: ByteBuf) {
-        super.read(buffer)
+    override fun read(buf: ByteBuf) {
+        super.read(buf)
 
-        merkleHash = buffer.readString()
+        merkleHash = buf.readString()
         rewardTransaction = RewardTransactionMessage::class.java.newInstance()
-        rewardTransaction.read(buffer)
-        voteTransactions = buffer.readList()
-        delegateTransactions = buffer.readList()
-        transferTransactions = buffer.readList()
+        rewardTransaction.read(buf)
+        voteTransactions = buf.readList()
+        delegateTransactions = buf.readList()
+        transferTransactions = buf.readList()
     }
 
-    override fun write(buffer: ByteBuf) {
-        super.write(buffer)
+    override fun write(buf: ByteBuf) {
+        super.write(buf)
 
-        buffer.writeString(merkleHash)
-        rewardTransaction.write(buffer)
-        buffer.writeList(voteTransactions)
-        buffer.writeList(delegateTransactions)
-        buffer.writeList(transferTransactions)
+        buf.writeString(merkleHash)
+        rewardTransaction.write(buf)
+        buf.writeList(voteTransactions)
+        buf.writeList(delegateTransactions)
+        buf.writeList(transferTransactions)
     }
 
     override fun toString() = "PendingBlockMessage(hash=$hash)"

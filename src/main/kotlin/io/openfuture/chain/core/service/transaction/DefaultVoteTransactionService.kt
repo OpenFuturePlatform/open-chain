@@ -46,6 +46,7 @@ internal class DefaultVoteTransactionService(
     override fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction = unconfirmedRepository.findOneByFooterHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
+    @BlockchainSynchronized
     @Transactional
     override fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction {
         return super.add(UnconfirmedVoteTransaction.of(message))
