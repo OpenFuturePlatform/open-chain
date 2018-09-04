@@ -5,7 +5,6 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.component.ExplorerAddressesHolder
-import io.openfuture.chain.network.handler.network.codec.MessageCodec
 import io.openfuture.chain.network.serialization.Serializable
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -18,7 +17,7 @@ class ConnectionHandler(
 ) : SimpleChannelInboundHandler<Serializable>() {
 
     companion object {
-        private val log = LoggerFactory.getLogger(MessageCodec::class.java)
+        private val log = LoggerFactory.getLogger(ConnectionHandler::class.java)
     }
 
 

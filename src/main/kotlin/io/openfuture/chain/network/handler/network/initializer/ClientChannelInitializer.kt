@@ -31,27 +31,29 @@ class ClientChannelInitializer(
 
         val pipeline = channel.pipeline()
 
-        pipeline.addLast(applicationContext.getBean(MessageCodec::class.java))
-        pipeline.addLast(applicationContext.getBean(ConnectionHandler::class.java))
-        pipeline.addLast(IdleStateHandler(readIdleTime, writeIdleTime, 0, TimeUnit.MILLISECONDS))
-        pipeline.addLast(applicationContext.getBean(HeartBeatHandler::class.java))
-        pipeline.addLast(applicationContext.getBean(ResponseTimeHandler::class.java))
-        pipeline.addLast(applicationContext.getBean(GreetingResponseHandler::class.java))
-        //        core
-        pipeline.addLast(applicationContext.getBean(TransferTransactionHandler::class.java))
-        pipeline.addLast(applicationContext.getBean(DelegateTransactionHandler::class.java))
-        pipeline.addLast(applicationContext.getBean(VoteTransactionHandler::class.java))
-        //        consensus
-        pipeline.addLast(applicationContext.getBean(PendingBlockNetworkHandler::class.java))
-        pipeline.addLast(applicationContext.getBean(BlockApprovalHandler::class.java))
-        //        sync
-        pipeline.addLast(applicationContext.getBean(DelegateRequestHandler::class.java))
-        pipeline.addLast(applicationContext.getBean(DelegateResponseHandler::class.java))
-        pipeline.addLast(applicationContext.getBean(HashBlockRequestHandler::class.java))
-        pipeline.addLast(applicationContext.getBean(HashBlockResponseHandler::class.java))
-        pipeline.addLast(applicationContext.getBean(SyncBlockRequestHandler::class.java))
-        pipeline.addLast(applicationContext.getBean(MainBlockHandler::class.java))
-        pipeline.addLast(applicationContext.getBean(GenesisBlockHandler::class.java))
+        pipeline.addLast(
+            applicationContext.getBean(MessageCodec::class.java),
+            applicationContext.getBean(ConnectionHandler::class.java),
+            IdleStateHandler(readIdleTime, writeIdleTime, 0, TimeUnit.MILLISECONDS),
+            applicationContext.getBean(HeartBeatHandler::class.java),
+            applicationContext.getBean(ResponseTimeHandler::class.java),
+            applicationContext.getBean(GreetingResponseHandler::class.java),
+            //        core
+            applicationContext.getBean(TransferTransactionHandler::class.java),
+            applicationContext.getBean(DelegateTransactionHandler::class.java),
+            applicationContext.getBean(VoteTransactionHandler::class.java),
+            //        consensus
+            applicationContext.getBean(PendingBlockNetworkHandler::class.java),
+            applicationContext.getBean(BlockApprovalHandler::class.java),
+            //        sync
+            applicationContext.getBean(DelegateRequestHandler::class.java),
+            applicationContext.getBean(DelegateResponseHandler::class.java),
+            applicationContext.getBean(HashBlockRequestHandler::class.java),
+            applicationContext.getBean(HashBlockResponseHandler::class.java),
+            applicationContext.getBean(SyncBlockRequestHandler::class.java),
+            applicationContext.getBean(MainBlockHandler::class.java),
+            applicationContext.getBean(GenesisBlockHandler::class.java)
+        )
     }
 
 }

@@ -11,7 +11,7 @@ import io.openfuture.chain.network.serialization.Serializable
 
 @NoArgConstructor
 data class HeartBeatMessage(
-    var explorerAddress: Set<NetworkAddress>,
+    var explorerAddress: Set<NetworkAddress> = setOf(),
     var type: Type = PING
 ) : Serializable {
 

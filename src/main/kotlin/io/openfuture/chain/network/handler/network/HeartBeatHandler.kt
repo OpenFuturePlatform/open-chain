@@ -4,7 +4,8 @@ import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
-import io.netty.handler.timeout.IdleState.*
+import io.netty.handler.timeout.IdleState.READER_IDLE
+import io.netty.handler.timeout.IdleState.WRITER_IDLE
 import io.netty.handler.timeout.IdleStateEvent
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.component.ExplorerAddressesHolder
@@ -40,7 +41,7 @@ class HeartBeatHandler(
                 channelsHolder.removeChannel(ctx.channel())
                 ctx.close()
             }
-            WRITER_IDLE -> ctx.writeAndFlush(HeartBeatMessage(explorerAddressesHolder.getAddresses()))
+            WRITER_IDLE -> ctx.writeAndFlush(HeartBeatMessage())
                     .addListener(ChannelFutureListener.CLOSE_ON_FAILURE)
             else -> {}
         }
