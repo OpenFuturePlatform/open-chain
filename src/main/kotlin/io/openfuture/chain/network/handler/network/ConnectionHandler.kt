@@ -1,5 +1,6 @@
 package io.openfuture.chain.network.handler.network
 
+import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.network.component.ChannelsHolder
@@ -7,10 +8,13 @@ import io.openfuture.chain.network.component.ExplorerAddressesHolder
 import io.openfuture.chain.network.handler.network.codec.MessageCodec
 import io.openfuture.chain.network.serialization.Serializable
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Component
 
+@Component
+@Sharable
 class ConnectionHandler(
-        private val channelsHolder: ChannelsHolder,
-        private val explorerAddressesHolder: ExplorerAddressesHolder
+    private val channelsHolder: ChannelsHolder,
+    private val explorerAddressesHolder: ExplorerAddressesHolder
 ) : SimpleChannelInboundHandler<Serializable>() {
 
     companion object {
