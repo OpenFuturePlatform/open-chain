@@ -1,5 +1,6 @@
 package io.openfuture.chain.rpc.controller.base
 
+import io.openfuture.chain.core.exception.SynchronizationException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.rpc.domain.ExceptionResponse
 import org.springframework.http.HttpStatus.BAD_REQUEST
@@ -21,7 +22,13 @@ class ExceptionRestControllerAdvice {
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(ValidationException::class)
     fun handleValidationException(ex: ValidationException): ExceptionResponse {
-        return ExceptionResponse(BAD_REQUEST.value(), ex.message, ex.type!!.name)
+        return ExceptionResponse(BAD_REQUEST.value(), ex.message, ex.type?.name)
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(SynchronizationException::class)
+    fun handleSynchronizationException(ex: SynchronizationException): ExceptionResponse {
+        return ExceptionResponse(BAD_REQUEST.value(), "Blockchain is synchronizing")
     }
 
 }
