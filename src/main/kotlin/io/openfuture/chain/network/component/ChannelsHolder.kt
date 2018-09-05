@@ -6,15 +6,19 @@ import io.netty.channel.group.ChannelGroup
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.exception.NotFoundChannelException
 import io.openfuture.chain.network.serialization.Serializable
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class ChannelsHolder(
     private val channelGroup: ChannelGroup
 ) {
 
-    private val channelsAddresses = ConcurrentHashMap<ChannelId, NetworkAddress>()
+    private val channelsAddresses = mutableMapOf<ChannelId, NetworkAddress>()
+
+    companion object {
+        private val log = LoggerFactory.getLogger(ChannelsHolder::class.java)
+    }
 
 
     fun broadcast(message: Serializable) {
@@ -41,14 +45,20 @@ class ChannelsHolder(
 
     fun getAddressByChannelId(channelId: ChannelId): NetworkAddress? = channelsAddresses[channelId]
 
+    @Synchronized
     fun addChannel(channel: Channel, networkAddress: NetworkAddress) {
         channelGroup.add(channel)
         channelsAddresses[channel.id()] = networkAddress
+
+        log.info("Connection with ${channel.remoteAddress()} established, count connections is ${channelGroup.size}")
     }
 
+    @Synchronized
     fun removeChannel(channel: Channel) {
         channelGroup.remove(channel)
         channelsAddresses.remove(channel.id())
+
+        log.info("Connection with ${channel.remoteAddress()} closed, count connections is ${channelGroup.size}")
     }
 
 }

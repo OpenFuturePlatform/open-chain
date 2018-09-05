@@ -21,6 +21,7 @@ class ExplorerAddressesHolder {
         this.addresses.addAll(addresses)
     }
 
+    @Synchronized
     fun removeAddress(address: NetworkAddress) {
         addresses.remove(address)
     }

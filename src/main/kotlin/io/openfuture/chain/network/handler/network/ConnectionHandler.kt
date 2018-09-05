@@ -21,18 +21,11 @@ class ConnectionHandler(
     }
 
 
-    override fun channelActive(ctx: ChannelHandlerContext) {
-        log.debug("Connection with ${ctx.channel().remoteAddress()} established")
-        super.channelActive(ctx)
-    }
-
-    override fun channelRead0(ctx: ChannelHandlerContext, msg: Serializable?) {
+    override fun channelRead0(ctx: ChannelHandlerContext, msg: Serializable) {
         ctx.fireChannelRead(msg)
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        log.debug("Connection with ${ctx.channel().remoteAddress()} closed")
-
         val address = channelsHolder.getAddressByChannelId(ctx.channel().id())
         if (null != address) {
             explorerAddressesHolder.removeAddress(address)
@@ -43,7 +36,7 @@ class ConnectionHandler(
     }
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
-        log.error("Connection error ${ctx.channel().remoteAddress()} with cause", cause)
+        log.error("Connection error ${ctx.channel().remoteAddress()} with cause: ${cause.message}")
 
         val address = channelsHolder.getAddressByChannelId(ctx.channel().id())
         if (null != address) {
