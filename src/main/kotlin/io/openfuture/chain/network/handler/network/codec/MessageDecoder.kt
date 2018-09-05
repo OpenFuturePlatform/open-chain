@@ -29,8 +29,10 @@ class MessageDecoder(
         val nodeVersion = nodeProperties.version!!
         if (nodeVersion != messageVersion) {
             log.warn("Version discrepancy. Your version is: $nodeVersion, incoming version is: $messageVersion")
+            return
         }
 
+        buf.readLong() //timestamp
         val type = MessageType.get(buf.readByte())
         val message = type.clazz.java.newInstance()
         message.read(buf)
