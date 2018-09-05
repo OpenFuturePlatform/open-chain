@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.lang.Math.max
+import java.lang.Math.min
 
 @Service
 class DefaultConnectionService(
@@ -29,10 +30,14 @@ class DefaultConnectionService(
     }
 
 
-    override fun connect(networkAddress: NetworkAddress) {
+    override fun connect(networkAddress: NetworkAddress, close: Boolean) {
         bootstrap.connect(networkAddress.host, networkAddress.port).addListener { future ->
             val channel = (future as ChannelFuture).channel()
             if (future.isSuccess) {
+                if (close) {
+                    channel.close()
+                    return@addListener
+                }
                 channel.writeAndFlush(GreetingMessage(config.getConfig().externalPort, nodeKeyHolder.getUid()))
                 channelHolder.addChannel(channel, networkAddress)
             } else {
@@ -51,7 +56,7 @@ class DefaultConnectionService(
             return
         }
 
-        val neededPeers = max(nodeProperties.peersNumber!! - channelHolder.getChannels().size, 0)
+        val neededPeers = nodeProperties.peersNumber!! - channelHolder.getChannels().size
         if (neededPeers > 0) {
             val addresses = explorerAddressesHolder.getAddresses().toMutableSet()
                 .minus(channelHolder.getAddresses())
@@ -62,6 +67,22 @@ class DefaultConnectionService(
 
             for (i in 1..neededPeers) {
                 connect(addresses.shuffled().first())
+            }
+        }
+    }
+
+    @Scheduled(fixedRateString = "\${node.check-network}")
+    fun checkNodes() {
+        if (channelHolder.getChannels().size >= nodeProperties.peersNumber!!) {
+            val addresses = explorerAddressesHolder.getAddresses().toMutableSet()
+                .minus(channelHolder.getAddresses())
+
+            if (nodeProperties.peersNumber!! > addresses.size) {
+                addresses.forEach { connect(it, true) }
+            } else {
+                for (i in 1..nodeProperties.peersNumber!!) {
+                    connect(addresses.shuffled().first(), true)
+                }
             }
         }
     }

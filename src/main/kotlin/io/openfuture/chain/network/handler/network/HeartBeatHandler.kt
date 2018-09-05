@@ -33,9 +33,10 @@ class HeartBeatHandler(
     override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
         if (evt !is IdleStateEvent) {
             super.userEventTriggered(ctx, evt)
+            return
         }
 
-        when ((evt as IdleStateEvent).state()) {
+        when (evt.state()) {
             READER_IDLE -> {
                 explorerAddressesHolder.removeAddress(channelsHolder.getAddressByChannelId(ctx.channel().id())!!)
                 channelsHolder.removeChannel(ctx.channel())

@@ -22,6 +22,6 @@ interface NetworkApiService {
 
 interface ConnectionService {
 
-    fun connect(networkAddress: NetworkAddress)
+    fun connect(networkAddress: NetworkAddress, close: Boolean = false)
 
 }
