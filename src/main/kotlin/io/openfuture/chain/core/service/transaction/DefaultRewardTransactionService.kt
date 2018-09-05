@@ -16,6 +16,8 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.core.RewardTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,6 +30,11 @@ class DefaultRewardTransactionService(
     private val delegateService: DelegateService,
     private val keyHolder: NodeKeyHolder
 ) : BaseTransactionService(), RewardTransactionService {
+
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(DefaultRewardTransactionService::class.java)
+    }
+
 
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<RewardTransaction> = repository.findAll(request)
@@ -71,7 +78,7 @@ class DefaultRewardTransactionService(
             super.validateBase(header, payload, footer)
             true
         } catch (e: ValidationException) {
-            DefaultTransferTransactionService.log.warn(e.message)
+            log.warn(e.message)
             false
         }
     }
