@@ -2,10 +2,10 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
-import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.exception.model.ExceptionType.ALREADY_DELEGATE
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_DELEGATE_KEY
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -19,6 +19,7 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,12 +30,11 @@ class DefaultDelegateTransactionService(
     uRepository: UDelegateTransactionRepository,
     capacityChecker: TransactionCapacityChecker,
     private val delegateService: DelegateService,
-    private val nodeKeyHolder: NodeKeyHolder,
     private val consensusProperties: ConsensusProperties
 ) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository, capacityChecker), DelegateTransactionService {
 
     companion object {
-        val log = LoggerFactory.getLogger(DefaultDelegateTransactionService::class.java)
+        private val log: Logger = LoggerFactory.getLogger(DefaultDelegateTransactionService::class.java)
     }
 
 
@@ -105,20 +105,17 @@ class DefaultDelegateTransactionService(
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
 
+        if (isAlreadyDelegate(utx.payload.nodeId)) {
+            throw ValidationException("Node ${utx.payload.nodeId} already registered as delegate", ALREADY_DELEGATE)
+        }
+
         super.validateExternal(utx.header, utx.payload, utx.footer, utx.payload.amount + utx.header.fee)
     }
 
-    private fun isValidNodeId(nodeId: String, publicKey: String): Boolean {
-        if (nodeId != ByteUtils.toHexString(HashUtils.sha256(ByteUtils.fromHexString(publicKey)))) {
-            return false
-        }
+    private fun isValidNodeId(nodeId: String, publicKey: String): Boolean =
+        nodeId == ByteUtils.toHexString(HashUtils.sha256(ByteUtils.fromHexString(publicKey)))
 
-        if (delegateService.isExistsByNodeId(nodeId) &&
-            unconfirmedRepository.findAll().any { it.payload.nodeId == nodeId }) {
-            return false
-        }
-
-        return true
-    }
+    private fun isAlreadyDelegate(nodeId: String): Boolean =
+        delegateService.isExistsByNodeId(nodeId) || unconfirmedRepository.findAll().any { it.payload.nodeId == nodeId }
 
 }

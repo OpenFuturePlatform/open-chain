@@ -17,6 +17,7 @@ import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -31,7 +32,7 @@ internal class DefaultVoteTransactionService(
 ) : ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository, capacityChecker), VoteTransactionService {
 
     companion object {
-        val log = LoggerFactory.getLogger(DefaultVoteTransactionService::class.java)
+        private val log: Logger = LoggerFactory.getLogger(DefaultVoteTransactionService::class.java)
     }
 
 
@@ -105,7 +106,7 @@ internal class DefaultVoteTransactionService(
         }
 
         if (isAlreadyVote(utx.header.senderAddress, utx.payload.nodeId, utx.payload.voteTypeId)) {
-            throw ValidationException("Address: ${utx.header.senderAddress} already vote for delegate with key: ${utx.payload.nodeId}")
+            throw ValidationException("Address: ${utx.header.senderAddress} has already voted for delegate: ${utx.payload.nodeId}")
         }
 
         if (!isExistsVoteType(utx.payload.voteTypeId)) {
@@ -120,13 +121,10 @@ internal class DefaultVoteTransactionService(
         val wallet = walletService.getByAddress(senderAddress)
 
         when (type) {
-            VoteType.FOR -> {
-                wallet.votes.add(delegate)
-            }
-            VoteType.AGAINST -> {
-                wallet.votes.remove(delegate)
-            }
+            VoteType.FOR -> wallet.votes.add(delegate)
+            VoteType.AGAINST -> wallet.votes.remove(delegate)
         }
+
         walletService.save(wallet)
     }
 
@@ -146,8 +144,6 @@ internal class DefaultVoteTransactionService(
         return voteTransactions.any { it.payload.nodeId == nodeId && it.payload.voteTypeId == voteTypeId }
     }
 
-    private fun isExistsVoteType(typeId: Int): Boolean {
-        return VoteType.values().any { it.getId() == typeId }
-    }
+    private fun isExistsVoteType(typeId: Int): Boolean = VoteType.values().any { it.getId() == typeId }
 
 }

@@ -13,6 +13,7 @@ import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
@@ -26,7 +27,7 @@ class DefaultTransferTransactionService(
 ) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository, capacityChecker), TransferTransactionService {
 
     companion object {
-        val log = LoggerFactory.getLogger(DefaultTransferTransactionService::class.java)
+        private val log: Logger = LoggerFactory.getLogger(DefaultTransferTransactionService::class.java)
     }
 
 
