@@ -56,7 +56,7 @@ class DefaultConnectionService(
             return
         }
 
-        val neededPeers = max(nodeProperties.peersNumber!! - channelHolder.getChannels().size, 0)
+        val neededPeers = nodeProperties.peersNumber!! - channelHolder.getChannels().size
         if (neededPeers > 0) {
             val addresses = explorerAddressesHolder.getAddresses().toMutableSet()
                 .minus(channelHolder.getAddresses())
@@ -77,7 +77,7 @@ class DefaultConnectionService(
             val addresses = explorerAddressesHolder.getAddresses().toMutableSet()
                 .minus(channelHolder.getAddresses())
 
-            if (min(nodeProperties.peersNumber!!, addresses.size) == addresses.size) {
+            if (nodeProperties.peersNumber!! > addresses.size) {
                 addresses.forEach { connect(it, true) }
             } else {
                 for (i in 1..nodeProperties.peersNumber!!) {

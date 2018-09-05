@@ -14,11 +14,11 @@ class ChannelsHolder(
     private val channelGroup: ChannelGroup
 ) {
 
-    private val channelsAddresses = mutableMapOf<ChannelId, NetworkAddress>()
-
     companion object {
         private val log = LoggerFactory.getLogger(ChannelsHolder::class.java)
     }
+
+    private val channelsAddresses = mutableMapOf<ChannelId, NetworkAddress>()
 
 
     fun broadcast(message: Serializable) {
@@ -50,7 +50,7 @@ class ChannelsHolder(
         channelGroup.add(channel)
         channelsAddresses[channel.id()] = networkAddress
 
-        log.info("Connection with ${channel.remoteAddress()} established, count connections is ${channelGroup.size}")
+        log.info("Connection with ${channel.remoteAddress()} established, connections count is ${channelGroup.size}")
     }
 
     @Synchronized
@@ -58,7 +58,7 @@ class ChannelsHolder(
         channelGroup.remove(channel)
         channelsAddresses.remove(channel.id())
 
-        log.info("Connection with ${channel.remoteAddress()} closed, count connections is ${channelGroup.size}")
+        log.info("Connection with ${channel.remoteAddress()} closed, connections count is ${channelGroup.size}")
     }
 
 }
