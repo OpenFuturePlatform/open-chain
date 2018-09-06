@@ -72,6 +72,8 @@ class DefaultTransferTransactionService(
             return tx
         }
 
+        walletService.decreaseBalance(message.senderAddress, message.fee)
+
         walletService.increaseBalance(message.recipientAddress, message.amount)
         walletService.decreaseBalance(message.senderAddress, message.amount)
 
@@ -96,7 +98,6 @@ class DefaultTransferTransactionService(
 
     @Transactional
     override fun save(tx: TransferTransaction): TransferTransaction {
-        updateTransferBalance(tx.header.senderAddress, tx.payload.recipientAddress, tx.payload.amount)
         return super.save(tx)
     }
 
@@ -105,9 +106,10 @@ class DefaultTransferTransactionService(
         super.validateExternal(utx.header, utx.payload, utx.footer, utx.payload.amount + utx.header.fee)
     }
 
-    private fun updateTransferBalance(from: String, to: String, amount: Long) {
-        walletService.increaseBalance(to, amount)
-        walletService.decreaseBalance(from, amount)
+    @Transactional
+    override fun updateUnconfirmedBalance(utx: UnconfirmedTransferTransaction) {
+        super.updateUnconfirmedBalance(utx)
+        walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.payload.amount)
     }
 
 }

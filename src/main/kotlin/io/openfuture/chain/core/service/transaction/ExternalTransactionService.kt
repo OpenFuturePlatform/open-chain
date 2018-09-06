@@ -38,7 +38,7 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
             return persistUtx
         }
 
-        walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.header.fee)
+        updateUnconfirmedBalance(utx)
 
         validate(utx)
         val savedUtx = save(utx)
@@ -55,6 +55,10 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
     open fun save(tx: T): T {
         capacityChecker.incrementCapacity()
         return repository.save(tx)
+    }
+
+    open fun updateUnconfirmedBalance(utx: U){
+        walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.header.fee)
     }
 
     protected fun confirm(utx: U, tx: T): T {
