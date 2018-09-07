@@ -5,6 +5,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## Added
+- Network: Node id as network identifier
+- Core: unconfirmed output balance added to wallet
+- RPC: added wallet address validation
+- RPC: Node id added to active delegate response
+- Wallet UI: Send delegate transaction
+- Wallet UI: Send vote transaction
+- Wallet UI: Transactions list
+
+## Changed
+- Network: Exploring addresses mechanism
+- Network: Reconnect to nodes mechanism
+- Core: Synchronization mechanism
+- Core: Wallet balances calculation improved
 
 ## [0.8.0] - 2018-09-03
 ## Added
