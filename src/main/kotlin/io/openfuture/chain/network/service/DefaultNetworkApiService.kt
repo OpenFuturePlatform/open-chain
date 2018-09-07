@@ -17,9 +17,9 @@ class DefaultNetworkApiService(
         channelsHolder.broadcast(message)
     }
 
-    override fun isChannelsEmpty(): Boolean = channelsHolder.getChannels().isEmpty()
+    override fun isChannelsEmpty(): Boolean = channelsHolder.isEmpty()
 
-    override fun getConnectionSize(): Int = channelsHolder.getChannels().size
+    override fun getConnectionSize(): Int = channelsHolder.size()
 
     override fun sendRandom(message: Serializable) {
         channelsHolder.sendRandom(message)
