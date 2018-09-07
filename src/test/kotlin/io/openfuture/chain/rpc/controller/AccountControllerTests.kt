@@ -107,7 +107,7 @@ class AccountControllerTests : ControllerTests() {
 
     @Test
     fun getBalanceShouldReturnWalletBalance() {
-        val address = "address"
+        val address = "0x51c5311F25206De4A9C6ecAa1Bc2Be257B0bA1fb"
         val expectedBalance = 1L
 
         given(walletService.getBalanceByAddress(address)).willReturn(expectedBalance)

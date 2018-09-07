@@ -2,6 +2,7 @@ package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.core.service.ViewDelegateService
 import io.openfuture.chain.core.service.WalletService
+import io.openfuture.chain.crypto.annotation.AddressChecksum
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
@@ -14,11 +15,13 @@ import io.openfuture.chain.rpc.domain.crypto.key.KeyDto
 import io.openfuture.chain.rpc.domain.crypto.key.RestoreRequest
 import io.openfuture.chain.rpc.domain.view.ViewDelegateResponse
 import org.springframework.data.domain.PageImpl
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.util.stream.Collectors
 import javax.validation.Valid
 
 @RestController
+@Validated
 @RequestMapping("/rpc/accounts")
 class AccountController(
     private val cryptoService: CryptoService,
@@ -36,10 +39,10 @@ class AccountController(
     }
 
     @GetMapping("/wallets/{address}/balance")
-    fun getBalance(@PathVariable address: String): Long = walletService.getBalanceByAddress(address)
+    fun getBalance(@PathVariable @AddressChecksum address: String): Long = walletService.getBalanceByAddress(address)
 
     @GetMapping("/wallets/{address}/delegates")
-    fun getDelegates(@PathVariable address: String, request: PageRequest): PageResponse<ViewDelegateResponse> {
+    fun getDelegates(@PathVariable @AddressChecksum address: String, request: PageRequest): PageResponse<ViewDelegateResponse> {
         val delegates = walletService.getVotesByAddress(address)
             .map { ViewDelegateResponse(viewDelegateService.getByNodeId(it.nodeId)) }
         val pageActiveDelegate = delegates.stream()

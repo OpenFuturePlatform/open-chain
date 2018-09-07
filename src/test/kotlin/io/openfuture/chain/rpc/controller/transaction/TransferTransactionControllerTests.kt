@@ -74,7 +74,7 @@ class TransferTransactionControllerTests : ControllerTests() {
 
     @Test
     fun getTransactionsByAddressShouldReturnTransferTransactionsListTest() {
-        val address = "address"
+        val address = "0x51c5311F25206De4A9C6ecAa1Bc2Be257B0bA1fb"
         val pageTransferTransactions = PageImpl(listOf(createTransferTransaction()))
         val expectedPageResponse = PageResponse(pageTransferTransactions)
 
