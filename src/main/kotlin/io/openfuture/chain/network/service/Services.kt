@@ -1,6 +1,7 @@
 package io.openfuture.chain.network.service
 
 import io.openfuture.chain.network.entity.NetworkAddress
+import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.serialization.Serializable
 
 
@@ -14,7 +15,7 @@ interface NetworkApiService {
 
     fun sendRandom(message: Serializable)
 
-    fun sendToAddress(message: Serializable, address: NetworkAddress)
+    fun sendToAddress(message: Serializable, nodeInfo: NodeInfo)
 
     fun getNetworkSize(): Int
 

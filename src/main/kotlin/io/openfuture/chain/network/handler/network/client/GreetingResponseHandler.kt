@@ -8,6 +8,7 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.component.ExplorerAddressesHolder
 import io.openfuture.chain.network.entity.NetworkAddress
+import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.message.network.GreetingResponseMessage
 import org.springframework.stereotype.Component
@@ -23,18 +24,17 @@ class GreetingResponseHandler(
 ) : SimpleChannelInboundHandler<GreetingResponseMessage>() {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
-        val channel = ctx.channel()
-        val socket = channel.remoteAddress() as InetSocketAddress
-
-        channelHolder.addChannel(channel, NetworkAddress(socket.address.hostAddress, socket.port))
-
-        channel.writeAndFlush(GreetingMessage(config.getConfig().externalPort, nodeKeyHolder.getUid()))
+        ctx.channel().writeAndFlush(GreetingMessage(config.getConfig().externalPort, nodeKeyHolder.getUid()))
         super.channelActive(ctx)
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: GreetingResponseMessage) {
+        val channel = ctx.channel()
+        val socket = channel.remoteAddress() as InetSocketAddress
+
         config.getConfig().externalHost = msg.externalHost
-        explorerAddressesHolder.addAddresses(msg.addresses)
+        channelHolder.addChannel(channel, NodeInfo(msg.uid, NetworkAddress(socket.address.hostAddress, socket.port)))
+        explorerAddressesHolder.addNodesInfo(msg.nodesInfo)
     }
 
 }

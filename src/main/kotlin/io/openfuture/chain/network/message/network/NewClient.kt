@@ -2,21 +2,21 @@ package io.openfuture.chain.network.message.network
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
-import io.openfuture.chain.network.entity.NetworkAddress
+import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.serialization.Serializable
 
 @NoArgConstructor
 data class NewClient(
-    var address: NetworkAddress
+    var nodeInfo: NodeInfo
 ) : Serializable {
 
     override fun read(buf: ByteBuf) {
-        address = NetworkAddress::class.java.newInstance()
-        address.read(buf)
+        nodeInfo = NodeInfo::class.java.newInstance()
+        nodeInfo.read(buf)
     }
 
     override fun write(buf: ByteBuf) {
-        address.write(buf)
+        nodeInfo.write(buf)
     }
 
 }

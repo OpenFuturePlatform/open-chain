@@ -14,7 +14,7 @@ class NewClientHandler(
 ) : SimpleChannelInboundHandler<NewClient>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: NewClient) {
-        explorerAddressesHolder.addAddress(msg.address)
+        explorerAddressesHolder.addNodeInfo(msg.nodeInfo)
     }
 
 }
