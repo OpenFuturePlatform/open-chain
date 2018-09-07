@@ -3,20 +3,15 @@ package io.openfuture.chain.network.config
 import io.netty.bootstrap.Bootstrap
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelOption.*
-import io.netty.channel.group.ChannelGroup
-import io.netty.channel.group.DefaultChannelGroup
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
-import io.netty.util.concurrent.GlobalEventExecutor
 import io.openfuture.chain.network.handler.network.initializer.ClientChannelInitializer
 import io.openfuture.chain.network.handler.network.initializer.ServerChannelInitializer
 import io.openfuture.chain.network.property.NodeProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.scheduling.annotation.EnableScheduling
 
-@EnableScheduling
 @Configuration
 class NettyConfig(
     private val serverChannelInitializer: ServerChannelInitializer,
@@ -45,8 +40,5 @@ class NettyConfig(
         .channel(NioSocketChannel::class.java)
         .handler(clientChannelInitializer)
         .option(SO_KEEPALIVE, properties.keepAlive!!)
-
-    @Bean(destroyMethod = "close")
-    fun channelGroup(): ChannelGroup = DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
 
 }
