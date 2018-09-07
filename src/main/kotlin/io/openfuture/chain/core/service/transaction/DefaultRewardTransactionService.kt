@@ -66,6 +66,7 @@ class DefaultRewardTransactionService(
         }
 
         updateTransferBalance(message.recipientAddress, message.reward)
+
         repository.save(RewardTransaction.of(message, block))
     }
 
@@ -90,7 +91,7 @@ class DefaultRewardTransactionService(
         val bank = walletService.getBalanceByAddress(senderAddress)
         val reward = if (consensusProperties.rewardBlock!! > bank) bank else consensusProperties.rewardBlock!!
 
-        walletService.decreaseBalance(consensusProperties.genesisAddress!!, reward)
+        walletService.decreaseBalance(senderAddress, reward)
     }
 
 }

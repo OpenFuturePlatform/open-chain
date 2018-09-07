@@ -70,6 +70,8 @@ class DefaultDelegateTransactionService(
             return tx
         }
 
+        walletService.decreaseBalance(message.senderAddress, message.fee)
+
         walletService.decreaseBalance(message.senderAddress, message.amount)
         walletService.increaseBalance(consensusProperties.genesisAddress!!, message.amount)
 
@@ -110,6 +112,12 @@ class DefaultDelegateTransactionService(
         }
 
         super.validateExternal(utx.header, utx.payload, utx.footer, utx.payload.amount + utx.header.fee)
+    }
+
+    @Transactional
+    override fun updateUnconfirmedBalance(utx: UnconfirmedDelegateTransaction) {
+        super.updateUnconfirmedBalance(utx)
+        walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.payload.amount)
     }
 
     private fun isValidNodeId(nodeId: String, publicKey: String): Boolean =

@@ -1,6 +1,7 @@
 package io.openfuture.chain.consensus.service
 
 import io.openfuture.chain.config.ServiceTests
+import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.repository.WalletRepository
 import io.openfuture.chain.core.service.DefaultWalletService
@@ -15,13 +16,14 @@ import org.mockito.Mockito.verify
 class DefaultWalletServiceTest : ServiceTests() {
 
     @Mock private lateinit var repository: WalletRepository
+    @Mock private lateinit var consensusProperties: ConsensusProperties
 
     private lateinit var service: WalletService
 
 
     @Before
     fun setUp() {
-        service = DefaultWalletService(repository)
+        service = DefaultWalletService(repository, consensusProperties)
     }
 
     @Test

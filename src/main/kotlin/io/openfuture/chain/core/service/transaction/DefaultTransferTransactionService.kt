@@ -39,19 +39,17 @@ class DefaultTransferTransactionService(
     override fun getAll(request: PageRequest): Page<TransferTransaction> = repository.findAll(request)
 
     @Transactional(readOnly = true)
-    override fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction> = unconfirmedRepository.findAllByOrderByHeaderFeeDesc()
+    override fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction> =
+        unconfirmedRepository.findAllByOrderByHeaderFeeDesc()
 
     @Transactional(readOnly = true)
-    override fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction = unconfirmedRepository.findOneByFooterHash(hash)
-        ?: throw NotFoundException("Transaction with hash $hash not found")
+    override fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction =
+        unconfirmedRepository.findOneByFooterHash(hash)
+            ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional(readOnly = true)
-    override fun getByAddress(address: String): List<TransferTransaction> {
-        val senderTransactions = repository.findAllByHeaderSenderAddress(address)
-        val recipientTransactions = (repository as TransferTransactionRepository).findAllByPayloadRecipientAddress(address)
-
-        return senderTransactions + recipientTransactions
-    }
+    override fun getByAddress(address: String, request: PageRequest): Page<TransferTransaction> =
+        (repository as TransferTransactionRepository).findAllByHeaderSenderAddressOrPayloadRecipientAddress(address, address, request)
 
     @BlockchainSynchronized
     @Transactional
@@ -71,6 +69,8 @@ class DefaultTransferTransactionService(
         if (null != tx) {
             return tx
         }
+
+        walletService.decreaseBalance(message.senderAddress, message.fee)
 
         walletService.increaseBalance(message.recipientAddress, message.amount)
         walletService.decreaseBalance(message.senderAddress, message.amount)
@@ -96,7 +96,6 @@ class DefaultTransferTransactionService(
 
     @Transactional
     override fun save(tx: TransferTransaction): TransferTransaction {
-        updateTransferBalance(tx.header.senderAddress, tx.payload.recipientAddress, tx.payload.amount)
         return super.save(tx)
     }
 
@@ -105,9 +104,10 @@ class DefaultTransferTransactionService(
         super.validateExternal(utx.header, utx.payload, utx.footer, utx.payload.amount + utx.header.fee)
     }
 
-    private fun updateTransferBalance(from: String, to: String, amount: Long) {
-        walletService.increaseBalance(to, amount)
-        walletService.decreaseBalance(from, amount)
+    @Transactional
+    override fun updateUnconfirmedBalance(utx: UnconfirmedTransferTransaction) {
+        super.updateUnconfirmedBalance(utx)
+        walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.payload.amount)
     }
 
 }

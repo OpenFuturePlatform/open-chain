@@ -119,7 +119,7 @@ interface TransferTransactionService {
 
     fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction>
 
-    fun getByAddress(address: String): List<TransferTransaction>
+    fun getByAddress(address: String, request: PageRequest): Page<TransferTransaction>
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction
 
