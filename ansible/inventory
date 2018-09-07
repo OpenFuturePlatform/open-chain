@@ -1,2 +1,21 @@
-35.194.73.134
-35.199.41.146
+server1  ansible_host=35.194.75.244
+server2  ansible_host=35.186.190.72
+server3  ansible_host=35.188.230.154
+server4  ansible_host=35.199.58.74
+server5  ansible_host=35.230.166.77
+server6  ansible_host=35.230.168.111
+server7  ansible_host=35.194.88.166
+server8  ansible_host=35.221.53.164
+server9  ansible_host=35.236.216.126
+server10  ansible_host=35.199.11.229
+server11  ansible_host=35.194.84.89
+server12  ansible_host=35.221.41.160
+server13  ansible_host=35.221.26.81
+server14  ansible_host=35.199.50.11
+server15  ansible_host=35.221.58.68
+server16  ansible_host=35.221.48.140
+server17  ansible_host=35.194.81.15
+server18  ansible_host=35.188.231.133
+server19  ansible_host=35.221.3.18
+server20  ansible_host=35.194.71.34
+server21  ansible_host=35.188.226.52
