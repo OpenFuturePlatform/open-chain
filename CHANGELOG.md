@@ -5,28 +5,24 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.8.0] - 2018-09-07
 ## Added
-- Network: Node id as network identifier
-- Core: unconfirmed output balance added to wallet
-- RPC: added wallet address validation
-- RPC: Node id added to active delegate response
+- Consensus: delegate public key field to a delegation transaction
+- RPC: delegate public key parameter to a delegation transaction request
+- Network: node ID as a network identifier
+- Core: unconfirmed output balance to a wallet
+- RPC: wallet address validation
+- RPC: node ID added to active delegate response
 - Wallet UI: Send delegate transaction
 - Wallet UI: Send vote transaction
 - Wallet UI: Transactions list
 
 ## Changed
-- Network: Exploring addresses mechanism
-- Network: Reconnect to nodes mechanism
-- Core: Synchronization mechanism
-- Core: Wallet balances calculation improved
-
-## [0.8.0] - 2018-09-03
-## Added
-- Consensus: Delegate public key field to delegate transaction
-- RPC: Delegate public key parameter to delegate transaction request
-
-## Changed
-- Ansible deploy script
+- Network: addresses exploring mechanism
+- Network: nodes reconnection mechanism
+- Core: synchronization mechanism
+- Core: wallet balances calculation improved
 
 ## [0.7.0] - 2018-08-31
 ## Added
