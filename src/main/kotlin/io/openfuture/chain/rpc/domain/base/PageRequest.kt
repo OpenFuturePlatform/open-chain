@@ -6,12 +6,11 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Direction
 import javax.validation.constraints.Max
 import javax.validation.constraints.Min
-import javax.validation.constraints.NotBlank
 
 open class PageRequest(
     @field:Min(value = 0) private var offset: Long = 0,
     @field:Min(value = 1) @field:Max(100) private var limit: Int = 100,
-    @field:NotBlank private var sortField: Array<String> = arrayOf(),
+    private var sortField: Array<String> = arrayOf(),
     private var sortDirection: Direction? = null
 ) : AbstractPageRequest(offset.toInt() / limit + 1, limit) {
 

@@ -17,18 +17,17 @@ class TransferTransactionController(
 
     @CrossOrigin
     @GetMapping("/address/{address}")
-    fun getTransactions(@PathVariable address: String): List<TransferTransactionResponse> =
-        transactionService.getByAddress(address).map { TransferTransactionResponse(it) }
+    fun getTransactions(@PathVariable address: String, request: PageRequest): PageResponse<TransferTransactionResponse> =
+        PageResponse(transactionService.getByAddress(address, request).map { TransferTransactionResponse(it) })
 
     @CrossOrigin
     @GetMapping("/{hash}")
-    fun get(@PathVariable hash: String): TransferTransactionResponse = TransferTransactionResponse(transactionService.getByHash(hash))
+    fun get(@PathVariable hash: String): TransferTransactionResponse =
+        TransferTransactionResponse(transactionService.getByHash(hash))
 
     @PostMapping
-    fun add(@Valid @RequestBody request: TransferTransactionRequest): TransferTransactionResponse {
-        val tx = transactionService.add(request)
-        return TransferTransactionResponse(tx)
-    }
+    fun add(@Valid @RequestBody request: TransferTransactionRequest): TransferTransactionResponse =
+        TransferTransactionResponse(transactionService.add(request))
 
     @CrossOrigin
     @GetMapping
