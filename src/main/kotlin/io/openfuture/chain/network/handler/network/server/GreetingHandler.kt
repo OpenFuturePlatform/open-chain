@@ -9,6 +9,7 @@ import io.openfuture.chain.network.component.ExplorerAddressesHolder
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.message.network.GreetingResponseMessage
+import io.openfuture.chain.network.message.network.NewClient
 import org.springframework.stereotype.Component
 import java.net.InetSocketAddress
 
@@ -25,15 +26,22 @@ class GreetingHandler(
         val hostAddress = (channel.remoteAddress() as InetSocketAddress).address.hostAddress
         val address = NetworkAddress(hostAddress, msg.externalPort)
 
-        if (nodeKeyHolder.getUid() == msg.uid || channelHolder.getAddresses().any { it == address }) {
+        if (nodeKeyHolder.getUid() == msg.uid) {
+            explorerAddressesHolder.me = address
+            ctx.channel().close()
+            return
+        }
+
+        if (channelHolder.getAddresses().any { it == address }) {
             ctx.close()
             return
         }
 
+        channelHolder.broadcast(NewClient(address))
+        ctx.writeAndFlush(GreetingResponseMessage(hostAddress, explorerAddressesHolder.getAddresses()))
+
         channelHolder.addChannel(channel, address)
         explorerAddressesHolder.addAddress(address)
-
-        ctx.writeAndFlush(GreetingResponseMessage(hostAddress))
     }
 
 }

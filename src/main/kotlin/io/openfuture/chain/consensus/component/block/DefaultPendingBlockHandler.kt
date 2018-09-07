@@ -29,6 +29,7 @@ class DefaultPendingBlockHandler(
     private var observable: PendingBlockMessage? = null
     private var timeSlotNumber: Long = 0
     private var stage: BlockApprovalStage = IDLE
+    private var blockAddedFlag = false
 
 
     @BlockchainSynchronized
@@ -39,17 +40,17 @@ class DefaultPendingBlockHandler(
             this.reset()
         }
 
-        if (!pendingBlocks.add(block)) {
+        if (!pendingBlocks.add(block) || blockAddedFlag) {
             return
         }
 
         val slotOwner = epochService.getCurrentSlotOwner()
         if (slotOwner.publicKey == block.publicKey && mainBlockService.verify(block)) {
             networkService.broadcast(block)
+            this.timeSlotNumber = blockSlotNumber
             if (IDLE == stage && isActiveDelegate()) {
                 this.observable = block
                 this.stage = PREPARE
-                this.timeSlotNumber = blockSlotNumber
                 val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKeyAsHexString())
                 vote.signature = SignatureUtils.sign(vote.getBytes(), keyHolder.getPrivateKey())
                 networkService.broadcast(vote)
@@ -103,6 +104,7 @@ class DefaultPendingBlockHandler(
                 networkService.broadcast(message)
                 if (blockCommits.size > (delegates.size - 1) / 3 * 2) {
                     pendingBlocks.find { it.hash == message.hash }?.let { mainBlockService.add(it) }
+                    blockAddedFlag = true
                 }
             }
         } else {
@@ -115,6 +117,7 @@ class DefaultPendingBlockHandler(
         prepareVotes.clear()
         commits.clear()
         pendingBlocks.clear()
+        blockAddedFlag = false
     }
 
     private fun isValidApprovalSignature(message: BlockApprovalMessage): Boolean =

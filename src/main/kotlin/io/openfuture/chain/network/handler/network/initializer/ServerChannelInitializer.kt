@@ -11,6 +11,7 @@ import io.openfuture.chain.network.handler.core.VoteTransactionHandler
 import io.openfuture.chain.network.handler.network.ConnectionHandler
 import io.openfuture.chain.network.handler.network.HeartBeatHandler
 import io.openfuture.chain.network.handler.network.NetworkStatusHandler
+import io.openfuture.chain.network.handler.network.NewClientHandler
 import io.openfuture.chain.network.handler.network.codec.MessageCodec
 import io.openfuture.chain.network.handler.network.server.GreetingHandler
 import io.openfuture.chain.network.handler.network.server.RequestTimeHandler
@@ -37,8 +38,9 @@ class ServerChannelInitializer(
             applicationContext.getBean(ConnectionHandler::class.java),
             IdleStateHandler(readIdleTime, writeIdleTime, 0, TimeUnit.MILLISECONDS),
             applicationContext.getBean(HeartBeatHandler::class.java),
-            applicationContext.getBean(RequestTimeHandler::class.java),
             applicationContext.getBean(GreetingHandler::class.java),
+            applicationContext.getBean(RequestTimeHandler::class.java),
+            applicationContext.getBean(NewClientHandler::class.java),
             applicationContext.getBean(NetworkStatusHandler::class.java),
             //        sync
             applicationContext.getBean(DelegateRequestHandler::class.java),

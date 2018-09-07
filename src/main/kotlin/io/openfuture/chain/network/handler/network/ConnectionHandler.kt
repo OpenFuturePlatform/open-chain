@@ -4,7 +4,6 @@ import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.network.component.ChannelsHolder
-import io.openfuture.chain.network.component.ExplorerAddressesHolder
 import io.openfuture.chain.network.serialization.Serializable
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -12,8 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 @Sharable
 class ConnectionHandler(
-    private val channelsHolder: ChannelsHolder,
-    private val explorerAddressesHolder: ExplorerAddressesHolder
+    private val channelsHolder: ChannelsHolder
 ) : SimpleChannelInboundHandler<Serializable>() {
 
     companion object {
@@ -26,25 +24,14 @@ class ConnectionHandler(
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        val address = channelsHolder.getAddressByChannelId(ctx.channel().id())
-        if (null != address) {
-            explorerAddressesHolder.removeAddress(address)
-            channelsHolder.removeChannel(ctx.channel())
-        }
-
+        channelsHolder.removeChannel(ctx.channel())
         super.channelInactive(ctx)
     }
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         log.error("Connection error ${ctx.channel().remoteAddress()} with cause: ${cause.message}")
 
-        val address = channelsHolder.getAddressByChannelId(ctx.channel().id())
-        if (null != address) {
-            explorerAddressesHolder.removeAddress(address)
-            channelsHolder.removeChannel(ctx.channel())
-        }
-
-        ctx.close()
+        channelsHolder.removeChannel(ctx.channel())
     }
 
 }

@@ -2,23 +2,16 @@ package io.openfuture.chain.network.service
 
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelFuture
-import io.openfuture.chain.core.component.NodeConfigurator
-import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.component.ExplorerAddressesHolder
 import io.openfuture.chain.network.entity.NetworkAddress
-import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.property.NodeProperties
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import java.lang.Math.max
-import java.lang.Math.min
 
 @Service
 class DefaultConnectionService(
-    private val config: NodeConfigurator,
-    private val nodeKeyHolder: NodeKeyHolder,
     private val bootstrap: Bootstrap,
     private val nodeProperties: NodeProperties,
     private val channelHolder: ChannelsHolder,
@@ -38,11 +31,9 @@ class DefaultConnectionService(
                     channel.close()
                     return@addListener
                 }
-                channel.writeAndFlush(GreetingMessage(config.getConfig().externalPort, nodeKeyHolder.getUid()))
-                channelHolder.addChannel(channel, networkAddress)
             } else {
                 log.warn("Can not connect to ${networkAddress.host}:${networkAddress.port}")
-                channel.close()
+
                 explorerAddressesHolder.removeAddress(networkAddress)
             }
         }
@@ -56,7 +47,7 @@ class DefaultConnectionService(
             return
         }
 
-        val neededPeers = nodeProperties.peersNumber!! - channelHolder.getChannels().size
+        val neededPeers = nodeProperties.peersNumber!! - channelHolder.size()
         if (neededPeers > 0) {
             val addresses = explorerAddressesHolder.getAddresses().toMutableSet()
                 .minus(channelHolder.getAddresses())
@@ -65,24 +56,20 @@ class DefaultConnectionService(
                 return
             }
 
-            for (i in 1..neededPeers) {
-                connect(addresses.shuffled().first())
-            }
+            addresses.shuffled().take(neededPeers).forEach { connect(it) }
         }
     }
 
     @Scheduled(fixedRateString = "\${node.check-network}")
     fun checkNodes() {
-        if (channelHolder.getChannels().size >= nodeProperties.peersNumber!!) {
+        if (channelHolder.size() >= nodeProperties.peersNumber!!) {
             val addresses = explorerAddressesHolder.getAddresses().toMutableSet()
                 .minus(channelHolder.getAddresses())
 
             if (nodeProperties.peersNumber!! > addresses.size) {
                 addresses.forEach { connect(it, true) }
             } else {
-                for (i in 1..nodeProperties.peersNumber!!) {
-                    connect(addresses.shuffled().first(), true)
-                }
+                addresses.shuffled().take(nodeProperties.peersNumber!!).forEach { connect(it, true) }
             }
         }
     }
