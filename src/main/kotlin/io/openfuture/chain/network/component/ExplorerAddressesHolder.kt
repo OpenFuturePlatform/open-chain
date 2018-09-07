@@ -1,34 +1,34 @@
 package io.openfuture.chain.network.component
 
-import io.openfuture.chain.network.entity.NetworkAddress
+import io.openfuture.chain.network.entity.NodeInfo
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class ExplorerAddressesHolder {
 
-    private val addresses = ConcurrentHashMap.newKeySet<NetworkAddress>()
-    var me: NetworkAddress? = null
+    private val nodesInfo = ConcurrentHashMap.newKeySet<NodeInfo>()
+    var me: NodeInfo? = null
 
 
-    fun getAddresses(): Set<NetworkAddress> {
-        me?.let { return addresses.minus(it) }
-        return addresses
+    fun getNodesInfo(): Set<NodeInfo> {
+        me?.let { return nodesInfo.filter { nodeInfo -> nodeInfo.uid != it.uid }.toSet() }
+        return nodesInfo
     }
 
     @Synchronized
-    fun addAddress(address: NetworkAddress) {
-        this.addresses.add(address)
+    fun addNodeInfo(nodeInfo: NodeInfo) {
+        this.nodesInfo.add(nodeInfo)
     }
 
     @Synchronized
-    fun addAddresses(addresses: Set<NetworkAddress>) {
-        this.addresses.addAll(addresses)
+    fun addNodesInfo(nodesInfo: Set<NodeInfo>) {
+        this.nodesInfo.addAll(nodesInfo)
     }
 
     @Synchronized
-    fun removeAddress(address: NetworkAddress) {
-        addresses.remove(address)
+    fun removeNodeInfo(nodeInfo: NodeInfo) {
+        nodesInfo.remove(nodeInfo)
     }
 
 }

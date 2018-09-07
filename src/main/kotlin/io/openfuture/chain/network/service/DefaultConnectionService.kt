@@ -34,42 +34,53 @@ class DefaultConnectionService(
             } else {
                 log.warn("Can not connect to ${networkAddress.host}:${networkAddress.port}")
 
-                explorerAddressesHolder.removeAddress(networkAddress)
+                explorerAddressesHolder.getNodesInfo().firstOrNull { it.address == networkAddress }?.let {
+                    explorerAddressesHolder.removeNodeInfo(it)
+                }
             }
         }
     }
 
     @Scheduled(fixedRateString = "\${node.check-connection-period}")
     fun findNewPeers() {
-        if (explorerAddressesHolder.getAddresses().isEmpty()) {
-            explorerAddressesHolder.addAddresses(nodeProperties.getRootAddresses())
+        if (explorerAddressesHolder.getNodesInfo().isEmpty()) {
             connect(nodeProperties.getRootAddresses().shuffled().first())
             return
         }
 
         val neededPeers = nodeProperties.peersNumber!! - channelHolder.size()
         if (neededPeers > 0) {
-            val addresses = explorerAddressesHolder.getAddresses().toMutableSet()
-                .minus(channelHolder.getAddresses())
+            val uids = explorerAddressesHolder.getNodesInfo().map { it.uid }
+                .minus(channelHolder.getNodesInfo().map { it.uid })
 
-            if (addresses.isEmpty()) {
+            if (uids.isEmpty()) {
+                connect(nodeProperties.getRootAddresses().shuffled().first())
                 return
             }
 
-            addresses.shuffled().take(neededPeers).forEach { connect(it) }
+            uids.shuffled().take(neededPeers).forEach {
+                connect(explorerAddressesHolder.getNodesInfo()
+                    .first { nodeInfo -> nodeInfo.uid == it }.address)
+            }
         }
     }
 
     @Scheduled(fixedRateString = "\${node.check-network}")
     fun checkNodes() {
         if (channelHolder.size() >= nodeProperties.peersNumber!!) {
-            val addresses = explorerAddressesHolder.getAddresses().toMutableSet()
-                .minus(channelHolder.getAddresses())
+            val uids = explorerAddressesHolder.getNodesInfo().map { it.uid }
+                .minus(channelHolder.getNodesInfo().map { it.uid })
 
-            if (nodeProperties.peersNumber!! > addresses.size) {
-                addresses.forEach { connect(it, true) }
+            if (nodeProperties.peersNumber!! > uids.size) {
+                uids.forEach {
+                    connect(explorerAddressesHolder.getNodesInfo()
+                        .first { nodeInfo -> nodeInfo.uid == it }.address, true)
+                }
             } else {
-                addresses.shuffled().take(nodeProperties.peersNumber!!).forEach { connect(it, true) }
+                uids.shuffled().take(nodeProperties.peersNumber!!).forEach {
+                    connect(explorerAddressesHolder.getNodesInfo()
+                        .first { nodeInfo -> nodeInfo.uid == it }.address, true)
+                }
             }
         }
     }

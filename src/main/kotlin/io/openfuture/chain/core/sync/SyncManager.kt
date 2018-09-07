@@ -5,7 +5,7 @@ import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.sync.SyncStatus.SyncStatusType.PROCESSING
 import io.openfuture.chain.core.sync.SyncStatus.SyncStatusType.SYNCHRONIZED
-import io.openfuture.chain.network.entity.NetworkAddress
+import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.core.BlockMessage
 import io.openfuture.chain.network.message.sync.*
 import io.openfuture.chain.network.service.NetworkApiService
@@ -27,10 +27,10 @@ class SyncManager(
     private var synchronizationSessionId: String = System.currentTimeMillis().toString()
 
     @Volatile
-    private var activeDelegateAddresses: MutableList<NetworkAddress> = mutableListOf()
+    private var activeDelegateAddresses: MutableList<NodeInfo> = mutableListOf()
 
     @Volatile
-    private var activeDelegatesLastHash: ConcurrentHashMap<String, MutableList<NetworkAddress>> = ConcurrentHashMap()
+    private var activeDelegatesLastHash: ConcurrentHashMap<String, MutableList<NodeInfo>> = ConcurrentHashMap()
 
     @Volatile
     private var expectedHash: String = EMPTY
@@ -53,19 +53,19 @@ class SyncManager(
             return
         }
 
-        activeDelegateAddresses.addAll(message.addresses)
+        activeDelegateAddresses.addAll(message.nodesInfo)
         activeDelegateAddresses.forEach { networkApiService.sendToAddress(HashBlockRequestMessage(synchronizationSessionId), it) }
     }
 
     @Synchronized
-    fun onHashResponseMessage(message: HashBlockResponseMessage, address: NetworkAddress) {
+    fun onHashResponseMessage(message: HashBlockResponseMessage, nodeInfo: NodeInfo) {
         if (message.synchronizationSessionId != synchronizationSessionId) {
             return
         }
 
         val delegateAddresses = activeDelegatesLastHash[message.hash]
-        if (null != delegateAddresses && !delegateAddresses.contains(address)) {
-            delegateAddresses.add(address)
+        if (null != delegateAddresses && !delegateAddresses.contains(nodeInfo)) {
+            delegateAddresses.add(nodeInfo)
             if (delegateAddresses.size > (activeDelegateAddresses.size - 1) / 3 * 2) {
                 val currentLastHash = blockService.getLast().hash
                 if (currentLastHash == message.hash) {
@@ -73,11 +73,11 @@ class SyncManager(
                     return
                 } else {
                     expectedHash = message.hash
-                    networkApiService.sendToAddress(SyncBlockRequestMessage(blockService.getLast().hash), address)
+                    networkApiService.sendToAddress(SyncBlockRequestMessage(blockService.getLast().hash), nodeInfo)
                 }
             }
         } else {
-            activeDelegatesLastHash[message.hash] = mutableListOf(address)
+            activeDelegatesLastHash[message.hash] = mutableListOf(nodeInfo)
         }
     }
 

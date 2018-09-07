@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.network.entity.NetworkAddress
+import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.sync.DelegateRequestMessage
 import io.openfuture.chain.network.message.sync.DelegateResponseMessage
 import org.springframework.stereotype.Component
@@ -17,9 +18,9 @@ class DelegateRequestHandler(
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: DelegateRequestMessage) {
         val delegates = genesisBlockService.getLast().payload.activeDelegates
-        val addresses = delegates.map { NetworkAddress(it.host, it.port) }
+        val nodesInfo = delegates.map { NodeInfo(it.nodeId, NetworkAddress(it.host, it.port)) }
 
-        ctx.writeAndFlush(DelegateResponseMessage(addresses, msg.synchronizationSessionId))
+        ctx.writeAndFlush(DelegateResponseMessage(nodesInfo, msg.synchronizationSessionId))
     }
 
 }

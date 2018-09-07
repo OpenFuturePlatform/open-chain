@@ -2,7 +2,7 @@ package io.openfuture.chain.network.service
 
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.component.ExplorerAddressesHolder
-import io.openfuture.chain.network.entity.NetworkAddress
+import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.serialization.Serializable
 import org.springframework.stereotype.Service
 
@@ -25,12 +25,12 @@ class DefaultNetworkApiService(
         channelsHolder.sendRandom(message)
     }
 
-    override fun sendToAddress(message: Serializable, address: NetworkAddress) {
-        if (!channelsHolder.send(message, address)) {
-            connectionService.connect(address)
+    override fun sendToAddress(message: Serializable, nodeInfo: NodeInfo) {
+        if (!channelsHolder.send(message, nodeInfo)) {
+            connectionService.connect(nodeInfo.address)
         }
     }
 
-    override fun getNetworkSize(): Int = explorerAddressesHolder.getAddresses().size
+    override fun getNetworkSize(): Int = explorerAddressesHolder.getNodesInfo().size
 
 }

@@ -7,6 +7,7 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.component.ExplorerAddressesHolder
 import io.openfuture.chain.network.entity.NetworkAddress
+import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.message.network.GreetingResponseMessage
 import io.openfuture.chain.network.message.network.NewClient
@@ -24,24 +25,24 @@ class GreetingHandler(
     override fun channelRead0(ctx: ChannelHandlerContext, msg: GreetingMessage) {
         val channel = ctx.channel()
         val hostAddress = (channel.remoteAddress() as InetSocketAddress).address.hostAddress
-        val address = NetworkAddress(hostAddress, msg.externalPort)
+        val nodeInfo = NodeInfo(msg.uid, NetworkAddress(hostAddress, msg.externalPort))
 
         if (nodeKeyHolder.getUid() == msg.uid) {
-            explorerAddressesHolder.me = address
+            explorerAddressesHolder.me = nodeInfo
             ctx.channel().close()
             return
         }
 
-        if (channelHolder.getAddresses().any { it == address }) {
+        if (channelHolder.getNodesInfo().any { it.uid == nodeInfo.uid }) {
             ctx.close()
             return
         }
 
-        channelHolder.broadcast(NewClient(address))
-        ctx.writeAndFlush(GreetingResponseMessage(hostAddress, explorerAddressesHolder.getAddresses()))
+        channelHolder.broadcast(NewClient(nodeInfo))
+        ctx.writeAndFlush(GreetingResponseMessage(nodeKeyHolder.getUid(), hostAddress, explorerAddressesHolder.getNodesInfo()))
 
-        channelHolder.addChannel(channel, address)
-        explorerAddressesHolder.addAddress(address)
+        channelHolder.addChannel(channel, nodeInfo)
+        explorerAddressesHolder.addNodeInfo(nodeInfo)
     }
 
 }

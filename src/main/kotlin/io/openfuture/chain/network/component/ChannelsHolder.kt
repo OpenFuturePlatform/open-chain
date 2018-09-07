@@ -4,7 +4,7 @@ import io.netty.channel.Channel
 import io.netty.channel.ChannelId
 import io.netty.channel.group.DefaultChannelGroup
 import io.netty.util.concurrent.GlobalEventExecutor
-import io.openfuture.chain.network.entity.NetworkAddress
+import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.exception.NotFoundChannelException
 import io.openfuture.chain.network.serialization.Serializable
 import org.slf4j.LoggerFactory
@@ -19,7 +19,7 @@ class ChannelsHolder {
     }
 
     private var channelGroup = DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
-    private var channelsAddresses = ConcurrentHashMap<ChannelId, NetworkAddress>()
+    private var nodesInfo = ConcurrentHashMap<ChannelId, NodeInfo>()
 
 
     fun broadcast(message: Serializable) {
@@ -33,10 +33,10 @@ class ChannelsHolder {
         channel.writeAndFlush(message)
     }
 
-    fun send(message: Serializable, address: NetworkAddress): Boolean {
-        val channelId = channelsAddresses.filter { it.value == address }.keys.firstOrNull() ?: return false
+    fun send(message: Serializable, nodeInfo: NodeInfo): Boolean {
+        val channelId = nodesInfo.filter { it.value == nodeInfo }.keys.firstOrNull() ?: return false
         val channel = channelGroup.firstOrNull { it.id() == channelId }
-            ?: throw NotFoundChannelException("Channel with address: ${address.host}:${address.port} is not exist")
+            ?: throw NotFoundChannelException("Channel with uid: ${nodeInfo.uid} is not exist")
 
         channel.writeAndFlush(message)
         return true
@@ -46,14 +46,14 @@ class ChannelsHolder {
 
     fun isEmpty(): Boolean = channelGroup.isEmpty()
 
-    fun getAddresses(): List<NetworkAddress> = channelGroup.map { channelsAddresses[it.id()]!! }
+    fun getNodesInfo(): List<NodeInfo> = channelGroup.map { nodesInfo[it.id()]!! }
 
-    fun getAddressByChannelId(channelId: ChannelId): NetworkAddress = channelsAddresses[channelId]!!
+    fun getNodeInfoByChannelId(channelId: ChannelId): NodeInfo = nodesInfo[channelId]!!
 
     @Synchronized
-    fun addChannel(channel: Channel, networkAddress: NetworkAddress) {
+    fun addChannel(channel: Channel, nodeInfo: NodeInfo) {
         channelGroup.add(channel)
-        channelsAddresses[channel.id()] = networkAddress
+        nodesInfo[channel.id()] = nodeInfo
 
         log.info("Connection with ${channel.remoteAddress()} established, connections count is ${channelGroup.size}")
     }
@@ -61,7 +61,7 @@ class ChannelsHolder {
     @Synchronized
     fun removeChannel(channel: Channel) {
         channelGroup.remove(channel)
-        channelsAddresses.remove(channel.id())
+        nodesInfo.remove(channel.id())
 
         channel.close()
 
