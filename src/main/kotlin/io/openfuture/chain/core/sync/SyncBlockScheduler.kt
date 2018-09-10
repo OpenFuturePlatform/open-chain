@@ -2,6 +2,7 @@ package io.openfuture.chain.core.sync
 
 import io.openfuture.chain.core.sync.SyncStatus.SyncStatusType.NOT_SYNCHRONIZED
 import io.openfuture.chain.core.sync.SyncStatus.SyncStatusType.PROCESSING
+import io.openfuture.chain.network.component.NodeClock
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.NetworkApiService
 import org.springframework.scheduling.annotation.Scheduled
@@ -12,7 +13,8 @@ class SyncBlockScheduler(
     private val nodeProperties: NodeProperties,
     private val syncStatus: SyncStatus,
     private val syncManager: SyncManager,
-    private val networkApiService: NetworkApiService
+    private val networkApiService: NetworkApiService,
+    private val nodeClock: NodeClock
 ) {
 
     @Scheduled(fixedRateString = "\${node.synchronization-interval}")
@@ -28,7 +30,7 @@ class SyncBlockScheduler(
     }
 
     private fun isResponseTimeOut(): Boolean {
-        return System.currentTimeMillis() - syncManager.getLastResponseTime() > nodeProperties.synchronizationResponseDelay!!
+        return nodeClock.networkTime() - syncManager.getLastResponseTime() > nodeProperties.synchronizationResponseDelay!!
     }
 
 }
