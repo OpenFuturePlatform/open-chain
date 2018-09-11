@@ -4,7 +4,7 @@ data class ExplorerResponse(
     val nodesCount: Int,
     val blocksCount: Long,
     val transactionsCount: Long,
-    val secondsPerBlock: Long,
+    val blockProductionTime: Long,
     val transactionsPerSecond: Long,
     val currentEpochNumber: Long,
     val currentEpochDate: Long,
