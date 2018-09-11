@@ -11,8 +11,11 @@ class ExplorerAddressesHolder {
     var me: NodeInfo? = null
 
 
-    fun getNodesInfo(): Set<NodeInfo> {
-        me?.let { return nodesInfo.filter { nodeInfo -> nodeInfo.uid != it.uid }.toSet() }
+    fun getNodesInfo(excludeMe: Boolean = true): Set<NodeInfo> {
+        if (excludeMe) {
+            me?.let { return nodesInfo.filter { nodeInfo -> nodeInfo.uid != it.uid }.toSet() }
+        }
+
         return nodesInfo
     }
 

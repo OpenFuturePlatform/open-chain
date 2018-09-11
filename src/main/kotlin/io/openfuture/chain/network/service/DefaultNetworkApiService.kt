@@ -31,6 +31,6 @@ class DefaultNetworkApiService(
         }
     }
 
-    override fun getNetworkSize(): Int = explorerAddressesHolder.getNodesInfo().size
+    override fun getNetworkSize(): Int = explorerAddressesHolder.getNodesInfo(false).size
 
 }

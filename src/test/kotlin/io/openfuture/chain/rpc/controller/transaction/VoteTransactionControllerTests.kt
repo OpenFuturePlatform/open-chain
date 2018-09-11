@@ -26,14 +26,15 @@ class VoteTransactionControllerTests : ControllerTests() {
 
     companion object {
         private const val VOTE_TRANSACTION_URL = "/rpc/transactions/vote"
+        private const val WALLET_ADDRESS = "0x51c5311F25206De4A9C6ecAa1Bc2Be257B0bA1fb"
     }
 
 
     @Test
     fun addTransactionShouldReturnAddedTransaction() {
-        val transactionRequest = VoteTransactionRequest(1L, 1L, "hash", "senderAddress", 1,
+        val transactionRequest = VoteTransactionRequest(1L, 1L, "hash", WALLET_ADDRESS, 1,
             "delegateKey", "senderSignature", "senderPublicKey")
-        val header = TransactionHeader(1L, 1L, "senderAddress")
+        val header = TransactionHeader(1L, 1L, WALLET_ADDRESS)
         val footer = TransactionFooter("senderPublicKey", "senderSignature", "hash")
         val payload = VoteTransactionPayload(1, "delegateKey")
         val unconfirmedVoteTransaction = UnconfirmedVoteTransaction(header, footer, payload)
@@ -55,7 +56,7 @@ class VoteTransactionControllerTests : ControllerTests() {
     fun getTransactionByHashShouldReturnTransaction() {
         val hash = "hash"
         val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
-        val header = TransactionHeader(1L, 1L, "senderAddress")
+        val header = TransactionHeader(1L, 1L, WALLET_ADDRESS)
         val footer = TransactionFooter("hash", "senderSignature", "senderPublicKey")
         val payload = VoteTransactionPayload(1, "delegateKey")
         val expectedTransaction = VoteTransaction(header, footer, mainBlock, payload).apply { id = 1 }

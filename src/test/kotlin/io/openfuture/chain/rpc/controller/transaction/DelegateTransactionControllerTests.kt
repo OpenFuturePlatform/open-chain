@@ -27,15 +27,16 @@ class DelegateTransactionControllerTests : ControllerTests() {
 
     companion object {
         private const val DELEGATE_TRANSACTION_URL = "/rpc/transactions/delegate"
+        private const val WALLET_ADDRESS = "0x51c5311F25206De4A9C6ecAa1Bc2Be257B0bA1fb"
     }
 
 
     @Test
     fun addTransactionShouldReturnAddedTransaction() {
-        val transactionRequest = DelegateTransactionRequest(1L, 1L, "senderAddress", 1L,
+        val transactionRequest = DelegateTransactionRequest(1L, 1L, WALLET_ADDRESS, 1L,
             "nodeId", "delegateKey", "host", 1,
             "hash", "senderSignature", "senderPublicKey")
-        val header = TransactionHeader(1L, 1L, "senderAddress")
+        val header = TransactionHeader(1L, 1L, WALLET_ADDRESS)
         val footer = TransactionFooter("senderPublicKey", "senderSignature", "hash")
         val payload = DelegateTransactionPayload("nodeId","delegateKey", "host", 1, 1)
         val unconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(header, footer, payload)
@@ -57,7 +58,7 @@ class DelegateTransactionControllerTests : ControllerTests() {
     fun getTransactionByHashShouldReturnTransaction() {
         val hash = "hash"
         val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
-        val header = TransactionHeader(1L, 1L, "senderAddress")
+        val header = TransactionHeader(1L, 1L, WALLET_ADDRESS)
         val footer = TransactionFooter("senderPublicKey", "senderSignature", "hash")
         val payload = DelegateTransactionPayload("nodeId", "delegateKey", "delegateHost", 8080, 1)
         val delegateTransaction = DelegateTransaction(header, footer, mainBlock, payload).apply { id = 1 }

@@ -29,16 +29,17 @@ class TransferTransactionControllerTests : ControllerTests() {
 
     companion object {
         private const val TRANSFER_TRANSACTION_URL = "/rpc/transactions/transfer"
+        private const val WALLET_ADDRESS = "0x51c5311F25206De4A9C6ecAa1Bc2Be257B0bA1fb"
     }
 
 
     @Test
     fun addTransactionShouldReturnAddedTransaction() {
-        val transactionRequest = TransferTransactionRequest(1L, 1L, "hash", "senderAddress",
-            1, "recipientAddress", "senderSignature", "recipientAddress")
-        val header = TransactionHeader(1L, 1L, "senderAddress")
+        val transactionRequest = TransferTransactionRequest(1L, 1L, "hash", WALLET_ADDRESS,
+            1, WALLET_ADDRESS, "senderSignature", "recipientAddress")
+        val header = TransactionHeader(1L, 1L, WALLET_ADDRESS)
         val footer = TransactionFooter("hash", "senderSignature", "senderPublicKey")
-        val payload = TransferTransactionPayload(1L, "delegateKey")
+        val payload = TransferTransactionPayload(1L, WALLET_ADDRESS)
         val unconfirmedTransferTransaction = UnconfirmedTransferTransaction(header, footer, payload)
         val expectedResponse = TransferTransactionResponse(unconfirmedTransferTransaction)
 
@@ -74,13 +75,12 @@ class TransferTransactionControllerTests : ControllerTests() {
 
     @Test
     fun getTransactionsByAddressShouldReturnTransferTransactionsListTest() {
-        val address = "0x51c5311F25206De4A9C6ecAa1Bc2Be257B0bA1fb"
         val pageTransferTransactions = PageImpl(listOf(createTransferTransaction()))
         val expectedPageResponse = PageResponse(pageTransferTransactions)
 
-        given(service.getByAddress(address, PageRequest())).willReturn(pageTransferTransactions)
+        given(service.getByAddress(WALLET_ADDRESS, PageRequest())).willReturn(pageTransferTransactions)
 
-        val actualTransferTransactions = webClient.get().uri("$TRANSFER_TRANSACTION_URL/address/$address")
+        val actualTransferTransactions = webClient.get().uri("$TRANSFER_TRANSACTION_URL/address/$WALLET_ADDRESS")
             .exchange()
             .expectStatus().isOk
             .expectBody(PageResponse::class.java)
@@ -112,9 +112,9 @@ class TransferTransactionControllerTests : ControllerTests() {
     private fun createTransferTransaction(): TransferTransaction {
         val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature",
             "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
-        val header = TransactionHeader(1, 1, "senderAddress")
+        val header = TransactionHeader(1, 1, WALLET_ADDRESS)
         val footer = TransactionFooter("hash", "senderSignature", "senderPublicKey")
-        val payload = TransferTransactionPayload(1, "recipientAddress")
+        val payload = TransferTransactionPayload(1, WALLET_ADDRESS)
         return TransferTransaction(header, footer, mainBlock, payload).apply { id = 1 }
 
     }

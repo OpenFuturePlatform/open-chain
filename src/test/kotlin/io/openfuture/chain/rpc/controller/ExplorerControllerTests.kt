@@ -34,12 +34,12 @@ class ExplorerControllerTests : ControllerTests() {
         val blockCount = 1L
         val nodesCount = 1200
         val epochNumber = 22L
-        val secondsPerBlock = 2L
+        val blockProductionTime = 2L
         val transactionsCount = 100L
         val epochDate = 1533201843817
         val delegatesCount = 1.toByte()
         val transactionsPerSecond = 17L
-        val expectedResponse = ExplorerResponse(nodesCount, blockCount, transactionsCount, secondsPerBlock,
+        val expectedResponse = ExplorerResponse(nodesCount, blockCount, transactionsCount, blockProductionTime,
             transactionsPerSecond, epochNumber, epochDate, delegatesCount)
 
         given(blockService.getCount()).willReturn(blockCount)
@@ -47,7 +47,7 @@ class ExplorerControllerTests : ControllerTests() {
         given(epochService.getEpochIndex()).willReturn(epochNumber)
         given(networkApiService.getNetworkSize()).willReturn(nodesCount)
         given(transactionService.getCount()).willReturn(transactionsCount)
-        given(blockService.getAvgProductionTime()).willReturn(secondsPerBlock)
+        given(blockService.getAvgProductionTime()).willReturn(blockProductionTime)
         given(transactionService.getProducingPerSecond()).willReturn(transactionsPerSecond)
         given(epochService.getDelegates()).willReturn(listOf(Delegate("publicKey", "nodeId", "address", "host", 1000, 1)))
 

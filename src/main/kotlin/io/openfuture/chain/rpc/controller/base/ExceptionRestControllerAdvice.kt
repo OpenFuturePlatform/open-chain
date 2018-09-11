@@ -4,7 +4,9 @@ import io.openfuture.chain.core.exception.SynchronizationException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.rpc.domain.ExceptionResponse
 import io.openfuture.chain.rpc.domain.ValidationErrorResponse
+import org.apache.commons.lang3.StringUtils.EMPTY
 import org.springframework.http.HttpStatus.BAD_REQUEST
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -37,6 +39,14 @@ class ExceptionRestControllerAdvice {
     @ExceptionHandler(ConstraintViolationException::class)
     fun handleConstraintViolationException(ex: ConstraintViolationException): List<ValidationErrorResponse> {
         return ex.constraintViolations.map { ValidationErrorResponse(it.propertyPath.toString(), it.message) }
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleMethodArgumentNotValidException(ex: MethodArgumentNotValidException): List<ValidationErrorResponse> {
+        return ex.bindingResult.fieldErrors.map {
+            ValidationErrorResponse(it.field, it.defaultMessage ?: EMPTY)
+        }
     }
 
 }
