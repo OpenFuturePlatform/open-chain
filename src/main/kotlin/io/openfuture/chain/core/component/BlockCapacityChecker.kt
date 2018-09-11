@@ -32,8 +32,4 @@ class BlockCapacityChecker(
         counter.getAndIncrement()
     }
 
-    fun getAvgTime(): Long {
-        return avg.get()
-    }
-
 }
