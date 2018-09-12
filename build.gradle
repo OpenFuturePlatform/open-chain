@@ -6,13 +6,12 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.spring' version '1.2.61'
     id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.61'
     id 'org.springframework.boot' version '2.0.4.RELEASE'
-    id 'com.palantir.git-version' version '0.12.0-rc2'
+    id "io.zensoft.versioning" version "1.0.0"
 }
 
 apply plugin: "io.spring.dependency-management"
 
 group = 'io.openfuture.chain'
-version = versionDetails().lastTag[1..-1]
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -85,8 +84,8 @@ compileTestKotlin {
 
 noArg {
     annotations("javax.persistence.MappedSuperclass",
-                "javax.persistence.Entity",
-                "io.openfuture.chain.core.annotation.NoArgConstructor")
+            "javax.persistence.Entity",
+            "io.openfuture.chain.core.annotation.NoArgConstructor")
 }
 
 // IDEA
