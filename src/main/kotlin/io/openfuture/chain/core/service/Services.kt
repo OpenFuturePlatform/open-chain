@@ -227,4 +227,6 @@ interface WalletService {
 
     fun increaseUnconfirmedOutput(address: String, amount: Long)
 
+    fun decreaseUnconfirmedOutput(address: String, amount: Long)
+
 }

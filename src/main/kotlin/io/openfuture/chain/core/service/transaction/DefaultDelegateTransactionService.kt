@@ -71,13 +71,12 @@ class DefaultDelegateTransactionService(
             return tx
         }
 
-        walletService.decreaseBalance(message.senderAddress, message.fee)
-
-        walletService.decreaseBalance(message.senderAddress, message.amount)
+        walletService.decreaseBalance(message.senderAddress, message.amount + message.fee)
         walletService.increaseBalance(consensusProperties.genesisAddress!!, message.amount)
 
         val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
         if (null != utx) {
+            walletService.decreaseUnconfirmedOutput(message.senderAddress, message.amount + message.fee)
             return confirm(utx, DelegateTransaction.of(utx, block))
         }
 
@@ -113,7 +112,7 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun validateNew(utx: UnconfirmedDelegateTransaction) {
-        if(!isValidActualBalance(utx.header.senderAddress, utx.payload.amount + utx.header.fee)) {
+        if (!isValidActualBalance(utx.header.senderAddress, utx.payload.amount + utx.header.fee)) {
             throw ValidationException("Insufficient actual balance", ExceptionType.INSUFFICIENT_ACTUAL_BALANCE)
         }
 
