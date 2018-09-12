@@ -75,7 +75,7 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         super.validateBase(header, payload, footer)
     }
 
-    protected fun isValidBalance(address: String, amount: Long): Boolean =
+    protected fun isValidActualBalance(address: String, amount: Long): Boolean =
         walletService.getActualBalanceByAddress(address) >= amount
 
     private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean =

@@ -121,7 +121,7 @@ internal class DefaultVoteTransactionService(
 
     @Transactional
     override fun validateNew(utx: UnconfirmedVoteTransaction) {
-        if (!isValidBalance(utx.header.senderAddress, utx.header.fee)) {
+        if (!isValidActualBalance(utx.header.senderAddress, utx.header.fee)) {
             throw ValidationException("Insufficient actual balance", ExceptionType.INSUFFICIENT_ACTUAL_BALANCE)
         }
 

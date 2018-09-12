@@ -113,7 +113,7 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun validateNew(utx: UnconfirmedDelegateTransaction) {
-        if(!isValidBalance(utx.header.senderAddress, utx.payload.amount + utx.header.fee)) {
+        if(!isValidActualBalance(utx.header.senderAddress, utx.payload.amount + utx.header.fee)) {
             throw ValidationException("Insufficient actual balance", ExceptionType.INSUFFICIENT_ACTUAL_BALANCE)
         }
 
