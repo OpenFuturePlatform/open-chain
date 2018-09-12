@@ -9,7 +9,7 @@ CREATE VIEW IF NOT EXISTS delegates_view AS
     d.port              as port,
     d.registration_date as registration_date,
     ifnull(sum(w.balance), 0)      as rating,
-    ifnull(count(d.id), 0)         as votes_count
+    ifnull(count(w2d.delegate_id), 0)         as votes_count
   from delegates as d
     left join wallets2delegates as w2d on d.id = w2d.delegate_id
     left join wallets as w on w.id = w2d.wallet_id
