@@ -38,7 +38,7 @@ dependencies {
 
     // DB
     compile('org.flywaydb:flyway-core')
-    compile("com.h2database:h2")
+    compile('com.h2database:h2')
 
     // Utils
     compile('org.apache.commons:commons-lang3:3.7')
