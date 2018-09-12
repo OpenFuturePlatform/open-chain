@@ -27,6 +27,6 @@ class Delegate(
     @Column(name = "registration_date", nullable = false)
     var registrationDate: Long,
 
-    id: Int = 0
+    id: Long = 0L
 
 ) : BaseModel(id)
