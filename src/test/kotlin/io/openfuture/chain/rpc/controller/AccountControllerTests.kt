@@ -110,7 +110,7 @@ class AccountControllerTests : ControllerTests() {
         val address = "0x51c5311F25206De4A9C6ecAa1Bc2Be257B0bA1fb"
         val expectedBalance = 1L
 
-        given(walletService.getBalanceByAddress(address)).willReturn(expectedBalance)
+        given(walletService.getActualBalanceByAddress(address)).willReturn(expectedBalance)
 
         val actualBalance = webClient.get().uri("$ACCOUNT_URL/wallets/$address/balance")
             .exchange()

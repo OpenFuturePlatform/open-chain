@@ -22,6 +22,7 @@ import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.network.message.sync.MainBlockMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
@@ -45,7 +46,7 @@ class DefaultMainBlockService(
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService, capacityChecker), MainBlockService {
 
     companion object {
-        val log = LoggerFactory.getLogger(DefaultMainBlockService::class.java)
+        private val log: Logger = LoggerFactory.getLogger(DefaultMainBlockService::class.java)
     }
 
 
@@ -177,22 +178,28 @@ class DefaultMainBlockService(
 
     private fun isValidReward(fees: Long, reward: Long): Boolean {
         val senderAddress = consensusProperties.genesisAddress!!
-        val bank = walletService.getBalanceByAddress(senderAddress)
+        val bank = walletService.getActualBalanceByAddress(senderAddress)
         val rewardBlock = consensusProperties.rewardBlock!!
 
         return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)
     }
 
     private fun isValidVoteTransactions(transactions: List<VoteTransactionMessage>): Boolean {
-        return transactions.all { voteTransactionService.verify(it) }
+        return transactions.all { voteTransactionService.verify(it) } &&
+            transactions.distinctBy { it.nodeId }.size == transactions.size
     }
 
     private fun isValidDelegateTransactions(transactions: List<DelegateTransactionMessage>): Boolean {
-        return transactions.all { delegateTransactionService.verify(it) }
+        return transactions.all { delegateTransactionService.verify(it) } &&
+            transactions.distinctBy { it.delegateKey }.size == transactions.size
     }
 
     private fun isValidTransferTransactions(transactions: List<TransferTransactionMessage>): Boolean {
-        return transactions.all { transferTransactionService.verify(it) }
+        val isValidBalances = transactions.groupBy { it.senderAddress }.entries.all {
+            it.value.map { it.amount + it.fee }.sum() <= walletService.getBalanceByAddress(it.key)
+        }
+
+        return transactions.all { transferTransactionService.verify(it) } && isValidBalances
     }
 
     private fun isValidMerkleHash(merkleHash: String, transactions: List<String>): Boolean {

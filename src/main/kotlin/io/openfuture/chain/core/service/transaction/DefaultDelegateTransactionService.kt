@@ -5,6 +5,7 @@ import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.exception.model.ExceptionType
 import io.openfuture.chain.core.exception.model.ExceptionType.ALREADY_DELEGATE
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_DELEGATE_KEY
 import io.openfuture.chain.core.model.entity.Delegate
@@ -107,11 +108,18 @@ class DefaultDelegateTransactionService(
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
 
+        super.validateExternal(utx.header, utx.payload, utx.footer)
+    }
+
+    @Transactional
+    override fun validateNew(utx: UnconfirmedDelegateTransaction) {
+        if(!isValidBalance(utx.header.senderAddress, utx.payload.amount + utx.header.fee)) {
+            throw ValidationException("Insufficient actual balance", ExceptionType.INSUFFICIENT_ACTUAL_BALANCE)
+        }
+
         if (isAlreadyDelegate(utx.payload.nodeId)) {
             throw ValidationException("Node ${utx.payload.nodeId} already registered as delegate", ALREADY_DELEGATE)
         }
-
-        super.validateExternal(utx.header, utx.payload, utx.footer, utx.payload.amount + utx.header.fee)
     }
 
     @Transactional

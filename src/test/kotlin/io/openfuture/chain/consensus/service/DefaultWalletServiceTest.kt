@@ -34,7 +34,7 @@ class DefaultWalletServiceTest : ServiceTests() {
 
         given(repository.findOneByAddress(address)).willReturn(wallet)
 
-        val actualBalance = service.getBalanceByAddress(address)
+        val actualBalance = service.getActualBalanceByAddress(address)
 
         assertThat(actualBalance).isEqualTo(expectedBalance)
     }
@@ -46,7 +46,7 @@ class DefaultWalletServiceTest : ServiceTests() {
 
         given(repository.findOneByAddress(address)).willReturn(null)
 
-        val actualBalance = service.getBalanceByAddress(address)
+        val actualBalance = service.getActualBalanceByAddress(address)
 
         assertThat(actualBalance).isEqualTo(expectedBalance)
     }

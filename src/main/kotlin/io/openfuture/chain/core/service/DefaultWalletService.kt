@@ -24,10 +24,17 @@ class DefaultWalletService(
         ?: throw NotFoundException("Wallet with address: $address not found")
 
     @Transactional(readOnly = true)
-    override fun getBalanceByAddress(address: String): Long {
+    override fun getActualBalanceByAddress(address: String): Long {
         val wallet = repository.findOneByAddress(address) ?: return DEFAULT_WALLET_BALANCE
 
         return wallet.balance - wallet.unconfirmedOutput
+    }
+
+    @Transactional(readOnly = true)
+    override fun getBalanceByAddress(address: String): Long {
+        val wallet = repository.findOneByAddress(address) ?: return DEFAULT_WALLET_BALANCE
+
+        return wallet.balance
     }
 
     @Transactional(readOnly = true)

@@ -3,7 +3,6 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_ADDRESS
-import io.openfuture.chain.core.exception.model.ExceptionType.INSUFFICIENT_BALANCE
 import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
@@ -38,9 +37,11 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
             return persistUtx
         }
 
+        validateNew(utx)
+        validate(utx)
+
         updateUnconfirmedBalance(utx)
 
-        validate(utx)
         val savedUtx = save(utx)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
@@ -48,9 +49,9 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
 
     abstract fun validate(utx: U)
 
-    open fun save(utx: U): U {
-        return unconfirmedRepository.save(utx)
-    }
+    abstract fun validateNew(utx: U)
+
+    open fun save(utx: U): U = unconfirmedRepository.save(utx)
 
     open fun save(tx: T): T {
         capacityChecker.incrementCapacity()
@@ -66,23 +67,18 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         return save(tx)
     }
 
-    protected fun validateExternal(header: TransactionHeader, payload: TransactionPayload, footer: TransactionFooter, amount: Long) {
+    protected fun validateExternal(header: TransactionHeader, payload: TransactionPayload, footer: TransactionFooter) {
         if (!isValidAddress(header.senderAddress, footer.senderPublicKey)) {
             throw ValidationException("Incorrect sender address", INCORRECT_ADDRESS)
-        }
-
-        if (!isValidBalance(header.senderAddress, amount)) {
-            throw ValidationException("Insufficient balance", INSUFFICIENT_BALANCE)
         }
 
         super.validateBase(header, payload, footer)
     }
 
-    private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean {
-        return cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
-    }
+    protected fun isValidBalance(address: String, amount: Long): Boolean =
+        walletService.getActualBalanceByAddress(address) >= amount
 
-    private fun isValidBalance(address: String, amount: Long): Boolean =
-        walletService.getBalanceByAddress(address) >= amount
+    private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean =
+        cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
 
 }

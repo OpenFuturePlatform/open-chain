@@ -5,8 +5,8 @@ import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_DELEGATE_KEY
-import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_VOTES_COUNT
+import io.openfuture.chain.core.exception.model.ExceptionType
+import io.openfuture.chain.core.exception.model.ExceptionType.*
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
@@ -105,15 +105,23 @@ internal class DefaultVoteTransactionService(
             throw ValidationException("Incorrect votes count", INCORRECT_VOTES_COUNT)
         }
 
-        if (isAlreadyVote(utx.header.senderAddress, utx.payload.nodeId, utx.payload.voteTypeId)) {
-            throw ValidationException("Address: ${utx.header.senderAddress} has already voted for delegate: ${utx.payload.nodeId}")
+        if (isAlreadyVoted(utx.header.senderAddress, utx.payload.nodeId, utx.payload.voteTypeId)) {
+            throw ValidationException("Address: ${utx.header.senderAddress} has already voted for delegate: ${utx.payload.nodeId}",
+                ALREADY_VOTED_FOR_DELEGATE)
         }
 
         if (!isExistsVoteType(utx.payload.voteTypeId)) {
             throw ValidationException("Vote type with id: ${utx.payload.voteTypeId} is not exists")
         }
 
-        super.validateExternal(utx.header, utx.payload, utx.footer, utx.header.fee)
+        super.validateExternal(utx.header, utx.payload, utx.footer)
+    }
+
+    @Transactional
+    override fun validateNew(utx: UnconfirmedVoteTransaction) {
+        if (!isValidBalance(utx.header.senderAddress, utx.header.fee)) {
+            throw ValidationException("Insufficient actual balance", ExceptionType.INSUFFICIENT_ACTUAL_BALANCE)
+        }
     }
 
     private fun updateWalletVotes(senderAddress: String, nodeId: String, type: VoteType) {
@@ -139,7 +147,7 @@ internal class DefaultVoteTransactionService(
         return consensusProperties.delegatesCount!! > confirmedVotes + unconfirmedForVotes
     }
 
-    private fun isAlreadyVote(senderAddress: String, nodeId: String, voteTypeId: Int): Boolean {
+    private fun isAlreadyVoted(senderAddress: String, nodeId: String, voteTypeId: Int): Boolean {
         val voteTransactions = repository.findAllByHeaderSenderAddress(senderAddress)
         return voteTransactions.any { it.payload.nodeId == nodeId && it.payload.voteTypeId == voteTypeId }
     }

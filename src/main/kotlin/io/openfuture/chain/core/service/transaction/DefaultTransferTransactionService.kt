@@ -4,6 +4,7 @@ import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.exception.model.ExceptionType.INSUFFICIENT_ACTUAL_BALANCE
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -100,8 +101,15 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
+    override fun validateNew(utx: UnconfirmedTransferTransaction) {
+        if(!isValidBalance(utx.header.senderAddress, utx.payload.amount + utx.header.fee)) {
+            throw ValidationException("Insufficient actual balance", INSUFFICIENT_ACTUAL_BALANCE)
+        }
+    }
+
+    @Transactional
     override fun validate(utx: UnconfirmedTransferTransaction) {
-        super.validateExternal(utx.header, utx.payload, utx.footer, utx.payload.amount + utx.header.fee)
+        super.validateExternal(utx.header, utx.payload, utx.footer)
     }
 
     @Transactional
