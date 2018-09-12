@@ -37,8 +37,7 @@ dependencies {
 
     // DB
     compile('org.flywaydb:flyway-core')
-    compile('com.enigmabridge:hibernate4-sqlite-dialect:0.1.2')
-    compile('org.xerial:sqlite-jdbc:3.23.1')
+    compile('com.h2database:h2')
 
     // Utils
     compile('org.apache.commons:commons-lang3:3.7')
@@ -57,7 +56,6 @@ dependencies {
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('io.projectreactor:reactor-test')
-    testCompile('org.postgresql:postgresql')
 }
 
 sourceSets {
@@ -83,6 +81,7 @@ compileTestKotlin {
         jvmTarget = "1.8"
     }
 }
+
 noArg {
     annotations("javax.persistence.MappedSuperclass",
             "javax.persistence.Entity",

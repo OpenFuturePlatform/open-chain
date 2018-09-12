@@ -103,8 +103,6 @@ interface TransactionService {
 
     fun getCount(): Long
 
-    fun getAllUnconfirmedByAddress(address: String): List<UnconfirmedTransaction>
-
     fun getUnconfirmedTransactionByHash(hash: String): UnconfirmedTransaction
 
     fun getProducingPerSecond(): Long
