@@ -39,7 +39,8 @@ class AccountController(
     }
 
     @GetMapping("/wallets/{address}/balance")
-    fun getBalance(@PathVariable @AddressChecksum address: String): Long = walletService.getBalanceByAddress(address)
+    fun getBalance(@PathVariable @AddressChecksum address: String): Long =
+        walletService.getActualBalanceByAddress(address)
 
     @GetMapping("/wallets/{address}/delegates")
     fun getDelegates(@PathVariable @AddressChecksum address: String, request: PageRequest): PageResponse<ViewDelegateResponse> {

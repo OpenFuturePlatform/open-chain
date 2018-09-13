@@ -19,6 +19,7 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
@@ -36,7 +37,7 @@ class DefaultGenesisBlockService(
 ) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService, capacityChecker), GenesisBlockService {
 
     companion object {
-        val log = LoggerFactory.getLogger(DefaultGenesisBlockService::class.java)
+        private val log: Logger = LoggerFactory.getLogger(DefaultGenesisBlockService::class.java)
     }
 
 

@@ -3,8 +3,10 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.TransactionCapacityChecker
+import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.exception.model.ExceptionType
 import io.openfuture.chain.core.exception.model.ExceptionType.ALREADY_DELEGATE
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_DELEGATE_KEY
 import io.openfuture.chain.core.model.entity.Delegate
@@ -52,12 +54,18 @@ class DefaultDelegateTransactionService(
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @BlockchainSynchronized
+    @Synchronized
     @Transactional
-    override fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction {
-        return super.add(UnconfirmedDelegateTransaction.of(message))
+    override fun add(message: DelegateTransactionMessage) {
+        try {
+            super.add(UnconfirmedDelegateTransaction.of(message))
+        } catch (ex: CoreException) {
+            log.debug(ex.message)
+        }
     }
 
     @BlockchainSynchronized
+    @Synchronized
     @Transactional
     override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction {
         return super.add(UnconfirmedDelegateTransaction.of(request))
@@ -70,13 +78,12 @@ class DefaultDelegateTransactionService(
             return tx
         }
 
-        walletService.decreaseBalance(message.senderAddress, message.fee)
-
-        walletService.decreaseBalance(message.senderAddress, message.amount)
+        walletService.decreaseBalance(message.senderAddress, message.amount + message.fee)
         walletService.increaseBalance(consensusProperties.genesisAddress!!, message.amount)
 
         val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
         if (null != utx) {
+            walletService.decreaseUnconfirmedOutput(message.senderAddress, message.amount + message.fee)
             return confirm(utx, DelegateTransaction.of(utx, block))
         }
 
@@ -107,11 +114,18 @@ class DefaultDelegateTransactionService(
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
 
+        super.validateExternal(utx.header, utx.payload, utx.footer)
+    }
+
+    @Transactional
+    override fun validateNew(utx: UnconfirmedDelegateTransaction) {
+        if (!isValidActualBalance(utx.header.senderAddress, utx.payload.amount + utx.header.fee)) {
+            throw ValidationException("Insufficient actual balance", ExceptionType.INSUFFICIENT_ACTUAL_BALANCE)
+        }
+
         if (isAlreadyDelegate(utx.payload.nodeId)) {
             throw ValidationException("Node ${utx.payload.nodeId} already registered as delegate", ALREADY_DELEGATE)
         }
-
-        super.validateExternal(utx.header, utx.payload, utx.footer, utx.payload.amount + utx.header.fee)
     }
 
     @Transactional
