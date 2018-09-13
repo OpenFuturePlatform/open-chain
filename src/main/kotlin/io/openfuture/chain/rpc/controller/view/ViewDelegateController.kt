@@ -1,8 +1,8 @@
 package io.openfuture.chain.rpc.controller.view
 
 import io.openfuture.chain.core.service.ViewDelegateService
-import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
+import io.openfuture.chain.rpc.domain.view.ViewDelegatePageRequest
 import io.openfuture.chain.rpc.domain.view.ViewDelegateResponse
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,7 +17,7 @@ class ViewDelegateController(
 ) {
 
     @GetMapping
-    fun getAll(request: PageRequest): PageResponse<ViewDelegateResponse> =
+    fun getAll(request: ViewDelegatePageRequest): PageResponse<ViewDelegateResponse> =
         PageResponse(viewDelegateService.getAll(request).map { ViewDelegateResponse(it) })
 
 }
