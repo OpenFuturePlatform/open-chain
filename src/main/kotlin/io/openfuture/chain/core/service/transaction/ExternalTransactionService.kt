@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.component.TransactionCapacityChecker
+import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_ADDRESS
 import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
@@ -31,6 +32,11 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
 
 
     protected fun add(utx: U): U {
+        val persistTx = repository.findOneByFooterHash(utx.footer.hash)
+        if (null != persistTx) {
+            throw CoreException("Transaction already handled")
+        }
+
         val persistUtx = unconfirmedRepository.findOneByFooterHash(utx.footer.hash)
 
         if (null != persistUtx) {
@@ -58,7 +64,7 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         return repository.save(tx)
     }
 
-    open fun updateUnconfirmedBalance(utx: U){
+    open fun updateUnconfirmedBalance(utx: U) {
         walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.header.fee)
     }
 

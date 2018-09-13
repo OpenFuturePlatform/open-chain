@@ -3,6 +3,7 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.TransactionCapacityChecker
+import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType
@@ -48,12 +49,18 @@ internal class DefaultVoteTransactionService(
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @BlockchainSynchronized
+    @Synchronized
     @Transactional
-    override fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction {
-        return super.add(UnconfirmedVoteTransaction.of(message))
+    override fun add(message: VoteTransactionMessage) {
+        try {
+            super.add(UnconfirmedVoteTransaction.of(message))
+        } catch (ex: CoreException) {
+            log.debug(ex.message)
+        }
     }
 
     @BlockchainSynchronized
+    @Synchronized
     @Transactional
     override fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction {
         return super.add(UnconfirmedVoteTransaction.of(request))

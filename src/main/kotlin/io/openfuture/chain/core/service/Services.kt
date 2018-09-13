@@ -121,7 +121,7 @@ interface TransferTransactionService {
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction
 
-    fun add(message: TransferTransactionMessage): UnconfirmedTransferTransaction
+    fun add(message: TransferTransactionMessage)
 
     fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction
 
@@ -153,7 +153,7 @@ interface VoteTransactionService {
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction
 
-    fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction
+    fun add(message: VoteTransactionMessage)
 
     fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction
 
@@ -171,7 +171,7 @@ interface DelegateTransactionService {
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction
 
-    fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction
+    fun add(message: DelegateTransactionMessage)
 
     fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction
 
