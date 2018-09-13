@@ -18,10 +18,6 @@ class DefaultTransactionService(
 ) : TransactionService {
 
     @Transactional(readOnly = true)
-    override fun getAllUnconfirmedByAddress(address: String): List<UnconfirmedTransaction> =
-        uRepository.findAllByHeaderSenderAddress(address)
-
-    @Transactional(readOnly = true)
     override fun getCount(): Long = repository.count()
 
     @Transactional(readOnly = true)

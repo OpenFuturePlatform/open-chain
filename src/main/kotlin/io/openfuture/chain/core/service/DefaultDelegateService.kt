@@ -3,7 +3,6 @@ package io.openfuture.chain.core.service
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.Delegate
-import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
 import io.openfuture.chain.core.repository.DelegateRepository
 import io.openfuture.chain.core.repository.ViewDelegateRepository
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -32,7 +31,7 @@ class DefaultDelegateService(
 
     @Transactional(readOnly = true)
     override fun getActiveDelegates(): List<Delegate> {
-        val sortFields = arrayOf("rating", "registrationDate")
+        val sortFields = arrayOf("rating", "registrationDate", "id")
         val pageRequest = PageRequest(0, consensusProperties.delegatesCount!!, sortFields, Sort.Direction.DESC)
         return viewRepository.findAll(pageRequest)
             .map { Delegate(it.publicKey, it.nodeId, it.address, it.host, it.port, it.registrationDate, it.id) }

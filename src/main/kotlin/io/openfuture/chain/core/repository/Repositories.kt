@@ -79,8 +79,6 @@ interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseReposit
 
     fun findAllByOrderByHeaderFeeDesc(): MutableList<UEntity>
 
-    fun findAllByHeaderSenderAddress(address: String): List<UEntity>
-
 }
 
 @Repository
