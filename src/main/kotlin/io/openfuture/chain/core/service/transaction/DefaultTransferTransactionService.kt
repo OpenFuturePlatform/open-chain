@@ -120,7 +120,7 @@ class DefaultTransferTransactionService(
         }
 
         if (utx.payload.amount <= 0) {
-            throw ValidationException("Amount should be no less than or equal to 0")
+            throw ValidationException("Amount should not be less than or equal to 0")
         }
 
         super.validateExternal(utx.header, utx.payload, utx.footer)
