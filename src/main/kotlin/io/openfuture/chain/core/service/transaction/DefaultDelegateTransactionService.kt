@@ -110,6 +110,14 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun validate(utx: UnconfirmedDelegateTransaction) {
+        if (utx.header.fee != consensusProperties.feeDelegateTx!!) {
+            throw ValidationException("Fee should be ${consensusProperties.feeDelegateTx!!}")
+        }
+
+        if (utx.payload.amount != consensusProperties.amountDelegateTx!!) {
+            throw ValidationException("Amount should be ${consensusProperties.amountDelegateTx!!}")
+        }
+
         if (!isValidNodeId(utx.payload.nodeId, utx.payload.delegateKey)) {
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
