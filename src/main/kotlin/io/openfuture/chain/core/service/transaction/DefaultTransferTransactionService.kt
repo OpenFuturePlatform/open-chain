@@ -115,6 +115,14 @@ class DefaultTransferTransactionService(
 
     @Transactional
     override fun validate(utx: UnconfirmedTransferTransaction) {
+        if (utx.header.fee < 0) {
+            throw ValidationException("Fee should not be less than 0")
+        }
+
+        if (utx.payload.amount <= 0) {
+            throw ValidationException("Amount should be no less than or equal to 0")
+        }
+
         super.validateExternal(utx.header, utx.payload, utx.footer)
     }
 

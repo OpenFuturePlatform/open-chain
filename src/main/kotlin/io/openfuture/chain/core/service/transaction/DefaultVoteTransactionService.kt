@@ -109,6 +109,12 @@ internal class DefaultVoteTransactionService(
             throw ValidationException("Vote type with id: ${utx.payload.voteTypeId} is not exists")
         }
 
+        if (utx.payload.voteTypeId == VoteType.FOR.getId() && utx.header.fee != consensusProperties.feeVoteTxFor!!) {
+            throw ValidationException("Fee should be ${consensusProperties.feeVoteTxFor!!}")
+        } else if (utx.payload.voteTypeId == VoteType.AGAINST.getId() && utx.header.fee != consensusProperties.feeVoteTxAgainst!!) {
+            throw ValidationException("Fee should be ${consensusProperties.feeVoteTxAgainst!!}")
+        }
+
         if (!isExistsDelegate(utx.payload.nodeId)) {
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
