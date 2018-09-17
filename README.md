@@ -1,5 +1,7 @@
 # OPEN Chain [![Twitter Follow](https://img.shields.io/twitter/follow/openplatformico.svg?style=social&label=Follow)](https://twitter.com/openplatformico)
 
+
+[![Explorer](https://img.shields.io/badge/open%20chain-explorer-007EC6.svg?style=flat-square)](http://explorer.openfuture.io)
 [![Release Version](https://img.shields.io/github/release/OpenFuturePlatform/open-chain/all.svg?style=flat-square)](https://github.com/OpenFuturePlatform/open-chain/releases)
 [![Release Date](https://img.shields.io/github/release-date-pre/OpenFuturePlatform/open-chain.svg?style=flat-square&colorB=007EC6)](https://github.com/OpenFuturePlatform/open-chain/releases)
 [![Last Commit](https://img.shields.io/github/last-commit/OpenFuturePlatform/open-chain.svg?style=flat-square&colorB=007EC6)](https://github.com/OpenFuturePlatform/open-chain/commits)
