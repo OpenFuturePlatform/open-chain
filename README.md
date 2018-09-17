@@ -7,7 +7,6 @@
 [![Last Commit](https://img.shields.io/github/last-commit/OpenFuturePlatform/open-chain.svg?style=flat-square&colorB=007EC6)](https://github.com/OpenFuturePlatform/open-chain/commits)
 [![Contributors](https://img.shields.io/github/contributors/OpenFuturePlatform/open-chain.svg?style=flat-square&colorB=007EC6)](https://github.com/OpenFuturePlatform/open-chain/contributors)
 [![License](https://img.shields.io/github/license/OpenFuturePlatform/open-chain.svg?style=flat-square)](./LICENSE.txt)
-[![Install4J](https://www.ej-technologies.com/images/product_banners/install4j_small.png)](https://www.ej-technologies.com/products/install4j/overview.html)
 
 
 ## OPEN Platform: A distributed network for the Smart Contracts
@@ -61,6 +60,9 @@ already have one.
 
 ### Appreciation
 
+[![jProfiler](https://www.ej-technologies.com/images/product_banners/jprofiler_medium.png)](https://www.ej-technologies.com/products/jprofiler/overview.html) [![install4j](https://www.ej-technologies.com/images/product_banners/install4j_medium.png)](https://www.ej-technologies.com/products/install4j/overview.html)
+
+* OPEN chain profiled by [jProfiler](https://www.ej-technologies.com/products/jprofiler/overview.html)
 * OPEN chain generates native installers by using [multi-platform installer builder Install4J](https://www.ej-technologies.com/products/install4j/overview.html) by EJ Technologies
 
 ### License
