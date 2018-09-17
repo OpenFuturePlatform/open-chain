@@ -12,6 +12,10 @@
 
 OPEN Platform uses blockchain technology to leverage **smart contracts** in order to autonomously manage digital assets and to create a **smart economy** within a decentralized network.
 
+## Explorer
+
+Take a look at the OPEN Chain Testnet Explorer: (explorer.openchain.io)[http://explorer.openchain.io]
+
 ### Supported Platforms
 
 OPEN Platform currently supports the following platforms:
