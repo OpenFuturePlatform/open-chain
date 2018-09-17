@@ -112,5 +112,4 @@ deploy-production:
       for i in `seq 1 21`; do eval echo "key: \$SERVER${i}" >> ansible/host_vars/server${i}; done
     - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -e "image_tag=${IMAGE_TAG}" -e "count=1" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.yml
   only:
-    - master
     - tags
