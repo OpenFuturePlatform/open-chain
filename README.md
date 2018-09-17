@@ -14,7 +14,7 @@ OPEN Platform uses blockchain technology to leverage **smart contracts** in orde
 
 ## Explorer
 
-Take a look at the OPEN Chain Testnet Explorer: (explorer.openchain.io)[http://explorer.openchain.io]
+Take a look at the OPEN Chain Testnet Explorer: [explorer.openchain.io](http://explorer.openchain.io).
 
 ### Supported Platforms
 
