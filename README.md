@@ -60,7 +60,7 @@ already have one.
 
 ### Appreciation
 
-[![jProfiler](https://www.ej-technologies.com/images/product_banners/jprofiler_medium.png)](https://www.ej-technologies.com/products/jprofiler/overview.html) [![install4j](https://www.ej-technologies.com/images/product_banners/install4j_medium.png)](https://www.ej-technologies.com/products/install4j/overview.html)
+[![jProfiler](https://www.ej-technologies.com/images/product_banners/jprofiler_small.png)](https://www.ej-technologies.com/products/jprofiler/overview.html) [![install4j](https://www.ej-technologies.com/images/product_banners/install4j_small.png)](https://www.ej-technologies.com/products/install4j/overview.html)
 
 * OPEN chain profiled by [jProfiler](https://www.ej-technologies.com/products/jprofiler/overview.html) by EJ Technologies
 * OPEN chain generates native installers by using [multi-platform installer builder Install4J](https://www.ej-technologies.com/products/install4j/overview.html) by EJ Technologies
