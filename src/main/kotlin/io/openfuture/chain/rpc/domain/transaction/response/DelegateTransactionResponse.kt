@@ -10,7 +10,8 @@ class DelegateTransactionResponse(
     senderSignature: String,
     senderPublicKey: String,
     hash: String,
-    val delegateKey: String,
+    val nodeId: String,
+    val amount: Long? = null,
     blockHash: String? = null
 ) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey, hash, blockHash) {
 
@@ -21,7 +22,8 @@ class DelegateTransactionResponse(
         tx.footer.senderSignature,
         tx.footer.senderPublicKey,
         tx.footer.hash,
-        tx.payload.delegateKey
+        tx.payload.nodeId,
+        tx.payload.amount
     )
 
     constructor(tx: DelegateTransaction) : this(
@@ -31,7 +33,8 @@ class DelegateTransactionResponse(
         tx.footer.senderSignature,
         tx.footer.senderPublicKey,
         tx.footer.hash,
-        tx.payload.delegateKey,
+        tx.payload.nodeId,
+        tx.payload.amount,
         tx.block.hash
     )
 

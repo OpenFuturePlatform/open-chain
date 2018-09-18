@@ -1,18 +1,17 @@
 plugins {
     id 'jacoco'
     id 'idea'
-    id 'org.jetbrains.kotlin.jvm' version '1.2.60'
-    id 'org.jetbrains.kotlin.kapt' version '1.2.60'
-    id 'org.jetbrains.kotlin.plugin.spring' version '1.2.60'
-    id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.60'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.61'
+    id 'org.jetbrains.kotlin.kapt' version '1.2.61'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.2.61'
+    id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.61'
     id 'org.springframework.boot' version '2.0.4.RELEASE'
-    id 'com.palantir.git-version' version '0.12.0-rc2'
+    id "io.zensoft.versioning" version "1.0.0"
 }
 
 apply plugin: "io.spring.dependency-management"
 
 group = 'io.openfuture.chain'
-version = versionDetails().lastTag[1..-1]
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
@@ -20,7 +19,7 @@ repositories {
 }
 
 ext {
-    kotlinVersion = '1.2.60'
+    kotlinVersion = '1.2.61'
 }
 
 dependencies {
@@ -38,8 +37,7 @@ dependencies {
 
     // DB
     compile('org.flywaydb:flyway-core')
-    compile('com.enigmabridge:hibernate4-sqlite-dialect:0.1.2')
-    compile('org.xerial:sqlite-jdbc:3.23.1')
+    compile('com.h2database:h2')
 
     // Utils
     compile('org.apache.commons:commons-lang3:3.7')
@@ -58,7 +56,6 @@ dependencies {
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('io.projectreactor:reactor-test')
-    testCompile('org.postgresql:postgresql')
 }
 
 sourceSets {
@@ -84,10 +81,11 @@ compileTestKotlin {
         jvmTarget = "1.8"
     }
 }
+
 noArg {
     annotations("javax.persistence.MappedSuperclass",
-                "javax.persistence.Entity",
-                "io.openfuture.chain.core.annotation.NoArgConstructor")
+            "javax.persistence.Entity",
+            "io.openfuture.chain.core.annotation.NoArgConstructor")
 }
 
 // IDEA

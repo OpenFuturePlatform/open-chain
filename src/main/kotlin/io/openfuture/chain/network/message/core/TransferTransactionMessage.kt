@@ -17,16 +17,34 @@ class TransferTransactionMessage(
     var recipientAddress: String
 ) : TransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
-    override fun read(buffer: ByteBuf) {
-        super.read(buffer)
-        amount = buffer.readLong()
-        recipientAddress = buffer.readString()
+    override fun read(buf: ByteBuf) {
+        super.read(buf)
+        amount = buf.readLong()
+        recipientAddress = buf.readString()
     }
 
-    override fun write(buffer: ByteBuf) {
-        super.write(buffer)
-        buffer.writeLong(amount)
-        buffer.writeString(recipientAddress)
+    override fun write(buf: ByteBuf) {
+        super.write(buf)
+        buf.writeLong(amount)
+        buf.writeString(recipientAddress)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is TransferTransactionMessage) return false
+        if (!super.equals(other)) return false
+
+        if (amount != other.amount) return false
+        if (recipientAddress != other.recipientAddress) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + amount.hashCode()
+        result = 31 * result + recipientAddress.hashCode()
+        return result
     }
 
 }

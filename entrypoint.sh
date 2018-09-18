@@ -1,5 +1,5 @@
 #!/bin/sh
 
-echo  "$KEY" | tr -d '\r' >> /root/config.json
+echo "$KEY" | sed -e "s/'/\"/g" > /root/config.json
 
 exec "$@"

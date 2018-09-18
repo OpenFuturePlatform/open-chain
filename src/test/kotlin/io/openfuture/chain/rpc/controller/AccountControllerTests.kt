@@ -1,6 +1,8 @@
 package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
+import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.service.ViewDelegateService
 import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
@@ -17,6 +19,8 @@ import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import reactor.core.publisher.Mono
 
 @WebFluxTest(AccountController::class)
@@ -27,6 +31,9 @@ class AccountControllerTests : ControllerTests() {
 
     @MockBean
     private lateinit var walletService: WalletService
+
+    @MockBean
+    private lateinit var viewDelegateService: ViewDelegateService
 
     companion object {
         private const val ACCOUNT_URL = "/rpc/accounts"
@@ -100,10 +107,10 @@ class AccountControllerTests : ControllerTests() {
 
     @Test
     fun getBalanceShouldReturnWalletBalance() {
-        val address = "address"
+        val address = "0x51c5311F25206De4A9C6ecAa1Bc2Be257B0bA1fb"
         val expectedBalance = 1L
 
-        given(walletService.getBalanceByAddress(address)).willReturn(expectedBalance)
+        given(walletService.getActualBalanceByAddress(address)).willReturn(expectedBalance)
 
         val actualBalance = webClient.get().uri("$ACCOUNT_URL/wallets/$address/balance")
             .exchange()
@@ -113,6 +120,9 @@ class AccountControllerTests : ControllerTests() {
 
         assertThat(actualBalance).isEqualTo(expectedBalance)
     }
+
+    @GetMapping("/wallets/{address}/delegates")
+    fun getDelegates(@PathVariable address: String): Set<Delegate> = walletService.getVotesByAddress(address)
 
     @Test
     fun doGenerateNewAccountShouldReturnGeneratedAccount() {

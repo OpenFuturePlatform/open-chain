@@ -6,27 +6,23 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Direction
 import javax.validation.constraints.Max
 import javax.validation.constraints.Min
-import javax.validation.constraints.NotBlank
 
 open class PageRequest(
     @field:Min(value = 0) private var offset: Long = 0,
     @field:Min(value = 1) @field:Max(100) private var limit: Int = 100,
-    @field:NotBlank private var sortField: Array<String> = arrayOf(),
-    private var sortDirection: Direction? = null
+    var sortField: Array<String> = arrayOf("id"),
+    var sortDirection: Direction = Direction.ASC
 ) : AbstractPageRequest(offset.toInt() / limit + 1, limit) {
 
-    override fun next(): Pageable = PageRequest(offset + limit, limit)
+    override fun next(): Pageable = PageRequest(offset + limit, limit, sortField, sortDirection)
 
     override fun getOffset(): Long = offset
 
     fun getLimit(): Int = limit
 
-    override fun getSort(): Sort {
-        val sort = if (sortField.isEmpty()) arrayOf("id") else sortField
-        return Sort.by(sortDirection ?: Direction.ASC, *sort)
-    }
+    override fun getSort(): Sort = if (sortField.isEmpty()) Sort.unsorted() else Sort.by(sortDirection, *sortField)
 
-    override fun first(): Pageable = PageRequest(0, limit)
+    override fun first(): Pageable = PageRequest(0, limit, sortField, sortDirection)
 
     override fun previous(): PageRequest {
         return if (offset == 0L) this else {

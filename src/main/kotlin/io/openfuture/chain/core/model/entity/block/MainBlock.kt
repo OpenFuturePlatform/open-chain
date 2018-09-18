@@ -3,7 +3,7 @@ package io.openfuture.chain.core.model.entity.block
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.MainBlockMessage
+import io.openfuture.chain.network.message.sync.MainBlockMessage
 import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.Table

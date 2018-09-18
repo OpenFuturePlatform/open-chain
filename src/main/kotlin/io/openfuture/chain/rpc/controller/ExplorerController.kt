@@ -23,7 +23,7 @@ class ExplorerController(
     @GetMapping
     fun getExplorerInfo(): ExplorerResponse {
         val blocksCount = blockService.getCount()
-        val secondsPerBlock = blockService.getAvgProductionTime()
+        val blockProductionTime = blockService.getAvgProductionTime()
         val transactionsCount = transactionService.getCount()
         val transactionsPerSecond = transactionService.getProducingPerSecond()
         val nodesCount = networkApiService.getNetworkSize()
@@ -31,7 +31,7 @@ class ExplorerController(
         val epochDate = epochService.getEpochStart()
         val delegatesCount = epochService.getDelegates().size
 
-        return ExplorerResponse(nodesCount, blocksCount, transactionsCount, secondsPerBlock, transactionsPerSecond, epochNumber,
+        return ExplorerResponse(nodesCount, blocksCount, transactionsCount, blockProductionTime, transactionsPerSecond, epochNumber,
             epochDate, delegatesCount.toByte())
     }
 

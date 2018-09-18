@@ -1,16 +1,21 @@
 # OPEN Chain [![Twitter Follow](https://img.shields.io/twitter/follow/openplatformico.svg?style=social&label=Follow)](https://twitter.com/openplatformico)
 
-[![Release Version](https://img.shields.io/github/release/OpenFuturePlatform/open-chain.svg?style=flat-square)](https://github.com/OpenFuturePlatform/open-chain/releases)
-[![Release Date](https://img.shields.io/github/release-date/OpenFuturePlatform/open-chain.svg?style=flat-square&colorB=007EC6)](https://github.com/OpenFuturePlatform/open-chain/releases)
+
+[![Explorer](https://img.shields.io/badge/open%20chain-explorer-007EC6.svg?style=flat-square)](http://explorer.openfuture.io)
+[![Release Version](https://img.shields.io/github/release/OpenFuturePlatform/open-chain/all.svg?style=flat-square)](https://github.com/OpenFuturePlatform/open-chain/releases)
+[![Release Date](https://img.shields.io/github/release-date-pre/OpenFuturePlatform/open-chain.svg?style=flat-square&colorB=007EC6)](https://github.com/OpenFuturePlatform/open-chain/releases)
 [![Last Commit](https://img.shields.io/github/last-commit/OpenFuturePlatform/open-chain.svg?style=flat-square&colorB=007EC6)](https://github.com/OpenFuturePlatform/open-chain/commits)
 [![Contributors](https://img.shields.io/github/contributors/OpenFuturePlatform/open-chain.svg?style=flat-square&colorB=007EC6)](https://github.com/OpenFuturePlatform/open-chain/contributors)
 [![License](https://img.shields.io/github/license/OpenFuturePlatform/open-chain.svg?style=flat-square)](./LICENSE.txt)
-[![Install4J](https://www.ej-technologies.com/images/product_banners/install4j_small.png)](https://www.ej-technologies.com/products/install4j/overview.html)
 
 
 ## OPEN Platform: A distributed network for the Smart Contracts
 
 OPEN Platform uses blockchain technology to leverage **smart contracts** in order to autonomously manage digital assets and to create a **smart economy** within a decentralized network.
+
+## Explorer
+
+Take a look at the OPEN Chain Testnet Explorer: [explorer.openfuture.io/](http://explorer.openfuture.io/).
 
 ### Supported Platforms
 
@@ -55,6 +60,9 @@ already have one.
 
 ### Appreciation
 
+[![jProfiler](https://www.ej-technologies.com/images/product_banners/jprofiler_small.png)](https://www.ej-technologies.com/products/jprofiler/overview.html) [![install4j](https://www.ej-technologies.com/images/product_banners/install4j_small.png)](https://www.ej-technologies.com/products/install4j/overview.html)
+
+* OPEN chain profiled by [jProfiler](https://www.ej-technologies.com/products/jprofiler/overview.html) by EJ Technologies
 * OPEN chain generates native installers by using [multi-platform installer builder Install4J](https://www.ej-technologies.com/products/install4j/overview.html) by EJ Technologies
 
 ### License

@@ -2,19 +2,24 @@ package io.openfuture.chain.network.message.network
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
-import io.openfuture.chain.network.message.base.BaseMessage
+import io.openfuture.chain.network.extension.readString
+import io.openfuture.chain.network.extension.writeString
+import io.openfuture.chain.network.serialization.Serializable
 
 @NoArgConstructor
-class GreetingMessage(
-    var port: Int
-) : BaseMessage {
+data class GreetingMessage(
+    var externalPort: Int,
+    var uid: String
+) : Serializable {
 
-    override fun read(buffer: ByteBuf) {
-        port = buffer.readInt()
+    override fun read(buf: ByteBuf) {
+        externalPort = buf.readInt()
+        uid = buf.readString()
     }
 
-    override fun write(buffer: ByteBuf) {
-        buffer.writeInt(port)
+    override fun write(buf: ByteBuf) {
+        buf.writeInt(externalPort)
+        buf.writeString(uid)
     }
 
 }

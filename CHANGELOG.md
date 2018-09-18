@@ -5,6 +5,46 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## Added
+- Core: transaction validation
+- Database: indexes on tables
+
+## Changed
+- Database moved to H2
+- Core: unconfirmed balances calculation improved
+
+## [0.8.0] - 2018-09-07
+## Added
+- Consensus: delegate public key field to a delegation transaction
+- RPC: delegate public key parameter to a delegation transaction request
+- Network: node ID as a network identifier
+- Core: unconfirmed output balance to a wallet
+- RPC: wallet address validation
+- RPC: node ID added to active delegate response
+- Wallet UI: Send delegate transaction
+- Wallet UI: Send vote transaction
+- Wallet UI: Transactions list
+
+## Changed
+- Network: addresses exploring mechanism
+- Network: nodes reconnection mechanism
+- Core: synchronization mechanism
+- Core: wallet balances calculation improved
+
+## [0.7.0] - 2018-08-31
+## Added
+- Master nodes initiation as active delegates on chain start
+- Configuration file
+- Network: Greeting response message contains node's external host
+- RPC: Get delegates by wallet address
+- Consensus: Added amount field to delegate transaction
+
+## Changed
+- Node private key moved from a separate file to a configuration file
+- Network: Improved connection to active delegates
+- Core: Improved vote transaction validation when a wallet had already voted
+- Core: Empty block creation is allowed
+- Wallet: Changed update balance logic
 
 ## [0.6.1] - 2018-08-27
 ### Added
@@ -169,6 +209,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[0.8.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.7.0...v0.8.0
+[0.7.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.4.0...v0.5.0

@@ -5,6 +5,7 @@ import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -15,7 +16,12 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.node.*
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.*
+import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.network.message.core.RewardTransactionMessage
+import io.openfuture.chain.network.message.core.TransferTransactionMessage
+import io.openfuture.chain.network.message.core.VoteTransactionMessage
+import io.openfuture.chain.network.message.sync.GenesisBlockMessage
+import io.openfuture.chain.network.message.sync.MainBlockMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
@@ -97,8 +103,6 @@ interface TransactionService {
 
     fun getCount(): Long
 
-    fun getAllUnconfirmedByAddress(address: String): List<UnconfirmedTransaction>
-
     fun getUnconfirmedTransactionByHash(hash: String): UnconfirmedTransaction
 
     fun getProducingPerSecond(): Long
@@ -115,11 +119,11 @@ interface TransferTransactionService {
 
     fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedTransferTransaction>
 
-    fun getByAddress(address: String): List<TransferTransaction>
+    fun getByAddress(address: String, request: PageRequest): Page<TransferTransaction>
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction
 
-    fun add(message: TransferTransactionMessage): UnconfirmedTransferTransaction
+    fun add(message: TransferTransactionMessage)
 
     fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction
 
@@ -153,7 +157,7 @@ interface VoteTransactionService {
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction
 
-    fun add(message: VoteTransactionMessage): UnconfirmedVoteTransaction
+    fun add(message: VoteTransactionMessage)
 
     fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction
 
@@ -173,7 +177,7 @@ interface DelegateTransactionService {
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction
 
-    fun add(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction
+    fun add(message: DelegateTransactionMessage)
 
     fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction
 
@@ -189,17 +193,31 @@ interface DelegateService {
 
     fun getByPublicKey(key: String): Delegate
 
+    fun getByNodeId(nodeId: String): Delegate
+
     fun getActiveDelegates(): List<Delegate>
 
     fun isExistsByPublicKey(key: String): Boolean
 
+    fun isExistsByNodeId(nodeId: String): Boolean
+
     fun save(delegate: Delegate): Delegate
+
+}
+
+interface ViewDelegateService {
+
+    fun getAll(request: PageRequest): Page<ViewDelegate>
+
+    fun getByNodeId(nodeId: String): ViewDelegate
 
 }
 
 interface WalletService {
 
     fun getByAddress(address: String): Wallet
+
+    fun getActualBalanceByAddress(address: String): Long
 
     fun getBalanceByAddress(address: String): Long
 
@@ -210,5 +228,9 @@ interface WalletService {
     fun increaseBalance(address: String, amount: Long)
 
     fun decreaseBalance(address: String, amount: Long)
+
+    fun increaseUnconfirmedOutput(address: String, amount: Long)
+
+    fun decreaseUnconfirmedOutput(address: String, amount: Long)
 
 }

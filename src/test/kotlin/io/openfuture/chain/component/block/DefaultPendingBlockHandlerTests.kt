@@ -45,7 +45,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
     @Test
     fun addBlockShouldAddMainBlockAndBroadcast() {
-        val delegate = Delegate("publicKey", "address", "host", 1111, 1)
+        val delegate = Delegate("publicKey", "nodeId", "address", "host", 1111, 1)
         val payload = MainBlockPayload(
             "merkleHash"
         )
@@ -57,11 +57,11 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
         given(keyHolder.getPrivateKey()).willReturn(
             ByteUtils.fromHexString(privateKey))
-        given(keyHolder.getPublicKey()).willReturn("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4")
+        given(keyHolder.getPublicKeyAsHexString()).willReturn("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4")
         given(epochService.getSlotNumber(pendingBlock.timestamp)).willReturn(2L)
         given(epochService.getCurrentSlotOwner()).willReturn(delegate)
         given(epochService.getDelegates()).willReturn(
-            listOf(Delegate("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4", "address", "host", 1111, 1)))
+            listOf(Delegate("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4", "nodeId", "address", "host", 1111, 1)))
         given(mainBlockService.verify(pendingBlock)).willReturn(true)
 
         defaultPendingBlockHandler.addBlock(pendingBlock)
@@ -75,7 +75,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         val privateKey = "237a1f68f5e6ee331c2d1fac4107807f7eaf7eed2265490d9a9a330c3549a43d"
         val publicKey = "020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948"
         val hash = "22c626c74fdc7aa6b2809d88a60068e6017a3d7015113ebd0af18cdf9f3809c6"
-        val delegate = Delegate(publicKey, "address", "host", 1111,  1)
+        val delegate = Delegate(publicKey, "nodeId", "address", "host", 1111,  1)
         val payload = MainBlockPayload(
             "merkleHash"
         )
@@ -94,12 +94,12 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
         given(keyHolder.getPrivateKey()).willReturn(
             ByteUtils.fromHexString(privateKey))
-        given(keyHolder.getPublicKey()).willReturn(publicKey)
+        given(keyHolder.getPublicKeyAsHexString()).willReturn(publicKey)
         given(epochService.getSlotNumber(pendingBlock.timestamp)).willReturn(2L)
         given(epochService.getCurrentSlotOwner()).willReturn(delegate)
         given(mainBlockService.verify(pendingBlock)).willReturn(true)
         given(epochService.getDelegates()).willReturn(
-            listOf(Delegate("020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948", "address", "host", 1111,  1)))
+            listOf(Delegate("020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948", "nodeId", "address", "host", 1111,  1)))
         defaultPendingBlockHandler.addBlock(pendingBlock)
 
         given(epochService.getDelegates()).willReturn(listOf(delegate))
@@ -112,7 +112,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
     @Test
     fun handleApproveMessageShouldCommitApproveMessage() {
         val publicKey = "037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"
-        val delegate = Delegate(publicKey, "address", "host", 1111,  1)
+        val delegate = Delegate(publicKey, "nodeId", "address", "host", 1111,  1)
         val message = BlockApprovalMessage(
             BlockApprovalStage.COMMIT.value,
             "2a897fecaaaddcd924a9f562be1cdacf0c7cf3370d1d13c3209f0d05be6bd26f",
@@ -133,8 +133,8 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         val privateKey2 = "a3ddaee50c7986bb95816b0d389eadbff39146af546fa795a6433c67af97c6c9"
         val publicKey = "020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948"
         val publicKey2 = "02fb3085f5f8bd7a095198211fb1d4781fd7f0643dec52328151b6cb46e46931fd"
-        val delegate = Delegate(publicKey, "address", "host", 1111,  1)
-        val delegate2 = Delegate(publicKey2, "address2", "host", 1111,  2)
+        val delegate = Delegate(publicKey, "nodeId", "address", "host", 1111,  1)
+        val delegate2 = Delegate(publicKey2, "nodeId", "address2", "host", 1111,  2)
         val message = BlockApprovalMessage(
             BlockApprovalStage.COMMIT.value,
             blockHash,

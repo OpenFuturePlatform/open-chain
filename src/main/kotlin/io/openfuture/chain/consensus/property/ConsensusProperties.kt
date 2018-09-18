@@ -49,21 +49,27 @@ class ConsensusProperties(
     var rewardBlock: Long? = null,
 
     /**
-     * Fee for transfer transaction
+     * Fee of vote transaction for delegate
      */
     @field:NotNull
-    var feeTransferTx: Long? = null,
+    var feeVoteTxFor: Long? = null,
 
     /**
-     * Fee for vote transaction
+     * Fee of vote transaction against delegate
      */
     @field:NotNull
-    var feeVoteTx: Long? = null,
+    var feeVoteTxAgainst: Long? = null,
 
     /**
      * Fee for delegate transaction
      */
     @field:NotNull
-    var feeDelegateTx: Long? = null
+    var feeDelegateTx: Long? = null,
+
+    /**
+     * Amount for delegate transaction
+     */
+    @field:NotNull
+    var amountDelegateTx: Long? = null
 
 )

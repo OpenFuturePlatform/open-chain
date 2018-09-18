@@ -1,9 +1,9 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.component.TransactionCapacityChecker
+import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.exception.model.ExceptionType.*
-import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
+import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_ADDRESS
 import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
@@ -32,13 +32,22 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
 
 
     protected fun add(utx: U): U {
+        val persistTx = repository.findOneByFooterHash(utx.footer.hash)
+        if (null != persistTx) {
+            throw CoreException("Transaction already handled")
+        }
+
         val persistUtx = unconfirmedRepository.findOneByFooterHash(utx.footer.hash)
 
         if (null != persistUtx) {
             return persistUtx
         }
 
+        validateNew(utx)
         validate(utx)
+
+        updateUnconfirmedBalance(utx)
+
         val savedUtx = save(utx)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
@@ -46,14 +55,17 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
 
     abstract fun validate(utx: U)
 
-    open fun save(utx: U): U {
-        return unconfirmedRepository.save(utx)
-    }
+    abstract fun validateNew(utx: U)
+
+    open fun save(utx: U): U = unconfirmedRepository.save(utx)
 
     open fun save(tx: T): T {
-        updateBalanceByFee(tx)
         capacityChecker.incrementCapacity()
         return repository.save(tx)
+    }
+
+    open fun updateUnconfirmedBalance(utx: U) {
+        walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.header.fee)
     }
 
     protected fun confirm(utx: U, tx: T): T {
@@ -69,12 +81,10 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         super.validateBase(header, payload, footer)
     }
 
-    private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean {
-        return cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
-    }
+    protected fun isValidActualBalance(address: String, amount: Long): Boolean =
+        walletService.getActualBalanceByAddress(address) >= amount
 
-    private fun updateBalanceByFee(tx: BaseTransaction) {
-        walletService.decreaseBalance(tx.header.senderAddress, tx.header.fee)
-    }
+    private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean =
+        cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
 
 }

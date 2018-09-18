@@ -1,7 +1,11 @@
 package io.openfuture.chain.rpc.controller
 
+import io.openfuture.chain.core.service.ViewDelegateService
 import io.openfuture.chain.core.service.WalletService
+import io.openfuture.chain.crypto.annotation.AddressChecksum
 import io.openfuture.chain.crypto.service.CryptoService
+import io.openfuture.chain.rpc.domain.base.PageRequest
+import io.openfuture.chain.rpc.domain.base.PageResponse
 import io.openfuture.chain.rpc.domain.crypto.AccountDto
 import io.openfuture.chain.rpc.domain.crypto.ValidateAddressRequest
 import io.openfuture.chain.rpc.domain.crypto.WalletDto
@@ -9,14 +13,20 @@ import io.openfuture.chain.rpc.domain.crypto.key.DerivationKeyRequest
 import io.openfuture.chain.rpc.domain.crypto.key.ImportKeyRequest
 import io.openfuture.chain.rpc.domain.crypto.key.KeyDto
 import io.openfuture.chain.rpc.domain.crypto.key.RestoreRequest
+import io.openfuture.chain.rpc.domain.view.ViewDelegateResponse
+import org.springframework.data.domain.PageImpl
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
+import java.util.stream.Collectors
 import javax.validation.Valid
 
 @RestController
+@Validated
 @RequestMapping("/rpc/accounts")
 class AccountController(
     private val cryptoService: CryptoService,
-    private val walletService: WalletService
+    private val walletService: WalletService,
+    private val viewDelegateService: ViewDelegateService
 ) {
 
     @GetMapping("/doGenerate")
@@ -29,7 +39,20 @@ class AccountController(
     }
 
     @GetMapping("/wallets/{address}/balance")
-    fun getBalance(@PathVariable address: String): Long = walletService.getBalanceByAddress(address)
+    fun getBalance(@PathVariable @AddressChecksum address: String): Long =
+        walletService.getActualBalanceByAddress(address)
+
+    @GetMapping("/wallets/{address}/delegates")
+    fun getDelegates(@PathVariable @AddressChecksum address: String, request: PageRequest): PageResponse<ViewDelegateResponse> {
+        val delegates = walletService.getVotesByAddress(address)
+            .map { ViewDelegateResponse(viewDelegateService.getByNodeId(it.nodeId)) }
+        val pageActiveDelegate = delegates.stream()
+            .skip(request.offset)
+            .limit(request.getLimit().toLong())
+            .collect(Collectors.toList())
+
+        return PageResponse(PageImpl(pageActiveDelegate, request, delegates.size.toLong()))
+    }
 
     @PostMapping("/wallets/validateAddress")
     fun validateAddress(@RequestBody @Valid request: ValidateAddressRequest): ValidateAddressRequest = request

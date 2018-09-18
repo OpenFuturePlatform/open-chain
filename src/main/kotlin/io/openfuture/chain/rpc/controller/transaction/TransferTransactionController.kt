@@ -1,15 +1,18 @@
 package io.openfuture.chain.rpc.controller.transaction
 
 import io.openfuture.chain.core.service.TransferTransactionService
+import io.openfuture.chain.crypto.annotation.AddressChecksum
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.TransferTransactionResponse
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
 
 @RestController
+@Validated
 @RequestMapping("/rpc/transactions/transfer")
 class TransferTransactionController(
     private val transactionService: TransferTransactionService
@@ -17,18 +20,17 @@ class TransferTransactionController(
 
     @CrossOrigin
     @GetMapping("/address/{address}")
-    fun getTransactions(@PathVariable address: String): List<TransferTransactionResponse> =
-        transactionService.getByAddress(address).map { TransferTransactionResponse(it) }
+    fun getTransactions(@PathVariable @AddressChecksum address: String, request: PageRequest): PageResponse<TransferTransactionResponse> =
+        PageResponse(transactionService.getByAddress(address, request).map { TransferTransactionResponse(it) })
 
     @CrossOrigin
     @GetMapping("/{hash}")
-    fun get(@PathVariable hash: String): TransferTransactionResponse = TransferTransactionResponse(transactionService.getByHash(hash))
+    fun get(@PathVariable hash: String): TransferTransactionResponse =
+        TransferTransactionResponse(transactionService.getByHash(hash))
 
     @PostMapping
-    fun add(@Valid @RequestBody request: TransferTransactionRequest): TransferTransactionResponse {
-        val tx = transactionService.add(request)
-        return TransferTransactionResponse(tx)
-    }
+    fun add(@Valid @RequestBody request: TransferTransactionRequest): TransferTransactionResponse =
+        TransferTransactionResponse(transactionService.add(request))
 
     @CrossOrigin
     @GetMapping

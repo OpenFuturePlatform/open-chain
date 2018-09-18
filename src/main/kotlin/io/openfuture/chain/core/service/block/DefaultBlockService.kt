@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.service.block
 
-import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.repository.BlockRepository
@@ -10,8 +9,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultBlockService(
-    private val repository: BlockRepository<Block>,
-    private val capacityChecker: BlockCapacityChecker
+    private val repository: BlockRepository<Block>
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -21,7 +19,9 @@ class DefaultBlockService(
     }
 
     override fun getAvgProductionTime(): Long {
-        return capacityChecker.getAvgTime()
+        val lastBlock = getLast()
+        val firstMainBlock = repository.findFirstByHeightGreaterThan(1) ?: return 0
+        return (lastBlock.timestamp - firstMainBlock.timestamp) / lastBlock.height
     }
 
     @Transactional(readOnly = true)

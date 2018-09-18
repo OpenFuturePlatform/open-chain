@@ -11,6 +11,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.repository.NoRepositoryBean
@@ -58,7 +59,7 @@ interface DelegateTransactionRepository : TransactionRepository<DelegateTransact
 @Repository
 interface TransferTransactionRepository : TransactionRepository<TransferTransaction> {
 
-    fun findAllByPayloadRecipientAddress(payloadRecipientAddress: String): List<TransferTransaction>
+    fun findAllByHeaderSenderAddressOrPayloadRecipientAddress(headerSenderAddress: String, payloadRecipientAddress: String, request: Pageable): Page<TransferTransaction>
 
 }
 
@@ -96,10 +97,20 @@ interface DelegateRepository : BaseRepository<Delegate> {
 
     fun findOneByPublicKey(key: String): Delegate?
 
+    fun findOneByNodeId(nodeId: String): Delegate?
+
+    fun existsByPublicKey(key: String): Boolean
+
+    fun existsByNodeId(nodeId: String): Boolean
+
 }
 
 @Repository
-interface ViewDelegateRepository : BaseRepository<ViewDelegate>
+interface ViewDelegateRepository : BaseRepository<ViewDelegate> {
+
+    fun findOneByNodeId(nodeId: String): ViewDelegate?
+
+}
 
 @Repository
 interface WalletRepository : BaseRepository<Wallet> {

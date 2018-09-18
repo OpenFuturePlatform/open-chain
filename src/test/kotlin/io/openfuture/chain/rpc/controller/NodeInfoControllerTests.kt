@@ -1,6 +1,8 @@
 package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
+import io.openfuture.chain.core.component.NodeConfigurator
+import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.node.CpuInfo
 import io.openfuture.chain.core.model.node.HardwareInfo
 import io.openfuture.chain.core.model.node.NetworkInfo
@@ -17,6 +19,12 @@ class NodeInfoControllerTests : ControllerTests() {
 
     @MockBean
     private lateinit var hardwareInfoService: HardwareInfoService
+
+    @MockBean
+    private lateinit var nodeKeyHolder: NodeKeyHolder
+
+    @MockBean
+    private lateinit var nodeConfigurator: NodeConfigurator
 
     companion object {
         private const val NODE_INFO_URL = "/rpc/info"

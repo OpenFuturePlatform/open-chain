@@ -14,19 +14,37 @@ class VoteTransactionMessage(
     senderSignature: String,
     senderPublicKey: String,
     var voteTypeId: Int,
-    var delegateKey: String
+    var nodeId: String
 ) : TransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
 
-    override fun read(buffer: ByteBuf) {
-        super.read(buffer)
-        voteTypeId = buffer.readInt()
-        delegateKey = buffer.readString()
+    override fun read(buf: ByteBuf) {
+        super.read(buf)
+        voteTypeId = buf.readInt()
+        nodeId = buf.readString()
     }
 
-    override fun write(buffer: ByteBuf) {
-        super.write(buffer)
-        buffer.writeInt(voteTypeId)
-        buffer.writeString(delegateKey)
+    override fun write(buf: ByteBuf) {
+        super.write(buf)
+        buf.writeInt(voteTypeId)
+        buf.writeString(nodeId)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is VoteTransactionMessage) return false
+        if (!super.equals(other)) return false
+
+        if (voteTypeId != other.voteTypeId) return false
+        if (nodeId != other.nodeId) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + voteTypeId
+        result = 31 * result + nodeId.hashCode()
+        return result
     }
 
 }

@@ -16,6 +16,8 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.core.RewardTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,6 +31,11 @@ class DefaultRewardTransactionService(
     private val keyHolder: NodeKeyHolder
 ) : BaseTransactionService(), RewardTransactionService {
 
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(DefaultRewardTransactionService::class.java)
+    }
+
+
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<RewardTransaction> = repository.findAll(request)
 
@@ -40,10 +47,10 @@ class DefaultRewardTransactionService(
     override fun create(timestamp: Long, fees: Long): RewardTransactionMessage {
         val senderAddress = consensusProperties.genesisAddress!!
         val rewardBlock = consensusProperties.rewardBlock!!
-        val bank = walletService.getBalanceByAddress(senderAddress)
+        val bank = walletService.getActualBalanceByAddress(senderAddress)
         val reward = fees + if (rewardBlock > bank) bank else rewardBlock
         val fee = 0L
-        val publicKey = keyHolder.getPublicKey()
+        val publicKey = keyHolder.getPublicKeyAsHexString()
         val delegate = delegateService.getByPublicKey(publicKey)
         val hash = createHash(TransactionHeader(timestamp, fee, senderAddress), RewardTransactionPayload(reward, delegate.address))
         val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())
@@ -59,20 +66,21 @@ class DefaultRewardTransactionService(
         }
 
         updateTransferBalance(message.recipientAddress, message.reward)
+
         repository.save(RewardTransaction.of(message, block))
     }
 
     @Transactional(readOnly = true)
     override fun verify(message: RewardTransactionMessage): Boolean {
-        try {
+        return try {
             val header = TransactionHeader(message.timestamp, message.fee, message.senderAddress)
             val payload = RewardTransactionPayload(message.reward, message.recipientAddress)
             val footer = TransactionFooter(message.hash, message.senderSignature, message.senderPublicKey)
             super.validateBase(header, payload, footer)
-            return true
+            true
         } catch (e: ValidationException) {
-            DefaultTransferTransactionService.log.warn(e.message)
-            return false
+            log.warn(e.message)
+            false
         }
     }
 
@@ -80,10 +88,10 @@ class DefaultRewardTransactionService(
         walletService.increaseBalance(to, amount)
 
         val senderAddress = consensusProperties.genesisAddress!!
-        val bank = walletService.getBalanceByAddress(senderAddress)
+        val bank = walletService.getActualBalanceByAddress(senderAddress)
         val reward = if (consensusProperties.rewardBlock!! > bank) bank else consensusProperties.rewardBlock!!
 
-        walletService.decreaseBalance(consensusProperties.genesisAddress!!, reward)
+        walletService.decreaseBalance(senderAddress, reward)
     }
 
 }

@@ -13,13 +13,13 @@ import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DefaultDelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.WalletService
+import io.openfuture.chain.core.sync.SyncStatus
+import io.openfuture.chain.core.sync.SyncStatus.SyncStatusType.NOT_SYNCHRONIZED
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.message.core.GenesisBlockMessage
-import io.openfuture.chain.network.service.NetworkApiService
-import io.openfuture.chain.network.sync.SyncManager
-import io.openfuture.chain.network.sync.impl.SynchronizationStatus.NOT_SYNCHRONIZED
+import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
@@ -33,12 +33,11 @@ class DefaultGenesisBlockService(
     capacityChecker: BlockCapacityChecker,
     repository: GenesisBlockRepository,
     private val keyHolder: NodeKeyHolder,
-    private val networkService: NetworkApiService,
-    private val syncManager: SyncManager
+    private val syncStatus: SyncStatus
 ) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService, capacityChecker), GenesisBlockService {
 
     companion object {
-        val log = LoggerFactory.getLogger(DefaultGenesisBlockService::class.java)
+        private val log: Logger = LoggerFactory.getLogger(DefaultGenesisBlockService::class.java)
     }
 
 
@@ -54,7 +53,8 @@ class DefaultGenesisBlockService(
     override fun getNextBlock(hash: String): GenesisBlock {
         val block = getByHash(hash)
 
-        return repository.findFirstByHeightGreaterThan(block.height) ?: throw NotFoundException("Next block by hash $hash not found")
+        return repository.findFirstByHeightGreaterThan(block.height)
+            ?: throw NotFoundException("Next block by hash $hash not found")
     }
 
     @Transactional(readOnly = true)
@@ -80,7 +80,7 @@ class DefaultGenesisBlockService(
         val payload = createPayload()
         val hash = createHash(timestamp, height, previousHash, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
-        val publicKey = keyHolder.getPublicKey()
+        val publicKey = keyHolder.getPublicKeyAsHexString()
 
         return GenesisBlockMessage(height, previousHash, timestamp, ByteUtils.toHexString(hash), signature,
             publicKey, payload.epochIndex, payload.activeDelegates.map { it.publicKey })
@@ -96,7 +96,7 @@ class DefaultGenesisBlockService(
         val block = GenesisBlock.of(message, delegates)
 
         if (!isSync(block)) {
-            syncManager.setSyncStatus(NOT_SYNCHRONIZED)
+            syncStatus.setSyncStatus(NOT_SYNCHRONIZED)
             return
         }
 

@@ -1,7 +1,10 @@
 package io.openfuture.chain.core.model.entity.delegate
 
 import org.hibernate.annotations.Immutable
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.Id
+import javax.persistence.Table
 
 @Entity
 @Immutable
@@ -10,10 +13,13 @@ class ViewDelegate(
 
     @Id
     @Column(name = "id")
-    var id: Int = 0,
+    var id: Long = 0,
 
     @Column(name = "public_key")
     var publicKey: String,
+
+    @Column(name = "node_id")
+    var nodeId: String,
 
     @Column(name = "address")
     var address: String,
