@@ -111,11 +111,13 @@ interface TransactionService {
 
 interface TransferTransactionService {
 
+    fun getUnconfirmedCount(): Long
+
     fun getByHash(hash: String): TransferTransaction
 
     fun getAll(request: PageRequest): Page<TransferTransaction>
 
-    fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction>
+    fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedTransferTransaction>
 
     fun getByAddress(address: String, request: PageRequest): Page<TransferTransaction>
 
@@ -147,9 +149,11 @@ interface RewardTransactionService {
 
 interface VoteTransactionService {
 
+    fun getUnconfirmedCount(): Long
+
     fun getByHash(hash: String): VoteTransaction
 
-    fun getAllUnconfirmed(): MutableList<UnconfirmedVoteTransaction>
+    fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedVoteTransaction>
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction
 
@@ -165,9 +169,11 @@ interface VoteTransactionService {
 
 interface DelegateTransactionService {
 
+    fun getUnconfirmedCount(): Long
+
     fun getByHash(hash: String): DelegateTransaction
 
-    fun getAllUnconfirmed(): MutableList<UnconfirmedDelegateTransaction>
+    fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedDelegateTransaction>
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction
 

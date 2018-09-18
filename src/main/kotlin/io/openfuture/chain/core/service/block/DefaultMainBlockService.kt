@@ -6,6 +6,8 @@ import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.model.domain.block.TransactionSelectionRequest
+import io.openfuture.chain.core.model.domain.block.TransactionSelectionResponse
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.repository.MainBlockRepository
@@ -81,14 +83,11 @@ class DefaultMainBlockService(
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
 
-        val voteTransactions = voteTransactionService.getAllUnconfirmed()
-        val delegateTransactions = delegateTransactionService.getAllUnconfirmed()
-        val transferTransactions = transferTransactionService.getAllUnconfirmed()
-        val transactions = voteTransactions + delegateTransactions + transferTransactions
+        val transactionsForBlock = getTransactions()
+        val fees = transactionsForBlock.getAll().map { it.header.fee }.sum()
+        val rewardTransactionMessage = rewardTransactionService.create(timestamp, fees)
 
-        val rewardTransactionMessage = rewardTransactionService.create(timestamp, transactions.map { it.header.fee }.sum())
-
-        val merkleHash = calculateMerkleRoot(transactions.map { it.footer.hash } + rewardTransactionMessage.hash)
+        val merkleHash = calculateMerkleRoot(transactionsForBlock.getAll().map { it.footer.hash } + rewardTransactionMessage.hash)
         val payload = MainBlockPayload(merkleHash)
 
         val hash = createHash(timestamp, height, previousHash, payload)
@@ -96,7 +95,8 @@ class DefaultMainBlockService(
         val publicKey = keyHolder.getPublicKeyAsHexString()
 
         return PendingBlockMessage(height, previousHash, timestamp, ByteUtils.toHexString(hash), signature, publicKey,
-            merkleHash, rewardTransactionMessage, voteTransactions.map { it.toMessage() }, delegateTransactions.map { it.toMessage() }, transferTransactions.map { it.toMessage() })
+            merkleHash, rewardTransactionMessage, transactionsForBlock.voteTransactions.map { it.toMessage() },
+            transactionsForBlock.delegateTransactions.map { it.toMessage() }, transactionsForBlock.transferTransactions.map { it.toMessage() })
     }
 
     @Transactional
@@ -229,6 +229,72 @@ class DefaultMainBlockService(
             treeLayout = mutableListOf()
         }
         return ByteUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
+    }
+
+    private fun getTransactions(): TransactionSelectionResponse {
+        val request = createBlockTransactionsRequest()
+
+        val voteTransactions =
+            voteTransactionService.getAllUnconfirmed(PageRequest(0, request.voteTransactionsCount))
+
+        val delegateTransactions =
+            delegateTransactionService.getAllUnconfirmed(PageRequest(0, request.delegateTransactionsCount))
+
+        val transferTransactions =
+            transferTransactionService.getAllUnconfirmed(PageRequest(0, request.transferTransactionsCount))
+
+        return TransactionSelectionResponse(voteTransactions, delegateTransactions, transferTransactions)
+    }
+
+    private fun createBlockTransactionsRequest(): TransactionSelectionRequest {
+        val votesCountTotal = voteTransactionService.getUnconfirmedCount().toInt()
+        val delegatesCountTotal = delegateTransactionService.getUnconfirmedCount().toInt()
+        val transfersCountTotal = transferTransactionService.getUnconfirmedCount().toInt()
+
+        if (votesCountTotal + delegatesCountTotal + transfersCountTotal <= consensusProperties.blockCapacity!!) {
+            return TransactionSelectionRequest(votesCountTotal, delegatesCountTotal, transfersCountTotal)
+        }
+
+        if (transfersCountTotal <= consensusProperties.blockCapacity!! / 2) {
+            return when {
+                votesCountTotal <= (consensusProperties.blockCapacity!! - transfersCountTotal) / 2 -> {
+                    val delegatesCount = consensusProperties.blockCapacity!! - (transfersCountTotal + votesCountTotal)
+                    TransactionSelectionRequest(votesCountTotal, delegatesCount, transfersCountTotal)
+                }
+                delegatesCountTotal <= (consensusProperties.blockCapacity!! - transfersCountTotal) / 2 -> {
+                    val votesCount = consensusProperties.blockCapacity!! - (transfersCountTotal + delegatesCountTotal)
+                    TransactionSelectionRequest(votesCount, delegatesCountTotal, transfersCountTotal)
+                }
+                else -> {
+                    val votesCount = (consensusProperties.blockCapacity!! - transfersCountTotal) / 2
+                    val delegatesCount = (consensusProperties.blockCapacity!! - transfersCountTotal) / 2
+                    TransactionSelectionRequest(votesCount, delegatesCount, transfersCountTotal)
+                }
+            }
+        } else {
+            return when {
+                delegatesCountTotal + votesCountTotal <= consensusProperties.blockCapacity!! / 2 -> {
+                    val transferCount = consensusProperties.blockCapacity!! - (votesCountTotal + delegatesCountTotal)
+                    TransactionSelectionRequest(votesCountTotal, delegatesCountTotal, transferCount)
+                }
+                votesCountTotal <= consensusProperties.blockCapacity!! / 2 / 2 -> {
+                    val delegatesCount = consensusProperties.blockCapacity!! / 2 - votesCountTotal
+                    val transferCount = consensusProperties.blockCapacity!! - (votesCountTotal + delegatesCountTotal)
+                    TransactionSelectionRequest(votesCountTotal, delegatesCount, transferCount)
+                }
+                delegatesCountTotal <= consensusProperties.blockCapacity!! / 2 / 2 -> {
+                    val votesCount = consensusProperties.blockCapacity!! / 2 - delegatesCountTotal
+                    val transferCount = consensusProperties.blockCapacity!! - (votesCountTotal + delegatesCountTotal)
+                    TransactionSelectionRequest(votesCount, delegatesCountTotal, transferCount)
+                }
+                else -> {
+                    val votesCount = consensusProperties.blockCapacity!! / 2 / 2
+                    val delegatesCount = consensusProperties.blockCapacity!! / 2 / 2
+                    val transferCount = consensusProperties.blockCapacity!! - (votesCountTotal + delegatesCountTotal)
+                    TransactionSelectionRequest(votesCount, delegatesCount, transferCount)
+                }
+            }
+        }
     }
 
 }

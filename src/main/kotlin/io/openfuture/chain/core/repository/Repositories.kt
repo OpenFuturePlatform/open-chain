@@ -77,7 +77,7 @@ interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseReposit
 
     fun findOneByFooterHash(hash: String): UEntity?
 
-    fun findAllByOrderByHeaderFeeDesc(): MutableList<UEntity>
+    fun findAllByOrderByHeaderFeeDesc(request: Pageable): MutableList<UEntity>
 
     fun findAllByHeaderSenderAddress(address: String): List<UEntity>
 

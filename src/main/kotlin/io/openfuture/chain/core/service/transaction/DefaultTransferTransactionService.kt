@@ -34,6 +34,11 @@ class DefaultTransferTransactionService(
 
 
     @Transactional(readOnly = true)
+    override fun getUnconfirmedCount(): Long {
+        return unconfirmedRepository.count()
+    }
+
+    @Transactional(readOnly = true)
     override fun getByHash(hash: String): TransferTransaction = repository.findOneByFooterHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
@@ -41,8 +46,8 @@ class DefaultTransferTransactionService(
     override fun getAll(request: PageRequest): Page<TransferTransaction> = repository.findAll(request)
 
     @Transactional(readOnly = true)
-    override fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction> =
-        unconfirmedRepository.findAllByOrderByHeaderFeeDesc()
+    override fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedTransferTransaction> =
+        unconfirmedRepository.findAllByOrderByHeaderFeeDesc(request)
 
     @Transactional(readOnly = true)
     override fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction =
