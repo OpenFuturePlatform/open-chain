@@ -12,7 +12,7 @@ open class PageRequest(
     @field:Min(value = 1) @field:Max(100) private var limit: Int = 100,
     var sortField: Array<String> = arrayOf("id"),
     var sortDirection: Direction = Direction.ASC
-) : AbstractPageRequest(offset.toInt() / limit + 1, limit) {
+) : AbstractPageRequest(if (limit != 0) offset.toInt() / limit + 1 else 1, limit) {
 
     override fun next(): Pageable = PageRequest(offset + limit, limit, sortField, sortDirection)
 
