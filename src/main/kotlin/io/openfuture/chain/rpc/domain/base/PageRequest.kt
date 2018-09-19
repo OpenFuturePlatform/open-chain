@@ -1,6 +1,5 @@
 package io.openfuture.chain.rpc.domain.base
 
-import org.springframework.data.domain.AbstractPageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Direction
@@ -10,9 +9,9 @@ import javax.validation.constraints.Min
 open class PageRequest(
     @field:Min(value = 0) private var offset: Long = 0,
     @field:Min(value = 1) @field:Max(100) private var limit: Int = 100,
-    var sortField: Array<String> = arrayOf("id"),
-    var sortDirection: Direction = Direction.ASC
-) : AbstractPageRequest(if (limit != 0) offset.toInt() / limit + 1 else 1, limit) {
+    private var sortField: Array<String> = arrayOf("id"),
+    private var sortDirection: Direction = Direction.ASC
+) : Pageable {
 
     override fun next(): Pageable = PageRequest(offset + limit, limit, sortField, sortDirection)
 
@@ -24,7 +23,15 @@ open class PageRequest(
 
     override fun first(): Pageable = PageRequest(0, limit, sortField, sortDirection)
 
-    override fun previous(): PageRequest {
+    override fun getPageNumber(): Int = offset.toInt() / limit + 1
+
+    override fun hasPrevious(): Boolean = offset > 0
+
+    override fun getPageSize(): Int = limit
+
+    override fun previousOrFirst(): Pageable = if (hasPrevious()) previous() else first()
+
+    fun previous(): PageRequest {
         return if (offset == 0L) this else {
             var newOffset = this.offset - limit
             if (newOffset < 0) newOffset = 0
