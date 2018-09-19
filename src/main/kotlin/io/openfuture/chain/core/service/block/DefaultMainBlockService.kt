@@ -10,6 +10,9 @@ import io.openfuture.chain.core.model.domain.block.TransactionSelectionRequest
 import io.openfuture.chain.core.model.domain.block.TransactionSelectionResponse
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncStatus
@@ -234,13 +237,13 @@ class DefaultMainBlockService(
     private fun getTransactions(): TransactionSelectionResponse {
         val request = createBlockTransactionsRequest()
 
-        val voteTransactions =
+        val voteTransactions = if (request.voteTransactionsCount == 0) emptyList<UnconfirmedVoteTransaction>() else
             voteTransactionService.getAllUnconfirmed(PageRequest(0, request.voteTransactionsCount))
 
-        val delegateTransactions =
+        val delegateTransactions = if (request.delegateTransactionsCount == 0) emptyList<UnconfirmedDelegateTransaction>() else
             delegateTransactionService.getAllUnconfirmed(PageRequest(0, request.delegateTransactionsCount))
 
-        val transferTransactions =
+        val transferTransactions = if (request.transferTransactionsCount == 0) emptyList<UnconfirmedTransferTransaction>() else
             transferTransactionService.getAllUnconfirmed(PageRequest(0, request.transferTransactionsCount))
 
         return TransactionSelectionResponse(voteTransactions, delegateTransactions, transferTransactions)
