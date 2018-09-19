@@ -84,7 +84,11 @@ interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseReposit
 }
 
 @Repository
-interface UVoteTransactionRepository : UTransactionRepository<UnconfirmedVoteTransaction>
+interface UVoteTransactionRepository : UTransactionRepository<UnconfirmedVoteTransaction> {
+
+    fun findOneByHeaderSenderAddressAndPayloadNodeIdAndPayloadVoteTypeId(senderAddress: String, nodeId: String, typeId: Int): UnconfirmedVoteTransaction?
+
+}
 
 @Repository
 interface UDelegateTransactionRepository : UTransactionRepository<UnconfirmedDelegateTransaction>
