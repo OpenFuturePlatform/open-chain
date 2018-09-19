@@ -98,19 +98,22 @@ package-native:
 ###########################
 # Deploy
 ###########################
+.deploy-to-host-script: &deploy_to_host |
+  if [[ ${CI_COMMIT_REF_NAME} == master ]]; then export IMAGE_TAG=latest; else export IMAGE_TAG=${CI_COMMIT_REF_NAME}; fi
+  echo "${DEPLOY_KEY_PROD}" | tr -d '\r' > ansible/key.pem
+  chmod 600 ansible/key.pem
+  mkdir ansible/host_vars
+  for i in `seq 1 21`; do eval echo "key: \$SERVER${i}" >> ansible/host_vars/server${i}; done
+  ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -f 25 -e "image_tag=${IMAGE_TAG}" -e "count=21" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.yml
+
 deploy-manual:
   stage: deploy
   image: openplatform/ansible
   dependencies: []
+  variables:
+    ANSIBLE_HOST_KEY_CHECKING: "False"
   script:
-    - if [[ ${CI_COMMIT_REF_NAME} == master ]]; then export IMAGE_TAG=latest; else export IMAGE_TAG=${CI_COMMIT_REF_NAME}; fi;
-    - echo "${DEPLOY_KEY_PROD}" | tr -d '\r' > ansible/key.pem
-    - chmod 600 ansible/key.pem
-    - export ANSIBLE_HOST_KEY_CHECKING=False
-    - mkdir ansible/host_vars
-    - |
-      for i in `seq 1 21`; do eval echo "key: \$SERVER${i}" >> ansible/host_vars/server${i}; done
-    - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -f 25 -e "image_tag=${IMAGE_TAG}" -e "count=21" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.yml
+    - *deploy_to_host
   when: manual
   only:
     - master
@@ -119,14 +122,9 @@ deploy-production:
   stage: deploy
   image: openplatform/ansible
   dependencies: []
+  variables:
+    ANSIBLE_HOST_KEY_CHECKING: "False"
   script:
-    - if [[ ${CI_COMMIT_REF_NAME} == master ]]; then export IMAGE_TAG=latest; else export IMAGE_TAG=${CI_COMMIT_REF_NAME}; fi;
-    - echo "${DEPLOY_KEY_PROD}" | tr -d '\r' > ansible/key.pem
-    - chmod 600 ansible/key.pem
-    - export ANSIBLE_HOST_KEY_CHECKING=False
-    - mkdir ansible/host_vars
-    - |
-      for i in `seq 1 21`; do eval echo "key: \$SERVER${i}" >> ansible/host_vars/server${i}; done
-    - ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -e "image_tag=${IMAGE_TAG}" -e "count=1" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.yml
+    - *deploy_to_host
   only:
     - tags

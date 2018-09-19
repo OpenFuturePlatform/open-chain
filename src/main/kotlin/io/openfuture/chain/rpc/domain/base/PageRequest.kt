@@ -10,8 +10,8 @@ import javax.validation.constraints.Min
 open class PageRequest(
     @field:Min(value = 0) private var offset: Long = 0,
     @field:Min(value = 1) @field:Max(100) private var limit: Int = 100,
-    var sortField: Array<String> = arrayOf("id"),
-    var sortDirection: Direction = Direction.ASC
+    private var sortField: Array<String> = arrayOf("id"),
+    private var sortDirection: Direction = Direction.ASC
 ) : AbstractPageRequest(offset.toInt() / limit + 1, limit) {
 
     override fun next(): Pageable = PageRequest(offset + limit, limit, sortField, sortDirection)
