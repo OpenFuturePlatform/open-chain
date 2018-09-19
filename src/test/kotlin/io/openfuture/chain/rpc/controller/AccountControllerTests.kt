@@ -3,6 +3,7 @@ package io.openfuture.chain.rpc.controller
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.service.ViewDelegateService
+import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
@@ -34,6 +35,9 @@ class AccountControllerTests : ControllerTests() {
 
     @MockBean
     private lateinit var viewDelegateService: ViewDelegateService
+
+    @MockBean
+    private lateinit var voteTransactionService: VoteTransactionService
 
     companion object {
         private const val ACCOUNT_URL = "/rpc/accounts"
@@ -150,7 +154,7 @@ class AccountControllerTests : ControllerTests() {
         val key = ExtendedKey.root(ByteArray(0))
         val publicKey = "publicKey"
         val privateKey = "privateKey"
-        val expectedWalletDto =  WalletDto(KeyDto("publicKey", "privateKey"), key.ecKey.getAddress())
+        val expectedWalletDto = WalletDto(KeyDto("publicKey", "privateKey"), key.ecKey.getAddress())
 
         given(cryptoService.importExtendedKey(importKeyRequest.decodedKey!!)).willReturn(key)
         given(cryptoService.serializePublicKey(key)).willReturn(publicKey)
@@ -171,7 +175,7 @@ class AccountControllerTests : ControllerTests() {
     fun doImportWifKeyShouldReturnWalletDto() {
         val importKeyRequest = ImportKeyRequest("decodedKey")
         val ecKey = ECKey(ByteArray(1))
-        val expectedWalletDto =  WalletDto(ecKey)
+        val expectedWalletDto = WalletDto(ecKey)
 
         given(cryptoService.importWifKey(importKeyRequest.decodedKey!!)).willReturn(ecKey)
 
@@ -189,7 +193,7 @@ class AccountControllerTests : ControllerTests() {
     fun doImportPrivateKeyShouldReturnWalletDto() {
         val importKeyRequest = ImportKeyRequest("decodedKey")
         val ecKey = ECKey(ByteArray(1))
-        val expectedWalletDto =  WalletDto(ecKey)
+        val expectedWalletDto = WalletDto(ecKey)
 
         given(cryptoService.importPrivateKey(importKeyRequest.decodedKey!!)).willReturn(ecKey)
 
