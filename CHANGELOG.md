@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ## Added
 - Core: transaction validation
+- Core: priority transaction selection
+- Core: block capacity
 - Database: indexes on tables
-- RPC: vote date added to all votes response 
+- RPC: recalled flag to casted votes
+- RPC: vote date to get all votes response 
 
 ## Changed
 - Database moved to H2
