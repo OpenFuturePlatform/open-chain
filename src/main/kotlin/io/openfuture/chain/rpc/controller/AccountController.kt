@@ -50,6 +50,7 @@ class AccountController(
             .map {
                 VotesResponse(
                     viewDelegateService.getByNodeId(it.nodeId),
+                    voteTransactionService.getLastVoteForDelegate(address, it.nodeId).header.timestamp,
                     voteTransactionService.getUnconfirmedBySenderAgainstDelegate(address, it.nodeId) != null
                 )
             }
