@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Added
 - Core: transaction validation
 - Database: indexes on tables
--RPC: vote date added to all votes response 
+- RPC: vote date added to all votes response 
 
 ## Changed
 - Database moved to H2
