@@ -159,6 +159,8 @@ interface VoteTransactionService {
 
     fun getUnconfirmedBySenderAgainstDelegate(senderAddress: String, nodeId: String): UnconfirmedVoteTransaction?
 
+    fun getLastVoteForDelegate(senderAddress: String, nodeId: String): VoteTransaction
+
     fun add(message: VoteTransactionMessage)
 
     fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction
