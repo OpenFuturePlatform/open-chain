@@ -51,7 +51,11 @@ interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 }
 
 @Repository
-interface VoteTransactionRepository : TransactionRepository<VoteTransaction>
+interface VoteTransactionRepository : TransactionRepository<VoteTransaction> {
+
+    fun findFirstByHeaderSenderAddressAndPayloadNodeIdAndPayloadVoteTypeIdOrderByHeaderTimestampDesc(senderAddress: String, nodeId: String, typeId: Int): VoteTransaction?
+
+}
 
 @Repository
 interface DelegateTransactionRepository : TransactionRepository<DelegateTransaction>

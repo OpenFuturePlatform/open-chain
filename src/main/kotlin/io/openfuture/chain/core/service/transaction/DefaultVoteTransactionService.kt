@@ -37,6 +37,7 @@ internal class DefaultVoteTransactionService(
         private val log: Logger = LoggerFactory.getLogger(DefaultVoteTransactionService::class.java)
     }
 
+
     @Transactional(readOnly = true)
     override fun getUnconfirmedCount(): Long {
         return unconfirmedRepository.count()
@@ -54,10 +55,17 @@ internal class DefaultVoteTransactionService(
     override fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction = unconfirmedRepository.findOneByFooterHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
+    @Transactional(readOnly = true)
     override fun getUnconfirmedBySenderAgainstDelegate(senderAddress: String, nodeId: String): UnconfirmedVoteTransaction? =
         (unconfirmedRepository as UVoteTransactionRepository)
             .findOneByHeaderSenderAddressAndPayloadNodeIdAndPayloadVoteTypeId(senderAddress, nodeId, VoteType.AGAINST.getId())
 
+
+    @Transactional(readOnly = true)
+    override fun getLastVoteForDelegate(senderAddress: String, nodeId: String): VoteTransaction =
+        (repository as VoteTransactionRepository)
+            .findFirstByHeaderSenderAddressAndPayloadNodeIdAndPayloadVoteTypeIdOrderByHeaderTimestampDesc(senderAddress, nodeId, VoteType.FOR.getId())
+            ?: throw NotFoundException("Last vote for delegate transaction not found")
 
     @BlockchainSynchronized
     @Synchronized

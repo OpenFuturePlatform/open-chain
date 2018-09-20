@@ -12,13 +12,13 @@ data class VotesResponse(
     val recalled: Boolean
 ) {
 
-    constructor(delegate: ViewDelegate, recalled: Boolean) : this(
+    constructor(delegate: ViewDelegate, voteTimestamp: Long, recalled: Boolean) : this(
         delegate.address,
         delegate.publicKey,
         delegate.nodeId,
         delegate.rating,
         delegate.votesCount,
-        delegate.registrationDate,
+        voteTimestamp,
         recalled
     )
 
