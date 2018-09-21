@@ -63,12 +63,14 @@ class DefaultWalletService(
         updateUnconfirmedByAddress(address, -amount)
     }
 
+    @Synchronized
     private fun updateByAddress(address: String, amount: Long) {
         val wallet = repository.findOneByAddress(address) ?: Wallet(address)
         wallet.balance += amount
         repository.save(wallet)
     }
 
+    @Synchronized
     private fun updateUnconfirmedByAddress(address: String, amount: Long) {
         val wallet = repository.findOneByAddress(address) ?: Wallet(address)
         wallet.unconfirmedOutput += amount
