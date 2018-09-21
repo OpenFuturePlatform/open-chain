@@ -188,8 +188,7 @@ class DefaultMainBlockService(
     }
 
     private fun isValidVoteTransactions(transactions: List<VoteTransactionMessage>): Boolean {
-        return transactions.all { voteTransactionService.verify(it) } &&
-            transactions.distinctBy { it.nodeId }.size == transactions.size
+        return transactions.all { voteTransactionService.verify(it) }
     }
 
     private fun isValidDelegateTransactions(transactions: List<DelegateTransactionMessage>): Boolean {
