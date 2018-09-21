@@ -8,6 +8,7 @@ import io.openfuture.chain.core.exception.SynchronizationException
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
 import org.slf4j.LoggerFactory
+import org.springframework.dao.PessimisticLockingFailureException
 import org.springframework.stereotype.Component
 
 @Component
@@ -26,7 +27,9 @@ class BlockApprovalHandler(
     }
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
-        if (cause !is SynchronizationException) {
+        if (cause is PessimisticLockingFailureException) {
+            log.error("Connection error ${ctx.channel().remoteAddress()} with cause: ${cause.message}")
+        } else if (cause !is SynchronizationException) {
             log.error("Connection error ${ctx.channel().remoteAddress()} with cause: ${cause.message}")
 
             channelsHolder.removeChannel(ctx.channel())
