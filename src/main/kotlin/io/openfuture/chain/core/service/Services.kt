@@ -55,6 +55,7 @@ interface BlockService {
 
     fun getAvgProductionTime(): Long
 
+    fun getCurrentHeight(): Long
 }
 
 interface GenesisBlockService {
@@ -65,7 +66,7 @@ interface GenesisBlockService {
 
     fun getLast(): GenesisBlock
 
-    fun create(timestamp: Long): GenesisBlockMessage
+    fun create(): GenesisBlockMessage
 
     fun add(message: GenesisBlockMessage)
 
@@ -76,6 +77,8 @@ interface GenesisBlockService {
     fun getNextBlock(hash: String): GenesisBlock
 
     fun getPreviousBlock(hash: String): GenesisBlock
+
+    fun isGenesisBlockRequired(): Boolean
 
 }
 

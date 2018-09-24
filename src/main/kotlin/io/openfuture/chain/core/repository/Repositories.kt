@@ -14,6 +14,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.NoRepositoryBean
 import org.springframework.stereotype.Repository
 
@@ -33,6 +34,9 @@ interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
 
     fun findAllByHeightGreaterThan(height: Long): List<Entity>
 
+    @Query(value = "Select HEIGHT From BLOCKS Order By HEIGHT Desc Limit 1", nativeQuery = true)
+    fun getCurrentHeight(): Long
+
 }
 
 @Repository
@@ -45,8 +49,6 @@ interface GenesisBlockRepository : BlockRepository<GenesisBlock>
 interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 
     fun findOneByFooterHash(hash: String): Entity?
-
-    fun findAllByHeaderSenderAddress(senderAddress: String): List<Entity>
 
 }
 

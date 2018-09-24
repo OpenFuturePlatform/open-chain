@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.block
 
+import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.component.NodeKeyHolder
@@ -33,13 +34,15 @@ class DefaultGenesisBlockService(
     capacityChecker: BlockCapacityChecker,
     repository: GenesisBlockRepository,
     private val keyHolder: NodeKeyHolder,
-    private val syncStatus: SyncStatus
+    private val syncStatus: SyncStatus,
+    private val consensusProperties: ConsensusProperties
 ) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService, capacityChecker), GenesisBlockService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultGenesisBlockService::class.java)
     }
 
+    @Volatile private var last: GenesisBlock = repository.findFirstByOrderByHeightDesc()!!
 
     @Transactional(readOnly = true)
     override fun getPreviousByHeight(height: Long): GenesisBlock = repository.findFirstByHeightLessThanOrderByHeightDesc(height)
@@ -68,13 +71,13 @@ class DefaultGenesisBlockService(
     override fun getAll(request: PageRequest): Page<GenesisBlock> = repository.findAll(request)
 
     @Transactional(readOnly = true)
-    override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()
-        ?: throw NotFoundException("Last block not found")
+    override fun getLast(): GenesisBlock = last
 
     @BlockchainSynchronized
     @Transactional
-    override fun create(timestamp: Long): GenesisBlockMessage {
+    override fun create(): GenesisBlockMessage {
         val lastBlock = blockService.getLast()
+        val timestamp = getTimestamp()
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
         val payload = createPayload()
@@ -101,6 +104,7 @@ class DefaultGenesisBlockService(
         }
 
         super.save(block)
+        last = block
     }
 
     @Transactional(readOnly = true)
@@ -112,6 +116,17 @@ class DefaultGenesisBlockService(
             log.warn(e.message)
             false
         }
+    }
+
+    override fun isGenesisBlockRequired(): Boolean {
+        val blocksProduced = blockService.getCurrentHeight() - getLast().height
+        return (consensusProperties.epochHeight!! - 1) <= blocksProduced
+    }
+
+    private fun getTimestamp(): Long {
+        val lastBlock = blockService.getLast()
+        val nextTimeSlot = ((lastBlock.timestamp - getLast().timestamp) / consensusProperties.getPeriod()) + 1
+        return getLast().timestamp + consensusProperties.getPeriod() * nextTimeSlot
     }
 
     private fun createPayload(): GenesisBlockPayload {
