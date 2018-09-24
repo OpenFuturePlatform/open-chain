@@ -35,4 +35,7 @@ class DefaultBlockService(
     @Transactional(readOnly = true)
     override fun isExists(hash: String): Boolean = repository.findOneByHash(hash)?.let { true } ?: false
 
+    @Transactional(readOnly = true)
+    override fun getCurrentHeight(): Long = repository.getCurrentHeight()
+
 }

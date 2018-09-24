@@ -11,6 +11,7 @@ import io.openfuture.chain.network.message.core.BlockMessage
 import io.openfuture.chain.network.message.sync.*
 import io.openfuture.chain.network.service.NetworkApiService
 import org.apache.commons.lang3.StringUtils.EMPTY
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.*
@@ -43,7 +44,7 @@ class SyncManager(
 
 
     companion object {
-        val log = LoggerFactory.getLogger(SyncManager::class.java)
+        private val log: Logger = LoggerFactory.getLogger(SyncManager::class.java)
     }
 
 
