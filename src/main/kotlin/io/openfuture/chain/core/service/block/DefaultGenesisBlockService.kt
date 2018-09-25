@@ -2,7 +2,6 @@ package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
-import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
@@ -31,12 +30,11 @@ class DefaultGenesisBlockService(
     blockService: BlockService,
     walletService: WalletService,
     delegateService: DefaultDelegateService,
-    capacityChecker: BlockCapacityChecker,
     repository: GenesisBlockRepository,
     private val keyHolder: NodeKeyHolder,
     private val syncStatus: SyncStatus,
     private val consensusProperties: ConsensusProperties
-) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService, capacityChecker), GenesisBlockService {
+) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService), GenesisBlockService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultGenesisBlockService::class.java)

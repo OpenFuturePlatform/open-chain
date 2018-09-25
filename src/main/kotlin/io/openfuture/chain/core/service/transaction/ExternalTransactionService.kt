@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.service.transaction
 
-import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_ADDRESS
@@ -20,8 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransaction>(
     protected val repository: TransactionRepository<T>,
-    protected val unconfirmedRepository: UTransactionRepository<U>,
-    private val capacityChecker: TransactionCapacityChecker
+    protected val unconfirmedRepository: UTransactionRepository<U>
 ) : BaseTransactionService() {
 
     @Autowired protected lateinit var walletService: WalletService
@@ -60,7 +58,6 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
     open fun save(utx: U): U = unconfirmedRepository.save(utx)
 
     open fun save(tx: T): T {
-        capacityChecker.incrementCapacity()
         return repository.save(tx)
     }
 

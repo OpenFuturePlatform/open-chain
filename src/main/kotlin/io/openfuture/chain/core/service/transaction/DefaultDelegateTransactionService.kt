@@ -2,7 +2,6 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
-import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
@@ -31,19 +30,16 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultDelegateTransactionService(
     repository: DelegateTransactionRepository,
     uRepository: UDelegateTransactionRepository,
-    capacityChecker: TransactionCapacityChecker,
     private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties
-) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository, capacityChecker), DelegateTransactionService {
+) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository), DelegateTransactionService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultDelegateTransactionService::class.java)
     }
 
     @Transactional(readOnly = true)
-    override fun getUnconfirmedCount(): Long {
-        return unconfirmedRepository.count()
-    }
+    override fun getUnconfirmedCount(): Long = unconfirmedRepository.count()
 
     @Transactional(readOnly = true)
     override fun getByHash(hash: String): DelegateTransaction = repository.findOneByFooterHash(hash)
@@ -71,9 +67,8 @@ class DefaultDelegateTransactionService(
     @BlockchainSynchronized
     @Synchronized
     @Transactional
-    override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction {
-        return super.add(UnconfirmedDelegateTransaction.of(request))
-    }
+    override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction =
+        super.add(UnconfirmedDelegateTransaction.of(request))
 
     @Transactional
     override fun toBlock(message: DelegateTransactionMessage, block: MainBlock): DelegateTransaction {

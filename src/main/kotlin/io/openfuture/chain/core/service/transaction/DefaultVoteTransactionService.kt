@@ -2,7 +2,6 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
-import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
@@ -28,10 +27,9 @@ import org.springframework.transaction.annotation.Transactional
 internal class DefaultVoteTransactionService(
     repository: VoteTransactionRepository,
     uRepository: UVoteTransactionRepository,
-    capacityChecker: TransactionCapacityChecker,
     private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties
-) : ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository, capacityChecker), VoteTransactionService {
+) : ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository), VoteTransactionService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultVoteTransactionService::class.java)
@@ -39,9 +37,7 @@ internal class DefaultVoteTransactionService(
 
 
     @Transactional(readOnly = true)
-    override fun getUnconfirmedCount(): Long {
-        return unconfirmedRepository.count()
-    }
+    override fun getUnconfirmedCount(): Long = unconfirmedRepository.count()
 
     @Transactional(readOnly = true)
     override fun getByHash(hash: String): VoteTransaction = repository.findOneByFooterHash(hash)
@@ -81,9 +77,8 @@ internal class DefaultVoteTransactionService(
     @BlockchainSynchronized
     @Synchronized
     @Transactional
-    override fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction {
-        return super.add(UnconfirmedVoteTransaction.of(request))
-    }
+    override fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction =
+        super.add(UnconfirmedVoteTransaction.of(request))
 
     @Transactional
     override fun toBlock(message: VoteTransactionMessage, block: MainBlock): VoteTransaction {

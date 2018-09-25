@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.service.block
 
-import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
@@ -19,12 +18,10 @@ abstract class BaseBlockService<T : Block>(
     protected val repository: BlockRepository<T>,
     protected val blockService: BlockService,
     protected val walletService: WalletService,
-    protected val delegateService: DelegateService,
-    private val capacityChecker: BlockCapacityChecker
+    protected val delegateService: DelegateService
 ) {
 
     protected fun save(block: T): T {
-        capacityChecker.incrementCapacity(block.timestamp)
         return repository.save(block)
     }
 
