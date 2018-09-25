@@ -1,7 +1,6 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
-import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
@@ -24,9 +23,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
-    uRepository: UTransferTransactionRepository,
-    capacityChecker: TransactionCapacityChecker
-) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository, capacityChecker), TransferTransactionService {
+    uRepository: UTransferTransactionRepository
+) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultTransferTransactionService::class.java)
@@ -34,9 +32,7 @@ class DefaultTransferTransactionService(
 
 
     @Transactional(readOnly = true)
-    override fun getUnconfirmedCount(): Long {
-        return unconfirmedRepository.count()
-    }
+    override fun getUnconfirmedCount(): Long = unconfirmedRepository.count()
 
     @Transactional(readOnly = true)
     override fun getByHash(hash: String): TransferTransaction = repository.findOneByFooterHash(hash)
@@ -72,9 +68,8 @@ class DefaultTransferTransactionService(
     @BlockchainSynchronized
     @Synchronized
     @Transactional
-    override fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction {
-        return super.add(UnconfirmedTransferTransaction.of(request))
-    }
+    override fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction =
+        super.add(UnconfirmedTransferTransaction.of(request))
 
     @Transactional
     override fun toBlock(message: TransferTransactionMessage, block: MainBlock): TransferTransaction {
@@ -107,9 +102,7 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun save(tx: TransferTransaction): TransferTransaction {
-        return super.save(tx)
-    }
+    override fun save(tx: TransferTransaction): TransferTransaction = super.save(tx)
 
     @Transactional
     override fun validateNew(utx: UnconfirmedTransferTransaction) {

@@ -3,6 +3,7 @@ package io.openfuture.chain.core.service.block
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
+import io.openfuture.chain.core.component.TransactionThroughput
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -45,7 +46,8 @@ class DefaultMainBlockService(
     private val transferTransactionService: TransferTransactionService,
     private val rewardTransactionService: RewardTransactionService,
     private val consensusProperties: ConsensusProperties,
-    private val syncStatus: SyncStatus
+    private val syncStatus: SyncStatus,
+    private val throughput: TransactionThroughput
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
 
     companion object {
@@ -133,6 +135,8 @@ class DefaultMainBlockService(
         message.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
         message.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
         message.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
+
+        throughput.updateThroughput(message.getTransactionsCount(), savedBlock.height)
     }
 
     // todo need to improve!
@@ -155,6 +159,8 @@ class DefaultMainBlockService(
         message.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
         message.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
         message.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
+
+        throughput.updateThroughput(message.getTransactionsCount(), savedBlock.height)
     }
 
     @Transactional(readOnly = true)

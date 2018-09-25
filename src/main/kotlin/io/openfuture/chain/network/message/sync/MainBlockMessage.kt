@@ -27,6 +27,9 @@ class MainBlockMessage(
         return voteTransactions + delegateTransactions + transferTransactions + rewardTransaction
     }
 
+    fun getTransactionsCount(): Int =
+        voteTransactions.size + delegateTransactions.size + transferTransactions.size + 1
+
     override fun read(buf: ByteBuf) {
         super.read(buf)
 

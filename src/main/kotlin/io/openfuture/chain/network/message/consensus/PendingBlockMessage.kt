@@ -31,6 +31,9 @@ class PendingBlockMessage(
         return voteTransactions + delegateTransactions + transferTransactions
     }
 
+    fun getTransactionsCount(): Int =
+        voteTransactions.size + delegateTransactions.size + transferTransactions.size + 1
+
     override fun read(buf: ByteBuf) {
         super.read(buf)
 
