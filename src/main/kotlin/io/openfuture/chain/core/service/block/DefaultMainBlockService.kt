@@ -2,7 +2,6 @@ package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
-import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
@@ -39,7 +38,6 @@ class DefaultMainBlockService(
     repository: MainBlockRepository,
     walletService: WalletService,
     delegateService: DelegateService,
-    capacityChecker: BlockCapacityChecker,
     private val clock: NodeClock,
     private val keyHolder: NodeKeyHolder,
     private val voteTransactionService: VoteTransactionService,
@@ -48,7 +46,7 @@ class DefaultMainBlockService(
     private val rewardTransactionService: RewardTransactionService,
     private val consensusProperties: ConsensusProperties,
     private val syncStatus: SyncStatus
-) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService, capacityChecker), MainBlockService {
+) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultMainBlockService::class.java)
