@@ -70,8 +70,6 @@ interface GenesisBlockService {
 
     fun add(message: GenesisBlockMessage)
 
-    fun verify(message: GenesisBlockMessage): Boolean
-
     fun getPreviousByHeight(height: Long): GenesisBlock
 
     fun getNextBlock(hash: String): GenesisBlock
