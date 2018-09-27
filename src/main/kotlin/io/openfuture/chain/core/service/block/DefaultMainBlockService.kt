@@ -99,18 +99,18 @@ class DefaultMainBlockService(
         val publicKey = keyHolder.getPublicKeyAsHexString()
 
         val vTx = transactionsForBlock.asSequence()
-            .filter { it is UnconfirmedVoteTransaction }
-            .map { (it as UnconfirmedVoteTransaction).toMessage() }
+            .filterIsInstance<UnconfirmedVoteTransaction>()
+            .map { it.toMessage() }
             .toList()
 
         val dTx = transactionsForBlock.asSequence()
-            .filter { it is UnconfirmedDelegateTransaction }
-            .map { (it as UnconfirmedDelegateTransaction).toMessage() }
+            .filterIsInstance<UnconfirmedDelegateTransaction>()
+            .map { it.toMessage() }
             .toList()
 
         val tTx = transactionsForBlock.asSequence()
-            .filter { it is UnconfirmedTransferTransaction }
-            .map { (it as UnconfirmedTransferTransaction).toMessage() }
+            .filterIsInstance<UnconfirmedTransferTransaction>()
+            .map { it.toMessage() }
             .toList()
 
         return PendingBlockMessage(height, previousHash, timestamp, ByteUtils.toHexString(hash), signature, publicKey,
@@ -216,8 +216,8 @@ class DefaultMainBlockService(
     }
 
     private fun isValidTransferTransactions(transactions: List<TransferTransactionMessage>): Boolean {
-        val isValidBalances = transactions.groupBy { it.senderAddress }.entries.all {
-            it.value.map { it.amount + it.fee }.sum() <= walletService.getBalanceByAddress(it.key)
+        val isValidBalances = transactions.groupBy { it.senderAddress }.entries.all { data ->
+            data.value.asSequence().map { it.amount + it.fee }.sum() <= walletService.getBalanceByAddress(data.key)
         }
 
         return transactions.all { transferTransactionService.verify(it) } && isValidBalances
