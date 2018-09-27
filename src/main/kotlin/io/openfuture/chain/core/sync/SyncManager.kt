@@ -27,6 +27,10 @@ class SyncManager(
     private val nodeClock: NodeClock
 ) {
 
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(SyncManager::class.java)
+    }
+
     @Volatile
     private var synchronizationSessionId: String = UUID.randomUUID().toString()
 
@@ -41,11 +45,6 @@ class SyncManager(
 
     @Volatile
     private var lastResponseTime: Long = nodeClock.networkTime()
-
-
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(SyncManager::class.java)
-    }
 
 
     @Synchronized

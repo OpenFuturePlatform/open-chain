@@ -38,6 +38,7 @@ class TransferTransaction(
         )
     }
 
+
     override fun toMessage(): TransferTransactionMessage = TransferTransactionMessage(
         header.timestamp,
         header.fee,

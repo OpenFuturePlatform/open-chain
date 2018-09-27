@@ -56,7 +56,8 @@ abstract class BaseBlockService<T : Block>(
 
     protected fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray {
         val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + previousHash.toByteArray(UTF_8).size + payload.getBytes().size)
-            .putLong(timestamp).putLong(height)
+            .putLong(timestamp)
+            .putLong(height)
             .put(previousHash.toByteArray(UTF_8))
             .put(payload.getBytes())
             .array()

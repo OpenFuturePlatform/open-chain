@@ -23,13 +23,11 @@ class PendingBlockMessage(
     var transferTransactions: List<TransferTransactionMessage>
 ) : BlockMessage(height, previousHash, timestamp, hash, signature, publicKey) {
 
-    fun getAllTransactions(): List<TransactionMessage> {
-        return voteTransactions + delegateTransactions + transferTransactions + rewardTransaction
-    }
+    fun getAllTransactions(): List<TransactionMessage> =
+        voteTransactions + delegateTransactions + transferTransactions + rewardTransaction
 
-    fun getExternalTransactions(): List<TransactionMessage> {
-        return voteTransactions + delegateTransactions + transferTransactions
-    }
+    fun getExternalTransactions(): List<TransactionMessage> =
+        voteTransactions + delegateTransactions + transferTransactions
 
     fun getTransactionsCount(): Int =
         voteTransactions.size + delegateTransactions.size + transferTransactions.size + 1

@@ -39,6 +39,7 @@ class DelegateTransaction(
         )
     }
 
+
     override fun toMessage(): DelegateTransactionMessage = DelegateTransactionMessage(
         header.timestamp,
         header.fee,

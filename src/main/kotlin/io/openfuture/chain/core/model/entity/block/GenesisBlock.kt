@@ -35,6 +35,7 @@ class GenesisBlock(
         )
     }
 
+
     override fun getPayload(): BlockPayload = payload
 
     override fun toMessage(): GenesisBlockMessage = GenesisBlockMessage(

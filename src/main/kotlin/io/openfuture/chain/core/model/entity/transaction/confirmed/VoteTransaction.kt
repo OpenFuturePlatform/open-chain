@@ -38,6 +38,7 @@ class VoteTransaction(
         )
     }
 
+
     override fun toMessage(): VoteTransactionMessage = VoteTransactionMessage (
         header.timestamp,
         header.fee,
