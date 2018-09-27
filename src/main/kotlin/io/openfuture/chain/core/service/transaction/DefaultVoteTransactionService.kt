@@ -179,17 +179,15 @@ internal class DefaultVoteTransactionService(
 
     private fun isValidVoteCount(senderAddress: String): Boolean {
         val confirmedVotes = walletService.getVotesByAddress(senderAddress).count()
-        val unconfirmedForVotes = unconfirmedRepository.findAll()
+        val unconfirmedForVotes = unconfirmedRepository.findAll().asSequence()
             .filter { it.header.senderAddress == senderAddress && it.payload.getVoteType() == VoteType.FOR }
             .count()
 
         return consensusProperties.delegatesCount!! >= confirmedVotes + unconfirmedForVotes
     }
 
-    private fun isAlreadyVoted(senderAddress: String, nodeId: String): Boolean {
-        val delegates = walletService.getVotesByAddress(senderAddress)
-        return delegates.any { it.nodeId == nodeId }
-    }
+    private fun isAlreadyVoted(senderAddress: String, nodeId: String): Boolean =
+        walletService.getVotesByAddress(senderAddress).any { it.nodeId == nodeId }
 
     private fun isAlreadySentVote(senderAddress: String, nodeId: String, voteTypeId: Int): Boolean {
         val unconfirmed = unconfirmedRepository.findAllByHeaderSenderAddress(senderAddress)

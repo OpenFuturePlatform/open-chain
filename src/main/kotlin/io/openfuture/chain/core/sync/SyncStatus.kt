@@ -15,9 +15,7 @@ class SyncStatus(
 
 
     @Synchronized
-    fun getSyncStatus(): SyncStatusType {
-        return syncStatus
-    }
+    fun getSyncStatus(): SyncStatusType = syncStatus
 
     @Synchronized
     fun setSyncStatus(status: SyncStatusType) {
