@@ -23,10 +23,6 @@ class MainBlockMessage(
     var transferTransactions: List<TransferTransactionMessage>
 ) : BlockMessage(height, previousHash, timestamp, hash, signature, publicKey) {
 
-    fun getAllTransactions(): List<TransactionMessage> {
-        return voteTransactions + delegateTransactions + transferTransactions + rewardTransaction
-    }
-
     fun getTransactionsCount(): Int =
         voteTransactions.size + delegateTransactions.size + transferTransactions.size + 1
 

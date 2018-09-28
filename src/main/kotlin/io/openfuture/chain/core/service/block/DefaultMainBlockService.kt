@@ -57,14 +57,14 @@ class DefaultMainBlockService(
 
     @Transactional(readOnly = true)
     override fun getByHash(hash: String): MainBlock = repository.findOneByHash(hash)
-        ?: throw NotFoundException("Block by $hash not found")
+        ?: throw NotFoundException("Block $hash not found")
 
     @Transactional(readOnly = true)
     override fun getNextBlock(hash: String): MainBlock {
         val block = getByHash(hash)
 
         return repository.findFirstByHeightGreaterThan(block.height)
-            ?: throw NotFoundException("Next block by hash $hash not found")
+            ?: throw NotFoundException("Block after $hash not found")
     }
 
     @Transactional(readOnly = true)
@@ -72,7 +72,7 @@ class DefaultMainBlockService(
         val block = getByHash(hash)
 
         return repository.findFirstByHeightLessThanOrderByHeightDesc(block.height)
-            ?: throw NotFoundException("Previous block by hash $hash not found")
+            ?: throw NotFoundException("Block before $hash not found")
     }
 
     @Transactional(readOnly = true)
@@ -131,6 +131,7 @@ class DefaultMainBlockService(
         }
 
         val savedBlock = super.save(block)
+
         rewardTransactionService.toBlock(message.rewardTransaction, savedBlock)
         message.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
         message.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
@@ -155,6 +156,7 @@ class DefaultMainBlockService(
         }
 
         val savedBlock = super.save(block)
+
         rewardTransactionService.toBlock(message.rewardTransaction, savedBlock)
         message.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
         message.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
@@ -227,6 +229,7 @@ class DefaultMainBlockService(
         if (transactions.isEmpty()) {
             return false
         }
+
         return merkleHash == calculateMerkleRoot(transactions)
     }
 
@@ -234,7 +237,8 @@ class DefaultMainBlockService(
         if (transactions.size == 1) {
             return transactions.single()
         }
-        var previousTreeLayout = transactions.sortedByDescending { it }.map { it.toByteArray() }
+
+        var previousTreeLayout = transactions.asSequence().sortedByDescending { it }.map { it.toByteArray() }.toList()
         var treeLayout = mutableListOf<ByteArray>()
         while (previousTreeLayout.size != 2) {
             for (i in 0 until previousTreeLayout.size step 2) {
