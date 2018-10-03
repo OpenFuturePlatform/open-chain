@@ -21,11 +21,7 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.NodeClock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.DelegateTransactionMessage
-import io.openfuture.chain.network.message.core.TransactionMessage
-import io.openfuture.chain.network.message.core.TransferTransactionMessage
-import io.openfuture.chain.network.message.core.VoteTransactionMessage
-import io.openfuture.chain.network.message.sync.MainBlockMessage
+import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.Logger
@@ -63,20 +59,13 @@ class DefaultMainBlockService(
         ?: throw NotFoundException("Block $hash not found")
 
     @Transactional(readOnly = true)
-    override fun getNextBlock(hash: String): MainBlock {
-        val block = getByHash(hash)
-
-        return repository.findFirstByHeightGreaterThan(block.height)
-            ?: throw NotFoundException("Block after $hash not found")
-    }
+    override fun getNextBlock(hash: String): MainBlock = repository.findFirstByHeightGreaterThan(getByHash(hash).height)
+        ?: throw NotFoundException("Block after $hash not found")
 
     @Transactional(readOnly = true)
-    override fun getPreviousBlock(hash: String): MainBlock {
-        val block = getByHash(hash)
-
-        return repository.findFirstByHeightLessThanOrderByHeightDesc(block.height)
+    override fun getPreviousBlock(hash: String): MainBlock =
+        repository.findFirstByHeightLessThanOrderByHeightDesc(getByHash(hash).height)
             ?: throw NotFoundException("Block before $hash not found")
-    }
 
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<MainBlock> = repository.findAll(request)
@@ -101,73 +90,23 @@ class DefaultMainBlockService(
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKeyAsHexString()
 
-        val vTx = transactionsForBlock.asSequence()
+        val voteTransactions = transactionsForBlock.asSequence()
             .filterIsInstance<UnconfirmedVoteTransaction>()
             .map { it.toMessage() }
             .toList()
 
-        val dTx = transactionsForBlock.asSequence()
+        val delegateTransactions = transactionsForBlock.asSequence()
             .filterIsInstance<UnconfirmedDelegateTransaction>()
             .map { it.toMessage() }
             .toList()
 
-        val tTx = transactionsForBlock.asSequence()
+        val transferTransactions = transactionsForBlock.asSequence()
             .filterIsInstance<UnconfirmedTransferTransaction>()
             .map { it.toMessage() }
             .toList()
 
         return PendingBlockMessage(height, previousHash, timestamp, ByteUtils.toHexString(hash), signature, publicKey,
-            merkleHash, rewardTransactionMessage, vTx, dTx, tTx)
-    }
-
-    @Transactional
-    @Synchronized
-    override fun add(message: PendingBlockMessage) {
-        if (null != repository.findOneByHash(message.hash)) {
-            return
-        }
-
-        val block = MainBlock.of(message)
-
-        if (!isSync(block)) {
-            syncStatus.setSyncStatus(NOT_SYNCHRONIZED)
-            return
-        }
-
-        val savedBlock = super.save(block)
-
-        rewardTransactionService.toBlock(message.rewardTransaction, savedBlock)
-        message.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
-        message.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
-        message.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
-
-        throughput.updateThroughput(message.getTransactionsCount(), savedBlock.height)
-    }
-
-    // todo need to improve!
-    // todo this method is equal "override fun add(message: PendingBlockMessage)", this necessary because we can't to create PacketType with the same class inside
-    @Transactional
-    @Synchronized
-    override fun add(message: MainBlockMessage) {
-        if (null != repository.findOneByHash(message.hash)) {
-            return
-        }
-
-        val block = MainBlock.of(message)
-
-        if (!isSync(block)) {
-            syncStatus.setSyncStatus(NOT_SYNCHRONIZED)
-            return
-        }
-
-        val savedBlock = super.save(block)
-
-        rewardTransactionService.toBlock(message.rewardTransaction, savedBlock)
-        message.voteTransactions.forEach { voteTransactionService.toBlock(it, savedBlock) }
-        message.delegateTransactions.forEach { delegateTransactionService.toBlock(it, savedBlock) }
-        message.transferTransactions.forEach { transferTransactionService.toBlock(it, savedBlock) }
-
-        throughput.updateThroughput(message.getTransactionsCount(), savedBlock.height)
+            merkleHash, rewardTransactionMessage, voteTransactions, delegateTransactions, transferTransactions)
     }
 
     @Synchronized
@@ -180,6 +119,32 @@ class DefaultMainBlockService(
             log.warn(e.message)
             false
         }
+    }
+
+    @Transactional
+    @Synchronized
+    override fun add(message: BaseMainBlockMessage) {
+        if (null != repository.findOneByHash(message.hash)) {
+            return
+        }
+
+        val block = MainBlock.of(message)
+        if (!isSync(block)) {
+            syncStatus.setSyncStatus(NOT_SYNCHRONIZED)
+            return
+        }
+
+        val savedBlock = super.save(block)
+        message.getAllTransactions().forEach {
+            when (it) {
+                is RewardTransactionMessage -> rewardTransactionService.toBlock(it, savedBlock)
+                is TransferTransactionMessage -> transferTransactionService.toBlock(it, savedBlock)
+                is DelegateTransactionMessage -> delegateTransactionService.toBlock(it, savedBlock)
+                is VoteTransactionMessage -> voteTransactionService.toBlock(it, savedBlock)
+            }
+        }
+
+        throughput.updateThroughput(message.getAllTransactions().size, savedBlock.height)
     }
 
     private fun validate(message: PendingBlockMessage) {
