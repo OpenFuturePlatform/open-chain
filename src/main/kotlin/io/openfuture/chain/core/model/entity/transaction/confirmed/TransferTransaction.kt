@@ -20,7 +20,7 @@ class TransferTransaction(
     @Embedded
     val payload: TransferTransactionPayload
 
-) : Transaction(header, footer, block) {
+) : Transaction(header, footer, payload, block) {
 
     companion object {
         fun of(message: TransferTransactionMessage, block: MainBlock): TransferTransaction = TransferTransaction(
