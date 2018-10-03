@@ -29,7 +29,7 @@ class DefaultPendingBlockHandler(
     private var observable: PendingBlockMessage? = null
     private var timeSlotNumber: Long = 0
     private var stage: BlockApprovalStage = IDLE
-    private var blockAddedFlag = false
+    @Volatile private var blockAddedFlag = false
 
 
     @BlockchainSynchronized
@@ -102,7 +102,7 @@ class DefaultPendingBlockHandler(
             if (!blockCommits.contains(delegate) && isValidApprovalSignature(message)) {
                 blockCommits.add(delegate)
                 networkService.broadcast(message)
-                if (blockCommits.size > (delegates.size - 1) / 3 * 2) {
+                if (blockCommits.size > (delegates.size / 3 * 2) && !blockAddedFlag) {
                     pendingBlocks.find { it.hash == message.hash }?.let { mainBlockService.add(it) }
                     blockAddedFlag = true
                 }
