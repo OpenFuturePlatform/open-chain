@@ -1,7 +1,6 @@
 package io.openfuture.chain.core.service
 
 import io.openfuture.chain.core.exception.NotFoundException
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.repository.WalletRepository
 import org.springframework.stereotype.Service
@@ -34,9 +33,6 @@ class DefaultWalletService(
 
         return wallet.balance
     }
-
-    @Transactional(readOnly = true)
-    override fun getVotesByAddress(address: String): MutableSet<Delegate> = this.getByAddress(address).votes
 
     @Transactional
     override fun save(wallet: Wallet) {

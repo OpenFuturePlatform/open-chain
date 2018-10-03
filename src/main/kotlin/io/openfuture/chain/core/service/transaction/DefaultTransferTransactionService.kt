@@ -87,7 +87,7 @@ class DefaultTransferTransactionService(
             return confirm(utx, TransferTransaction.of(utx, block))
         }
 
-        return this.save(TransferTransaction.of(message, block))
+        return save(TransferTransaction.of(message, block))
     }
 
     @Transactional
@@ -105,14 +105,9 @@ class DefaultTransferTransactionService(
     override fun save(tx: TransferTransaction): TransferTransaction = super.save(tx)
 
     @Transactional
-    override fun validateNew(utx: UnconfirmedTransferTransaction) {
-        if (!isValidActualBalance(utx.header.senderAddress, utx.payload.amount + utx.header.fee)) {
-            throw ValidationException("Insufficient actual balance", INSUFFICIENT_ACTUAL_BALANCE)
-        }
-    }
-
-    @Transactional
     override fun validate(utx: UnconfirmedTransferTransaction) {
+        super.validate(utx)
+
         if (utx.header.fee < 0) {
             throw ValidationException("Fee should not be less than 0")
         }
@@ -121,7 +116,13 @@ class DefaultTransferTransactionService(
             throw ValidationException("Amount should not be less than or equal to 0")
         }
 
-        super.validateExternal(utx.header, utx.payload, utx.footer)
+    }
+
+    @Transactional
+    override fun validateNew(utx: UnconfirmedTransferTransaction) {
+        if (!isValidActualBalance(utx.header.senderAddress, utx.payload.amount + utx.header.fee)) {
+            throw ValidationException("Insufficient actual balance", INSUFFICIENT_ACTUAL_BALANCE)
+        }
     }
 
     @Transactional

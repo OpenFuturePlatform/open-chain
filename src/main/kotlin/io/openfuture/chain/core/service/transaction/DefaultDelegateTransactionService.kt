@@ -109,6 +109,8 @@ class DefaultDelegateTransactionService(
 
     @Transactional
     override fun validate(utx: UnconfirmedDelegateTransaction) {
+        super.validate(utx)
+
         if (utx.header.fee != consensusProperties.feeDelegateTx!!) {
             throw ValidationException("Fee should be ${consensusProperties.feeDelegateTx!!}")
         }
@@ -120,8 +122,6 @@ class DefaultDelegateTransactionService(
         if (!isValidNodeId(utx.payload.nodeId, utx.payload.delegateKey)) {
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
-
-        super.validateExternal(utx.header, utx.payload, utx.footer)
     }
 
     @Transactional
@@ -132,6 +132,10 @@ class DefaultDelegateTransactionService(
 
         if (isAlreadyDelegate(utx.payload.nodeId)) {
             throw ValidationException("Node ${utx.payload.nodeId} already registered as delegate", ALREADY_DELEGATE)
+        }
+
+        if (isAlreadySendRequest(utx.payload.nodeId)) {
+            throw ValidationException("Node ${utx.payload.nodeId} already send request to become delegate", ALREADY_DELEGATE)
         }
     }
 
@@ -144,7 +148,9 @@ class DefaultDelegateTransactionService(
     private fun isValidNodeId(nodeId: String, publicKey: String): Boolean =
         nodeId == ByteUtils.toHexString(HashUtils.sha256(ByteUtils.fromHexString(publicKey)))
 
-    private fun isAlreadyDelegate(nodeId: String): Boolean =
-        delegateService.isExistsByNodeId(nodeId) || unconfirmedRepository.findAll().any { it.payload.nodeId == nodeId }
+    private fun isAlreadyDelegate(nodeId: String): Boolean = delegateService.isExistsByNodeId(nodeId)
+
+    private fun isAlreadySendRequest(nodeId: String): Boolean =
+        unconfirmedRepository.findAll().any { it.payload.nodeId == nodeId }
 
 }

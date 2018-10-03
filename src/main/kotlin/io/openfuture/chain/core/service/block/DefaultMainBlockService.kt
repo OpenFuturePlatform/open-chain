@@ -8,6 +8,7 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
+import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -21,6 +22,7 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.NodeClock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.network.message.core.TransactionMessage
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.network.message.sync.MainBlockMessage
@@ -41,6 +43,7 @@ class DefaultMainBlockService(
     delegateService: DelegateService,
     private val clock: NodeClock,
     private val keyHolder: NodeKeyHolder,
+    private val walletVoteService: WalletVoteService,
     private val voteTransactionService: VoteTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
@@ -118,6 +121,7 @@ class DefaultMainBlockService(
     }
 
     @Transactional
+    @Synchronized
     override fun add(message: PendingBlockMessage) {
         if (null != repository.findOneByHash(message.hash)) {
             return
@@ -143,6 +147,7 @@ class DefaultMainBlockService(
     // todo need to improve!
     // todo this method is equal "override fun add(message: PendingBlockMessage)", this necessary because we can't to create PacketType with the same class inside
     @Transactional
+    @Synchronized
     override fun add(message: MainBlockMessage) {
         if (null != repository.findOneByHash(message.hash)) {
             return
@@ -165,6 +170,7 @@ class DefaultMainBlockService(
         throughput.updateThroughput(message.getTransactionsCount(), savedBlock.height)
     }
 
+    @Synchronized
     @Transactional(readOnly = true)
     override fun verify(message: PendingBlockMessage): Boolean {
         return try {
@@ -177,12 +183,18 @@ class DefaultMainBlockService(
     }
 
     private fun validate(message: PendingBlockMessage) {
-        if (!isValidReward(message.getExternalTransactions().map { it.fee }.sum(), message.rewardTransaction.reward)) {
-            throw ValidationException("Invalid reward: ${message.rewardTransaction.reward}")
-        }
+        super.validateBase(MainBlock.of(message))
 
         if (!isValidMerkleHash(message.merkleHash, message.getAllTransactions().map { it.hash })) {
             throw ValidationException("Invalid merkle hash: ${message.merkleHash}")
+        }
+
+        if (!isValidBalances(message.getExternalTransactions())) {
+            throw ValidationException("Invalid balances")
+        }
+
+        if (!isValidRewardTransaction(message)) {
+            throw ValidationException("Invalid reward transaction")
         }
 
         if (!isValidVoteTransactions(message.voteTransactions)) {
@@ -196,8 +208,63 @@ class DefaultMainBlockService(
         if (!isValidTransferTransactions(message.transferTransactions)) {
             throw ValidationException("Invalid transfer transactions")
         }
+    }
 
-        super.validateBase(MainBlock.of(message))
+    private fun isValidBalances(transactions: List<TransactionMessage>): Boolean =
+        transactions.groupBy { it.senderAddress }.entries.all { sender ->
+            sender.value.asSequence()
+                .map {
+                    when (it) {
+                        is TransferTransactionMessage -> it.amount + it.fee
+                        is DelegateTransactionMessage -> it.amount + it.fee
+                        is VoteTransactionMessage -> it.fee
+                        else -> 0
+                    }
+                }
+                .sum() <= walletService.getBalanceByAddress(sender.key)
+        }
+
+    private fun isValidRewardTransaction(message: PendingBlockMessage): Boolean =
+        isValidReward(message.getExternalTransactions().asSequence().map { it.fee }.sum(), message.rewardTransaction.reward) &&
+            rewardTransactionService.verify(message.rewardTransaction)
+
+    private fun isValidVoteTransactions(transactions: List<VoteTransactionMessage>): Boolean {
+        if (transactions.isEmpty()) {
+            return true
+        }
+
+        val validVotes = transactions.groupBy { it.senderAddress }.entries.all { sender ->
+            val persistVotes = walletVoteService.getVotesByAddress(sender.key).map { it.id.nodeId }
+            val pendingVotes = sender.value.asSequence().filter { VoteType.FOR.getId() == it.voteTypeId }.map { it.nodeId }.toList()
+
+            val hasDuplicates = pendingVotes.intersect(persistVotes).isNotEmpty()
+            !hasDuplicates && consensusProperties.delegatesCount!! >= persistVotes.size + pendingVotes.size
+        }
+
+        val existDelegates = delegateService.isExistsByNodeIds(transactions.map { it.nodeId })
+
+        return transactions.all { voteTransactionService.verify(it) } && validVotes && existDelegates
+    }
+
+    private fun isValidDelegateTransactions(transactions: List<DelegateTransactionMessage>): Boolean {
+        if (transactions.isEmpty()) {
+            return true
+        }
+
+        return transactions.all { delegateTransactionService.verify(it) } &&
+            !delegateService.isExistsByNodeIds(transactions.map { it.nodeId }) &&
+            transactions.distinctBy { it.nodeId }.size == transactions.size
+    }
+
+    private fun isValidTransferTransactions(transactions: List<TransferTransactionMessage>): Boolean =
+        transactions.all { transferTransactionService.verify(it) }
+
+    private fun isValidMerkleHash(merkleHash: String, transactions: List<String>): Boolean {
+        if (transactions.isEmpty()) {
+            return false
+        }
+
+        return merkleHash == calculateMerkleRoot(transactions)
     }
 
     private fun isValidReward(fees: Long, reward: Long): Boolean {
@@ -206,31 +273,6 @@ class DefaultMainBlockService(
         val rewardBlock = consensusProperties.rewardBlock!!
 
         return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)
-    }
-
-    private fun isValidVoteTransactions(transactions: List<VoteTransactionMessage>): Boolean {
-        return transactions.all { voteTransactionService.verify(it) }
-    }
-
-    private fun isValidDelegateTransactions(transactions: List<DelegateTransactionMessage>): Boolean {
-        return transactions.all { delegateTransactionService.verify(it) } &&
-            transactions.distinctBy { it.delegateKey }.size == transactions.size
-    }
-
-    private fun isValidTransferTransactions(transactions: List<TransferTransactionMessage>): Boolean {
-        val isValidBalances = transactions.groupBy { it.senderAddress }.entries.all { data ->
-            data.value.asSequence().map { it.amount + it.fee }.sum() <= walletService.getBalanceByAddress(data.key)
-        }
-
-        return transactions.all { transferTransactionService.verify(it) } && isValidBalances
-    }
-
-    private fun isValidMerkleHash(merkleHash: String, transactions: List<String>): Boolean {
-        if (transactions.isEmpty()) {
-            return false
-        }
-
-        return merkleHash == calculateMerkleRoot(transactions)
     }
 
     private fun calculateMerkleRoot(transactions: List<String>): String {
@@ -282,35 +324,27 @@ class DefaultMainBlockService(
             result.addAll(vTx)
             capacity -= vTx.size
 
-            result = filterTx(result)
+            result = filterTransactions(result)
             capacity = consensusProperties.blockCapacity!! - result.size
         } while (0 != counter && 0 < capacity)
 
         return result
     }
 
-    private fun filterTx(txList: List<UnconfirmedTransaction>): MutableList<UnconfirmedTransaction> {
+    private fun filterTransactions(transactions: List<UnconfirmedTransaction>): MutableList<UnconfirmedTransaction> {
         val result = mutableListOf<UnconfirmedTransaction>()
-        val map = txList.groupBy { it.header.senderAddress }
+        val transactionsBySender = transactions.groupBy { it.header.senderAddress }
 
-        map.forEach {
+        transactionsBySender.forEach {
             var balance = walletService.getBalanceByAddress(it.key)
             val list = it.value.filter { tx ->
-                when (tx) {
-                    is UnconfirmedTransferTransaction -> {
-                        balance -= tx.header.fee + tx.payload.amount
-                        0 <= balance
-                    }
-                    is UnconfirmedDelegateTransaction -> {
-                        balance -= tx.header.fee + tx.payload.amount
-                        0 <= balance
-                    }
-                    is UnconfirmedVoteTransaction -> {
-                        balance -= tx.header.fee
-                        0 <= balance
-                    }
-                    else -> false
+                balance -= when (tx) {
+                    is UnconfirmedTransferTransaction -> tx.header.fee + tx.payload.amount
+                    is UnconfirmedDelegateTransaction -> tx.header.fee + tx.payload.amount
+                    is UnconfirmedVoteTransaction -> tx.header.fee
+                    else -> 0
                 }
+                0 <= balance
             }
             result.addAll(list)
         }

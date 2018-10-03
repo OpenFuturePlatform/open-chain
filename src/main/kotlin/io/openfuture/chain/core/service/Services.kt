@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service
 
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.Wallet
+import io.openfuture.chain.core.model.entity.WalletVote
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -206,6 +207,8 @@ interface DelegateService {
 
     fun isExistsByNodeId(nodeId: String): Boolean
 
+    fun isExistsByNodeIds(nodeIds: List<String>): Boolean
+
     fun save(delegate: Delegate): Delegate
 
 }
@@ -226,8 +229,6 @@ interface WalletService {
 
     fun getBalanceByAddress(address: String): Long
 
-    fun getVotesByAddress(address: String): MutableSet<Delegate>
-
     fun save(wallet: Wallet)
 
     fun increaseBalance(address: String, amount: Long)
@@ -237,5 +238,15 @@ interface WalletService {
     fun increaseUnconfirmedOutput(address: String, amount: Long)
 
     fun decreaseUnconfirmedOutput(address: String, amount: Long)
+
+}
+
+interface WalletVoteService {
+
+    fun getVotesByAddress(address: String): List<WalletVote>
+
+    fun add(address: String, nodeId: String): WalletVote
+
+    fun remove(address: String, nodeId: String)
 
 }
