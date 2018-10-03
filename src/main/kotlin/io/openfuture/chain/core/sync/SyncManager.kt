@@ -32,7 +32,7 @@ class SyncManager(
     }
 
     @Volatile
-    private var synchronizationSessionId: String = UUID.randomUUID().toString()
+    private var sessionId: String = UUID.randomUUID().toString()
 
     @Volatile
     private var activeDelegateAddresses: MutableList<NodeInfo> = mutableListOf()
@@ -46,37 +46,40 @@ class SyncManager(
     @Volatile
     private var lastResponseTime: Long = nodeClock.networkTime()
 
+    @Volatile
+    private var unlocked: Boolean = false
+
 
     @Synchronized
     fun getLastResponseTime(): Long = lastResponseTime
 
     @Synchronized
     fun onDelegateResponseMessage(message: DelegateResponseMessage) {
-        if (message.synchronizationSessionId != synchronizationSessionId || !activeDelegateAddresses.isEmpty()) {
+        if (message.synchronizationSessionId != sessionId || !activeDelegateAddresses.isEmpty()) {
             return
         }
 
         activeDelegateAddresses.addAll(message.nodesInfo)
-        activeDelegateAddresses.forEach { networkApiService.sendToAddress(HashBlockRequestMessage(synchronizationSessionId), it) }
+        activeDelegateAddresses.forEach { networkApiService.sendToAddress(HashBlockRequestMessage(sessionId), it) }
     }
 
     @Synchronized
     fun onHashResponseMessage(message: HashBlockResponseMessage, nodeInfo: NodeInfo) {
-        if (message.synchronizationSessionId != synchronizationSessionId) {
+        if (message.synchronizationSessionId != sessionId) {
             return
         }
 
         val delegateAddresses = activeDelegatesLastHash[message.hash]
         if (null != delegateAddresses && !delegateAddresses.contains(nodeInfo)) {
             delegateAddresses.add(nodeInfo)
-            if (delegateAddresses.size > (activeDelegateAddresses.size - 1) / 3 * 2) {
+            if (delegateAddresses.size > (activeDelegateAddresses.size - 1) / 3 * 1) {
                 val currentLastHash = blockService.getLast().hash
                 if (currentLastHash == message.hash) {
                     unlock()
                     return
                 } else {
                     expectedHash = message.hash
-                    networkApiService.sendToAddress(SyncBlockRequestMessage(blockService.getLast().hash), nodeInfo)
+                    networkApiService.sendToAddress(SyncBlockRequestMessage(currentLastHash), nodeInfo)
                 }
             }
         } else {
@@ -88,7 +91,7 @@ class SyncManager(
     fun synchronize() {
         try {
             processing()
-            networkApiService.sendRandom(DelegateRequestMessage(synchronizationSessionId))
+            networkApiService.sendRandom(DelegateRequestMessage(sessionId))
         } catch (e: Exception) {
             synchronize()
             log.warn(e.message)
@@ -125,11 +128,16 @@ class SyncManager(
         activeDelegatesLastHash.clear()
         expectedHash = EMPTY
         lastResponseTime = nodeClock.networkTime()
-        synchronizationSessionId = UUID.randomUUID().toString()
+        sessionId = UUID.randomUUID().toString()
+        unlocked = false
     }
 
     private fun unlock() {
-        syncStatus.setSyncStatus(SYNCHRONIZED)
+        if (!unlocked) {
+            syncStatus.setSyncStatus(SYNCHRONIZED)
+        }
+
+        unlocked = true
     }
 
 }
