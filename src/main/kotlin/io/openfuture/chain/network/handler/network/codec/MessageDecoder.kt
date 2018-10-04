@@ -8,6 +8,7 @@ import io.openfuture.chain.network.message.base.MessageType
 import io.openfuture.chain.network.property.NodeProperties
 import org.apache.commons.lang3.builder.ToStringBuilder
 import org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE
 import org.springframework.context.annotation.Scope
@@ -20,7 +21,7 @@ class MessageDecoder(
 ) : ReplayingDecoder<Nothing>() {
 
     companion object {
-        private val log = LoggerFactory.getLogger(MessageDecoder::class.java)
+        private val log: Logger = LoggerFactory.getLogger(MessageDecoder::class.java)
     }
 
 

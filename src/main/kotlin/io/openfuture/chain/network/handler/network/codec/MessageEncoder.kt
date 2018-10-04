@@ -11,6 +11,7 @@ import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.serialization.Serializable
 import org.apache.commons.lang3.builder.ToStringBuilder
 import org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -22,7 +23,7 @@ class MessageEncoder(
 ) : MessageToByteEncoder<Serializable>() {
 
     companion object {
-        private val log = LoggerFactory.getLogger(MessageEncoder::class.java)
+        private val log: Logger = LoggerFactory.getLogger(MessageEncoder::class.java)
     }
 
 
