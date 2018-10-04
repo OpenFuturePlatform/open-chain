@@ -46,9 +46,6 @@ class SyncManager(
     @Volatile
     private var lastResponseTime: Long = nodeClock.networkTime()
 
-    @Volatile
-    private var unlocked: Boolean = false
-
 
     @Synchronized
     fun getLastResponseTime(): Long = lastResponseTime
@@ -129,15 +126,10 @@ class SyncManager(
         expectedHash = EMPTY
         lastResponseTime = nodeClock.networkTime()
         sessionId = UUID.randomUUID().toString()
-        unlocked = false
     }
 
     private fun unlock() {
-        if (!unlocked) {
-            syncStatus.setSyncStatus(SYNCHRONIZED)
-        }
-
-        unlocked = true
+        syncStatus.setSyncStatus(SYNCHRONIZED)
     }
 
 }
