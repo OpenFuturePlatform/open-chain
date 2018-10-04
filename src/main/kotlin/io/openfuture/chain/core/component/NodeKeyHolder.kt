@@ -38,7 +38,7 @@ class NodeKeyHolder(
             val seedPhrase = cryptoService.generateSeedPhrase()
             val masterKey = cryptoService.getMasterKey(seedPhrase).ecKey
 
-            config.getConfig().secret = ByteUtils.toHexString(masterKey.getPrivate())
+            config.setSecret(ByteUtils.toHexString(masterKey.getPrivate()))
         }
     }
 

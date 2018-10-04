@@ -27,7 +27,7 @@ class NodeConfigurator(
 
         if (!file.exists()) {
             file.createNewFile()
-            file.writeText(mapper.writeValueAsString(config), UTF_8)
+            updateFile()
         } else {
             config = mapper.readValue(file, NodeConfig::class.java)
         }
@@ -36,10 +36,24 @@ class NodeConfigurator(
 
     @PreDestroy
     private fun destroy() {
-        file.writeText(mapper.writeValueAsString(config), UTF_8)
+        updateFile()
     }
 
     fun getConfig(): NodeConfig = config
+
+    fun setExternalHost(host: String) {
+        config.externalHost = host
+        updateFile()
+    }
+
+    fun setSecret(secret: String) {
+        config.secret = secret
+        updateFile()
+    }
+
+    private fun updateFile() {
+        file.writeText(mapper.writeValueAsString(config), UTF_8)
+    }
 
     @NoArgConstructor
     data class NodeConfig(
