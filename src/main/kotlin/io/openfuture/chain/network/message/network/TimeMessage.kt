@@ -6,7 +6,6 @@ import io.openfuture.chain.network.serialization.Serializable
 
 @NoArgConstructor
 data class TimeMessage (
-    var isSynchronized: Boolean = false,
     var originalTime: Long = 0,
     var receiveTime: Long = 0,
     var transmitTime: Long = 0,
@@ -14,11 +13,17 @@ data class TimeMessage (
 ) : Serializable {
 
     override fun read(buf: ByteBuf) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        originalTime = buf.readLong()
+        receiveTime = buf.readLong()
+        transmitTime = buf.readLong()
+        destinationTime = buf.readLong()
     }
 
     override fun write(buf: ByteBuf) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        buf.writeLong(originalTime)
+        buf.writeLong(receiveTime)
+        buf.writeLong(transmitTime)
+        buf.writeLong(destinationTime)
     }
 
     fun isValidRequest(): Boolean = 0L != originalTime
