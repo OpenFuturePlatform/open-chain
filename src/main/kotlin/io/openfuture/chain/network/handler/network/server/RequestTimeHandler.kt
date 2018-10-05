@@ -16,7 +16,7 @@ class RequestTimeHandler(
     override fun channelRead0(ctx: ChannelHandlerContext, msg: TimeMessage) {
         val received = clock.currentTimeMillis()
         if (msg.isValidRequest()) {
-            ctx.writeAndFlush(TimeMessage(clock.isSynchronized(), msg.originalTime, received,
+            ctx.writeAndFlush(TimeMessage(msg.originalTime, received,
                 clock.currentTimeMillis()))
         }
     }

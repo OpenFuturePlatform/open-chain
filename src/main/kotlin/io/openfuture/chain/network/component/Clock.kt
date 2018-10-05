@@ -25,7 +25,7 @@ class Clock (
     fun sync() {
         val addresses = nodeProperties.getRootAddresses()
         syncState.setClockStatus(PROCESSING)
-        val message = TimeMessage(isSynchronized(), currentTimeMillis())
+        val message = TimeMessage(currentTimeMillis())
         addresses.forEach { connectionService.connectAndSend(it, message) }
     }
 
