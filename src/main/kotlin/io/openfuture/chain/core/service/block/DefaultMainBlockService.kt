@@ -14,11 +14,11 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
-import io.openfuture.chain.core.sync.SyncStatus
-import io.openfuture.chain.core.sync.SyncStatus.SyncStatusType.NOT_SYNCHRONIZED
+import io.openfuture.chain.core.sync.SyncState
+import io.openfuture.chain.core.sync.SyncState.SyncStatusType.NOT_SYNCHRONIZED
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.component.NodeClock
+import io.openfuture.chain.network.component.Clock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
@@ -39,14 +39,14 @@ class DefaultMainBlockService(
     repository: MainBlockRepository,
     walletService: WalletService,
     delegateService: DelegateService,
-    private val clock: NodeClock,
+    private val clock: Clock,
     private val keyHolder: NodeKeyHolder,
     private val voteTransactionService: VoteTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
     private val rewardTransactionService: RewardTransactionService,
     private val consensusProperties: ConsensusProperties,
-    private val syncStatus: SyncStatus,
+    private val syncStatus: SyncState,
     private val throughput: TransactionThroughput
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
 
@@ -82,7 +82,7 @@ class DefaultMainBlockService(
     @Synchronized
     @Transactional(readOnly = true)
     override fun create(): PendingBlockMessage {
-        val timestamp = clock.networkTime()
+        val timestamp = clock.currentTimeMillis()
         val lastBlock = blockService.getLast()
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
@@ -126,7 +126,7 @@ class DefaultMainBlockService(
         val block = MainBlock.of(message)
 
         if (!isSync(block)) {
-            syncStatus.setSyncStatus(NOT_SYNCHRONIZED)
+            syncStatus.setChainStatus(NOT_SYNCHRONIZED)
             return
         }
 
@@ -150,7 +150,7 @@ class DefaultMainBlockService(
         val block = MainBlock.of(message)
 
         if (!isSync(block)) {
-            syncStatus.setSyncStatus(NOT_SYNCHRONIZED)
+            syncStatus.setChainStatus(NOT_SYNCHRONIZED)
             return
         }
 

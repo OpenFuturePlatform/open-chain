@@ -3,9 +3,9 @@ package io.openfuture.chain.core.sync
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
-import io.openfuture.chain.core.sync.SyncStatus.SyncStatusType.PROCESSING
-import io.openfuture.chain.core.sync.SyncStatus.SyncStatusType.SYNCHRONIZED
-import io.openfuture.chain.network.component.NodeClock
+import io.openfuture.chain.core.sync.SyncState.SyncStatusType.PROCESSING
+import io.openfuture.chain.core.sync.SyncState.SyncStatusType.SYNCHRONIZED
+import io.openfuture.chain.network.component.Clock
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.core.BlockMessage
 import io.openfuture.chain.network.message.sync.*
@@ -23,8 +23,8 @@ class SyncManager(
     private val networkApiService: NetworkApiService,
     private val mainBlockService: MainBlockService,
     private val genesisBlockService: GenesisBlockService,
-    private val syncStatus: SyncStatus,
-    private val nodeClock: NodeClock
+    private val syncStatus: SyncState,
+    private val clock: Clock
 ) {
 
     @Volatile
@@ -40,7 +40,7 @@ class SyncManager(
     private var expectedHash: String = EMPTY
 
     @Volatile
-    private var lastResponseTime: Long = nodeClock.networkTime()
+    private var lastResponseTime: Long = clock.currentTimeMillis()
 
 
     companion object {
@@ -112,25 +112,25 @@ class SyncManager(
         if (expectedHash == block.hash) {
             unlock()
         } else {
-            lastResponseTime = nodeClock.networkTime()
+            lastResponseTime = clock.currentTimeMillis()
         }
     }
 
     private fun processing() {
         reset()
-        syncStatus.setSyncStatus(PROCESSING)
+        syncStatus.setChainStatus(PROCESSING)
     }
 
     private fun reset() {
         activeDelegateAddresses.clear()
         activeDelegatesLastHash.clear()
         expectedHash = EMPTY
-        lastResponseTime = nodeClock.networkTime()
+        lastResponseTime = clock.currentTimeMillis()
         synchronizationSessionId = UUID.randomUUID().toString()
     }
 
     private fun unlock() {
-        syncStatus.setSyncStatus(SYNCHRONIZED)
+        syncStatus.setChainStatus(SYNCHRONIZED)
     }
 
 }

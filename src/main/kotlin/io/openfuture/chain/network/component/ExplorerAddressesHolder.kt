@@ -1,5 +1,6 @@
 package io.openfuture.chain.network.component
 
+import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
@@ -30,8 +31,8 @@ class ExplorerAddressesHolder {
     }
 
     @Synchronized
-    fun removeNodeInfo(nodeInfo: NodeInfo) {
-        nodesInfo.remove(nodeInfo)
+    fun removeNodeInfo(address: NetworkAddress) {
+        nodesInfo.removeIf { address == it.address }
     }
 
 }

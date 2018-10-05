@@ -36,7 +36,11 @@ class ChannelsHolder {
     fun send(message: Serializable, nodeInfo: NodeInfo): Boolean {
         val channelId = nodesInfo.filter { it.value == nodeInfo }.keys.firstOrNull() ?: return false
         val channel = channelGroup.firstOrNull { it.id() == channelId }
-            ?: throw NotFoundChannelException("Channel with uid: ${nodeInfo.uid} is not exist")
+
+        if (null == channel) {
+            nodesInfo.remove(channelId)
+            return false
+        }
 
         channel.writeAndFlush(message)
         return true

@@ -5,14 +5,16 @@ import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
-import io.openfuture.chain.core.sync.SyncStatus.SyncStatusType
+import io.openfuture.chain.core.sync.SyncState
+import io.openfuture.chain.core.sync.SyncState.SyncStatusType
+import io.openfuture.chain.core.sync.SyncState.SyncStatusType.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+import javax.annotation.PostConstruct
 
 @Component
 class BlockProductionScheduler(
@@ -21,7 +23,8 @@ class BlockProductionScheduler(
     private val mainBlockService: MainBlockService,
     private val genesisBlockService: GenesisBlockService,
     private val pendingBlockHandler: PendingBlockHandler,
-    private val consensusProperties: ConsensusProperties
+    private val consensusProperties: ConsensusProperties,
+    private val syncState: SyncState
 ) {
 
     companion object {
@@ -31,20 +34,19 @@ class BlockProductionScheduler(
     private lateinit var executor: ScheduledExecutorService
 
 
-    @EventListener(condition = "#status.name() == 'SYNCHRONIZED'")
-    fun onSyncReady(status: SyncStatusType) {
+    @PostConstruct
+    fun onSyncReady() {
         executor = Executors.newSingleThreadScheduledExecutor()
         executor.scheduleAtFixedRate({ proceedProductionLoop() }, epochService.timeToNextTimeSlot(),
             consensusProperties.getPeriod(), TimeUnit.MILLISECONDS)
     }
 
-    @EventListener(condition = "#status.name() == 'NOT_SYNCHRONIZED'")
-    fun onSyncNeeded(status: SyncStatusType) {
-        executor.shutdownNow()
-    }
-
     private fun proceedProductionLoop() {
         try {
+            if (SYNCHRONIZED != syncState.getNodeStatus()) {
+                log.error("Node is not synchronized")
+                return
+            }
             val slotOwner = epochService.getCurrentSlotOwner()
             if (genesisBlockService.isGenesisBlockRequired()) {
                 val genesisBlock = genesisBlockService.create()

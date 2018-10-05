@@ -23,6 +23,8 @@ interface NetworkApiService {
 
 interface ConnectionService {
 
-    fun connect(networkAddress: NetworkAddress, close: Boolean = false)
+    fun connect(networkAddress: NetworkAddress)
+
+    fun connectAndSend(networkAddress: NetworkAddress, msg: Serializable)
 
 }
