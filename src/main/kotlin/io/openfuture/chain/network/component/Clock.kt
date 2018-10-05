@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
-class Clock (
+class Clock(
     private val syncState: SyncState,
     private val nodeProperties: NodeProperties,
     private val connectionService: ConnectionService
@@ -25,8 +25,9 @@ class Clock (
     fun sync() {
         val addresses = nodeProperties.getRootAddresses()
         syncState.setClockStatus(PROCESSING)
-        val message = TimeMessage(currentTimeMillis())
+        val message = TimeMessage(true, currentTimeMillis())
         addresses.forEach { connectionService.connectAndSend(it, message) }
+        offsets.clear()
     }
 
     @Synchronized
@@ -41,11 +42,11 @@ class Clock (
 
         if (0 < offsets.size) {
             offset = offsets.asSequence().groupBy { it }.maxBy { it.value.size }!!.key
-            syncState.setClockStatus(SYNCHRONIZED)
+            if (SYNCHRONIZED != syncState.getClockStatus()) {
+                syncState.setClockStatus(SYNCHRONIZED)
+            }
         }
     }
-
-    fun isSynchronized(): Boolean = SYNCHRONIZED == syncState.getClockStatus()
 
     private fun calculateOffset(msg: TimeMessage): Long =
         ((msg.receiveTime - msg.originalTime) + (msg.transmitTime - msg.destinationTime)) / 2

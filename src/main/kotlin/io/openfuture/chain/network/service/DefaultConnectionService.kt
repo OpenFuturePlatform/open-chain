@@ -37,12 +37,9 @@ class DefaultConnectionService(
     override fun connectAndSend(networkAddress: NetworkAddress, msg: Serializable) {
         bootstrap.connect(networkAddress.host, networkAddress.port).addListener { future ->
             val channel = (future as ChannelFuture).channel()
+
             if (future.isSuccess) {
-                channel.write(msg)
-                channel.close()
-            } else {
-                log.warn("Can not connect to ${networkAddress.host}:${networkAddress.port}")
-                explorerAddressesHolder.removeNodeInfo(networkAddress)
+                channel.writeAndFlush(msg)
             }
         }
     }

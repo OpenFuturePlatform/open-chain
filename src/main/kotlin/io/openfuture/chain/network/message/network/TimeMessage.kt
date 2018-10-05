@@ -6,6 +6,7 @@ import io.openfuture.chain.network.serialization.Serializable
 
 @NoArgConstructor
 data class TimeMessage (
+    var isClient: Boolean = false,
     var originalTime: Long = 0,
     var receiveTime: Long = 0,
     var transmitTime: Long = 0,
@@ -13,6 +14,7 @@ data class TimeMessage (
 ) : Serializable {
 
     override fun read(buf: ByteBuf) {
+        isClient = buf.readBoolean()
         originalTime = buf.readLong()
         receiveTime = buf.readLong()
         transmitTime = buf.readLong()
@@ -20,6 +22,7 @@ data class TimeMessage (
     }
 
     override fun write(buf: ByteBuf) {
+        buf.writeBoolean(isClient)
         buf.writeLong(originalTime)
         buf.writeLong(receiveTime)
         buf.writeLong(transmitTime)

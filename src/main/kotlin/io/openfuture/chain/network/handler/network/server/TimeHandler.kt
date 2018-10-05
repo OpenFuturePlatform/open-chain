@@ -1,4 +1,4 @@
-package io.openfuture.chain.network.handler.network.client
+package io.openfuture.chain.network.handler.network.server
 
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
@@ -9,15 +9,23 @@ import org.springframework.stereotype.Component
 
 @Component
 @Sharable
-class ResponseTimeHandler(
-    private val clock: Clock
+class TimeHandler(
+    var clock: Clock
 ) : SimpleChannelInboundHandler<TimeMessage>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: TimeMessage) {
-        msg.destinationTime = clock.currentTimeMillis()
+        val time = clock.currentTimeMillis()
+        if (msg.isClient && msg.isValidRequest()) {
+            ctx.writeAndFlush(TimeMessage(false, msg.originalTime, time, clock.currentTimeMillis()))
+            return
+        }
+
         if (msg.isValidResponse()) {
+            msg.destinationTime = time
             clock.adjust(msg)
         }
+
+        ctx.channel().close()
     }
 
 }
