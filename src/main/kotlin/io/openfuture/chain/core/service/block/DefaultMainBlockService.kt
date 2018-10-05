@@ -79,31 +79,31 @@ class DefaultMainBlockService(
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
 
+        var fees = 0L
+        val hashes = mutableListOf<String>()
         val transactionsForBlock = getTransactions()
-        val fees = transactionsForBlock.asSequence().map { it.header.fee }.sum()
-        val rewardTransactionMessage = rewardTransactionService.create(timestamp, fees)
 
-        val merkleHash = calculateMerkleRoot(transactionsForBlock.map { it.footer.hash } + rewardTransactionMessage.hash)
+        val voteTransactions = mutableListOf<VoteTransactionMessage>()
+        val delegateTransactions = mutableListOf<DelegateTransactionMessage>()
+        val transferTransactions = mutableListOf<TransferTransactionMessage>()
+
+        transactionsForBlock.asSequence().forEach {
+            fees += it.header.fee
+            hashes.add(it.footer.hash)
+            when (it) {
+                is UnconfirmedVoteTransaction -> voteTransactions.add(it.toMessage())
+                is UnconfirmedDelegateTransaction -> delegateTransactions.add(it.toMessage())
+                is UnconfirmedTransferTransaction -> transferTransactions.add(it.toMessage())
+            }
+        }
+
+        val rewardTransactionMessage = rewardTransactionService.create(timestamp, fees)
+        val merkleHash = calculateMerkleRoot(hashes + rewardTransactionMessage.hash)
         val payload = MainBlockPayload(merkleHash)
 
         val hash = createHash(timestamp, height, previousHash, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKeyAsHexString()
-
-        val voteTransactions = transactionsForBlock.asSequence()
-            .filterIsInstance<UnconfirmedVoteTransaction>()
-            .map { it.toMessage() }
-            .toList()
-
-        val delegateTransactions = transactionsForBlock.asSequence()
-            .filterIsInstance<UnconfirmedDelegateTransaction>()
-            .map { it.toMessage() }
-            .toList()
-
-        val transferTransactions = transactionsForBlock.asSequence()
-            .filterIsInstance<UnconfirmedTransferTransaction>()
-            .map { it.toMessage() }
-            .toList()
 
         return PendingBlockMessage(height, previousHash, timestamp, ByteUtils.toHexString(hash), signature, publicKey,
             merkleHash, rewardTransactionMessage, voteTransactions, delegateTransactions, transferTransactions)
@@ -112,17 +112,23 @@ class DefaultMainBlockService(
     @Synchronized
     @Transactional(readOnly = true)
     override fun verify(message: PendingBlockMessage): Boolean {
-        return try {
+        try {
+            val block = MainBlock.of(message)
+            if (!isSync(block)) {
+                syncStatus.setSyncStatus(NOT_SYNCHRONIZED)
+                return false
+            }
+
             validate(message)
-            true
+            return true
         } catch (e: ValidationException) {
             log.warn(e.message)
-            false
+            return false
         }
     }
 
-    @Transactional
     @Synchronized
+    @Transactional
     override fun add(message: BaseMainBlockMessage) {
         if (null != repository.findOneByHash(message.hash)) {
             return
