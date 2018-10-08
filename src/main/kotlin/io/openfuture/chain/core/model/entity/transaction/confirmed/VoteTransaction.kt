@@ -20,7 +20,7 @@ class VoteTransaction(
     @Embedded
     val payload: VoteTransactionPayload
 
-) : Transaction(header, footer, block) {
+) : Transaction(header, footer, payload, block) {
 
     companion object {
         fun of(message: VoteTransactionMessage, block: MainBlock): VoteTransaction = VoteTransaction(
@@ -38,7 +38,8 @@ class VoteTransaction(
         )
     }
 
-    override fun toMessage(): VoteTransactionMessage = VoteTransactionMessage (
+
+    override fun toMessage(): VoteTransactionMessage = VoteTransactionMessage(
         header.timestamp,
         header.fee,
         header.senderAddress,

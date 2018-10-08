@@ -2,6 +2,7 @@ package io.openfuture.chain.core.repository
 
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.Wallet
+import io.openfuture.chain.core.model.entity.WalletVote
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.NoRepositoryBean
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @NoRepositoryBean
@@ -65,7 +67,7 @@ interface DelegateTransactionRepository : TransactionRepository<DelegateTransact
 @Repository
 interface TransferTransactionRepository : TransactionRepository<TransferTransaction> {
 
-    fun findAllByHeaderSenderAddressOrPayloadRecipientAddress(headerSenderAddress: String, payloadRecipientAddress: String, request: Pageable): Page<TransferTransaction>
+    fun findAllByHeaderSenderAddressOrPayloadRecipientAddress(senderAddress: String, recipientAddress: String, request: Pageable): Page<TransferTransaction>
 
 }
 
@@ -113,6 +115,9 @@ interface DelegateRepository : BaseRepository<Delegate> {
 
     fun existsByNodeId(nodeId: String): Boolean
 
+    @Query("Select * From DELEGATES Where NODE_ID In :ids ", nativeQuery = true)
+    fun findByNodeIds(@Param("ids") nodeIds: List<String>): List<Delegate>
+
 }
 
 @Repository
@@ -126,5 +131,14 @@ interface ViewDelegateRepository : BaseRepository<ViewDelegate> {
 interface WalletRepository : BaseRepository<Wallet> {
 
     fun findOneByAddress(address: String): Wallet?
+
+}
+
+@Repository
+interface WalletVoteRepository : BaseRepository<WalletVote> {
+
+    fun findAllByIdAddress(address: String): List<WalletVote>
+
+    fun deleteByIdAddressAndIdNodeId(address: String, nodeId: String)
 
 }

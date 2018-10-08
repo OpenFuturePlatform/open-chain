@@ -3,10 +3,7 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_ADDRESS
-import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
-import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
@@ -36,46 +33,36 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         }
 
         val persistUtx = unconfirmedRepository.findOneByFooterHash(utx.footer.hash)
-
         if (null != persistUtx) {
             return persistUtx
         }
 
-        validateNew(utx)
         validate(utx)
-
-        updateUnconfirmedBalance(utx)
+        validateNew(utx)
 
         val savedUtx = save(utx)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
     }
 
-    abstract fun validate(utx: U)
-
     abstract fun validateNew(utx: U)
+
+    open fun validate(utx: U) {
+
+        validateBase(utx.header, utx.externalPayload, utx.footer)
+
+        if (!isValidAddress(utx.header.senderAddress, utx.footer.senderPublicKey)) {
+            throw ValidationException("Incorrect sender address", INCORRECT_ADDRESS)
+        }
+    }
 
     open fun save(utx: U): U = unconfirmedRepository.save(utx)
 
-    open fun save(tx: T): T {
-        return repository.save(tx)
-    }
-
-    open fun updateUnconfirmedBalance(utx: U) {
-        walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.header.fee)
-    }
+    open fun save(tx: T): T = repository.save(tx)
 
     protected fun confirm(utx: U, tx: T): T {
         unconfirmedRepository.delete(utx)
         return save(tx)
-    }
-
-    protected fun validateExternal(header: TransactionHeader, payload: TransactionPayload, footer: TransactionFooter) {
-        if (!isValidAddress(header.senderAddress, footer.senderPublicKey)) {
-            throw ValidationException("Incorrect sender address", INCORRECT_ADDRESS)
-        }
-
-        super.validateBase(header, payload, footer)
     }
 
     protected fun isValidActualBalance(address: String, amount: Long): Boolean =

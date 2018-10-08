@@ -18,7 +18,7 @@ class UnconfirmedVoteTransaction(
     @Embedded
     val payload: VoteTransactionPayload
 
-) : UnconfirmedTransaction(header, footer) {
+) : UnconfirmedTransaction(header, footer, payload) {
 
     companion object {
         fun of(message: VoteTransactionMessage): UnconfirmedVoteTransaction = UnconfirmedVoteTransaction(

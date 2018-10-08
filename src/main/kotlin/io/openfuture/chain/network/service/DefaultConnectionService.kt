@@ -6,6 +6,7 @@ import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.component.ExplorerAddressesHolder
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.property.NodeProperties
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -19,7 +20,7 @@ class DefaultConnectionService(
 ) : ConnectionService {
 
     companion object {
-        private val log = LoggerFactory.getLogger(DefaultConnectionService::class.java)
+        private val log: Logger = LoggerFactory.getLogger(DefaultConnectionService::class.java)
     }
 
 

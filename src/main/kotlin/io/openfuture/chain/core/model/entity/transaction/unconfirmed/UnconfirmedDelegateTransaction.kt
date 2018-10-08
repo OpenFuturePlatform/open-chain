@@ -18,7 +18,7 @@ class UnconfirmedDelegateTransaction(
     @Embedded
     var payload: DelegateTransactionPayload
 
-) : UnconfirmedTransaction(header, footer) {
+) : UnconfirmedTransaction(header, footer, payload) {
 
     companion object {
         fun of(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
@@ -31,12 +31,12 @@ class UnconfirmedDelegateTransaction(
         fun of(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
             TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
             TransactionFooter(request.hash!!, request.senderSignature!!, request.senderPublicKey!!),
-            DelegateTransactionPayload(request.nodeId!!, request.nodeKey!!, request.nodeHost!!, request. nodePort!!,
+            DelegateTransactionPayload(request.nodeId!!, request.nodeKey!!, request.nodeHost!!, request.nodePort!!,
                 request.amount!!)
         )
     }
 
-    override fun toMessage(): DelegateTransactionMessage = DelegateTransactionMessage (
+    override fun toMessage(): DelegateTransactionMessage = DelegateTransactionMessage(
         header.timestamp,
         header.fee,
         header.senderAddress,

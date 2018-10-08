@@ -44,6 +44,9 @@ class DefaultDelegateService(
     @Transactional(readOnly = true)
     override fun isExistsByNodeId(nodeId: String): Boolean = repository.existsByNodeId(nodeId)
 
+    @Transactional(readOnly = true)
+    override fun isExistsByNodeIds(nodeIds: List<String>): Boolean = repository.findByNodeIds(nodeIds).isNotEmpty()
+
     @Transactional
     override fun save(delegate: Delegate): Delegate = repository.save(delegate)
 
