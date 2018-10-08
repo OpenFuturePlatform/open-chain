@@ -13,9 +13,6 @@ class Wallet(
     var address: String,
 
     @Column(name = "balance", nullable = false)
-    var balance: Long = 0,
-
-    @Column(name = "unconfirmed_output", nullable = false)
-    var unconfirmedOutput: Long = 0
+    var balance: Long = 0
 
 ) : BaseModel()

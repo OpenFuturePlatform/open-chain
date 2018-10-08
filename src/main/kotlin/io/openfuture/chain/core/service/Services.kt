@@ -229,10 +229,6 @@ interface WalletService {
 
     fun decreaseBalance(address: String, amount: Long)
 
-    fun increaseUnconfirmedOutput(address: String, amount: Long)
-
-    fun decreaseUnconfirmedOutput(address: String, amount: Long)
-
 }
 
 interface WalletVoteService {

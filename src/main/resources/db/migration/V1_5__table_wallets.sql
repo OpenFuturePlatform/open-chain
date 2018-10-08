@@ -1,8 +1,7 @@
 CREATE TABLE wallets (
   id                 BIGINT AUTO_INCREMENT PRIMARY KEY,
   address            VARCHAR NOT NULL UNIQUE,
-  balance            BIGINT DEFAULT 0,
-  unconfirmed_output BIGINT DEFAULT 0
+  balance            BIGINT DEFAULT 0
 );
 
 CREATE TABLE wallet_votes (

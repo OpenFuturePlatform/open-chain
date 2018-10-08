@@ -11,6 +11,7 @@ import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DefaultDelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.WalletService
+import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.core.sync.SyncStatus
 import io.openfuture.chain.core.sync.SyncStatus.SyncStatusType.NOT_SYNCHRONIZED
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -99,8 +100,13 @@ class DefaultGenesisBlockService(
     }
 
     override fun isGenesisBlockRequired(): Boolean {
-        val blocksProduced = blockService.getCurrentHeight() - getLast().height
-        return (consensusProperties.epochHeight!! - 1) <= blocksProduced
+        BlockchainLock.readLock.lock()
+        try {
+            val blocksProduced = blockService.getCurrentHeight() - getLast().height
+            return (consensusProperties.epochHeight!! - 1) <= blocksProduced
+        } finally {
+            BlockchainLock.readLock.unlock()
+        }
     }
 
     private fun getTimestamp(): Long {

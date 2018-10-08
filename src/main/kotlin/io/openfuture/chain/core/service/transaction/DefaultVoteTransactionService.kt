@@ -16,6 +16,7 @@ import io.openfuture.chain.core.repository.VoteTransactionRepository
 import io.openfuture.chain.core.service.DefaultWalletVoteService
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
+import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
@@ -66,41 +67,51 @@ internal class DefaultVoteTransactionService(
             ?: throw NotFoundException("Last vote for delegate transaction not found")
 
     @BlockchainSynchronized
-    @Synchronized
     @Transactional
     override fun add(message: VoteTransactionMessage) {
+        BlockchainLock.writeLock.lock()
         try {
             super.add(UnconfirmedVoteTransaction.of(message))
         } catch (ex: CoreException) {
             log.debug(ex.message)
+        } finally {
+            BlockchainLock.writeLock.unlock()
         }
     }
 
     @BlockchainSynchronized
-    @Synchronized
     @Transactional
-    override fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction =
-        super.add(UnconfirmedVoteTransaction.of(request))
-
-    @Transactional
-    override fun toBlock(message: VoteTransactionMessage, block: MainBlock): VoteTransaction {
-        val tx = repository.findOneByFooterHash(message.hash)
-        if (null != tx) {
-            return tx
+    override fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction {
+        BlockchainLock.writeLock.lock()
+        try {
+            return super.add(UnconfirmedVoteTransaction.of(request))
+        } finally {
+            BlockchainLock.writeLock.unlock()
         }
-
-        walletService.decreaseBalance(message.senderAddress, message.fee)
-
-        val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
-        if (null != utx) {
-            walletService.decreaseUnconfirmedOutput(message.senderAddress, message.fee)
-            return confirm(utx, VoteTransaction.of(utx, block))
-        }
-
-        return this.save(VoteTransaction.of(message, block))
     }
 
     @Transactional
+    override fun toBlock(message: VoteTransactionMessage, block: MainBlock): VoteTransaction {
+        BlockchainLock.writeLock.lock()
+        try {
+            val tx = repository.findOneByFooterHash(message.hash)
+            if (null != tx) {
+                return tx
+            }
+
+            walletService.decreaseBalance(message.senderAddress, message.fee)
+
+            val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
+            if (null != utx) {
+                return confirm(utx, VoteTransaction.of(utx, block))
+            }
+
+            return this.save(VoteTransaction.of(message, block))
+        } finally {
+            BlockchainLock.writeLock.unlock()
+        }
+    }
+
     override fun verify(message: VoteTransactionMessage): Boolean {
         return try {
             validate(UnconfirmedVoteTransaction.of(message))
@@ -118,7 +129,6 @@ internal class DefaultVoteTransactionService(
         return super.save(tx)
     }
 
-    @Transactional
     override fun validate(utx: UnconfirmedVoteTransaction) {
         super.validate(utx)
 
@@ -131,7 +141,7 @@ internal class DefaultVoteTransactionService(
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     override fun validateNew(utx: UnconfirmedVoteTransaction) {
         if (!isValidActualBalance(utx.header.senderAddress, utx.header.fee)) {
             throw ValidationException("Insufficient actual balance", ExceptionType.INSUFFICIENT_ACTUAL_BALANCE)

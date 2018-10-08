@@ -15,6 +15,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
+import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.core.sync.SyncStatus
 import io.openfuture.chain.core.sync.SyncStatus.SyncStatusType.NOT_SYNCHRONIZED
 import io.openfuture.chain.crypto.util.HashUtils
@@ -71,50 +72,52 @@ class DefaultMainBlockService(
     override fun getAll(request: PageRequest): Page<MainBlock> = repository.findAll(request)
 
     @BlockchainSynchronized
-    @Synchronized
     @Transactional(readOnly = true)
     override fun create(): PendingBlockMessage {
-        val timestamp = clock.networkTime()
-        val lastBlock = blockService.getLast()
-        val height = lastBlock.height + 1
-        val previousHash = lastBlock.hash
+        BlockchainLock.readLock.lock()
+        try {
+            val timestamp = clock.networkTime()
+            val lastBlock = blockService.getLast()
+            val height = lastBlock.height + 1
+            val previousHash = lastBlock.hash
 
-        var fees = 0L
-        val hashes = mutableListOf<String>()
-        val transactionsForBlock = getTransactions()
+            var fees = 0L
+            val hashes = mutableListOf<String>()
+            val transactionsForBlock = getTransactions()
 
-        val voteTransactions = mutableListOf<VoteTransactionMessage>()
-        val delegateTransactions = mutableListOf<DelegateTransactionMessage>()
-        val transferTransactions = mutableListOf<TransferTransactionMessage>()
+            val voteTransactions = mutableListOf<VoteTransactionMessage>()
+            val delegateTransactions = mutableListOf<DelegateTransactionMessage>()
+            val transferTransactions = mutableListOf<TransferTransactionMessage>()
 
-        transactionsForBlock.asSequence().forEach {
-            fees += it.header.fee
-            hashes.add(it.footer.hash)
-            when (it) {
-                is UnconfirmedVoteTransaction -> voteTransactions.add(it.toMessage())
-                is UnconfirmedDelegateTransaction -> delegateTransactions.add(it.toMessage())
-                is UnconfirmedTransferTransaction -> transferTransactions.add(it.toMessage())
+            transactionsForBlock.asSequence().forEach {
+                fees += it.header.fee
+                hashes.add(it.footer.hash)
+                when (it) {
+                    is UnconfirmedVoteTransaction -> voteTransactions.add(it.toMessage())
+                    is UnconfirmedDelegateTransaction -> delegateTransactions.add(it.toMessage())
+                    is UnconfirmedTransferTransaction -> transferTransactions.add(it.toMessage())
+                }
             }
+
+            val rewardTransactionMessage = rewardTransactionService.create(timestamp, fees)
+            val merkleHash = calculateMerkleRoot(hashes + rewardTransactionMessage.hash)
+            val payload = MainBlockPayload(merkleHash)
+            val hash = createHash(timestamp, height, previousHash, payload)
+            val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
+            val publicKey = keyHolder.getPublicKeyAsHexString()
+
+            return PendingBlockMessage(height, previousHash, timestamp, ByteUtils.toHexString(hash), signature, publicKey,
+                merkleHash, rewardTransactionMessage, voteTransactions, delegateTransactions, transferTransactions)
+        } finally {
+            BlockchainLock.readLock.unlock()
         }
-
-        val rewardTransactionMessage = rewardTransactionService.create(timestamp, fees)
-        val merkleHash = calculateMerkleRoot(hashes + rewardTransactionMessage.hash)
-        val payload = MainBlockPayload(merkleHash)
-
-        val hash = createHash(timestamp, height, previousHash, payload)
-        val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
-        val publicKey = keyHolder.getPublicKeyAsHexString()
-
-        return PendingBlockMessage(height, previousHash, timestamp, ByteUtils.toHexString(hash), signature, publicKey,
-            merkleHash, rewardTransactionMessage, voteTransactions, delegateTransactions, transferTransactions)
     }
 
-    @Synchronized
     @Transactional(readOnly = true)
     override fun verify(message: PendingBlockMessage): Boolean {
+        BlockchainLock.readLock.lock()
         try {
-            val block = MainBlock.of(message)
-            if (!isSync(block)) {
+            if (!isSync(MainBlock.of(message))) {
                 syncStatus.setSyncStatus(NOT_SYNCHRONIZED)
                 return false
             }
@@ -123,34 +126,41 @@ class DefaultMainBlockService(
             return true
         } catch (e: ValidationException) {
             log.warn(e.message)
-            return false
+        } finally {
+            BlockchainLock.readLock.unlock()
         }
+
+        return false
     }
 
-    @Synchronized
     @Transactional
     override fun add(message: BaseMainBlockMessage) {
-        if (null != repository.findOneByHash(message.hash)) {
-            return
-        }
-
-        val block = MainBlock.of(message)
-        if (!isSync(block)) {
-            syncStatus.setSyncStatus(NOT_SYNCHRONIZED)
-            return
-        }
-
-        val savedBlock = super.save(block)
-        message.getAllTransactions().forEach {
-            when (it) {
-                is RewardTransactionMessage -> rewardTransactionService.toBlock(it, savedBlock)
-                is TransferTransactionMessage -> transferTransactionService.toBlock(it, savedBlock)
-                is DelegateTransactionMessage -> delegateTransactionService.toBlock(it, savedBlock)
-                is VoteTransactionMessage -> voteTransactionService.toBlock(it, savedBlock)
+        BlockchainLock.writeLock.lock()
+        try {
+            if (null != repository.findOneByHash(message.hash)) {
+                return
             }
-        }
 
-        throughput.updateThroughput(message.getAllTransactions().size, savedBlock.height)
+            val block = MainBlock.of(message)
+            if (!isSync(block)) {
+                syncStatus.setSyncStatus(NOT_SYNCHRONIZED)
+                return
+            }
+
+            val savedBlock = super.save(block)
+            message.getAllTransactions().forEach {
+                when (it) {
+                    is RewardTransactionMessage -> rewardTransactionService.toBlock(it, savedBlock)
+                    is TransferTransactionMessage -> transferTransactionService.toBlock(it, savedBlock)
+                    is DelegateTransactionMessage -> delegateTransactionService.toBlock(it, savedBlock)
+                    is VoteTransactionMessage -> voteTransactionService.toBlock(it, savedBlock)
+                }
+            }
+
+            throughput.updateThroughput(message.getAllTransactions().size, savedBlock.height)
+        } finally {
+            BlockchainLock.writeLock.unlock()
+        }
     }
 
     private fun validate(message: PendingBlockMessage) {

@@ -11,6 +11,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.repository.TransferTransactionRepository
 import io.openfuture.chain.core.repository.UTransferTransactionRepository
 import io.openfuture.chain.core.service.TransferTransactionService
+import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
@@ -55,42 +56,52 @@ class DefaultTransferTransactionService(
         (repository as TransferTransactionRepository).findAllByHeaderSenderAddressOrPayloadRecipientAddress(address, address, request)
 
     @BlockchainSynchronized
-    @Synchronized
     @Transactional
     override fun add(message: TransferTransactionMessage) {
+        BlockchainLock.writeLock.lock()
         try {
             super.add(UnconfirmedTransferTransaction.of(message))
         } catch (ex: CoreException) {
             log.debug(ex.message)
+        } finally {
+            BlockchainLock.writeLock.unlock()
         }
     }
 
     @BlockchainSynchronized
-    @Synchronized
     @Transactional
-    override fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction =
-        super.add(UnconfirmedTransferTransaction.of(request))
-
-    @Transactional
-    override fun toBlock(message: TransferTransactionMessage, block: MainBlock): TransferTransaction {
-        val tx = repository.findOneByFooterHash(message.hash)
-        if (null != tx) {
-            return tx
+    override fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction {
+        BlockchainLock.writeLock.lock()
+        try {
+            return super.add(UnconfirmedTransferTransaction.of(request))
+        } finally {
+            BlockchainLock.writeLock.unlock()
         }
-
-        walletService.increaseBalance(message.recipientAddress, message.amount)
-        walletService.decreaseBalance(message.senderAddress, message.amount + message.fee)
-
-        val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
-        if (null != utx) {
-            walletService.decreaseUnconfirmedOutput(message.senderAddress, message.amount + message.fee)
-            return confirm(utx, TransferTransaction.of(utx, block))
-        }
-
-        return save(TransferTransaction.of(message, block))
     }
 
     @Transactional
+    override fun toBlock(message: TransferTransactionMessage, block: MainBlock): TransferTransaction {
+        BlockchainLock.writeLock.lock()
+        try {
+            val tx = repository.findOneByFooterHash(message.hash)
+            if (null != tx) {
+                return tx
+            }
+
+            walletService.increaseBalance(message.recipientAddress, message.amount)
+            walletService.decreaseBalance(message.senderAddress, message.amount + message.fee)
+
+            val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
+            if (null != utx) {
+                return confirm(utx, TransferTransaction.of(utx, block))
+            }
+
+            return save(TransferTransaction.of(message, block))
+        } finally {
+            BlockchainLock.writeLock.unlock()
+        }
+    }
+
     override fun verify(message: TransferTransactionMessage): Boolean {
         return try {
             validate(UnconfirmedTransferTransaction.of(message))
@@ -104,7 +115,6 @@ class DefaultTransferTransactionService(
     @Transactional
     override fun save(tx: TransferTransaction): TransferTransaction = super.save(tx)
 
-    @Transactional
     override fun validate(utx: UnconfirmedTransferTransaction) {
         super.validate(utx)
 
@@ -118,17 +128,11 @@ class DefaultTransferTransactionService(
 
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     override fun validateNew(utx: UnconfirmedTransferTransaction) {
         if (!isValidActualBalance(utx.header.senderAddress, utx.payload.amount + utx.header.fee)) {
             throw ValidationException("Insufficient actual balance", INSUFFICIENT_ACTUAL_BALANCE)
         }
-    }
-
-    @Transactional
-    override fun updateUnconfirmedBalance(utx: UnconfirmedTransferTransaction) {
-        super.updateUnconfirmedBalance(utx)
-        walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.payload.amount)
     }
 
 }

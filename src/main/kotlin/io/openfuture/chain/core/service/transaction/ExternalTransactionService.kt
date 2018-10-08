@@ -41,7 +41,6 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         validateNew(utx)
 
         val savedUtx = save(utx)
-        updateUnconfirmedBalance(utx)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
     }
@@ -57,18 +56,14 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         }
     }
 
-    open fun updateUnconfirmedBalance(utx: U) {
-        walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.header.fee)
-    }
+    open fun save(utx: U): U = unconfirmedRepository.save(utx)
+
+    open fun save(tx: T): T = repository.save(tx)
 
     protected fun confirm(utx: U, tx: T): T {
         unconfirmedRepository.delete(utx)
         return save(tx)
     }
-
-    open fun save(utx: U): U = unconfirmedRepository.save(utx)
-
-    open fun save(tx: T): T = repository.save(tx)
 
     protected fun isValidActualBalance(address: String, amount: Long): Boolean =
         walletService.getActualBalanceByAddress(address) >= amount
