@@ -162,8 +162,8 @@ internal class DefaultVoteTransactionService(
                     ALREADY_VOTED_FOR_DELEGATE)
             }
 
-            if (!isValidVoteCount(utx.header.senderAddress)) {
-                throw ValidationException("Incorrect votes count", INCORRECT_VOTES_COUNT)
+            if (!isVoteLeft(utx.header.senderAddress)) {
+                throw ValidationException("No votes left", INCORRECT_VOTES_COUNT)
             }
         }
     }
@@ -177,7 +177,7 @@ internal class DefaultVoteTransactionService(
 
     private fun isExistsDelegate(nodeId: String): Boolean = delegateService.isExistsByNodeId(nodeId)
 
-    private fun isValidVoteCount(senderAddress: String): Boolean {
+    private fun isVoteLeft(senderAddress: String): Boolean {
         val confirmedVotes = walletVoteService.getVotesByAddress(senderAddress).count()
         val unconfirmedForVotes = unconfirmedRepository.findAllByHeaderSenderAddress(senderAddress).asSequence()
             .filter { VoteType.FOR == it.payload.getVoteType() }
