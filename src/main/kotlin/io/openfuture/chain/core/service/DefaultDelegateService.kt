@@ -31,7 +31,7 @@ class DefaultDelegateService(
 
     @Transactional(readOnly = true)
     override fun getActiveDelegates(): List<Delegate> {
-        val sortFields = arrayOf("rating", "registrationDate", "id")
+        val sortFields = setOf("rating", "registrationDate", "id")
         val pageRequest = PageRequest(0, consensusProperties.delegatesCount!!, sortFields, Sort.Direction.DESC)
         return viewRepository.findAll(pageRequest)
             .map { Delegate(it.publicKey, it.nodeId, it.address, it.host, it.port, it.registrationDate, it.id) }
