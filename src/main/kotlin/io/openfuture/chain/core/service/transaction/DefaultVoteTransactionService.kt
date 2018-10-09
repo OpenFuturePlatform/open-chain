@@ -183,7 +183,7 @@ internal class DefaultVoteTransactionService(
             .filter { VoteType.FOR == it.payload.getVoteType() }
             .count()
 
-        return consensusProperties.delegatesCount!! >= confirmedVotes + unconfirmedForVotes
+        return consensusProperties.delegatesCount!! > confirmedVotes + unconfirmedForVotes
     }
 
     private fun isAlreadyVoted(senderAddress: String, nodeId: String): Boolean =
