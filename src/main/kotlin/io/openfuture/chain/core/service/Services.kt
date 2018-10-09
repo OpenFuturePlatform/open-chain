@@ -21,6 +21,7 @@ import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import org.springframework.data.domain.Page
@@ -111,11 +112,11 @@ interface TransferTransactionService {
 
     fun getByHash(hash: String): TransferTransaction
 
-    fun getAll(request: PageRequest): Page<TransferTransaction>
+    fun getAll(request: TransactionPageRequest): Page<TransferTransaction>
 
     fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedTransferTransaction>
 
-    fun getByAddress(address: String, request: PageRequest): Page<TransferTransaction>
+    fun getByAddress(address: String, request: TransactionPageRequest): Page<TransferTransaction>
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction
 
@@ -131,7 +132,7 @@ interface TransferTransactionService {
 
 interface RewardTransactionService {
 
-    fun getAll(request: PageRequest): Page<RewardTransaction>
+    fun getAll(request: TransactionPageRequest): Page<RewardTransaction>
 
     fun getByRecipientAddress(address: String): List<RewardTransaction>
 

@@ -2,8 +2,8 @@ package io.openfuture.chain.rpc.controller.transaction
 
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.crypto.annotation.AddressChecksum
-import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
+import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.TransferTransactionResponse
 import org.springframework.validation.annotation.Validated
@@ -20,7 +20,7 @@ class TransferTransactionController(
 
     @CrossOrigin
     @GetMapping("/address/{address}")
-    fun getTransactions(@PathVariable @AddressChecksum address: String, request: PageRequest): PageResponse<TransferTransactionResponse> =
+    fun getTransactions(@PathVariable @AddressChecksum address: String, @Valid request: TransactionPageRequest): PageResponse<TransferTransactionResponse> =
         PageResponse(transactionService.getByAddress(address, request).map { TransferTransactionResponse(it) })
 
     @CrossOrigin
@@ -34,7 +34,7 @@ class TransferTransactionController(
 
     @CrossOrigin
     @GetMapping
-    fun getAll(request: PageRequest): PageResponse<TransferTransactionResponse> =
+    fun getAll(@Valid request: TransactionPageRequest): PageResponse<TransferTransactionResponse> =
         PageResponse(transactionService.getAll(request).map { TransferTransactionResponse(it) })
 
 }
