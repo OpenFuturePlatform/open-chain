@@ -5,7 +5,7 @@ plugins {
     id 'org.jetbrains.kotlin.kapt' version '1.2.71'
     id 'org.jetbrains.kotlin.plugin.spring' version '1.2.71'
     id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.71'
-    id 'org.springframework.boot' version '2.0.4.RELEASE'
+    id 'org.springframework.boot' version '2.0.5.RELEASE'
     id "io.zensoft.versioning" version "1.0.0"
 }
 
