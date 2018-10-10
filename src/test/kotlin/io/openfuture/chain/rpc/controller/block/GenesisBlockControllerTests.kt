@@ -30,7 +30,7 @@ class GenesisBlockControllerTests : ControllerTests() {
     @Test
     fun getAllGenesisBlocksShouldReturnGenesisBlocksList() {
         val pageGenesisBlocks = PageImpl(listOf(GenesisBlock(1, 1, "previousHash",
-            "hash", "signature", "publicKey", GenesisBlockPayload(1L, listOf()))))
+            "hash", "signature", "publicKey", GenesisBlockPayload(1L, mutableListOf()))))
         val expectedPageResponse = PageResponse(pageGenesisBlocks)
 
         given(service.getAll(PageRequest())).willReturn(pageGenesisBlocks)
@@ -99,7 +99,7 @@ class GenesisBlockControllerTests : ControllerTests() {
 
     private fun createGenesisBlock(): GenesisBlock =
         GenesisBlock(1, 1, "previousHash", "hash", "signature",
-            "publicKey", GenesisBlockPayload(1, listOf())).apply { id = 1 }
+            "publicKey", GenesisBlockPayload(1, mutableListOf())).apply { id = 1 }
 
 }
 
