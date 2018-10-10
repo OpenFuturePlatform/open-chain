@@ -81,11 +81,19 @@ compileTestKotlin {
         jvmTarget = "1.8"
     }
 }
-
 noArg {
-    annotations("javax.persistence.MappedSuperclass",
+    annotations(
+            "javax.persistence.MappedSuperclass", 
             "javax.persistence.Entity",
-            "io.openfuture.chain.core.annotation.NoArgConstructor")
+            "io.openfuture.chain.core.annotation.NoArgConstructor"
+    )
+}
+allOpen {
+    annotations(
+            "javax.persistence.MappedSuperclass",
+            "javax.persistence.Entity",
+            "io.openfuture.chain.core.annotation.OpenClass"
+    )
 }
 
 // IDEA
