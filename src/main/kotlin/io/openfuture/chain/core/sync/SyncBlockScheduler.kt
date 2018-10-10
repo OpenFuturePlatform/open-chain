@@ -29,8 +29,7 @@ class SyncBlockScheduler(
         }
     }
 
-    private fun isResponseTimeOut(): Boolean {
-        return nodeClock.networkTime() - syncManager.getLastResponseTime() > nodeProperties.synchronizationResponseDelay!!
-    }
+    private fun isResponseTimeOut(): Boolean =
+        nodeClock.networkTime() - syncManager.getLastResponseTime() > nodeProperties.synchronizationResponseDelay!!
 
 }

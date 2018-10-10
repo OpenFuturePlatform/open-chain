@@ -1,5 +1,6 @@
 package io.openfuture.chain.network.component
 
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
@@ -15,7 +16,7 @@ class NodeClock {
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
 
     companion object {
-        private val log = LoggerFactory.getLogger(NodeClock::class.java)
+        private val log: Logger = LoggerFactory.getLogger(NodeClock::class.java)
         private const val MINIMUM_OFFSETS_SIZE_TO_DO_SYNC = 5
     }
 

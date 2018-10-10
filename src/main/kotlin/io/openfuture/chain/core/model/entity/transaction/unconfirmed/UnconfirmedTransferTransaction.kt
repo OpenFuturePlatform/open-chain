@@ -18,7 +18,7 @@ class UnconfirmedTransferTransaction(
     @Embedded
     var payload: TransferTransactionPayload
 
-) : UnconfirmedTransaction(header, footer) {
+) : UnconfirmedTransaction(header, footer, payload) {
 
     companion object {
         fun of(message: TransferTransactionMessage): UnconfirmedTransferTransaction = UnconfirmedTransferTransaction(

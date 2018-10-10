@@ -5,13 +5,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.0.0] - 2018-09-25
 ## Added
 - Core: transaction validation
-- Database: indexes on tables
+- Core: transactions priority balancing
+- Core: block capacity
+- Database: tables indexes 
+- RPC: recalled vote flag
+- RPC: vote date to "get all votes" response 
 
 ## Changed
-- Database moved to H2
-- Core: unconfirmed balances calculation improved
+- SQLite database changed to H2
+- Core: unconfirmed balance calculation is improved
 
 ## [0.8.0] - 2018-09-07
 ## Added
@@ -209,6 +215,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[1.0.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.8.0...v1.0.0
 [0.8.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.6.0...v0.6.1

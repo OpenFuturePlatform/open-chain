@@ -72,4 +72,8 @@ class ConsensusProperties(
     @field:NotNull
     var amountDelegateTx: Long? = null
 
-)
+) {
+
+    fun getPeriod(): Long = timeSlotDuration!! + timeSlotInterval!!
+
+}

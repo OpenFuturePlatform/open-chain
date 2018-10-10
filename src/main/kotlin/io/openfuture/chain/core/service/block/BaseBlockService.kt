@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.service.block
 
-import io.openfuture.chain.core.component.BlockCapacityChecker
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
@@ -19,12 +18,10 @@ abstract class BaseBlockService<T : Block>(
     protected val repository: BlockRepository<T>,
     protected val blockService: BlockService,
     protected val walletService: WalletService,
-    protected val delegateService: DelegateService,
-    private val capacityChecker: BlockCapacityChecker
+    protected val delegateService: DelegateService
 ) {
 
     protected fun save(block: T): T {
-        capacityChecker.incrementCapacity(block.timestamp)
         return repository.save(block)
     }
 
@@ -59,7 +56,8 @@ abstract class BaseBlockService<T : Block>(
 
     protected fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray {
         val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + previousHash.toByteArray(UTF_8).size + payload.getBytes().size)
-            .putLong(timestamp).putLong(height)
+            .putLong(timestamp)
+            .putLong(height)
             .put(previousHash.toByteArray(UTF_8))
             .put(payload.getBytes())
             .array()

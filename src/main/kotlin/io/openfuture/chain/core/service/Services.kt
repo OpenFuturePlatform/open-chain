@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service
 
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.Wallet
+import io.openfuture.chain.core.model.entity.WalletVote
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -16,12 +17,8 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.node.*
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.DelegateTransactionMessage
-import io.openfuture.chain.network.message.core.RewardTransactionMessage
-import io.openfuture.chain.network.message.core.TransferTransactionMessage
-import io.openfuture.chain.network.message.core.VoteTransactionMessage
+import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
-import io.openfuture.chain.network.message.sync.MainBlockMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
@@ -55,6 +52,7 @@ interface BlockService {
 
     fun getAvgProductionTime(): Long
 
+    fun getCurrentHeight(): Long
 }
 
 interface GenesisBlockService {
@@ -65,17 +63,17 @@ interface GenesisBlockService {
 
     fun getLast(): GenesisBlock
 
-    fun create(timestamp: Long): GenesisBlockMessage
+    fun create(): GenesisBlockMessage
 
     fun add(message: GenesisBlockMessage)
-
-    fun verify(message: GenesisBlockMessage): Boolean
 
     fun getPreviousByHeight(height: Long): GenesisBlock
 
     fun getNextBlock(hash: String): GenesisBlock
 
     fun getPreviousBlock(hash: String): GenesisBlock
+
+    fun isGenesisBlockRequired(): Boolean
 
 }
 
@@ -87,9 +85,7 @@ interface MainBlockService {
 
     fun create(): PendingBlockMessage
 
-    fun add(message: PendingBlockMessage)
-
-    fun add(message: MainBlockMessage)
+    fun add(message: BaseMainBlockMessage)
 
     fun verify(message: PendingBlockMessage): Boolean
 
@@ -111,11 +107,13 @@ interface TransactionService {
 
 interface TransferTransactionService {
 
+    fun getUnconfirmedCount(): Long
+
     fun getByHash(hash: String): TransferTransaction
 
     fun getAll(request: PageRequest): Page<TransferTransaction>
 
-    fun getAllUnconfirmed(): MutableList<UnconfirmedTransferTransaction>
+    fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedTransferTransaction>
 
     fun getByAddress(address: String, request: PageRequest): Page<TransferTransaction>
 
@@ -147,11 +145,17 @@ interface RewardTransactionService {
 
 interface VoteTransactionService {
 
+    fun getUnconfirmedCount(): Long
+
     fun getByHash(hash: String): VoteTransaction
 
-    fun getAllUnconfirmed(): MutableList<UnconfirmedVoteTransaction>
+    fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedVoteTransaction>
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction
+
+    fun getUnconfirmedBySenderAgainstDelegate(senderAddress: String, nodeId: String): UnconfirmedVoteTransaction?
+
+    fun getLastVoteForDelegate(senderAddress: String, nodeId: String): VoteTransaction
 
     fun add(message: VoteTransactionMessage)
 
@@ -165,9 +169,11 @@ interface VoteTransactionService {
 
 interface DelegateTransactionService {
 
+    fun getUnconfirmedCount(): Long
+
     fun getByHash(hash: String): DelegateTransaction
 
-    fun getAllUnconfirmed(): MutableList<UnconfirmedDelegateTransaction>
+    fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedDelegateTransaction>
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction
 
@@ -195,6 +201,8 @@ interface DelegateService {
 
     fun isExistsByNodeId(nodeId: String): Boolean
 
+    fun isExistsByNodeIds(nodeIds: List<String>): Boolean
+
     fun save(delegate: Delegate): Delegate
 
 }
@@ -215,16 +223,20 @@ interface WalletService {
 
     fun getBalanceByAddress(address: String): Long
 
-    fun getVotesByAddress(address: String): MutableSet<Delegate>
-
     fun save(wallet: Wallet)
 
     fun increaseBalance(address: String, amount: Long)
 
     fun decreaseBalance(address: String, amount: Long)
 
-    fun increaseUnconfirmedOutput(address: String, amount: Long)
+}
 
-    fun decreaseUnconfirmedOutput(address: String, amount: Long)
+interface WalletVoteService {
+
+    fun getVotesByAddress(address: String): List<WalletVote>
+
+    fun add(address: String, nodeId: String): WalletVote
+
+    fun remove(address: String, nodeId: String)
 
 }

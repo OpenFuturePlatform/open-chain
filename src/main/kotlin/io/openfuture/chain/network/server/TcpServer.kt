@@ -2,6 +2,7 @@ package io.openfuture.chain.network.server
 
 import io.netty.bootstrap.ServerBootstrap
 import io.openfuture.chain.network.property.NodeProperties
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationListener
@@ -14,7 +15,7 @@ class TcpServer(
 ) : ApplicationListener<ApplicationReadyEvent> {
 
     companion object {
-        private val log = LoggerFactory.getLogger(TcpServer::class.java)
+        private val log: Logger = LoggerFactory.getLogger(TcpServer::class.java)
         private const val LOGO = """
 
               ______                                      _                       _  _                             _____    ______   _____    ______      _

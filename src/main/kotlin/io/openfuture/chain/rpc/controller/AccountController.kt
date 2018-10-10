@@ -1,7 +1,9 @@
 package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.core.service.ViewDelegateService
+import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.service.WalletService
+import io.openfuture.chain.core.service.WalletVoteService
 import io.openfuture.chain.crypto.annotation.AddressChecksum
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -13,7 +15,7 @@ import io.openfuture.chain.rpc.domain.crypto.key.DerivationKeyRequest
 import io.openfuture.chain.rpc.domain.crypto.key.ImportKeyRequest
 import io.openfuture.chain.rpc.domain.crypto.key.KeyDto
 import io.openfuture.chain.rpc.domain.crypto.key.RestoreRequest
-import io.openfuture.chain.rpc.domain.view.ViewDelegateResponse
+import io.openfuture.chain.rpc.domain.vote.VotesResponse
 import org.springframework.data.domain.PageImpl
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -26,7 +28,9 @@ import javax.validation.Valid
 class AccountController(
     private val cryptoService: CryptoService,
     private val walletService: WalletService,
-    private val viewDelegateService: ViewDelegateService
+    private val walletVoteService: WalletVoteService,
+    private val viewDelegateService: ViewDelegateService,
+    private val voteTransactionService: VoteTransactionService
 ) {
 
     @GetMapping("/doGenerate")
@@ -43,9 +47,16 @@ class AccountController(
         walletService.getActualBalanceByAddress(address)
 
     @GetMapping("/wallets/{address}/delegates")
-    fun getDelegates(@PathVariable @AddressChecksum address: String, request: PageRequest): PageResponse<ViewDelegateResponse> {
-        val delegates = walletService.getVotesByAddress(address)
-            .map { ViewDelegateResponse(viewDelegateService.getByNodeId(it.nodeId)) }
+    fun getDelegates(@PathVariable @AddressChecksum address: String, request: PageRequest): PageResponse<VotesResponse> {
+        val delegates = walletVoteService.getVotesByAddress(address)
+            .map {
+                VotesResponse(
+                    viewDelegateService.getByNodeId(it.id.nodeId),
+                    voteTransactionService.getLastVoteForDelegate(address, it.id.nodeId).header.timestamp,
+                    voteTransactionService.getUnconfirmedBySenderAgainstDelegate(address, it.id.nodeId) != null
+                )
+            }
+
         val pageActiveDelegate = delegates.stream()
             .skip(request.offset)
             .limit(request.getLimit().toLong())

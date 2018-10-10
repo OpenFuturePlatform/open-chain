@@ -2,7 +2,6 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
-import io.openfuture.chain.core.component.TransactionCapacityChecker
 import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
@@ -17,8 +16,10 @@ import io.openfuture.chain.core.repository.DelegateTransactionRepository
 import io.openfuture.chain.core.repository.UDelegateTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateTransactionService
+import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.Logger
@@ -30,10 +31,9 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultDelegateTransactionService(
     repository: DelegateTransactionRepository,
     uRepository: UDelegateTransactionRepository,
-    capacityChecker: TransactionCapacityChecker,
     private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties
-) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository, capacityChecker), DelegateTransactionService {
+) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository), DelegateTransactionService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultDelegateTransactionService::class.java)
@@ -41,56 +41,67 @@ class DefaultDelegateTransactionService(
 
 
     @Transactional(readOnly = true)
+    override fun getUnconfirmedCount(): Long = unconfirmedRepository.count()
+
+    @Transactional(readOnly = true)
     override fun getByHash(hash: String): DelegateTransaction = repository.findOneByFooterHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional(readOnly = true)
-    override fun getAllUnconfirmed(): MutableList<UnconfirmedDelegateTransaction> {
-        return unconfirmedRepository.findAllByOrderByHeaderFeeDesc()
-    }
+    override fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedDelegateTransaction> =
+        unconfirmedRepository.findAllByOrderByHeaderFeeDesc(request)
 
     @Transactional(readOnly = true)
     override fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction = unconfirmedRepository.findOneByFooterHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @BlockchainSynchronized
-    @Synchronized
     @Transactional
     override fun add(message: DelegateTransactionMessage) {
+        BlockchainLock.writeLock.lock()
         try {
             super.add(UnconfirmedDelegateTransaction.of(message))
         } catch (ex: CoreException) {
             log.debug(ex.message)
+        } finally {
+            BlockchainLock.writeLock.unlock()
         }
     }
 
     @BlockchainSynchronized
-    @Synchronized
     @Transactional
     override fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction {
-        return super.add(UnconfirmedDelegateTransaction.of(request))
+        BlockchainLock.writeLock.lock()
+        try {
+            return super.add(UnconfirmedDelegateTransaction.of(request))
+        } finally {
+            BlockchainLock.writeLock.unlock()
+        }
     }
 
     @Transactional
     override fun toBlock(message: DelegateTransactionMessage, block: MainBlock): DelegateTransaction {
-        val tx = repository.findOneByFooterHash(message.hash)
-        if (null != tx) {
-            return tx
+        BlockchainLock.writeLock.lock()
+        try {
+            val tx = repository.findOneByFooterHash(message.hash)
+            if (null != tx) {
+                return tx
+            }
+
+            walletService.decreaseBalance(message.senderAddress, message.amount + message.fee)
+            walletService.increaseBalance(consensusProperties.genesisAddress!!, message.amount)
+
+            val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
+            if (null != utx) {
+                return confirm(utx, DelegateTransaction.of(utx, block))
+            }
+
+            return this.save(DelegateTransaction.of(message, block))
+        } finally {
+            BlockchainLock.writeLock.unlock()
         }
-
-        walletService.decreaseBalance(message.senderAddress, message.amount + message.fee)
-        walletService.increaseBalance(consensusProperties.genesisAddress!!, message.amount)
-
-        val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
-        if (null != utx) {
-            walletService.decreaseUnconfirmedOutput(message.senderAddress, message.amount + message.fee)
-            return confirm(utx, DelegateTransaction.of(utx, block))
-        }
-
-        return this.save(DelegateTransaction.of(message, block))
     }
 
-    @Transactional
     override fun verify(message: DelegateTransactionMessage): Boolean {
         return try {
             validate(UnconfirmedDelegateTransaction.of(message))
@@ -108,8 +119,9 @@ class DefaultDelegateTransactionService(
         return super.save(tx)
     }
 
-    @Transactional
     override fun validate(utx: UnconfirmedDelegateTransaction) {
+        super.validate(utx)
+
         if (utx.header.fee != consensusProperties.feeDelegateTx!!) {
             throw ValidationException("Fee should be ${consensusProperties.feeDelegateTx!!}")
         }
@@ -121,11 +133,9 @@ class DefaultDelegateTransactionService(
         if (!isValidNodeId(utx.payload.nodeId, utx.payload.delegateKey)) {
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
-
-        super.validateExternal(utx.header, utx.payload, utx.footer)
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     override fun validateNew(utx: UnconfirmedDelegateTransaction) {
         if (!isValidActualBalance(utx.header.senderAddress, utx.payload.amount + utx.header.fee)) {
             throw ValidationException("Insufficient actual balance", ExceptionType.INSUFFICIENT_ACTUAL_BALANCE)
@@ -134,18 +144,18 @@ class DefaultDelegateTransactionService(
         if (isAlreadyDelegate(utx.payload.nodeId)) {
             throw ValidationException("Node ${utx.payload.nodeId} already registered as delegate", ALREADY_DELEGATE)
         }
-    }
 
-    @Transactional
-    override fun updateUnconfirmedBalance(utx: UnconfirmedDelegateTransaction) {
-        super.updateUnconfirmedBalance(utx)
-        walletService.increaseUnconfirmedOutput(utx.header.senderAddress, utx.payload.amount)
+        if (isAlreadySendRequest(utx.payload.nodeId)) {
+            throw ValidationException("Node ${utx.payload.nodeId} already send request to become delegate", ALREADY_DELEGATE)
+        }
     }
 
     private fun isValidNodeId(nodeId: String, publicKey: String): Boolean =
         nodeId == ByteUtils.toHexString(HashUtils.sha256(ByteUtils.fromHexString(publicKey)))
 
-    private fun isAlreadyDelegate(nodeId: String): Boolean =
-        delegateService.isExistsByNodeId(nodeId) || unconfirmedRepository.findAll().any { it.payload.nodeId == nodeId }
+    private fun isAlreadyDelegate(nodeId: String): Boolean = delegateService.isExistsByNodeId(nodeId)
+
+    private fun isAlreadySendRequest(nodeId: String): Boolean =
+        unconfirmedRepository.findAll().any { it.payload.nodeId == nodeId }
 
 }

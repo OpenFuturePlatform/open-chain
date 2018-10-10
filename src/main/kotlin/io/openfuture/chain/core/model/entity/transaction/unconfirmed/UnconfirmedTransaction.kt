@@ -3,6 +3,7 @@ package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
+import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.network.message.core.TransactionMessage
 import javax.persistence.Entity
 import javax.persistence.Inheritance
@@ -14,9 +15,10 @@ import javax.persistence.Table
 @Inheritance(strategy = InheritanceType.JOINED)
 abstract class UnconfirmedTransaction(
     header: TransactionHeader,
-    footer: TransactionFooter
-) : BaseTransaction(header, footer) {
+    footer: TransactionFooter,
+    payload: TransactionPayload
+) : BaseTransaction(header, footer, payload) {
 
-    abstract fun toMessage() : TransactionMessage
+    abstract fun toMessage(): TransactionMessage
 
 }

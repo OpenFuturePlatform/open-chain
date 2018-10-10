@@ -28,11 +28,13 @@ class DefaultBlockService(
     override fun getCount(): Long = repository.count()
 
     @Transactional(readOnly = true)
-    override fun getLast(): Block {
-        return repository.findFirstByOrderByHeightDesc() ?: throw NotFoundException("Last block not found!")
-    }
+    override fun getLast(): Block =
+        repository.findFirstByOrderByHeightDesc() ?: throw NotFoundException("Last block not found!")
 
     @Transactional(readOnly = true)
     override fun isExists(hash: String): Boolean = repository.findOneByHash(hash)?.let { true } ?: false
+
+    @Transactional(readOnly = true)
+    override fun getCurrentHeight(): Long = repository.getCurrentHeight()
 
 }

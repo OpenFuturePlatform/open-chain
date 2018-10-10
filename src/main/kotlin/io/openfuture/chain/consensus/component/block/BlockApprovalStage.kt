@@ -8,4 +8,5 @@ enum class BlockApprovalStage(val value: Int) : Dictionary {
     COMMIT(3);
 
     override fun getId(): Int = value
+
 }

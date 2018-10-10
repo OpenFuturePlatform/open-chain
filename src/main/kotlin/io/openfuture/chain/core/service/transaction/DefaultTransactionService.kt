@@ -1,6 +1,6 @@
 package io.openfuture.chain.core.service.transaction
 
-import io.openfuture.chain.core.component.TransactionCapacityChecker
+import io.openfuture.chain.core.component.TransactionThroughput
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultTransactionService(
     private val repository: TransactionRepository<Transaction>,
     private val uRepository: UTransactionRepository<UnconfirmedTransaction>,
-    private val capacityChecker: TransactionCapacityChecker
+    private val throughput: TransactionThroughput
 ) : TransactionService {
 
     @Transactional(readOnly = true)
@@ -24,8 +24,6 @@ class DefaultTransactionService(
     override fun getUnconfirmedTransactionByHash(hash: String): UnconfirmedTransaction = uRepository.findOneByFooterHash(hash)
         ?: throw NotFoundException("Unconfirmed transaction with hash $hash not found")
 
-    override fun getProducingPerSecond(): Long {
-        return capacityChecker.getCountPerSecond()
-    }
+    override fun getProducingPerSecond(): Long = throughput.getThroughput()
 
 }

@@ -2,6 +2,8 @@ package io.openfuture.chain.consensus.service
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.core.model.entity.Wallet
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
+import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.repository.WalletRepository
 import io.openfuture.chain.core.service.DefaultWalletService
 import io.openfuture.chain.core.service.WalletService
@@ -15,13 +17,14 @@ import org.mockito.Mockito.verify
 class DefaultWalletServiceTest : ServiceTests() {
 
     @Mock private lateinit var repository: WalletRepository
+    @Mock private lateinit var unconfirmedTransactionRepository: UTransactionRepository<UnconfirmedTransaction>
 
     private lateinit var service: WalletService
 
 
     @Before
     fun setUp() {
-        service = DefaultWalletService(repository)
+        service = DefaultWalletService(repository, unconfirmedTransactionRepository)
     }
 
     @Test
@@ -32,7 +35,7 @@ class DefaultWalletServiceTest : ServiceTests() {
 
         given(repository.findOneByAddress(address)).willReturn(wallet)
 
-        val actualBalance = service.getActualBalanceByAddress(address)
+        val actualBalance = service.getBalanceByAddress(address)
 
         assertThat(actualBalance).isEqualTo(expectedBalance)
     }
@@ -44,7 +47,7 @@ class DefaultWalletServiceTest : ServiceTests() {
 
         given(repository.findOneByAddress(address)).willReturn(null)
 
-        val actualBalance = service.getActualBalanceByAddress(address)
+        val actualBalance = service.getBalanceByAddress(address)
 
         assertThat(actualBalance).isEqualTo(expectedBalance)
     }

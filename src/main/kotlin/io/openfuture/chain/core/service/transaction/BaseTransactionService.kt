@@ -32,12 +32,10 @@ abstract class BaseTransactionService {
         return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
     }
 
-    private fun isValidHash(header: TransactionHeader, payload: TransactionPayload, hash: String): Boolean {
-        return createHash(header, payload) == hash
-    }
+    private fun isValidHash(header: TransactionHeader, payload: TransactionPayload, hash: String): Boolean =
+        createHash(header, payload) == hash
 
-    private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean {
-        return SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
-    }
+    private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean =
+        SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
 
 }

@@ -1,9 +1,10 @@
 package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.service.ViewDelegateService
+import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.service.WalletService
+import io.openfuture.chain.core.service.WalletVoteService
 import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import io.openfuture.chain.crypto.service.CryptoService
@@ -19,8 +20,6 @@ import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import reactor.core.publisher.Mono
 
 @WebFluxTest(AccountController::class)
@@ -33,7 +32,13 @@ class AccountControllerTests : ControllerTests() {
     private lateinit var walletService: WalletService
 
     @MockBean
+    private lateinit var walletVoteService: WalletVoteService
+
+    @MockBean
     private lateinit var viewDelegateService: ViewDelegateService
+
+    @MockBean
+    private lateinit var voteTransactionService: VoteTransactionService
 
     companion object {
         private const val ACCOUNT_URL = "/rpc/accounts"
@@ -121,9 +126,6 @@ class AccountControllerTests : ControllerTests() {
         assertThat(actualBalance).isEqualTo(expectedBalance)
     }
 
-    @GetMapping("/wallets/{address}/delegates")
-    fun getDelegates(@PathVariable address: String): Set<Delegate> = walletService.getVotesByAddress(address)
-
     @Test
     fun doGenerateNewAccountShouldReturnGeneratedAccount() {
         val seedPhrase = "1 2 3 4 5 6 7 8 9 10 11 12"
@@ -150,7 +152,7 @@ class AccountControllerTests : ControllerTests() {
         val key = ExtendedKey.root(ByteArray(0))
         val publicKey = "publicKey"
         val privateKey = "privateKey"
-        val expectedWalletDto =  WalletDto(KeyDto("publicKey", "privateKey"), key.ecKey.getAddress())
+        val expectedWalletDto = WalletDto(KeyDto("publicKey", "privateKey"), key.ecKey.getAddress())
 
         given(cryptoService.importExtendedKey(importKeyRequest.decodedKey!!)).willReturn(key)
         given(cryptoService.serializePublicKey(key)).willReturn(publicKey)
@@ -171,7 +173,7 @@ class AccountControllerTests : ControllerTests() {
     fun doImportWifKeyShouldReturnWalletDto() {
         val importKeyRequest = ImportKeyRequest("decodedKey")
         val ecKey = ECKey(ByteArray(1))
-        val expectedWalletDto =  WalletDto(ecKey)
+        val expectedWalletDto = WalletDto(ecKey)
 
         given(cryptoService.importWifKey(importKeyRequest.decodedKey!!)).willReturn(ecKey)
 
@@ -189,7 +191,7 @@ class AccountControllerTests : ControllerTests() {
     fun doImportPrivateKeyShouldReturnWalletDto() {
         val importKeyRequest = ImportKeyRequest("decodedKey")
         val ecKey = ECKey(ByteArray(1))
-        val expectedWalletDto =  WalletDto(ecKey)
+        val expectedWalletDto = WalletDto(ecKey)
 
         given(cryptoService.importPrivateKey(importKeyRequest.decodedKey!!)).willReturn(ecKey)
 

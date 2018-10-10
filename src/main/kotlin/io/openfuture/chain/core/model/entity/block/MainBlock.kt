@@ -2,7 +2,7 @@ package io.openfuture.chain.core.model.entity.block
 
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
-import io.openfuture.chain.network.message.consensus.PendingBlockMessage
+import io.openfuture.chain.network.message.core.BaseMainBlockMessage
 import io.openfuture.chain.network.message.sync.MainBlockMessage
 import javax.persistence.Embedded
 import javax.persistence.Entity
@@ -24,17 +24,7 @@ class MainBlock(
 ) : Block(timestamp, height, previousHash, hash, signature, publicKey) {
 
     companion object {
-        fun of(message: PendingBlockMessage): MainBlock = MainBlock(
-            message.timestamp,
-            message.height,
-            message.previousHash,
-            message.hash,
-            message.signature,
-            message.publicKey,
-            MainBlockPayload(message.merkleHash)
-        )
-
-        fun of(message: MainBlockMessage): MainBlock = MainBlock(
+        fun of(message: BaseMainBlockMessage): MainBlock = MainBlock(
             message.timestamp,
             message.height,
             message.previousHash,
@@ -45,10 +35,9 @@ class MainBlock(
         )
     }
 
-    fun getTransactionsCount(): Int {
-        return payload.transferTransactions.size + payload.voteTransactions.size + payload.delegateTransactions.size +
-            payload.rewardTransaction.size
-    }
+
+    fun getTransactionsCount(): Int = payload.transferTransactions.size + payload.voteTransactions.size +
+        payload.delegateTransactions.size + payload.rewardTransaction.size
 
     override fun getPayload(): BlockPayload = payload
 

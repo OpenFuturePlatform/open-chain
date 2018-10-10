@@ -32,7 +32,7 @@ class GreetingResponseHandler(
         val channel = ctx.channel()
         val socket = channel.remoteAddress() as InetSocketAddress
 
-        config.getConfig().externalHost = msg.externalHost
+        config.setExternalHost(msg.externalHost)
         channelHolder.addChannel(channel, NodeInfo(msg.uid, NetworkAddress(socket.address.hostAddress, socket.port)))
         explorerAddressesHolder.addNodesInfo(msg.nodesInfo)
     }

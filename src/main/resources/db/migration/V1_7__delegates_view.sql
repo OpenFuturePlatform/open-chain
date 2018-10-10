@@ -8,9 +8,9 @@ CREATE VIEW IF NOT EXISTS delegates_view AS
          d.port                             AS port,
          d.registration_date                AS registration_date,
          ifnull(sum(w.balance), 0)          AS rating,
-         ifnull(count(w2d.delegate_id), 0)  AS votes_count
+         ifnull(count(wv.node_id), 0)       AS votes_count
   FROM delegates AS d
-         LEFT JOIN wallets2delegates AS w2d ON d.id = w2d.delegate_id
-         LEFT JOIN wallets AS w ON w.id = w2d.wallet_id
+    LEFT JOIN wallet_votes AS wv ON d.node_id = wv.node_id
+    LEFT JOIN wallets AS w ON w.address = wv.address
   GROUP BY d.public_key
   ORDER BY rating DESC, registration_date DESC;

@@ -55,7 +55,7 @@ CREATE TABLE vote_transactions (
 );
 
 -- UNCONFIRMED TABLES
-CREATE TABLE u_transactions (
+CREATE MEMORY TABLE u_transactions (
   id               BIGINT AUTO_INCREMENT PRIMARY KEY,
   timestamp        BIGINT  NOT NULL,
   fee              BIGINT  NOT NULL,
@@ -68,13 +68,13 @@ CREATE TABLE u_transactions (
 CREATE INDEX u_transactions_fee
   ON u_transactions (fee);
 --
-CREATE TABLE u_transfer_transactions (
+CREATE MEMORY TABLE u_transfer_transactions (
   id                BIGINT PRIMARY KEY REFERENCES u_transactions,
   amount            BIGINT  NOT NULL,
   recipient_address VARCHAR NOT NULL
 );
 --
-CREATE TABLE u_delegate_transactions (
+CREATE MEMORY TABLE u_delegate_transactions (
   id            BIGINT PRIMARY KEY REFERENCES u_transactions,
   node_id       VARCHAR NOT NULL UNIQUE,
   delegate_key  VARCHAR NOT NULL UNIQUE,
@@ -83,7 +83,7 @@ CREATE TABLE u_delegate_transactions (
   amount        BIGINT  NOT NULL
 );
 --
-CREATE TABLE u_vote_transactions (
+CREATE MEMORY TABLE u_vote_transactions (
   id           BIGINT PRIMARY KEY REFERENCES u_transactions,
   vote_type_id INTEGER NOT NULL REFERENCES vote_types,
   node_id      VARCHAR NOT NULL
