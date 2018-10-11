@@ -87,7 +87,7 @@ class DefaultGenesisBlockService(
             return
         }
 
-        val delegates = message.delegates.map { delegateService.getByPublicKey(it) }
+        val delegates = message.delegates.asSequence().map { delegateService.getByPublicKey(it) }.toMutableList()
         val block = GenesisBlock.of(message, delegates)
 
         if (!isSync(block)) {
@@ -117,7 +117,7 @@ class DefaultGenesisBlockService(
 
     private fun createPayload(): GenesisBlockPayload {
         val epochIndex = getLast().payload.epochIndex + 1
-        val delegates = delegateService.getActiveDelegates()
+        val delegates = delegateService.getActiveDelegates().toMutableList()
         return GenesisBlockPayload(epochIndex, delegates)
     }
 
