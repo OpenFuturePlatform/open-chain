@@ -5,16 +5,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.1.0] - 2018-10-11
 ## Added
 - Smart contract: base initialization
-- Smart contract: define base entities
-- Smart contract: define base service interface
+- Smart contract: base entities
+- Smart contract: base service interface
 - Smart contract: samples
-- Core: unconfirmed balances check by unconfirmed transactions
-- Wallet UI: sorting transactions by timestamp in reverse order
+- Core: unconfirmed balance check by unconfirmed transactions
+- Wallet UI: sorting transactions by timestamp in a reverse order
 
 ## Changed
-- Core: transaction validation improved when creating block
+- Core: transaction validation improved when creating a block
 - Core: update configuration file information when values change
 - Database: unconfirmed balance removed from wallets table
 
@@ -227,6 +229,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[1.1.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.8.0...v1.0.0
 [0.8.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.6.1...v0.7.0
