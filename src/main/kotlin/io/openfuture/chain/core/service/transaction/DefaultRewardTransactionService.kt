@@ -15,7 +15,7 @@ import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.core.RewardTransactionMessage
-import io.openfuture.chain.rpc.domain.base.PageRequest
+import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -38,7 +38,8 @@ class DefaultRewardTransactionService(
 
 
     @Transactional(readOnly = true)
-    override fun getAll(request: PageRequest): Page<RewardTransaction> = repository.findAll(request)
+    override fun getAll(request: TransactionPageRequest): Page<RewardTransaction> =
+        repository.findAll(request.toEntityRequest())
 
     @Transactional(readOnly = true)
     override fun getByRecipientAddress(address: String): List<RewardTransaction> =

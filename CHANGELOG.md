@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## Added
+- Core: unconfirmed balances check by unconfirmed transactions
+- Wallet UI: sorting transactions by timestamp in reverse order
+
+## Changed
+- Core: transaction validation improved when creating block
+- Core: update configuration file information when values change
+- Database: unconfirmed balance removed from wallets table
 
 ## [1.0.0] - 2018-09-25
 ## Added

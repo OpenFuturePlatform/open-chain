@@ -9,8 +9,8 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTrans
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.service.TransferTransactionService
-import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
+import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.TransferTransactionResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -60,7 +60,7 @@ class TransferTransactionControllerTests : ControllerTests() {
         val pageTransferTransactions = PageImpl(listOf(createTransferTransaction()))
         val expectedPageResponse = PageResponse(pageTransferTransactions)
 
-        given(service.getAll(PageRequest())).willReturn(pageTransferTransactions)
+        given(service.getAll(TransactionPageRequest())).willReturn(pageTransferTransactions)
 
         val actualPageResponse = webClient.get().uri(TRANSFER_TRANSACTION_URL)
             .exchange()
@@ -78,7 +78,7 @@ class TransferTransactionControllerTests : ControllerTests() {
         val pageTransferTransactions = PageImpl(listOf(createTransferTransaction()))
         val expectedPageResponse = PageResponse(pageTransferTransactions)
 
-        given(service.getByAddress(WALLET_ADDRESS, PageRequest())).willReturn(pageTransferTransactions)
+        given(service.getByAddress(WALLET_ADDRESS, TransactionPageRequest())).willReturn(pageTransferTransactions)
 
         val actualTransferTransactions = webClient.get().uri("$TRANSFER_TRANSACTION_URL/address/$WALLET_ADDRESS")
             .exchange()
