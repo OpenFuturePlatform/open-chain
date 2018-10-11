@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ## Added
+- Smart contract: base initialization
+- Smart contract: define base entities
+- Smart contract: define base service interface
+- Smart contract: samples
 - Core: unconfirmed balances check by unconfirmed transactions
 - Wallet UI: sorting transactions by timestamp in reverse order
 
