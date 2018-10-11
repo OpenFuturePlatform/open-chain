@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="7.0.5" transformSequenceNumber="7">
   <directoryPresets config="/" />
-  <application name="OPEN Chain" distributionSourceDir="" applicationId="2301-4490-4052-1739" mediaDir="/packages/artifacts" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.version}_${compiler:sys.platform}" compression="9" lzmaCompression="true" pack200Compression="true" excludeSignedFromPacking="true" commonExternalFiles="false" createMd5Sums="true" shrinkRuntime="true" shortName="open-chain" publisher="OPEN Platform" publisherWeb="https://openfuture.io" version="0.5.0" allPathsRelative="false" backupOnSave="false" autoSave="true" convertDotsToUnderscores="true" macSignature="????" macVolumeId="fdf5c5b057ad2f78" javaMinVersion="1.8" javaMaxVersion="" allowBetaVM="false" jdkMode="runtimeJre" jdkName="">
+  <application name="OPEN Chain" distributionSourceDir="" applicationId="2301-4490-4052-1739" mediaDir="/packages/artifacts" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.version}_${compiler:sys.platform}" compression="9" lzmaCompression="true" pack200Compression="true" excludeSignedFromPacking="true" commonExternalFiles="false" createMd5Sums="true" shrinkRuntime="true" shortName="open-chain" publisher="OPEN Platform" publisherWeb="https://openfuture.io" version="${VERSION}" allPathsRelative="false" backupOnSave="false" autoSave="true" convertDotsToUnderscores="true" macSignature="????" macVolumeId="fdf5c5b057ad2f78" javaMinVersion="1.8" javaMaxVersion="" allowBetaVM="false" jdkMode="runtimeJre" jdkName="">
     <languages skipLanguageSelection="false" languageSelectionInPrincipalLanguage="false">
       <principalLanguage id="en" customLocalizationFile="" />
       <additionalLanguages />
