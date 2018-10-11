@@ -1,14 +1,11 @@
 package io.openfuture.chain.smartcontract.service
 
-import io.openfuture.chain.smartcontract.model.Contract
-import io.openfuture.chain.smartcontract.model.ContractMethod
+import io.openfuture.chain.smartcontract.model.SmartContract
 
 interface ContractService {
 
-    fun invoke(address: String, method: ContractMethod)
+    fun deploy(contract: SmartContract)
 
-    fun deploy(contract: Contract)
-
-    fun get(address: String): Contract
+    fun get(address: String): SmartContract
 
 }
