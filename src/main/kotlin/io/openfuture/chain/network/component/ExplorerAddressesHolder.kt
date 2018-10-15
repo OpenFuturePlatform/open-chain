@@ -4,6 +4,7 @@ import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.min
 
 @Component
 class ExplorerAddressesHolder {
@@ -34,5 +35,7 @@ class ExplorerAddressesHolder {
     fun removeNodeInfo(address: NetworkAddress) {
         nodesInfo.removeIf { address == it.address }
     }
+
+    fun getRandomList(listSize: Int): List<NodeInfo> = nodesInfo.shuffled().subList(0, min(nodesInfo.size, listSize))
 
 }

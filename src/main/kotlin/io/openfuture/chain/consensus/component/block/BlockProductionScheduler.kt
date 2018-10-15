@@ -6,8 +6,7 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.sync.SyncState
-import io.openfuture.chain.core.sync.SyncState.SyncStatusType
-import io.openfuture.chain.core.sync.SyncState.SyncStatusType.*
+import io.openfuture.chain.core.sync.SyncState.SyncStatusType.SYNCHRONIZED
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -44,7 +43,7 @@ class BlockProductionScheduler(
     private fun proceedProductionLoop() {
         try {
             if (SYNCHRONIZED != syncState.getNodeStatus()) {
-                log.error("Node is not synchronized")
+                log.warn("Node is not synchronized")
                 return
             }
             val slotOwner = epochService.getCurrentSlotOwner()

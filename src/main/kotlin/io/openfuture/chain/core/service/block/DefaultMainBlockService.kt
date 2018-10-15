@@ -18,7 +18,7 @@ import io.openfuture.chain.core.sync.SyncState
 import io.openfuture.chain.core.sync.SyncState.SyncStatusType.NOT_SYNCHRONIZED
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.component.Clock
+import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.network.message.core.TransferTransactionMessage

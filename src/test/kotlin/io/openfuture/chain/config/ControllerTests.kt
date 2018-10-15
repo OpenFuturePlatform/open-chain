@@ -1,6 +1,6 @@
 package io.openfuture.chain.config
 
-import io.openfuture.chain.network.component.Clock
+import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.property.NodeProperties
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired

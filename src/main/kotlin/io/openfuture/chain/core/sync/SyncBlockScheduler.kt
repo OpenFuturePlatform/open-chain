@@ -2,7 +2,7 @@ package io.openfuture.chain.core.sync
 
 import io.openfuture.chain.core.sync.SyncState.SyncStatusType.NOT_SYNCHRONIZED
 import io.openfuture.chain.core.sync.SyncState.SyncStatusType.PROCESSING
-import io.openfuture.chain.network.component.Clock
+import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.NetworkApiService
 import org.springframework.scheduling.annotation.Scheduled

@@ -5,7 +5,7 @@ import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.sync.SyncState.SyncStatusType.PROCESSING
 import io.openfuture.chain.core.sync.SyncState.SyncStatusType.SYNCHRONIZED
-import io.openfuture.chain.network.component.Clock
+import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.core.BlockMessage
 import io.openfuture.chain.network.message.sync.*

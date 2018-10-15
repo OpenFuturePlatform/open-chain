@@ -58,18 +58,13 @@ class ChannelsHolder {
     fun addChannel(channel: Channel, nodeInfo: NodeInfo) {
         channelGroup.add(channel)
         nodesInfo[channel.id()] = nodeInfo
-
-        log.info("Connection with ${channel.remoteAddress()} established, connections count is ${channelGroup.size}")
     }
 
     @Synchronized
     fun removeChannel(channel: Channel) {
         channelGroup.remove(channel)
         nodesInfo.remove(channel.id())
-
         channel.close()
-
-        log.info("Connection with ${channel.remoteAddress()} closed, connections count is ${channelGroup.size}")
     }
 
 }

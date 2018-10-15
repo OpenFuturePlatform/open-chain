@@ -4,7 +4,6 @@ import io.openfuture.chain.core.component.NodeConfigurator
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.node.HardwareInfo
 import io.openfuture.chain.core.service.HardwareInfoService
-import io.openfuture.chain.network.component.Clock
 import io.openfuture.chain.rpc.domain.NodeInfoResponse
 import org.springframework.context.ApplicationContext
 import org.springframework.web.bind.annotation.CrossOrigin

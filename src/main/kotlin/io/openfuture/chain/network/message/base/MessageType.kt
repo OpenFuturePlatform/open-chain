@@ -17,25 +17,26 @@ enum class MessageType(
 
     // network
     HEART_BEAT(1, HeartBeatMessage::class),
-    TIME(2, TimeMessage::class),
-    GREETING(3, GreetingMessage::class),
-    GREETING_RESPONSE(4, GreetingResponseMessage::class),
-    NEW_CLIENT(5, NewClient::class),
+    REQUEST_TIME(2, RequestTimeMessage::class),
+    RESPONSE_TIME(3, ResponseTimeMessage::class),
+    GREETING(4, GreetingMessage::class),
+    GREETING_RESPONSE(5, GreetingResponseMessage::class),
+    NEW_CLIENT(6, NewClient::class),
     // core
-    TRANSFER_TRANSACTION(6, TransferTransactionMessage::class),
-    DELEGATE_TRANSACTION(7, DelegateTransactionMessage::class),
-    VOTE_TRANSACTION(8, VoteTransactionMessage::class),
+    TRANSFER_TRANSACTION(7, TransferTransactionMessage::class),
+    DELEGATE_TRANSACTION(8, DelegateTransactionMessage::class),
+    VOTE_TRANSACTION(9, VoteTransactionMessage::class),
     // consensus
-    BLOCK_APPROVAL(9, BlockApprovalMessage::class),
-    PENDING_BLOCK(10, PendingBlockMessage::class),
+    BLOCK_APPROVAL(10, BlockApprovalMessage::class),
+    PENDING_BLOCK(11, PendingBlockMessage::class),
     // sync
-    HASH_BLOCK_REQUEST(11, HashBlockRequestMessage::class),
-    HASH_BLOCK_RESPONSE(12, HashBlockResponseMessage::class),
-    SYNC_BLOCKS_REQUEST(13, SyncBlockRequestMessage::class),
-    DELEGATE_REQUEST(14, DelegateRequestMessage::class),
-    DELEGATE_RESPONSE(15, DelegateResponseMessage::class),
-    MAIN_BLOCK(16, MainBlockMessage::class),
-    GENESIS_BLOCK(17, GenesisBlockMessage::class);
+    HASH_BLOCK_REQUEST(12, HashBlockRequestMessage::class),
+    HASH_BLOCK_RESPONSE(13, HashBlockResponseMessage::class),
+    SYNC_BLOCKS_REQUEST(14, SyncBlockRequestMessage::class),
+    DELEGATE_REQUEST(15, DelegateRequestMessage::class),
+    DELEGATE_RESPONSE(16, DelegateResponseMessage::class),
+    MAIN_BLOCK(17, MainBlockMessage::class),
+    GENESIS_BLOCK(18, GenesisBlockMessage::class);
 
 
     companion object {
