@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.1.0] - 2018-10-11
+## Added
+- Smart contract: base initialization
+- Smart contract: base entities
+- Smart contract: base service interface
+- Smart contract: samples
+- Core: unconfirmed balance check by unconfirmed transactions
+- Wallet UI: sorting transactions by timestamp in a reverse order
+
+## Changed
+- Core: transaction validation improved when creating a block
+- Core: update configuration file information when values change
+- Database: unconfirmed balance removed from wallets table
+
 ## [1.0.0] - 2018-09-25
 ## Added
 - Core: transaction validation
@@ -215,6 +229,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[1.1.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.8.0...v1.0.0
 [0.8.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.6.1...v0.7.0

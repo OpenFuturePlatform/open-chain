@@ -49,7 +49,7 @@ class DelegateControllerTests : ControllerTests() {
     fun getAllActiveShouldReturnActiveDelegatesListTest() {
         val delegate = Delegate("publicKey", "nodeId", "address", "host", 1, 1)
         val genesisBlock = GenesisBlock(1, 1,   "previousHash", "hash", "signature", "publicKey",
-            GenesisBlockPayload(1, listOf(delegate)))
+            GenesisBlockPayload(1, mutableListOf(delegate)))
         val expectedPageResponse = PageResponse(PageImpl(listOf(DelegateResponse(delegate))))
 
         given(genesisBlockService.getLast()).willReturn(genesisBlock)

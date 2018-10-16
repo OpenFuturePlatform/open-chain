@@ -30,12 +30,11 @@ class BlockProductionScheduler(
         private val log: Logger = LoggerFactory.getLogger(BlockProductionScheduler::class.java)
     }
 
-    private lateinit var executor: ScheduledExecutorService
+    private val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
 
 
     @PostConstruct
-    fun onSyncReady() {
-        executor = Executors.newSingleThreadScheduledExecutor()
+    fun init() {
         executor.scheduleAtFixedRate({ proceedProductionLoop() }, epochService.timeToNextTimeSlot(),
             consensusProperties.getPeriod(), TimeUnit.MILLISECONDS)
     }

@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.block
 
+import io.openfuture.chain.core.annotation.OpenClass
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
@@ -14,6 +15,7 @@ import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets.UTF_8
 
+@OpenClass
 abstract class BaseBlockService<T : Block>(
     protected val repository: BlockRepository<T>,
     protected val blockService: BlockService,
@@ -56,7 +58,8 @@ abstract class BaseBlockService<T : Block>(
 
     protected fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray {
         val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + previousHash.toByteArray(UTF_8).size + payload.getBytes().size)
-            .putLong(timestamp).putLong(height)
+            .putLong(timestamp)
+            .putLong(height)
             .put(previousHash.toByteArray(UTF_8))
             .put(payload.getBytes())
             .array()

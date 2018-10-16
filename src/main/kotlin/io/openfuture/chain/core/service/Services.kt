@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service
 
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.Wallet
+import io.openfuture.chain.core.model.entity.WalletVote
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -16,14 +17,11 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.node.*
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.DelegateTransactionMessage
-import io.openfuture.chain.network.message.core.RewardTransactionMessage
-import io.openfuture.chain.network.message.core.TransferTransactionMessage
-import io.openfuture.chain.network.message.core.VoteTransactionMessage
+import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
-import io.openfuture.chain.network.message.sync.MainBlockMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import org.springframework.data.domain.Page
@@ -70,8 +68,6 @@ interface GenesisBlockService {
 
     fun add(message: GenesisBlockMessage)
 
-    fun verify(message: GenesisBlockMessage): Boolean
-
     fun getPreviousByHeight(height: Long): GenesisBlock
 
     fun getNextBlock(hash: String): GenesisBlock
@@ -90,9 +86,7 @@ interface MainBlockService {
 
     fun create(): PendingBlockMessage
 
-    fun add(message: PendingBlockMessage)
-
-    fun add(message: MainBlockMessage)
+    fun add(message: BaseMainBlockMessage)
 
     fun verify(message: PendingBlockMessage): Boolean
 
@@ -118,11 +112,11 @@ interface TransferTransactionService {
 
     fun getByHash(hash: String): TransferTransaction
 
-    fun getAll(request: PageRequest): Page<TransferTransaction>
+    fun getAll(request: TransactionPageRequest): Page<TransferTransaction>
 
     fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedTransferTransaction>
 
-    fun getByAddress(address: String, request: PageRequest): Page<TransferTransaction>
+    fun getByAddress(address: String, request: TransactionPageRequest): Page<TransferTransaction>
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction
 
@@ -138,7 +132,7 @@ interface TransferTransactionService {
 
 interface RewardTransactionService {
 
-    fun getAll(request: PageRequest): Page<RewardTransaction>
+    fun getAll(request: TransactionPageRequest): Page<RewardTransaction>
 
     fun getByRecipientAddress(address: String): List<RewardTransaction>
 
@@ -208,6 +202,8 @@ interface DelegateService {
 
     fun isExistsByNodeId(nodeId: String): Boolean
 
+    fun isExistsByNodeIds(nodeIds: List<String>): Boolean
+
     fun save(delegate: Delegate): Delegate
 
 }
@@ -228,16 +224,20 @@ interface WalletService {
 
     fun getBalanceByAddress(address: String): Long
 
-    fun getVotesByAddress(address: String): MutableSet<Delegate>
-
     fun save(wallet: Wallet)
 
     fun increaseBalance(address: String, amount: Long)
 
     fun decreaseBalance(address: String, amount: Long)
 
-    fun increaseUnconfirmedOutput(address: String, amount: Long)
+}
 
-    fun decreaseUnconfirmedOutput(address: String, amount: Long)
+interface WalletVoteService {
+
+    fun getVotesByAddress(address: String): List<WalletVote>
+
+    fun add(address: String, nodeId: String): WalletVote
+
+    fun remove(address: String, nodeId: String)
 
 }

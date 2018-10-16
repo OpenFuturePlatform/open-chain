@@ -7,6 +7,7 @@ import io.openfuture.chain.consensus.component.block.PendingBlockHandler
 import io.openfuture.chain.core.exception.SynchronizationException
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.dao.PessimisticLockingFailureException
 import org.springframework.stereotype.Component
@@ -19,7 +20,7 @@ class BlockApprovalHandler(
 ) : SimpleChannelInboundHandler<BlockApprovalMessage>() {
 
     companion object {
-        private val log = LoggerFactory.getLogger(BlockApprovalHandler::class.java)
+        private val log: Logger = LoggerFactory.getLogger(BlockApprovalHandler::class.java)
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: BlockApprovalMessage) {

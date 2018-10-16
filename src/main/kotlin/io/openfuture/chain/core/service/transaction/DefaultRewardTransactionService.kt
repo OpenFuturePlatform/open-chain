@@ -12,9 +12,10 @@ import io.openfuture.chain.core.repository.RewardTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.RewardTransactionService
 import io.openfuture.chain.core.service.WalletService
+import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.core.RewardTransactionMessage
-import io.openfuture.chain.rpc.domain.base.PageRequest
+import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -37,7 +38,8 @@ class DefaultRewardTransactionService(
 
 
     @Transactional(readOnly = true)
-    override fun getAll(request: PageRequest): Page<RewardTransaction> = repository.findAll(request)
+    override fun getAll(request: TransactionPageRequest): Page<RewardTransaction> =
+        repository.findAll(request.toEntityRequest())
 
     @Transactional(readOnly = true)
     override fun getByRecipientAddress(address: String): List<RewardTransaction> =
@@ -60,14 +62,18 @@ class DefaultRewardTransactionService(
 
     @Transactional
     override fun toBlock(message: RewardTransactionMessage, block: MainBlock) {
-        val transaction = repository.findOneByFooterHash(message.hash)
-        if (null != transaction) {
-            return
+        BlockchainLock.writeLock.lock()
+        try {
+            val transaction = repository.findOneByFooterHash(message.hash)
+            if (null != transaction) {
+                return
+            }
+
+            updateTransferBalance(message.recipientAddress, message.reward)
+            repository.save(RewardTransaction.of(message, block))
+        } finally {
+            BlockchainLock.writeLock.unlock()
         }
-
-        updateTransferBalance(message.recipientAddress, message.reward)
-
-        repository.save(RewardTransaction.of(message, block))
     }
 
     @Transactional(readOnly = true)

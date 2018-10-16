@@ -24,7 +24,7 @@ class GenesisBlock(
 ) : Block(timestamp, height, previousHash, hash, signature, publicKey) {
 
     companion object {
-        fun of(message: GenesisBlockMessage, delegates: List<Delegate>): GenesisBlock = GenesisBlock(
+        fun of(message: GenesisBlockMessage, delegates: MutableList<Delegate>): GenesisBlock = GenesisBlock(
             message.timestamp,
             message.height,
             message.previousHash,
@@ -34,6 +34,7 @@ class GenesisBlock(
             GenesisBlockPayload(message.epochIndex, delegates)
         )
     }
+
 
     override fun getPayload(): BlockPayload = payload
 

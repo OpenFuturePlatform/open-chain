@@ -82,6 +82,11 @@ package-native:
   stage: package
   dependencies:
     - build-jar
+  before_script:
+    - apk --no-cache add gettext
+    - export VERSION=$(echo ${CI_COMMIT_REF_NAME} | sed -e 's/v//')
+    - envsubst '${VERSION}' < install4j/multi.install4j > install4j/multi.install4j.new
+    - mv install4j/multi.install4j.new install4j/multi.install4j
   script:
     - mv build/libs/open-chain-*.jar build/libs/open-chain.jar
     - |

@@ -20,7 +20,7 @@ class DelegateTransaction(
     @Embedded
     val payload: DelegateTransactionPayload
 
-) : Transaction(header, footer, block) {
+) : Transaction(header, footer, payload, block) {
 
     companion object {
         fun of(message: DelegateTransactionMessage, block: MainBlock): DelegateTransaction = DelegateTransaction(
@@ -38,6 +38,7 @@ class DelegateTransaction(
             utx.payload
         )
     }
+
 
     override fun toMessage(): DelegateTransactionMessage = DelegateTransactionMessage(
         header.timestamp,

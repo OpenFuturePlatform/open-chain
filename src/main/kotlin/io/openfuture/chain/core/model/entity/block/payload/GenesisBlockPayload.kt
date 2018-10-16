@@ -16,17 +16,17 @@ class GenesisBlockPayload(
     @JoinTable(name = "delegate2genesis",
         joinColumns = [(JoinColumn(name = "genesis_id"))],
         inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
-    var activeDelegates: List<Delegate>
+    var activeDelegates: MutableList<Delegate>
 
 ) : BlockPayload {
 
     override fun getBytes(): ByteArray {
         val keys = activeDelegates.map { it.publicKey }
-        val keysLength = keys.map { it.toByteArray(UTF_8).size }.sum()
+        val keysLength = keys.asSequence().map { it.toByteArray(UTF_8).size }.sum()
 
         val buffer = ByteBuffer.allocate(LONG_BYTES + keysLength)
         buffer.putLong(epochIndex)
-        keys.forEach { buffer.put(it.toByteArray(UTF_8))}
+        keys.forEach { buffer.put(it.toByteArray(UTF_8)) }
         return buffer.array()
     }
 

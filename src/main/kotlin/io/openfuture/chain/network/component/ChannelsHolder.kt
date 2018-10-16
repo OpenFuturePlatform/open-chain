@@ -7,6 +7,7 @@ import io.netty.util.concurrent.GlobalEventExecutor
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.exception.NotFoundChannelException
 import io.openfuture.chain.network.serialization.Serializable
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
@@ -15,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap
 class ChannelsHolder {
 
     companion object {
-        private val log = LoggerFactory.getLogger(ChannelsHolder::class.java)
+        private val log: Logger = LoggerFactory.getLogger(ChannelsHolder::class.java)
     }
 
     private var channelGroup = DefaultChannelGroup(GlobalEventExecutor.INSTANCE)

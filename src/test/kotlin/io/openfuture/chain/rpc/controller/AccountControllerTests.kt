@@ -1,10 +1,10 @@
 package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.service.ViewDelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.service.WalletService
+import io.openfuture.chain.core.service.WalletVoteService
 import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import io.openfuture.chain.crypto.service.CryptoService
@@ -20,8 +20,6 @@ import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import reactor.core.publisher.Mono
 
 @WebFluxTest(AccountController::class)
@@ -32,6 +30,9 @@ class AccountControllerTests : ControllerTests() {
 
     @MockBean
     private lateinit var walletService: WalletService
+
+    @MockBean
+    private lateinit var walletVoteService: WalletVoteService
 
     @MockBean
     private lateinit var viewDelegateService: ViewDelegateService
@@ -124,9 +125,6 @@ class AccountControllerTests : ControllerTests() {
 
         assertThat(actualBalance).isEqualTo(expectedBalance)
     }
-
-    @GetMapping("/wallets/{address}/delegates")
-    fun getDelegates(@PathVariable address: String): Set<Delegate> = walletService.getVotesByAddress(address)
 
     @Test
     fun doGenerateNewAccountShouldReturnGeneratedAccount() {

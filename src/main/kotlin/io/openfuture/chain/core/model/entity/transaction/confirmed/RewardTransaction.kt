@@ -19,7 +19,7 @@ class RewardTransaction(
     @Embedded
     val payload: RewardTransactionPayload
 
-) : Transaction(header, footer, block) {
+) : Transaction(header, footer, payload, block) {
 
     companion object {
         fun of(message: RewardTransactionMessage, block: MainBlock): RewardTransaction = RewardTransaction(
@@ -29,6 +29,7 @@ class RewardTransaction(
             RewardTransactionPayload(message.reward, message.recipientAddress)
         )
     }
+
 
     override fun toMessage(): RewardTransactionMessage = RewardTransactionMessage(
         header.timestamp,
