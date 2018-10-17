@@ -4,7 +4,9 @@ import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelFuture
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.component.ExplorerAddressesHolder
+import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.entity.NetworkAddress
+import io.openfuture.chain.network.message.network.RequestTimeMessage
 import io.openfuture.chain.network.property.NodeProperties
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class DefaultConnectionService(
+    private val clock: Clock,
     private val bootstrap: Bootstrap,
     private val nodeProperties: NodeProperties,
     private val channelHolder: ChannelsHolder,
@@ -24,19 +27,23 @@ class DefaultConnectionService(
     }
 
 
-    override fun connect(networkAddress: NetworkAddress, close: Boolean) {
+    override fun connect(networkAddress: NetworkAddress) {
         bootstrap.connect(networkAddress.host, networkAddress.port).addListener { future ->
-            val channel = (future as ChannelFuture).channel()
-            if (future.isSuccess) {
-                if (close) {
-                    channel.close()
-                    return@addListener
-                }
-            } else {
+            if (!future.isSuccess) {
                 log.warn("Can not connect to ${networkAddress.host}:${networkAddress.port}")
+                explorerAddressesHolder.removeNodeInfo(networkAddress)
+            }
+            return@addListener
+        }
+    }
 
-                explorerAddressesHolder.getNodesInfo().firstOrNull { it.address == networkAddress }?.let {
-                    explorerAddressesHolder.removeNodeInfo(it)
+    override fun sendTimeSyncRequest(addresses: Set<NetworkAddress>) {
+        addresses.forEach { networkAddress ->
+            bootstrap.connect(networkAddress.host, networkAddress.port).addListener { future ->
+                val channel = (future as ChannelFuture).channel()
+
+                if (future.isSuccess) {
+                    channel.writeAndFlush(RequestTimeMessage(clock.currentTimeMillis()))
                 }
             }
         }
@@ -51,8 +58,9 @@ class DefaultConnectionService(
 
         val neededPeers = nodeProperties.peersNumber!! - channelHolder.size()
         if (neededPeers > 0) {
-            val uids = explorerAddressesHolder.getNodesInfo().map { it.uid }
-                .minus(channelHolder.getNodesInfo().map { it.uid })
+            log.warn("Need  $neededPeers peers, current peers count ${channelHolder.size()}")
+            val uids = explorerAddressesHolder.getNodesInfo().asSequence().map { it.uid }
+                .minus(channelHolder.getNodesInfo().map { it.uid }).toList()
 
             if (uids.isEmpty()) {
                 connect(nodeProperties.getRootAddresses().shuffled().first())
@@ -62,26 +70,6 @@ class DefaultConnectionService(
             uids.shuffled().take(neededPeers).forEach {
                 connect(explorerAddressesHolder.getNodesInfo()
                     .first { nodeInfo -> nodeInfo.uid == it }.address)
-            }
-        }
-    }
-
-    @Scheduled(fixedRateString = "\${node.check-network}")
-    fun checkNodes() {
-        if (channelHolder.size() >= nodeProperties.peersNumber!!) {
-            val uids = explorerAddressesHolder.getNodesInfo().map { it.uid }
-                .minus(channelHolder.getNodesInfo().map { it.uid })
-
-            if (nodeProperties.peersNumber!! > uids.size) {
-                uids.forEach {
-                    connect(explorerAddressesHolder.getNodesInfo()
-                        .first { nodeInfo -> nodeInfo.uid == it }.address, true)
-                }
-            } else {
-                uids.shuffled().take(nodeProperties.peersNumber!!).forEach {
-                    connect(explorerAddressesHolder.getNodesInfo()
-                        .first { nodeInfo -> nodeInfo.uid == it }.address, true)
-                }
             }
         }
     }

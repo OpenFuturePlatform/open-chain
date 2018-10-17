@@ -4,10 +4,7 @@ import io.openfuture.chain.network.entity.NetworkAddress
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
-import javax.validation.constraints.Min
-import javax.validation.constraints.NotEmpty
-import javax.validation.constraints.NotNull
-import javax.validation.constraints.Size
+import javax.validation.constraints.*
 
 @Component
 @Validated
@@ -64,7 +61,13 @@ class NodeProperties(
     @field:NotNull
     var synchronizationInterval: Long? = null,
 
-    /** Max synchronization response delay in milliseconds */
+    /** Interval for time synchronization in milliseconds. Min value 60000 millis*/
+    @field:Min(15 * 1000)
+    @field:NotNull
+    var timeSynchronizationInterval: Long? = null,
+
+    /** Max synchronization response delay in milliseconds. Max value 10000 millis*/
+    @field:Max(10 * 1000)
     @field:NotNull
     var synchronizationResponseDelay: Long? = null
 
