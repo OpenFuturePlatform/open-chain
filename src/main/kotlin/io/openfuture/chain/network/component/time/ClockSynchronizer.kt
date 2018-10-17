@@ -16,7 +16,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.math.max
 
 @Component
-class ClockSynchronizer (
+class ClockSynchronizer(
     private val clock: Clock,
     private val syncState: SyncState,
     private val properties: NodeProperties,
@@ -79,12 +79,8 @@ class ClockSynchronizer (
         }
     }
 
-    private fun getEffectiveOffset(): Long {
-        return Math.round(offsets.average())
-    }
-
     private fun mitigate() {
-        if (offsets.size < Math.floor(SELECTION_SIZE * 0.66)) {
+        if (offsets.size < (SELECTION_SIZE * 2 / 3)) {
             syncState.setClockStatus(NOT_SYNCHRONIZED)
             return
         }
@@ -97,6 +93,8 @@ class ClockSynchronizer (
             syncState.setClockStatus(SYNCHRONIZED)
         }
     }
+
+    private fun getEffectiveOffset(): Long = Math.round(offsets.average())
 
     private fun getRemoteOffset(msg: ResponseTimeMessage, destinationTime: Long): Long =
         ((msg.receiveTime.minus(msg.originalTime)).plus(msg.transmitTime.minus(destinationTime))).div(2)
