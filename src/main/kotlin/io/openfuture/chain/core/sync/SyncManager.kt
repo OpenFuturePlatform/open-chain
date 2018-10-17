@@ -69,7 +69,7 @@ class SyncManager(
         val delegateAddresses = activeDelegatesLastHash[message.hash]
         if (null != delegateAddresses && !delegateAddresses.contains(nodeInfo)) {
             delegateAddresses.add(nodeInfo)
-            if (delegateAddresses.size > (activeDelegateAddresses.size - 1) / 3 * 2) {
+            if (delegateAddresses.size > (activeDelegateAddresses.size * 2 / 3)) {
                 val currentLastHash = blockService.getLast().hash
                 if (currentLastHash == message.hash) {
                     unlock()
