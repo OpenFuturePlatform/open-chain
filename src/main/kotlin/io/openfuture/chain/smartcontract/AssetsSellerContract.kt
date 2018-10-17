@@ -2,9 +2,9 @@ package io.openfuture.chain.smartcontract
 
 import io.openfuture.chain.smartcontract.annotation.ContractMethod
 import io.openfuture.chain.smartcontract.model.Address
+import io.openfuture.chain.smartcontract.model.Event
 import io.openfuture.chain.smartcontract.model.Message
 import io.openfuture.chain.smartcontract.model.SmartContract
-import io.openfuture.chain.smartcontract.utils.EventUtils
 import io.openfuture.chain.smartcontract.utils.UuidUtils
 
 
@@ -13,29 +13,29 @@ class AssetsSellerContract : SmartContract("") {
     private val assets: MutableMap<String, Address> = mutableMapOf()
     private val price: Long = 1L
 
-    override fun handle(message: Message) {
-        TODO()
-    }
 
     @ContractMethod
     fun generateAsset(message: Message, params: Map<String, String>) {
-        assert(message.value == price, "Insufficient funds.")
+        required(message.value == price, "Insufficient funds.")
 
         val uuid = UuidUtils.getRandomUuid()
         assets[uuid] = message.sender
 
-        EventUtils.emit(this, mapOf(
-            "operation" to "boughtAsset",
-            "asset" to uuid,
-            "buyer" to message.sender.toString()
-        ))
+        BoughtAssetEvent(uuid, message.sender.toString()).emit()
     }
 
 
     @ContractMethod
-    fun balanceOf(message: Message): List<String> {
-        return assets.filterValues { it == message.sender }.keys.toList()
-    }
+    fun balanceOf(message: Message): List<String> = assets.filterValues { it == message.sender }.keys.toList()
 
+
+    class BoughtAssetEvent(private val asset: String, private val buyer: String) : Event() {
+
+        override fun parameters(): Map<String, Any> = mapOf(
+            "asset" to asset,
+            "buyer" to buyer
+        )
+
+    }
 
 }

@@ -1,11 +1,14 @@
 package io.openfuture.chain.smartcontract.model
 
-import io.openfuture.chain.smartcontract.exception.AssertionException
 import io.openfuture.chain.smartcontract.exception.RequiredException
+import io.openfuture.chain.smartcontract.utils.AddressUtils
 
-abstract class SmartContract(address: String) : Address(address) {
+abstract class SmartContract(ownerAddress: String) {
 
-    protected lateinit var owner: Address
+    protected val owner: Address = Address(ownerAddress)
+    //TODO calculate from owner address (Keccak256 hash of sender address and nonce)
+    protected var address: Address = Address(AddressUtils.generateContractAddress(ownerAddress, "0"))
+
 
     protected fun transfer(address: String, amount: Long) {
         transfer(Address(address), amount)
@@ -15,21 +18,10 @@ abstract class SmartContract(address: String) : Address(address) {
         TODO()
     }
 
-    /**
-     * Default method.
-     */
-    abstract fun handle(message: Message)
-
-    protected fun assert(value: Boolean, message: String? = null) {
+    protected fun required(value: Boolean, message: String? = null) {
         if (!value) {
-            throw AssertionException(message)
-        }
-    }
-
-    protected fun required(arg: String?, message: String? = null) {
-        if (arg == null) {
             throw RequiredException(message)
         }
     }
-}
 
+}
