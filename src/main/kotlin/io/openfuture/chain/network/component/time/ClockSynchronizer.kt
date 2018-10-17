@@ -26,11 +26,11 @@ class ClockSynchronizer(
 
     companion object {
         private val log = LoggerFactory.getLogger(Clock::class.java)
-        private const val SELECTION_SIZE: Int = 5
     }
 
     @Volatile private var offsets: MutableList<Long> = mutableListOf()
 
+    private val selectionSize: Int = properties.getRootAddresses().size
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
     private var syncRound: AtomicInteger = AtomicInteger()
     private var deviation: AtomicLong = AtomicLong()
@@ -45,7 +45,7 @@ class ClockSynchronizer(
             }
             offsets.clear()
 
-            val addresses = addressHolder.getRandomList(SELECTION_SIZE).asSequence().map { it.address }.toSet()
+            val addresses = addressHolder.getRandomList(selectionSize).asSequence().map { it.address }.toSet()
             connectionService.sendTimeSyncRequest(addresses)
         } finally {
             lock.writeLock().unlock()
@@ -80,7 +80,7 @@ class ClockSynchronizer(
     }
 
     private fun mitigate() {
-        if (offsets.size < (SELECTION_SIZE * 2 / 3)) {
+        if (offsets.size < (selectionSize * 2 / 3)) {
             syncState.setClockStatus(NOT_SYNCHRONIZED)
             return
         }
