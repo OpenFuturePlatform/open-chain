@@ -43,10 +43,8 @@ class ServerChannelInitializer(
             applicationContext.getBean(NewClientHandler::class.java),
             applicationContext.getBean(NetworkStatusHandler::class.java),
             //        sync
-            applicationContext.getBean(DelegateRequestHandler::class.java),
-            applicationContext.getBean(DelegateResponseHandler::class.java),
-            applicationContext.getBean(HashBlockRequestHandler::class.java),
-            applicationContext.getBean(HashBlockResponseHandler::class.java),
+            applicationContext.getBean(SyncRequestHandler::class.java),
+            applicationContext.getBean(SyncResponseHandler::class.java),
             applicationContext.getBean(SyncBlockRequestHandler::class.java),
             applicationContext.getBean(MainBlockHandler::class.java),
             applicationContext.getBean(GenesisBlockHandler::class.java),

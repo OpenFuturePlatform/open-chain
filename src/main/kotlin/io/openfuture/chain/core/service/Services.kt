@@ -25,6 +25,7 @@ import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import org.springframework.data.domain.Page
+import org.springframework.transaction.annotation.Transactional
 
 interface HardwareInfoService {
 
@@ -54,6 +55,9 @@ interface BlockService {
     fun getAvgProductionTime(): Long
 
     fun getCurrentHeight(): Long
+
+    fun isExists(hash: String, height: Long): Boolean
+
 }
 
 interface GenesisBlockService {

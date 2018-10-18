@@ -30,13 +30,11 @@ enum class MessageType(
     BLOCK_APPROVAL(10, BlockApprovalMessage::class),
     PENDING_BLOCK(11, PendingBlockMessage::class),
     // sync
-    HASH_BLOCK_REQUEST(12, HashBlockRequestMessage::class),
-    HASH_BLOCK_RESPONSE(13, HashBlockResponseMessage::class),
+    HASH_BLOCK_REQUEST(12, SyncRequestMessage::class),
+    HASH_BLOCK_RESPONSE(13, SyncResponseMessage::class),
     SYNC_BLOCKS_REQUEST(14, SyncBlockRequestMessage::class),
-    DELEGATE_REQUEST(15, DelegateRequestMessage::class),
-    DELEGATE_RESPONSE(16, DelegateResponseMessage::class),
-    MAIN_BLOCK(17, MainBlockMessage::class),
-    GENESIS_BLOCK(18, GenesisBlockMessage::class);
+    MAIN_BLOCK(15, MainBlockMessage::class),
+    GENESIS_BLOCK(16, GenesisBlockMessage::class);
 
 
     companion object {
