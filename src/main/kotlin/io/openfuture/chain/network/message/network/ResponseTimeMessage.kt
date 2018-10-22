@@ -5,19 +5,22 @@ import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.network.serialization.Serializable
 
 @NoArgConstructor
-data class ResponseTimeMessage(
-    var nodeTime: Long,
-    var networkTime: Long
+data class ResponseTimeMessage (
+    var originalTime: Long,
+    var receiveTime: Long,
+    var transmitTime: Long
 ) : Serializable {
 
     override fun read(buf: ByteBuf) {
-        nodeTime = buf.readLong()
-        networkTime = buf.readLong()
+        originalTime = buf.readLong()
+        receiveTime = buf.readLong()
+        transmitTime = buf.readLong()
     }
 
     override fun write(buf: ByteBuf) {
-        buf.writeLong(nodeTime)
-        buf.writeLong(networkTime)
+        buf.writeLong(originalTime)
+        buf.writeLong(receiveTime)
+        buf.writeLong(transmitTime)
     }
 
 }
