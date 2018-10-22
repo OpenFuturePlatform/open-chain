@@ -19,20 +19,26 @@ open class PageRequest(
 
     override fun next(): Pageable = PageRequest(offset + limit, limit, sortBy, sortDirection)
 
-    override fun getOffset(): Long = offset
-
-    fun getLimit(): Int = limit
-
     override fun getSort(): Sort = if (sortBy.isEmpty()) Sort.unsorted() else Sort.by(sortDirection, *sortBy.toTypedArray())
 
     override fun first(): Pageable = PageRequest(0, limit, sortBy, sortDirection)
 
-    override fun previous(): PageRequest {
-        return if (offset == 0L) this else {
-            var newOffset = this.offset - limit
-            if (newOffset < 0) newOffset = 0
-            PageRequest(newOffset, limit)
-        }
+    override fun previous(): PageRequest = if (offset == 0L) this else {
+        var newOffset = this.offset - limit
+        if (newOffset < 0) newOffset = 0
+        PageRequest(newOffset, limit)
+    }
+
+    override fun getOffset(): Long = offset
+
+    fun setOffset(offset: Long) {
+        this.offset = offset
+    }
+
+    fun getLimit(): Int = limit
+
+    fun setLimit(limit: Int) {
+        this.limit = limit
     }
 
     fun toEntityRequest(): PageRequest {
