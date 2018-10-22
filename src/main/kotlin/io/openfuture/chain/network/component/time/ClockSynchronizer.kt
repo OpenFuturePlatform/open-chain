@@ -65,7 +65,7 @@ class ClockSynchronizer(
             val offset = getRemoteOffset(msg, destinationTime)
 
             if (0 == syncRound.get()) {
-                deviation.getAndSet(max(deviation.get(), offset))
+                deviation.getAndSet(max(deviation.get(), Math.abs(offset)))
                 offsets.add(offset)
                 return
             }

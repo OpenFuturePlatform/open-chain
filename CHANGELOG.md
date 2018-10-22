@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.2.0] - 2018-10-22
+## Added
+- Smart contract: adress generation utilites 
+- Smart contract: test contract
+
+## Changed
+- Network: time synchronization protocol accuracy is increased
+- Communication Protocol: time synchronization messages are updated
+- Smart contract: base contract class structure
+
 ## [1.1.0] - 2018-10-11
 ## Added
 - Smart contract: base initialization
@@ -229,6 +239,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[1.2.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.8.0...v1.0.0
 [0.8.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.7.0...v0.8.0

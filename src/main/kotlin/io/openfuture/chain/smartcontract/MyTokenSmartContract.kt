@@ -3,7 +3,6 @@ package io.openfuture.chain.smartcontract
 import io.openfuture.chain.smartcontract.annotation.ContractConstruct
 import io.openfuture.chain.smartcontract.annotation.ContractMethod
 import io.openfuture.chain.smartcontract.model.Address
-import io.openfuture.chain.smartcontract.model.Message
 import io.openfuture.chain.smartcontract.model.SmartContract
 
 class MyTokenSmartContract : SmartContract("") {
@@ -17,13 +16,7 @@ class MyTokenSmartContract : SmartContract("") {
         ticker = "YSD"
     }
 
-    override fun handle(message: Message) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     @ContractMethod
-    fun balanceOf(address: Address): Long {
-        return values[address.toString()] ?: 0
-    }
+    fun balanceOf(address: Address): Long = values[address.toString()] ?: 0
 
 }
