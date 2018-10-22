@@ -1,3 +1,12 @@
 package io.openfuture.chain.smartcontract.model
 
-data class Event(val params: Map<String, Any>)
+abstract class Event {
+
+    abstract fun parameters(): Map<String, Any>
+
+    fun emit() {
+        val params = parameters()
+        TODO()
+    }
+
+}
