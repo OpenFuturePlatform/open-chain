@@ -1,7 +1,6 @@
 package io.openfuture.chain.rpc.domain.base
 
 import io.openfuture.chain.rpc.validation.annotation.SortConstraint
-import org.springframework.data.domain.AbstractPageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Direction
@@ -15,19 +14,21 @@ open class PageRequest(
     var sortBy: Set<String> = setOf("id"),
     var sortDirection: Direction = Direction.ASC,
     val maySortBy: Map<String, String> = mapOf("id" to "id")
-) : AbstractPageRequest(offset.toInt() / limit + 1, limit) {
+) : Pageable {
+
+    override fun getPageNumber(): Int = offset.toInt() / limit + 1
+
+    override fun hasPrevious(): Boolean = offset > 0
+
+    override fun getPageSize(): Int = limit
+
+    override fun previousOrFirst(): Pageable = if (hasPrevious()) previous() else first()
 
     override fun next(): Pageable = PageRequest(offset + limit, limit, sortBy, sortDirection)
 
     override fun getSort(): Sort = if (sortBy.isEmpty()) Sort.unsorted() else Sort.by(sortDirection, *sortBy.toTypedArray())
 
     override fun first(): Pageable = PageRequest(0, limit, sortBy, sortDirection)
-
-    override fun previous(): PageRequest = if (offset == 0L) this else {
-        var newOffset = this.offset - limit
-        if (newOffset < 0) newOffset = 0
-        PageRequest(newOffset, limit)
-    }
 
     override fun getOffset(): Long = offset
 
@@ -39,6 +40,12 @@ open class PageRequest(
 
     fun setLimit(limit: Int) {
         this.limit = limit
+    }
+
+    fun previous(): PageRequest = if (offset == 0L) this else {
+        var newOffset = this.offset - limit
+        if (newOffset < 0) newOffset = 0
+        PageRequest(newOffset, limit)
     }
 
     fun toEntityRequest(): PageRequest {
