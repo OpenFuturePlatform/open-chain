@@ -8,12 +8,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [1.2.0] - 2018-10-22
 ## Added
-- Smart contract: adress generation utils 
+- Smart contract: adress generation utilites 
 - Smart contract: test contract
 
 ## Changed
-- Network: accuracy of time sync protocol is increased
-- Communication Protocol: messages of time sync are updated
+- Network: time synchronization protocol accuracy is increased
+- Communication Protocol: time synchronization messages are updated
 - Smart contract: base contract class structure
 
 ## [1.1.0] - 2018-10-11
