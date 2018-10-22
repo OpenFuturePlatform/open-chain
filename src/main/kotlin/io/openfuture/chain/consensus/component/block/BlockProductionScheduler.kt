@@ -5,8 +5,9 @@ import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
-import io.openfuture.chain.core.sync.SyncState
-import io.openfuture.chain.core.sync.SyncState.SyncStatusType.SYNCHRONIZED
+import io.openfuture.chain.core.sync.SyncManager
+import io.openfuture.chain.core.sync.SyncStatus.SYNCHRONIZED
+import io.openfuture.chain.network.component.time.ClockSynchronizer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -23,7 +24,8 @@ class BlockProductionScheduler(
     private val genesisBlockService: GenesisBlockService,
     private val pendingBlockHandler: PendingBlockHandler,
     private val consensusProperties: ConsensusProperties,
-    private val syncState: SyncState
+    private val syncManager: SyncManager,
+    private val clockSynchronizer: ClockSynchronizer
 ) {
 
     companion object {
@@ -41,8 +43,13 @@ class BlockProductionScheduler(
 
     private fun proceedProductionLoop() {
         try {
-            if (SYNCHRONIZED != syncState.getNodeStatus()) {
-                log.warn("Node is not synchronized")
+            if (SYNCHRONIZED != syncManager.getStatus()) {
+                log.warn("Ledger is not synchronized")
+                syncManager.outOfSync()
+                return
+            }
+            if (SYNCHRONIZED != clockSynchronizer.getStatus()) {
+                log.warn("Clock is not synchronized")
                 return
             }
             val slotOwner = epochService.getCurrentSlotOwner()

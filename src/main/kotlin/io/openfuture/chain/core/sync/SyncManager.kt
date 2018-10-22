@@ -103,14 +103,37 @@ class SyncManager(
 
     }
 
-    @Synchronized
     fun onMainBlockMessage(block: MainBlockMessage) {
+
         mainBlockService.add(block)
     }
 
-    @Synchronized
     fun onGenesisBlockMessage(block: GenesisBlockMessage) {
         genesisBlockService.add(block)
+    }
+
+    fun getStatus(): SyncStatus {
+        lock.readLock().lock()
+        try {
+            return status
+        } finally {
+            lock.readLock().unlock()
+        }
+
+    }
+
+    fun outOfSync() {
+        lock.writeLock().lock()
+        try {
+            if (isCheckInProgress.get()) {
+                return
+            }
+            status = NOT_SYNCHRONIZED
+            sync()
+        } finally {
+            lock.writeLock().unlock()
+        }
+
     }
 
 }

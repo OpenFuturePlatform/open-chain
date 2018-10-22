@@ -1,7 +1,7 @@
 package io.openfuture.chain.network.component.time
 
-import io.openfuture.chain.core.sync.SyncState
-import io.openfuture.chain.core.sync.SyncState.SyncStatusType.*
+import io.openfuture.chain.core.sync.SyncStatus
+import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.component.ExplorerAddressesHolder
 import io.openfuture.chain.network.message.network.ResponseTimeMessage
 import io.openfuture.chain.network.property.NodeProperties
@@ -18,7 +18,6 @@ import kotlin.math.max
 @Component
 class ClockSynchronizer(
     private val clock: Clock,
-    private val syncState: SyncState,
     private val properties: NodeProperties,
     private val connectionService: ConnectionService,
     private val addressHolder: ExplorerAddressesHolder
@@ -32,6 +31,7 @@ class ClockSynchronizer(
 
     private val selectionSize: Int = properties.getRootAddresses().size
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
+    private var status: SyncStatus = NOT_SYNCHRONIZED
     private var syncRound: AtomicInteger = AtomicInteger()
     private var deviation: AtomicLong = AtomicLong()
 
@@ -40,8 +40,8 @@ class ClockSynchronizer(
     fun sync() {
         lock.writeLock().lock()
         try {
-            if (SYNCHRONIZED != syncState.getClockStatus()) {
-                syncState.setClockStatus(PROCESSING)
+            if (SYNCHRONIZED != status) {
+                status = PROCESSING
             }
             offsets.clear()
 
@@ -79,9 +79,11 @@ class ClockSynchronizer(
         }
     }
 
+    fun getStatus(): SyncStatus = status
+
     private fun mitigate() {
         if ((selectionSize * 2 / 3) > offsets.size) {
-            syncState.setClockStatus(NOT_SYNCHRONIZED)
+            status = NOT_SYNCHRONIZED
             return
         }
 
@@ -89,8 +91,8 @@ class ClockSynchronizer(
         syncRound.getAndIncrement()
         log.info("Effective offset ${getEffectiveOffset()}")
 
-        if (SYNCHRONIZED != syncState.getClockStatus()) {
-            syncState.setClockStatus(SYNCHRONIZED)
+        if (SYNCHRONIZED != status) {
+            status = SYNCHRONIZED
         }
     }
 
