@@ -1,13 +1,14 @@
 package io.openfuture.chain.network.component.time
 
 import org.springframework.stereotype.Component
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.locks.ReadWriteLock
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
 @Component
 class Clock {
 
-    @Volatile private var offset: Long = 0
+    @Volatile private var offset: AtomicLong = AtomicLong()
 
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
 
@@ -15,7 +16,7 @@ class Clock {
     fun currentTimeMillis(): Long {
         lock.readLock().lock()
         try {
-            return System.currentTimeMillis().plus(offset)
+            return System.currentTimeMillis().plus(offset.get())
         } finally {
             lock.readLock().unlock()
         }
@@ -24,7 +25,7 @@ class Clock {
     fun adjust(offset: Long) {
         lock.writeLock().lock()
         try {
-            this.offset = offset
+            this.offset.getAndAdd(offset)
         } finally {
             lock.writeLock().unlock()
         }
