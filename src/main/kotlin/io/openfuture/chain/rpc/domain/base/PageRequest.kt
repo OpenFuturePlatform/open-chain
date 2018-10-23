@@ -53,4 +53,27 @@ open class PageRequest(
         return this
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is PageRequest) return false
+
+        if (offset != other.offset) return false
+        if (limit != other.limit) return false
+        if (sortBy != other.sortBy) return false
+        if (sortDirection != other.sortDirection) return false
+        if (maySortBy != other.maySortBy) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = offset.hashCode()
+        result = 31 * result + limit
+        result = 31 * result + sortBy.hashCode()
+        result = 31 * result + sortDirection.hashCode()
+        result = 31 * result + maySortBy.hashCode()
+        return result
+    }
+
+
 }
