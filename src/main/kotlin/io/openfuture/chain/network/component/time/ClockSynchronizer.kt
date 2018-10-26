@@ -36,7 +36,7 @@ class ClockSynchronizer(
     private var deviation: AtomicLong = AtomicLong()
 
 
-    @Scheduled(fixedDelayString = "\${node.time-synchronization-interval}")
+    @Scheduled(fixedDelayString = "\${node.time-sync-interval}")
     fun sync() {
         lock.writeLock().lock()
         try {
@@ -82,6 +82,7 @@ class ClockSynchronizer(
     fun getStatus(): SyncStatus = status
 
     private fun mitigate() {
+        log.error("Offsets size ${offsets.size}")
         if ((selectionSize * 2 / 3) > offsets.size) {
             status = NOT_SYNCHRONIZED
             return

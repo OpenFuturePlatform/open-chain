@@ -8,6 +8,7 @@ import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.message.network.RequestTimeMessage
 import io.openfuture.chain.network.property.NodeProperties
+import io.openfuture.chain.network.serialization.Serializable
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
@@ -38,12 +39,26 @@ class DefaultConnectionService(
     }
 
     override fun sendTimeSyncRequest(addresses: Set<NetworkAddress>) {
-        addresses.forEach { networkAddress ->
-            bootstrap.connect(networkAddress.host, networkAddress.port).addListener { future ->
+        addresses.forEach { address ->
+            bootstrap.connect(address.host, address.port).addListener { future ->
                 val channel = (future as ChannelFuture).channel()
 
                 if (future.isSuccess) {
                     channel.writeAndFlush(RequestTimeMessage(clock.currentTimeMillis()))
+                    log.error("Send Clock Request to ${address.port}")
+                }
+            }
+        }
+    }
+
+    override fun poll(message: Serializable, pollSize: Int) {
+        explorerAddressesHolder.getRandomList(pollSize).map { it.address }.forEach { address ->
+            bootstrap.connect(address.host, address.port).addListener { future ->
+                val channel = (future as ChannelFuture).channel()
+
+                if (future.isSuccess) {
+                    channel.writeAndFlush(message)
+                    log.error("Send ${message::class.java.simpleName} to ${address.port}")
                 }
             }
         }

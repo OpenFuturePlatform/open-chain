@@ -44,6 +44,7 @@ class ChannelsHolder {
         }
 
         channel.writeAndFlush(message)
+        log.error("Send ${message::class.java.simpleName} to ${nodeInfo.address.port}")
         return true
     }
 
@@ -52,8 +53,6 @@ class ChannelsHolder {
     fun isEmpty(): Boolean = channelGroup.isEmpty()
 
     fun getNodesInfo(): List<NodeInfo> = channelGroup.map { nodesInfo[it.id()]!! }
-
-    fun getNodeInfoByChannelId(channelId: ChannelId): NodeInfo = nodesInfo[channelId]!!
 
     @Synchronized
     fun addChannel(channel: Channel, nodeInfo: NodeInfo) {

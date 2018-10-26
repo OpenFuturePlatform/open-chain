@@ -34,7 +34,4 @@ class DefaultNetworkApiService(
 
     override fun getNetworkSize(): Int = explorerAddressesHolder.getNodesInfo(false).size
 
-    override fun poll(message: Serializable, pollSize: Int) =
-        explorerAddressesHolder.getRandomList(pollSize).forEach { address -> channelsHolder.send(message, address) }
-
 }

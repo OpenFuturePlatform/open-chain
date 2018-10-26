@@ -43,13 +43,10 @@ class BlockProductionScheduler(
 
     private fun proceedProductionLoop() {
         try {
-            if (SYNCHRONIZED != syncManager.getStatus()) {
-                log.warn("Ledger is not synchronized")
+            if (SYNCHRONIZED != clockSynchronizer.getStatus() || SYNCHRONIZED != syncManager.getStatus()) {
+                log.warn("Clock is ${clockSynchronizer.getStatus()}")
+                log.warn("Ledger is ${syncManager.getStatus()}")
                 syncManager.outOfSync()
-                return
-            }
-            if (SYNCHRONIZED != clockSynchronizer.getStatus()) {
-                log.warn("Clock is not synchronized")
                 return
             }
             val slotOwner = epochService.getCurrentSlotOwner()
