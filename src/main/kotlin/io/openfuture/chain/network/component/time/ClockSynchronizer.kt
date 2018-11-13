@@ -9,6 +9,7 @@ import io.openfuture.chain.network.service.ConnectionService
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.locks.ReadWriteLock
@@ -27,14 +28,14 @@ class ClockSynchronizer(
         private val log = LoggerFactory.getLogger(Clock::class.java)
     }
 
-    @Volatile private var offsets: MutableList<Long> = mutableListOf()
-
+    private val offsets: MutableList<Long> = Collections.synchronizedList(mutableListOf())
     private val selectionSize: Int = properties.getRootAddresses().size
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
-    private var status: SyncStatus = NOT_SYNCHRONIZED
-    private var syncRound: AtomicInteger = AtomicInteger()
-    private var deviation: AtomicLong = AtomicLong()
+    private val syncRound: AtomicInteger = AtomicInteger()
+    private val deviation: AtomicLong = AtomicLong()
 
+    @Volatile
+    private var status: SyncStatus = NOT_SYNCHRONIZED
 
     @Scheduled(fixedDelayString = "\${node.time-sync-interval}")
     fun sync() {
@@ -79,10 +80,17 @@ class ClockSynchronizer(
         }
     }
 
-    fun getStatus(): SyncStatus = status
+    fun getStatus(): SyncStatus {
+        lock.readLock().lock()
+        try {
+            return status
+        } finally {
+            lock.readLock().unlock()
+        }
+    }
 
     private fun mitigate() {
-        log.error("Offsets size ${offsets.size}")
+        log.error("CLOCK: Offsets size ${offsets.size}")
         if ((selectionSize * 2 / 3) > offsets.size) {
             status = NOT_SYNCHRONIZED
             return
@@ -90,7 +98,7 @@ class ClockSynchronizer(
 
         clock.adjust(getEffectiveOffset())
         syncRound.getAndIncrement()
-        log.info("Effective offset ${getEffectiveOffset()}")
+        log.info("CLOCK: Effective offset ${getEffectiveOffset()}")
 
         if (SYNCHRONIZED != status) {
             status = SYNCHRONIZED

@@ -8,14 +8,15 @@ import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.component.ExplorerAddressesHolder
 import io.openfuture.chain.network.component.time.Clock
-import io.openfuture.chain.network.message.sync.*
+import io.openfuture.chain.network.message.sync.SyncBlockRequestMessage
+import io.openfuture.chain.network.message.sync.SyncRequestMessage
+import io.openfuture.chain.network.message.sync.SyncResponseMessage
 import io.openfuture.chain.network.property.NodeProperties
-import io.openfuture.chain.network.serialization.Serializable
 import io.openfuture.chain.network.service.ConnectionService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.*
 import java.util.concurrent.locks.ReadWriteLock
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
@@ -33,13 +34,13 @@ class SyncManager(
         private val log: Logger = LoggerFactory.getLogger(SyncManager::class.java)
     }
 
-    @Volatile
-    private var responses: MutableList<SyncResponseMessage> = mutableListOf()
-    private var isCheckInProgress: AtomicBoolean = AtomicBoolean()
-    private var status: SyncStatus = NOT_SYNCHRONIZED
+    private val responses: MutableList<SyncResponseMessage> = Collections.synchronizedList(mutableListOf())
     private val selectionSize: Int = properties.getRootAddresses().size
     private val threshold: Int = selectionSize * 2 / 3
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
+
+    @Volatile
+    private var status: SyncStatus = NOT_SYNCHRONIZED
 
     private var channelGroup = DefaultChannelGroup("ledger-sync", GlobalEventExecutor.INSTANCE)
 
@@ -47,22 +48,19 @@ class SyncManager(
     fun sync() {
         lock.writeLock().lock()
         try {
-            if (isCheckInProgress.get()) {
+            if (SYNCHRONIZED == status || PROCESSING == status) {
                 return
             }
 
-            if (SYNCHRONIZED == status) {
-                return
-            }
-
-            isCheckInProgress.set(true)
+            status = PROCESSING
             responses.clear()
             val lastBlock = blockService.getLast()
             val message = SyncRequestMessage(clock.currentTimeMillis(), lastBlock.hash, lastBlock.height)
             registerNodes()
+            log.error("LEDGER: channelGroup size ${channelGroup.size}")
             val groupFuture = channelGroup.writeAndFlush(message)
-            log.error("Sync request is ${groupFuture.isSuccess}")
-            log.error("Sync request is partial ${groupFuture.isPartialSuccess}")
+            log.error("LEDGER: Sync request is ${groupFuture.isSuccess}")
+            log.error("LEDGER: Sync request is partial ${groupFuture.isPartialSuccess}")
 //            connectionService.poll(message, selectionSize)
         } finally {
             lock.writeLock().unlock()
@@ -101,10 +99,9 @@ class SyncManager(
     private fun checkState() {
         lock.writeLock().lock()
         try {
-            log.error("<<<responses.size = ${responses.size}>>>")
+            log.error("LEDGER: <<< responses.size = ${responses.size}>>>")
             if (threshold > responses.size) {
                 status = NOT_SYNCHRONIZED
-                isCheckInProgress.set(false)
                 return
             }
 
@@ -113,15 +110,15 @@ class SyncManager(
 
             if ((selectionSize - 1) / 2 > topList.size || 1 < topSet.size) {
                 status = NOT_SYNCHRONIZED
-                isCheckInProgress.set(false)
                 return
             }
 
             if (blockService.isExists(topList.first().lastBlockHash, topList.first().lastBlockHeight)) {
                 status = SYNCHRONIZED
-                isCheckInProgress.set(false)
+                log.error("LEDGER: set SYNCHRONIZED status")
             } else {
                 status = PROCESSING
+                log.error("LEDGER: set PROCESSING status")
                 val message = SyncBlockRequestMessage(blockService.getLast().hash)
                 connectionService.poll(message, selectionSize)
             }
@@ -143,7 +140,7 @@ class SyncManager(
     fun outOfSync() {
         lock.writeLock().lock()
         try {
-            if (isCheckInProgress.get()) {
+            if (PROCESSING == status) {
                 return
             }
             status = NOT_SYNCHRONIZED
