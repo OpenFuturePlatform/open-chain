@@ -28,7 +28,8 @@ class ClockSynchronizer(
         private val log = LoggerFactory.getLogger(Clock::class.java)
     }
 
-    @Volatile private var offsets: MutableList<Long> = mutableListOf()
+    @Volatile
+    private var offsets: MutableList<Long> = mutableListOf()
 
     private val selectionSize: Int = properties.getRootAddresses().size
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
@@ -39,18 +40,18 @@ class ClockSynchronizer(
     @Scheduled(fixedDelayString = "\${node.time-synchronization-interval}")
     fun sync() {
         lock.writeLock().lock()
+        val addresses = addressHolder.getRandomList(selectionSize).asSequence().map { it.address }.toSet()
         try {
             if (SYNCHRONIZED != syncState.getClockStatus()) {
                 syncState.setClockStatus(PROCESSING)
             }
             offsets.clear()
-
-            val addresses = addressHolder.getRandomList(selectionSize).asSequence().map { it.address }.toSet()
             connectionService.sendTimeSyncRequest(addresses)
         } finally {
             lock.writeLock().unlock()
 
-            Thread.sleep(properties.synchronizationResponseDelay!!)
+            waitResponseMessages(addresses.size, properties.synchronizationResponseDelay!!)
+
             mitigate()
         }
     }
@@ -76,6 +77,19 @@ class ClockSynchronizer(
 
         } finally {
             lock.writeLock().unlock()
+        }
+    }
+
+    private fun waitResponseMessages(expectedNumberResponses: Int, maxWaitTime: Long) {
+        if (expectedNumberResponses != 0) {
+            var countWaitingSteps = 0
+            val second = 1000L
+            val maxCountDelays = maxWaitTime / second
+
+            while (offsets.size != expectedNumberResponses && countWaitingSteps < maxCountDelays) {
+                ++countWaitingSteps
+                Thread.sleep(second)
+            }
         }
     }
 
