@@ -248,6 +248,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[1.3.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v0.8.0...v1.0.0
