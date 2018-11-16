@@ -17,7 +17,7 @@ class NewClientHandler(
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: NewClient) {
         val nodeInfo = msg.nodeInfo
-        if (!explorerAddressesHolder.hasNodeInfo(nodeInfo)) {
+        if (nodeInfo != explorerAddressesHolder.me && !explorerAddressesHolder.hasNodeInfo(nodeInfo)) {
             explorerAddressesHolder.addNodeInfo(nodeInfo)
             channelsHolder.broadcast(msg)
         }
