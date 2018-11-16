@@ -30,8 +30,8 @@ enum class MessageType(
     BLOCK_APPROVAL(10, BlockApprovalMessage::class),
     PENDING_BLOCK(11, PendingBlockMessage::class),
     // sync
-    HASH_BLOCK_REQUEST(12, SyncRequestMessage::class),
-    HASH_BLOCK_RESPONSE(13, SyncResponseMessage::class),
+    SYNC_REQUEST(12, SyncRequestMessage::class),
+    SYNC_RESPONSE(13, SyncResponseMessage::class),
     SYNC_BLOCKS_REQUEST(14, SyncBlockRequestMessage::class),
     MAIN_BLOCK(15, MainBlockMessage::class),
     GENESIS_BLOCK(16, GenesisBlockMessage::class);
