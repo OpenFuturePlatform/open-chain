@@ -5,6 +5,8 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.network.message.sync.SyncBlockRequestMessage
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -13,10 +15,15 @@ class SyncBlockRequestHandler(
     private val blockService: BlockService
 ) : SimpleChannelInboundHandler<SyncBlockRequestMessage>() {
 
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(SyncBlockRequestHandler::class.java)
+    }
+
+
     override fun channelRead0(ctx: ChannelHandlerContext, msg: SyncBlockRequestMessage) {
-        blockService.getAfterCurrentHash(msg.hash)
-            .map { it.toMessage() }
-            .forEach { response -> ctx.writeAndFlush(response) }
+        val blocksToSend = blockService.getAfterCurrentHash(msg.hash)
+        log.debug("Sending blocks size = ${blocksToSend.size} ")
+        blocksToSend.forEach { ctx.writeAndFlush(it.toMessage()) }
     }
 
 }

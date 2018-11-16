@@ -7,6 +7,8 @@ import io.openfuture.chain.core.sync.SyncManager
 import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.message.sync.SyncResponseMessage
 import io.openfuture.chain.network.property.NodeProperties
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -17,12 +19,20 @@ class SyncResponseHandler(
     private val properties: NodeProperties
 ) : SimpleChannelInboundHandler<SyncResponseMessage>() {
 
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(SyncResponseHandler::class.java)
+    }
+
+
     override fun channelRead0(ctx: ChannelHandlerContext, msg: SyncResponseMessage) {
         if (properties.syncResponseDelay!! < clock.currentTimeMillis() - msg.timestamp) {
+            log.debug("Expired sync response")
             return
         }
+
+        log.debug("RESPONSE from ${ctx.channel().remoteAddress()}")
         syncManager.onSyncResponseMessage(msg)
-        ctx.close()
+        ctx.channel().close()
     }
 
 }
