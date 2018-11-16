@@ -22,7 +22,7 @@ class NodeProperties(
 
     /** Node communication protocol version */
     @field:NotNull
-    var version: String? = null,
+    var protocolVersion: String? = null,
 
     /** */
     @field:NotNull

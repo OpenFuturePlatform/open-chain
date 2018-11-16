@@ -32,9 +32,10 @@ class MessageDecoder(
 
     override fun decode(ctx: ChannelHandlerContext, buf: ByteBuf, out: MutableList<Any>) {
         val messageVersion = buf.readString()
-        val nodeVersion = nodeProperties.version!!
-        if (nodeVersion != messageVersion) {
-            log.warn("Version discrepancy. Your version is: $nodeVersion, incoming version is: $messageVersion")
+        val protocolVersion = nodeProperties.protocolVersion!!
+        if (protocolVersion != messageVersion) {
+            log.warn("Version discrepancy. Your version is: $protocolVersion, incoming version is: $messageVersion")
+            return
         }
 
         val originTime = buf.readLong() //timestamp
