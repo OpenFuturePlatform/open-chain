@@ -28,7 +28,7 @@ class MessageEncoder(
 
 
     override fun encode(ctx: ChannelHandlerContext, message: Serializable, buf: ByteBuf) {
-        log.debug("Encoding ${ToStringBuilder.reflectionToString(message, SHORT_PREFIX_STYLE)} " +
+        log.trace("Encoding ${ToStringBuilder.reflectionToString(message, SHORT_PREFIX_STYLE)} " +
             "to ${ctx.channel().remoteAddress()}")
 
         buf.writeString(nodeProperties.version!!)
