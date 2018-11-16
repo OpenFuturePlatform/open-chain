@@ -21,17 +21,16 @@ class ExplorerAddressesHolder {
         return nodesInfo
     }
 
-    @Synchronized
     fun addNodeInfo(nodeInfo: NodeInfo) {
         this.nodesInfo.add(nodeInfo)
     }
 
-    @Synchronized
     fun addNodesInfo(nodesInfo: Set<NodeInfo>) {
         this.nodesInfo.addAll(nodesInfo)
     }
 
-    @Synchronized
+    fun hasNodeInfo(nodeInfo: NodeInfo): Boolean = this.nodesInfo.contains(nodeInfo)
+
     fun removeNodeInfo(address: NetworkAddress) {
         nodesInfo.removeIf { address == it.address }
     }
