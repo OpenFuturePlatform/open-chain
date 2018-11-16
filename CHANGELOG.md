@@ -5,14 +5,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-##Added
-- Network: broadcast new client info though the entire the network
+
+## [1.3.0] - 2018-11-16
+## Added
+- Network: broadcast new client info over the entire network
 - Network: filtering expired messages
 
 ## Changed
-- Network: removed heart beat handler response
+- Network: removed heartbeat handler response
 - RPC: Response pagination improved
-
 
 ## [1.2.0] - 2018-10-22
 ## Added
