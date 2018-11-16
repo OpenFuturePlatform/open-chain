@@ -69,7 +69,12 @@ class NodeProperties(
     /** Max synchronization response delay in milliseconds. Max value 10000 millis*/
     @field:Max(10 * 1000)
     @field:NotNull
-    var synchronizationResponseDelay: Long? = null
+    var synchronizationResponseDelay: Long? = null,
+
+    @field:NotNull
+    var peerUnavailabilityPeriod: Long? = null,
+
+    var allowedConnections: Int = peersNumber!! * 2
 
 ) {
 

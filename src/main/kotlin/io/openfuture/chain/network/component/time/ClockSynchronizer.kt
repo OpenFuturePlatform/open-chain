@@ -2,7 +2,7 @@ package io.openfuture.chain.network.component.time
 
 import io.openfuture.chain.core.sync.SyncState
 import io.openfuture.chain.core.sync.SyncState.SyncStatusType.*
-import io.openfuture.chain.network.component.ExplorerAddressesHolder
+import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.message.network.ResponseTimeMessage
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.ConnectionService
@@ -21,7 +21,7 @@ class ClockSynchronizer(
     private val syncState: SyncState,
     private val properties: NodeProperties,
     private val connectionService: ConnectionService,
-    private val addressHolder: ExplorerAddressesHolder
+    private val addressHolder: AddressesHolder
 ) {
 
     companion object {

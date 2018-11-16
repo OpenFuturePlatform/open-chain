@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.serialization.Serializable
+import io.openfuture.chain.network.service.ConnectionService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -12,7 +13,8 @@ import org.springframework.stereotype.Component
 @Component
 @Sharable
 class ConnectionHandler(
-    private val channelsHolder: ChannelsHolder
+    private val channelsHolder: ChannelsHolder,
+    private val connectionService: ConnectionService
 ) : SimpleChannelInboundHandler<Serializable>() {
 
     companion object {
@@ -26,6 +28,7 @@ class ConnectionHandler(
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
         channelsHolder.removeChannel(ctx.channel())
+        ctx.executor().submit { connectionService.findNewPeer() }
         super.channelInactive(ctx)
     }
 
@@ -33,6 +36,7 @@ class ConnectionHandler(
         log.error("Connection error ${ctx.channel().remoteAddress()} with cause: ${cause.message}")
 
         channelsHolder.removeChannel(ctx.channel())
+        ctx.executor().submit { connectionService.findNewPeer() }
     }
 
 }

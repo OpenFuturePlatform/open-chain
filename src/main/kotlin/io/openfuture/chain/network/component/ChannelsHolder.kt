@@ -15,10 +15,6 @@ import java.util.concurrent.ConcurrentHashMap
 @Component
 class ChannelsHolder {
 
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(ChannelsHolder::class.java)
-    }
-
     private var channelGroup = DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
     private var nodesInfo = ConcurrentHashMap<ChannelId, NodeInfo>()
 

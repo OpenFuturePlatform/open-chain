@@ -1,7 +1,7 @@
 package io.openfuture.chain.network.service
 
 import io.openfuture.chain.network.component.ChannelsHolder
-import io.openfuture.chain.network.component.ExplorerAddressesHolder
+import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.serialization.Serializable
 import org.springframework.stereotype.Service
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 class DefaultNetworkApiService(
     private val channelsHolder: ChannelsHolder,
     private val connectionService: ConnectionService,
-    private val explorerAddressesHolder: ExplorerAddressesHolder
+    private val addressesHolder: AddressesHolder
 ) : NetworkApiService {
 
     override fun broadcast(message: Serializable) {
@@ -32,6 +32,6 @@ class DefaultNetworkApiService(
         }
     }
 
-    override fun getNetworkSize(): Int = explorerAddressesHolder.getNodesInfo(false).size
+    override fun getNetworkSize(): Int = addressesHolder.getNodesInfo(false).size
 
 }

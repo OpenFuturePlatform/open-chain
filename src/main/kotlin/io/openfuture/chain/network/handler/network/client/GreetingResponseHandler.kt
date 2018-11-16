@@ -6,11 +6,12 @@ import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.core.component.NodeConfigurator
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.component.ChannelsHolder
-import io.openfuture.chain.network.component.ExplorerAddressesHolder
+import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.message.network.GreetingResponseMessage
+import io.openfuture.chain.network.service.ConnectionService
 import org.springframework.stereotype.Component
 import java.net.InetSocketAddress
 
@@ -20,7 +21,8 @@ class GreetingResponseHandler(
     private val config: NodeConfigurator,
     private val nodeKeyHolder: NodeKeyHolder,
     private val channelHolder: ChannelsHolder,
-    private val explorerAddressesHolder: ExplorerAddressesHolder
+    private val addressesHolder: AddressesHolder,
+    private val connectionService: ConnectionService
 ) : SimpleChannelInboundHandler<GreetingResponseMessage>() {
 
     override fun channelActive(ctx: ChannelHandlerContext) {
@@ -33,8 +35,14 @@ class GreetingResponseHandler(
         val socket = channel.remoteAddress() as InetSocketAddress
 
         config.setExternalHost(msg.externalHost)
-        channelHolder.addChannel(channel, NodeInfo(msg.uid, NetworkAddress(socket.address.hostAddress, socket.port)))
-        explorerAddressesHolder.addNodesInfo(msg.nodesInfo)
+        if (msg.accepted) {
+            val address = NetworkAddress(socket.address.hostAddress, socket.port)
+            channelHolder.addChannel(channel, NodeInfo(msg.uid, address))
+        } else {
+            // TODO reject
+        }
+        addressesHolder.addNodesInfo(msg.nodesInfo)
+        ctx.executor().submit { connectionService.findNewPeer() }
     }
 
 }

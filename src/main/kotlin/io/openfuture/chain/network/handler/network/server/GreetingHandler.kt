@@ -5,12 +5,14 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.component.ChannelsHolder
-import io.openfuture.chain.network.component.ExplorerAddressesHolder
+import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.message.network.GreetingResponseMessage
 import io.openfuture.chain.network.message.network.NewClient
+import io.openfuture.chain.network.property.NodeProperties
+import io.openfuture.chain.network.service.ConnectionService
 import org.springframework.stereotype.Component
 import java.net.InetSocketAddress
 
@@ -19,30 +21,32 @@ import java.net.InetSocketAddress
 class GreetingHandler(
     private val nodeKeyHolder: NodeKeyHolder,
     private val channelHolder: ChannelsHolder,
-    private val explorerAddressesHolder: ExplorerAddressesHolder
+    private val addressesHolder: AddressesHolder,
+    private val nodeProperties: NodeProperties
 ) : SimpleChannelInboundHandler<GreetingMessage>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: GreetingMessage) {
-        val channel = ctx.channel()
-        val hostAddress = (channel.remoteAddress() as InetSocketAddress).address.hostAddress
+        val hostAddress = (ctx.channel().remoteAddress() as InetSocketAddress).address.hostAddress
         val nodeInfo = NodeInfo(msg.uid, NetworkAddress(hostAddress, msg.externalPort))
-
-        if (nodeKeyHolder.getUid() == msg.uid) {
-            explorerAddressesHolder.me = nodeInfo
-            ctx.channel().close()
-            return
+        when {
+            channelHolder.getNodesInfo().any { it.uid == msg.uid } -> {
+                ctx.close()
+            }
+            nodeProperties.allowedConnections < channelHolder.size() -> {
+                val response = GreetingResponseMessage(nodeKeyHolder.getUid(), hostAddress,
+                    addressesHolder.getNodesInfo(), false)
+                ctx.writeAndFlush(response)
+                ctx.close()
+            }
+            else -> {
+                val response = GreetingResponseMessage(nodeKeyHolder.getUid(), hostAddress,
+                    addressesHolder.getNodesInfo())
+                ctx.writeAndFlush(response)
+                addressesHolder.addNodeInfo(nodeInfo)
+                channelHolder.addChannel(ctx.channel(), nodeInfo)
+                channelHolder.broadcast(NewClient(nodeInfo))
+            }
         }
-
-        if (channelHolder.getNodesInfo().any { it.uid == nodeInfo.uid }) {
-            ctx.close()
-            return
-        }
-
-        channelHolder.broadcast(NewClient(nodeInfo))
-        ctx.writeAndFlush(GreetingResponseMessage(nodeKeyHolder.getUid(), hostAddress, explorerAddressesHolder.getNodesInfo()))
-
-        channelHolder.addChannel(channel, nodeInfo)
-        explorerAddressesHolder.addNodeInfo(nodeInfo)
     }
 
 }
