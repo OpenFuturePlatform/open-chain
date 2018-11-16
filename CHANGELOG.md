@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ##Added
 - Network: broadcast new client info though the entire the network
+- Network: filtering expired messages
 
 ## Changed
 - Network: removed heart beat handler response

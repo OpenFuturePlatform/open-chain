@@ -50,7 +50,7 @@ class ClockSynchronizer(
         } finally {
             lock.writeLock().unlock()
 
-            Thread.sleep(properties.synchronizationResponseDelay!!)
+            Thread.sleep(properties.expiry!!)
             mitigate()
         }
     }
@@ -102,7 +102,7 @@ class ClockSynchronizer(
     private fun getScale(): Double = 1.div(Math.log(Math.E.plus(syncRound.get())))
 
     private fun isExpired(msg: ResponseTimeMessage, destinationTime: Long): Boolean =
-        properties.synchronizationResponseDelay!! < Math.abs(destinationTime.minus(msg.originalTime))
+        properties.expiry!! < Math.abs(destinationTime.minus(msg.originalTime))
 
     private fun isOutOfBound(offset: Long): Boolean = (deviation.get() * getScale()) < Math.abs(offset)
 
