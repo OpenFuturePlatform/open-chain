@@ -44,9 +44,8 @@ class MessageDecoder(
 
         message.read(buf)
 
-        if (!isNonExpiredOrSyncTimeMessages(message, originTime)) {
-            log.debug("Message ${ToStringBuilder.reflectionToString(message,SHORT_PREFIX_STYLE)} " +
-                    "is expiry from ${ctx.channel().remoteAddress()}")
+        if (isExpired(message, originTime)) {
+            log.debug("Message $type  from ${ctx.channel().remoteAddress()} decline by expiration")
             return
         }
 
@@ -57,12 +56,12 @@ class MessageDecoder(
         out.add(message)
     }
 
-    private fun isNonExpiredOrSyncTimeMessages(message: Serializable, originTime: Long): Boolean {
-        val receivedTime = clock.currentTimeMillis()
-        return when (message) {
-            is RequestTimeMessage, is ResponseTimeMessage -> true
-            else -> Math.abs(receivedTime - originTime) < nodeProperties.expiryTime!!
+    private fun isExpired(message: Serializable, originTime: Long): Boolean {
+        if (message is RequestTimeMessage || message is  ResponseTimeMessage) {
+            return false
         }
+
+        return (clock.currentTimeMillis() - originTime) > nodeProperties.expiry!!
     }
 
 }

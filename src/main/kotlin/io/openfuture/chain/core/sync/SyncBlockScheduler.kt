@@ -30,6 +30,6 @@ class SyncBlockScheduler(
     }
 
     private fun isResponseTimeOut(): Boolean =
-        clock.currentTimeMillis() - syncManager.getLastResponseTime() > nodeProperties.synchronizationResponseDelay!!
+        clock.currentTimeMillis() - syncManager.getLastResponseTime() > nodeProperties.expiry!!
 
 }

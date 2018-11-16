@@ -6,7 +6,6 @@ import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.message.network.RequestTimeMessage
 import io.openfuture.chain.network.message.network.ResponseTimeMessage
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
