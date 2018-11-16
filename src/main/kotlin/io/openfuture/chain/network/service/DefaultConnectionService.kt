@@ -3,10 +3,13 @@ package io.openfuture.chain.network.service
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
+import io.openfuture.chain.core.component.NodeConfigurator
+import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.entity.NetworkAddress
+import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.message.network.RequestTimeMessage
 import io.openfuture.chain.network.property.NodeProperties
 import org.slf4j.Logger
@@ -21,8 +24,10 @@ class DefaultConnectionService(
     private val bootstrap: Bootstrap,
     private val nodeProperties: NodeProperties,
     private val channelHolder: ChannelsHolder,
-    private val addressesHolder: AddressesHolder
-) : ConnectionService {
+    private val addressesHolder: AddressesHolder,
+    private val config: NodeConfigurator,
+    private val nodeKeyHolder: NodeKeyHolder
+    ) : ConnectionService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultConnectionService::class.java)
@@ -61,7 +66,11 @@ class DefaultConnectionService(
         val knownPeers = mutableListOf(*channelHolder.getNodesInfo().toTypedArray())
         for (i in 0 until addressesHolder.size()) {
             val peer = addressesHolder.getRandom(connectedPeers = channelHolder.getNodesInfo())
-            connect(peer.address, Consumer { connected = true })
+            connect(peer.address, Consumer {
+                val message = GreetingMessage(config.getConfig().externalPort, nodeKeyHolder.getUid())
+                it.writeAndFlush(message)
+                connected = true
+            })
             if (connected) {
                 break
             }
