@@ -44,7 +44,7 @@ class ChannelsHolder {
         }
 
         channel.writeAndFlush(message)
-        log.error("Send ${message::class.java.simpleName} to ${nodeInfo.address.port}")
+        log.debug("Send ${message::class.java.simpleName} to ${nodeInfo.address.port}")
         return true
     }
 

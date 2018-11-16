@@ -44,12 +44,13 @@ class BlockProductionScheduler(
     private fun proceedProductionLoop() {
         try {
             if (SYNCHRONIZED != clockSynchronizer.getStatus() || SYNCHRONIZED != syncManager.getStatus()) {
-                log.warn("Clock is ${clockSynchronizer.getStatus()}")
-                log.warn("Ledger is ${syncManager.getStatus()}")
-                syncManager.outOfSync()
+                log.warn("----------------Clock is ${clockSynchronizer.getStatus()}----------------")
+                log.warn("----------------Ledger is ${syncManager.getStatus()}----------------")
+//                if (SYNCHRONIZED != syncManager.getStatus()) syncManager.outOfSync()
                 return
             }
             val slotOwner = epochService.getCurrentSlotOwner()
+            log.debug("CONSENSUS: Slot owner ${slotOwner.id}")
             if (genesisBlockService.isGenesisBlockRequired()) {
                 val genesisBlock = genesisBlockService.create()
                 genesisBlockService.add(genesisBlock)
