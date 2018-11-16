@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ## Added
 - Network: check the expiration date of the message
+- New client info broadcast to all nodes: broadcast new client info though the entire the network is added
 
 ## [1.2.0] - 2018-10-22
 ## Added
