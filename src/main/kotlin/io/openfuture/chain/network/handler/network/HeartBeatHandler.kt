@@ -9,8 +9,6 @@ import io.netty.handler.timeout.IdleState.WRITER_IDLE
 import io.netty.handler.timeout.IdleStateEvent
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.message.network.HeartBeatMessage
-import io.openfuture.chain.network.message.network.HeartBeatMessage.Type.PING
-import io.openfuture.chain.network.message.network.HeartBeatMessage.Type.PONG
 import org.springframework.stereotype.Component
 
 @Component
@@ -20,25 +18,20 @@ class HeartBeatHandler(
 ) : SimpleChannelInboundHandler<HeartBeatMessage>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: HeartBeatMessage) {
-        if (msg.type == PING) {
-            ctx.writeAndFlush(HeartBeatMessage(PONG))
-        }
     }
 
-    override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
-        if (evt !is IdleStateEvent) {
-            super.userEventTriggered(ctx, evt)
+    override fun userEventTriggered(ctx: ChannelHandlerContext, event: Any) {
+        if (event !is IdleStateEvent) {
+            super.userEventTriggered(ctx, event)
             return
         }
 
-        when (evt.state()) {
-            READER_IDLE -> {
-                channelsHolder.removeChannel(ctx.channel())
-            }
-            WRITER_IDLE -> ctx.writeAndFlush(HeartBeatMessage())
+        val eventState = event.state()
+        if (READER_IDLE == eventState) {
+            channelsHolder.removeChannel(ctx.channel())
+        } else if (WRITER_IDLE == eventState) {
+            ctx.writeAndFlush(HeartBeatMessage())
                 .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
-            else -> {
-            }
         }
     }
 
