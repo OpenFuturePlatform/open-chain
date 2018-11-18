@@ -49,7 +49,7 @@ class ClockSynchronizer(
         } finally {
             lock.writeLock().unlock()
 
-            waitResponseMessages(addresses.size, properties.synchronizationResponseDelay!!)
+            waitResponseMessages(addresses.size, properties.expiry!!)
 
             mitigate()
         }
