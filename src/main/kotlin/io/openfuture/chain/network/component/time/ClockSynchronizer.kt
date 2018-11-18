@@ -28,8 +28,7 @@ class ClockSynchronizer(
         private val log = LoggerFactory.getLogger(Clock::class.java)
     }
 
-    @Volatile
-    private var offsets: MutableList<Long> = mutableListOf()
+    @Volatile private var offsets: MutableList<Long> = mutableListOf()
 
     private val selectionSize: Int = properties.getRootAddresses().size
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
@@ -116,7 +115,7 @@ class ClockSynchronizer(
     private fun getScale(): Double = 1.div(Math.log(Math.E.plus(syncRound.get())))
 
     private fun isExpired(msg: ResponseTimeMessage, destinationTime: Long): Boolean =
-        properties.synchronizationResponseDelay!! < Math.abs(destinationTime.minus(msg.originalTime))
+        properties.expiry!! < Math.abs(destinationTime.minus(msg.originalTime))
 
     private fun isOutOfBound(offset: Long): Boolean = (deviation.get() * getScale()) < Math.abs(offset)
 

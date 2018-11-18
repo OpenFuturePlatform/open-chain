@@ -22,7 +22,7 @@ class NodeProperties(
 
     /** Node communication protocol version */
     @field:NotNull
-    var version: String? = null,
+    var protocolVersion: String? = null,
 
     /** */
     @field:NotNull
@@ -69,7 +69,7 @@ class NodeProperties(
     /** Max synchronization response delay in milliseconds. Max value 10000 millis*/
     @field:Max(10 * 1000)
     @field:NotNull
-    var synchronizationResponseDelay: Long? = null
+    var expiry: Long? = null
 
 ) {
 

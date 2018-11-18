@@ -5,7 +5,6 @@ import io.openfuture.chain.smartcontract.model.Address
 import io.openfuture.chain.smartcontract.model.Event
 import io.openfuture.chain.smartcontract.model.Message
 import io.openfuture.chain.smartcontract.model.SmartContract
-import io.openfuture.chain.smartcontract.utils.UuidUtils
 
 
 class AssetsSellerContract : SmartContract("") {
@@ -18,7 +17,7 @@ class AssetsSellerContract : SmartContract("") {
     fun generateAsset(message: Message, params: Map<String, String>) {
         required(message.value == price, "Insufficient funds.")
 
-        val uuid = UuidUtils.getRandomUuid()
+        val uuid = params["uuid"]!!
         assets[uuid] = message.sender
 
         BoughtAssetEvent(uuid, message.sender.toString()).emit()
