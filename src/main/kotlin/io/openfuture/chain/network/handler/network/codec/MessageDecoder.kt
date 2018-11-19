@@ -45,7 +45,7 @@ class MessageDecoder(
         message.read(buf)
 
         if (isExpired(message, originTime)) {
-            log.debug("Message $type  from ${ctx.channel().remoteAddress()} decline by expiration")
+            log.debug("Message $type from ${ctx.channel().remoteAddress()} decline by expiration")
             return
         }
 

@@ -19,6 +19,8 @@ interface NetworkApiService {
 
     fun getNetworkSize(): Int
 
+    fun poll(message: Serializable, pollSize: Int)
+
 }
 
 interface ConnectionService {

@@ -54,6 +54,8 @@ class ChannelsHolder {
 
     fun getNodesInfo(): List<NodeInfo> = channelGroup.map { nodesInfo[it.id()]!! }
 
+    fun getNodeInfoByChannelId(channelId: ChannelId): NodeInfo = nodesInfo[channelId]!!
+
     @Synchronized
     fun addChannel(channel: Channel, nodeInfo: NodeInfo) {
         channelGroup.add(channel)

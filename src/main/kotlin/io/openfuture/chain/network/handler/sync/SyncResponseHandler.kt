@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.core.sync.SyncManager
+import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.message.sync.SyncResponseMessage
 import io.openfuture.chain.network.property.NodeProperties
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component
 @Sharable
 class SyncResponseHandler(
     private val clock: Clock,
+    private val channelsHolder: ChannelsHolder,
     private val syncManager: SyncManager,
     private val properties: NodeProperties
 ) : SimpleChannelInboundHandler<SyncResponseMessage>() {
@@ -31,8 +33,8 @@ class SyncResponseHandler(
         }
 
         log.debug("RESPONSE from ${ctx.channel().remoteAddress()}")
-        syncManager.onSyncResponseMessage(msg)
-        ctx.channel().close()
+        syncManager.onSyncResponseMessage(msg, channelsHolder.getNodeInfoByChannelId(ctx.channel().id()))
+//        ctx.channel().close()
     }
 
 }

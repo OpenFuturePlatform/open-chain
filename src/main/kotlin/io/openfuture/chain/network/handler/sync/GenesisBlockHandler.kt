@@ -28,7 +28,7 @@ class GenesisBlockHandler(
             genesisBlockService.add(msg)
         }
 
-        ctx.channel().close()
+//        ctx.channel().close()
     }
 
 }

@@ -28,7 +28,7 @@ class MainBlockHandler(
             mainBlockService.add(msg)
         }
 
-        ctx.channel().close()
+//        ctx.channel().close()
     }
 
 }
