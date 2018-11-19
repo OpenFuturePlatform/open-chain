@@ -87,7 +87,7 @@ class SyncManager(
 
         val lastBlock = blockService.getLast()
         sendSyncRequest(SyncRequestMessage(clock.currentTimeMillis(), lastBlock.hash, lastBlock.height))
-        Thread.sleep(properties.syncResponseDelay!!)
+        Thread.sleep(properties.expiry!!)
         checkState()
     }
 
@@ -192,6 +192,6 @@ class SyncManager(
     }
 
     private fun isTimeOut(): Boolean =
-        clock.currentTimeMillis() - startSyncTime > properties.syncResponseDelay!!
+        clock.currentTimeMillis() - startSyncTime > properties.expiry!!
 
 }

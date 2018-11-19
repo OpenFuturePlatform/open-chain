@@ -27,7 +27,7 @@ class SyncRequestHandler(
 
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: SyncRequestMessage) {
-        if (properties.syncResponseDelay!! < clock.currentTimeMillis() - msg.timestamp) {
+        if (properties.expiry!! < clock.currentTimeMillis() - msg.timestamp) {
             log.debug("Expired sync request")
             return
         }
