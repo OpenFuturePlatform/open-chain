@@ -4,6 +4,7 @@ import io.openfuture.chain.network.entity.NetworkAddress
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
+import javax.annotation.PostConstruct
 import javax.validation.constraints.*
 
 @Component
@@ -72,11 +73,17 @@ class NodeProperties(
     var synchronizationResponseDelay: Long? = null,
 
     @field:NotNull
-    var peerUnavailabilityPeriod: Long? = null,
-
-    var allowedConnections: Int = peersNumber!! * 2
+    var peerUnavailabilityPeriod: Long? = null
 
 ) {
+
+    var allowedConnections: Int? = null
+
+
+    @PostConstruct
+    private fun init() {
+        allowedConnections = peersNumber!! * 2
+    }
 
     fun getRootAddresses(): Set<NetworkAddress> = rootNodes.map {
         val addressParts = it.split(':')
