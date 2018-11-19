@@ -153,6 +153,14 @@ class SyncManager(
                 nodesToAsk.addAll(responses[message]!!)
                 nodesToAsk.addAll(maxMatch.value)
                 return true
+            } else if (message.size == maxMatch.key.size - 1 && message == maxMatch.key.dropLast(1)) {
+                if (threshold > responses[message]!!.size + maxMatch.value.size) {
+                    return false
+                }
+                chainToSync.addAll(maxMatch.key)
+                nodesToAsk.addAll(responses[message]!!)
+                nodesToAsk.addAll(maxMatch.value)
+                return true
             }
         }
 
