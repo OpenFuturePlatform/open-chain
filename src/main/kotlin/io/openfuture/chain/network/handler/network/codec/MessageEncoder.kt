@@ -31,7 +31,7 @@ class MessageEncoder(
         log.trace("Encoding ${ToStringBuilder.reflectionToString(message, SHORT_PREFIX_STYLE)} " +
             "to ${ctx.channel().remoteAddress()}")
 
-        buf.writeString(nodeProperties.version!!)
+        buf.writeString(nodeProperties.protocolVersion!!)
         buf.writeLong(clock.currentTimeMillis())
         buf.writeByte(MessageType.get(message).id.toInt())
         message.write(buf)
