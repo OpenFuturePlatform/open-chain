@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import javax.validation.Valid
 
 @CrossOrigin
 @RestController
@@ -17,7 +18,7 @@ class ViewDelegateController(
 ) {
 
     @GetMapping
-    fun getAll(request: ViewDelegatePageRequest): PageResponse<ViewDelegateResponse> =
+    fun getAll(@Valid request: ViewDelegatePageRequest): PageResponse<ViewDelegateResponse> =
         PageResponse(viewDelegateService.getAll(request).map { ViewDelegateResponse(it) })
 
 }

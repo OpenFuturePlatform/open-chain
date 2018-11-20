@@ -82,6 +82,11 @@ package-native:
   stage: package
   dependencies:
     - build-jar
+  before_script:
+    - apk --no-cache add gettext
+    - export VERSION=$(echo ${CI_COMMIT_REF_NAME} | sed -e 's/v//')
+    - envsubst '${VERSION}' < install4j/multi.install4j > install4j/multi.install4j.new
+    - mv install4j/multi.install4j.new install4j/multi.install4j
   script:
     - mv build/libs/open-chain-*.jar build/libs/open-chain.jar
     - |
@@ -105,6 +110,19 @@ package-native:
   mkdir ansible/host_vars
   for i in `seq 1 21`; do eval echo "key: \$SERVER${i}" >> ansible/host_vars/server${i}; done
   ansible-playbook --private-key=ansible/key.pem -i ansible/inventory -f 25 -e "image_tag=${IMAGE_TAG}" -e "count=21" -e "user_login=${DEPLOY_USER_PROD}" ansible/deploy.yml
+
+copy-packages:
+  stage: deploy
+  dependencies:
+    - package-native
+  before_script:
+    - apk --no-cache add rsync openssh-client
+    - echo "${DEPLOY_KEY_OPEN}" | tr -d '\r' > key.pem
+    - chmod 600 key.pem
+  script:
+    - rsync -avzhO --no-p --delete -e "ssh -i key.pem -o StrictHostKeyChecking=no" artifacts/ ${DEPLOY_USER_PROD}@openfuture.io:/var/www/updates.openfuture.io/
+  only:
+    - tags
 
 deploy-manual:
   stage: deploy

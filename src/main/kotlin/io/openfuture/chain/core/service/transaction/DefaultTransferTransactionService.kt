@@ -14,6 +14,7 @@ import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
+import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -40,7 +41,8 @@ class DefaultTransferTransactionService(
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional(readOnly = true)
-    override fun getAll(request: PageRequest): Page<TransferTransaction> = repository.findAll(request)
+    override fun getAll(request: TransactionPageRequest): Page<TransferTransaction> =
+        repository.findAll(request.toEntityRequest())
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedTransferTransaction> =
@@ -52,8 +54,8 @@ class DefaultTransferTransactionService(
             ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional(readOnly = true)
-    override fun getByAddress(address: String, request: PageRequest): Page<TransferTransaction> =
-        (repository as TransferTransactionRepository).findAllByHeaderSenderAddressOrPayloadRecipientAddress(address, address, request)
+    override fun getByAddress(address: String, request: TransactionPageRequest): Page<TransferTransaction> =
+        (repository as TransferTransactionRepository).findAllByHeaderSenderAddressOrPayloadRecipientAddress(address, address, request.toEntityRequest())
 
     @BlockchainSynchronized
     @Transactional

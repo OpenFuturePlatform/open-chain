@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.transaction
 
+import io.openfuture.chain.core.annotation.OpenClass
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_HASH
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_SIGNATURE
@@ -11,6 +12,7 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.nio.ByteBuffer
 
+@OpenClass
 abstract class BaseTransactionService {
 
     protected fun validateBase(header: TransactionHeader, payload: TransactionPayload, footer: TransactionFooter) {

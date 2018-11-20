@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToByteEncoder
-import io.openfuture.chain.network.component.NodeClock
+import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.extension.writeString
 import io.openfuture.chain.network.message.base.MessageType
 import io.openfuture.chain.network.property.NodeProperties
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component
 @Sharable
 class MessageEncoder(
     private val nodeProperties: NodeProperties,
-    private val nodeClock: NodeClock
+    private val clock: Clock
 ) : MessageToByteEncoder<Serializable>() {
 
     companion object {
@@ -31,8 +31,8 @@ class MessageEncoder(
         log.debug("Encoding ${ToStringBuilder.reflectionToString(message, SHORT_PREFIX_STYLE)} " +
             "to ${ctx.channel().remoteAddress()}")
 
-        buf.writeString(nodeProperties.version!!)
-        buf.writeLong(nodeClock.networkTime())
+        buf.writeString(nodeProperties.protocolVersion!!)
+        buf.writeLong(clock.currentTimeMillis())
         buf.writeByte(MessageType.get(message).id.toInt())
         message.write(buf)
     }

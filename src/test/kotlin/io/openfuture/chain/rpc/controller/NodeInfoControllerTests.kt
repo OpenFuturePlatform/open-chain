@@ -35,8 +35,6 @@ class NodeInfoControllerTests : ControllerTests() {
     fun getUptimeShouldReturnApplicationUptime() {
         val expectedTimestamp = System.currentTimeMillis()
 
-        given(nodeClock.nodeTime()).willReturn(expectedTimestamp)
-
         val actualTimeStamp = webClient.get().uri("$NODE_INFO_URL/getUptime")
                 .exchange()
                 .expectStatus().isOk

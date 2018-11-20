@@ -37,7 +37,11 @@ class ChannelsHolder {
     fun send(message: Serializable, nodeInfo: NodeInfo): Boolean {
         val channelId = nodesInfo.filter { it.value == nodeInfo }.keys.firstOrNull() ?: return false
         val channel = channelGroup.firstOrNull { it.id() == channelId }
-            ?: throw NotFoundChannelException("Channel with uid: ${nodeInfo.uid} is not exist")
+
+        if (null == channel) {
+            nodesInfo.remove(channelId)
+            return false
+        }
 
         channel.writeAndFlush(message)
         return true
@@ -55,18 +59,13 @@ class ChannelsHolder {
     fun addChannel(channel: Channel, nodeInfo: NodeInfo) {
         channelGroup.add(channel)
         nodesInfo[channel.id()] = nodeInfo
-
-        log.info("Connection with ${channel.remoteAddress()} established, connections count is ${channelGroup.size}")
     }
 
     @Synchronized
     fun removeChannel(channel: Channel) {
         channelGroup.remove(channel)
         nodesInfo.remove(channel.id())
-
         channel.close()
-
-        log.info("Connection with ${channel.remoteAddress()} closed, connections count is ${channelGroup.size}")
     }
 
 }
