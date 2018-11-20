@@ -75,6 +75,8 @@ class NodeProperties(
     @field:NotNull
     var peerUnavailabilityPeriod: Long? = null,
 
+    @field:Max(10 * 1000)
+    @field:NotNull
     var expiry: Long? = null
 
 ) {
