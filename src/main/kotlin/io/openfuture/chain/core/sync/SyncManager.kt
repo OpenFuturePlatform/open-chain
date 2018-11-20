@@ -47,7 +47,7 @@ class SyncManager(
 
     @Scheduled(fixedRateString = "\${node.sync-interval}")
     fun syncBlock() {
-        if (clockSynchronizer.getStatus() != SYNCHRONIZED) {
+        if (SYNCHRONIZED != clockSynchronizer.getStatus()) {
             return
         }
 
@@ -83,7 +83,7 @@ class SyncManager(
         status = PROCESSING
         startSyncTime = clock.currentTimeMillis()
         log.debug("Set PROCESSING")
-        clearData()
+        reset()
 
         val lastBlock = blockService.getLast()
         networkApiService.poll(SyncRequestMessage(clock.currentTimeMillis(), lastBlock.hash, lastBlock.height), selectionSize)
@@ -96,8 +96,8 @@ class SyncManager(
     }
 
     fun onBlockMessage(msg: BlockMessage, action: BlockMessage.() -> Unit) {
+        action(msg)
         if (syncResult.add(msg.hash)) {
-            action(msg)
             log.debug("BLOCK ADDED ${msg.hash}")
             unlockIfSynchronized()
         }
@@ -177,10 +177,6 @@ class SyncManager(
     @Synchronized
     private fun unlockIfSynchronized(): Boolean {
         log.debug("Try to unlock")
-        log.debug("----------------------------")
-        log.debug(syncResult.toString())
-        log.debug(chainToSync.toString())
-        log.debug("----------------------------")
         if (syncResult.size == chainToSync.size && syncResult == chainToSync.map { it.hash }.toSet()) {
             status = SYNCHRONIZED
             log.debug("SYNCHRONIZED")
@@ -190,14 +186,14 @@ class SyncManager(
         return false
     }
 
-    private fun clearData() {
-        log.debug("Clearing")
+    private fun reset() {
+        log.debug("RESET")
         responses.clear()
         chainToSync.clear()
         syncResult.clear()
         nodesToAsk.clear()
     }
 
-    private fun isTimeOut(): Boolean = clock.currentTimeMillis() - startSyncTime > 30000!!
+    private fun isTimeOut(): Boolean = clock.currentTimeMillis() - startSyncTime > properties.syncInterval!!
 
 }

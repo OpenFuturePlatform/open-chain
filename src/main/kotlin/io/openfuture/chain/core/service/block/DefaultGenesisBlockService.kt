@@ -81,6 +81,7 @@ class DefaultGenesisBlockService(
     }
 
     @Transactional
+    @Synchronized
     override fun add(message: GenesisBlockMessage) {
         if (null != repository.findOneByHash(message.hash)) {
             return
