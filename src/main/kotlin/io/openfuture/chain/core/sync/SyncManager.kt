@@ -105,7 +105,7 @@ class SyncManager(
 
     @Synchronized
     private fun checkState() {
-        log.debug("LEDGER: <<< responses.size = ${responses.size}>>>")
+        log.debug("LEDGER: <<< responses.size = ${responses.flatMap { it.value }.size}>>>")
         if (threshold > responses.flatMap { it.value }.size) {
             log.debug("~~~~~~~~~~~~~NOT_SYNCHRONIZED responses.size~~~~~~~~~~~~~")
             status = NOT_SYNCHRONIZED
