@@ -23,7 +23,7 @@ class NodeProperties(
 
     /** Node communication protocol version */
     @field:NotNull
-    var version: String? = null,
+    var protocolVersion: String? = null,
 
     /** */
     @field:NotNull
@@ -73,7 +73,9 @@ class NodeProperties(
     var synchronizationResponseDelay: Long? = null,
 
     @field:NotNull
-    var peerUnavailabilityPeriod: Long? = null
+    var peerUnavailabilityPeriod: Long? = null,
+
+    var expiry: Long? = null
 
 ) {
 

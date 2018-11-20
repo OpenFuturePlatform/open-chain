@@ -27,7 +27,7 @@ class RestResponseControllerAdvice(
     override fun beforeBodyWrite(body: Any?, returnType: MethodParameter, selectedContentType: MediaType,
                                  selectedConverterType: Class<out HttpMessageConverter<*>>, request: ServerHttpRequest,
                                  response: ServerHttpResponse): RestResponse<Any?> {
-        return RestResponse(clock.currentTimeMillis(), nodeProperties.version!!, body)
+        return RestResponse(clock.currentTimeMillis(), nodeProperties.protocolVersion!!, body)
     }
 
 }
