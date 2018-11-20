@@ -3,7 +3,6 @@ package io.openfuture.chain.core.sync
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.component.time.Clock
-import io.openfuture.chain.network.component.time.ClockSynchronizer
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.core.BlockMessage
 import io.openfuture.chain.network.message.sync.SyncBlockDto
@@ -24,8 +23,7 @@ class SyncManager(
     private val clock: Clock,
     private val properties: NodeProperties,
     private val blockService: BlockService,
-    private val networkApiService: NetworkApiService,
-    private val clockSynchronizer: ClockSynchronizer
+    private val networkApiService: NetworkApiService
 ) {
 
     companion object {
@@ -47,10 +45,6 @@ class SyncManager(
 
     @Scheduled(fixedRateString = "\${node.sync-interval}")
     fun syncBlock() {
-        if (SYNCHRONIZED != clockSynchronizer.getStatus()) {
-            return
-        }
-
         if (status == PROCESSING && isTimeOut() && !unlockIfSynchronized()) {
             status = NOT_SYNCHRONIZED
         }
