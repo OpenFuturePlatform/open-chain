@@ -35,6 +35,6 @@ class ExplorerAddressesHolder {
         nodesInfo.removeIf { address == it.address }
     }
 
-    fun getRandomList(listSize: Int): List<NodeInfo> = nodesInfo.shuffled().subList(0, min(nodesInfo.size, listSize))
+    fun getRandomList(listSize: Int): List<NodeInfo> = getNodesInfo().shuffled().take(min(nodesInfo.size, listSize))
 
 }
