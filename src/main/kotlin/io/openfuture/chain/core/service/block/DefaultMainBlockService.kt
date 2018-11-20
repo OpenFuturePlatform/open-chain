@@ -117,7 +117,6 @@ class DefaultMainBlockService(
         BlockchainLock.readLock.lock()
         try {
             if (!isSync(MainBlock.of(message))) {
-                log.debug("~~~~~~~~~~~~~~~~~~~~~MAIN BLOCK SERVICE outOfSync~~~~~~~~~~~~~~~~~~~~~~~~~~")
                 syncManager.outOfSync()
                 return false
             }
@@ -144,7 +143,6 @@ class DefaultMainBlockService(
 
             val block = MainBlock.of(message)
             if (!isSync(block)) {
-                log.debug("OUT OF SYNC main block service")
                 syncManager.outOfSync()
                 return
             }
