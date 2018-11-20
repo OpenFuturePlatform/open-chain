@@ -29,10 +29,10 @@ class GreetingHandler(
         val hostAddress = (ctx.channel().remoteAddress() as InetSocketAddress).address.hostAddress
         val nodeInfo = NodeInfo(msg.uid, NetworkAddress(hostAddress, msg.externalPort))
         when {
-            channelHolder.getNodesInfo().any { it.uid == msg.uid } -> {
+            msg.uid == nodeKeyHolder.getUid() || channelHolder.getNodesInfo().any { it.uid == msg.uid } -> {
                 ctx.close()
             }
-            nodeProperties.allowedConnections < channelHolder.size() -> {
+            nodeProperties.allowedConnections!! < channelHolder.size() -> {
                 val response = GreetingResponseMessage(nodeKeyHolder.getUid(), hostAddress,
                     addressesHolder.getNodesInfo(), false)
                 ctx.writeAndFlush(response)

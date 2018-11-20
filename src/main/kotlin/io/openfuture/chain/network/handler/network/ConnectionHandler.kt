@@ -27,6 +27,7 @@ class ConnectionHandler(
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
+        log.warn("${ctx.channel().remoteAddress()} disconnected...")
         channelsHolder.removeChannel(ctx.channel())
         ctx.executor().submit { connectionService.findNewPeer() }
         super.channelInactive(ctx)
