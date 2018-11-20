@@ -90,7 +90,7 @@ class ClockSynchronizer(
     }
 
     private fun mitigate() {
-        log.error("CLOCK: Offsets size ${offsets.size}")
+        log.debug("CLOCK: Offsets size ${offsets.size}")
         if ((selectionSize * 2 / 3) > offsets.size) {
             status = NOT_SYNCHRONIZED
             return
