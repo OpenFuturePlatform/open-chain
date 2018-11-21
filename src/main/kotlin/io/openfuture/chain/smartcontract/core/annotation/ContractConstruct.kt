@@ -1,4 +1,4 @@
-package io.openfuture.chain.smartcontract.annotation
+package io.openfuture.chain.smartcontract.core.annotation
 
 @Target(AnnotationTarget.FUNCTION)
 annotation class ContractConstruct

@@ -1,4 +1,4 @@
-package io.openfuture.chain.smartcontract.utils
+package io.openfuture.chain.smartcontract.core.utils
 
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import kotlin.text.Charsets.UTF_8

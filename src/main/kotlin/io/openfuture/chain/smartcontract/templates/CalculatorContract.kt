@@ -1,7 +1,7 @@
-package io.openfuture.chain.smartcontract
+package io.openfuture.chain.smartcontract.templates
 
-import io.openfuture.chain.smartcontract.annotation.ContractMethod
-import io.openfuture.chain.smartcontract.model.SmartContract
+import io.openfuture.chain.smartcontract.core.annotation.ContractMethod
+import io.openfuture.chain.smartcontract.core.model.SmartContract
 
 class CalculatorContract() : SmartContract("") {
 

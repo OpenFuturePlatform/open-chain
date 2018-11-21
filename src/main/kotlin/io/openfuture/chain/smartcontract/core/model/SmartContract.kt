@@ -1,7 +1,7 @@
-package io.openfuture.chain.smartcontract.model
+package io.openfuture.chain.smartcontract.core.model
 
-import io.openfuture.chain.smartcontract.exception.RequiredException
-import io.openfuture.chain.smartcontract.utils.AddressUtils
+import io.openfuture.chain.smartcontract.core.exception.RequiredException
+import io.openfuture.chain.smartcontract.core.utils.AddressUtils
 
 abstract class SmartContract(ownerAddress: String) {
 

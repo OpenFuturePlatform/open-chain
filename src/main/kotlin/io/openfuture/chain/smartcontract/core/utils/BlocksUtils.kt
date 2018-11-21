@@ -1,4 +1,4 @@
-package io.openfuture.chain.smartcontract.utils
+package io.openfuture.chain.smartcontract.core.utils
 
 object BlocksUtils {
 
