@@ -27,8 +27,6 @@ class MainBlockHandler(
         syncManager.onBlockMessage(msg) {
             mainBlockService.add(msg)
         }
-
-//        ctx.channel().close()
     }
 
 }

@@ -27,8 +27,6 @@ class GenesisBlockHandler(
         syncManager.onBlockMessage(msg) {
             genesisBlockService.add(msg)
         }
-
-//        ctx.channel().close()
     }
 
 }
