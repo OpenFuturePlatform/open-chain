@@ -16,16 +16,16 @@ import io.openfuture.chain.network.server.ServerReadyEvent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationListener
+import org.springframework.context.annotation.Lazy
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
-import javax.annotation.PostConstruct
 
 @Service
 class DefaultConnectionService(
     private val clock: Clock,
-    private val bootstrap: Bootstrap,
+    @Lazy private val bootstrap: Bootstrap,
     private val nodeProperties: NodeProperties,
     private val channelHolder: ChannelsHolder,
     private val addressesHolder: AddressesHolder,

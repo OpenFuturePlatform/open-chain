@@ -24,7 +24,26 @@ import java.util.concurrent.TimeUnit
 @Component
 class ClientChannelInitializer(
     private val nodeProperties: NodeProperties,
-    private val applicationContext: ApplicationContext
+    private val applicationContext: ApplicationContext,
+    private val connectionHandler: ConnectionHandler,
+    private val heartBeatHandler: HeartBeatHandler,
+    private val greetingResponseHandler: GreetingResponseHandler,
+    private val responseTimeHandler: ResponseTimeHandler,
+    private val newClientHandler: NewClientHandler,
+    private val networkStatusHandler: NetworkStatusHandler,
+    private val delegateRequestHandler: DelegateRequestHandler,
+    private val delegateResponseHandler: DelegateResponseHandler,
+    private val hashBlockRequestHandler: HashBlockRequestHandler,
+    private val hashBlockResponseHandler: HashBlockResponseHandler,
+    private val syncBlockRequestHandler: SyncBlockRequestHandler,
+    private val mainBlockHandler: MainBlockHandler,
+    private val genesisBlockHandler: GenesisBlockHandler,
+    private val syncStatusHandler: SyncStatusHandler,
+    private val transferTransactionHandler: TransferTransactionHandler,
+    private val delegateTransactionHandler: DelegateTransactionHandler,
+    private val voteTransactionHandler: VoteTransactionHandler,
+    private val pendingBlockNetworkHandler: PendingBlockNetworkHandler,
+    private val blockApprovalHandler: BlockApprovalHandler
 ) : ChannelInitializer<Channel>() {
 
     override fun initChannel(channel: Channel) {
@@ -35,29 +54,29 @@ class ClientChannelInitializer(
 
         pipeline.addLast(
             applicationContext.getBean(MessageCodec::class.java),
-            applicationContext.getBean(ConnectionHandler::class.java),
+            connectionHandler,
             IdleStateHandler(readIdleTime, writeIdleTime, 0, TimeUnit.MILLISECONDS),
-            applicationContext.getBean(HeartBeatHandler::class.java),
-            applicationContext.getBean(GreetingResponseHandler::class.java),
-            applicationContext.getBean(ResponseTimeHandler::class.java),
-            applicationContext.getBean(NewClientHandler::class.java),
-            applicationContext.getBean(NetworkStatusHandler::class.java),
+            heartBeatHandler,
+            greetingResponseHandler,
+            responseTimeHandler,
+            newClientHandler,
+            networkStatusHandler,
             //        sync
-            applicationContext.getBean(DelegateRequestHandler::class.java),
-            applicationContext.getBean(DelegateResponseHandler::class.java),
-            applicationContext.getBean(HashBlockRequestHandler::class.java),
-            applicationContext.getBean(HashBlockResponseHandler::class.java),
-            applicationContext.getBean(SyncBlockRequestHandler::class.java),
-            applicationContext.getBean(MainBlockHandler::class.java),
-            applicationContext.getBean(GenesisBlockHandler::class.java),
-            applicationContext.getBean(SyncStatusHandler::class.java),
+            delegateRequestHandler,
+            delegateResponseHandler,
+            hashBlockRequestHandler,
+            hashBlockResponseHandler,
+            syncBlockRequestHandler,
+            mainBlockHandler,
+            genesisBlockHandler,
+            syncStatusHandler,
             //        core
-            applicationContext.getBean(TransferTransactionHandler::class.java),
-            applicationContext.getBean(DelegateTransactionHandler::class.java),
-            applicationContext.getBean(VoteTransactionHandler::class.java),
+            transferTransactionHandler,
+            delegateTransactionHandler,
+            voteTransactionHandler,
             //        consensus
-            applicationContext.getBean(PendingBlockNetworkHandler::class.java),
-            applicationContext.getBean(BlockApprovalHandler::class.java)
+            pendingBlockNetworkHandler,
+            blockApprovalHandler
         )
     }
 
