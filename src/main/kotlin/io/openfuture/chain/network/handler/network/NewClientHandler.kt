@@ -3,8 +3,9 @@ package io.openfuture.chain.network.handler.network
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
-import io.openfuture.chain.network.component.ChannelsHolder
+import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.component.AddressesHolder
+import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.message.network.NewClient
 import io.openfuture.chain.network.service.ConnectionService
 import org.springframework.stereotype.Component
@@ -14,12 +15,13 @@ import org.springframework.stereotype.Component
 class NewClientHandler(
     private val addressesHolder: AddressesHolder,
     private val channelsHolder: ChannelsHolder,
-    private val connectionService: ConnectionService
+    private val connectionService: ConnectionService,
+    private val nodeKeyHolder: NodeKeyHolder
 ) : SimpleChannelInboundHandler<NewClient>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: NewClient) {
         val nodeInfo = msg.nodeInfo
-        if (nodeInfo != addressesHolder.me && !addressesHolder.hasNodeInfo(nodeInfo)) {
+        if (nodeInfo.uid != nodeKeyHolder.getUid() && !addressesHolder.hasNodeInfo(nodeInfo)) {
             addressesHolder.addNodeInfo(nodeInfo)
             channelsHolder.broadcast(msg)
             ctx.executor().submit { connectionService.findNewPeer() }

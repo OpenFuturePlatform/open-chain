@@ -1,5 +1,6 @@
 package io.openfuture.chain.network.component
 
+import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.property.NodeProperties
@@ -8,7 +9,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class AddressesHolder(
-    private val nodeProperties: NodeProperties
+    private val nodeProperties: NodeProperties,
+    private val nodeKeyHolder: NodeKeyHolder
 ) {
 
     private val nodesInfo = ConcurrentHashMap<NodeInfo, ConnectionMark>()
@@ -29,11 +31,16 @@ class AddressesHolder(
     }
 
     fun addNodeInfo(nodeInfo: NodeInfo) {
-        this.nodesInfo[nodeInfo] = ConnectionMark()
+        val uid = nodeKeyHolder.getUid()
+        if (uid != nodeInfo.uid) {
+            this.nodesInfo[nodeInfo] = ConnectionMark()
+        }
     }
 
     fun addNodesInfo(nodesInfo: Set<NodeInfo>) {
-        this.nodesInfo.putAll(nodesInfo.associate { it to ConnectionMark() })
+        val uid = nodeKeyHolder.getUid()
+        val nodesInfoWithoutMe = nodesInfo.filter { uid != it.uid }
+        this.nodesInfo.putAll(nodesInfoWithoutMe.associate { it to ConnectionMark() })
     }
 
     fun removeNodeInfo(address: NetworkAddress) {
