@@ -20,8 +20,7 @@ class ClockSynchronizer(
     private val clock: Clock,
     private val syncState: SyncState,
     private val properties: NodeProperties,
-    private val connectionService: ConnectionService,
-    private val addressHolder: AddressesHolder
+    private val connectionService: ConnectionService
 ) {
 
     companion object {
@@ -45,8 +44,7 @@ class ClockSynchronizer(
             }
             offsets.clear()
 
-            val addresses = addressHolder.getRandomList(selectionSize).asSequence().map { it.address }.toSet()
-            connectionService.sendTimeSyncRequest(addresses)
+            connectionService.sendTimeSyncRequest()
         } finally {
             lock.writeLock().unlock()
 

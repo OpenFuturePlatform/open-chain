@@ -34,9 +34,9 @@ class ServerChannelInitializer(
         val pipeline = ch.pipeline()
 
         pipeline.addLast(
-            applicationContext.getBean(MessageCodec::class.java),
-            applicationContext.getBean(ConnectionHandler::class.java),
             IdleStateHandler(readIdleTime, writeIdleTime, 0, TimeUnit.MILLISECONDS),
+            applicationContext.getBean(ConnectionHandler::class.java),
+            applicationContext.getBean(MessageCodec::class.java),
             applicationContext.getBean(HeartBeatHandler::class.java),
             applicationContext.getBean(GreetingHandler::class.java),
             applicationContext.getBean(RequestTimeHandler::class.java),

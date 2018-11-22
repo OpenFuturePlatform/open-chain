@@ -14,7 +14,7 @@ class AddressesHolder(
 ) {
 
     private val nodesInfo = ConcurrentHashMap<NodeInfo, ConnectionMark>()
-    var me: NodeInfo? = null
+    private var me: NodeInfo? = null
 
 
     class ConnectionMark(
@@ -44,8 +44,7 @@ class AddressesHolder(
     }
 
     fun removeNodeInfo(address: NetworkAddress) {
-        //TODO remove correctly
-        nodesInfo.keys.removeIf { address == it.address }
+        nodesInfo.entries.removeIf { address == it.key.address }
     }
 
     fun getRandomList(listSize: Int = nodesInfo.size, connectedPeers: List<NodeInfo> = emptyList()): List<NodeInfo> {
@@ -62,7 +61,17 @@ class AddressesHolder(
 
     fun hasNodeInfo(nodeInfo: NodeInfo): Boolean = this.nodesInfo.containsKey(nodeInfo)
 
+    fun isRejected(address: NetworkAddress): Boolean {
+        this.nodesInfo.entries.find { it.key.address == address }?.let {
+            return it.value.rejected
+        }
+        return me?.address == address
+    }
+
     fun markRejected(nodeInfo: NodeInfo) {
+        if (nodeKeyHolder.getUid() == nodeInfo.uid) {
+            me = nodeInfo
+        }
         val mark = nodesInfo[nodeInfo] ?: return
         mark.rejected = true
         mark.timestamp = System.currentTimeMillis()

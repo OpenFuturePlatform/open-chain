@@ -24,7 +24,7 @@ class NewClientHandler(
         if (nodeInfo.uid != nodeKeyHolder.getUid() && !addressesHolder.hasNodeInfo(nodeInfo)) {
             addressesHolder.addNodeInfo(nodeInfo)
             channelsHolder.broadcast(msg)
-            ctx.executor().submit { connectionService.findNewPeer() }
+            connectionService.findNewPeer()
         }
     }
 

@@ -1,6 +1,7 @@
 package io.openfuture.chain.network.service
 
 import io.netty.channel.Channel
+import io.netty.channel.ChannelFuture
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.serialization.Serializable
@@ -25,9 +26,9 @@ interface NetworkApiService {
 
 interface ConnectionService {
 
-    fun connect(networkAddress: NetworkAddress, onConnect: Consumer<Channel>? = null)
+    fun connect(networkAddress: NetworkAddress, onConnect: Consumer<Channel>? = null): ChannelFuture
 
-    fun sendTimeSyncRequest(addresses: Set<NetworkAddress>)
+    fun sendTimeSyncRequest()
 
     fun findNewPeer()
 

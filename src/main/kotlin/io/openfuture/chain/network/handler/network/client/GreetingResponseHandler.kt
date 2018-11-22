@@ -27,14 +27,18 @@ class GreetingResponseHandler(
         val socket = channel.remoteAddress() as InetSocketAddress
 
         config.setExternalHost(msg.externalHost)
+        val address = NetworkAddress(socket.address.hostAddress, socket.port)
+        val nodeInfo = NodeInfo(msg.uid, address)
         if (msg.accepted) {
-            val address = NetworkAddress(socket.address.hostAddress, socket.port)
-            channelHolder.addChannel(channel, NodeInfo(msg.uid, address))
+            if (channelHolder.getNodesInfo().any { it == nodeInfo }) {
+                ctx.close()
+            }
+            channelHolder.addChannel(channel, nodeInfo)
         } else {
-            // TODO reject
+            addressesHolder.markRejected(nodeInfo)
         }
         addressesHolder.addNodesInfo(msg.nodesInfo)
-        ctx.executor().submit { connectionService.findNewPeer() }
+        connectionService.findNewPeer()
     }
 
 }

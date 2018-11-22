@@ -14,7 +14,8 @@ data class GreetingResponseMessage(
     var uid: String,
     var externalHost: String,
     var nodesInfo: Set<NodeInfo>,
-    var accepted: Boolean = true
+    var accepted: Boolean = true,
+    var loop: Boolean = false
 ) : Serializable {
 
     override fun read(buf: ByteBuf) {
@@ -22,6 +23,7 @@ data class GreetingResponseMessage(
         externalHost = buf.readString()
         nodesInfo = buf.readSet()
         accepted = buf.readBoolean()
+        loop = buf.readBoolean()
     }
 
     override fun write(buf: ByteBuf) {
@@ -29,6 +31,7 @@ data class GreetingResponseMessage(
         buf.writeString(externalHost)
         buf.writeSet(nodesInfo)
         buf.writeBoolean(accepted)
+        buf.writeBoolean(loop)
     }
 
 }

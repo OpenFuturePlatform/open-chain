@@ -20,7 +20,6 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
-import javax.annotation.PostConstruct
 
 @Service
 class DefaultConnectionService(
@@ -42,8 +41,8 @@ class DefaultConnectionService(
         findNewPeer()
     }
 
-    override fun connect(networkAddress: NetworkAddress, onConnect: Consumer<Channel>?) {
-        bootstrap.connect(networkAddress.host, networkAddress.port).addListener { future ->
+    override fun connect(networkAddress: NetworkAddress, onConnect: Consumer<Channel>?): ChannelFuture {
+        return bootstrap.connect(networkAddress.host, networkAddress.port).addListener { future ->
             if (future.isSuccess) {
                 onConnect?.let {
                     val channel = (future as ChannelFuture).channel()
@@ -53,11 +52,13 @@ class DefaultConnectionService(
                 log.warn("Can not connect to ${networkAddress.host}:${networkAddress.port}")
                 addressesHolder.removeNodeInfo(networkAddress)
             }
-            return@addListener
-        }.await(3, TimeUnit.SECONDS)
+        }.sync()
     }
 
-    override fun sendTimeSyncRequest(addresses: Set<NetworkAddress>) {
+    override fun sendTimeSyncRequest() {
+        val addresses = addressesHolder
+            .getRandomList(nodeProperties.getRootAddresses().size)
+            .map { it.address }
         addresses.forEach { networkAddress ->
             connect(networkAddress, Consumer {
                 val message = RequestTimeMessage(clock.currentTimeMillis())
@@ -66,51 +67,54 @@ class DefaultConnectionService(
         }
     }
 
+    @Synchronized
     override fun findNewPeer() {
         if (nodeProperties.peersNumber!! <= channelHolder.size()) {
             return
         }
         if (addressesHolder.size() <= nodeProperties.peersNumber!!) {
-            while(!findBootNode() && nodeProperties.peersNumber!! <= channelHolder.size()) {
-                log.info("Unable to find boot peer. Waiting...")
-                Thread.sleep(3000)
+            while (!findBootNode()) {
+                log.warn("Unable to find boot peer. Retry...")
+                TimeUnit.SECONDS.sleep(3)
             }
             return
         }
         findRegularPeer()
     }
 
-    private fun findRegularPeer() {
+    private fun findBootNode(): Boolean {
+        val connectedPeers = channelHolder.getNodesInfo().map { it.address }
+        for (bootAddress in nodeProperties.getRootAddresses().minus(connectedPeers)) {
+            if (addressesHolder.isRejected(bootAddress)) {
+                continue
+            }
+            val channelFuture = connect(bootAddress, Consumer {
+                greet(it, bootAddress)
+            })
+            if (channelFuture.isSuccess) return true
+        }
+        return false
+    }
+
+    private fun findRegularPeer(): Boolean {
         var connected = false
         val knownPeers = channelHolder.getNodesInfo().toMutableList()
         for (i in 0 until addressesHolder.size()) {
-            val peer = addressesHolder.getRandom(connectedPeers = channelHolder.getNodesInfo())
+            val peer = addressesHolder.getRandom(channelHolder.getNodesInfo())
             connect(peer.address, Consumer {
-                val message = GreetingMessage(config.getConfig().externalPort, nodeKeyHolder.getUid())
-                it.writeAndFlush(message)
-                log.info("Connected to ${peer.address.host}:${peer.address.port}")
-                connected = true
-            })
-            if (connected) {
-                break
-            }
-            knownPeers.add(peer)
-        }
-    }
-
-    private fun findBootNode(): Boolean {
-        var connected = false
-        val connectedPeers = channelHolder.getNodesInfo().map { it.address }
-        for (bootAddress in nodeProperties.getRootAddresses().minus(connectedPeers)) {
-            connect(bootAddress, Consumer {
-                val message = GreetingMessage(config.getConfig().externalPort, nodeKeyHolder.getUid())
-                it.writeAndFlush(message)
-                log.info("Connected to ${bootAddress.host}:${bootAddress.port}")
-                connected = true
+                connected = greet(it, peer.address)
             })
             if (connected) return true
+            knownPeers.add(peer)
         }
         return false
+    }
+
+    private fun greet(channel: Channel, address: NetworkAddress): Boolean {
+        log.info("Connected to ${address.host}:${address.port}")
+        val message = GreetingMessage(config.getConfig().externalPort, nodeKeyHolder.getUid())
+        channel.writeAndFlush(message)
+        return true
     }
 
     @Scheduled(fixedRateString = "\${node.peer-unavailability-period}")
