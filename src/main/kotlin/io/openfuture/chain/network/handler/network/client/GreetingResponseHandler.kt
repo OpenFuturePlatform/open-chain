@@ -9,6 +9,7 @@ import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.network.GreetingResponseMessage
+import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.ConnectionService
 import org.springframework.stereotype.Component
 import java.net.InetSocketAddress
@@ -19,7 +20,8 @@ class GreetingResponseHandler(
     private val config: NodeConfigurator,
     private val channelHolder: ChannelsHolder,
     private val addressesHolder: AddressesHolder,
-    private val connectionService: ConnectionService
+    private val connectionService: ConnectionService,
+    private val nodeProperties: NodeProperties
 ) : SimpleChannelInboundHandler<GreetingResponseMessage>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: GreetingResponseMessage) {
@@ -35,7 +37,11 @@ class GreetingResponseHandler(
             }
             channelHolder.addChannel(channel, nodeInfo)
         } else {
-            addressesHolder.markRejected(nodeInfo)
+            if (msg.loop) {
+                nodeProperties.setMyself(nodeInfo)
+            } else {
+                addressesHolder.markRejected(nodeInfo)
+            }
         }
         addressesHolder.addNodesInfo(msg.nodesInfo)
         connectionService.findNewPeer()

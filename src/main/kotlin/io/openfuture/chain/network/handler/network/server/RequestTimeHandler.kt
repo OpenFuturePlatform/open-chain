@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 @Sharable
 class RequestTimeHandler(
-    var clock: Clock
+    private val clock: Clock
 ) : SimpleChannelInboundHandler<RequestTimeMessage>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: RequestTimeMessage) {

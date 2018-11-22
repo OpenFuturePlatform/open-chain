@@ -14,7 +14,6 @@ class AddressesHolder(
 ) {
 
     private val nodesInfo = ConcurrentHashMap<NodeInfo, ConnectionMark>()
-    private var me: NodeInfo? = null
 
 
     private class ConnectionMark(
@@ -61,13 +60,10 @@ class AddressesHolder(
         this.nodesInfo.entries.find { it.key.address == address }?.let {
             return it.value.rejected
         }
-        return me?.address == address
+        return false
     }
 
     fun markRejected(nodeInfo: NodeInfo) {
-        if (nodeKeyHolder.getUid() == nodeInfo.uid) {
-            me = nodeInfo
-        }
         val mark = nodesInfo[nodeInfo] ?: return
         mark.rejected = true
         mark.timestamp = System.currentTimeMillis()

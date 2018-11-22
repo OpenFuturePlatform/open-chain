@@ -7,8 +7,6 @@ import io.netty.util.concurrent.GlobalEventExecutor
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.exception.NotFoundChannelException
 import io.openfuture.chain.network.serialization.Serializable
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 
@@ -59,7 +57,6 @@ class ChannelsHolder {
 
     @Synchronized
     fun removeChannel(channel: Channel) {
-        channelGroup.remove(channel)
         nodesInfo.remove(channel.id())
         channel.close()
     }

@@ -1,6 +1,7 @@
 package io.openfuture.chain.network.property
 
 import io.openfuture.chain.network.entity.NetworkAddress
+import io.openfuture.chain.network.entity.NodeInfo
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
@@ -82,16 +83,28 @@ class NodeProperties(
 ) {
 
     var allowedConnections: Int? = null
-
+    private var me: NodeInfo? = null
+    private var rootNetworkAddresses = mutableSetOf<NetworkAddress>()
 
     @PostConstruct
     private fun init() {
         allowedConnections = peersNumber!! * 2
+
+        rootNetworkAddresses = rootNodes.map {
+            val addressParts = it.split(':')
+            NetworkAddress(addressParts[0], addressParts[1].toInt())
+        }.toMutableSet()
     }
 
-    fun getRootAddresses(): Set<NetworkAddress> = rootNodes.map {
-        val addressParts = it.split(':')
-        NetworkAddress(addressParts[0], addressParts[1].toInt())
-    }.toSet()
+    fun getRootAddresses(): Set<NetworkAddress> = rootNetworkAddresses
+
+    fun setMyself(nodeInfo: NodeInfo) {
+        me = nodeInfo
+        rootNetworkAddresses.remove(me!!.address)
+    }
+
+    fun getMe(): NodeInfo? {
+        return me
+    }
 
 }

@@ -4,7 +4,6 @@ import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
-import io.netty.util.concurrent.GenericFutureListener
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.component.ChannelsHolder
@@ -47,7 +46,7 @@ class GreetingHandler(
         } else {
             log.info("Rejected connection from ${ctx.channel().remoteAddress()} (Tachka ${msg.externalPort})")
             response.accepted = false
-            response.loop = msg.uid != nodeKeyHolder.getUid()
+            response.loop = (msg.uid == nodeKeyHolder.getUid())
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE)
         }
     }
