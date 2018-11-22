@@ -30,8 +30,12 @@ class SourceClassLoader(
     override fun loadClass(name: String): Class<*> = loadClass(name, false)
 
     override fun loadClass(name: String, resolve: Boolean): Class<*> {
-        //todo validate
-        return super.loadClass(name, resolve)
+        try {
+            //todo validate
+            return super.loadClass(name, resolve)
+        } catch (ex: Throwable) {
+            throw ClassLoadingException(ex.message, ex)
+        }
     }
 
     override fun findClass(name: String): Class<*> {
