@@ -1,11 +1,12 @@
 package io.openfuture.chain.smartcontract.deploy.load
 
-import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
 import io.openfuture.chain.smartcontract.deploy.domain.ClassSource.Companion.isClass
 import io.openfuture.chain.smartcontract.deploy.domain.LoadedClass
 import io.openfuture.chain.smartcontract.deploy.exception.ClassLoadingException
 import io.openfuture.chain.smartcontract.deploy.utils.asResourcePath
 import io.openfuture.chain.smartcontract.deploy.utils.toURL
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.URL
@@ -19,37 +20,40 @@ class SourceClassLoader(
     paths: List<Path> = emptyList()
 ) : URLClassLoader(resolvePaths(paths), getSystemClassLoader()) {
 
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(SourceClassLoader::class.java)
+    }
+
     private val classes: MutableMap<String, LoadedClass> = mutableMapOf()
 
 
     override fun loadClass(name: String): Class<*> = loadClass(name, false)
 
-    override fun loadClass(name: String?, resolve: Boolean): Class<*> {
+    override fun loadClass(name: String, resolve: Boolean): Class<*> {
         //todo validate
         return super.loadClass(name, resolve)
     }
 
     override fun findClass(name: String): Class<*> {
         val loadedClass = classes[name]
-        if (null == loadedClass) {
-            val bytes = readClassBytes(name)
-            val clazz = loadBytes(name, bytes).clazz
-            classes[name] = LoadedClass(clazz, bytes)
-            resolveClass(clazz)
-            return clazz
+        if (null != loadedClass) {
+            log.trace("Class $name already loaded")
+            return loadedClass.clazz
         }
 
-        return loadedClass.clazz
+        val bytes = readClassBytes(name)
+        val clazz = loadBytes(name, bytes).clazz
+        classes[name] = LoadedClass(clazz, bytes)
+//        resolveClass(clazz)
+        return clazz
     }
 
-    fun loadBytes(className: String, bytes: ByteArray): LoadedClass =
-        LoadedClass(defineClass(className, bytes, 0, bytes.size), bytes)
-
-    // Load class by path todo: check is class
-    fun loadClassFromPath(source: ClassSource): LoadedClass {
-        addURL(source.path.parent.toURL())
-        loadClass(source.name)
-        return classes[source.name]!!
+    fun loadBytes(className: String, bytes: ByteArray): LoadedClass {
+        try {
+            return LoadedClass(defineClass(className, bytes, 0, bytes.size), bytes)
+        } catch (ex: Throwable) {
+            throw ClassLoadingException(ex.message, ex)
+        }
     }
 
     private fun readClassBytes(fullyQualifiedClassName: String): ByteArray {
