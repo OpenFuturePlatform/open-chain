@@ -13,6 +13,7 @@ VALUES (1, 1);
 INSERT INTO wallets (id, address, balance)
 VALUES (1, '0x0000000000000000000000000000000000000000', 10000000000000000);
 
+
 INSERT INTO delegates (id, public_key, node_id, address, host, port, registration_date)
 VALUES (1, '02b04aa1832e799503000a6b8da1cdbb737c167fc829472c726a12ad9a4ccf24eb',
        'e1980f62f593c33d293a3c40e1a23d4624ebd2efaa7e0e4ab6251c55890d8f68',

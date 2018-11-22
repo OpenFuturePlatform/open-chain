@@ -17,16 +17,12 @@ class AddressesHolder(
     private var me: NodeInfo? = null
 
 
-    class ConnectionMark(
+    private class ConnectionMark(
         var rejected: Boolean = false,
         var timestamp: Long = System.currentTimeMillis()
     )
 
-    fun getNodesInfo(excludeMe: Boolean = true): Set<NodeInfo> {
-        if (excludeMe) {
-            me?.let { return nodesInfo.filter { entry-> entry.key.uid != it.uid }.keys }
-        }
-
+    fun getNodesInfo(): Set<NodeInfo> {
         return nodesInfo.keys
     }
 
