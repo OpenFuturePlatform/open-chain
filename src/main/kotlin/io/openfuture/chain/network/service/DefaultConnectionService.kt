@@ -107,16 +107,14 @@ class DefaultConnectionService(
     }
 
     private fun findRegularPeer(): Boolean {
-        val knownPeers = channelHolder.getNodesInfo().toMutableList()
-        for (i in 0 until addressesHolder.size()) {
-            val peer = addressesHolder.getRandom(channelHolder.getNodesInfo())
+        val knownPeers = channelHolder.getNodesInfo()
+        for (peer in addressesHolder.getRandomList(connectedPeers = knownPeers)) {
             if (!addressesHolder.isRejected(peer.address)) {
                 val channelFuture = connect(peer.address, Consumer {
                     greet(it, peer.address)
                 })
                 if (channelFuture) return true
             }
-            knownPeers.add(peer)
         }
         return false
     }
