@@ -47,7 +47,7 @@ class ChannelsHolder {
 
     fun getNodesInfo(): List<NodeInfo> = channelGroup.map { nodesInfo[it.id()]!! }
 
-    fun getNodeInfoByChannelId(channelId: ChannelId): NodeInfo = nodesInfo[channelId]!!
+    fun getNodeInfoByChannelId(channelId: ChannelId): NodeInfo? = nodesInfo[channelId]
 
     @Synchronized
     fun addChannel(channel: Channel, nodeInfo: NodeInfo) {
@@ -58,6 +58,7 @@ class ChannelsHolder {
     @Synchronized
     fun removeChannel(channel: Channel) {
         nodesInfo.remove(channel.id())
+        channelGroup.remove(channel)
         channel.close()
     }
 

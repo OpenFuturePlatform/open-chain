@@ -60,7 +60,7 @@ class AddressesHolder(
         this.nodesInfo.entries.find { it.key.address == address }?.let {
             return it.value.rejected
         }
-        return false
+        return nodeProperties.getMe()?.address == address
     }
 
     fun markRejected(nodeInfo: NodeInfo) {

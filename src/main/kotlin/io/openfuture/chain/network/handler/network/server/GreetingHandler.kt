@@ -4,6 +4,7 @@ import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
+import io.netty.util.concurrent.GenericFutureListener
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.component.ChannelsHolder
@@ -37,23 +38,24 @@ class GreetingHandler(
         val nodeInfo = NodeInfo(msg.uid, NetworkAddress(hostAddress, msg.externalPort))
         val nodesInfo = addressesHolder.getNodesInfo()
         val response = GreetingResponseMessage(nodeKeyHolder.getUid(), hostAddress, nodesInfo)
-        if (isConnectionAcceptable(msg)) {
+        if (isConnectionAcceptable(nodeInfo)) {
             log.info("Accepted connection from ${ctx.channel().remoteAddress()} (Tachka ${msg.externalPort})")
-            ctx.writeAndFlush(response)
             addressesHolder.addNodeInfo(nodeInfo)
             channelHolder.addChannel(ctx.channel(), nodeInfo)
             channelHolder.broadcast(NewClient(nodeInfo))
+            ctx.writeAndFlush(response)
         } else {
             log.info("Rejected connection from ${ctx.channel().remoteAddress()} (Tachka ${msg.externalPort})")
+            log.info("Is known: ${channelHolder.getNodesInfo().joinToString { it.address.port.toString() }} | ${channelHolder.size()})")
             response.accepted = false
             response.loop = (msg.uid == nodeKeyHolder.getUid())
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE)
         }
     }
 
-    private fun isConnectionAcceptable(msg: GreetingMessage): Boolean {
-        return msg.uid != nodeKeyHolder.getUid()
-            && !channelHolder.getNodesInfo().any { it.uid != msg.uid }
+    private fun isConnectionAcceptable(nodeInfo: NodeInfo): Boolean {
+        return nodeInfo.uid != nodeKeyHolder.getUid()
+            && !channelHolder.getNodesInfo().any { it == nodeInfo }
             && nodeProperties.allowedConnections!! > channelHolder.size()
     }
 }

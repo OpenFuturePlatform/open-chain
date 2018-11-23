@@ -24,7 +24,11 @@ class HeartBeatHandler(
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: HeartBeatMessage) {
-        //log.info("Received heartbeat message from ${ctx.channel().remoteAddress()}")
+        if (null != channelsHolder.getNodeInfoByChannelId(ctx.channel().id())) {
+            log.info("Received heartbeat message from ${ctx.channel().remoteAddress()}")
+        } else {
+            log.info("Unknown heartbeat from ${ctx.channel().remoteAddress()}")
+        }
     }
 
     override fun userEventTriggered(ctx: ChannelHandlerContext, event: Any) {
@@ -32,14 +36,12 @@ class HeartBeatHandler(
             super.userEventTriggered(ctx, event)
             return
         }
-
-
-        log.info("Fired idle event from ${ctx.channel().remoteAddress()}. Event - ${event::class.java.simpleName} with state ${event.state()}")
+        //log.info("Idle event inbound to ${ctx.channel().remoteAddress()}")
 
         val eventState = event.state()
         if (READER_IDLE == eventState) {
             channelsHolder.removeChannel(ctx.channel())
-        } else if (WRITER_IDLE == eventState) {
+        } else if (WRITER_IDLE == eventState && null != channelsHolder.getNodeInfoByChannelId(ctx.channel().id())) {
             //log.info("Sending heartbeat message to ${ctx.channel().remoteAddress()}")
             ctx.writeAndFlush(HeartBeatMessage())
                 .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)

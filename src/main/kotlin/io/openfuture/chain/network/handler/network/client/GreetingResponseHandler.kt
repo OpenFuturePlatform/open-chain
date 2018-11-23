@@ -32,9 +32,6 @@ class GreetingResponseHandler(
         val address = NetworkAddress(socket.address.hostAddress, socket.port)
         val nodeInfo = NodeInfo(msg.uid, address)
         if (msg.accepted) {
-            if (channelHolder.getNodesInfo().any { it == nodeInfo }) {
-                ctx.close()
-            }
             channelHolder.addChannel(channel, nodeInfo)
         } else {
             if (msg.loop) {

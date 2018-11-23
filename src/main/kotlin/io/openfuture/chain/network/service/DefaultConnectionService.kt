@@ -19,6 +19,8 @@ import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Lazy
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
@@ -37,23 +39,30 @@ class DefaultConnectionService(
         private val log: Logger = LoggerFactory.getLogger(DefaultConnectionService::class.java)
     }
 
+    private val executor: ExecutorService = Executors.newSingleThreadExecutor()
+
 
     override fun onApplicationEvent(event: ServerReadyEvent) {
         findNewPeer()
     }
 
-    override fun connect(networkAddress: NetworkAddress, onConnect: Consumer<Channel>?): ChannelFuture {
-        return bootstrap.connect(networkAddress.host, networkAddress.port).addListener { future ->
-            if (future.isSuccess) {
-                onConnect?.let {
-                    val channel = (future as ChannelFuture).channel()
-                    it.accept(channel)
+    override fun connect(networkAddress: NetworkAddress, onConnect: Consumer<Channel>?): Boolean {
+        return try {
+            bootstrap.connect(networkAddress.host, networkAddress.port).addListener { future ->
+                if (future.isSuccess) {
+                    onConnect?.let {
+                        val channel = (future as ChannelFuture).channel()
+                        it.accept(channel)
+                    }
+                } else {
+                    log.warn("Can not connect to ${networkAddress.host}:${networkAddress.port}")
+                    addressesHolder.removeNodeInfo(networkAddress)
                 }
-            } else {
-                log.warn("Can not connect to ${networkAddress.host}:${networkAddress.port}")
-                addressesHolder.removeNodeInfo(networkAddress)
-            }
-        }.sync()
+            }.sync()
+            true
+        } catch (ex: Exception) {
+            false
+        }
     }
 
     override fun sendTimeSyncRequest() {
@@ -68,51 +77,52 @@ class DefaultConnectionService(
         }
     }
 
-    @Synchronized
     override fun findNewPeer() {
-        if (nodeProperties.peersNumber!! <= channelHolder.size()) {
-            return
+        if (nodeProperties.peersNumber!! > channelHolder.size()) {
+            executor.execute { findNewPeer0() }
         }
+    }
+
+    private fun findNewPeer0() {
+        log.info("Searching new peers ${channelHolder.getNodesInfo().joinToString { it.address.port.toString() }} | ${channelHolder.size()}")
         if (addressesHolder.size() <= nodeProperties.peersNumber!!) {
-            while (!findBootNode()) {
+            while (!findBootNode() && nodeProperties.peersNumber!! > channelHolder.size()) {
                 log.warn("Unable to find boot peer. Retry...")
                 TimeUnit.SECONDS.sleep(3)
             }
-            return
+        } else {
+            findRegularPeer()
         }
-        findRegularPeer()
     }
 
     private fun findBootNode(): Boolean {
         val connectedPeers = channelHolder.getNodesInfo().map { it.address }
         for (bootAddress in nodeProperties.getRootAddresses().minus(connectedPeers)) {
-            if (addressesHolder.isRejected(bootAddress)) {
-                continue
-            }
             val channelFuture = connect(bootAddress, Consumer {
                 greet(it, bootAddress)
             })
-            if (channelFuture.isSuccess) return true
+            if (channelFuture) return true
         }
         return false
     }
 
     private fun findRegularPeer(): Boolean {
-        var connected = false
         val knownPeers = channelHolder.getNodesInfo().toMutableList()
         for (i in 0 until addressesHolder.size()) {
             val peer = addressesHolder.getRandom(channelHolder.getNodesInfo())
-            connect(peer.address, Consumer {
-                connected = greet(it, peer.address)
-            })
-            if (connected) return true
+            if (!addressesHolder.isRejected(peer.address)) {
+                val channelFuture = connect(peer.address, Consumer {
+                    greet(it, peer.address)
+                })
+                if (channelFuture) return true
+            }
             knownPeers.add(peer)
         }
         return false
     }
 
     private fun greet(channel: Channel, address: NetworkAddress): Boolean {
-        log.info("Connected to ${address.host}:${address.port}")
+        log.info("Sent greeting to ${address.host}:${address.port}")
         val message = GreetingMessage(config.getConfig().externalPort, nodeKeyHolder.getUid())
         channel.writeAndFlush(message)
         return true

@@ -5,6 +5,7 @@ import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.serialization.Serializable
 import org.springframework.stereotype.Service
+import java.util.function.Consumer
 
 @Service
 class DefaultNetworkApiService(
@@ -27,8 +28,9 @@ class DefaultNetworkApiService(
 
     override fun sendToAddress(message: Serializable, nodeInfo: NodeInfo) {
         if (!channelsHolder.send(message, nodeInfo)) {
-            connectionService.connect(nodeInfo.address)
-            channelsHolder.send(message, nodeInfo)
+            connectionService.connect(nodeInfo.address, Consumer {
+                it.writeAndFlush(message)
+            })
         }
     }
 
