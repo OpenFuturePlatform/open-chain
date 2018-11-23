@@ -13,14 +13,14 @@ import javax.validation.constraints.*
 @ConfigurationProperties(value = "node")
 class NodeProperties(
 
-    /** Node server port */
-    @field:NotNull
-    var port: Int? = null,
-
     /** Root nodes list */
     @field:NotEmpty
     @field:Size(min = 1, max = 21)
     var rootNodes: List<String> = emptyList(),
+
+    /** Node server port */
+    @field:NotNull
+    var port: Int? = null,
 
     /** Node communication protocol version */
     @field:NotNull
@@ -103,8 +103,6 @@ class NodeProperties(
         rootNetworkAddresses.remove(me!!.address)
     }
 
-    fun getMe(): NodeInfo? {
-        return me
-    }
+    fun getMe(): NodeInfo? = me
 
 }
