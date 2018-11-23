@@ -10,14 +10,6 @@ abstract class SmartContract(ownerAddress: String) {
     protected var address: Address = Address(AddressUtils.generateContractAddress(ownerAddress, "0"))
 
 
-    protected fun transfer(address: String, amount: Long) {
-        transfer(Address(address), amount)
-    }
-
-    protected fun transfer(address: Address, amount: Long) {
-        TODO()
-    }
-
     protected fun required(value: Boolean, message: String? = null) {
         if (!value) {
             throw RequiredException(message)
