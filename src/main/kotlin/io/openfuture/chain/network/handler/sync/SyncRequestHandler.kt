@@ -37,9 +37,10 @@ class SyncRequestHandler(
             return
         }
 
-        val blocksAfter = blockService.getAfterCurrentHash(msg.lastBlockHash).map { SyncBlockDto(it.height, it.hash) }
-        ctx.writeAndFlush(SyncResponseMessage(clock.currentTimeMillis(), blocksAfter))
-        log.debug("REQUEST from ${ctx.channel().remoteAddress()} handled: send ${blocksAfter.size}-[${blocksAfter.map { it.height }}]")
+        val lastBlocks = blockService.getAfterCurrentHashAndLast30Blocks(msg.lastBlockHash).map { SyncBlockDto(it.height, it.hash) }
+//        val blocksAfter = blockService.getAfterCurrentHash(msg.lastBlockHash).map { SyncBlockDto(it.height, it.hash) }
+        ctx.writeAndFlush(SyncResponseMessage(clock.currentTimeMillis(), lastBlocks))
+        log.debug("REQUEST from ${ctx.channel().remoteAddress()} handled: send ${lastBlocks.size}-[${lastBlocks.map { it.height }}]")
 //        ctx.channel().close()
     }
 
