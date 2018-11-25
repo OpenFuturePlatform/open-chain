@@ -51,14 +51,13 @@ class ClockSynchronizer(
         } finally {
             lock.writeLock().unlock()
 
-//            Thread.sleep(properties.expiry!!)
-
             waitResponseMessages(addresses.size, properties.expiry!!)
             mitigate()
         }
     }
 
     fun add(msg: ResponseTimeMessage, destinationTime: Long) {
+        log.debug("clock response")
         lock.writeLock().lock()
         try {
             if (isExpired(msg, destinationTime)) {
@@ -137,6 +136,6 @@ class ClockSynchronizer(
     private fun isExpired(msg: ResponseTimeMessage, destinationTime: Long): Boolean =
         properties.expiry!! < Math.abs(destinationTime.minus(msg.originalTime))
 
-    private fun isOutOfBound(offset: Long): Boolean = deviation.get() < Math.abs(offset)
+    private fun isOutOfBound(offset: Long): Boolean = 20 < Math.abs(offset)
 
 }

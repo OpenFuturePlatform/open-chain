@@ -23,8 +23,8 @@ import org.springframework.stereotype.Component
 @Component
 @Scope(SCOPE_PROTOTYPE)
 class MessageDecoder(
-    private val nodeProperties: NodeProperties,
-    private val clock: Clock
+        private val nodeProperties: NodeProperties,
+        private val clock: Clock
 ) : ReplayingDecoder<Nothing>() {
 
     companion object {
@@ -46,7 +46,7 @@ class MessageDecoder(
 
         message.read(buf)
 
-        if(message is MainBlockMessage || message is GenesisBlockMessage){
+        if (message is MainBlockMessage || message is GenesisBlockMessage) {
             out.add(message)
             return
         }
@@ -57,14 +57,14 @@ class MessageDecoder(
         }
 
         log.trace("Decoded ${ToStringBuilder.reflectionToString(message, SHORT_PREFIX_STYLE)} " +
-                    "from ${ctx.channel().remoteAddress()}"
+                "from ${ctx.channel().remoteAddress()}"
         )
 
         out.add(message)
     }
 
     private fun isExpired(message: Serializable, originTime: Long): Boolean {
-        if (message is RequestTimeMessage || message is  ResponseTimeMessage) {
+        if (message is RequestTimeMessage || message is ResponseTimeMessage) {
             return false
         }
 

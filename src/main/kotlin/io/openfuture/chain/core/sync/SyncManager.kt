@@ -124,35 +124,37 @@ class SyncManager(
         val nodeToAsk = nodesToAsk.first()
 
         log.debug("CHAIN: size=${chainToSync.size} ${chainToSync.map { it.height }.toList()}")
-        log.debug("Node to ask = $nodeToAsk")
+        log.debug("Node to ask = ${nodeToAsk.address}")
         networkApiService.sendToAddress(SyncBlockRequestMessage(blockService.getLast().hash), nodeToAsk)
     }
 
     private fun findSubCommonChainAnswer(firstPopular: Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>): Boolean {
-        var diff = 0
+
+        var diff: Int = 0
         val secondPopular = responses.filter { it.key != firstPopular.key }.maxBy { it.value.size }!!
 
-        val maxHeightSeq = firstPopular.key.maxBy { it.height }!!.height
-        val maxHeightSeq2 = secondPopular.key.maxBy { it.height }!!.height
+        val maxHeightSeq = firstPopular.key.first().height
+        val maxHeightSeq2 = secondPopular.key.first().height
 
         if (maxHeightSeq > maxHeightSeq2) {
             diff = (maxHeightSeq - maxHeightSeq2).toInt()
-            if (firstPopular.key.drop(diff) == secondPopular.key.dropLast(diff) && threshold < firstPopular.value.size + secondPopular.value.size) {
+            if (firstPopular.key.drop(diff) == secondPopular.key.dropLast(diff) && isMoreThreshold(firstPopular, secondPopular)) {
                 nodesToAsk.addAll(firstPopular.value)
                 chainToSync.addAll(firstPopular.key)
                 return true
             }
         } else if (maxHeightSeq < maxHeightSeq2) {
             diff = (maxHeightSeq2 - maxHeightSeq).toInt()
-            if (secondPopular.key.drop(diff) == firstPopular.key.dropLast(diff) && threshold < firstPopular.value.size + secondPopular.value.size) {
+            if (secondPopular.key.drop(diff) == firstPopular.key.dropLast(diff) && isMoreThreshold(firstPopular, secondPopular)) {
                 nodesToAsk.addAll(firstPopular.value)
                 chainToSync.addAll(firstPopular.key)
                 return true
             }
         }
         return false
-
     }
+
+    fun isMoreThreshold(first: Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>, second: Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>): Boolean = threshold <= first.value.size + second.value.size
 
     //todo checks & simpler algorithm
     private fun fillChainToSync(): Boolean {
@@ -160,6 +162,12 @@ class SyncManager(
         val maxBlockSize = responses.maxBy { it.key.size }!!
 
         // if max length chain is most often
+        if (responses.keys.size == 1 && maxMatch.value.size >= threshold) {
+            nodesToAsk.addAll(maxMatch.value)
+            chainToSync.addAll(maxMatch.key)
+            return true
+        }
+
         if (responses.filter { it.key.size == 30 }.size == responses.keys.size) {
             return findSubCommonChainAnswer(maxMatch)
         }
@@ -171,34 +179,11 @@ class SyncManager(
 
         val diff = maxBlockSize.key.size - nextMaxBlockSize.key.size
 
-        if (maxBlockSize.key.drop(diff) == nextMaxBlockSize.key &&
-                threshold < maxBlockSize.value.size + nextMaxBlockSize.value.size) {
+        if (maxBlockSize.key.drop(diff) == nextMaxBlockSize.key && isMoreThreshold(maxBlockSize, nextMaxBlockSize)) {
             nodesToAsk.addAll(maxBlockSize.value)
             chainToSync.addAll(maxMatch.key)
             return true
         }
-
-
-//        for (message in responses.keys()) {
-//            //check if max match is a subseq of the message with difference 1
-//            if (message.size == maxMatch.key.size + 1 && message.dropLast(1) == maxMatch.key) {
-//                if (threshold > responses[message]!!.size + maxMatch.value.size) {
-//                    return false
-//                }
-//                chainToSync.addAll(message)
-//                nodesToAsk.addAll(responses[message]!!)
-//                nodesToAsk.addAll(maxMatch.value)
-//                return true
-//            } else if (message.size == maxMatch.key.size - 1 && message == maxMatch.key.dropLast(1)) {
-//                if (threshold > responses[message]!!.size + maxMatch.value.size) {
-//                    return false
-//                }
-//                chainToSync.addAll(maxMatch.key)
-//                nodesToAsk.addAll(responses[message]!!)
-//                nodesToAsk.addAll(maxMatch.value)
-//                return true
-//            }
-//        }
 
         if (threshold > maxMatch.value.size + responses.filter { it.key.isEmpty() }.values.size) {
             return false
@@ -230,6 +215,7 @@ class SyncManager(
         nodesToAsk.clear()
     }
 
+    //todo need to think
     private fun isTimeOut(): Boolean = clock.currentTimeMillis() - startSyncTime > properties.syncInterval!!
 
 }
