@@ -13,8 +13,17 @@ import java.util.concurrent.ConcurrentHashMap
 @Component
 class ChannelsHolder {
 
-    private var channelGroup = DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
-    private var nodesInfo = ConcurrentHashMap<ChannelId, NodeInfo>()
+    private val nodesInfo = ConcurrentHashMap<ChannelId, NodeInfo>()
+
+    private val channelGroup = object : DefaultChannelGroup(GlobalEventExecutor.INSTANCE) {
+
+        @Synchronized
+        override fun remove(channel: Channel): Boolean {
+            nodesInfo.remove(channel.id())
+            return super.remove(channel)
+        }
+
+    }
 
 
     fun broadcast(message: Serializable) {
@@ -57,12 +66,6 @@ class ChannelsHolder {
         nodesInfo[channel.id()] = nodeInfo
         channelGroup.add(channel)
         return true
-    }
-
-    @Synchronized
-    fun removeChannel(channel: Channel) {
-        nodesInfo.remove(channel.id())
-        channel.close()
     }
 
 }

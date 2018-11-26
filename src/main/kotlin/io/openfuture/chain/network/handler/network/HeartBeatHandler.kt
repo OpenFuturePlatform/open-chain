@@ -39,7 +39,6 @@ class HeartBeatHandler(
         val eventState = event.state()
         if (READER_IDLE == eventState) {
             ctx.close()
-            channelsHolder.removeChannel(ctx.channel())
         } else if (WRITER_IDLE == eventState && null != channelsHolder.getNodeInfoByChannelId(ctx.channel().id())) {
             ctx.writeAndFlush(HeartBeatMessage())
                 .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
@@ -54,7 +53,6 @@ class HeartBeatHandler(
             }
             is ReadTimeoutException -> {
                 ctx.close()
-                channelsHolder.removeChannel(ctx.channel())
             }
             else -> super.exceptionCaught(ctx, cause)
         }

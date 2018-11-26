@@ -39,7 +39,6 @@ class ConnectionHandler(
     override fun channelInactive(ctx: ChannelHandlerContext) {
         log.warn("${ctx.channel().remoteAddress()} disconnected, operating peers count is ${channelsHolder.size()}, peers count: ${channels.size}")
         ctx.close()
-        channelsHolder.removeChannel(ctx.channel())
         connectionService.findNewPeer()
         super.channelInactive(ctx)
     }
@@ -47,7 +46,6 @@ class ConnectionHandler(
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         log.error("Connection error ${ctx.channel().remoteAddress()} with cause: ${cause.message}")
         ctx.close()
-        channelsHolder.removeChannel(ctx.channel())
         connectionService.findNewPeer()
     }
 
