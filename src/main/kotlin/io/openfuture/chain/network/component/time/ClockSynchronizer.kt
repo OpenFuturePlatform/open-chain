@@ -2,7 +2,6 @@ package io.openfuture.chain.network.component.time
 
 import io.openfuture.chain.core.sync.SyncState
 import io.openfuture.chain.core.sync.SyncState.SyncStatusType.*
-import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.message.network.ResponseTimeMessage
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.ConnectionService
@@ -37,7 +36,6 @@ class ClockSynchronizer(
 
     @Scheduled(fixedDelayString = "\${node.time-synchronization-interval}")
     fun sync() {
-        lock.writeLock().lock()
         try {
             if (SYNCHRONIZED != syncState.getClockStatus()) {
                 syncState.setClockStatus(PROCESSING)
@@ -46,8 +44,6 @@ class ClockSynchronizer(
 
             connectionService.sendTimeSyncRequest()
         } finally {
-            lock.writeLock().unlock()
-
             Thread.sleep(properties.expiry!!)
             mitigate()
         }
@@ -102,6 +98,7 @@ class ClockSynchronizer(
     private fun isExpired(msg: ResponseTimeMessage, destinationTime: Long): Boolean =
         properties.expiry!! < Math.abs(destinationTime.minus(msg.originalTime))
 
-    private fun isOutOfBound(offset: Long): Boolean = (deviation.get() * getScale()) < Math.abs(offset)
+    //private fun isOutOfBound(offset: Long): Boolean = (deviation.get() * getScale()) < Math.abs(offset)
+    private fun isOutOfBound(offset: Long): Boolean = 20 < Math.abs(offset)
 
 }
