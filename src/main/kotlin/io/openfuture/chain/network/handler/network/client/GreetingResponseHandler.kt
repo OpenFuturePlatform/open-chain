@@ -49,7 +49,9 @@ class GreetingResponseHandler(
             }
             ctx.close()
         }
-        addressesHolder.addNodesInfo(msg.nodesInfo)
+        if (!msg.loop) {
+            addressesHolder.addNodesInfo(msg.nodesInfo)
+        }
         connectionService.findNewPeer()
     }
 
