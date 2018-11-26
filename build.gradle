@@ -54,8 +54,8 @@ dependencies {
     compile("javax.xml.bind:jaxb-api:2.3.0")
 
     // Byte code
-    compile("org.ow2.asm:asm:6.2.1")
-    compile("org.ow2.asm:asm-commons:6.2.1")
+    compile("org.ow2.asm:asm:7.0")
+    compile("org.ow2.asm:asm-commons:7.0")
 
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
