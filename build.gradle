@@ -53,6 +53,10 @@ dependencies {
     //JAXB
     compile("javax.xml.bind:jaxb-api:2.3.0")
 
+    // Byte code
+    compile("org.ow2.asm:asm:6.2.1")
+    compile("org.ow2.asm:asm-commons:6.2.1")
+
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('io.projectreactor:reactor-test')
@@ -83,7 +87,7 @@ compileTestKotlin {
 }
 noArg {
     annotations(
-            "javax.persistence.MappedSuperclass", 
+            "javax.persistence.MappedSuperclass",
             "javax.persistence.Entity",
             "io.openfuture.chain.core.annotation.NoArgConstructor"
     )
@@ -115,4 +119,4 @@ jacocoTestReport {
 check.dependsOn jacocoTestReport
 
 // Front
-processResources.dependsOn(':frontend:assemble')
+//processResources.dependsOn(':frontend:assemble')
