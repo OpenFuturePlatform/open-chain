@@ -1,5 +1,6 @@
 package io.openfuture.chain.network.handler.network.server
 
+import io.netty.channel.Channel
 import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
@@ -38,10 +39,9 @@ class GreetingHandler(
         val nodeInfo = NodeInfo(msg.uid, NetworkAddress(hostAddress, msg.externalPort))
         val nodesInfo = addressesHolder.getNodesInfo()
         val response = GreetingResponseMessage(nodeKeyHolder.getUid(), hostAddress, nodesInfo)
-        if (isConnectionAcceptable(nodeInfo)) {
+        if (isConnectionAcceptable(nodeInfo, ctx.channel())) {
             log.info("Accepted connection from ${ctx.channel().remoteAddress()} (Tachka ${msg.externalPort})")
             addressesHolder.addNodeInfo(nodeInfo)
-            channelHolder.addChannel(ctx.channel(), nodeInfo)
             channelHolder.broadcast(NewClient(nodeInfo))
             ctx.writeAndFlush(response)
         } else {
@@ -53,9 +53,9 @@ class GreetingHandler(
         }
     }
 
-    private fun isConnectionAcceptable(nodeInfo: NodeInfo): Boolean {
+    private fun isConnectionAcceptable(nodeInfo: NodeInfo, channel: Channel): Boolean {
         return nodeInfo.uid != nodeKeyHolder.getUid()
-            && !channelHolder.getNodesInfo().any { it == nodeInfo }
             && nodeProperties.allowedConnections!! > channelHolder.size()
+            && channelHolder.addChannel(channel, nodeInfo)
     }
 }

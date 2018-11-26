@@ -50,15 +50,18 @@ class ChannelsHolder {
     fun getNodeInfoByChannelId(channelId: ChannelId): NodeInfo? = nodesInfo[channelId]
 
     @Synchronized
-    fun addChannel(channel: Channel, nodeInfo: NodeInfo) {
-        channelGroup.add(channel)
+    fun addChannel(channel: Channel, nodeInfo: NodeInfo): Boolean {
+        if (nodesInfo.contains(nodeInfo)) {
+            return false
+        }
         nodesInfo[channel.id()] = nodeInfo
+        channelGroup.add(channel)
+        return true
     }
 
     @Synchronized
     fun removeChannel(channel: Channel) {
         nodesInfo.remove(channel.id())
-        channelGroup.remove(channel)
         channel.close()
     }
 

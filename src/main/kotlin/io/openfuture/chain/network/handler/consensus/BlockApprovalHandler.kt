@@ -33,6 +33,7 @@ class BlockApprovalHandler(
         } else if (cause !is SynchronizationException) {
             log.error("Connection error ${ctx.channel().remoteAddress()} with cause: ${cause.message}")
 
+            ctx.close()
             channelsHolder.removeChannel(ctx.channel())
         }
     }

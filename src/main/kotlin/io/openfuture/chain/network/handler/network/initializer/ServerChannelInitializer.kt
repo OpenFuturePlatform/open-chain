@@ -3,6 +3,8 @@ package io.openfuture.chain.network.handler.network.initializer
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
 import io.netty.handler.timeout.IdleStateHandler
+import io.netty.handler.timeout.ReadTimeoutHandler
+import io.netty.handler.timeout.WriteTimeoutHandler
 import io.openfuture.chain.network.handler.consensus.BlockApprovalHandler
 import io.openfuture.chain.network.handler.consensus.PendingBlockNetworkHandler
 import io.openfuture.chain.network.handler.core.DelegateTransactionHandler
@@ -53,10 +55,11 @@ class ServerChannelInitializer(
         val pipeline = ch.pipeline()
 
         pipeline.addLast(
-            IdleStateHandler(readIdleTime, writeIdleTime, 0, TimeUnit.MILLISECONDS),
+            ReadTimeoutHandler(readIdleTime, TimeUnit.MILLISECONDS),
+            WriteTimeoutHandler(writeIdleTime, TimeUnit.MILLISECONDS),
+            heartBeatHandler,
             applicationContext.getBean(MessageCodec::class.java),
             connectionHandler,
-            heartBeatHandler,
             greetingHandler,
             requestTimeHandler,
             newClientHandler,

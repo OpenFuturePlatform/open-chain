@@ -84,8 +84,7 @@ class DefaultConnectionService(
     }
 
     private fun findNewPeer0() {
-        log.info("Searching new peers ${channelHolder.getNodesInfo().joinToString { it.address.port.toString() }} | ${channelHolder.size()}")
-        if (addressesHolder.size() <= nodeProperties.peersNumber!!) {
+        if (addressesHolder.size() <= nodeProperties.rootNodes.size + nodeProperties.peersNumber!!) {
             while (!findBootNode() && nodeProperties.peersNumber!! > channelHolder.size()) {
                 log.warn("Unable to find boot peer. Retry...")
                 TimeUnit.SECONDS.sleep(3)
@@ -96,35 +95,40 @@ class DefaultConnectionService(
     }
 
     private fun findBootNode(): Boolean {
+        log.info("Searching boot peers ${channelHolder.getNodesInfo().joinToString { it.address.port.toString() }} | ${channelHolder.size()}")
         val connectedPeers = channelHolder.getNodesInfo().map { it.address }
-        for (bootAddress in nodeProperties.getRootAddresses().minus(connectedPeers)) {
-            val channelFuture = connect(bootAddress, Consumer {
+        for (bootAddress in nodeProperties.getRootAddresses().minus(connectedPeers).shuffled()) {
+            val connected = connect(bootAddress, Consumer {
                 greet(it, bootAddress)
             })
-            if (channelFuture) return true
+            if (connected) return true
         }
         return false
     }
 
     private fun findRegularPeer(): Boolean {
-        val knownPeers = channelHolder.getNodesInfo().toMutableList()
-        for (i in 0 until addressesHolder.size()) {
-            val peer = addressesHolder.getRandom(channelHolder.getNodesInfo())
+        log.info("Looking for regular peer ${channelHolder.getNodesInfo().joinToString { it.address.port.toString() }} | ${channelHolder.size()}")
+        val knownPeers = channelHolder.getNodesInfo()
+        for (peer in addressesHolder.getRandomList(connectedPeers = knownPeers)) {
             if (!addressesHolder.isRejected(peer.address)) {
-                val channelFuture = connect(peer.address, Consumer {
+                val connected = connect(peer.address, Consumer {
                     greet(it, peer.address)
                 })
-                if (channelFuture) return true
+                if (connected) return true
             }
-            knownPeers.add(peer)
         }
         return false
     }
 
     private fun greet(channel: Channel, address: NetworkAddress): Boolean {
-        log.info("Sent greeting to ${address.host}:${address.port}")
         val message = GreetingMessage(config.getConfig().externalPort, nodeKeyHolder.getUid())
-        channel.writeAndFlush(message)
+        channel.writeAndFlush(message).addListener {
+            if (it.isSuccess) {
+                log.info("Sent greeting to ${address.host}:${address.port} success")
+            } else {
+                log.info("Sent greeting to ${address.host}:${address.port} failed")
+            }
+        }
         return true
     }
 

@@ -7,6 +7,8 @@ import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.handler.timeout.IdleState.READER_IDLE
 import io.netty.handler.timeout.IdleState.WRITER_IDLE
 import io.netty.handler.timeout.IdleStateEvent
+import io.netty.handler.timeout.ReadTimeoutException
+import io.netty.handler.timeout.WriteTimeoutException
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.message.network.HeartBeatMessage
 import org.slf4j.Logger
@@ -24,11 +26,7 @@ class HeartBeatHandler(
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: HeartBeatMessage) {
-        if (null != channelsHolder.getNodeInfoByChannelId(ctx.channel().id())) {
-            log.info("Received heartbeat message from ${ctx.channel().remoteAddress()}")
-        } else {
-            log.info("Unknown heartbeat from ${ctx.channel().remoteAddress()}")
-        }
+        log.info("Received heartbeat message from ${ctx.channel().remoteAddress()}")
     }
 
     override fun userEventTriggered(ctx: ChannelHandlerContext, event: Any) {
@@ -36,15 +34,29 @@ class HeartBeatHandler(
             super.userEventTriggered(ctx, event)
             return
         }
-        //log.info("Idle event inbound to ${ctx.channel().remoteAddress()}")
+        log.info("Idle event (${event.state()}) inbound to ${ctx.channel().remoteAddress()}")
 
         val eventState = event.state()
         if (READER_IDLE == eventState) {
+            ctx.close()
             channelsHolder.removeChannel(ctx.channel())
         } else if (WRITER_IDLE == eventState && null != channelsHolder.getNodeInfoByChannelId(ctx.channel().id())) {
-            //log.info("Sending heartbeat message to ${ctx.channel().remoteAddress()}")
             ctx.writeAndFlush(HeartBeatMessage())
                 .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
+        }
+    }
+
+    override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
+        when (cause) {
+            is WriteTimeoutException -> {
+                ctx.writeAndFlush(HeartBeatMessage())
+                    .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
+            }
+            is ReadTimeoutException -> {
+                ctx.close()
+                channelsHolder.removeChannel(ctx.channel())
+            }
+            else -> super.exceptionCaught(ctx, cause)
         }
     }
 
