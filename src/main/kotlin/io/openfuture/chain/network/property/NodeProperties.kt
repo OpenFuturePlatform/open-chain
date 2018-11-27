@@ -64,7 +64,7 @@ class NodeProperties(
     var synchronizationInterval: Long? = null,
 
     /** Interval for time synchronization in milliseconds. Min value 60000 millis*/
-    @field:Min(1 * 1000)
+    @field:Min(15 * 1000)
     @field:NotNull
     var timeSynchronizationInterval: Long? = null,
 
