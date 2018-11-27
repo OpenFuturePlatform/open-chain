@@ -68,7 +68,7 @@ class ClockSynchronizer(
 
             if (0 == syncRound.get()) {
 //                deviation.getAndSet(max(deviation.get(), Math.abs(offset)))
-                deviation.set(20)
+                deviation.set(500)
                 offsets.add(offset)
                 return
             }
@@ -136,6 +136,6 @@ class ClockSynchronizer(
     private fun isExpired(msg: ResponseTimeMessage, destinationTime: Long): Boolean =
         properties.expiry!! < Math.abs(destinationTime.minus(msg.originalTime))
 
-    private fun isOutOfBound(offset: Long): Boolean = 20 < Math.abs(offset)
+    private fun isOutOfBound(offset: Long): Boolean = deviation.get() < Math.abs(offset)
 
 }

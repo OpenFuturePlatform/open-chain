@@ -20,10 +20,10 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class SyncManager(
-        private val clock: Clock,
-        private val properties: NodeProperties,
-        private val blockService: BlockService,
-        private val networkApiService: NetworkApiService
+    private val clock: Clock,
+    private val properties: NodeProperties,
+    private val blockService: BlockService,
+    private val networkApiService: NetworkApiService
 ) {
 
     companion object {
@@ -80,7 +80,10 @@ class SyncManager(
         reset()
 
         val lastBlock = blockService.getLast()
-        networkApiService.poll(SyncRequestMessage(clock.currentTimeMillis(), lastBlock.hash, lastBlock.height), selectionSize)
+        networkApiService.poll(
+            SyncRequestMessage(clock.currentTimeMillis(), lastBlock.hash, lastBlock.height),
+            selectionSize
+        )
         Thread.sleep(properties.expiry!!)
         checkState()
     }
@@ -128,72 +131,89 @@ class SyncManager(
         networkApiService.sendToAddress(SyncBlockRequestMessage(blockService.getLast().hash), nodeToAsk)
     }
 
-    private fun findSubCommonChainAnswer(firstPopular: Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>): Boolean {
-
-        var diff: Int = 0
-        val secondPopular = responses.filter { it.key != firstPopular.key }.maxBy { it.value.size }!!
-
-        val maxHeightSeq = firstPopular.key.first().height
-        val maxHeightSeq2 = secondPopular.key.first().height
-
-        if (maxHeightSeq > maxHeightSeq2) {
-            diff = (maxHeightSeq - maxHeightSeq2).toInt()
-            if (firstPopular.key.drop(diff) == secondPopular.key.dropLast(diff) && isMoreThreshold(firstPopular, secondPopular)) {
-                nodesToAsk.addAll(firstPopular.value)
-                chainToSync.addAll(firstPopular.key)
-                return true
-            }
-        } else if (maxHeightSeq < maxHeightSeq2) {
-            diff = (maxHeightSeq2 - maxHeightSeq).toInt()
-            if (secondPopular.key.drop(diff) == firstPopular.key.dropLast(diff) && isMoreThreshold(firstPopular, secondPopular)) {
-                nodesToAsk.addAll(firstPopular.value)
-                chainToSync.addAll(firstPopular.key)
-                return true
-            }
-        }
-        return false
-    }
-
-    fun isMoreThreshold(first: Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>, second: Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>): Boolean = threshold <= first.value.size + second.value.size
-
     //todo checks & simpler algorithm
     private fun fillChainToSync(): Boolean {
         val maxMatch = responses.maxBy { it.value.size }!!
         val maxBlockSize = responses.maxBy { it.key.size }!!
 
         // if max length chain is most often
-        if (responses.keys.size == 1 && maxMatch.value.size >= threshold) {
-            nodesToAsk.addAll(maxMatch.value)
-            chainToSync.addAll(maxMatch.key)
+        if (responses.keys.size == 1) {
+
+            if (maxMatch.value.size >= threshold) {
+                addNodeForSync(maxMatch.value, maxMatch.key)
+                return true
+            }
+            return false
+        } else if (maxMatch.key.size == 30) {
+            val secondPopular = responses.filter { it.key != maxMatch.key }.maxBy { it.value.size }!!
+
+            if (secondPopular.key.size == 30) {
+                return findSubCommonChainAnswer(maxMatch, secondPopular)
+            }
+        }
+
+        val nextMaxBlockSize = responses.filter { it.key != maxBlockSize.key }.maxBy { it.key.size }!!
+
+        if (nextMaxBlockSize.key.isNotEmpty() && maxBlockSize.key.size != nextMaxBlockSize.key.size) {
+            val diff = maxBlockSize.key.size - nextMaxBlockSize.key.size
+
+            if (diff != 1 && maxBlockSize.key.drop(diff) == nextMaxBlockSize.key &&
+                isMoreThreshold(maxBlockSize, nextMaxBlockSize)
+            ) {
+                addNodeForSync(nextMaxBlockSize.value, nextMaxBlockSize.key)
+                return true
+            }
+
+        } else if (maxBlockSize.key.size == 1 && threshold <= maxBlockSize.value.size) {
+            addNodeForSync(maxBlockSize.value, maxBlockSize.key)
             return true
         }
 
-        if (responses.filter { it.key.size == 30 }.size == responses.keys.size) {
-            return findSubCommonChainAnswer(maxMatch)
-        }
-
-
-        val withoutMaxBlockSize = responses.filter { it.key != maxBlockSize.key }
-        log.debug("full = ${responses.keys.size} after filter = ${withoutMaxBlockSize.keys.size}")
-        val nextMaxBlockSize = withoutMaxBlockSize.maxBy { it.key.size }!!
-
-        val diff = maxBlockSize.key.size - nextMaxBlockSize.key.size
-
-        if (maxBlockSize.key.drop(diff) == nextMaxBlockSize.key && isMoreThreshold(maxBlockSize, nextMaxBlockSize)) {
-            nodesToAsk.addAll(maxBlockSize.value)
-            chainToSync.addAll(maxMatch.key)
-            return true
-        }
-
-        if (threshold > maxMatch.value.size + responses.filter { it.key.isEmpty() }.values.size) {
+        if (threshold > maxMatch.value.size + responses.filter { it.value != maxMatch.value && it.key.isEmpty() }.values.size
+        ) {
             return false
         }
 
-        chainToSync.addAll(maxMatch.key)
-        nodesToAsk.addAll(maxMatch.value)
+        addNodeForSync(maxMatch.value, maxMatch.key)
         return true
     }
 
+    private fun findSubCommonChainAnswer(
+        firstPopular: Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>,
+        secondPopular: Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>
+    ): Boolean {
+        var diff: Int
+
+        val maxHeightSeq = firstPopular.key.first().height
+        val maxHeightSeq2 = secondPopular.key.first().height
+
+        val isMoreThreshold = isMoreThreshold(firstPopular, secondPopular)
+
+        if (maxHeightSeq > maxHeightSeq2) {
+            diff = (maxHeightSeq - maxHeightSeq2).toInt()
+            if (firstPopular.key.drop(diff) == secondPopular.key.dropLast(diff) && isMoreThreshold) {
+                addNodeForSync(firstPopular.value, firstPopular.key)
+                return true
+            }
+        } else if (maxHeightSeq < maxHeightSeq2) {
+            diff = (maxHeightSeq2 - maxHeightSeq).toInt()
+            if (secondPopular.key.drop(diff) == firstPopular.key.dropLast(diff) && isMoreThreshold) {
+                addNodeForSync(firstPopular.value, firstPopular.key)
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun isMoreThreshold(
+        first: Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>,
+        second: Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>
+    ): Boolean = threshold <= first.value.size + second.value.size
+
+    private fun addNodeForSync(value: MutableList<NodeInfo>, key: List<SyncBlockDto>) {
+        nodesToAsk.addAll(value)
+        chainToSync.addAll(key)
+    }
 
     @Synchronized
     private fun unlockIfSynchronized(): Boolean {

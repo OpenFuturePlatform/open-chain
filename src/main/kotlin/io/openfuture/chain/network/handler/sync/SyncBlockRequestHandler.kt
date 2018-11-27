@@ -21,8 +21,9 @@ class SyncBlockRequestHandler(
 
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: SyncBlockRequestMessage) {
+        log.debug("###########Start search blocks################# ")
         val blocksToSend = blockService.getAfterCurrentHash(msg.hash)
-        log.debug("Sending blocks size = ${blocksToSend.size} ")
+        log.debug(">>>>>Sending blocks size = ${blocksToSend.size} to ${ctx.channel().remoteAddress()}")
         blocksToSend.forEach { ctx.writeAndFlush(it.toMessage()) }
     }
 

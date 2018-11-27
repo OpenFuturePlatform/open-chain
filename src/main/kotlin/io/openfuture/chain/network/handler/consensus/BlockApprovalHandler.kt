@@ -5,6 +5,8 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.consensus.component.block.PendingBlockHandler
 import io.openfuture.chain.core.exception.SynchronizationException
+import io.openfuture.chain.core.sync.SyncManager
+import io.openfuture.chain.core.sync.SyncStatus
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
 import org.slf4j.Logger
@@ -16,7 +18,8 @@ import org.springframework.stereotype.Component
 @Sharable
 class BlockApprovalHandler(
     private val pendingBlockHandler: PendingBlockHandler,
-    private val channelsHolder: ChannelsHolder
+    private val channelsHolder: ChannelsHolder,
+    private val syncManager: SyncManager
 ) : SimpleChannelInboundHandler<BlockApprovalMessage>() {
 
     companion object {
@@ -24,6 +27,10 @@ class BlockApprovalHandler(
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: BlockApprovalMessage) {
+        if (syncManager.getStatus() != SyncStatus.SYNCHRONIZED) {
+            log.debug("Block approval message decline")
+            return
+        }
         pendingBlockHandler.handleApproveMessage(msg)
     }
 
