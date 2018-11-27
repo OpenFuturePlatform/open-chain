@@ -99,6 +99,6 @@ class ClockSynchronizer(
         properties.expiry!! < Math.abs(destinationTime.minus(msg.originalTime))
 
     //private fun isOutOfBound(offset: Long): Boolean = (deviation.get() * getScale()) < Math.abs(offset)
-    private fun isOutOfBound(offset: Long): Boolean = 20 < Math.abs(offset)
+    private fun isOutOfBound(offset: Long): Boolean = 500 < Math.abs(offset)
 
 }
