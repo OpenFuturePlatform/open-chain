@@ -48,7 +48,7 @@ class SourceClassLoader(
         val bytes = readClassBytes(name)
         val clazz = loadBytes(name, bytes).clazz
         classes[name] = LoadedClass(clazz, bytes)
-//        resolveClass(clazz)
+        resolveClass(clazz)
         return clazz
     }
 
