@@ -64,7 +64,7 @@ class NodeProperties(
     var synchronizationInterval: Long? = null,
 
     /** Interval for time synchronization in milliseconds. Min value 60000 millis*/
-    @field:Min(15 * 1000)
+    @field:Min(1 * 1000)
     @field:NotNull
     var timeSynchronizationInterval: Long? = null,
 
@@ -82,7 +82,7 @@ class NodeProperties(
 
 ) {
 
-    var allowedConnections: Int? = null
+    private var allowedConnections: Int? = null
     private var me: NodeInfo? = null
     private var rootNetworkAddresses = mutableSetOf<NetworkAddress>()
 
@@ -98,11 +98,14 @@ class NodeProperties(
 
     fun getRootAddresses(): Set<NetworkAddress> = rootNetworkAddresses
 
+
     fun setMyself(nodeInfo: NodeInfo) {
         me = nodeInfo
         rootNetworkAddresses.remove(me!!.address)
     }
 
     fun getMe(): NodeInfo? = me
+
+    fun getAllowedConnections(): Int = allowedConnections!!
 
 }

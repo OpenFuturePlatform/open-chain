@@ -5,7 +5,6 @@ import io.netty.channel.ChannelFutureListener
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
-import io.netty.util.concurrent.GenericFutureListener
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.component.ChannelsHolder
@@ -55,7 +54,7 @@ class GreetingHandler(
 
     private fun isConnectionAcceptable(nodeInfo: NodeInfo, channel: Channel): Boolean {
         return nodeInfo.uid != nodeKeyHolder.getUid()
-            && nodeProperties.allowedConnections!! > channelHolder.size()
+            && nodeProperties.getAllowedConnections() > channelHolder.size()
             && channelHolder.addChannel(channel, nodeInfo)
     }
 }
