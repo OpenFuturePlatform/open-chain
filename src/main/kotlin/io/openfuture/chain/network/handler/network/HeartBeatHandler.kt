@@ -7,8 +7,6 @@ import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.handler.timeout.IdleState.READER_IDLE
 import io.netty.handler.timeout.IdleState.WRITER_IDLE
 import io.netty.handler.timeout.IdleStateEvent
-import io.netty.handler.timeout.ReadTimeoutException
-import io.netty.handler.timeout.WriteTimeoutException
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.message.network.HeartBeatMessage
 import org.slf4j.Logger
@@ -42,19 +40,6 @@ class HeartBeatHandler(
         } else if (WRITER_IDLE == eventState && null != channelsHolder.getNodeInfoByChannelId(ctx.channel().id())) {
             ctx.writeAndFlush(HeartBeatMessage())
                 .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
-        }
-    }
-
-    override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
-        when (cause) {
-            is WriteTimeoutException -> {
-                ctx.writeAndFlush(HeartBeatMessage())
-                    .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
-            }
-            is ReadTimeoutException -> {
-                ctx.close()
-            }
-            else -> super.exceptionCaught(ctx, cause)
         }
     }
 
