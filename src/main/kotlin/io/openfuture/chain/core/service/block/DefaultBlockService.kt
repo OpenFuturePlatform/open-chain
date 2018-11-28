@@ -42,7 +42,7 @@ class DefaultBlockService(
     override fun getCurrentHeight(): Long = repository.getCurrentHeight()
 
     @Transactional(readOnly = true)
-    override fun getAfterCurrentHashAndLast30Blocks(hash: String): List<Block> {
+    override fun getCarcassForBlockSync(hash: String): List<Block> {
         val startBlock = repository.findOneByHash(hash) ?: return emptyList()
         return repository.findTop30ByHeightGreaterThanOrderByHeightDesc(startBlock.height)
     }

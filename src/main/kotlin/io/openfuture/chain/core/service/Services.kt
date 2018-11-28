@@ -57,7 +57,7 @@ interface BlockService {
 
     fun isExists(hash: String, height: Long): Boolean
 
-    fun getAfterCurrentHashAndLast30Blocks(hash: String): List<Block>
+    fun getCarcassForBlockSync(hash: String): List<Block>
 
 }
 
