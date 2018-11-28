@@ -2,11 +2,10 @@ package io.openfuture.chain.network.handler.network
 
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
-import io.netty.channel.SimpleChannelInboundHandler
+import io.netty.channel.ChannelInboundHandlerAdapter
 import io.netty.channel.group.DefaultChannelGroup
 import io.netty.util.concurrent.GlobalEventExecutor
 import io.openfuture.chain.network.component.ChannelsHolder
-import io.openfuture.chain.network.serialization.Serializable
 import io.openfuture.chain.network.service.ConnectionService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,18 +16,13 @@ import org.springframework.stereotype.Component
 class ConnectionHandler(
     private val channelsHolder: ChannelsHolder,
     private val connectionService: ConnectionService
-) : SimpleChannelInboundHandler<Serializable>() {
+) : ChannelInboundHandlerAdapter() {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(ConnectionHandler::class.java)
     }
 
     private val channels = DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
-
-
-    override fun channelRead0(ctx: ChannelHandlerContext, msg: Serializable) {
-        ctx.fireChannelRead(msg)
-    }
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         channels.add(ctx.channel())
