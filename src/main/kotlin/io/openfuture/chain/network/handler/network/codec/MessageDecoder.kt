@@ -46,11 +46,6 @@ class MessageDecoder(
 
         message.read(buf)
 
-        if (message is MainBlockMessage || message is GenesisBlockMessage) {
-            out.add(message)
-            return
-        }
-
         if (isExpired(message, originTime)) {
             log.debug("Message $type from ${ctx.channel().remoteAddress()} decline by expiration")
             return
@@ -65,7 +60,7 @@ class MessageDecoder(
     }
 
     private fun isExpired(message: Serializable, originTime: Long): Boolean {
-        if (message is RequestTimeMessage || message is ResponseTimeMessage) {
+        if (message is RequestTimeMessage || message is ResponseTimeMessage || message is MainBlockMessage || message is GenesisBlockMessage) {
             return false
         }
 
