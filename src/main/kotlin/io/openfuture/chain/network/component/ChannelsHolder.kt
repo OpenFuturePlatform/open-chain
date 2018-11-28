@@ -8,6 +8,7 @@ import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.exception.NotFoundChannelException
 import io.openfuture.chain.network.serialization.Serializable
 import org.springframework.stereotype.Component
+import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
@@ -20,7 +21,9 @@ class ChannelsHolder {
         @Synchronized
         override fun remove(channel: Channel): Boolean {
             nodesInfo.remove(channel.id())
-            return super.remove(channel)
+            val result = super.remove(channel)
+            printChannels()
+            return result
         }
 
     }
@@ -66,6 +69,21 @@ class ChannelsHolder {
         nodesInfo[channel.id()] = nodeInfo
         channelGroup.add(channel)
         return true
+    }
+
+    @Synchronized
+    fun hasChannel(channel: Channel): Boolean = channelGroup.contains(channel)
+
+    fun printChannels() {
+        for (channel in channelGroup) {
+            System.out.print("${(channel.remoteAddress() as InetSocketAddress).port} ")
+        }
+        println()
+        for (channel in channelGroup) {
+            System.out.print("${(channel.localAddress() as InetSocketAddress).port} ")
+        }
+        println()
+        println("------------------------------------------------")
     }
 
 }
