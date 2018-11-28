@@ -25,7 +25,6 @@ import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import org.springframework.data.domain.Page
-import org.springframework.transaction.annotation.Transactional
 
 interface HardwareInfoService {
 
@@ -57,6 +56,8 @@ interface BlockService {
     fun getCurrentHeight(): Long
 
     fun isExists(hash: String, height: Long): Boolean
+
+    fun getAfterCurrentHashAndLast30Blocks(hash: String): List<Block>
 
 }
 

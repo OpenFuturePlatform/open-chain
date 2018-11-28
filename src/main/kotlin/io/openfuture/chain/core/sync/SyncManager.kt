@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.sync
 
+import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.component.time.Clock
@@ -38,14 +39,13 @@ class SyncManager(
     private var status: SyncStatus = NOT_SYNCHRONIZED
 
     private var startSyncTime = clock.currentTimeMillis()
-    private var chainToSync = Collections.synchronizedList(mutableListOf<SyncBlockDto>())
-    private var nodesToAsk = Collections.synchronizedList(mutableListOf<NodeInfo>())
-    private var syncResult = Collections.synchronizedSet(mutableSetOf<String>())
+
+    private var lastBlockToSync: SyncBlockDto? = null
 
 
     @Scheduled(fixedRateString = "\${node.sync-interval}")
     fun syncBlock() {
-        if (status == PROCESSING && isTimeOut() && !unlockIfSynchronized()) {
+        if (status == PROCESSING && isTimeOut()) {
             status = NOT_SYNCHRONIZED
         }
 
@@ -80,9 +80,12 @@ class SyncManager(
         reset()
 
         val lastBlock = blockService.getLast()
-        networkApiService.poll(SyncRequestMessage(clock.currentTimeMillis(), lastBlock.hash, lastBlock.height), selectionSize)
+        networkApiService.poll(
+            SyncRequestMessage(clock.currentTimeMillis(), lastBlock.hash, lastBlock.height),
+            selectionSize
+        )
         Thread.sleep(properties.expiry!!)
-        checkState()
+        checkState(lastBlock)
     }
 
     fun onSyncResponseMessage(msg: SyncResponseMessage, nodeInfo: NodeInfo) {
@@ -91,14 +94,15 @@ class SyncManager(
 
     fun onBlockMessage(msg: BlockMessage, action: BlockMessage.() -> Unit) {
         action(msg)
-        if (syncResult.add(msg.hash)) {
-            log.debug("BLOCK ADDED ${msg.hash}")
-            unlockIfSynchronized()
+        log.debug("BLOCK ADDED ${msg.hash}")
+        if (lastBlockToSync != null && lastBlockToSync == SyncBlockDto(msg.height, msg.hash)) {
+            status = SYNCHRONIZED
+            log.debug("SYNCHRONIZED")
         }
     }
 
     @Synchronized
-    private fun checkState() {
+    private fun checkState(lastBlock: Block) {
         log.debug("LEDGER: <<< responses.size = ${responses.flatMap { it.value }.size}>>>")
         if (threshold > responses.flatMap { it.value }.size) {
             log.debug("~~~~~~~~~~~~~NOT_SYNCHRONIZED responses.size~~~~~~~~~~~~~")
@@ -112,7 +116,8 @@ class SyncManager(
             return
         }
 
-        if (!fillChainToSync()) {
+        val nodesToAsk = fillChainToSync(lastBlock)
+        if (nodesToAsk.isEmpty()) {
             status = NOT_SYNCHRONIZED
             log.debug("~~~~~~~~~~~~~NOT_SYNCHRONIZED fillChainToSync~~~~~~~~~~~~~")
             responses.entries.forEach {
@@ -121,73 +126,101 @@ class SyncManager(
             return
         }
 
-        log.debug("CHAIN: size=${chainToSync.size} ${chainToSync.map { it.height }.toList()}")
-        nodesToAsk.forEach { networkApiService.sendToAddress(SyncBlockRequestMessage(blockService.getLast().hash), it) }
+
+//        log.debug("CHAIN: size=${chainToSync.size} ${chainToSync.map { it.height }.toList()}")
+        log.debug("LAST BLOCK TO SYNC: $lastBlockToSync")
+        nodesToAsk.forEach { networkApiService.sendToAddress(SyncBlockRequestMessage(lastBlock.hash), it) }
     }
 
-    //todo checks & simpler algorithm
-    private fun fillChainToSync(): Boolean {
-        val maxMatch = responses.maxBy { it.value.size }!!
-        val maxBlockSize = responses.maxBy { it.key.size }!!
 
-        // if max length chain is most often
-        if (maxBlockSize.key.size == maxMatch.key.size && maxMatch.value.size >= threshold) {
-            nodesToAsk.addAll(maxMatch.value)
-            chainToSync.addAll(maxMatch.key)
-            return true
+    fun fillChainToSync(lastBlock: Block): List<NodeInfo> {
+        val maxPopular = maxPopularChain(responses)
+        val maxByHeight = responses.maxBy { it.chainHeight() }!!
+
+        // If most frequent chain is the longest
+        if (maxByHeight.chain == maxPopular.chain) {
+            if (isEnough(maxPopular.answersCount())) {
+                return returnResult(maxByHeight.chain.first(), maxPopular.answers)
+            }
+
+            if (maxPopular.chain.size == 1) {
+                val emptyAnswer = responses.firstOrNull { it.chain.isEmpty() } ?: return emptyList()
+                if (isEnough(maxPopular.answersCount() + emptyAnswer.answersCount())) {
+                    return returnResult(maxByHeight.chain.first(), maxPopular.answers, emptyAnswer.answers)
+                }
+            } else {
+                val subPopChain = maxPopular.chain.drop(1)
+                val subChain = responses.firstOrNull { it.chain.take(subPopChain.size) == subPopChain }
+                    ?: return emptyList()
+                if (isEnough(maxPopular.answersCount() + subChain.answersCount())) {
+                    return returnResult(maxByHeight.chain.first(), maxPopular.answers, subChain.answers)
+                }
+            }
+
         }
 
-        for (message in responses.keys()) {
-            //check if max match is a subseq of the message with difference 1
-            if (message.size == maxMatch.key.size + 1 && message.dropLast(1) == maxMatch.key) {
-                if (threshold > responses[message]!!.size + maxMatch.value.size) {
-                    return false
-                }
-                chainToSync.addAll(message)
-                nodesToAsk.addAll(responses[message]!!)
-                nodesToAsk.addAll(maxMatch.value)
-                return true
-            } else if (message.size == maxMatch.key.size - 1 && message == maxMatch.key.dropLast(1)) {
-                if (threshold > responses[message]!!.size + maxMatch.value.size) {
-                    return false
-                }
-                chainToSync.addAll(maxMatch.key)
-                nodesToAsk.addAll(responses[message]!!)
-                nodesToAsk.addAll(maxMatch.value)
-                return true
+        //if most frequent chain is a subchain of a larger chain
+        if (maxPopular.chain.isEmpty()) {
+            val oneElementChain =
+                responses.firstOrNull { it.chain.size == 1 && it.chainHeight() isNext lastBlock.height }
+                    ?: return emptyList()
+            if (isEnough(maxPopular.answersCount() + oneElementChain.answersCount())) {
+                return returnResult(oneElementChain.chain.first(), oneElementChain.answers, maxPopular.answers)
+            }
+        } else {
+            val nextHeight = responses.firstOrNull { it.chainHeight() isNext maxPopular.chainHeight() }
+                ?: return emptyList()
+
+            val subChain = nextHeight.chain.drop(1)
+            if (subChain == maxPopular.chain.take(subChain.size)) {
+                return returnResult(nextHeight.chain.first(), nextHeight.answers, maxPopular.answers)
             }
         }
 
-        if (threshold > maxMatch.value.size + responses.filter { it.key.isEmpty() }.values.size) {
-            return false
-        }
-
-        chainToSync.addAll(maxMatch.key)
-        nodesToAsk.addAll(maxMatch.value)
-        return true
+        return emptyList()
     }
 
+    private fun isEnough(available: Int): Boolean = available >= threshold
 
-    @Synchronized
-    private fun unlockIfSynchronized(): Boolean {
-        log.debug("Try to unlock")
-        if (syncResult.size == chainToSync.size && syncResult == chainToSync.map { it.hash }.toSet()) {
-            status = SYNCHRONIZED
-            log.debug("SYNCHRONIZED")
-            return true
-        }
+    private fun maxPopularChain(response: ConcurrentHashMap<List<SyncBlockDto>, MutableList<NodeInfo>>): Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>> =
+        response.maxWith(Comparator { r1, r2 ->
+            return@Comparator when {
+                r1.answersCount() == r2.answersCount() -> return@Comparator (r1.chainHeight() - r2.chainHeight()).toInt()
+                else -> r1.answersCount() - r2.answersCount()
+            }
+        })!!
 
-        return false
+    private fun returnResult(lastChainBlock: SyncBlockDto, vararg answers: List<NodeInfo>): MutableList<NodeInfo> {
+        lastBlockToSync = lastChainBlock
+        val nodeToSync: MutableList<NodeInfo> = mutableListOf()
+        nodeToSync.addAll(answers.flatMap { it })
+        return nodeToSync
     }
 
     private fun reset() {
         log.debug("RESET")
         responses.clear()
-        chainToSync.clear()
-        syncResult.clear()
-        nodesToAsk.clear()
+        lastBlockToSync = null
     }
 
-    private fun isTimeOut(): Boolean = clock.currentTimeMillis() - startSyncTime > properties.syncInterval!!
+    //todo need to think
+    private fun isTimeOut(): Boolean = clock.currentTimeMillis() - startSyncTime > 210000
+
+    //Extentions
+    private fun <K, V> Map<out K, V>.firstOrNull(predicate: (Map.Entry<K, V>) -> Boolean): Map.Entry<K, V>? =
+        this.filter(predicate).entries.firstOrNull()
+
+    private fun Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>.answersCount(): Int = this.value.size
+
+    private fun Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>.chainHeight(): Long = this.key.firstOrNull()?.height
+        ?: 0
+
+    private val Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>.chain: List<SyncBlockDto>
+        get() = this.key
+
+    private val Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>.answers: MutableList<NodeInfo>
+        get() = this.value
+
+    private infix fun Long.isNext(prev: Long): Boolean = this == prev + 1
 
 }

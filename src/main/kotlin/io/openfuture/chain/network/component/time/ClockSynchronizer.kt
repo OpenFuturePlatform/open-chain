@@ -14,7 +14,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.locks.ReadWriteLock
 import java.util.concurrent.locks.ReentrantReadWriteLock
-import kotlin.math.max
 
 @Component
 class ClockSynchronizer(
@@ -40,23 +39,25 @@ class ClockSynchronizer(
     @Scheduled(fixedDelayString = "\${node.time-sync-interval}")
     fun sync() {
         lock.writeLock().lock()
+        val addresses = addressHolder.getRandomList(selectionSize).asSequence().map { it.address }.toSet()
         try {
             if (SYNCHRONIZED != status) {
                 status = PROCESSING
             }
             offsets.clear()
 
-            val addresses = addressHolder.getRandomList(selectionSize).asSequence().map { it.address }.toSet()
+
             connectionService.sendTimeSyncRequest(addresses)
         } finally {
             lock.writeLock().unlock()
 
-            Thread.sleep(properties.expiry!!)
+            waitResponseMessages(addresses.size, properties.expiry!!)
             mitigate()
         }
     }
 
     fun add(msg: ResponseTimeMessage, destinationTime: Long) {
+        log.debug("clock response")
         lock.writeLock().lock()
         try {
             if (isExpired(msg, destinationTime)) {
@@ -66,7 +67,8 @@ class ClockSynchronizer(
             val offset = getRemoteOffset(msg, destinationTime)
 
             if (0 == syncRound.get()) {
-                deviation.getAndSet(max(deviation.get(), Math.abs(offset)))
+//                deviation.getAndSet(max(deviation.get(), Math.abs(offset)))
+                deviation.set(500)
                 offsets.add(offset)
                 return
             }
@@ -110,6 +112,20 @@ class ClockSynchronizer(
         }
     }
 
+
+    private fun waitResponseMessages(expectedNumberResponses: Int, maxWaitTime: Long) {
+        if (expectedNumberResponses != 0) {
+            var countWaitingSteps = 0
+            val second = 1000L
+            val maxCountDelays = maxWaitTime / second
+
+            while (offsets.size != expectedNumberResponses && countWaitingSteps < maxCountDelays) {
+                ++countWaitingSteps
+                Thread.sleep(second)
+            }
+        }
+    }
+
     private fun getEffectiveOffset(): Long = Math.round(offsets.average())
 
     private fun getRemoteOffset(msg: ResponseTimeMessage, destinationTime: Long): Long =
@@ -120,6 +136,6 @@ class ClockSynchronizer(
     private fun isExpired(msg: ResponseTimeMessage, destinationTime: Long): Boolean =
         properties.expiry!! < Math.abs(destinationTime.minus(msg.originalTime))
 
-    private fun isOutOfBound(offset: Long): Boolean = (deviation.get() * getScale()) < Math.abs(offset)
+    private fun isOutOfBound(offset: Long): Boolean = deviation.get() < Math.abs(offset)
 
 }
