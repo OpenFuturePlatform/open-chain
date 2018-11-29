@@ -51,7 +51,7 @@ class ClockSynchronizer(
         } finally {
             lock.writeLock().unlock()
 
-            waitResponseMessages(addresses.size, properties.expiry!!)
+            Thread.sleep(properties.expiry!!)
             mitigate()
         }
     }
@@ -67,7 +67,7 @@ class ClockSynchronizer(
 
             if (0 == syncRound.get()) {
 //                deviation.getAndSet(max(deviation.get(), Math.abs(offset)))
-                deviation.set(500)
+                deviation.set(500)//TODO: don`t forget to change
                 offsets.add(offset)
                 return
             }
@@ -108,20 +108,6 @@ class ClockSynchronizer(
             }
         } finally {
             lock.writeLock().unlock()
-        }
-    }
-
-
-    private fun waitResponseMessages(expectedNumberResponses: Int, maxWaitTime: Long) {
-        if (expectedNumberResponses != 0) {
-            var countWaitingSteps = 0
-            val second = 1000L
-            val maxCountDelays = maxWaitTime / second
-
-            while (offsets.size != expectedNumberResponses && countWaitingSteps < maxCountDelays) {
-                ++countWaitingSteps
-                Thread.sleep(second)
-            }
         }
     }
 
