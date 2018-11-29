@@ -84,7 +84,7 @@ class DefaultConnectionService(
     }
 
     private fun findNewPeer0() {
-        if (channelHolder.isEmpty() && addressesHolder.size() <= nodeProperties.rootNodes.size + nodeProperties.peersNumber!!) {
+        if (channelHolder.isEmpty() && addressesHolder.size() <= nodeProperties.rootNodes.size) {
             while (channelHolder.isEmpty() && nodeProperties.peersNumber!! > channelHolder.size()) {
                 findBootNode()
                 log.warn("Unable to find boot peer. Retry...")
