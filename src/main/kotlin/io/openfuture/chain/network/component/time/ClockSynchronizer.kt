@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.locks.ReadWriteLock
@@ -32,6 +33,7 @@ class ClockSynchronizer(
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
     private val syncRound: AtomicInteger = AtomicInteger()
     private val deviation: AtomicLong = AtomicLong()
+    private val nodesTime: ConcurrentHashMap<ResponseTimeMessage, Long> = ConcurrentHashMap()
 
     @Volatile
     private var status: SyncStatus = NOT_SYNCHRONIZED
@@ -45,7 +47,7 @@ class ClockSynchronizer(
                 status = PROCESSING
             }
             offsets.clear()
-
+            nodesTime.clear()
 
             connectionService.sendTimeSyncRequest(addresses)
         } finally {
@@ -65,16 +67,18 @@ class ClockSynchronizer(
             }
 
             val offset = getRemoteOffset(msg, destinationTime)
+            log.debug("#######offset = $offset")
 
-            if (0 == syncRound.get()) {
-//                deviation.getAndSet(max(deviation.get(), Math.abs(offset)))
-                deviation.set(500)//TODO: don`t forget to change
-                offsets.add(offset)
-                return
+            if (msg.status == SYNCHRONIZED.priority) {
+                nodesTime[msg] = offset
             }
 
-            if (!isOutOfBound(offset)) {
-                offsets.add(offset)
+            if (0 == syncRound.get()) {
+                deviation.set(500)
+                if (!isOutOfBound(offset)) {
+                    offsets.add(offset)
+                }
+                return
             }
 
         } finally {
@@ -93,35 +97,46 @@ class ClockSynchronizer(
 
     private fun mitigate() {
         lock.writeLock().lock()
-        log.debug("CLOCK: Offsets size ${offsets.size}")
+        log.debug("CLOCK: Offsets size ${offsets.size} nodesTime size ${nodesTime.size}")
         try {
-            if ((selectionSize * 2 / 3) > offsets.size) {
-                status = NOT_SYNCHRONIZED
-                return
+
+            val offset = if (syncRound.get() != 0) {
+                if ((selectionSize * 2 / 3) > nodesTime.size) {
+                    status = NOT_SYNCHRONIZED
+                    return
+                }
+                nodesTime.values.average().toLong()
+            } else {
+                if ((selectionSize * 2 / 3) > offsets.size) {
+                    status = NOT_SYNCHRONIZED
+                    return
+                }
+                getEffectiveOffset()
             }
 
-            clock.adjust(getEffectiveOffset())
+            clock.adjust(offset)
             syncRound.getAndIncrement()
-            log.info("CLOCK: Effective offset ${getEffectiveOffset()}")
+            log.info("CLOCK: Effective offset $offset")
 
             if (SYNCHRONIZED != status) {
                 status = SYNCHRONIZED
             }
+
         } finally {
             lock.writeLock().unlock()
         }
     }
 
-    private fun getEffectiveOffset(): Long = Math.round(offsets.average())
+    private fun getEffectiveOffset(): Long = offsets.average().toLong()
 
     private fun getRemoteOffset(msg: ResponseTimeMessage, destinationTime: Long): Long =
-        ((msg.receiveTime.minus(msg.originalTime)).plus(msg.transmitTime.minus(destinationTime))).div(2)
+        ((destinationTime - msg.originalTime) + (msg.transmitTime - msg.receiveTime)) / 2
 
     private fun getScale(): Double = 1.div(Math.log(Math.E.plus(syncRound.get())))
 
     private fun isExpired(msg: ResponseTimeMessage, destinationTime: Long): Boolean =
         properties.expiry!! < Math.abs(destinationTime.minus(msg.originalTime))
 
-    private fun isOutOfBound(offset: Long): Boolean = deviation.get() < Math.abs(offset)
+    private fun isOutOfBound(offset: Long): Boolean = deviation.get() < offset
 
 }

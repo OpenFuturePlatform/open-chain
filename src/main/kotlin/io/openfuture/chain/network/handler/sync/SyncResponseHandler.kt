@@ -34,7 +34,6 @@ class SyncResponseHandler(
 
         log.debug("RESPONSE from ${ctx.channel().remoteAddress()}")
         syncManager.onSyncResponseMessage(msg, channelsHolder.getNodeInfoByChannelId(ctx.channel().id()))
-//        ctx.channel().close()
     }
 
 }
