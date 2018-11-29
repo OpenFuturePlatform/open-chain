@@ -201,7 +201,7 @@ class SyncManager(
     }
 
     //todo need to think
-    private fun isTimeOut(): Boolean = clock.currentTimeMillis() - startSyncTime > 210000
+    private fun isTimeOut(): Boolean = clock.currentTimeMillis() - startSyncTime > properties.syncExpiry!!
 
     private fun <K, V> Map<out K, V>.firstOrNull(predicate: (Map.Entry<K, V>) -> Boolean): Map.Entry<K, V>? =
         this.filter(predicate).entries.firstOrNull()
