@@ -16,8 +16,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.BlockchainLock
-import io.openfuture.chain.core.sync.SyncState
-import io.openfuture.chain.core.sync.SyncState.SyncStatusType.NOT_SYNCHRONIZED
+import io.openfuture.chain.core.sync.SyncManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.time.Clock
@@ -46,7 +45,7 @@ class DefaultMainBlockService(
     private val transferTransactionService: TransferTransactionService,
     private val rewardTransactionService: RewardTransactionService,
     private val consensusProperties: ConsensusProperties,
-    private val syncStatus: SyncState,
+    private val syncManager: SyncManager,
     private val throughput: TransactionThroughput
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
 
@@ -118,7 +117,7 @@ class DefaultMainBlockService(
         BlockchainLock.readLock.lock()
         try {
             if (!isSync(MainBlock.of(message))) {
-                syncStatus.setChainStatus(NOT_SYNCHRONIZED)
+                syncManager.outOfSync()
                 return false
             }
 
@@ -134,6 +133,7 @@ class DefaultMainBlockService(
     }
 
     @Transactional
+    @Synchronized
     override fun add(message: BaseMainBlockMessage) {
         BlockchainLock.writeLock.lock()
         try {
@@ -143,7 +143,7 @@ class DefaultMainBlockService(
 
             val block = MainBlock.of(message)
             if (!isSync(block)) {
-                syncStatus.setChainStatus(NOT_SYNCHRONIZED)
+                syncManager.outOfSync()
                 return
             }
 

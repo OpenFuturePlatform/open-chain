@@ -35,6 +35,16 @@ class DefaultBlockService(
     override fun isExists(hash: String): Boolean = repository.findOneByHash(hash)?.let { true } ?: false
 
     @Transactional(readOnly = true)
+    override fun isExists(hash: String, height: Long): Boolean =
+        repository.findOneByHashAndHeight(hash, height)?.let { true } ?: false
+
+    @Transactional(readOnly = true)
     override fun getCurrentHeight(): Long = repository.getCurrentHeight()
+
+    @Transactional(readOnly = true)
+    override fun getCarcassForBlockSync(hash: String): List<Block> {
+        val startBlock = repository.findOneByHash(hash) ?: return emptyList()
+        return repository.findTop30ByHeightGreaterThanOrderByHeightDesc(startBlock.height)
+    }
 
 }
