@@ -28,6 +28,8 @@ interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
 
     fun findOneByHash(hash: String): Entity?
 
+    fun findOneByHashAndHeight(hash: String, height: Long): Entity?
+
     fun findFirstByOrderByHeightDesc(): Entity?
 
     fun findFirstByHeightLessThanOrderByHeightDesc(height: Long): Entity?
@@ -38,6 +40,8 @@ interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
 
     @Query(value = "Select HEIGHT From BLOCKS Order By HEIGHT Desc Limit 1", nativeQuery = true)
     fun getCurrentHeight(): Long
+
+    fun findTop30ByHeightGreaterThanOrderByHeightDesc(height: Long): List<Entity>
 
 }
 

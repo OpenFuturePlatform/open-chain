@@ -2,12 +2,16 @@ package io.openfuture.chain.network.service
 
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelFuture
+import io.openfuture.chain.core.component.NodeConfigurator
+import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.component.ExplorerAddressesHolder
 import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.entity.NetworkAddress
+import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.message.network.RequestTimeMessage
 import io.openfuture.chain.network.property.NodeProperties
+import io.openfuture.chain.network.serialization.Serializable
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
@@ -19,7 +23,9 @@ class DefaultConnectionService(
     private val bootstrap: Bootstrap,
     private val nodeProperties: NodeProperties,
     private val channelHolder: ChannelsHolder,
-    private val explorerAddressesHolder: ExplorerAddressesHolder
+    private val explorerAddressesHolder: ExplorerAddressesHolder,
+    private val config: NodeConfigurator,
+    private val nodeKeyHolder: NodeKeyHolder
 ) : ConnectionService {
 
     companion object {
@@ -32,18 +38,36 @@ class DefaultConnectionService(
             if (!future.isSuccess) {
                 log.warn("Can not connect to ${networkAddress.host}:${networkAddress.port}")
                 explorerAddressesHolder.removeNodeInfo(networkAddress)
+            } else {
+                val greeting = GreetingMessage(config.getConfig().externalPort, nodeKeyHolder.getUid())
+                (future as ChannelFuture).channel().writeAndFlush(greeting)
             }
+
             return@addListener
         }
     }
 
     override fun sendTimeSyncRequest(addresses: Set<NetworkAddress>) {
-        addresses.forEach { networkAddress ->
-            bootstrap.connect(networkAddress.host, networkAddress.port).addListener { future ->
+        addresses.forEach { address ->
+            bootstrap.connect(address.host, address.port).addListener { future ->
                 val channel = (future as ChannelFuture).channel()
 
                 if (future.isSuccess) {
                     channel.writeAndFlush(RequestTimeMessage(clock.currentTimeMillis()))
+                    log.debug("Send Clock Request to ${address.port}")
+                }
+            }
+        }
+    }
+
+    override fun poll(message: Serializable, pollSize: Int) {
+        explorerAddressesHolder.getRandomList(pollSize).map { it.address }.forEach { address ->
+            bootstrap.connect(address.host, address.port).addListener { future ->
+                val channel = (future as ChannelFuture).channel()
+
+                if (future.isSuccess) {
+                    channel.writeAndFlush(message)
+                    log.debug("Send ${message::class.java.simpleName} to ${address.port}")
                 }
             }
         }

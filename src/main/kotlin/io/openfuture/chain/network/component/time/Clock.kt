@@ -8,8 +8,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 @Component
 class Clock {
 
-    @Volatile private var offset: AtomicLong = AtomicLong()
-
+    private val offset: AtomicLong = AtomicLong()
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
 
 

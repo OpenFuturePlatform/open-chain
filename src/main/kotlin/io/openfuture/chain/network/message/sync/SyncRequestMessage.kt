@@ -7,16 +7,22 @@ import io.openfuture.chain.network.extension.writeString
 import io.openfuture.chain.network.serialization.Serializable
 
 @NoArgConstructor
-data class HashBlockRequestMessage(
-    var synchronizationSessionId: String
+data class SyncRequestMessage(
+    var timestamp: Long,
+    var lastBlockHash: String,
+    var lastBlockHeight: Long
 ) : Serializable {
 
     override fun read(buf: ByteBuf) {
-        synchronizationSessionId = buf.readString()
+        timestamp = buf.readLong()
+        lastBlockHash = buf.readString()
+        lastBlockHeight = buf.readLong()
     }
 
     override fun write(buf: ByteBuf) {
-        buf.writeString(synchronizationSessionId)
+        buf.writeLong(timestamp)
+        buf.writeString(lastBlockHash)
+        buf.writeLong(lastBlockHeight)
     }
 
 }
