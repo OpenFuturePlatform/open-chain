@@ -103,15 +103,15 @@ class SyncManager(
 
     @Synchronized
     private fun checkState(lastBlock: Block) {
-        log.debug("LEDGER: <<< responses.size = ${responses.flatMap { it.value }.size}>>>")
+        log.debug("LEDGER: <<< responses.size = ${responses.flatMap { it.value }.size} >>>")
         if (threshold > responses.flatMap { it.value }.size) {
-            log.debug("~~~~~~~~~~~~~NOT_SYNCHRONIZED responses.size~~~~~~~~~~~~~")
+            log.debug("LEDGER: NOT_SYNCHRONIZED reason - responses size")
             status = NOT_SYNCHRONIZED
             return
         }
 
         if (responses.flatMap { it.key }.isEmpty()) {
-            log.debug("SYNCHRONIZED status (empty)")
+            log.debug("LEDGER: SYNCHRONIZED (empty)")
             status = SYNCHRONIZED
             return
         }
@@ -119,16 +119,13 @@ class SyncManager(
         val nodesToAsk = fillChainToSync(lastBlock)
         if (nodesToAsk.isEmpty()) {
             status = NOT_SYNCHRONIZED
-            log.debug("~~~~~~~~~~~~~NOT_SYNCHRONIZED fillChainToSync~~~~~~~~~~~~~")
-            responses.entries.forEach {
-                log.debug("${it.key.map { it.height }}:${it.value.size}")
-            }
+            log.debug("LEDGER: NOT_SYNCHRONIZED reason - chain not found")
+            responses.entries.forEach { log.debug("${it.key.map { it.height }}:${it.value.size}") }
             return
         }
 
 
-//        log.debug("CHAIN: size=${chainToSync.size} ${chainToSync.map { it.height }.toList()}")
-        log.debug("LAST BLOCK TO SYNC: $lastBlockToSync")
+        log.debug("LEDGER: last block to sync: $lastBlockToSync")
         nodesToAsk.forEach { networkApiService.sendToAddress(SyncBlockRequestMessage(lastBlock.hash), it) }
     }
 
@@ -206,7 +203,6 @@ class SyncManager(
     //todo need to think
     private fun isTimeOut(): Boolean = clock.currentTimeMillis() - startSyncTime > 210000
 
-    //Extentions
     private fun <K, V> Map<out K, V>.firstOrNull(predicate: (Map.Entry<K, V>) -> Boolean): Map.Entry<K, V>? =
         this.filter(predicate).entries.firstOrNull()
 

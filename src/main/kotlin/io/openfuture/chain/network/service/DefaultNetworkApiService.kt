@@ -34,7 +34,7 @@ class DefaultNetworkApiService(
 
     override fun sendToAddress(message: Serializable, nodeInfo: NodeInfo) {
         if (!channelsHolder.send(message, nodeInfo)) {
-            log.debug("CAN NOT SEND to ${nodeInfo.address.port}")
+            log.debug("Can not send to ${nodeInfo.address.port}")
             connectionService.connect(nodeInfo.address)
             channelsHolder.send(message, nodeInfo)
         }
