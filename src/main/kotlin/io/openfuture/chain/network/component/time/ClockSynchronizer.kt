@@ -67,7 +67,6 @@ class ClockSynchronizer(
             }
 
             val offset = getRemoteOffset(msg, destinationTime)
-            log.debug("#######offset = $offset")
 
             if (msg.status == SYNCHRONIZED.priority) {
                 nodesTime[msg] = offset
