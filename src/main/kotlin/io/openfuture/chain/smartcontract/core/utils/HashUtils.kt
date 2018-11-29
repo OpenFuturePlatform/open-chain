@@ -1,4 +1,4 @@
-package io.openfuture.chain.smartcontract.utils
+package io.openfuture.chain.smartcontract.core.utils
 
 import org.bouncycastle.crypto.digests.RIPEMD160Digest
 import org.bouncycastle.jcajce.provider.digest.Keccak
