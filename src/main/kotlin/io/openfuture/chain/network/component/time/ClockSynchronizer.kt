@@ -125,8 +125,7 @@ class ClockSynchronizer(
         }
     }
 
-    private fun getEffectiveOffset(): Long = offsets.average().toLong()
-
+    private fun getEffectiveOffset(): Long = Math.round(offsets.average())
     private fun getRemoteOffset(msg: ResponseTimeMessage, destinationTime: Long): Long =
         ((destinationTime - msg.originalTime) + (msg.transmitTime - msg.receiveTime)) / 2
 
