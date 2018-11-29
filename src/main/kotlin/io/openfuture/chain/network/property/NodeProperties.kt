@@ -69,7 +69,12 @@ class NodeProperties(
     /** Max synchronization response delay in milliseconds. Max value 10000 millis*/
     @field:Max(10 * 1000)
     @field:NotNull
-    var expiry: Long? = null
+    var expiry: Long? = null,
+
+    /** Max chain synchronization time in milliseconds. Min value 10000 millis*/
+    @field:Min(10 * 1000)
+    @field:NotNull
+    var syncExpiry: Long? = null
 
 ) {
 

@@ -59,7 +59,6 @@ class ClockSynchronizer(
     }
 
     fun add(msg: ResponseTimeMessage, destinationTime: Long) {
-        log.debug("clock response")
         lock.writeLock().lock()
         try {
             if (isExpired(msg, destinationTime)) {
