@@ -26,6 +26,7 @@ class ConnectionHandler(
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
         channelsHolder.removeChannel(ctx.channel())
+        log.debug("CHANNEL Inactive")
         super.channelInactive(ctx)
     }
 

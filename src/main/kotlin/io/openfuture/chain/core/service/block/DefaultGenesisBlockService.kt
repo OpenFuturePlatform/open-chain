@@ -12,8 +12,7 @@ import io.openfuture.chain.core.service.DefaultDelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.sync.BlockchainLock
-import io.openfuture.chain.core.sync.SyncState
-import io.openfuture.chain.core.sync.SyncState.SyncStatusType.NOT_SYNCHRONIZED
+import io.openfuture.chain.core.sync.SyncManager
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -29,7 +28,7 @@ class DefaultGenesisBlockService(
     delegateService: DefaultDelegateService,
     repository: GenesisBlockRepository,
     private val keyHolder: NodeKeyHolder,
-    private val syncStatus: SyncState,
+    private val syncManager: SyncManager,
     private val consensusProperties: ConsensusProperties
 ) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService), GenesisBlockService {
 
@@ -82,6 +81,7 @@ class DefaultGenesisBlockService(
     }
 
     @Transactional
+    @Synchronized
     override fun add(message: GenesisBlockMessage) {
         if (null != repository.findOneByHash(message.hash)) {
             return
@@ -91,7 +91,7 @@ class DefaultGenesisBlockService(
         val block = GenesisBlock.of(message, delegates)
 
         if (!isSync(block)) {
-            syncStatus.setChainStatus(NOT_SYNCHRONIZED)
+            syncManager.outOfSync()
             return
         }
 
