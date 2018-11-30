@@ -11,8 +11,6 @@ import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.network.GreetingResponseMessage
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.ConnectionService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.net.InetSocketAddress
 
@@ -26,10 +24,6 @@ class GreetingResponseHandler(
     private val nodeProperties: NodeProperties
 ) : SimpleChannelInboundHandler<GreetingResponseMessage>() {
 
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(GreetingResponseHandler::class.java)
-    }
-
     override fun channelRead0(ctx: ChannelHandlerContext, msg: GreetingResponseMessage) {
         val channel = ctx.channel()
         val socket = channel.remoteAddress() as InetSocketAddress
@@ -38,20 +32,14 @@ class GreetingResponseHandler(
         val address = NetworkAddress(socket.address.hostAddress, socket.port)
         val nodeInfo = NodeInfo(msg.uid, address)
         if (msg.accepted) {
-            log.error("Received accept from ${ctx.channel().remoteAddress()}")
             channelHolder.addChannel(channel, nodeInfo)
         } else {
-            log.error("Received reject from ${ctx.channel().remoteAddress()}")
             if (msg.loop) {
                 nodeProperties.setMyself(nodeInfo)
-            } else {
-                addressesHolder.markRejected(nodeInfo)
             }
-            ctx.close()
+            addressesHolder.markRejected(nodeInfo)
         }
-        if (!msg.loop) {
-            addressesHolder.addNodesInfo(msg.nodesInfo)
-        }
+        addressesHolder.addNodesInfo(msg.nodesInfo)
         connectionService.findNewPeer()
     }
 

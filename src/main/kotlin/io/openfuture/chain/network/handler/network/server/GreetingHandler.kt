@@ -38,14 +38,15 @@ class GreetingHandler(
         val nodeInfo = NodeInfo(msg.uid, NetworkAddress(hostAddress, msg.externalPort))
         val nodesInfo = addressesHolder.getNodesInfo()
         val response = GreetingResponseMessage(nodeKeyHolder.getUid(), hostAddress, nodesInfo)
-        if (isConnectionAcceptable(nodeInfo, ctx.channel())) {
+        val channel = ctx.channel()
+        if (isConnectionAcceptable(nodeInfo, channel)) {
+            channelHolder.addChannel(channel, nodeInfo)
             log.info("Accepted connection from ${ctx.channel().remoteAddress()} (Tachka ${msg.externalPort})")
             addressesHolder.addNodeInfo(nodeInfo)
             channelHolder.broadcast(NewClient(nodeInfo))
             ctx.writeAndFlush(response)
         } else {
             log.info("Rejected connection from ${ctx.channel().remoteAddress()} (Tachka ${msg.externalPort})")
-            log.info("Is known: ${channelHolder.getNodesInfo().joinToString { it.address.port.toString() }} | ${channelHolder.size()})")
             response.accepted = false
             response.loop = (msg.uid == nodeKeyHolder.getUid())
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE)
@@ -55,6 +56,6 @@ class GreetingHandler(
     private fun isConnectionAcceptable(nodeInfo: NodeInfo, channel: Channel): Boolean {
         return nodeInfo.uid != nodeKeyHolder.getUid()
             && nodeProperties.getAllowedConnections() > channelHolder.size()
-            && channelHolder.addChannel(channel, nodeInfo)
+            && !channelHolder.hasChannel(channel)
     }
 }

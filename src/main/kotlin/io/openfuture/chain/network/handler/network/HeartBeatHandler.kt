@@ -7,8 +7,6 @@ import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.handler.timeout.IdleState.READER_IDLE
 import io.netty.handler.timeout.IdleState.WRITER_IDLE
 import io.netty.handler.timeout.IdleStateEvent
-import io.netty.handler.timeout.ReadTimeoutException
-import io.netty.handler.timeout.WriteTimeoutException
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.message.network.HeartBeatMessage
 import org.slf4j.Logger

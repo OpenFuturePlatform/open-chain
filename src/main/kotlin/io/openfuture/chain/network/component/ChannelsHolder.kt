@@ -62,4 +62,7 @@ class ChannelsHolder {
         return channelGroup.add(channel)
     }
 
+    @Synchronized
+    fun hasChannel(channel: Channel): Boolean = channelGroup.contains(channel)
+
 }
