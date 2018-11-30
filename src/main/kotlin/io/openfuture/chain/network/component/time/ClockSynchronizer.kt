@@ -99,20 +99,13 @@ class ClockSynchronizer(
         try {
 
             val offset = if (syncRound.get() != 0) {
-                if ((selectionSize * 2 / 3) > nodesTime.size) {
-                    status = NOT_SYNCHRONIZED
-                    return
-                }
-                nodesTime.values.average().toLong()
+                computeOffset(nodesTime.size) { nodesTime.values.min()!! }
             } else {
-                if ((selectionSize * 2 / 3) > offsets.size) {
-                    status = NOT_SYNCHRONIZED
-                    return
-                }
-                getEffectiveOffset()
+                computeOffset(offsets.size) { getEffectiveOffset() }
             }
 
-            clock.adjust(offset)
+            offset?.let { clock.adjust(offset) } ?: return
+
             syncRound.getAndIncrement()
             log.info("CLOCK: Effective offset $offset")
 
@@ -125,7 +118,16 @@ class ClockSynchronizer(
         }
     }
 
-    private fun getEffectiveOffset(): Long = Math.round(offsets.average())
+    private fun computeOffset(size: Int, computation: () -> Long): Long? {
+        return if ((selectionSize * 2 / 3) > size) {
+            status = NOT_SYNCHRONIZED
+            null
+        } else {
+            computation()
+        }
+    }
+
+    private fun getEffectiveOffset(): Long = offsets.min()!!.toLong()
     private fun getRemoteOffset(msg: ResponseTimeMessage, destinationTime: Long): Long =
         ((destinationTime - msg.originalTime) + (msg.transmitTime - msg.receiveTime)) / 2
 
