@@ -22,17 +22,9 @@ class ConnectionHandler(
         private val log: Logger = LoggerFactory.getLogger(ConnectionHandler::class.java)
     }
 
-    private val channels = DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
-
-    override fun channelActive(ctx: ChannelHandlerContext) {
-        channels.add(ctx.channel())
-        log.info("${ctx.channel().remoteAddress()} connected, operating peers count is ${channelsHolder.size()}, peers count: ${channels.size}")
-        super.channelActive(ctx)
-    }
-
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        log.warn("${ctx.channel().remoteAddress()} disconnected, operating peers count is ${channelsHolder.size()}, peers count: ${channels.size}")
-        channels.remove(ctx.channel())
+        log.debug("${ctx.channel().remoteAddress()} disconnected, operating peers count is ${channelsHolder.size()}")
+        channelsHolder.remove(ctx.channel())
         connectionService.findNewPeer()
         super.channelInactive(ctx)
     }

@@ -34,27 +34,17 @@ class HeartBeatHandler(
             super.userEventTriggered(ctx, event)
             return
         }
-        log.info("Idle event (${event.state()}) inbound to ${ctx.channel().remoteAddress()}")
 
         val eventState = event.state()
         if (READER_IDLE == eventState) {
+            if (null != channelsHolder.getNodeInfoByChannelId(ctx.channel().id())) {
+                log.info("Removed idle node - ${ctx.channel().remoteAddress()}")
+            }
             ctx.close()
         } else if (WRITER_IDLE == eventState && null != channelsHolder.getNodeInfoByChannelId(ctx.channel().id())) {
+            log.info("Sending heartbeat message to ${ctx.channel().remoteAddress()}")
             ctx.writeAndFlush(HeartBeatMessage())
                 .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
-        }
-    }
-
-    override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
-        when (cause) {
-            is WriteTimeoutException -> {
-                ctx.writeAndFlush(HeartBeatMessage())
-                    .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
-            }
-            is ReadTimeoutException -> {
-                ctx.close()
-            }
-            else -> super.exceptionCaught(ctx, cause)
         }
     }
 

@@ -84,8 +84,8 @@ class DefaultConnectionService(
     }
 
     private fun findNewPeer0() {
-        if (addressesHolder.size() <= nodeProperties.rootNodes.size + nodeProperties.peersNumber!!) {
-            while (!findBootNode() && nodeProperties.peersNumber!! > channelHolder.size()) {
+        if (addressesHolder.size() < nodeProperties.rootNodes.size) {
+            while (!findBootNode() && nodeProperties.rootNodes.size > channelHolder.size()) {
                 log.warn("Unable to find boot peer. Retry...")
                 TimeUnit.SECONDS.sleep(3)
             }
@@ -135,6 +135,7 @@ class DefaultConnectionService(
     @Scheduled(fixedRateString = "\${node.peer-unavailability-period}")
     fun maintain() {
         addressesHolder.cancelRejectedStatus()
+        findNewPeer()
     }
 
 }

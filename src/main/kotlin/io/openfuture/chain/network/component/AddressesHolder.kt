@@ -28,14 +28,16 @@ class AddressesHolder(
     fun addNodeInfo(nodeInfo: NodeInfo) {
         val uid = nodeKeyHolder.getUid()
         if (uid != nodeInfo.uid) {
-            this.nodesInfo[nodeInfo] = ConnectionMark()
+            this.nodesInfo.putIfAbsent(nodeInfo, ConnectionMark())
         }
     }
 
     fun addNodesInfo(nodesInfo: Set<NodeInfo>) {
         val uid = nodeKeyHolder.getUid()
         val nodesInfoWithoutMe = nodesInfo.filter { uid != it.uid }
-        this.nodesInfo.putAll(nodesInfoWithoutMe.associate { it to ConnectionMark() })
+        for (nodeInfo in nodesInfoWithoutMe) {
+            this.nodesInfo.putIfAbsent(nodeInfo, ConnectionMark())
+        }
     }
 
     fun removeNodeInfo(address: NetworkAddress) {

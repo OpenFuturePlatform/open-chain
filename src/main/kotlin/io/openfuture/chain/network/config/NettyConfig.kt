@@ -27,7 +27,7 @@ class NettyConfig(
 
     @Bean
     fun serverBootstrap(): ServerBootstrap = ServerBootstrap()
-        .group(bossGroup(), workerGroup())
+        .group(workerGroup(), bossGroup())
         .channel(NioServerSocketChannel::class.java)
         .childHandler(serverChannelInitializer)
         .option(SO_BACKLOG, properties.backlog!!)
@@ -36,7 +36,7 @@ class NettyConfig(
 
     @Bean
     fun clientBootstrap(): Bootstrap = Bootstrap()
-        .group(workerGroup())
+        .group(bossGroup())
         .channel(NioSocketChannel::class.java)
         .handler(clientChannelInitializer)
         .option(SO_KEEPALIVE, properties.keepAlive!!)
