@@ -78,9 +78,27 @@ class DefaultConnectionService(
     }
 
     override fun findNewPeer() {
-        if (nodeProperties.peersNumber!! > channelHolder.size()) {
+        if (channelHolder.size() < nodeProperties.peersNumber!!) {
             executor.execute { findNewPeer0() }
         }
+    }
+
+    override fun findRegularPeer(): Boolean {
+        if (channelHolder.size() >= nodeProperties.peersNumber!!) {
+            return false
+        }
+
+        log.info("Looking for regular peer ${channelHolder.getNodesInfo().joinToString { it.address.port.toString() }} | ${channelHolder.size()}")
+        val knownPeers = channelHolder.getNodesInfo()
+        for (peer in addressesHolder.getRandomList(connectedPeers = knownPeers)) {
+            if (!addressesHolder.isRejected(peer.address)) {
+                val connected = connect(peer.address, Consumer {
+                    greet(it, peer.address)
+                })
+                if (connected) return true
+            }
+        }
+        return false
     }
 
     private fun findNewPeer0() {
@@ -103,20 +121,6 @@ class DefaultConnectionService(
                 greet(it, bootAddress)
             })
             if (connected) return true
-        }
-        return false
-    }
-
-    private fun findRegularPeer(): Boolean {
-        log.info("Looking for regular peer ${channelHolder.getNodesInfo().joinToString { it.address.port.toString() }} | ${channelHolder.size()}")
-        val knownPeers = channelHolder.getNodesInfo()
-        for (peer in addressesHolder.getRandomList(connectedPeers = knownPeers)) {
-            if (!addressesHolder.isRejected(peer.address)) {
-                val connected = connect(peer.address, Consumer {
-                    greet(it, peer.address)
-                })
-                if (connected) return true
-            }
         }
         return false
     }
