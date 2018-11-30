@@ -40,7 +40,7 @@ class GreetingResponseHandler(
             addressesHolder.markRejected(nodeInfo)
         }
         addressesHolder.addNodesInfo(msg.nodesInfo)
-        connectionService.findNewPeer()
+        connectionService.findRegularPeer()
     }
 
 }
