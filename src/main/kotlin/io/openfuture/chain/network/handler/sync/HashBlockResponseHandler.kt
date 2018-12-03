@@ -11,12 +11,13 @@ import org.springframework.stereotype.Component
 @Component
 @Sharable
 class HashBlockResponseHandler(
-    private val syncManager: SyncManager,
-    private val channelsHolder: ChannelsHolder
+    private val syncManager: SyncManager
 ) : SimpleChannelInboundHandler<HashBlockResponseMessage>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: HashBlockResponseMessage) {
-        syncManager.onHashResponseMessage(msg, channelsHolder.getNodeInfoByChannelId(ctx.channel().id())!!)
+        ctx.channel().attr(ChannelsHolder.NODE_INFO_KEY).get()?.let {
+            syncManager.onHashResponseMessage(msg, it)
+        }
     }
 
 }

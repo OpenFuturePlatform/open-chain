@@ -29,6 +29,7 @@ class DefaultNetworkApiService(
     override fun sendToAddress(message: Serializable, nodeInfo: NodeInfo) {
         if (!channelsHolder.send(message, nodeInfo)) {
             connectionService.connect(nodeInfo.address, Consumer {
+                it.attr(ChannelsHolder.NODE_INFO_KEY).set(nodeInfo)
                 it.writeAndFlush(message)
             })
         }

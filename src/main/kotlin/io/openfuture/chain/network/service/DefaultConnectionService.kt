@@ -21,6 +21,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
@@ -40,7 +41,7 @@ class DefaultConnectionService(
     }
 
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
-
+    private var connectionTask: Future<*>? = null
 
     override fun onApplicationEvent(event: ServerReadyEvent) {
         findNewPeer()
@@ -78,8 +79,8 @@ class DefaultConnectionService(
     }
 
     override fun findNewPeer() {
-        if (nodeProperties.peersNumber!! > channelHolder.size()) {
-            executor.execute { findNewPeer0() }
+        if (nodeProperties.peersNumber!! > channelHolder.size() && (null == connectionTask || connectionTask!!.isDone)) {
+            connectionTask = executor.submit { findNewPeer0() }
         }
     }
 

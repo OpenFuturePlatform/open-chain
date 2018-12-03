@@ -7,7 +7,6 @@ import io.netty.util.AttributeKey
 import io.netty.util.concurrent.GlobalEventExecutor
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.exception.NotFoundChannelException
-import io.openfuture.chain.network.handler.network.ConnectionHandler
 import io.openfuture.chain.network.serialization.Serializable
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,7 +16,7 @@ import org.springframework.stereotype.Component
 class ChannelsHolder {
 
     companion object {
-        private val uidKey = AttributeKey.valueOf<NodeInfo>("uid")
+        val NODE_INFO_KEY = AttributeKey.valueOf<NodeInfo>("uid")
         private val log: Logger = LoggerFactory.getLogger(ChannelsHolder::class.java)
     }
 
@@ -35,7 +34,7 @@ class ChannelsHolder {
     }
 
     fun send(message: Serializable, nodeInfo: NodeInfo): Boolean {
-        val channel = channelGroup.firstOrNull { it.attr(uidKey).get() == nodeInfo } ?: return false
+        val channel = channelGroup.firstOrNull { it.attr(NODE_INFO_KEY).get() == nodeInfo } ?: return false
         channel.writeAndFlush(message)
         return true
     }
@@ -48,16 +47,16 @@ class ChannelsHolder {
 
     fun isEmpty(): Boolean = channelGroup.isEmpty()
 
-    fun getNodesInfo(): List<NodeInfo> = channelGroup.map { it.attr(uidKey).get() }
+    fun getNodesInfo(): List<NodeInfo> = channelGroup.map { it.attr(NODE_INFO_KEY).get() }
 
-    fun getNodeInfoByChannelId(channelId: ChannelId): NodeInfo? = channelGroup.find(channelId)?.attr(uidKey)?.get()
+    fun getNodeInfoByChannelId(channelId: ChannelId): NodeInfo? = channelGroup.find(channelId)?.attr(NODE_INFO_KEY)?.get()
 
     @Synchronized
     fun addChannel(channel: Channel, nodeInfo: NodeInfo): Boolean {
-        if(channelGroup.any { it.attr(uidKey).get() == nodeInfo }) {
+        if(channelGroup.any { it.attr(NODE_INFO_KEY).get() == nodeInfo }) {
             return false
         }
-        channel.attr(uidKey).setIfAbsent(nodeInfo)
+        channel.attr(NODE_INFO_KEY).setIfAbsent(nodeInfo)
         log.debug("${channel.remoteAddress()} connected, operating peers count is ${size()}")
         return channelGroup.add(channel)
     }
