@@ -35,7 +35,6 @@ class SourceClassLoader(
 
     override fun loadClass(name: String, resolve: Boolean): Class<*> {
         try {
-            //todo validate
             return super.loadClass(name, resolve)
         } catch (ex: Throwable) {
             throw ClassLoadingException(ex.message, ex)
