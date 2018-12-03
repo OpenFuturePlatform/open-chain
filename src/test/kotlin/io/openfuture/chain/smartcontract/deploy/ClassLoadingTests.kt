@@ -1,6 +1,5 @@
 package io.openfuture.chain.smartcontract.deploy
 
-import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
 import io.openfuture.chain.smartcontract.deploy.load.SourceClassLoader
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -8,18 +7,6 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 class ClassLoadingTests {
-
-    @Test
-    fun loadBytesWhenValidContract() {
-        val path = "/classes/CalculatorContract.class"
-        val bytes = getResource(path).toFile().readBytes()
-        val loader = SourceClassLoader()
-
-        val loaded = loader.loadBytes(ClassSource(bytes))
-
-        assertThat(loaded.clazz.newInstance().javaClass.simpleName).isEqualTo("CalculatorContract")
-        assertThat(loaded.byteCode).isEqualTo(bytes)
-    }
 
     @Test
     fun loadClassFromFile() {
@@ -37,7 +24,7 @@ class ClassLoadingTests {
 
 
     @Test
-    fun loadBytesWhenJavaClass() {
+    fun loadBytesWhenValidJavaContractClass() {
         val javaBytes = getResource("/classes/JavaContract.class").toFile().readBytes()
         val className = "io.test.JavaContract"
         val loader = SourceClassLoader()
@@ -50,7 +37,7 @@ class ClassLoadingTests {
     }
 
     @Test
-    fun loadBytesWhenKotlinClass() {
+    fun loadBytesWhenValidKotlinContractClass() {
         val kotlinBytes = getResource("/classes/KotlinContract.class").toFile().readBytes()
         val className = "io.test.KotlinContract"
 
