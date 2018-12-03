@@ -9,11 +9,9 @@ class DefaultContractService : ContractService {
 
     private val classLoader = SourceClassLoader()
 
-    
+
     override fun deploy(bytes: ByteArray) {
-        // simple deploy method
-        val source = ClassSource(bytes)
-        classLoader.loadBytes(source.qualifiedName, bytes)
+        classLoader.loadBytes(ClassSource(bytes))
     }
 
     override fun run(className: String, method: String, vararg params: Any) {

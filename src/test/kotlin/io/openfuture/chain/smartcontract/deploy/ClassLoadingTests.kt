@@ -1,5 +1,6 @@
 package io.openfuture.chain.smartcontract.deploy
 
+import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
 import io.openfuture.chain.smartcontract.deploy.load.SourceClassLoader
 import org.assertj.core.api.Assertions.assertThat
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -8,11 +9,22 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 class ClassLoadingTests {
+    
+    @Test
+    fun loadBytesWhenValidContract() {
+        val path = "/classes/CalculatorContract.class"
+        val bytes = getResource(path).toFile().readBytes()
+        val loader = SourceClassLoader()
+
+        val loaded = loader.loadBytes(ClassSource(bytes))
+
+        assertThat(loaded.clazz.newInstance().javaClass.simpleName).isEqualTo("CalculatorContract")
+        assertThat(loaded.byteCode).isEqualTo(bytes)
+    }
 
     @Test
     fun loadClassFromFile() {
         val path = "/classes/CalculatorContract.class"
-
         val loader = SourceClassLoader(listOf(getResource(path)))
 
         val clazz = loader.loadClass("io.openfuture.chain.smartcontract.templates.CalculatorContract")

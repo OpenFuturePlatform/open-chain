@@ -1,10 +1,14 @@
 package io.openfuture.chain.smartcontract.deploy.load
 
+import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
 import io.openfuture.chain.smartcontract.deploy.domain.ClassSource.Companion.isClass
 import io.openfuture.chain.smartcontract.deploy.domain.LoadedClass
 import io.openfuture.chain.smartcontract.deploy.exception.ClassLoadingException
 import io.openfuture.chain.smartcontract.deploy.utils.asResourcePath
 import io.openfuture.chain.smartcontract.deploy.utils.toURL
+import io.test.io.openfuture.chain.smartcontract.deploy.validation.SourceValidator
+import io.test.io.openfuture.chain.smartcontract.deploy.validation.ValidationResult
+import org.objectweb.asm.ClassReader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
@@ -52,12 +56,22 @@ class SourceClassLoader(
         return clazz
     }
 
+    fun loadBytes(classSource: ClassSource): LoadedClass = loadBytes(classSource.qualifiedName, classSource.bytes)
+
     fun loadBytes(className: String, bytes: ByteArray): LoadedClass {
         try {
+            validate(bytes)
             return LoadedClass(defineClass(className, bytes, 0, bytes.size), bytes)
         } catch (ex: Throwable) {
             throw ClassLoadingException(ex.message, ex)
         }
+    }
+
+    private fun validate(bytes: ByteArray) {
+        val result = ValidationResult()
+        ClassReader(bytes).accept(SourceValidator(result), 0)
+        if (result.hasErrors())
+            throw ClassLoadingException("Contract class is invalid")
     }
 
     private fun readClassBytes(fullyQualifiedClassName: String): ByteArray {
