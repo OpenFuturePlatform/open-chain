@@ -1,4 +1,4 @@
-package io.test.io.openfuture.chain.smartcontract.deploy.service
+package io.openfuture.chain.smartcontract.deploy.execution
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
