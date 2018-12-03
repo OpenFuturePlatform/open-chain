@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
 class ChannelsHolder {
 
     companion object {
-        val NODE_INFO_KEY = AttributeKey.valueOf<NodeInfo>("uid")
+        val NODE_INFO_KEY: AttributeKey<NodeInfo> = AttributeKey.valueOf<NodeInfo>("uid")
         private val log: Logger = LoggerFactory.getLogger(ChannelsHolder::class.java)
     }
 
