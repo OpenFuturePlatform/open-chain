@@ -8,10 +8,7 @@ import io.openfuture.chain.network.handler.consensus.PendingBlockNetworkHandler
 import io.openfuture.chain.network.handler.core.DelegateTransactionHandler
 import io.openfuture.chain.network.handler.core.TransferTransactionHandler
 import io.openfuture.chain.network.handler.core.VoteTransactionHandler
-import io.openfuture.chain.network.handler.network.ConnectionHandler
-import io.openfuture.chain.network.handler.network.HeartBeatHandler
-import io.openfuture.chain.network.handler.network.NetworkStatusHandler
-import io.openfuture.chain.network.handler.network.NewClientHandler
+import io.openfuture.chain.network.handler.network.*
 import io.openfuture.chain.network.handler.network.client.GreetingResponseHandler
 import io.openfuture.chain.network.handler.network.client.ResponseTimeHandler
 import io.openfuture.chain.network.handler.network.codec.MessageCodec
@@ -24,7 +21,8 @@ import java.util.concurrent.TimeUnit
 @Component
 class ClientChannelInitializer(
     private val nodeProperties: NodeProperties,
-    private val applicationContext: ApplicationContext
+    private val applicationContext: ApplicationContext,
+    private val cacheHandler: CacheHandler
 ) : ChannelInitializer<Channel>() {
 
     override fun initChannel(channel: Channel) {
@@ -34,6 +32,7 @@ class ClientChannelInitializer(
         val pipeline = channel.pipeline()
 
         pipeline.addLast(
+            cacheHandler,
             applicationContext.getBean(MessageCodec::class.java),
             applicationContext.getBean(ConnectionHandler::class.java),
             IdleStateHandler(readIdleTime, writeIdleTime, 0, TimeUnit.MILLISECONDS),

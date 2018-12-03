@@ -71,6 +71,10 @@ class NodeProperties(
     @field:NotNull
     var expiry: Long? = null,
 
+    /** Time after that cache message will expired */
+    @field:NotNull
+    var messageCacheExpireInterval: Long? = null,
+
     /** Max chain synchronization time in milliseconds. Min value 10000 millis*/
     @field:Min(10 * 1000)
     @field:NotNull
