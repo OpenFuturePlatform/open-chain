@@ -19,7 +19,7 @@ class CacheHandler(
         val bytes = ByteArray(length)
         buf.readBytes(bytes)
         buf.resetReaderIndex()
-        if (messageCache.getAndSaveHash(bytes) == null) {
+        if (null == messageCache.getAndSaveHash(bytes)) {
             ctx.fireChannelRead(buf)
         }
     }
