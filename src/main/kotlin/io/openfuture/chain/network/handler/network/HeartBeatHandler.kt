@@ -24,7 +24,7 @@ class HeartBeatHandler(
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: HeartBeatMessage) {
-        log.info("Received heartbeat message from ${ctx.channel().remoteAddress()}")
+        // Do nothing
     }
 
     override fun userEventTriggered(ctx: ChannelHandlerContext, event: Any) {
@@ -40,7 +40,6 @@ class HeartBeatHandler(
             }
             ctx.close()
         } else if (WRITER_IDLE == eventState && null != channelsHolder.getNodeInfoByChannelId(ctx.channel().id())) {
-            log.info("Sending heartbeat message to ${ctx.channel().remoteAddress()}")
             ctx.writeAndFlush(HeartBeatMessage())
                 .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
         }
