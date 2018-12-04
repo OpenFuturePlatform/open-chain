@@ -3,7 +3,7 @@ package io.openfuture.chain.smartcontract.deploy.load
 import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
 import io.openfuture.chain.smartcontract.deploy.domain.ClassSource.Companion.isClass
 import io.openfuture.chain.smartcontract.deploy.domain.LoadedClass
-import io.openfuture.chain.smartcontract.deploy.exception.ClassLoadingException
+import io.openfuture.chain.smartcontract.deploy.exception.ContractLoadingException
 import io.openfuture.chain.smartcontract.deploy.utils.asResourcePath
 import io.openfuture.chain.smartcontract.deploy.utils.toURL
 import io.openfuture.chain.smartcontract.deploy.validation.SourceValidator
@@ -37,7 +37,7 @@ class SourceClassLoader(
         try {
             return super.loadClass(name, resolve)
         } catch (ex: Throwable) {
-            throw ClassLoadingException(ex.message, ex)
+            throw ContractLoadingException(ex.message, ex)
         }
     }
 
@@ -62,7 +62,7 @@ class SourceClassLoader(
             validate(bytes)
             return LoadedClass(defineClass(className, bytes, 0, bytes.size), bytes)
         } catch (ex: Throwable) {
-            throw ClassLoadingException(ex.message, ex)
+            throw ContractLoadingException(ex.message, ex)
         }
     }
 
@@ -70,15 +70,15 @@ class SourceClassLoader(
         val result = ValidationResult()
         ClassReader(bytes).accept(SourceValidator(result), 0)
         if (result.hasErrors())
-            throw ClassLoadingException("Contract class is invalid")
+            throw ContractLoadingException("Contract class is invalid")
     }
 
     private fun readClassBytes(fullyQualifiedClassName: String): ByteArray {
         try {
             return (getResourceAsStream("${fullyQualifiedClassName.asResourcePath}.class")
-                ?: throw ClassLoadingException("Class not found $fullyQualifiedClassName")).readBytes()
+                ?: throw ContractLoadingException("Class not found $fullyQualifiedClassName")).readBytes()
         } catch (e: IOException) {
-            throw ClassLoadingException("Error reading bytecode", e)
+            throw ContractLoadingException("Error reading bytecode", e)
         }
     }
 

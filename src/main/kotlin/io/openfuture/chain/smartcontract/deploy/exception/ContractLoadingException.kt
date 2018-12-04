@@ -1,6 +1,6 @@
 package io.openfuture.chain.smartcontract.deploy.exception
 
-class ClassLoadingException(
+class ContractLoadingException(
     message: String? = "Class loading failed",
     cause: Throwable? = null
 ) : RuntimeException(message, cause)
