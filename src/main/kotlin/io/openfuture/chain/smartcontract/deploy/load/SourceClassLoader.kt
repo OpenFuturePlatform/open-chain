@@ -6,8 +6,8 @@ import io.openfuture.chain.smartcontract.deploy.domain.LoadedClass
 import io.openfuture.chain.smartcontract.deploy.exception.ClassLoadingException
 import io.openfuture.chain.smartcontract.deploy.utils.asResourcePath
 import io.openfuture.chain.smartcontract.deploy.utils.toURL
-import io.test.io.openfuture.chain.smartcontract.deploy.validation.SourceValidator
-import io.test.io.openfuture.chain.smartcontract.deploy.validation.ValidationResult
+import io.openfuture.chain.smartcontract.deploy.validation.SourceValidator
+import io.openfuture.chain.smartcontract.deploy.validation.ValidationResult
 import org.objectweb.asm.ClassReader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
