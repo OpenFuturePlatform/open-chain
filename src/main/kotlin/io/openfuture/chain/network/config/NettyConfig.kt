@@ -20,7 +20,7 @@ class NettyConfig(
 ) {
 
     @Bean(destroyMethod = "shutdownGracefully")
-    fun bossGroup(): NioEventLoopGroup = NioEventLoopGroup()
+    fun bossGroup(): NioEventLoopGroup = NioEventLoopGroup(properties.bossCount!!)
 
     @Bean(destroyMethod = "shutdownGracefully")
     fun workerGroup(): NioEventLoopGroup = NioEventLoopGroup()
