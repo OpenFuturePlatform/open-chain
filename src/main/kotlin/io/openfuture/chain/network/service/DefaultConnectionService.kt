@@ -73,7 +73,7 @@ class DefaultConnectionService(
             .map { it.address }
         var numberOfConnections = nodeProperties.getRootAddresses().size
         val it = addresses.iterator()
-        while (numberOfConnections != 0 || it.hasNext()) {
+        while (it.hasNext() && numberOfConnections != 0) {
             val address = it.next()
             val connected = connect(address, Consumer {
                 val message = RequestTimeMessage(clock.currentTimeMillis())
