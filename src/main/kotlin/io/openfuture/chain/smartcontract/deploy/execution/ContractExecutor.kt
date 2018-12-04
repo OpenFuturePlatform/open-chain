@@ -11,7 +11,7 @@ class ContractExecutor {
         private val log: Logger = LoggerFactory.getLogger(ContractExecutor::class.java)
     }
 
-    private val pool = Executors.newFixedThreadPool(4)
+    private val pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1)
 
 
     fun run(runnableClass: String, method: String, vararg input: Any): Result {
