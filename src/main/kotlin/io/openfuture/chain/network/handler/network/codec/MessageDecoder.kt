@@ -8,6 +8,8 @@ import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.message.base.MessageType
 import io.openfuture.chain.network.message.network.RequestTimeMessage
 import io.openfuture.chain.network.message.network.ResponseTimeMessage
+import io.openfuture.chain.network.message.sync.GenesisBlockMessage
+import io.openfuture.chain.network.message.sync.MainBlockMessage
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.serialization.Serializable
 import org.apache.commons.lang3.builder.ToStringBuilder
@@ -45,19 +47,18 @@ class MessageDecoder(
         message.read(buf)
 
         if (isExpired(message, originTime)) {
-            log.debug("Message $type  from ${ctx.channel().remoteAddress()} decline by expiration")
+            log.debug("Message $type from ${ctx.channel().remoteAddress()} decline by expiration")
             return
         }
 
-        log.debug("Decoded ${ToStringBuilder.reflectionToString(message, SHORT_PREFIX_STYLE)} " +
-                    "from ${ctx.channel().remoteAddress()}"
-        )
+        log.trace("Decoded ${ToStringBuilder.reflectionToString(message, SHORT_PREFIX_STYLE)} " +
+            "from ${ctx.channel().remoteAddress()}")
 
         out.add(message)
     }
 
     private fun isExpired(message: Serializable, originTime: Long): Boolean {
-        if (message is RequestTimeMessage || message is  ResponseTimeMessage) {
+        if (message is RequestTimeMessage || message is ResponseTimeMessage || message is MainBlockMessage || message is GenesisBlockMessage) {
             return false
         }
 

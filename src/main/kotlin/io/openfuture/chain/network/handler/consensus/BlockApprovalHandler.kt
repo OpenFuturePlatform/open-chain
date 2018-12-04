@@ -30,7 +30,7 @@ class BlockApprovalHandler(
             log.error("Connection error ${ctx.channel().remoteAddress()} with cause: ${cause.message}")
         } else if (cause !is SynchronizationException) {
             log.error("Connection error ${ctx.channel().remoteAddress()} with cause: ${cause.message}")
-
+            cause.printStackTrace()
             ctx.close()
         }
     }

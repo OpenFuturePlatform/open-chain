@@ -20,14 +20,14 @@ class NettyConfig(
 ) {
 
     @Bean(destroyMethod = "shutdownGracefully")
-    fun bossGroup(): NioEventLoopGroup = NioEventLoopGroup(properties.bossCount!!)
+    fun bossGroup(): NioEventLoopGroup = NioEventLoopGroup()
 
     @Bean(destroyMethod = "shutdownGracefully")
     fun workerGroup(): NioEventLoopGroup = NioEventLoopGroup()
 
     @Bean
     fun serverBootstrap(): ServerBootstrap = ServerBootstrap()
-        .group(workerGroup(), bossGroup())
+        .group(bossGroup(), workerGroup())
         .channel(NioServerSocketChannel::class.java)
         .childHandler(serverChannelInitializer)
         .option(SO_BACKLOG, properties.backlog!!)
@@ -36,7 +36,7 @@ class NettyConfig(
 
     @Bean
     fun clientBootstrap(): Bootstrap = Bootstrap()
-        .group(bossGroup())
+        .group(workerGroup())
         .channel(NioSocketChannel::class.java)
         .handler(clientChannelInitializer)
         .option(SO_KEEPALIVE, properties.keepAlive!!)

@@ -21,6 +21,8 @@ interface NetworkApiService {
 
     fun getNetworkSize(): Int
 
+    fun poll(message: Serializable, pollSize: Int)
+
 }
 
 interface ConnectionService {
@@ -30,5 +32,4 @@ interface ConnectionService {
     fun sendTimeSyncRequest()
 
     fun findNewPeer()
-
 }

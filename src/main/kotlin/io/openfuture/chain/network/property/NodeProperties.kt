@@ -61,24 +61,25 @@ class NodeProperties(
 
     /** Interval for synchronization blocks in milliseconds */
     @field:NotNull
-    var synchronizationInterval: Long? = null,
+    var syncInterval: Long? = null,
 
     /** Interval for time synchronization in milliseconds. Min value 60000 millis*/
     @field:Min(15 * 1000)
     @field:NotNull
-    var timeSynchronizationInterval: Long? = null,
+    var timeSyncInterval: Long? = null,
 
     /** Max synchronization response delay in milliseconds. Max value 10000 millis*/
     @field:Max(10 * 1000)
     @field:NotNull
-    var synchronizationResponseDelay: Long? = null,
+    var expiry: Long? = null,
+
+    /** Max chain synchronization time in milliseconds. Min value 10000 millis*/
+    @field:Min(10 * 1000)
+    @field:NotNull
+    var syncExpiry: Long? = null,
 
     @field:NotNull
-    var peerUnavailabilityPeriod: Long? = null,
-
-    @field:Max(10 * 1000)
-    @field:NotNull
-    var expiry: Long? = null
+    var peerUnavailabilityPeriod: Long? = null
 
 ) {
 

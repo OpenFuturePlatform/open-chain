@@ -3,8 +3,6 @@ package io.openfuture.chain.network.handler.network
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelInboundHandlerAdapter
-import io.netty.channel.group.DefaultChannelGroup
-import io.netty.util.concurrent.GlobalEventExecutor
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.service.ConnectionService
 import org.slf4j.Logger

@@ -36,6 +36,7 @@ class ChannelsHolder {
     fun send(message: Serializable, nodeInfo: NodeInfo): Boolean {
         val channel = channelGroup.firstOrNull { it.attr(NODE_INFO_KEY).get() == nodeInfo } ?: return false
         channel.writeAndFlush(message)
+        log.debug("Send ${message::class.java.simpleName} to ${nodeInfo.address.port}")
         return true
     }
 
