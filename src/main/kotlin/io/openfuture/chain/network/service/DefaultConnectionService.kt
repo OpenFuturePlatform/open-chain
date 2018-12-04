@@ -32,7 +32,6 @@ class DefaultConnectionService(
     private val nodeProperties: NodeProperties,
     private val channelHolder: ChannelsHolder,
     private val addressesHolder: AddressesHolder,
-    private val config: NodeConfigurator,
     private val nodeKeyHolder: NodeKeyHolder
 ) : ConnectionService, ApplicationListener<ServerReadyEvent> {
 
@@ -48,7 +47,8 @@ class DefaultConnectionService(
     }
 
     override fun connect(networkAddress: NetworkAddress, onConnect: Consumer<Channel>?): Boolean {
-        return try {
+        var result = true
+        try {
             bootstrap.connect(networkAddress.host, networkAddress.port).addListener { future ->
                 if (future.isSuccess) {
                     onConnect?.let {
@@ -58,23 +58,30 @@ class DefaultConnectionService(
                 } else {
                     log.warn("Can not connect to ${networkAddress.host}:${networkAddress.port}")
                     addressesHolder.removeNodeInfo(networkAddress)
+                    result = false
                 }
             }.sync()
-            true
         } catch (ex: Exception) {
-            false
+            result = false
         }
+        return result
     }
 
     override fun sendTimeSyncRequest() {
         val addresses = addressesHolder
-            .getRandomList(nodeProperties.getRootAddresses().size)
+            .getRandomList()
             .map { it.address }
-        addresses.forEach { networkAddress ->
-            connect(networkAddress, Consumer {
+        var numberOfConnections = nodeProperties.getRootAddresses().size
+        val it = addresses.iterator()
+        while (numberOfConnections != 0 || it.hasNext()) {
+            val address = it.next()
+            val connected = connect(address, Consumer {
                 val message = RequestTimeMessage(clock.currentTimeMillis())
                 it.writeAndFlush(message)
             })
+            if (connected) {
+                numberOfConnections--
+            }
         }
     }
 
@@ -122,7 +129,7 @@ class DefaultConnectionService(
     }
 
     private fun greet(channel: Channel, address: NetworkAddress): Boolean {
-        val message = GreetingMessage(config.getConfig().externalPort, nodeKeyHolder.getUid())
+        val message = GreetingMessage(nodeProperties.port!!, nodeKeyHolder.getUid())
         channel.writeAndFlush(message).addListener {
             if (it.isSuccess) {
                 log.info("Sent greeting to ${address.host}:${address.port} success")
