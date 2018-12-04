@@ -1,4 +1,4 @@
-package io.test.io.openfuture.chain.smartcontract.deploy.validation
+package io.openfuture.chain.smartcontract.deploy.validation
 
 import io.openfuture.chain.smartcontract.deploy.utils.asPackagePath
 import org.objectweb.asm.ClassVisitor

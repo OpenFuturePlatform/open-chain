@@ -1,4 +1,4 @@
-package io.test.io.openfuture.chain.smartcontract.core.service
+package io.openfuture.chain.smartcontract.core.service
 
 import io.openfuture.chain.smartcontract.core.model.SmartContract
 
