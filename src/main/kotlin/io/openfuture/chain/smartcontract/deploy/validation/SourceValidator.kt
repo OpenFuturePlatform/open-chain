@@ -53,17 +53,21 @@ class SourceValidator(val result: ValidationResult) : ClassVisitor(ASM6) {
             val variableType = descriptor.let { Type.getType(descriptor)?.className }
             validateType(variableType, "$variableType is forbidden to use in a contract's method")
 
+            log.debug("LOCAL_VAR: name-$name, descriptor-$descriptor")
             super.visitLocalVariable(name, descriptor, signature, start, end, index)
         }
 
         override fun visitTryCatchBlock(start: Label?, end: Label?, handler: Label?, type: String?) {
             validateType(type?.asPackagePath, "$type is forbidden to use in a contract's method")
+
             log.debug("TRY_CATCH: type-$type")
             super.visitTryCatchBlock(start, end, handler, type)
         }
 
         override fun visitTypeInsn(opcode: Int, type: String?) {
             validateType(type?.asPackagePath, "$type is forbidden to use in a contract")
+
+            log.debug("TYPE: type-$type")
             super.visitTypeInsn(opcode, type)
         }
 
