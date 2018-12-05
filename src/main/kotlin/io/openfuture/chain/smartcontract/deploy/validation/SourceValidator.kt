@@ -1,6 +1,8 @@
 package io.openfuture.chain.smartcontract.deploy.validation
 
+import io.openfuture.chain.smartcontract.core.model.SmartContract
 import io.openfuture.chain.smartcontract.deploy.utils.asPackagePath
+import io.openfuture.chain.smartcontract.deploy.utils.asResourcePath
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.Label
@@ -12,7 +14,7 @@ import org.slf4j.LoggerFactory
 class SourceValidator(val result: ValidationResult) : ClassVisitor(ASM6) {
 
     companion object {
-        private const val superContractName = "io/openfuture/chain/smartcontract/core/model/SmartContract"
+        private val superContractName = SmartContract::class.java.name.asResourcePath
         private val log: Logger = LoggerFactory.getLogger(SourceValidator::class.java)
     }
 
