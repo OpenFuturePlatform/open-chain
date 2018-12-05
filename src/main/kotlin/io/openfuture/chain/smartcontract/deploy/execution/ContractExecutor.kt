@@ -20,10 +20,12 @@ class ContractExecutor {
     fun run(runnableClass: String, method: String, vararg input: Any): Result {
         var output: Any? = null
         var exception: Throwable? = null
+        val threadName = "$runnableClass-${uniqueIdentifier.getAndIncrement()}"
         val completionLatch = CountDownLatch(1)
         pool.execute {
             try {
                 log.debug("Execution started for $runnableClass - $method")
+                Thread.currentThread().name = threadName
                 val clazz = Class.forName(runnableClass)
                 val instance = clazz.newInstance()
                 output = clazz.getDeclaredMethod(method, *input.map { it.javaClass }.toTypedArray()).invoke(instance, *input)
@@ -36,10 +38,10 @@ class ContractExecutor {
         }
         completionLatch.await()
 
-        if (null != exception) {
-            throw ContractExecutionException(exception!!.message, exception)
+        if (null == exception) {
+            return Result(threadName, output)
         } else {
-            return Result("$runnableClass-${uniqueIdentifier.getAndIncrement()}", output)
+            throw ContractExecutionException(exception!!.message, exception)
         }
     }
 
