@@ -3,6 +3,7 @@ package io.openfuture.chain.smartcontract.deploy.validation
 object BlackList {
 
     private val entries = setOf(
+        "((^(?!java\\.)).*) | ((^(?!io\\.openfuture\\.chain\\.smartcontract\\.)).*) ",
         "java\\.awt\\..*",
         "java\\.beans\\..*",
         "java\\.lang\\.invoke\\..*",
