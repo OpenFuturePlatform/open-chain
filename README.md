@@ -7,6 +7,7 @@
 [![Last Commit](https://img.shields.io/github/last-commit/OpenFuturePlatform/open-chain.svg?style=flat-square&colorB=007EC6)](https://github.com/OpenFuturePlatform/open-chain/commits)
 [![Contributors](https://img.shields.io/github/contributors/OpenFuturePlatform/open-chain.svg?style=flat-square&colorB=007EC6)](https://github.com/OpenFuturePlatform/open-chain/contributors)
 [![License](https://img.shields.io/github/license/OpenFuturePlatform/open-chain.svg?style=flat-square)](./LICENSE.txt)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FOpenFuturePlatform%2Fopen-chain.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FOpenFuturePlatform%2Fopen-chain?ref=badge_shield)
 
 
 ## OPEN Platform: A distributed network for the Smart Contracts
@@ -68,3 +69,6 @@ already have one.
 ### License
 
 The OPEN Platform project is licensed under the [MIT license](./LICENSE.txt).
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FOpenFuturePlatform%2Fopen-chain.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FOpenFuturePlatform%2Fopen-chain?ref=badge_large)
