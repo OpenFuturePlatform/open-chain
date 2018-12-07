@@ -2,37 +2,35 @@ package io.openfuture.chain.network.component.time
 
 import io.openfuture.chain.core.sync.SyncStatus
 import io.openfuture.chain.core.sync.SyncStatus.*
-import io.openfuture.chain.network.component.ExplorerAddressesHolder
-import io.openfuture.chain.network.message.network.ResponseTimeMessage
 import io.openfuture.chain.network.property.NodeProperties
-import io.openfuture.chain.network.service.ConnectionService
+import org.apache.commons.net.ntp.NTPUDPClient
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import java.util.*
+import java.net.InetAddress
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.locks.ReadWriteLock
 import java.util.concurrent.locks.ReentrantReadWriteLock
-import kotlin.math.max
 
 @Component
 class ClockSynchronizer(
-    private val clock: Clock,
-    private val properties: NodeProperties,
-    private val connectionService: ConnectionService,
-    private val addressHolder: ExplorerAddressesHolder
+        private val clock: Clock,
+        private val properties: NodeProperties
 ) {
 
     companion object {
         private val log = LoggerFactory.getLogger(Clock::class.java)
     }
 
-    private val offsets: MutableList<Long> = Collections.synchronizedList(mutableListOf())
-    private val selectionSize: Int = properties.getRootAddresses().size
+    private var lastQuizTime: Long? = null
+    private var nearestNtpServer: InetAddress? = null
+    private val ntpClient = NTPUDPClient()
+    private val ntpsInetAddress = properties.ntpServers.map { InetAddress.getByName(it) }.toList()
+    private var quizResult = mutableMapOf<InetAddress, NtpResult>()
+
+
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
     private val syncRound: AtomicInteger = AtomicInteger()
-    private val deviation: AtomicLong = AtomicLong()
 
     @Volatile
     private var status: SyncStatus = NOT_SYNCHRONIZED
@@ -40,47 +38,24 @@ class ClockSynchronizer(
     @Scheduled(fixedDelayString = "\${node.time-sync-interval}")
     fun sync() {
         lock.writeLock().lock()
-        val addresses = addressHolder.getRandomList(selectionSize).asSequence().map { it.address }.toSet()
+        var offset = 0L
         try {
             if (SYNCHRONIZED != status) {
                 status = PROCESSING
             }
-            offsets.clear()
-
-
-            connectionService.sendTimeSyncRequest(addresses)
-        } finally {
-            lock.writeLock().unlock()
-
-            Thread.sleep(properties.expiry!!)
-            mitigate()
-        }
-    }
-
-    fun add(msg: ResponseTimeMessage, destinationTime: Long) {
-        log.debug("clock response")
-        lock.writeLock().lock()
-        try {
-            if (isExpired(msg, destinationTime)) {
-                return
-            }
-
-            val offset = getRemoteOffset(msg, destinationTime)
-
-            if (0 == syncRound.get()) {
-                deviation.getAndSet(max(deviation.get(), Math.abs(offset)))
-                offsets.add(offset)
-                return
-            }
-
-            if (!isOutOfBound(offset)) {
-                offsets.add(offset)
+            offset = if (isQuizTime()) {
+                startNtpQuiz()
+            } else {
+                syncByNearestNtpServer()
             }
 
         } finally {
             lock.writeLock().unlock()
+
+            mitigate(offset)
         }
     }
+
 
     fun getStatus(): SyncStatus {
         lock.readLock().lock()
@@ -91,37 +66,64 @@ class ClockSynchronizer(
         }
     }
 
-    private fun mitigate() {
-        lock.writeLock().lock()
-        log.debug("CLOCK: Offsets size ${offsets.size}")
-        try {
-            if ((selectionSize * 2 / 3) > offsets.size) {
-                status = NOT_SYNCHRONIZED
-                return
-            }
+    private fun isQuizTime(): Boolean {
+        if (lastQuizTime == null) {
+            return true
+        } else if (clock.currentTimeMillis() > lastQuizTime!!.plus(properties.nextNtpServerInterval!!)) {
+            return true
+        }
+        return false
+    }
 
-            clock.adjust(getEffectiveOffset())
+    private fun syncByNearestNtpServer(): Long {
+        val info = ntpClient.getTime(nearestNtpServer)
+        info.computeDetails()
+        return info.offset
+    }
+
+    private fun startNtpQuiz(): Long {
+        lastQuizTime = clock.currentTimeMillis()
+        quizResult.clear()
+        for (address in ntpsInetAddress) {
+            val info = ntpClient.getTime(address)
+            info.computeDetails()
+            quizResult[address] = NtpResult(info.delay, info.offset)
+        }
+
+        val minDelay = quizResult.minBy { it.value.delay }!!
+        nearestNtpServer = minDelay.key
+
+        return minDelay.value.offset
+    }
+
+    private fun mitigate(offset: Long) {
+        lock.writeLock().lock()
+        try {
+            clock.adjust(offset)
+
             syncRound.getAndIncrement()
-            log.info("CLOCK: Effective offset ${getEffectiveOffset()}")
+            log.info("CLOCK: Effective offset $offset")
 
             if (SYNCHRONIZED != status) {
                 status = SYNCHRONIZED
             }
+
         } finally {
             lock.writeLock().unlock()
         }
+
     }
 
 
-    private fun getEffectiveOffset(): Long = Math.round(offsets.average())
-
-    private fun getRemoteOffset(msg: ResponseTimeMessage, destinationTime: Long): Long =
-        ((msg.receiveTime.minus(msg.originalTime)).plus(msg.transmitTime.minus(destinationTime))).div(2)
-
-    private fun getScale(): Double = 1.div(Math.log(Math.E.plus(syncRound.get())))
-
-    private fun isExpired(msg: ResponseTimeMessage, destinationTime: Long): Boolean =
-        properties.expiry!! < Math.abs(destinationTime.minus(msg.originalTime))
-
-    private fun isOutOfBound(offset: Long): Boolean = (deviation.get() * getScale()) < Math.abs(offset)
+//    private fun getEffectiveOffset(): Long = Math.round(offsets.average())
+//
+//    private fun getRemoteOffset(msg: ResponseTimeMessage, destinationTime: Long): Long =
+//            ((msg.receiveTime.minus(msg.originalTime)).plus(msg.transmitTime.minus(destinationTime))).div(2)
+//
+//    private fun getScale(): Double = 1.div(Math.log(Math.E.plus(syncRound.get())))
+//
+//    private fun isExpired(msg: ResponseTimeMessage, destinationTime: Long): Boolean =
+//            properties.expiry!! < Math.abs(destinationTime.minus(msg.originalTime))
+//
+//    private fun isOutOfBound(offset: Long): Boolean = (deviation.get() * getScale()) < Math.abs(offset)
 }

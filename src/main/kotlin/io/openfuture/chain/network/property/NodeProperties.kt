@@ -74,7 +74,15 @@ class NodeProperties(
     /** Max chain synchronization time in milliseconds. Min value 10000 millis*/
     @field:Min(10 * 1000)
     @field:NotNull
-    var syncExpiry: Long? = null
+    var syncExpiry: Long? = null,
+
+    @field:NotEmpty
+    var ntpServers:List<String> = emptyList(),
+
+    @field:NotNull
+    var nextNtpServerInterval:Long? = null
+
+
 
 ) {
 

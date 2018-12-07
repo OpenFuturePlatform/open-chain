@@ -16,8 +16,8 @@ class ResponseTimeHandler (
 ) : SimpleChannelInboundHandler<ResponseTimeMessage>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: ResponseTimeMessage) {
-        val destinationTime = clock.currentTimeMillis()
-        clockSynchronizer.add(msg, destinationTime)
+//        val destinationTime = clock.currentTimeMillis()
+//        clockSynchronizer.add(msg, destinationTime)
         ctx.channel().close()
     }
 
