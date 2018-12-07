@@ -19,11 +19,12 @@ class MessageCache(
     fun hasAndSaveHash(message: ByteArray): Boolean {
         val hash = HashUtils.sha256(message)
         val hexHash = ByteUtils.toHexString(hash)
-        val result = cache.getIfPresent(hexHash)
-        if (null != result) {
+        val hashValue = cache.getIfPresent(hexHash)
+        val hasResult = (null != hashValue)
+        if (hasResult) {
             cache.put(hexHash, hexHash)
         }
-        return (null != result)
+        return hasResult
     }
 
     fun size(): Long = cache.estimatedSize()
