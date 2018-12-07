@@ -13,19 +13,25 @@ import io.openfuture.chain.network.serialization.Serializable
 data class GreetingResponseMessage(
     var uid: String,
     var externalHost: String,
-    var nodesInfo: Set<NodeInfo>
+    var nodesInfo: Set<NodeInfo>,
+    var accepted: Boolean = true,
+    var loop: Boolean = false
 ) : Serializable {
 
     override fun read(buf: ByteBuf) {
         uid = buf.readString()
         externalHost = buf.readString()
         nodesInfo = buf.readSet()
+        accepted = buf.readBoolean()
+        loop = buf.readBoolean()
     }
 
     override fun write(buf: ByteBuf) {
         buf.writeString(uid)
         buf.writeString(externalHost)
         buf.writeSet(nodesInfo)
+        buf.writeBoolean(accepted)
+        buf.writeBoolean(loop)
     }
 
 }

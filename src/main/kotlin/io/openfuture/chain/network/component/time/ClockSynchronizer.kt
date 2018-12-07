@@ -2,7 +2,6 @@ package io.openfuture.chain.network.component.time
 
 import io.openfuture.chain.core.sync.SyncStatus
 import io.openfuture.chain.core.sync.SyncStatus.*
-import io.openfuture.chain.network.component.ExplorerAddressesHolder
 import io.openfuture.chain.network.message.network.ResponseTimeMessage
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.ConnectionService
@@ -20,8 +19,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 class ClockSynchronizer(
     private val clock: Clock,
     private val properties: NodeProperties,
-    private val connectionService: ConnectionService,
-    private val addressHolder: ExplorerAddressesHolder
+    private val connectionService: ConnectionService
 ) {
 
     companion object {
@@ -41,7 +39,6 @@ class ClockSynchronizer(
     @Scheduled(fixedDelayString = "\${node.time-sync-interval}")
     fun sync() {
         lock.writeLock().lock()
-        val addresses = addressHolder.getRandomList(selectionSize).asSequence().map { it.address }.toSet()
         try {
             if (SYNCHRONIZED != status) {
                 status = PROCESSING
@@ -49,7 +46,7 @@ class ClockSynchronizer(
             offsets.clear()
             nodesTime.clear()
 
-            connectionService.sendTimeSyncRequest(addresses)
+            connectionService.sendTimeSyncRequest()
         } finally {
             lock.writeLock().unlock()
 
