@@ -17,7 +17,7 @@ class MessageCache(
         .build<String, Boolean>()
 
 
-    fun hasAndSaveHash(message: ByteArray): Boolean {
+    fun saveIfAbsent(message: ByteArray): Boolean {
         val hash = HashUtils.sha256(message)
         val hexHash = ByteUtils.toHexString(hash)
         val hasResult = cache.getIfPresent(hexHash)?: false
