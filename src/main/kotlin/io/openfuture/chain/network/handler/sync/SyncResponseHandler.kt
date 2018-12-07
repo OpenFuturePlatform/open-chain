@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component
 @Sharable
 class SyncResponseHandler(
     private val clock: Clock,
-    private val channelsHolder: ChannelsHolder,
     private val syncManager: SyncManager,
     private val properties: NodeProperties
 ) : SimpleChannelInboundHandler<SyncResponseMessage>() {
@@ -33,7 +32,9 @@ class SyncResponseHandler(
         }
 
         log.debug("RESPONSE from ${ctx.channel().remoteAddress()}")
-        syncManager.onSyncResponseMessage(msg, channelsHolder.getNodeInfoByChannelId(ctx.channel().id()))
+        ctx.channel().attr(ChannelsHolder.NODE_INFO_KEY).get()?.let {
+            syncManager.onSyncResponseMessage(msg, it)
+        }
     }
 
 }
