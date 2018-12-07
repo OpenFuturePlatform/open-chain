@@ -18,7 +18,7 @@ class CacheHandler(
     override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
         val buf = msg as ByteBuf
         messageDecoder.readTimeAndCheckVersion(buf)
-        val length = buf.readableBytes() - buf.readerIndex()
+        val length = buf.readableBytes()
         val bytes = ByteArray(length)
         buf.readBytes(bytes)
         buf.resetReaderIndex()
