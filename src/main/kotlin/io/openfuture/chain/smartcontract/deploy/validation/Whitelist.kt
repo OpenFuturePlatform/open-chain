@@ -15,40 +15,41 @@ object Whitelist {
     )
 
     // todo package to exceptions from packages
-    private val map: Map<String, Set<String>> = mapOf(
-        "java.lang" to setOf(
-            "invoke",
-            "*Thread*"
-        )
+    private val map: Map<String, Regex> = mapOf(
+        "java.lang." to setOf(
+            "invoke.",
+            "ref.",
+            "reflect.",
+
+            ".*Thread",
+            "Shutdown",
+            "ClassLoader"
+        ).toOrRegex(),
+
+        "java.util." to setOf(
+            "concurrent.",
+            "logging.",
+            "prefs.",
+            "jar.",
+
+            "UUID",
+            ".*Random",
+            "WeakHashMap",
+            "Timer",
+            "Scanner"
+        ).toOrRegex(),
+
+        "io.openfuture.chain.smartcontract." to Regex("")
     )
 
-    private val allowedNamespaces = setOf(
-        "java.lang.",
-        "java.util.",
-        "io.openfuture.chain.smartcontract."
+    private val blacklistedExceptions = setOf(
+        "java.lang.StackOverflowError",
+        "java.lang.OutOfMemoryError",
+        "java.lang.VirtualMachineError",
+        "java.lang.ThreadDeath",
+        "java.lang.Throwable",
+        "java.lang.Error"
     )
-
-    private val blackListedEntries = setOf(
-        "java\\.awt\\..*",
-        "java\\.beans\\..*",
-        "java\\.lang\\.invoke\\..*",
-        "java\\.lang\\..*Thread.*",
-        "java\\.lang\\.Shutdown.*",
-        "java\\.lang\\.ref\\..*",
-        "java\\.lang\\.reflect\\.InvocationHandler.*",
-        "java\\.lang\\.reflect\\.Proxy.*",
-        "java\\.lang\\.reflect\\.Weak.*",
-        "java\\.io\\..*File.*",
-        "java\\.net\\..*Content.*",
-        "java\\.net\\.Host.*",
-        "java\\.net\\.Inet.*",
-        "java\\.nio\\.file\\..*",
-        "java\\.util\\..*Random.*",
-        "java\\.util\\.WeakHashMap.*",
-        "java\\.util\\.concurrent\\..*",
-        "java\\.util\\.concurrent\\.locks\\..*",
-        "javax\\.activation\\..*"
-    ).map { it.toRegex() }
 
 
     fun isAllowed(className: String): Boolean {
@@ -56,9 +57,19 @@ object Whitelist {
             return true
         }
 
-        return allowedNamespaces.any { className.startsWith(it) } && blackListedEntries.none { it.matches(className) }
+        for (rootPackage in map.keys) {
+            if (className.startsWith(rootPackage)) {
+                return !map[rootPackage]!!.matches(className.removePrefix(rootPackage))
+            }
+        }
+
+        return false
     }
 
+    fun isAllowedException(className: String): Boolean = !blacklistedExceptions.contains(className)
+
     private fun isPrimitive(className: String): Boolean = primitives.contains(className)
+
+    private fun Set<String>.toOrRegex(): Regex = this.joinToString(separator = "|") { "($it.*)" }.toRegex()
 
 }
