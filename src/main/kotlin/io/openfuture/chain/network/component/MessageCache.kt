@@ -14,15 +14,15 @@ class MessageCache(
 
     private val cache = Caffeine.newBuilder()
         .expireAfterWrite(consensusProperties.getPeriod(), TimeUnit.MILLISECONDS)
-        .build<String, String>()
+        .build<String, Boolean>()
+
 
     fun hasAndSaveHash(message: ByteArray): Boolean {
         val hash = HashUtils.sha256(message)
         val hexHash = ByteUtils.toHexString(hash)
-        val hashValue = cache.getIfPresent(hexHash)
-        val hasResult = (null != hashValue)
+        val hasResult = cache.getIfPresent(hexHash)?: false
         if (hasResult) {
-            cache.put(hexHash, hexHash)
+            cache.put(hexHash, true)
         }
         return hasResult
     }
