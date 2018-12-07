@@ -5,7 +5,6 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.consensus.component.block.PendingBlockHandler
 import io.openfuture.chain.core.exception.SynchronizationException
-import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -15,8 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 @Sharable
 class BlockApprovalHandler(
-    private val pendingBlockHandler: PendingBlockHandler,
-    private val channelsHolder: ChannelsHolder
+    private val pendingBlockHandler: PendingBlockHandler
 ) : SimpleChannelInboundHandler<BlockApprovalMessage>() {
 
     companion object {
@@ -32,8 +30,7 @@ class BlockApprovalHandler(
             log.error("Connection error ${ctx.channel().remoteAddress()} with cause: ${cause.message}")
         } else if (cause !is SynchronizationException) {
             log.error("Connection error ${ctx.channel().remoteAddress()} with cause: ${cause.message}")
-
-            channelsHolder.removeChannel(ctx.channel())
+            ctx.close()
         }
     }
 

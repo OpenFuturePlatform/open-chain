@@ -10,7 +10,6 @@ data class ResponseTimeMessage(
     var originalTime: Long,
     var receiveTime: Long,
     var transmitTime: Long,
-    var nodeInfo: NetworkAddress,
     var status: Int
 ) : Serializable {
 
@@ -19,8 +18,6 @@ data class ResponseTimeMessage(
         receiveTime = buf.readLong()
         transmitTime = buf.readLong()
         status = buf.readInt()
-        nodeInfo = NetworkAddress::class.java.getConstructor().newInstance()
-        nodeInfo.read(buf)
     }
 
     override fun write(buf: ByteBuf) {
@@ -28,7 +25,6 @@ data class ResponseTimeMessage(
         buf.writeLong(receiveTime)
         buf.writeLong(transmitTime)
         buf.writeInt(status)
-        nodeInfo.write(buf)
 
     }
 
