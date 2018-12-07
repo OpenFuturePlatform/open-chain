@@ -8,6 +8,7 @@ import org.objectweb.asm.*
 import org.objectweb.asm.Opcodes.ASM6
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.lang.reflect.Modifier
 
 class SourceValidator(val result: ValidationResult) : ClassVisitor(ASM6) {
 
@@ -34,6 +35,14 @@ class SourceValidator(val result: ValidationResult) : ClassVisitor(ASM6) {
     }
 
     override fun visitMethod(access: Int, name: String?, descriptor: String?, signature: String?, exceptions: Array<out String>?): MethodVisitor {
+        if (Modifier.isNative(access)) {
+            result.addError("Native methods not allowed")
+        }
+
+        if (Modifier.isSynchronized(access)) {
+            result.addError("Synchronized methods not allowed")
+        }
+
         validateType(descriptor.let { Type.getReturnType(descriptor)?.className })
 
         log.debug("METHOD: name-$name, descriptor-$descriptor, signature-$signature, exceptions-$exceptions")
@@ -45,6 +54,7 @@ class SourceValidator(val result: ValidationResult) : ClassVisitor(ASM6) {
             result.addError(message ?: "$classType is forbidden in the smart contract")
         }
     }
+
 
     private inner class SourceMethodVisitor : MethodVisitor(ASM6) {
 
@@ -58,7 +68,9 @@ class SourceValidator(val result: ValidationResult) : ClassVisitor(ASM6) {
         }
 
         override fun visitTryCatchBlock(start: Label?, end: Label?, handler: Label?, type: String?) {
-            validateType(type?.asPackagePath)
+            if (null != type && !Whitelist.isAllowedException(type.asPackagePath)) {
+                result.addError("Disallowed to throw ${type.asPackagePath} exception")
+            }
 
             log.debug("TRY_CATCH: type-$type")
             super.visitTryCatchBlock(start, end, handler, type)
