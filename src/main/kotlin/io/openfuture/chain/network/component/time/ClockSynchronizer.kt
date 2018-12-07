@@ -8,14 +8,15 @@ import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.net.InetAddress
+import java.net.SocketTimeoutException
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReadWriteLock
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
 @Component
 class ClockSynchronizer(
-        private val clock: Clock,
-        private val properties: NodeProperties
+    private val clock: Clock,
+    private val properties: NodeProperties
 ) {
 
     companion object {
@@ -24,7 +25,7 @@ class ClockSynchronizer(
 
     private var lastQuizTime: Long? = null
     private var nearestNtpServer: InetAddress? = null
-    private val ntpClient = NTPUDPClient()
+    private val ntpClient = NTPUDPClient().apply { defaultTimeout = 3000 }
     private val ntpsInetAddress = properties.ntpServers.map { InetAddress.getByName(it) }.toList()
     private var quizResult = mutableMapOf<InetAddress, NtpResult>()
 
@@ -56,7 +57,6 @@ class ClockSynchronizer(
         }
     }
 
-
     fun getStatus(): SyncStatus {
         lock.readLock().lock()
         try {
@@ -76,8 +76,10 @@ class ClockSynchronizer(
     }
 
     private fun syncByNearestNtpServer(): Long {
+        log.debug("Send to nearest ${nearestNtpServer!!.hostName} ntp server")
         val info = ntpClient.getTime(nearestNtpServer)
         info.computeDetails()
+        log.debug("Answer from nearest ntp server")
         return info.offset
     }
 
@@ -85,9 +87,17 @@ class ClockSynchronizer(
         lastQuizTime = clock.currentTimeMillis()
         quizResult.clear()
         for (address in ntpsInetAddress) {
-            val info = ntpClient.getTime(address)
-            info.computeDetails()
-            quizResult[address] = NtpResult(info.delay, info.offset)
+            try {
+                log.debug("Send to ntp server")
+                val info = ntpClient.getTime(address)
+                info.computeDetails()
+                val res = NtpResult(info.delay, info.offset)
+                log.debug("Answer from #${address.hostName} server $res")
+                quizResult[address] = res
+            } catch (e: SocketTimeoutException) {
+                log.debug("Ntp server #${address.hostName} answer too long")
+                continue
+            }
         }
 
         val minDelay = quizResult.minBy { it.value.delay }!!
@@ -102,7 +112,7 @@ class ClockSynchronizer(
             clock.adjust(offset)
 
             syncRound.getAndIncrement()
-            log.info("CLOCK: Effective offset $offset")
+            log.debug("CLOCK: Effective offset $offset")
 
             if (SYNCHRONIZED != status) {
                 status = SYNCHRONIZED
@@ -113,17 +123,4 @@ class ClockSynchronizer(
         }
 
     }
-
-
-//    private fun getEffectiveOffset(): Long = Math.round(offsets.average())
-//
-//    private fun getRemoteOffset(msg: ResponseTimeMessage, destinationTime: Long): Long =
-//            ((msg.receiveTime.minus(msg.originalTime)).plus(msg.transmitTime.minus(destinationTime))).div(2)
-//
-//    private fun getScale(): Double = 1.div(Math.log(Math.E.plus(syncRound.get())))
-//
-//    private fun isExpired(msg: ResponseTimeMessage, destinationTime: Long): Boolean =
-//            properties.expiry!! < Math.abs(destinationTime.minus(msg.originalTime))
-//
-//    private fun isOutOfBound(offset: Long): Boolean = (deviation.get() * getScale()) < Math.abs(offset)
 }

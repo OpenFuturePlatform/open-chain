@@ -27,7 +27,5 @@ interface ConnectionService {
 
     fun connect(networkAddress: NetworkAddress)
 
-    fun sendTimeSyncRequest(addresses: Set<NetworkAddress>)
-
     fun poll(message: Serializable, pollSize: Int)
 }

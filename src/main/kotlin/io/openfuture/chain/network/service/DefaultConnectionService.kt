@@ -9,7 +9,6 @@ import io.openfuture.chain.network.component.ExplorerAddressesHolder
 import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.message.network.GreetingMessage
-import io.openfuture.chain.network.message.network.RequestTimeMessage
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.serialization.Serializable
 import org.slf4j.Logger
@@ -44,19 +43,6 @@ class DefaultConnectionService(
             }
 
             return@addListener
-        }
-    }
-
-    override fun sendTimeSyncRequest(addresses: Set<NetworkAddress>) {
-        addresses.forEach { address ->
-            bootstrap.connect(address.host, address.port).addListener { future ->
-                val channel = (future as ChannelFuture).channel()
-
-                if (future.isSuccess) {
-                    channel.writeAndFlush(RequestTimeMessage(clock.currentTimeMillis()))
-                    log.debug("Send Clock Request to ${address.port}")
-                }
-            }
         }
     }
 

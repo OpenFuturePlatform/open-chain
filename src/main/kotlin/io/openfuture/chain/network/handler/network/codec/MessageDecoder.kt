@@ -6,8 +6,6 @@ import io.netty.handler.codec.ReplayingDecoder
 import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.message.base.MessageType
-import io.openfuture.chain.network.message.network.RequestTimeMessage
-import io.openfuture.chain.network.message.network.ResponseTimeMessage
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.network.message.sync.MainBlockMessage
 import io.openfuture.chain.network.property.NodeProperties
@@ -58,7 +56,7 @@ class MessageDecoder(
     }
 
     private fun isExpired(message: Serializable, originTime: Long): Boolean {
-        if (message is RequestTimeMessage || message is ResponseTimeMessage || message is MainBlockMessage || message is GenesisBlockMessage) {
+        if (message is MainBlockMessage || message is GenesisBlockMessage) {
             return false
         }
 

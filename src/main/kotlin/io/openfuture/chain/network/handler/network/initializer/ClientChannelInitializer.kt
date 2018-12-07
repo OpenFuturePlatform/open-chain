@@ -13,7 +13,6 @@ import io.openfuture.chain.network.handler.network.HeartBeatHandler
 import io.openfuture.chain.network.handler.network.NetworkStatusHandler
 import io.openfuture.chain.network.handler.network.NewClientHandler
 import io.openfuture.chain.network.handler.network.client.GreetingResponseHandler
-import io.openfuture.chain.network.handler.network.client.ResponseTimeHandler
 import io.openfuture.chain.network.handler.network.codec.MessageCodec
 import io.openfuture.chain.network.handler.sync.*
 import io.openfuture.chain.network.property.NodeProperties
@@ -39,7 +38,6 @@ class ClientChannelInitializer(
             IdleStateHandler(readIdleTime, writeIdleTime, 0, TimeUnit.MILLISECONDS),
             applicationContext.getBean(HeartBeatHandler::class.java),
             applicationContext.getBean(GreetingResponseHandler::class.java),
-            applicationContext.getBean(ResponseTimeHandler::class.java),
             applicationContext.getBean(NewClientHandler::class.java),
             applicationContext.getBean(NetworkStatusHandler::class.java),
             //        sync
