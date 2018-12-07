@@ -41,14 +41,16 @@ class GreetingHandler(
         val channel = ctx.channel()
         if (isConnectionAcceptable(nodeInfo, channel)) {
             channelHolder.addChannel(channel, nodeInfo)
-            log.info("Accepted connection from ${ctx.channel().remoteAddress()} (Tachka ${msg.externalPort})")
+            log.info("Accepted connection from ${ctx.channel().remoteAddress()} (${channelHolder.getNodesInfo().joinToString { it.address.port.toString() }})")
+            ctx.writeAndFlush(response)
             addressesHolder.addNodeInfo(nodeInfo)
             channelHolder.broadcast(NewClient(nodeInfo))
-            ctx.writeAndFlush(response)
         } else {
-            log.info("Rejected connection from ${ctx.channel().remoteAddress()} (Tachka ${msg.externalPort})")
+            log.info("Rejected connection from ${ctx.channel().remoteAddress()} (${channelHolder.getNodesInfo().joinToString { it.address.port.toString() }}")
             response.accepted = false
-            response.loop = (msg.uid == nodeKeyHolder.getUid())
+            if (msg.uid == nodeKeyHolder.getUid()) {
+                nodeProperties.setMyself(nodeInfo)
+            }
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE)
         }
     }

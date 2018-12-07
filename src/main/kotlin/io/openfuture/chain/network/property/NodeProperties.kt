@@ -48,7 +48,7 @@ class NodeProperties(
 
     /** Inbound connections number */
     @field:NotNull
-    @field:Min(5)
+    @field:Min(2)
     var peersNumber: Int? = null,
 
     /** Config path */

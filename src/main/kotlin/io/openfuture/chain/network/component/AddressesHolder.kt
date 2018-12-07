@@ -4,6 +4,7 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.property.NodeProperties
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 
@@ -71,6 +72,8 @@ class AddressesHolder(
         mark.timestamp = System.currentTimeMillis()
     }
 
+
+    @Scheduled(fixedRateString = "\${node.peer-unavailability-period}")
     fun cancelRejectedStatus() {
         val timeFrom = System.currentTimeMillis() - nodeProperties.peerUnavailabilityPeriod!!
         nodesInfo.filter { it.value.timestamp > timeFrom }.forEach {

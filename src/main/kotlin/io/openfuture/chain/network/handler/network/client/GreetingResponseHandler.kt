@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.core.component.NodeConfigurator
+import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.entity.NetworkAddress
@@ -19,9 +20,7 @@ import java.net.InetSocketAddress
 class GreetingResponseHandler(
     private val config: NodeConfigurator,
     private val channelHolder: ChannelsHolder,
-    private val addressesHolder: AddressesHolder,
-    private val connectionService: ConnectionService,
-    private val nodeProperties: NodeProperties
+    private val addressesHolder: AddressesHolder
 ) : SimpleChannelInboundHandler<GreetingResponseMessage>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: GreetingResponseMessage) {
@@ -34,13 +33,9 @@ class GreetingResponseHandler(
         if (msg.accepted) {
             channelHolder.addChannel(channel, nodeInfo)
         } else {
-            if (msg.loop) {
-                nodeProperties.setMyself(nodeInfo)
-            }
             addressesHolder.markRejected(nodeInfo)
         }
         addressesHolder.addNodesInfo(msg.nodesInfo)
-        connectionService.findNewPeer()
     }
 
 }

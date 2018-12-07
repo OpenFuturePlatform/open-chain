@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component
 class NewClientHandler(
     private val addressesHolder: AddressesHolder,
     private val channelsHolder: ChannelsHolder,
-    private val connectionService: ConnectionService,
     private val nodeKeyHolder: NodeKeyHolder
 ) : SimpleChannelInboundHandler<NewClient>() {
 
@@ -24,7 +23,7 @@ class NewClientHandler(
         if (nodeInfo.uid != nodeKeyHolder.getUid() && !addressesHolder.hasNodeInfo(nodeInfo)) {
             addressesHolder.addNodeInfo(nodeInfo)
             channelsHolder.broadcast(msg)
-            connectionService.findNewPeer()
+            channelsHolder.findNewPeer()
         }
     }
 
