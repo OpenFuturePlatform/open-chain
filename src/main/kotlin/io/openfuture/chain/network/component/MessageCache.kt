@@ -16,14 +16,14 @@ class MessageCache(
         .expireAfterWrite(consensusProperties.getPeriod(), TimeUnit.MILLISECONDS)
         .build<String, String>()
 
-    fun getAndSaveHash(message: ByteArray): String? {
+    fun hasAndSaveHash(message: ByteArray): Boolean {
         val hash = HashUtils.sha256(message)
         val hexHash = ByteUtils.toHexString(hash)
         val result = cache.getIfPresent(hexHash)
-        if (result == null) {
+        if (null != result) {
             cache.put(hexHash, hexHash)
         }
-        return result
+        return (null != result)
     }
 
     fun size(): Long = cache.estimatedSize()
