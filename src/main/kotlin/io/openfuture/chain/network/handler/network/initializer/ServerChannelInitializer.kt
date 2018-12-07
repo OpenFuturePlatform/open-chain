@@ -22,7 +22,8 @@ import java.util.concurrent.TimeUnit
 class ServerChannelInitializer(
     private val nodeProperties: NodeProperties,
     private val applicationContext: ApplicationContext,
-    private val cacheHandler: CacheHandler
+    private val cacheHandler: CacheHandler,
+    private val requestCountHandler: RequestCountHandler
 ) : ChannelInitializer<SocketChannel>() {
 
     override fun initChannel(ch: SocketChannel) {
@@ -32,10 +33,11 @@ class ServerChannelInitializer(
         val pipeline = ch.pipeline()
 
         pipeline.addLast(
+            IdleStateHandler(readIdleTime, writeIdleTime, 0, TimeUnit.MILLISECONDS),
             cacheHandler,
+            requestCountHandler,
             applicationContext.getBean(MessageCodec::class.java),
             applicationContext.getBean(ConnectionHandler::class.java),
-            IdleStateHandler(readIdleTime, writeIdleTime, 0, TimeUnit.MILLISECONDS),
             applicationContext.getBean(HeartBeatHandler::class.java),
             applicationContext.getBean(GreetingHandler::class.java),
             applicationContext.getBean(RequestTimeHandler::class.java),
