@@ -22,7 +22,7 @@ class AddressesHolder(
         var timestamp: Long = System.currentTimeMillis()
     )
 
-    fun getNodesInfo(): Set<NodeInfo> {
+    fun getNodeInfos(): Set<NodeInfo> {
         return nodesInfo.keys
     }
 
@@ -33,7 +33,7 @@ class AddressesHolder(
         }
     }
 
-    fun addNodesInfo(nodesInfo: Set<NodeInfo>) {
+    fun addNodeInfos(nodesInfo: Set<NodeInfo>) {
         val uid = nodeKeyHolder.getUid()
         val nodesInfoWithoutMe = nodesInfo.filter { uid != it.uid }
         for (nodeInfo in nodesInfoWithoutMe) {
@@ -45,12 +45,8 @@ class AddressesHolder(
         nodesInfo.entries.removeIf { address == it.key.address }
     }
 
-    fun getRandomList(listSize: Int = nodesInfo.size, connectedPeers: List<NodeInfo> = emptyList()): List<NodeInfo> {
-        return nodesInfo.filter { !it.value.rejected }.keys.minus(connectedPeers).shuffled().take(listSize)
-    }
-
-    fun getRandom(connectedPeers: List<NodeInfo> = emptyList()): NodeInfo {
-        return nodesInfo.filter { !it.value.rejected }.keys.minus(connectedPeers).shuffled().first()
+    fun getRandomList(listSize: Int = nodesInfo.size, exclude: List<NodeInfo> = emptyList()): List<NodeInfo> {
+        return nodesInfo.filter { !it.value.rejected }.keys.minus(exclude).shuffled().take(listSize)
     }
 
     fun size(): Int {
@@ -59,13 +55,6 @@ class AddressesHolder(
 
     fun hasNodeInfo(nodeInfo: NodeInfo): Boolean = this.nodesInfo.containsKey(nodeInfo)
 
-    fun isRejected(address: NetworkAddress): Boolean {
-        this.nodesInfo.entries.find { it.key.address == address }?.let {
-            return it.value.rejected
-        }
-        return nodeProperties.getMe()?.address == address
-    }
-
     fun markRejected(nodeInfo: NodeInfo) {
         val mark = nodesInfo[nodeInfo] ?: return
         mark.rejected = true
@@ -73,9 +62,9 @@ class AddressesHolder(
     }
 
 
-    @Scheduled(fixedRateString = "\${node.peer-unavailability-period}")
+    @Scheduled(fixedRateString = "\${node.peer-penalty}")
     fun cancelRejectedStatus() {
-        val timeFrom = System.currentTimeMillis() - nodeProperties.peerUnavailabilityPeriod!!
+        val timeFrom = System.currentTimeMillis() - nodeProperties.peerPenalty!!
         nodesInfo.filter { it.value.timestamp > timeFrom }.forEach {
             it.value.rejected = false
         }

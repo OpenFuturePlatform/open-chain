@@ -79,7 +79,7 @@ class NodeProperties(
     var syncExpiry: Long? = null,
 
     @field:NotNull
-    var peerUnavailabilityPeriod: Long? = null
+    var peerPenalty: Long? = null
 
 ) {
 

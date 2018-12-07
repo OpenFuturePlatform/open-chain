@@ -35,7 +35,7 @@ class DefaultNetworkApiService(
         }
     }
 
-    override fun getNetworkSize(): Int = addressesHolder.getNodesInfo().size + 1
+    override fun getNetworkSize(): Int = addressesHolder.getNodeInfos().size + 1
 
     override fun poll(message: Serializable, pollSize: Int) {
         addressesHolder.getRandomList(pollSize).forEach { sendToAddress(message, it) }

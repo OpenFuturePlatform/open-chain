@@ -6,7 +6,6 @@ import io.netty.channel.group.DefaultChannelGroup
 import io.netty.util.AttributeKey
 import io.netty.util.concurrent.GlobalEventExecutor
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.exception.NotFoundChannelException
 import io.openfuture.chain.network.message.network.GreetingMessage
@@ -30,21 +29,21 @@ class ChannelsHolder(
     private val addressesHolder: AddressesHolder,
     private val nodeKeyHolder: NodeKeyHolder,
     private val connectionService: ConnectionService
-): ApplicationListener<ServerReadyEvent> {
+) : ApplicationListener<ServerReadyEvent> {
 
     companion object {
         val NODE_INFO_KEY: AttributeKey<NodeInfo> = AttributeKey.valueOf<NodeInfo>("uid")
         private val log: Logger = LoggerFactory.getLogger(ChannelsHolder::class.java)
     }
 
-    private val channelGroup = object: DefaultChannelGroup(GlobalEventExecutor.INSTANCE) {
+    private val channelGroup = object : DefaultChannelGroup(GlobalEventExecutor.INSTANCE) {
 
         override fun add(element: Channel): Boolean {
             val result = super.add(element)
             findNewPeer()
             return result
         }
-        
+
         override fun remove(element: Channel): Boolean {
             val result = super.remove(element)
             findNewPeer()
@@ -92,7 +91,7 @@ class ChannelsHolder(
 
     @Synchronized
     fun addChannel(channel: Channel, nodeInfo: NodeInfo): Boolean {
-        if(channelGroup.any { it.attr(NODE_INFO_KEY).get() == nodeInfo }) {
+        if (channelGroup.any { it.attr(NODE_INFO_KEY).get() == nodeInfo }) {
             return false
         }
         channel.attr(NODE_INFO_KEY).setIfAbsent(nodeInfo)
@@ -125,7 +124,7 @@ class ChannelsHolder(
         val connectedPeers = getNodesInfo().map { it.address }
         for (bootAddress in nodeProperties.getRootAddresses().minus(connectedPeers).shuffled()) {
             val connected = connectionService.connect(bootAddress, Consumer {
-                greet(it, bootAddress)
+                greet(it)
             })
             if (connected) return true
         }
@@ -135,26 +134,18 @@ class ChannelsHolder(
     private fun findRegularPeer(): Boolean {
         log.info("Looking for regular peer ${getNodesInfo().joinToString { it.address.port.toString() }} | ${channelGroup.size}")
         val knownPeers = getNodesInfo()
-        for (peer in addressesHolder.getRandomList(connectedPeers = knownPeers)) {
-            if (!addressesHolder.isRejected(peer.address)) {
-                val connected = connectionService.connect(peer.address, Consumer {
-                    greet(it, peer.address)
-                })
-                if (connected) return true
-            }
+        for (peer in addressesHolder.getRandomList(exclude = knownPeers)) {
+            val connected = connectionService.connect(peer.address, Consumer {
+                greet(it)
+            })
+            if (connected) return true
         }
         return false
     }
 
-    private fun greet(channel: Channel, address: NetworkAddress): Boolean {
+    private fun greet(channel: Channel): Boolean {
         val message = GreetingMessage(nodeProperties.port!!, nodeKeyHolder.getUid())
-        channel.writeAndFlush(message).addListener {
-            if (it.isSuccess) {
-                log.info("Sent greeting to ${address.host}:${address.port} success")
-            } else {
-                log.info("Sent greeting to ${address.host}:${address.port} failed")
-            }
-        }
+        channel.writeAndFlush(message)
         return true
     }
 

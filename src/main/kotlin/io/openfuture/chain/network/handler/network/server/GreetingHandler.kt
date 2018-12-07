@@ -36,17 +36,17 @@ class GreetingHandler(
     override fun channelRead0(ctx: ChannelHandlerContext, msg: GreetingMessage) {
         val hostAddress = (ctx.channel().remoteAddress() as InetSocketAddress).address.hostAddress
         val nodeInfo = NodeInfo(msg.uid, NetworkAddress(hostAddress, msg.externalPort))
-        val nodesInfo = addressesHolder.getNodesInfo()
+        val nodesInfo = addressesHolder.getNodeInfos()
         val response = GreetingResponseMessage(nodeKeyHolder.getUid(), hostAddress, nodesInfo)
         val channel = ctx.channel()
         if (isConnectionAcceptable(nodeInfo, channel)) {
             channelHolder.addChannel(channel, nodeInfo)
-            log.info("Accepted connection from ${ctx.channel().remoteAddress()} (${channelHolder.getNodesInfo().joinToString { it.address.port.toString() }})")
+            log.debug("Accepted connection from ${ctx.channel().remoteAddress()}")
             ctx.writeAndFlush(response)
             addressesHolder.addNodeInfo(nodeInfo)
             channelHolder.broadcast(NewClient(nodeInfo))
         } else {
-            log.info("Rejected connection from ${ctx.channel().remoteAddress()} (${channelHolder.getNodesInfo().joinToString { it.address.port.toString() }}")
+            log.debug("Rejected connection from ${ctx.channel().remoteAddress()}")
             response.accepted = false
             if (msg.uid == nodeKeyHolder.getUid()) {
                 nodeProperties.setMyself(nodeInfo)

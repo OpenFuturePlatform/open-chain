@@ -4,14 +4,11 @@ import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.core.component.NodeConfigurator
-import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.network.GreetingResponseMessage
-import io.openfuture.chain.network.property.NodeProperties
-import io.openfuture.chain.network.service.ConnectionService
 import org.springframework.stereotype.Component
 import java.net.InetSocketAddress
 
@@ -35,7 +32,7 @@ class GreetingResponseHandler(
         } else {
             addressesHolder.markRejected(nodeInfo)
         }
-        addressesHolder.addNodesInfo(msg.nodesInfo)
+        addressesHolder.addNodeInfos(msg.nodesInfo)
     }
 
 }
