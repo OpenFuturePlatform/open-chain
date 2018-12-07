@@ -21,7 +21,7 @@ class MessageCache(
         val hash = HashUtils.sha256(message)
         val hexHash = ByteUtils.toHexString(hash)
         val hasResult = cache.getIfPresent(hexHash)?: false
-        if (hasResult) {
+        if (!hasResult) {
             cache.put(hexHash, true)
         }
         return hasResult
