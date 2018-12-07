@@ -14,15 +14,15 @@ class MessageCache(
 
     private val cache = Caffeine.newBuilder()
         .expireAfterWrite(consensusProperties.getPeriod(), TimeUnit.MILLISECONDS)
-        .build<String, Boolean>()
+        .build<String, String>()
 
 
     fun saveIfAbsent(message: ByteArray): Boolean {
         val hash = HashUtils.sha256(message)
         val hexHash = ByteUtils.toHexString(hash)
-        val hasResult = cache.getIfPresent(hexHash)?: false
+        val hasResult = (null != cache.getIfPresent(hexHash))
         if (!hasResult) {
-            cache.put(hexHash, true)
+            cache.put(hexHash, hexHash)
         }
         return hasResult
     }
