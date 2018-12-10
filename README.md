@@ -1,3 +1,4 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/2ae56b1812484bd79a40ea87c57069e9)](https://app.codacy.com/app/open/open-chain?utm_source=github.com&utm_medium=referral&utm_content=OpenFuturePlatform/open-chain&utm_campaign=Badge_Grade_Dashboard)
 # OPEN Chain [![Twitter Follow](https://img.shields.io/twitter/follow/openplatformico.svg?style=social&label=Follow)](https://twitter.com/openplatformico)
 
 
