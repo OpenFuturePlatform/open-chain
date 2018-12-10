@@ -5,7 +5,7 @@ plugins {
     id 'org.jetbrains.kotlin.kapt' version '1.3.11'
     id 'org.jetbrains.kotlin.plugin.spring' version '1.3.11'
     id 'org.jetbrains.kotlin.plugin.jpa' version '1.3.11'
-    id 'org.springframework.boot' version '2.0.5.RELEASE'
+    id 'org.springframework.boot' version '2.1.1.RELEASE'
     id "io.zensoft.versioning" version "1.0.0"
 }
 
@@ -20,6 +20,7 @@ repositories {
 
 ext {
     kotlinVersion = '1.3.11'
+    springBootVersion = '2.1.1.RELEASE'
 }
 
 dependencies {
