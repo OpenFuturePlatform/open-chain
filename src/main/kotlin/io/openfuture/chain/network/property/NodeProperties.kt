@@ -79,7 +79,14 @@ class NodeProperties(
     var syncExpiry: Long? = null,
 
     @field:NotNull
-    var peerPenalty: Long? = null
+    var peerPenalty: Long? = null,
+
+    @field:NotEmpty
+    var ntpServers: List<String> = emptyList(),
+
+    /** Time value for choosing next ntp server, which equals 21 epoch * 18000 millis*/
+    @field:NotNull
+    var nextNtpServerInterval: Long? = null
 
 ) {
 

@@ -11,7 +11,6 @@ import io.openfuture.chain.network.handler.core.VoteTransactionHandler
 import io.openfuture.chain.network.handler.network.*
 import io.openfuture.chain.network.handler.network.codec.MessageCodec
 import io.openfuture.chain.network.handler.network.server.GreetingHandler
-import io.openfuture.chain.network.handler.network.server.RequestTimeHandler
 import io.openfuture.chain.network.handler.sync.*
 import io.openfuture.chain.network.property.NodeProperties
 import org.springframework.context.ApplicationContext
@@ -26,7 +25,6 @@ class ServerChannelInitializer(
     private val connectionHandler: ConnectionHandler,
     private val heartBeatHandler: HeartBeatHandler,
     private val greetingHandler: GreetingHandler,
-    private val requestTimeHandler: RequestTimeHandler,
     private val newClientHandler: NewClientHandler,
     private val networkStatusHandler: NetworkStatusHandler,
     private val syncRequestHandler: SyncRequestHandler,
@@ -54,7 +52,6 @@ class ServerChannelInitializer(
             applicationContext.getBean(MessageCodec::class.java),
             heartBeatHandler,
             greetingHandler,
-            requestTimeHandler,
             newClientHandler,
             networkStatusHandler,
             //        sync
