@@ -19,6 +19,10 @@ class ConnectionHandler(
         private val log: Logger = LoggerFactory.getLogger(ConnectionHandler::class.java)
     }
 
+    override fun channelActive(ctx: ChannelHandlerContext) {
+        log.info("Inbound connection from ${ctx.channel().remoteAddress()}")
+    }
+
     override fun channelInactive(ctx: ChannelHandlerContext) {
         log.debug("${ctx.channel().remoteAddress()} disconnected, operating peers count is ${channelsHolder.size()}")
         super.channelInactive(ctx)
