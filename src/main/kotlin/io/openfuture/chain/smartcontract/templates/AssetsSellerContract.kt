@@ -7,7 +7,7 @@ import io.openfuture.chain.smartcontract.core.model.Message
 import io.openfuture.chain.smartcontract.core.model.SmartContract
 
 
-class AssetsSellerContract : SmartContract("") {
+class AssetsSellerContract : SmartContract() {
 
     private val assets: MutableMap<String, Address> = mutableMapOf()
     private val price: Long = 1L

@@ -3,13 +3,17 @@ package io.openfuture.chain.smartcontract.templates
 import io.openfuture.chain.smartcontract.core.annotation.ContractMethod
 import io.openfuture.chain.smartcontract.core.model.SmartContract
 
-class CalculatorContract() : SmartContract("") {
+class CalculatorContract() : SmartContract() {
 
     private var result: Long = 0
 
 
     @ContractMethod
-    fun add(value: Long) {
+    fun add(sender: String, value: Long) {
+        if (sender == owner) {
+
+        }
+
         result += value
     }
 
@@ -25,6 +29,7 @@ class CalculatorContract() : SmartContract("") {
 
     @ContractMethod
     fun divide(value: Long) {
+
         required(value != 0L, "Division by zero is not allowed")
         result /= value
     }
