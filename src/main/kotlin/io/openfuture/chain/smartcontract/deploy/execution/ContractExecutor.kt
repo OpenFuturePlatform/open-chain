@@ -1,6 +1,13 @@
 package io.openfuture.chain.smartcontract.deploy.execution
 
+import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
+import io.openfuture.chain.smartcontract.deploy.domain.ContractDto
+import io.openfuture.chain.smartcontract.deploy.domain.ContractMethod
 import io.openfuture.chain.smartcontract.deploy.exception.ContractExecutionException
+import io.openfuture.chain.smartcontract.deploy.exception.ContractLoadingException
+import io.openfuture.chain.smartcontract.deploy.load.SourceClassLoader
+import org.apache.commons.lang3.reflect.FieldUtils
+import org.apache.commons.lang3.reflect.MethodUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CountDownLatch
@@ -15,38 +22,55 @@ class ContractExecutor {
     }
 
     private val pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1)
+    private val classLoader = SourceClassLoader()
 
 
-    fun run(runnableClass: String, method: String, vararg input: Any): Result {
+    fun run(initiatorAddress: String, contract: ContractDto, method: ContractMethod): ExecutionResult {
         var output: Any? = null
         var exception: Throwable? = null
-        val threadName = "$runnableClass-${uniqueIdentifier.getAndIncrement()}"
+        val threadName = "${contract.clazz}-${uniqueIdentifier.getAndIncrement()}"
         val completionLatch = CountDownLatch(1)
         pool.execute {
+            Thread.currentThread().name = threadName
             try {
-                log.debug("Execution started for $runnableClass - $method")
-                Thread.currentThread().name = threadName
-                val clazz = Class.forName(runnableClass)
-                val instance = clazz.newInstance()
-                output = clazz.getDeclaredMethod(method, *input.map { it.javaClass }.toTypedArray()).invoke(instance, *input)
+                val instance = loadClassAndState(contract)
+                val fullInput = (method.params.toMutableList() + initiatorAddress).toTypedArray()
+                val fullClassInput = (method.params.map { it.javaClass } + String::class.java).toTypedArray()
+
+                output = MethodUtils.invokeExactMethod(instance, method.name, fullInput, fullClassInput)
             } catch (ex: Throwable) {
-                log.debug("Error while executing ($runnableClass - $method): ${ex.message}")
+                log.debug("Error while executing (${contract.clazz} - ${method.name}): ${ex.message}")
                 exception = ex
             }
-            log.debug("Execution completed for $runnableClass - $method")
             completionLatch.countDown()
+            Thread.sleep(1000)
         }
         completionLatch.await()
 
         if (null == exception) {
-            return Result(threadName, output)
+            //todo save state?
+            return ExecutionResult(threadName, output)
         } else {
             throw ContractExecutionException(exception!!.message, exception)
         }
     }
 
-    data class Result(
+    private fun loadClassAndState(contract: ContractDto): Any {
+        try {
+            val instance = (Class.forName(contract.clazz) ?: classLoader.loadBytes(ClassSource(contract.bytes)).clazz)
+                .newInstance()
+            //todo load state
+            FieldUtils.writeField(instance, "address", contract.address, true)
+            FieldUtils.writeField(instance, "owner", contract.owner, true)
+            return instance
+        } catch (ex: Throwable) {
+            throw ContractLoadingException("Error while loading contract and state: ${ex.message}", ex)
+        }
+    }
+
+    data class ExecutionResult(
         val identifier: String,
         val output: Any?
     )
+
 }
