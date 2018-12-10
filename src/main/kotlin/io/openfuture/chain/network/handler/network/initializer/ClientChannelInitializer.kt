@@ -49,7 +49,7 @@ class ClientChannelInitializer(
         val pipeline = channel.pipeline()
 
         pipeline.addLast(
-            //IdleStateHandler(readIdleTime, writeIdleTime, 0, TimeUnit.MILLISECONDS),
+            IdleStateHandler(readIdleTime, writeIdleTime, 0, TimeUnit.MILLISECONDS),
             connectionHandler,
             applicationContext.getBean(MessageCodec::class.java),
             heartBeatHandler,
