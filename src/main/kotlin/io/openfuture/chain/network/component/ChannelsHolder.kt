@@ -110,13 +110,17 @@ class ChannelsHolder(
     }
 
     private fun findNewPeer0() {
-        if (addressesHolder.size() < nodeProperties.rootNodes.size) {
+        val addresses = addressesHolder.getNodeInfos().filter { !getNodesInfo().contains(it) }
+        if (addresses.size < nodeProperties.rootNodes.size) {
             while (!findBootNode() && nodeProperties.rootNodes.size > channelGroup.size) {
                 log.warn("Unable to find boot peer. Retry...")
                 TimeUnit.SECONDS.sleep(3)
             }
         } else {
-            findRegularPeer()
+            while (!findRegularPeer() && nodeProperties.rootNodes.size > channelGroup.size) {
+                log.warn("Unable to find regular peer. Retry...")
+                TimeUnit.SECONDS.sleep(3)
+            }
         }
     }
 

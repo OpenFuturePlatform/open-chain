@@ -43,7 +43,7 @@ class MessageDecoder(
             return
         }
 
-        log.trace("Decoded ${ToStringBuilder.reflectionToString(message, SHORT_PREFIX_STYLE)} " +
+        log.debug("Decoded ${ToStringBuilder.reflectionToString(message, SHORT_PREFIX_STYLE)} " +
             "from ${ctx.channel().remoteAddress()}")
 
         out.add(message)
