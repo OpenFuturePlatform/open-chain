@@ -10,6 +10,6 @@ class ValidationResult(
 
     fun hasErrors(): Boolean = errors.isNotEmpty()
 
-    override fun toString(): String = errors.joinToString(separator = "\n", prefix = "[", postfix = "]")
+    override fun toString(): String = errors.joinToString(separator = "\n", prefix = "\n", postfix = "\n")
 
 }

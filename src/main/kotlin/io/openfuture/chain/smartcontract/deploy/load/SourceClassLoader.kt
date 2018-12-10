@@ -69,8 +69,10 @@ class SourceClassLoader(
     private fun validate(bytes: ByteArray) {
         val result = ValidationResult()
         ClassReader(bytes).accept(SourceValidator(result), 0)
-        if (result.hasErrors())
+        if (result.hasErrors()) {
+            log.debug(result.toString())
             throw ContractLoadingException("Contract class is invalid")
+        }
     }
 
     private fun readClassBytes(fullyQualifiedClassName: String): ByteArray {
