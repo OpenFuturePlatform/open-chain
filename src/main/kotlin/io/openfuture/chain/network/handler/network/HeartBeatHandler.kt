@@ -24,7 +24,7 @@ class HeartBeatHandler(
     }
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: HeartBeatMessage) {
-        // Do nothing
+        log.info("Got heartbeat from ${ctx.channel().remoteAddress()}")
     }
 
     override fun userEventTriggered(ctx: ChannelHandlerContext, event: Any) {
