@@ -1,13 +1,12 @@
 package io.openfuture.chain.smartcontract.core.model
 
 import io.openfuture.chain.smartcontract.core.exception.RequiredException
-import io.openfuture.chain.smartcontract.core.utils.AddressUtils
+import java.io.Serializable
 
-abstract class SmartContract(ownerAddress: String) {
+abstract class SmartContract : Serializable {
 
-    protected val owner: Address = Address(ownerAddress)
-    //TODO calculate from owner address (Keccak256 hash of sender address and nonce)
-    protected var address: Address = Address(AddressUtils.generateContractAddress(ownerAddress, "0"))
+    protected lateinit var owner: String
+    protected lateinit var address: String
 
 
     protected fun required(value: Boolean, message: String? = null) {
