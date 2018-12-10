@@ -43,7 +43,6 @@ class ContractExecutor {
                 exception = ex
             }
             completionLatch.countDown()
-            Thread.sleep(1000)
         }
         completionLatch.await()
 
