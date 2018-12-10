@@ -121,34 +121,13 @@ class ChannelsHolder(
                 })
                 if (connected) break@loop
             }
+            if (nodeProperties.peersNumber!! <= channelGroup.size) {
+                return
+            }
             log.info("Unable to find peer. Retry...")
             Thread.sleep(3000)
         }
     }
-
-//    private fun findBootNode(): Boolean {
-//        log.info("Searching boot peers ${channelGroup.joinToString { it.remoteAddress().toString() }} | ${channelGroup.size}")
-//        val connectedPeers = getNodesInfo().map { it.address }
-//        for (bootAddress in nodeProperties.getRootAddresses().minus(connectedPeers).shuffled()) {
-//            val connected = connectionService.connect(bootAddress, Consumer {
-//                greet(it)
-//            })
-//            if (connected) return true
-//        }
-//        return false
-//    }
-//
-//    private fun findRegularPeer(): Boolean {
-//        log.info("Looking for regular peer ${channelGroup.joinToString { it.remoteAddress().toString() }} | ${channelGroup.size}")
-//        val knownPeers = getNodesInfo()
-//        for (peer in addressesHolder.getRandomList(exclude = knownPeers)) {
-//            val connected = connectionService.connect(peer.address, Consumer {
-//                greet(it)
-//            })
-//            if (connected) return true
-//        }
-//        return false
-//    }
 
     private fun greet(channel: Channel) {
         val message = GreetingMessage(nodeProperties.port!!, nodeKeyHolder.getUid())
