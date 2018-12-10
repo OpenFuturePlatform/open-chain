@@ -1,7 +1,6 @@
 package io.openfuture.chain.network.component
 
 import io.netty.channel.Channel
-import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelId
 import io.netty.channel.group.DefaultChannelGroup
 import io.netty.util.AttributeKey
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Component
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 @Component
@@ -110,48 +108,49 @@ class ChannelsHolder(
     }
 
     private fun findNewPeer0() {
-        val addresses = addressesHolder.getNodeInfos().filter { !getNodesInfo().contains(it) }
-        if (addresses.size < nodeProperties.rootNodes.size) {
-            while (!findBootNode() && nodeProperties.rootNodes.size > channelGroup.size) {
-                log.warn("Unable to find boot peer. Retry...")
-                TimeUnit.SECONDS.sleep(3)
+        loop@ while (true) {
+            val connectedNodesInfo = getNodesInfo()
+            val regularAddresses = addressesHolder.getRandomList(exclude = connectedNodesInfo).map { it.address }
+            val bootAddresses = nodeProperties.getRootAddresses().minus(connectedNodesInfo.map { it.address })
+            val addresses = regularAddresses.plus(bootAddresses).distinct().shuffled()
+            for (address in addresses) {
+                val connected = connectionService.connect(address, Consumer {
+                    greet(it)
+                })
+                if (connected) break@loop
             }
-        } else {
-            while (!findRegularPeer() && nodeProperties.rootNodes.size > channelGroup.size) {
-                log.warn("Unable to find regular peer. Retry...")
-                TimeUnit.SECONDS.sleep(3)
-            }
+            log.info("Unable to find peer. Retry...")
+            Thread.sleep(3000)
         }
     }
 
-    private fun findBootNode(): Boolean {
-        log.info("Searching boot peers ${channelGroup.joinToString { it.remoteAddress().toString() }} | ${channelGroup.size}")
-        val connectedPeers = getNodesInfo().map { it.address }
-        for (bootAddress in nodeProperties.getRootAddresses().minus(connectedPeers).shuffled()) {
-            val connected = connectionService.connect(bootAddress, Consumer {
-                greet(it)
-            })
-            if (connected) return true
-        }
-        return false
-    }
+//    private fun findBootNode(): Boolean {
+//        log.info("Searching boot peers ${channelGroup.joinToString { it.remoteAddress().toString() }} | ${channelGroup.size}")
+//        val connectedPeers = getNodesInfo().map { it.address }
+//        for (bootAddress in nodeProperties.getRootAddresses().minus(connectedPeers).shuffled()) {
+//            val connected = connectionService.connect(bootAddress, Consumer {
+//                greet(it)
+//            })
+//            if (connected) return true
+//        }
+//        return false
+//    }
+//
+//    private fun findRegularPeer(): Boolean {
+//        log.info("Looking for regular peer ${channelGroup.joinToString { it.remoteAddress().toString() }} | ${channelGroup.size}")
+//        val knownPeers = getNodesInfo()
+//        for (peer in addressesHolder.getRandomList(exclude = knownPeers)) {
+//            val connected = connectionService.connect(peer.address, Consumer {
+//                greet(it)
+//            })
+//            if (connected) return true
+//        }
+//        return false
+//    }
 
-    private fun findRegularPeer(): Boolean {
-        log.info("Looking for regular peer ${channelGroup.joinToString { it.remoteAddress().toString() }} | ${channelGroup.size}")
-        val knownPeers = getNodesInfo()
-        for (peer in addressesHolder.getRandomList(exclude = knownPeers)) {
-            val connected = connectionService.connect(peer.address, Consumer {
-                greet(it)
-            })
-            if (connected) return true
-        }
-        return false
-    }
-
-    private fun greet(channel: Channel): Boolean {
+    private fun greet(channel: Channel) {
         val message = GreetingMessage(nodeProperties.port!!, nodeKeyHolder.getUid())
         channel.writeAndFlush(message)
-        return true
     }
 
 }
