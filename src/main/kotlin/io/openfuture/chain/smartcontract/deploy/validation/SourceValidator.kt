@@ -23,7 +23,9 @@ class SourceValidator(val result: ValidationResult) : ClassVisitor(ASM6) {
             result.addError("Class is not a smart contract. Should inherit a $superContractName class")
         }
 
-        log.debug("CLASS: name-$name, interfaces-$interfaces, signature-$signature, version-$version")
+        interfaces?.forEach { validateType(it.asPackagePath) }
+
+        log.debug("CLASS: name-$name, superName-$superName, signature-$signature, version-$version")
         super.visit(version, access, name, signature, superName, interfaces)
     }
 
