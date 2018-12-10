@@ -50,7 +50,6 @@ class ServerChannelInitializer(
 
         pipeline.addLast(
             IdleStateHandler(readIdleTime, writeIdleTime, 0, TimeUnit.MILLISECONDS),
-            cacheHandler,
             connectionHandler,
             applicationContext.getBean(MessageCodec::class.java),
             heartBeatHandler,

@@ -41,12 +41,12 @@ class GreetingHandler(
         val channel = ctx.channel()
         if (isConnectionAcceptable(nodeInfo, channel)) {
             channelHolder.addChannel(channel, nodeInfo)
-            log.debug("Accepted connection from ${ctx.channel().remoteAddress()}")
+            log.info("Accepted connection from ${ctx.channel().remoteAddress()}")
             ctx.writeAndFlush(response)
             addressesHolder.addNodeInfo(nodeInfo)
             channelHolder.broadcast(NewClient(nodeInfo))
         } else {
-            log.debug("Rejected connection from ${ctx.channel().remoteAddress()}")
+            log.info("Rejected connection from ${ctx.channel().remoteAddress()}")
             response.accepted = false
             if (msg.uid == nodeKeyHolder.getUid()) {
                 nodeProperties.setMyself(nodeInfo)

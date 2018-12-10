@@ -12,8 +12,7 @@ import org.springframework.stereotype.Component
 @Component
 @Sharable
 class ConnectionHandler(
-    private val channelsHolder: ChannelsHolder,
-    private val connectionService: ConnectionService
+    private val channelsHolder: ChannelsHolder
 ) : ChannelInboundHandlerAdapter() {
 
     companion object {
@@ -22,7 +21,6 @@ class ConnectionHandler(
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
         log.debug("${ctx.channel().remoteAddress()} disconnected, operating peers count is ${channelsHolder.size()}")
-        channelsHolder.remove(ctx.channel())
         super.channelInactive(ctx)
     }
 
