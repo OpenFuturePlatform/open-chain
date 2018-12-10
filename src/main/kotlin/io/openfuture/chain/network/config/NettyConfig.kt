@@ -11,6 +11,8 @@ import io.openfuture.chain.network.handler.network.initializer.ServerChannelInit
 import io.openfuture.chain.network.property.NodeProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
 
 @Configuration
 class NettyConfig(
@@ -19,8 +21,11 @@ class NettyConfig(
     private val properties: NodeProperties
 ) {
 
+    @Bean
+    fun taskScheduler(): ScheduledExecutorService = Executors.newScheduledThreadPool(5)
+
     @Bean(destroyMethod = "shutdownGracefully")
-    fun bossGroup(): NioEventLoopGroup = NioEventLoopGroup(properties.bossCount!!)
+    fun bossGroup(): NioEventLoopGroup = NioEventLoopGroup()
 
     @Bean(destroyMethod = "shutdownGracefully")
     fun workerGroup(): NioEventLoopGroup = NioEventLoopGroup()

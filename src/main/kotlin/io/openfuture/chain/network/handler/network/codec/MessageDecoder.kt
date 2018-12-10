@@ -33,14 +33,8 @@ class MessageDecoder(
 
 
     override fun decode(ctx: ChannelHandlerContext, buf: ByteBuf, out: MutableList<Any>) {
-        val messageVersion = buf.readString()
-        val protocolVersion = nodeProperties.protocolVersion!!
-        if (protocolVersion != messageVersion) {
-            log.warn("Version discrepancy. Your version is: $protocolVersion, incoming version is: $messageVersion")
-            return
-        }
+        val originTime = readTimeAndCheckVersion(buf) ?: return
 
-        val originTime = buf.readLong() //timestamp
         val type = MessageType.get(buf.readByte())
         val message = type.clazz.java.getConstructor().newInstance()
 
@@ -55,6 +49,17 @@ class MessageDecoder(
             "from ${ctx.channel().remoteAddress()}")
 
         out.add(message)
+    }
+
+    fun readTimeAndCheckVersion(buf: ByteBuf): Long? {
+        val messageVersion = buf.readString()
+        val protocolVersion = nodeProperties.protocolVersion!!
+        if (protocolVersion != messageVersion) {
+            log.warn("Version discrepancy. Your version is: $protocolVersion, incoming version is: $messageVersion")
+            return null
+        }
+
+        return buf.readLong()
     }
 
     private fun isExpired(message: Serializable, originTime: Long): Boolean {

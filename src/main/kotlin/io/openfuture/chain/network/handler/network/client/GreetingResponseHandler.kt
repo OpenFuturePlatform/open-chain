@@ -27,12 +27,13 @@ class GreetingResponseHandler(
         config.setExternalHost(msg.externalHost)
         val address = NetworkAddress(socket.address.hostAddress, socket.port)
         val nodeInfo = NodeInfo(msg.uid, address)
+        addressesHolder.addNodeInfos(msg.nodesInfo)
         if (msg.accepted) {
             channelHolder.addChannel(channel, nodeInfo)
         } else {
             addressesHolder.markRejected(nodeInfo)
+            channelHolder.remove(channel)
         }
-        addressesHolder.addNodeInfos(msg.nodesInfo)
     }
 
 }

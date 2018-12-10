@@ -1,6 +1,7 @@
 package io.openfuture.chain.network.component
 
 import io.netty.channel.Channel
+import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelId
 import io.netty.channel.group.DefaultChannelGroup
 import io.netty.util.AttributeKey
@@ -57,7 +58,7 @@ class ChannelsHolder(
 
 
     override fun onApplicationEvent(event: ServerReadyEvent) {
-        findNewPeer0()
+        findNewPeer()
     }
 
     fun broadcast(message: Serializable) {
@@ -90,7 +91,7 @@ class ChannelsHolder(
     fun getNodeInfoByChannelId(channelId: ChannelId): NodeInfo? = channelGroup.find(channelId)?.attr(NODE_INFO_KEY)?.get()
 
     @Synchronized
-    fun addChannel(channel: Channel, nodeInfo: NodeInfo): Boolean {
+    fun addChannel(channel: Channel, nodeInfo: NodeInfo? = null): Boolean {
         if (channelGroup.any { it.attr(NODE_INFO_KEY).get() == nodeInfo }) {
             return false
         }
@@ -120,7 +121,7 @@ class ChannelsHolder(
     }
 
     private fun findBootNode(): Boolean {
-        log.info("Searching boot peers ${getNodesInfo().joinToString { it.address.port.toString() }} | ${channelGroup.size}")
+        log.info("Searching boot peers ${channelGroup.joinToString { it.remoteAddress().toString() }} | ${channelGroup.size}")
         val connectedPeers = getNodesInfo().map { it.address }
         for (bootAddress in nodeProperties.getRootAddresses().minus(connectedPeers).shuffled()) {
             val connected = connectionService.connect(bootAddress, Consumer {
@@ -132,7 +133,7 @@ class ChannelsHolder(
     }
 
     private fun findRegularPeer(): Boolean {
-        log.info("Looking for regular peer ${getNodesInfo().joinToString { it.address.port.toString() }} | ${channelGroup.size}")
+        log.info("Looking for regular peer ${channelGroup.joinToString { it.remoteAddress().toString() }} | ${channelGroup.size}")
         val knownPeers = getNodesInfo()
         for (peer in addressesHolder.getRandomList(exclude = knownPeers)) {
             val connected = connectionService.connect(peer.address, Consumer {
