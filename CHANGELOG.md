@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ## Changed
-- Sync: time waiting of messages for time synchronization is reduced
+- Sync: time synchronization based on ntp servers
 
 ## [1.4.0] - 2018-11-29
 ### Added
