@@ -1,22 +1,33 @@
 package io.openfuture.chain.smartcontract.deploy.service
 
 import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
+import io.openfuture.chain.smartcontract.deploy.domain.ContractMethod
+import io.openfuture.chain.smartcontract.deploy.execution.ContractExecutor
 import io.openfuture.chain.smartcontract.deploy.load.SourceClassLoader
+import io.openfuture.chain.smartcontract.repository.ContractRepository
 import org.springframework.stereotype.Service
 
 @Service
-class DefaultContractService : ContractService {
+class DefaultContractService(
+    private val repository: ContractRepository
+) : ContractService {
 
     private val classLoader = SourceClassLoader()
+    private val executor = ContractExecutor()
 
 
     override fun deploy(bytes: ByteArray) {
         classLoader.loadBytes(ClassSource(bytes))
     }
 
-    override fun run(className: String, method: String, vararg params: Any) {
-        //run a method of a contract in separate thread
-        TODO("not implemented")
+    //todo replace with transaction
+    override fun callMethod(txSender: String, contractAddress: String, methodName: String, vararg params: Any) {
+        val contact = repository.get(contractAddress)
+
+        //todo validateIsMethodExists()
+        val method = ContractMethod(methodName, params)
+
+        executor.run(txSender, contact, method)
     }
 
 }

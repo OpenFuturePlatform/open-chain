@@ -4,6 +4,6 @@ interface ContractService {
 
     fun deploy(bytes: ByteArray)
 
-    fun run(className: String, method: String, vararg params: Any)
+    fun callMethod(txSender: String, contractAddress: String, methodName: String, vararg params: Any)
 
 }
