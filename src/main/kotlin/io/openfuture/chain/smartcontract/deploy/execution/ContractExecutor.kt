@@ -34,11 +34,13 @@ class ContractExecutor {
             Thread.currentThread().name = threadName
             try {
                 val instance = loadClassAndState(contract)
+                //todo is sender required?
                 val fullInput = (method.params.toMutableList() + initiatorAddress).toTypedArray()
                 val fullClassInput = (method.params.map { it.javaClass } + String::class.java).toTypedArray()
 
-                result.output = MethodUtils.invokeExactMethod(instance, method.name, fullInput, fullClassInput)
                 result.instance = instance
+                result.output = MethodUtils.invokeExactMethod(instance, method.name, method.params,
+                    method.params.map { it.javaClass }.toTypedArray())
             } catch (ex: Throwable) {
                 log.debug("Error while executing (${contract.clazz} - ${method.name}): ${ex.message}")
                 exception = ex
