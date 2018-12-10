@@ -4,6 +4,7 @@ import io.openfuture.chain.core.sync.SyncStatus
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.property.NodeProperties
 import org.apache.commons.net.ntp.NTPUDPClient
+import org.apache.commons.net.ntp.TimeInfo
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -25,9 +26,9 @@ class ClockSynchronizer(
 
     private var lastQuizTime: Long? = null
     private var nearestNtpServer: InetAddress? = null
+    private var quizResult = mutableMapOf<InetAddress, TimeInfo>()
     private val ntpClient = NTPUDPClient().apply { defaultTimeout = 3000 }
     private val ntpsInetAddress = properties.ntpServers.map { InetAddress.getByName(it) }.toList()
-    private var quizResult = mutableMapOf<InetAddress, NtpResult>()
 
 
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
@@ -76,27 +77,34 @@ class ClockSynchronizer(
     }
 
     private fun syncByNearestNtpServer(): Long {
-        log.debug("Send to nearest ${nearestNtpServer!!.hostName} ntp server")
-        val info = ntpClient.getTime(nearestNtpServer)
-        info.computeDetails()
-        log.debug("Answer from nearest ntp server")
-        return info.offset
+        var success = false
+        var info: TimeInfo? = null
+        do {
+            try {
+                log.debug("Ask ${nearestNtpServer!!.hostName} server")
+                info = ntpClient.getTime(nearestNtpServer)
+                info.computeDetails()
+                success = true
+            } catch (e: SocketTimeoutException) {
+                log.debug("Ntp server ${nearestNtpServer!!.hostName} answers too long")
+            }
+        } while (!success)
+
+        return info!!.offset
     }
 
     private fun startNtpQuiz(): Long {
         lastQuizTime = clock.currentTimeMillis()
         quizResult.clear()
+
         for (address in ntpsInetAddress) {
             try {
-                log.debug("Send to ntp server")
+                log.debug("Ask ${address.hostName} server")
                 val info = ntpClient.getTime(address)
                 info.computeDetails()
-                val res = NtpResult(info.delay, info.offset)
-                log.debug("Answer from #${address.hostName} server $res")
-                quizResult[address] = res
+                quizResult[address] = info
             } catch (e: SocketTimeoutException) {
-                log.debug("Ntp server #${address.hostName} answer too long")
-                continue
+                log.debug("Ntp server ${address.hostName} answers too long")
             }
         }
 
