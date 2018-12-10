@@ -1,4 +1,4 @@
-package io.openfuture.chain.smartcontract.repository
+package io.openfuture.chain.smartcontract.deploy.repository
 
 import io.openfuture.chain.smartcontract.deploy.domain.ContractDto
 

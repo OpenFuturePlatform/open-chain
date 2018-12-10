@@ -4,7 +4,7 @@ import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
 import io.openfuture.chain.smartcontract.deploy.domain.ContractMethod
 import io.openfuture.chain.smartcontract.deploy.execution.ContractExecutor
 import io.openfuture.chain.smartcontract.deploy.load.SourceClassLoader
-import io.openfuture.chain.smartcontract.repository.ContractRepository
+import io.openfuture.chain.smartcontract.deploy.repository.ContractRepository
 import org.springframework.stereotype.Service
 
 @Service
