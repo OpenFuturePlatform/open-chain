@@ -9,11 +9,7 @@ class CalculatorContract() : SmartContract() {
 
 
     @ContractMethod
-    fun add(sender: String, value: Long) {
-        if (sender == owner) {
-
-        }
-
+    fun add(value: Long) {
         result += value
     }
 
