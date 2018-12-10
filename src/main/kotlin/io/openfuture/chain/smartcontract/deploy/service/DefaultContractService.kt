@@ -27,7 +27,8 @@ class DefaultContractService(
         //todo validateIsMethodExists()
         val method = ContractMethod(methodName, params)
 
-        executor.run(txSender, contact, method)
+        val result = executor.run(txSender, contact, method)
+        //todo update state
     }
 
 }

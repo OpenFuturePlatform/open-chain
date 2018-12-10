@@ -26,9 +26,9 @@ class ContractExecutor {
 
 
     fun run(initiatorAddress: String, contract: ContractDto, method: ContractMethod): ExecutionResult {
-        var output: Any? = null
         var exception: Throwable? = null
         val threadName = "${contract.clazz}-${uniqueIdentifier.getAndIncrement()}"
+        val result = ExecutionResult(threadName, null, null)
         val completionLatch = CountDownLatch(1)
         pool.execute {
             Thread.currentThread().name = threadName
@@ -37,7 +37,8 @@ class ContractExecutor {
                 val fullInput = (method.params.toMutableList() + initiatorAddress).toTypedArray()
                 val fullClassInput = (method.params.map { it.javaClass } + String::class.java).toTypedArray()
 
-                output = MethodUtils.invokeExactMethod(instance, method.name, fullInput, fullClassInput)
+                result.output = MethodUtils.invokeExactMethod(instance, method.name, fullInput, fullClassInput)
+                result.instance = instance
             } catch (ex: Throwable) {
                 log.debug("Error while executing (${contract.clazz} - ${method.name}): ${ex.message}")
                 exception = ex
@@ -47,8 +48,7 @@ class ContractExecutor {
         completionLatch.await()
 
         if (null == exception) {
-            //todo save state?
-            return ExecutionResult(threadName, output)
+            return result
         } else {
             throw ContractExecutionException(exception!!.message, exception)
         }
@@ -68,8 +68,9 @@ class ContractExecutor {
     }
 
     data class ExecutionResult(
-        val identifier: String,
-        val output: Any?
+        var identifier: String,
+        var instance: Any?,
+        var output: Any?
     )
 
 }
