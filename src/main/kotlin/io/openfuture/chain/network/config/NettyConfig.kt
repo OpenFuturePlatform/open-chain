@@ -25,7 +25,7 @@ class NettyConfig(
     fun taskScheduler(): ScheduledExecutorService = Executors.newScheduledThreadPool(5)
 
     @Bean(destroyMethod = "shutdownGracefully")
-    fun bossGroup(): NioEventLoopGroup = NioEventLoopGroup(properties.bossCount!!)
+    fun bossGroup(): NioEventLoopGroup = NioEventLoopGroup()
 
     @Bean(destroyMethod = "shutdownGracefully")
     fun workerGroup(): NioEventLoopGroup = NioEventLoopGroup()
