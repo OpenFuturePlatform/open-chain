@@ -10,7 +10,6 @@ import io.openfuture.chain.network.handler.core.TransferTransactionHandler
 import io.openfuture.chain.network.handler.core.VoteTransactionHandler
 import io.openfuture.chain.network.handler.network.*
 import io.openfuture.chain.network.handler.network.client.GreetingResponseHandler
-import io.openfuture.chain.network.handler.network.client.ResponseTimeHandler
 import io.openfuture.chain.network.handler.network.codec.MessageCodec
 import io.openfuture.chain.network.handler.sync.*
 import io.openfuture.chain.network.property.NodeProperties
@@ -26,7 +25,6 @@ class ClientChannelInitializer(
     private val connectionHandler: ConnectionHandler,
     private val heartBeatHandler: HeartBeatHandler,
     private val greetingResponseHandler: GreetingResponseHandler,
-    private val responseTimeHandler: ResponseTimeHandler,
     private val newClientHandler: NewClientHandler,
     private val networkStatusHandler: NetworkStatusHandler,
     private val syncRequestHandler: SyncRequestHandler,
@@ -54,7 +52,6 @@ class ClientChannelInitializer(
             applicationContext.getBean(MessageCodec::class.java),
             heartBeatHandler,
             greetingResponseHandler,
-            responseTimeHandler,
             newClientHandler,
             networkStatusHandler,
             //        sync

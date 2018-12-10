@@ -17,24 +17,22 @@ enum class MessageType(
 
     // network
     HEART_BEAT(1, HeartBeatMessage::class),
-    REQUEST_TIME(2, RequestTimeMessage::class),
-    RESPONSE_TIME(3, ResponseTimeMessage::class),
-    GREETING(4, GreetingMessage::class),
-    GREETING_RESPONSE(5, GreetingResponseMessage::class),
-    NEW_CLIENT(6, NewClient::class),
+    GREETING(2, GreetingMessage::class),
+    GREETING_RESPONSE(3, GreetingResponseMessage::class),
+    NEW_CLIENT(4, NewClient::class),
     // core
-    TRANSFER_TRANSACTION(7, TransferTransactionMessage::class),
-    DELEGATE_TRANSACTION(8, DelegateTransactionMessage::class),
-    VOTE_TRANSACTION(9, VoteTransactionMessage::class),
+    TRANSFER_TRANSACTION(5, TransferTransactionMessage::class),
+    DELEGATE_TRANSACTION(6, DelegateTransactionMessage::class),
+    VOTE_TRANSACTION(7, VoteTransactionMessage::class),
     // consensus
-    BLOCK_APPROVAL(10, BlockApprovalMessage::class),
-    PENDING_BLOCK(11, PendingBlockMessage::class),
+    BLOCK_APPROVAL(8, BlockApprovalMessage::class),
+    PENDING_BLOCK(9, PendingBlockMessage::class),
     // sync
-    SYNC_REQUEST(12, SyncRequestMessage::class),
-    SYNC_RESPONSE(13, SyncResponseMessage::class),
-    SYNC_BLOCKS_REQUEST(14, SyncBlockRequestMessage::class),
-    MAIN_BLOCK(15, MainBlockMessage::class),
-    GENESIS_BLOCK(16, GenesisBlockMessage::class);
+    SYNC_REQUEST(10, SyncRequestMessage::class),
+    SYNC_RESPONSE(11, SyncResponseMessage::class),
+    SYNC_BLOCKS_REQUEST(12, SyncBlockRequestMessage::class),
+    MAIN_BLOCK(13, MainBlockMessage::class),
+    GENESIS_BLOCK(14, GenesisBlockMessage::class);
 
 
     companion object {

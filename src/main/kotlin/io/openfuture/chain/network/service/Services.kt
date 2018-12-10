@@ -29,5 +29,4 @@ interface ConnectionService {
 
     fun connect(networkAddress: NetworkAddress, onConnect: Consumer<Channel>? = null): Boolean
 
-    fun sendTimeSyncRequest()
 }

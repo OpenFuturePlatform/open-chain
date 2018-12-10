@@ -23,7 +23,6 @@ class BlockProductionScheduler(
     private val mainBlockService: MainBlockService,
     private val genesisBlockService: GenesisBlockService,
     private val pendingBlockHandler: PendingBlockHandler,
-    private val consensusProperties: ConsensusProperties,
     private val syncManager: SyncManager,
     private val clockSynchronizer: ClockSynchronizer
 ) {
@@ -37,8 +36,7 @@ class BlockProductionScheduler(
 
     @PostConstruct
     fun init() {
-        executor.scheduleAtFixedRate({ proceedProductionLoop() }, epochService.timeToNextTimeSlot(),
-            consensusProperties.getPeriod(), TimeUnit.MILLISECONDS)
+        executor.schedule({ proceedProductionLoop() }, epochService.timeToNextTimeSlot(), TimeUnit.MILLISECONDS)
     }
 
     private fun proceedProductionLoop() {
@@ -61,6 +59,8 @@ class BlockProductionScheduler(
             }
         } catch (ex: Exception) {
             log.error("Block creation failure inbound: ${ex.message}")
+        } finally {
+            executor.schedule({ proceedProductionLoop() }, epochService.timeToNextTimeSlot(), TimeUnit.MILLISECONDS)
         }
     }
 
