@@ -8,10 +8,7 @@ import io.openfuture.chain.network.handler.consensus.PendingBlockNetworkHandler
 import io.openfuture.chain.network.handler.core.DelegateTransactionHandler
 import io.openfuture.chain.network.handler.core.TransferTransactionHandler
 import io.openfuture.chain.network.handler.core.VoteTransactionHandler
-import io.openfuture.chain.network.handler.network.ConnectionHandler
-import io.openfuture.chain.network.handler.network.HeartBeatHandler
-import io.openfuture.chain.network.handler.network.NetworkStatusHandler
-import io.openfuture.chain.network.handler.network.NewClientHandler
+import io.openfuture.chain.network.handler.network.*
 import io.openfuture.chain.network.handler.network.client.GreetingResponseHandler
 import io.openfuture.chain.network.handler.network.codec.MessageCodec
 import io.openfuture.chain.network.handler.sync.*
@@ -23,7 +20,24 @@ import java.util.concurrent.TimeUnit
 @Component
 class ClientChannelInitializer(
     private val nodeProperties: NodeProperties,
-    private val applicationContext: ApplicationContext
+    private val applicationContext: ApplicationContext,
+    private val cacheHandler: CacheHandler,
+    private val connectionHandler: ConnectionHandler,
+    private val heartBeatHandler: HeartBeatHandler,
+    private val greetingResponseHandler: GreetingResponseHandler,
+    private val newClientHandler: NewClientHandler,
+    private val networkStatusHandler: NetworkStatusHandler,
+    private val syncRequestHandler: SyncRequestHandler,
+    private val syncResponseHandler: SyncResponseHandler,
+    private val syncBlockRequestHandler: SyncBlockRequestHandler,
+    private val mainBlockHandler: MainBlockHandler,
+    private val genesisBlockHandler: GenesisBlockHandler,
+    private val syncStatusHandler: SyncStatusHandler,
+    private val transferTransactionHandler: TransferTransactionHandler,
+    private val delegateTransactionHandler: DelegateTransactionHandler,
+    private val voteTransactionHandler: VoteTransactionHandler,
+    private val pendingBlockNetworkHandler: PendingBlockNetworkHandler,
+    private val blockApprovalHandler: BlockApprovalHandler
 ) : ChannelInitializer<Channel>() {
 
     override fun initChannel(channel: Channel) {
@@ -33,27 +47,27 @@ class ClientChannelInitializer(
         val pipeline = channel.pipeline()
 
         pipeline.addLast(
-            applicationContext.getBean(MessageCodec::class.java),
-            applicationContext.getBean(ConnectionHandler::class.java),
             IdleStateHandler(readIdleTime, writeIdleTime, 0, TimeUnit.MILLISECONDS),
-            applicationContext.getBean(HeartBeatHandler::class.java),
-            applicationContext.getBean(GreetingResponseHandler::class.java),
-            applicationContext.getBean(NewClientHandler::class.java),
-            applicationContext.getBean(NetworkStatusHandler::class.java),
+            connectionHandler,
+            applicationContext.getBean(MessageCodec::class.java),
+            heartBeatHandler,
+            greetingResponseHandler,
+            newClientHandler,
+            networkStatusHandler,
             //        sync
-            applicationContext.getBean(SyncRequestHandler::class.java),
-            applicationContext.getBean(SyncResponseHandler::class.java),
-            applicationContext.getBean(SyncBlockRequestHandler::class.java),
-            applicationContext.getBean(MainBlockHandler::class.java),
-            applicationContext.getBean(GenesisBlockHandler::class.java),
-            applicationContext.getBean(SyncStatusHandler::class.java),
+            syncRequestHandler,
+            syncResponseHandler,
+            syncBlockRequestHandler,
+            mainBlockHandler,
+            genesisBlockHandler,
+            syncStatusHandler,
             //        core
-            applicationContext.getBean(TransferTransactionHandler::class.java),
-            applicationContext.getBean(DelegateTransactionHandler::class.java),
-            applicationContext.getBean(VoteTransactionHandler::class.java),
+            transferTransactionHandler,
+            delegateTransactionHandler,
+            voteTransactionHandler,
             //        consensus
-            applicationContext.getBean(PendingBlockNetworkHandler::class.java),
-            applicationContext.getBean(BlockApprovalHandler::class.java)
+            pendingBlockNetworkHandler,
+            blockApprovalHandler
         )
     }
 

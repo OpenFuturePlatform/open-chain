@@ -1,87 +1,49 @@
 package io.openfuture.chain.network.service
 
 import io.netty.bootstrap.Bootstrap
+import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
-import io.openfuture.chain.core.component.NodeConfigurator
-import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.network.component.ChannelsHolder
-import io.openfuture.chain.network.component.ExplorerAddressesHolder
+import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.entity.NetworkAddress
-import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.property.NodeProperties
-import io.openfuture.chain.network.serialization.Serializable
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
+import java.util.function.Consumer
 
 @Service
 class DefaultConnectionService(
-    private val clock: Clock,
-    private val bootstrap: Bootstrap,
-    private val nodeProperties: NodeProperties,
-    private val channelHolder: ChannelsHolder,
-    private val explorerAddressesHolder: ExplorerAddressesHolder,
-    private val config: NodeConfigurator,
-    private val nodeKeyHolder: NodeKeyHolder
+    @Lazy private val bootstrap: Bootstrap,
+    private val addressesHolder: AddressesHolder
 ) : ConnectionService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultConnectionService::class.java)
     }
 
-
-    override fun connect(networkAddress: NetworkAddress) {
-        bootstrap.connect(networkAddress.host, networkAddress.port).addListener { future ->
-            if (!future.isSuccess) {
-                log.warn("Can not connect to ${networkAddress.host}:${networkAddress.port}")
-                explorerAddressesHolder.removeNodeInfo(networkAddress)
-            } else {
-                val greeting = GreetingMessage(config.getConfig().externalPort, nodeKeyHolder.getUid())
-                (future as ChannelFuture).channel().writeAndFlush(greeting)
-            }
-
-            return@addListener
-        }
-    }
-
-    override fun poll(message: Serializable, pollSize: Int) {
-        explorerAddressesHolder.getRandomList(pollSize).map { it.address }.forEach { address ->
-            bootstrap.connect(address.host, address.port).addListener { future ->
-                val channel = (future as ChannelFuture).channel()
-
+    override fun connect(networkAddress: NetworkAddress, onConnect: Consumer<Channel>?): Boolean {
+        var result = true
+        try {
+            bootstrap.connect(networkAddress.host, networkAddress.port).addListener { future ->
                 if (future.isSuccess) {
-                    channel.writeAndFlush(message)
-                    log.debug("Send ${message::class.java.simpleName} to ${address.port}")
+                    onConnect?.let {
+                        val channel = (future as ChannelFuture).channel()
+                        it.accept(channel)
+                    }
+                } else {
+                    log.warn("Can not connect to ${networkAddress.host}:${networkAddress.port}")
+                    addressesHolder.removeNodeInfo(networkAddress)
+                    result = false
                 }
-            }
+            }.sync()
+        } catch (ex: Exception) {
+            result = false
         }
+        return result
     }
 
-    @Scheduled(fixedRateString = "\${node.check-connection-period}")
-    fun findNewPeers() {
-        if (explorerAddressesHolder.getNodesInfo().isEmpty()) {
-            connect(nodeProperties.getRootAddresses().shuffled().first())
-            return
-        }
 
-        val neededPeers = nodeProperties.peersNumber!! - channelHolder.size()
-        if (neededPeers > 0) {
-            log.warn("Need  $neededPeers peers, current peers count ${channelHolder.size()}")
-            val uids = explorerAddressesHolder.getNodesInfo().asSequence().map { it.uid }
-                .minus(channelHolder.getNodesInfo().map { it.uid }).toList()
-
-            if (uids.isEmpty()) {
-                connect(nodeProperties.getRootAddresses().shuffled().first())
-                return
-            }
-
-            uids.shuffled().take(neededPeers).forEach {
-                connect(explorerAddressesHolder.getNodesInfo()
-                    .first { nodeInfo -> nodeInfo.uid == it }.address)
-            }
-        }
-    }
 
 }
