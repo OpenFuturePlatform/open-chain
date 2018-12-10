@@ -22,7 +22,7 @@ class NettyConfig(
 ) {
 
     @Bean
-    fun taskScheduler(): ScheduledExecutorService = Executors.newScheduledThreadPool(1)
+    fun taskScheduler(): ScheduledExecutorService = Executors.newScheduledThreadPool(5)
 
     @Bean(destroyMethod = "shutdownGracefully")
     fun bossGroup(): NioEventLoopGroup = NioEventLoopGroup(properties.bossCount!!)
