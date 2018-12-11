@@ -25,7 +25,7 @@ class ContractExecutor {
     private val classLoader = SourceClassLoader()
 
 
-    fun run(initiatorAddress: String, contract: ContractDto, method: ContractMethod): ExecutionResult {
+    fun run(contract: ContractDto, method: ContractMethod): ExecutionResult {
         var exception: Throwable? = null
         val threadName = "${contract.clazz}-${uniqueIdentifier.getAndIncrement()}"
         val result = ExecutionResult(threadName, null, null)
@@ -34,10 +34,6 @@ class ContractExecutor {
             Thread.currentThread().name = threadName
             try {
                 val instance = loadClassAndState(contract)
-                //todo is sender required?
-                val fullInput = (method.params.toMutableList() + initiatorAddress).toTypedArray()
-                val fullClassInput = (method.params.map { it.javaClass } + String::class.java).toTypedArray()
-
                 result.instance = instance
                 result.output = MethodUtils.invokeExactMethod(instance, method.name, method.params,
                     method.params.map { it.javaClass }.toTypedArray())

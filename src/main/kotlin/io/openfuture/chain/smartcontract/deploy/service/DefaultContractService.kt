@@ -21,13 +21,13 @@ class DefaultContractService(
     }
 
     //todo replace with transaction
-    override fun callMethod(txSender: String, contractAddress: String, methodName: String, vararg params: Any) {
+    override fun callMethod(contractAddress: String, methodName: String, vararg params: Any) {
         val contact = repository.get(contractAddress)
 
         //todo validateIsMethodExists()
         val method = ContractMethod(methodName, params)
 
-        val result = executor.run(txSender, contact, method)
+        val result = executor.run(contact, method)
         //todo update state
     }
 
