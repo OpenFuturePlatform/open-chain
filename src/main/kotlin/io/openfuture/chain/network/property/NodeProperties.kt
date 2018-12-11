@@ -26,11 +26,11 @@ class NodeProperties(
     @field:NotNull
     var protocolVersion: String? = null,
 
-    /** */
+    /** Number of boss threads */
     @field:NotNull
     var bossCount: Int? = null,
 
-    /** */
+    /** Backlog */
     @field:NotNull
     var backlog: Int? = null,
 
@@ -38,7 +38,7 @@ class NodeProperties(
     @field:NotNull
     var keepAlive: Boolean? = null,
 
-    /** */
+    /** Connection timeout */
     @field:NotNull
     var connectionTimeout: Int? = null,
 
