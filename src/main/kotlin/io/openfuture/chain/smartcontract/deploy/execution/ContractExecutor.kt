@@ -58,10 +58,15 @@ class ContractExecutor {
 
     private fun loadClassAndState(contract: ContractDto): Any {
         try {
-            val instance = (Class.forName(contract.clazz) ?: classLoader.loadBytes(ClassSource(contract.bytes)).clazz)
-                .newInstance()
+            var instance = Class.forName(contract.clazz)?.newInstance()
+
+            if (null == instance) {
+                instance = classLoader.loadBytes(ClassSource(contract.bytes)).clazz.newInstance()
+                ContractInjector(instance).injectFields(contract.address, contract.owner)
+            }
+
             //todo load state
-            return ContractInjector(instance).injectFields(contract.address, contract.owner)
+            return instance!!
         } catch (ex: Throwable) {
             throw ContractLoadingException("Error while loading contract and state: ${ex.message}", ex)
         }
