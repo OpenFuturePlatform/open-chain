@@ -20,6 +20,7 @@ class ConnectionHandler(
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
         log.debug("${ctx.channel().remoteAddress()} disconnected, operating peers count is ${channelsHolder.size()}")
+        channelsHolder.findNewPeer()
         super.channelInactive(ctx)
     }
 

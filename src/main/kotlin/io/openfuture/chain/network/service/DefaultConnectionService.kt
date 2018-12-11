@@ -6,7 +6,6 @@ import io.netty.channel.ChannelFuture
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.entity.NetworkAddress
-import io.openfuture.chain.network.message.network.RequestTimeMessage
 import io.openfuture.chain.network.property.NodeProperties
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -16,9 +15,7 @@ import java.util.function.Consumer
 
 @Service
 class DefaultConnectionService(
-    private val clock: Clock,
     @Lazy private val bootstrap: Bootstrap,
-    private val nodeProperties: NodeProperties,
     private val addressesHolder: AddressesHolder
 ) : ConnectionService {
 
@@ -47,22 +44,6 @@ class DefaultConnectionService(
         return result
     }
 
-    override fun sendTimeSyncRequest() {
-        val addresses = addressesHolder
-            .getRandomList()
-            .map { it.address }
-        var numberOfConnections = nodeProperties.getRootAddresses().size
-        val it = addresses.iterator()
-        while (it.hasNext() && numberOfConnections != 0) {
-            val address = it.next()
-            val connected = connect(address, Consumer {
-                val message = RequestTimeMessage(clock.currentTimeMillis())
-                it.writeAndFlush(message)
-            })
-            if (connected) {
-                numberOfConnections--
-            }
-        }
-    }
+
 
 }

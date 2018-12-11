@@ -54,8 +54,6 @@ class SyncManager(
         }
     }
 
-
-    @Synchronized
     fun getStatus(): SyncStatus = status
 
     @Synchronized
@@ -64,7 +62,6 @@ class SyncManager(
             status = NOT_SYNCHRONIZED
             log.debug("set NOT_SYNCHRONIZED in outOfSync")
         }
-        sync()
     }
 
     @Synchronized
@@ -101,7 +98,6 @@ class SyncManager(
         }
     }
 
-    @Synchronized
     private fun checkState(lastBlock: Block) {
         log.debug("LEDGER: <<< responses.size = ${responses.flatMap { it.value }.size} >>>")
         if (threshold > responses.flatMap { it.value }.size) {
@@ -177,7 +173,7 @@ class SyncManager(
         return emptyList()
     }
 
-    private fun isEnough(available: Int): Boolean = available >= threshold
+    private fun isEnough(available: Int): Boolean = available > threshold
 
     private fun maxPopularChain(response: ConcurrentHashMap<List<SyncBlockDto>, MutableList<NodeInfo>>): Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>> =
         response.maxWith(Comparator { r1, r2 ->

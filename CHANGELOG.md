@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Changed
+- Sync: time synchronization based on ntp servers
 - Smart contracts: contract variables class validation is supplemented
 
 ## [1.4.0] - 2018-11-29
