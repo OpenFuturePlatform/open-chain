@@ -5,8 +5,8 @@ import io.openfuture.chain.smartcontract.deploy.domain.ContractDto
 import io.openfuture.chain.smartcontract.deploy.domain.ContractMethod
 import io.openfuture.chain.smartcontract.deploy.exception.ContractExecutionException
 import io.openfuture.chain.smartcontract.deploy.exception.ContractLoadingException
+import io.openfuture.chain.smartcontract.deploy.load.ContractInjector
 import io.openfuture.chain.smartcontract.deploy.load.SourceClassLoader
-import org.apache.commons.lang3.reflect.FieldUtils
 import org.apache.commons.lang3.reflect.MethodUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -61,9 +61,7 @@ class ContractExecutor {
             val instance = (Class.forName(contract.clazz) ?: classLoader.loadBytes(ClassSource(contract.bytes)).clazz)
                 .newInstance()
             //todo load state
-            FieldUtils.writeField(instance, "address", contract.address, true)
-            FieldUtils.writeField(instance, "owner", contract.owner, true)
-            return instance
+            return ContractInjector(instance).injectFields(contract.address, contract.owner)
         } catch (ex: Throwable) {
             throw ContractLoadingException("Error while loading contract and state: ${ex.message}", ex)
         }
