@@ -1,11 +1,11 @@
 plugins {
     id 'jacoco'
     id 'idea'
-    id 'org.jetbrains.kotlin.jvm' version '1.2.71'
-    id 'org.jetbrains.kotlin.kapt' version '1.2.71'
-    id 'org.jetbrains.kotlin.plugin.spring' version '1.2.71'
-    id 'org.jetbrains.kotlin.plugin.jpa' version '1.2.71'
-    id 'org.springframework.boot' version '2.0.5.RELEASE'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.11'
+    id 'org.jetbrains.kotlin.kapt' version '1.3.11'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.3.11'
+    id 'org.jetbrains.kotlin.plugin.jpa' version '1.3.11'
+    id 'org.springframework.boot' version '2.1.1.RELEASE'
     id "io.zensoft.versioning" version "1.0.0"
 }
 
@@ -19,7 +19,8 @@ repositories {
 }
 
 ext {
-    kotlinVersion = '1.2.71'
+    kotlinVersion = '1.3.11'
+    springBootVersion = '2.1.1.RELEASE'
 }
 
 dependencies {
@@ -35,11 +36,15 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
     compile('org.springframework.boot:spring-boot-starter-web')
 
+    // Cache
+    compile('com.github.ben-manes.caffeine:caffeine')
+
     // DB
     compile('org.flywaydb:flyway-core')
     compile('com.h2database:h2')
 
     // Utils
+    compile('commons-net:commons-net:3.6')
     compile('org.apache.commons:commons-lang3:3.7')
     compile('com.github.oshi:oshi-core:3.5.0')
 
@@ -52,6 +57,10 @@ dependencies {
 
     //JAXB
     compile("javax.xml.bind:jaxb-api:2.3.0")
+
+    // Byte code
+    compile("org.ow2.asm:asm:7.0")
+    compile("org.ow2.asm:asm-commons:7.0")
 
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
@@ -83,7 +92,7 @@ compileTestKotlin {
 }
 noArg {
     annotations(
-            "javax.persistence.MappedSuperclass", 
+            "javax.persistence.MappedSuperclass",
             "javax.persistence.Entity",
             "io.openfuture.chain.core.annotation.NoArgConstructor"
     )

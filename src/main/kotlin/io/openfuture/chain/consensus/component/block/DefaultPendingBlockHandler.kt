@@ -12,6 +12,8 @@ import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.service.NetworkApiService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -21,6 +23,10 @@ class DefaultPendingBlockHandler(
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService
 ) : PendingBlockHandler {
+
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(DefaultPendingBlockHandler::class.java)
+    }
 
     private val pendingBlocks: MutableSet<PendingBlockMessage> = mutableSetOf()
     private val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
@@ -103,7 +109,10 @@ class DefaultPendingBlockHandler(
                 blockCommits.add(delegate)
                 networkService.broadcast(message)
                 if (blockCommits.size > (delegates.size / 3 * 2) && !blockAddedFlag) {
-                    pendingBlocks.find { it.hash == message.hash }?.let { mainBlockService.add(it) }
+                    pendingBlocks.find { it.hash == message.hash }?.let {
+                        log.debug("CONSENSUS: Saving main block ${it.hash}")
+                        mainBlockService.add(it)
+                    }
                     blockAddedFlag = true
                 }
             }

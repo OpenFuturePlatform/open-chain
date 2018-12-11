@@ -5,28 +5,40 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## Changed
+- Sync: time synchronization based on ntp servers
+
+## [1.4.0] - 2018-11-29
+### Added
+- Smart contracts: loading of a contract to JVM
+- Smart contracts: contract basic validation
+
+### Changed
+- Core: at chain synchronization a chain of blocks is requested instead of last block
+- Core: time synchronization is based on time-synchronized nodes
+
 
 ## [1.3.0] - 2018-11-16
-## Added
+### Added
 - Network: broadcast new client info over the entire network
 - Network: filtering expired messages
 
-## Changed
+### Changed
 - Network: removed heartbeat handler response
 - RPC: Response pagination improved
 
 ## [1.2.0] - 2018-10-22
-## Added
+### Added
 - Smart contract: adress generation utilites 
 - Smart contract: test contract
 
-## Changed
+### Changed
 - Network: time synchronization protocol accuracy is increased
 - Communication Protocol: time synchronization messages are updated
 - Smart contract: base contract class structure
 
 ## [1.1.0] - 2018-10-11
-## Added
+### Added
 - Smart contract: base initialization
 - Smart contract: base entities
 - Smart contract: base service interface
@@ -34,13 +46,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Core: unconfirmed balance check by unconfirmed transactions
 - Wallet UI: sorting transactions by timestamp in a reverse order
 
-## Changed
+### Changed
 - Core: transaction validation improved when creating a block
 - Core: update configuration file information when values change
 - Database: unconfirmed balance removed from wallets table
 
 ## [1.0.0] - 2018-09-25
-## Added
+### Added
 - Core: transaction validation
 - Core: transactions priority balancing
 - Core: block capacity
@@ -48,12 +60,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC: recalled vote flag
 - RPC: vote date to "get all votes" response 
 
-## Changed
+### Changed
 - SQLite database changed to H2
 - Core: unconfirmed balance calculation is improved
 
 ## [0.8.0] - 2018-09-07
-## Added
+### Added
 - Consensus: delegate public key field to a delegation transaction
 - RPC: delegate public key parameter to a delegation transaction request
 - Network: node ID as a network identifier
@@ -64,21 +76,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Wallet UI: Send vote transaction
 - Wallet UI: Transactions list
 
-## Changed
+### Changed
 - Network: addresses exploring mechanism
 - Network: nodes reconnection mechanism
 - Core: synchronization mechanism
 - Core: wallet balances calculation improved
 
 ## [0.7.0] - 2018-08-31
-## Added
+### Added
 - Master nodes initiation as active delegates on chain start
 - Configuration file
 - Network: Greeting response message contains node's external host
 - RPC: Get delegates by wallet address
 - Consensus: Added amount field to delegate transaction
 
-## Changed
+### Changed
 - Node private key moved from a separate file to a configuration file
 - Network: Improved connection to active delegates
 - Core: Improved vote transaction validation when a wallet had already voted
@@ -248,6 +260,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[1.4.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.0.0...v1.1.0

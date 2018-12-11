@@ -54,6 +54,11 @@ interface BlockService {
     fun getAvgProductionTime(): Long
 
     fun getCurrentHeight(): Long
+
+    fun isExists(hash: String, height: Long): Boolean
+
+    fun getCarcassForBlockSync(hash: String): List<Block>
+
 }
 
 interface GenesisBlockService {

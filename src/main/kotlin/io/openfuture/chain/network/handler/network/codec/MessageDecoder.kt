@@ -6,8 +6,8 @@ import io.netty.handler.codec.ReplayingDecoder
 import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.message.base.MessageType
-import io.openfuture.chain.network.message.network.RequestTimeMessage
-import io.openfuture.chain.network.message.network.ResponseTimeMessage
+import io.openfuture.chain.network.message.sync.GenesisBlockMessage
+import io.openfuture.chain.network.message.sync.MainBlockMessage
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.serialization.Serializable
 import org.apache.commons.lang3.builder.ToStringBuilder
@@ -31,33 +31,37 @@ class MessageDecoder(
 
 
     override fun decode(ctx: ChannelHandlerContext, buf: ByteBuf, out: MutableList<Any>) {
-        val messageVersion = buf.readString()
-        val protocolVersion = nodeProperties.protocolVersion!!
-        if (protocolVersion != messageVersion) {
-            log.warn("Version discrepancy. Your version is: $protocolVersion, incoming version is: $messageVersion")
-            return
-        }
+        val originTime = readTimeAndCheckVersion(buf) ?: return
 
-        val originTime = buf.readLong() //timestamp
         val type = MessageType.get(buf.readByte())
         val message = type.clazz.java.getConstructor().newInstance()
 
         message.read(buf)
 
         if (isExpired(message, originTime)) {
-            log.debug("Message $type  from ${ctx.channel().remoteAddress()} decline by expiration")
+            log.debug("Message $type from ${ctx.channel().remoteAddress()} decline by expiration")
             return
         }
 
         log.debug("Decoded ${ToStringBuilder.reflectionToString(message, SHORT_PREFIX_STYLE)} " +
-                    "from ${ctx.channel().remoteAddress()}"
-        )
+            "from ${ctx.channel().remoteAddress()}")
 
         out.add(message)
     }
 
+    fun readTimeAndCheckVersion(buf: ByteBuf): Long? {
+        val messageVersion = buf.readString()
+        val protocolVersion = nodeProperties.protocolVersion!!
+        if (protocolVersion != messageVersion) {
+            log.warn("Version discrepancy. Your version is: $protocolVersion, incoming version is: $messageVersion")
+            return null
+        }
+
+        return buf.readLong()
+    }
+
     private fun isExpired(message: Serializable, originTime: Long): Boolean {
-        if (message is RequestTimeMessage || message is  ResponseTimeMessage) {
+        if (message is MainBlockMessage || message is GenesisBlockMessage) {
             return false
         }
 

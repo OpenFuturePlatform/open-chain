@@ -5,13 +5,16 @@ import io.openfuture.chain.network.property.NodeProperties
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.ApplicationEvent
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Component
 
 @Component
 class TcpServer(
     private val bootstrap: ServerBootstrap,
-    private val properties: NodeProperties
+    private val properties: NodeProperties,
+    private val eventPublisher: ApplicationEventPublisher
 ) : ApplicationListener<ApplicationReadyEvent> {
 
     companion object {
@@ -35,6 +38,7 @@ class TcpServer(
             val channelFuture = bootstrap.bind(properties.port!!).sync()
             log.info("Netty started on port: ${properties.port}")
             log.info(LOGO)
+            eventPublisher.publishEvent(ServerReadyEvent(this))
 
             channelFuture.channel().closeFuture().sync()
         } catch (e: InterruptedException) {
@@ -43,3 +47,5 @@ class TcpServer(
     }
 
 }
+
+class ServerReadyEvent(source: Any): ApplicationEvent(source)
