@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service
 
 @Service
 class DefaultContractService(
-    private val repository: ContractRepository
+    private val repository: ContractRepository,
+    private val executor: ContractExecutor
 ) : ContractService {
 
     private val classLoader = SourceClassLoader()
-    private val executor = ContractExecutor()
 
 
     override fun deploy(bytes: ByteArray) {

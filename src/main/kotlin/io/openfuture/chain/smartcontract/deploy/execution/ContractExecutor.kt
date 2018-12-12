@@ -1,5 +1,6 @@
 package io.openfuture.chain.smartcontract.deploy.execution
 
+import io.openfuture.chain.smartcontract.deploy.ContractProperties
 import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
 import io.openfuture.chain.smartcontract.deploy.domain.ContractDto
 import io.openfuture.chain.smartcontract.deploy.domain.ContractMethod
@@ -10,11 +11,16 @@ import io.openfuture.chain.smartcontract.deploy.load.SourceClassLoader
 import org.apache.commons.lang3.reflect.MethodUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.concurrent.CountDownLatch
+import org.springframework.stereotype.Component
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.atomic.AtomicInteger
 
-class ContractExecutor {
+
+@Component
+class ContractExecutor(
+    private val properties: ContractProperties
+) {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(ContractExecutor::class.java)
@@ -29,8 +35,8 @@ class ContractExecutor {
         var exception: Throwable? = null
         val threadName = "${contract.clazz}-${uniqueIdentifier.getAndIncrement()}"
         val result = ExecutionResult(threadName, null, null)
-        val completionLatch = CountDownLatch(1)
-        pool.execute {
+
+        val task = pool.submit {
             Thread.currentThread().name = threadName
             try {
                 val instance = loadClassAndState(contract)
@@ -41,9 +47,13 @@ class ContractExecutor {
                 log.debug("Error while executing (${contract.clazz} - ${method.name}): ${ex.message}")
                 exception = ex
             }
-            completionLatch.countDown()
         }
-        completionLatch.await()
+
+        try {
+            task.get(properties.executionTimeout!!, MILLISECONDS)
+        } catch (ex: Exception) {
+            throw ContractExecutionException(ex.message, ex)
+        }
 
         if (null == exception) {
             return result
