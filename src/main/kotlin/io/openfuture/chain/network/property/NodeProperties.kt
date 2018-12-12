@@ -84,9 +84,12 @@ class NodeProperties(
     @field:NotEmpty
     var ntpServers: List<String> = emptyList(),
 
-    /** Time value for choosing next ntp server, which equals 21 epoch * 18000 millis*/
+    /** Time value for choosing next ntp server, which equals 24 hours*/
     @field:NotNull
-    var nextNtpServerInterval: Long? = null
+    var nextNtpServerInterval: Long? = null,
+
+    @field:NotNull
+    var ntpOffsetThreshold:Long? = null
 
 ) {
 

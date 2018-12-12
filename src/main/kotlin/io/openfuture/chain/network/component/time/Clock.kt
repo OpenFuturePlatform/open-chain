@@ -24,7 +24,7 @@ class Clock {
     fun adjust(offset: Long) {
         lock.writeLock().lock()
         try {
-            this.offset.getAndAdd(offset)
+            this.offset.set(offset)
         } finally {
             lock.writeLock().unlock()
         }
