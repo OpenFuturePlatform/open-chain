@@ -18,7 +18,7 @@
           RPC_PORT: "{{ item.app_port }}"
           NODE_PORT: "{{ item.api_port }}"
           KEY: '{ "externalPort" : {{ item.api_port }}, "externalHost" : "", "secret" : "{{ item.secret_key }}" }'
-          JMX_OPTS: "-Xrunjdwp:transport=dt_socket,server=y,address=8000,suspend=n -Dcom.sun.management.jmxremote.rmi.port=7000 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=7000 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Djava.rmi.server.hostname={{ansible_host}}"
+          JMX_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000 -Dcom.sun.management.jmxremote.rmi.port=7000 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=7000 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Djava.rmi.server.hostname={{ansible_host}}"
         published_ports:
           - "{{ item.app_port }}:{{ item.app_port }}"
           - "{{ item.api_port }}:{{ item.api_port }}"
