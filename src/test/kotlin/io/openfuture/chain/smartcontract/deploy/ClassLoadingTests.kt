@@ -1,11 +1,12 @@
 package io.openfuture.chain.smartcontract.deploy
 
+import io.openfuture.chain.ResourceUtils.getResource
+import io.openfuture.chain.ResourceUtils.getResourceBytes
 import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
 import io.openfuture.chain.smartcontract.deploy.exception.ContractLoadingException
 import io.openfuture.chain.smartcontract.deploy.load.SourceClassLoader
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import java.nio.file.Path
 import java.nio.file.Paths
 
 class ClassLoadingTests {
@@ -13,7 +14,7 @@ class ClassLoadingTests {
     @Test
     fun loadClassFromFile() {
         val path = "/classes/CalculatorContract.class"
-        val loader = SourceClassLoader(listOf(getResource(path)))
+        val loader = SourceClassLoader(listOf(Paths.get(getResource(path).toURI())))
 
         val clazz = loader.loadClass("io.openfuture.chain.smartcontract.templates.CalculatorContract")
         val contract = clazz.newInstance()
@@ -27,7 +28,7 @@ class ClassLoadingTests {
 
     @Test
     fun loadBytesWhenValidJavaContractClass() {
-        val javaBytes = getResource("/classes/JavaContract.class").toFile().readBytes()
+        val javaBytes = getResourceBytes("/classes/JavaContract.class")
         val className = "io.test.JavaContract"
         val loader = SourceClassLoader()
 
@@ -40,7 +41,7 @@ class ClassLoadingTests {
 
     @Test
     fun loadBytesWhenValidKotlinContractClass() {
-        val kotlinBytes = getResource("/classes/KotlinContract.class").toFile().readBytes()
+        val kotlinBytes = getResourceBytes("/classes/KotlinContract.class")
         val className = "io.test.KotlinContract"
         val loader = SourceClassLoader()
 
@@ -53,7 +54,7 @@ class ClassLoadingTests {
 
     @Test(expected = ContractLoadingException::class)
     fun loadBytesWhenJavaClassIsNotContractShouldThrowContractLoadingException() {
-        val bytes = getResource("/classes/HelloClass.class").toFile().readBytes()
+        val bytes = getResourceBytes("/classes/HelloClass.class")
         val loader = SourceClassLoader()
 
         loader.loadBytes(ClassSource(bytes))
@@ -61,7 +62,7 @@ class ClassLoadingTests {
 
     @Test(expected = ContractLoadingException::class)
     fun loadBytesWhenJavaClassContainsInvalidFieldTypeShouldThrowContractLoadingException() {
-        val bytes = getResource("/classes/JavaContractField.class").toFile().readBytes()
+        val bytes = getResourceBytes("/classes/JavaContractField.class")
         val loader = SourceClassLoader()
 
         loader.loadBytes(ClassSource(bytes))
@@ -69,7 +70,7 @@ class ClassLoadingTests {
 
     @Test(expected = ContractLoadingException::class)
     fun loadBytesWhenJavaClassContainsInvalidMethodReturnTypeShouldThrowContractLoadingException() {
-        val bytes = getResource("/classes/JavaContractMethod.class").toFile().readBytes()
+        val bytes = getResourceBytes("/classes/JavaContractMethod.class")
         val loader = SourceClassLoader()
 
         loader.loadBytes(ClassSource(bytes))
@@ -77,13 +78,10 @@ class ClassLoadingTests {
 
     @Test(expected = ContractLoadingException::class)
     fun loadBytesWhenJavaClassContainsThreadAndThreadDeathExceptionShouldThrowContractLoadingException() {
-        val bytes = getResource("/classes/JavaContractThread.class").toFile().readBytes()
+        val bytes = getResourceBytes("/classes/JavaContractThread.class")
         val loader = SourceClassLoader()
 
         loader.loadBytes(ClassSource(bytes))
     }
-
-
-    private fun getResource(path: String): Path = Paths.get(javaClass.getResource(path).toURI())
 
 }
