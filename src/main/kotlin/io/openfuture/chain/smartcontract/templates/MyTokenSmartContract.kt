@@ -5,7 +5,7 @@ import io.openfuture.chain.smartcontract.core.annotation.ContractMethod
 import io.openfuture.chain.smartcontract.core.model.Address
 import io.openfuture.chain.smartcontract.core.model.SmartContract
 
-class MyTokenSmartContract : SmartContract("") {
+class MyTokenSmartContract : SmartContract() {
 
     private val values: MutableMap<String, Long> = mutableMapOf()
     private lateinit var ticker: String

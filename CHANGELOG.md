@@ -5,11 +5,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-## Changed
+### Added
+- Smart contracts: contract basic executor
+
+### Changed
 - Sync: time synchronization based on ntp servers
 - Network: Strict quantity of permanent connections
 - Network: On failed connection attempt, node not allowed to retry connect for an hour
 - Network: Node maintains minimum amount of connections, when it lacks of it
+- Smart contracts: contract variables class validation is supplemented
 
 ## [1.4.0] - 2018-11-29
 ### Added

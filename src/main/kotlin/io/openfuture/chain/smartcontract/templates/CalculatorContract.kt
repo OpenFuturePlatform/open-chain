@@ -3,7 +3,7 @@ package io.openfuture.chain.smartcontract.templates
 import io.openfuture.chain.smartcontract.core.annotation.ContractMethod
 import io.openfuture.chain.smartcontract.core.model.SmartContract
 
-class CalculatorContract() : SmartContract("") {
+class CalculatorContract() : SmartContract() {
 
     private var result: Long = 0
 
@@ -25,6 +25,7 @@ class CalculatorContract() : SmartContract("") {
 
     @ContractMethod
     fun divide(value: Long) {
+
         required(value != 0L, "Division by zero is not allowed")
         result /= value
     }

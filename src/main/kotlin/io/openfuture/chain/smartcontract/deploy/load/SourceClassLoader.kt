@@ -1,10 +1,15 @@
 package io.openfuture.chain.smartcontract.deploy.load
 
+import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
 import io.openfuture.chain.smartcontract.deploy.domain.ClassSource.Companion.isClass
 import io.openfuture.chain.smartcontract.deploy.domain.LoadedClass
-import io.openfuture.chain.smartcontract.deploy.exception.ClassLoadingException
+import io.openfuture.chain.smartcontract.deploy.exception.ContractLoadingException
+import io.openfuture.chain.smartcontract.deploy.utils.asPackagePath
 import io.openfuture.chain.smartcontract.deploy.utils.asResourcePath
 import io.openfuture.chain.smartcontract.deploy.utils.toURL
+import io.openfuture.chain.smartcontract.deploy.validation.SourceValidator
+import io.openfuture.chain.smartcontract.deploy.validation.ValidationResult
+import org.objectweb.asm.ClassReader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
@@ -31,10 +36,9 @@ class SourceClassLoader(
 
     override fun loadClass(name: String, resolve: Boolean): Class<*> {
         try {
-            //todo validate
             return super.loadClass(name, resolve)
         } catch (ex: Throwable) {
-            throw ClassLoadingException(ex.message, ex)
+            throw ContractLoadingException(ex.message, ex)
         }
     }
 
@@ -52,20 +56,34 @@ class SourceClassLoader(
         return clazz
     }
 
+    fun loadBytes(classSource: ClassSource): LoadedClass = loadBytes(classSource.qualifiedName, classSource.bytes)
+
     fun loadBytes(className: String, bytes: ByteArray): LoadedClass {
         try {
+            validate(bytes)
             return LoadedClass(defineClass(className, bytes, 0, bytes.size), bytes)
         } catch (ex: Throwable) {
-            throw ClassLoadingException(ex.message, ex)
+            throw ContractLoadingException(ex.message, ex)
+        }
+    }
+
+    fun getLoadedClass(name: String) : Class<*>? = findLoadedClass(name.asPackagePath)
+
+    private fun validate(bytes: ByteArray) {
+        val result = ValidationResult()
+        ClassReader(bytes).accept(SourceValidator(result), 0)
+        if (result.hasErrors()) {
+            log.debug(result.toString())
+            throw ContractLoadingException("Contract class is invalid")
         }
     }
 
     private fun readClassBytes(fullyQualifiedClassName: String): ByteArray {
         try {
             return (getResourceAsStream("${fullyQualifiedClassName.asResourcePath}.class")
-                ?: throw ClassLoadingException("Class not found $fullyQualifiedClassName")).readBytes()
+                ?: throw ContractLoadingException("Class not found $fullyQualifiedClassName")).readBytes()
         } catch (e: IOException) {
-            throw ClassLoadingException("Error reading bytecode", e)
+            throw ContractLoadingException("Error reading bytecode", e)
         }
     }
 
