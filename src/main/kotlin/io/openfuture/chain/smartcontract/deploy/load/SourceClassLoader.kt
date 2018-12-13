@@ -4,6 +4,7 @@ import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
 import io.openfuture.chain.smartcontract.deploy.domain.ClassSource.Companion.isClass
 import io.openfuture.chain.smartcontract.deploy.domain.LoadedClass
 import io.openfuture.chain.smartcontract.deploy.exception.ContractLoadingException
+import io.openfuture.chain.smartcontract.deploy.utils.asPackagePath
 import io.openfuture.chain.smartcontract.deploy.utils.asResourcePath
 import io.openfuture.chain.smartcontract.deploy.utils.toURL
 import io.openfuture.chain.smartcontract.deploy.validation.SourceValidator
@@ -65,6 +66,8 @@ class SourceClassLoader(
             throw ContractLoadingException(ex.message, ex)
         }
     }
+
+    fun getLoadedClass(name: String) : Class<*>? = findLoadedClass(name.asPackagePath)
 
     private fun validate(bytes: ByteArray) {
         val result = ValidationResult()

@@ -64,11 +64,11 @@ class ContractExecutor(
 
     private fun loadClassAndState(contract: ContractDto): Any {
         try {
-            val instance = try {
-                Class.forName(contract.clazz).newInstance()
-            } catch (ex: ClassNotFoundException) {
-                val temp = classLoader.loadBytes(ClassSource(contract.bytes)).clazz.newInstance()
-                ContractInjector(temp).injectFields(contract.address, contract.owner)
+            var instance = classLoader.getLoadedClass(contract.clazz)?.newInstance()
+
+            if (null == instance) {
+                instance = classLoader.loadBytes(ClassSource(contract.bytes)).clazz.newInstance()
+                ContractInjector(instance).injectFields(contract.address, contract.owner)
             }
             //todo load state
             return instance!!
