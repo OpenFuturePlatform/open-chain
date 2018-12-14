@@ -5,15 +5,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.5.0] - 2018-12-14
 ### Added
 - Smart contracts: contract basic executor
 
 ### Changed
 - Sync: time synchronization based on ntp servers
-- Network: Strict quantity of permanent connections
-- Network: On failed connection attempt, node not allowed to retry connect for an hour
-- Network: Node maintains minimum amount of connections, when it lacks of it
-- Smart contracts: contract variables class validation is supplemented
+- Network: strict quantity of permanent connections
+- Network: in case of failed connection attempt, node is not allowed to retry connect for an hour
+- Network: node maintains minimum amount of connections, when there is a lack of them
+- Smart contracts: contract variable class validation is supplemented
 
 ## [1.4.0] - 2018-11-29
 ### Added
@@ -21,7 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Smart contracts: contract basic validation
 
 ### Changed
-- Core: at chain synchronization a chain of blocks is requested instead of last block
+- Core: when chain synchronization a chain of blocks is requested instead of the last block
 - Core: time synchronization is based on time-synchronized nodes
 
 
@@ -32,7 +34,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Network: removed heartbeat handler response
-- RPC: Response pagination improved
+- RPC: response pagination improved
 
 ## [1.2.0] - 2018-10-22
 ### Added
