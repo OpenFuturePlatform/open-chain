@@ -88,7 +88,7 @@ class ClockSynchronizer(
 
     private fun syncByNearestNtpServer(): Long {
         var info: TimeInfo?
-        var tryQuiz:Boolean
+        var tryQuiz: Boolean
         var attempt = 0
         val result = mutableListOf<TimeInfo>()
         do {
@@ -105,7 +105,7 @@ class ClockSynchronizer(
             }
         } while (tryQuiz)
 
-        val minOffset = result.minBy { it.offset }!!.offset
+        val minOffset = result.minBy { it.offset }?.offset ?: return lastOffset
         return isThreshold(minOffset)
     }
 
