@@ -1,5 +1,6 @@
 package io.openfuture.chain.smartcontract.deploy.execution
 
+import io.openfuture.chain.smartcontract.core.model.SmartContract
 import io.openfuture.chain.smartcontract.deploy.ContractProperties
 import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
 import io.openfuture.chain.smartcontract.deploy.domain.ContractDto
@@ -8,6 +9,7 @@ import io.openfuture.chain.smartcontract.deploy.exception.ContractExecutionExcep
 import io.openfuture.chain.smartcontract.deploy.exception.ContractLoadingException
 import io.openfuture.chain.smartcontract.deploy.load.ContractInjector
 import io.openfuture.chain.smartcontract.deploy.load.SourceClassLoader
+import io.openfuture.chain.smartcontract.deploy.utils.SerializationUtils
 import org.apache.commons.lang3.reflect.MethodUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -40,9 +42,9 @@ class ContractExecutor(
             Thread.currentThread().name = threadName
             try {
                 val instance = loadClassAndState(contract)
-                result.instance = instance
+                result.instance = instance as SmartContract
                 result.output = MethodUtils.invokeExactMethod(instance, method.name, method.params,
-                    method.params.map { it.javaClass }.toTypedArray())
+                    method.params.map { it::class.javaPrimitiveType ?: it::class.javaObjectType }.toTypedArray())
             } catch (ex: Throwable) {
                 log.debug("Error while executing (${contract.clazz} - ${method.name}): ${ex.message}")
                 exception = ex
@@ -68,10 +70,14 @@ class ContractExecutor(
 
             if (null == instance) {
                 instance = classLoader.loadBytes(ClassSource(contract.bytes)).clazz.newInstance()
-                ContractInjector(instance).injectFields(contract.address, contract.owner)
             }
-            //todo load state
-            return instance!!
+
+            if (contract.state.isNotEmpty()) {
+                instance = SerializationUtils.deserialize<SmartContract>(contract.state, classLoader)
+            }
+
+            ContractInjector(instance!!).injectFields(contract.address, contract.owner)
+            return instance
         } catch (ex: Throwable) {
             throw ContractLoadingException("Error while loading contract and state: ${ex.message}", ex)
         }
@@ -79,7 +85,7 @@ class ContractExecutor(
 
     data class ExecutionResult(
         var identifier: String,
-        var instance: Any?,
+        var instance: SmartContract?,
         var output: Any?
     )
 
