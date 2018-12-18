@@ -29,7 +29,8 @@ class DefaultContractService(
         val method = ContractMethod(methodName, params)
 
         val result = executor.run(contact, method)
-        val newState = SerializationUtils.serialize(result.instance!!)
+        contact.state = SerializationUtils.serialize(result.instance!!)
+        repository.save(contact)
     }
 
 }
