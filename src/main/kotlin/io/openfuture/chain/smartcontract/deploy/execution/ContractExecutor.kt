@@ -9,7 +9,6 @@ import io.openfuture.chain.smartcontract.deploy.exception.ContractExecutionExcep
 import io.openfuture.chain.smartcontract.deploy.exception.ContractLoadingException
 import io.openfuture.chain.smartcontract.deploy.load.ContractInjector
 import io.openfuture.chain.smartcontract.deploy.load.SourceClassLoader
-import io.openfuture.chain.smartcontract.deploy.utils.SerializationUtils
 import org.apache.commons.lang3.reflect.MethodUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -72,11 +71,9 @@ class ContractExecutor(
                 instance = classLoader.loadBytes(ClassSource(contract.bytes)).clazz.newInstance()
             }
 
-            if (contract.state.isNotEmpty()) {
-                instance = SerializationUtils.deserialize<SmartContract>(contract.state, classLoader)
-            }
-
-            ContractInjector(instance!!).injectFields(contract.address, contract.owner)
+            val injector = ContractInjector(instance as SmartContract, classLoader)
+            injector.injectState(contract.state)
+            injector.injectFields(contract.address, contract.owner)
             return instance
         } catch (ex: Throwable) {
             throw ContractLoadingException("Error while loading contract and state: ${ex.message}", ex)
