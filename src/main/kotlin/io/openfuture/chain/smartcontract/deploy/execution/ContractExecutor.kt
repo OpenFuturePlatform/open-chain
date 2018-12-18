@@ -42,8 +42,7 @@ class ContractExecutor(
             try {
                 val instance = loadClassAndState(contract)
                 result.instance = instance as SmartContract
-                result.output = MethodUtils.invokeExactMethod(instance, method.name, method.params,
-                    method.params.map { it::class.javaPrimitiveType ?: it::class.javaObjectType }.toTypedArray())
+                result.output = executeMethod(instance, method)
             } catch (ex: Throwable) {
                 log.debug("Error while executing (${contract.clazz} - ${method.name}): ${ex.message}")
                 exception = ex
@@ -61,6 +60,11 @@ class ContractExecutor(
         } else {
             throw ContractExecutionException(exception!!.message, exception)
         }
+    }
+
+    private fun executeMethod(instance: SmartContract, method: ContractMethod): Any? {
+        val paramTypes = instance.javaClass.declaredMethods.firstOrNull { it.name == method.name }?.parameterTypes
+        return MethodUtils.invokeExactMethod(instance, method.name, method.params, paramTypes)
     }
 
     private fun loadClassAndState(contract: ContractDto): Any {
