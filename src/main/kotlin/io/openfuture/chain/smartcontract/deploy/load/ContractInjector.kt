@@ -3,6 +3,7 @@ package io.openfuture.chain.smartcontract.deploy.load
 import io.openfuture.chain.smartcontract.core.model.SmartContract
 import io.openfuture.chain.smartcontract.deploy.utils.SerializationUtils
 import org.apache.commons.lang3.reflect.FieldUtils
+import org.apache.commons.lang3.reflect.FieldUtils.writeField
 
 class ContractInjector(
     private val instance: SmartContract,
@@ -16,8 +17,8 @@ class ContractInjector(
 
 
     fun injectFields(address: String, owner: String): SmartContract {
-        FieldUtils.writeField(instance, ADDRESS_FIELD, address, true)
-        FieldUtils.writeField(instance, OWNER_FIELD, owner, true)
+        writeField(instance, ADDRESS_FIELD, address, true)
+        writeField(instance, OWNER_FIELD, owner, true)
         return instance
     }
 
@@ -29,7 +30,7 @@ class ContractInjector(
 
         val deserialized = SerializationUtils.deserialize<SmartContract>(state, classLoader)
         deserialized.javaClass.declaredFields.forEach {
-            FieldUtils.writeField(instance, it.name, FieldUtils.readField(deserialized, it.name, true), true)
+            writeField(instance, it.name, FieldUtils.readField(deserialized, it.name, true), true)
         }
 
         return instance
