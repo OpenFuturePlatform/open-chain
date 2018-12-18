@@ -1,6 +1,6 @@
 package io.openfuture.chain.smartcontract.deploy.utils
 
-import io.openfuture.chain.smartcontract.deploy.exception.ContractLoadingException
+import org.apache.commons.lang3.SerializationException
 import java.io.*
 
 object SerializationUtils {
@@ -15,7 +15,7 @@ object SerializationUtils {
         try {
             ObjectOutputStream(outputStream).writeObject(obj)
         } catch (ex: IOException) {
-            throw ContractLoadingException(ex.message)
+            throw SerializationException(ex.message)
         }
     }
 
@@ -27,9 +27,9 @@ object SerializationUtils {
         try {
             return ClassLoaderAwareObjectInputStream(inputStream, classLoader).readObject() as T
         } catch (ex: ClassNotFoundException) {
-            throw ContractLoadingException(ex.message)
+            throw SerializationException(ex.message)
         } catch (ex: IOException) {
-            throw ContractLoadingException(ex.message)
+            throw SerializationException(ex.message)
         }
     }
 
