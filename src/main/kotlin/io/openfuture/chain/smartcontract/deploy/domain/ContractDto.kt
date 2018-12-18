@@ -1,9 +1,9 @@
 package io.openfuture.chain.smartcontract.deploy.domain
 
 class ContractDto(
-    val address: String,
-    val owner: String,
-    val state: ByteArray,
-    val bytes: ByteArray,
-    val clazz: String
+    var address: String,
+    var owner: String,
+    var state: ByteArray,
+    var bytes: ByteArray,
+    var clazz: String
 )
