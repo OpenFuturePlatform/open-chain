@@ -6,7 +6,6 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.network.component.time.Clock
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Service
@@ -24,10 +23,11 @@ class DefaultEpochService(
 
     override fun getGenesisBlockHeight(): Long = genesisBlockService.getLast().height
 
-    @Transactional(readOnly = true)
-    override fun getCurrentSlotOwner(): Delegate {
+    override fun getCurrentSlotOwner(): Delegate = getSlotOwner(clock.currentTimeMillis())
+
+    override fun getSlotOwner(time: Long): Delegate {
         val genesisBlock = genesisBlockService.getLast()
-        val random = Random(genesisBlock.height + getSlotNumber(clock.currentTimeMillis()))
+        val random = Random(genesisBlock.height + getSlotNumber(time))
         return genesisBlock.payload.activeDelegates.shuffled(random).first()
     }
 
