@@ -1,218 +1,288 @@
 package io.openfuture.chain.core.sync
 
+import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.BlockService
+import io.openfuture.chain.core.service.DelegateService
+import io.openfuture.chain.core.service.block.DefaultMainBlockService
 import io.openfuture.chain.core.sync.SyncStatus.*
+import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.component.time.Clock
+import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
-import io.openfuture.chain.network.message.core.BlockMessage
-import io.openfuture.chain.network.message.sync.SyncBlockDto
-import io.openfuture.chain.network.message.sync.SyncBlockRequestMessage
+import io.openfuture.chain.network.message.sync.EpochRequestMessage
+import io.openfuture.chain.network.message.sync.EpochResponseMessage
+import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.network.message.sync.SyncRequestMessage
-import io.openfuture.chain.network.message.sync.SyncResponseMessage
 import io.openfuture.chain.network.property.NodeProperties
+import io.openfuture.chain.network.serialization.Serializable
 import io.openfuture.chain.network.service.NetworkApiService
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
+import java.net.InetAddress
 
 @Component
 class SyncManager(
     private val clock: Clock,
-    private val properties: NodeProperties,
     private val blockService: BlockService,
-    private val networkApiService: NetworkApiService
+    private val properties: NodeProperties,
+    private val channelsHolder: ChannelsHolder,
+    private val delegateService: DelegateService,
+    private val networkApiService: NetworkApiService,
+    private val consensusProperties: ConsensusProperties,
+    private val currentGenesisBlock: CurrentGenesisBlock,
+    private val mainBlockService: DefaultMainBlockService
 ) {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(SyncManager::class.java)
     }
 
-    private var responses: ConcurrentHashMap<List<SyncBlockDto>, MutableList<NodeInfo>> = ConcurrentHashMap()
-    private val selectionSize: Int = properties.getRootAddresses().size
-    private val threshold: Int = selectionSize * 2 / 3
+    @Volatile
+    private var lastResponseTime: Long = 0L
 
     @Volatile
-    private var status: SyncStatus = NOT_SYNCHRONIZED
+    private var status: SyncStatus = SYNCHRONIZED
 
-    private var startSyncTime = clock.currentTimeMillis()
+    @Volatile
+    private var activeDelegateNodeInfo: NodeInfo? = null
 
-    private var lastBlockToSync: SyncBlockDto? = null
+    @Volatile
+    private lateinit var delegateNodeInfo: List<NodeInfo>
 
+    @Volatile
+    private var cursorGenesisBlock: GenesisBlock? = null
+
+    /**
+     * Latest genesis block from delegates
+     * */
+    @Volatile
+    private var latestGenesisBlock: GenesisBlock? = null
+
+    /**
+     * Native genesis block on start up
+     * */
+    @Volatile
+    var currentLastGenesisBlock: GenesisBlock = currentGenesisBlock.block
+
+    fun getStatus(): SyncStatus = status
+
+    fun resetCursorAndLastBlock() {
+        this.cursorGenesisBlock = null
+        this.latestGenesisBlock = null
+    }
 
     @Scheduled(fixedRateString = "\${node.sync-interval}")
     fun syncBlock() {
-        if (status == PROCESSING && isTimeOut()) {
-            status = NOT_SYNCHRONIZED
-        }
-
-        if (status == NOT_SYNCHRONIZED) {
+        if (status != SYNCHRONIZED) {
+            log.debug("Ledger in $status")
             sync()
         }
     }
 
-    fun getStatus(): SyncStatus = status
-
     @Synchronized
-    fun outOfSync() {
+    fun outOfSync(publicKey: String) {
         if (PROCESSING != status) {
             status = NOT_SYNCHRONIZED
             log.debug("set NOT_SYNCHRONIZED in outOfSync")
+
+        }
+        if (null == activeDelegateNodeInfo) {
+            val uid = ByteUtils.toHexString(HashUtils.sha256(ByteUtils.fromHexString(publicKey)))
+            activeDelegateNodeInfo = channelsHolder.getNodesInfo().firstOrNull { it.uid == uid }
         }
     }
 
     @Synchronized
     fun sync() {
-        if (NOT_SYNCHRONIZED != status) {
-            log.debug("SYNCHRONIZED or PROCESSING")
-            return
-        }
-
-        status = PROCESSING
-        startSyncTime = clock.currentTimeMillis()
-        log.debug("Set PROCESSING")
-        reset()
-
-        val lastBlock = blockService.getLast()
-        networkApiService.poll(
-            SyncRequestMessage(clock.currentTimeMillis(), lastBlock.hash, lastBlock.height),
-            selectionSize
-        )
-        Thread.sleep(properties.expiry!!)
-        checkState(lastBlock)
-    }
-
-    fun onSyncResponseMessage(msg: SyncResponseMessage, nodeInfo: NodeInfo) {
-        responses[msg.blocksAfter] = responses.getOrDefault(msg.blocksAfter, mutableListOf()).apply { add(nodeInfo) }
-    }
-
-    fun onBlockMessage(msg: BlockMessage, action: BlockMessage.() -> Unit) {
-        action(msg)
-        log.debug("BLOCK ADDED ${msg.hash}")
-        if (lastBlockToSync != null && lastBlockToSync == SyncBlockDto(msg.height, msg.hash)) {
-            status = SYNCHRONIZED
-            log.debug("SYNCHRONIZED")
-        }
-    }
-
-    private fun checkState(lastBlock: Block) {
-        log.debug("LEDGER: <<< responses.size = ${responses.flatMap { it.value }.size} >>>")
-        if (threshold > responses.flatMap { it.value }.size) {
-            log.debug("LEDGER: NOT_SYNCHRONIZED reason - responses size")
-            status = NOT_SYNCHRONIZED
-            return
-        }
-
-        if (responses.flatMap { it.key }.isEmpty()) {
-            log.debug("LEDGER: SYNCHRONIZED (empty)")
+        if (null == activeDelegateNodeInfo) {
+//set sync, because activeDelegateNodeInfo didn't have in channelsHolder
             status = SYNCHRONIZED
             return
         }
 
-        val nodesToAsk = fillChainToSync(lastBlock)
-        if (nodesToAsk.isEmpty()) {
-            status = NOT_SYNCHRONIZED
-            log.debug("LEDGER: NOT_SYNCHRONIZED reason - chain not found")
-            responses.entries.forEach { log.debug("${it.key.map { it.height }}:${it.value.size}") }
+        if (NOT_SYNCHRONIZED == status && null == latestGenesisBlock) {
+            status = PROCESSING
+            networkApiService.sendToAddress(SyncRequestMessage(), activeDelegateNodeInfo!!)
             return
         }
 
+        if (status == PROCESSING && clock.currentTimeMillis() >= lastResponseTime) {
+            when {
+                null == cursorGenesisBlock -> {
+                    log.debug("####AGAIN SyncRequestMessage")
+                    status = PROCESSING
+                    networkApiService.sendToAddress(SyncRequestMessage(), activeDelegateNodeInfo!!)
+                }
+                currentLastGenesisBlock.hash != cursorGenesisBlock!!.hash -> sendMessageToRandomDelegate(
+                    EpochRequestMessage(cursorGenesisBlock!!.payload.epochIndex - 1), delegateNodeInfo)
+                else -> resetCursorAndLastBlock()
+            }
+            return
+        }
 
-        log.debug("LEDGER: last block to sync: $lastBlockToSync")
-        nodesToAsk.forEach { networkApiService.sendToAddress(SyncBlockRequestMessage(lastBlock.hash), it) }
+        if (NOT_SYNCHRONIZED == status && null == latestGenesisBlock) {
+            status = PROCESSING
+            channelsHolder.send(SyncRequestMessage(), activeDelegateNodeInfo!!)
+        }
     }
 
+    fun setReceivedLastGenesisBlock(receivedLastGenesisBlock: GenesisBlockMessage) {
+        val block = GenesisBlock.of(receivedLastGenesisBlock, delegateService)
 
-    fun fillChainToSync(lastBlock: Block): List<NodeInfo> {
-        val maxPopular = maxPopularChain(responses)
-        val maxByHeight = responses.maxBy { it.chainHeight() }!!
+        if (block.hash == currentLastGenesisBlock.hash) {
+            latestGenesisBlock = block
+            cursorGenesisBlock = block
+            val nodesInfo = currentLastGenesisBlock.payload
+                .activeDelegates.map { NodeInfo(it.nodeId, NetworkAddress(it.host, it.port)) }
+            sendMessageToRandomDelegate(EpochRequestMessage(block.payload.epochIndex), nodesInfo)
+            return
+        }
 
-        // If most frequent chain is the longest
-        if (maxByHeight.chain == maxPopular.chain) {
-            if (isEnough(maxPopular.answersCount())) {
-                return returnResult(maxByHeight.chain.first(), maxPopular.answers)
+        if (latestGenesisBlock == null) {
+            cursorGenesisBlock = block
+            latestGenesisBlock = block
+            delegateNodeInfo = block.payload
+                .activeDelegates.map { NodeInfo(it.nodeId, NetworkAddress(it.host, it.port)) }
+
+            blockService.saveUnique(block)
+            sendMessageToRandomDelegate(EpochRequestMessage(block.payload.epochIndex - 1), delegateNodeInfo)
+        }
+    }
+
+    fun epochResponse(address: InetAddress, msg: EpochResponseMessage) {
+        latestGenesisBlock ?: return
+
+        lastResponseTime = clock.currentTimeMillis() + properties.expiry!!
+
+        if (!msg.isEpochExists) {
+            sendEpochRequestToFilteredNodes(cursorGenesisBlock!!.payload.epochIndex, address, msg.nodeId)
+            return
+        }
+
+        val genesisBlockMessage = msg.genesisBlock!!
+        val genesisBlock = GenesisBlock.of(genesisBlockMessage, delegateService)
+        val mainBlockMessages = msg.mainBlocks
+        if (mainBlockMessages.isEmpty() && isLatestEpochForSync(genesisBlockMessage.hash, address, msg.nodeId)) {
+            setSynchronized()
+            return
+        }
+
+        epochSync(msg, genesisBlock, address)
+    }
+
+    private fun epochSync(msg: EpochResponseMessage, genesisBlock: GenesisBlock, address: InetAddress) {
+        val mainBlockMessages = msg.mainBlocks
+        val mainBlocks = mainBlockMessages.map { MainBlock.of(it) }
+
+        if (mainBlocks.size == consensusProperties.epochHeight!!) {
+            if (!isValidBlocks(genesisBlock, mainBlocks, cursorGenesisBlock!!)) {
+                sendEpochRequestToFilteredNodes(genesisBlock.payload.epochIndex, address, msg.nodeId)
+                return
             }
 
-            if (maxPopular.chain.size == 1) {
-                val emptyAnswer = responses.firstOrNull { it.chain.isEmpty() } ?: return emptyList()
-                if (isEnough(maxPopular.answersCount() + emptyAnswer.answersCount())) {
-                    return returnResult(maxByHeight.chain.first(), maxPopular.answers, emptyAnswer.answers)
-                }
+            mainBlockService.saveUniqueBlocks(mainBlocks)
+            blockService.saveUnique(genesisBlock)
+            if (currentLastGenesisBlock.hash != genesisBlock.hash) {
+                cursorGenesisBlock = genesisBlock
+                sendMessageToRandomDelegate(EpochRequestMessage(cursorGenesisBlock!!.payload.epochIndex - 1), delegateNodeInfo)
             } else {
-                val subPopChain = maxPopular.chain.drop(1)
-                val subChain = responses.firstOrNull { it.chain.take(subPopChain.size) == subPopChain }
-                    ?: return emptyList()
-                if (isEnough(maxPopular.answersCount() + subChain.answersCount())) {
-                    return returnResult(maxByHeight.chain.first(), maxPopular.answers, subChain.answers)
-                }
+                currentLastGenesisBlock = latestGenesisBlock!!
+                resetCursorAndLastBlock()
             }
-
+        } else if (!isItActiveDelegate(address, msg.nodeId)) {
+            sendEpochRequestToFilteredNodes(genesisBlock.payload.epochIndex, address, msg.nodeId)
+        } else if (isLatestEpochForSync(genesisBlock.hash, address, msg.nodeId) && isValidBlocks(genesisBlock, mainBlocks)) {
+            mainBlockService.saveUniqueBlocks(mainBlocks)
+            setSynchronized()
         }
+    }
 
-        //if most frequent chain is a subchain of a larger chain
-        if (maxPopular.chain.isEmpty()) {
-            val oneElementChain =
-                responses.firstOrNull { it.chain.size == 1 && it.chainHeight() isNext lastBlock.height }
-                    ?: return emptyList()
-            if (isEnough(maxPopular.answersCount() + oneElementChain.answersCount())) {
-                return returnResult(oneElementChain.chain.first(), oneElementChain.answers, maxPopular.answers)
+    @Synchronized
+    private fun setSynchronized() {
+        currentGenesisBlock.block = currentLastGenesisBlock
+        resetCursorAndLastBlock()
+        activeDelegateNodeInfo = null
+        status = SYNCHRONIZED
+        lastResponseTime = 0L
+    }
+
+    private fun getFilteredNodesInfo(address: InetAddress, nodeId: String): List<NodeInfo> =
+        delegateNodeInfo.filter { it.address.host != address.hostAddress && it.uid != nodeId }
+
+    private fun sendEpochRequestToFilteredNodes(epochIndex: Long, address: InetAddress, nodeId: String) {
+        val nodesInfo = getFilteredNodesInfo(address, nodeId)
+        sendMessageToRandomDelegate(EpochRequestMessage(epochIndex), nodesInfo)
+    }
+
+    private fun sendMessageToRandomDelegate(message: Serializable, nodesInfo: List<NodeInfo>): Boolean {
+        if (nodesInfo.isEmpty()) return false
+
+        lastResponseTime = clock.currentTimeMillis() + properties.syncExpiry!!
+
+        val shuffledNodesInfo = nodesInfo.shuffled()
+        for (nodeInfo in shuffledNodesInfo) {
+            if (networkApiService.sendToAddress(message, nodeInfo)) {
+                log.debug("Send ${message::class.java} request to ${nodeInfo.address} ")
+                return true
             }
+        }
+        return false
+    }
+
+    private fun isItActiveDelegate(address: InetAddress, nodeId: String): Boolean =
+        latestGenesisBlock!!.payload
+            .activeDelegates.any { it.host == address.hostAddress && it.nodeId == nodeId }
+
+
+    private fun isLatestEpochForSync(receivedHash: String, address: InetAddress, nodeId: String): Boolean =
+        receivedHash == currentLastGenesisBlock.hash && isItActiveDelegate(address, nodeId)
+
+    private fun isValidBlocks(genesisBlock: GenesisBlock, mainBlocks: List<MainBlock>): Boolean {
+        val blocks = ArrayList<Block>(mainBlocks.size + 1)
+        blocks.add(genesisBlock)
+        blocks.addAll(mainBlocks)
+        val blockIterator = blocks.iterator()
+        return isValidBlocks(blockIterator, true)
+    }
+
+    private fun isValidBlocks(
+        genesisBlock: GenesisBlock,
+        mainBlocks: List<MainBlock>,
+        lastGenesisBlock: GenesisBlock
+    ): Boolean {
+        val blocks = ArrayList<Block>(mainBlocks.size + 2)
+        blocks.add(genesisBlock)
+        blocks.addAll(mainBlocks)
+        blocks.add(lastGenesisBlock)
+        val blockIterator = blocks.reversed().iterator()
+        return isValidBlocks(blockIterator, false)
+    }
+
+    private fun isValidBlocks(blockIterator: Iterator<Block>, isStraight: Boolean): Boolean {
+        var currentMainBlock = blockIterator.next()
+        while (blockIterator.hasNext()) {
+            val nextBlock = blockIterator.next()
+            if (!isPreviousBlockValid(nextBlock, currentMainBlock, isStraight)) {
+                return false
+            }
+            currentMainBlock = nextBlock
+        }
+        return true
+    }
+
+    private fun isPreviousBlockValid(nextBlock: Block, currentBlock: Block, isStraight: Boolean): Boolean {
+        return if (isStraight) {
+            mainBlockService.isPreviousBlockValid(currentBlock, nextBlock)
         } else {
-            val nextHeight = responses.firstOrNull { it.chainHeight() isNext maxPopular.chainHeight() }
-                ?: return emptyList()
-
-            val subChain = nextHeight.chain.drop(1)
-            if (subChain == maxPopular.chain.take(subChain.size)) {
-                return returnResult(nextHeight.chain.first(), nextHeight.answers, maxPopular.answers)
-            }
+            mainBlockService.isPreviousBlockValid(nextBlock, currentBlock)
         }
-
-        return emptyList()
     }
-
-    private fun isEnough(available: Int): Boolean = available > threshold
-
-    private fun maxPopularChain(response: ConcurrentHashMap<List<SyncBlockDto>, MutableList<NodeInfo>>): Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>> =
-        response.maxWith(Comparator { r1, r2 ->
-            return@Comparator when {
-                r1.answersCount() == r2.answersCount() -> return@Comparator (r1.chainHeight() - r2.chainHeight()).toInt()
-                else -> r1.answersCount() - r2.answersCount()
-            }
-        })!!
-
-    private fun returnResult(lastChainBlock: SyncBlockDto, vararg answers: List<NodeInfo>): MutableList<NodeInfo> {
-        lastBlockToSync = lastChainBlock
-        val nodeToSync: MutableList<NodeInfo> = mutableListOf()
-        nodeToSync.addAll(answers.flatMap { it })
-        return nodeToSync
-    }
-
-    private fun reset() {
-        log.debug("RESET")
-        responses.clear()
-        lastBlockToSync = null
-    }
-
-    //todo need to think
-    private fun isTimeOut(): Boolean = clock.currentTimeMillis() - startSyncTime > properties.syncExpiry!!
-
-    private fun <K, V> Map<out K, V>.firstOrNull(predicate: (Map.Entry<K, V>) -> Boolean): Map.Entry<K, V>? =
-        this.filter(predicate).entries.firstOrNull()
-
-    private fun Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>.answersCount(): Int = this.value.size
-
-    private fun Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>.chainHeight(): Long = this.key.firstOrNull()?.height
-        ?: 0
-
-    private val Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>.chain: List<SyncBlockDto>
-        get() = this.key
-
-    private val Map.Entry<List<SyncBlockDto>, MutableList<NodeInfo>>.answers: MutableList<NodeInfo>
-        get() = this.value
-
-    private infix fun Long.isNext(prev: Long): Boolean = this == prev + 1
 
 }
