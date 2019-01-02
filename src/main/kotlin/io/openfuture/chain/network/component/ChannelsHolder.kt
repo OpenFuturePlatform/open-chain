@@ -7,7 +7,6 @@ import io.netty.util.AttributeKey
 import io.netty.util.concurrent.GlobalEventExecutor
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.entity.NodeInfo
-import io.openfuture.chain.network.exception.NotFoundChannelException
 import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.serialization.Serializable
@@ -63,14 +62,8 @@ class ChannelsHolder(
         channelGroup.writeAndFlush(message)
     }
 
-    fun sendRandom(message: Serializable) {
-        val channel = channelGroup.shuffled().firstOrNull()
-            ?: throw NotFoundChannelException("List channels is empty")
-        channel.writeAndFlush(message)
-    }
-
     fun send(message: Serializable, nodeInfo: NodeInfo): Boolean {
-        val channel = channelGroup.firstOrNull { it.attr(NODE_INFO_KEY).get() == nodeInfo } ?: return false
+        val channel = channelGroup.firstOrNull { nodeInfo == it.attr(NODE_INFO_KEY).get() } ?: return false
         channel.writeAndFlush(message)
         log.debug("Send ${message::class.java.simpleName} to ${nodeInfo.address.port}")
         return true
