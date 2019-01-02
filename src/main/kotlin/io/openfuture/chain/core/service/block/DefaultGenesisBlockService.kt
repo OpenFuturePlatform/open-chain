@@ -12,6 +12,7 @@ import io.openfuture.chain.core.service.DefaultDelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.sync.BlockchainLock
+import io.openfuture.chain.core.sync.CurrentGenesisBlock
 import io.openfuture.chain.core.sync.SyncManager
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
@@ -26,14 +27,12 @@ class DefaultGenesisBlockService(
     blockService: BlockService,
     walletService: WalletService,
     delegateService: DefaultDelegateService,
-    repository: GenesisBlockRepository,
     private val keyHolder: NodeKeyHolder,
     private val syncManager: SyncManager,
-    private val consensusProperties: ConsensusProperties
-) : BaseBlockService<GenesisBlock>(repository, blockService, walletService, delegateService), GenesisBlockService {
-
-    @Volatile private var last: GenesisBlock = repository.findFirstByOrderByHeightDesc()!!
-
+    private val consensusProperties: ConsensusProperties,
+    private val currentGenesisBlock: CurrentGenesisBlock,
+    private val genesisBlockRepository: GenesisBlockRepository
+) : BaseBlockService<GenesisBlock>(genesisBlockRepository, blockService, walletService, delegateService), GenesisBlockService {
 
     @Transactional(readOnly = true)
     override fun getPreviousByHeight(height: Long): GenesisBlock = repository.findFirstByHeightLessThanOrderByHeightDesc(height)
@@ -61,8 +60,11 @@ class DefaultGenesisBlockService(
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<GenesisBlock> = repository.findAll(request)
 
+    override fun getLast(): GenesisBlock = currentGenesisBlock.block
+
     @Transactional(readOnly = true)
-    override fun getLast(): GenesisBlock = last
+    override fun getByEpochIndex(epochIndex: Long): GenesisBlock? =
+        genesisBlockRepository.findOneByPayloadEpochIndex(epochIndex)
 
     @BlockchainSynchronized
     @Transactional
@@ -91,19 +93,19 @@ class DefaultGenesisBlockService(
         val block = GenesisBlock.of(message, delegates)
 
         if (!isSync(block)) {
-            syncManager.outOfSync()
+            syncManager.outOfSync(message.publicKey)
             return
         }
 
         super.save(block)
-        last = block
+        currentGenesisBlock.block = block
     }
 
     override fun isGenesisBlockRequired(): Boolean {
         BlockchainLock.readLock.lock()
         try {
             val blocksProduced = blockService.getCurrentHeight() - getLast().height
-            return (consensusProperties.epochHeight!! - 1) <= blocksProduced
+            return (consensusProperties.epochHeight!!) <= blocksProduced
         } finally {
             BlockchainLock.readLock.unlock()
         }

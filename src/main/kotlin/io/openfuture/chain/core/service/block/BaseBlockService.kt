@@ -23,6 +23,15 @@ abstract class BaseBlockService<T : Block>(
     protected val delegateService: DelegateService
 ) {
 
+    fun isPreviousBlockValid(previousBlock: Block, block: Block): Boolean {
+        if (!isValidPreviousHash(block, previousBlock)) return false
+        if (!isValidHeight(block, previousBlock)) return false
+        if (!isValidTimeStamp(block, previousBlock)) return false
+        if (previousBlock.height != 1L
+            && !isValidSignature(previousBlock.hash, previousBlock.signature, previousBlock.publicKey)) return false
+        return true
+    }
+
     protected fun save(block: T): T {
         return repository.save(block)
     }

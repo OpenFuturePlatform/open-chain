@@ -13,6 +13,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
+import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.BlockchainLock
@@ -26,6 +27,7 @@ import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -39,14 +41,15 @@ class DefaultMainBlockService(
     delegateService: DelegateService,
     private val clock: Clock,
     private val keyHolder: NodeKeyHolder,
+    @Lazy private val syncManager: SyncManager,
+    private val throughput: TransactionThroughput,
     private val walletVoteService: WalletVoteService,
-    private val voteTransactionService: VoteTransactionService,
-    private val delegateTransactionService: DelegateTransactionService,
-    private val transferTransactionService: TransferTransactionService,
-    private val rewardTransactionService: RewardTransactionService,
     private val consensusProperties: ConsensusProperties,
-    private val syncManager: SyncManager,
-    private val throughput: TransactionThroughput
+    private val genesisBlockRepository: GenesisBlockRepository,
+    private val voteTransactionService: VoteTransactionService,
+    private val rewardTransactionService: RewardTransactionService,
+    private val delegateTransactionService: DelegateTransactionService,
+    private val transferTransactionService: TransferTransactionService
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
 
     companion object {
@@ -117,7 +120,7 @@ class DefaultMainBlockService(
         BlockchainLock.readLock.lock()
         try {
             if (!isSync(MainBlock.of(message))) {
-                syncManager.outOfSync()
+                syncManager.outOfSync(message.publicKey)
                 return false
             }
 
@@ -143,7 +146,7 @@ class DefaultMainBlockService(
 
             val block = MainBlock.of(message)
             if (!isSync(block)) {
-                syncManager.outOfSync()
+                syncManager.outOfSync(message.publicKey)
                 return
             }
 
@@ -161,6 +164,28 @@ class DefaultMainBlockService(
         } finally {
             BlockchainLock.writeLock.unlock()
         }
+    }
+
+    @Transactional
+    @Synchronized
+    override fun saveUniqueBlocks(blocks: List<MainBlock>) {
+        val blocksToSave = ArrayList<MainBlock>(blocks.size)
+        for (block in blocks) {
+            val blockFound = repository.findOneByHash(block.hash)
+
+            if (null == blockFound) {
+                blocksToSave.add(block)
+            }
+        }
+        repository.saveAll(blocksToSave)
+    }
+
+    @Transactional(readOnly = true)
+    override fun getBlocksByEpochIndex(epochIndex: Long): List<MainBlock> {
+        val genesisBlock = genesisBlockRepository.findByPayloadEpochIndex(epochIndex) ?: return emptyList()
+        val beginHeight = genesisBlock.height + 1
+        val endEpochHeight = beginHeight + consensusProperties.epochHeight!! - 1
+        return repository.findAllByHeightBetween(beginHeight, endEpochHeight)
     }
 
     private fun validate(message: PendingBlockMessage) {

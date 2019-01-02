@@ -31,6 +31,14 @@ class DefaultBlockService(
     override fun getLast(): Block =
         repository.findFirstByOrderByHeightDesc() ?: throw NotFoundException("Last block not found!")
 
+    @Transactional
+    @Synchronized
+    override fun saveUnique(block: Block) {
+        if (null == repository.findOneByHash(block.hash)) {
+            repository.save(block)
+        }
+    }
+
     @Transactional(readOnly = true)
     override fun isExists(hash: String): Boolean = repository.findOneByHash(hash)?.let { true } ?: false
 
@@ -40,11 +48,5 @@ class DefaultBlockService(
 
     @Transactional(readOnly = true)
     override fun getCurrentHeight(): Long = repository.getCurrentHeight()
-
-    @Transactional(readOnly = true)
-    override fun getCarcassForBlockSync(hash: String): List<Block> {
-        val startBlock = repository.findOneByHash(hash) ?: return emptyList()
-        return repository.findTop30ByHeightGreaterThanOrderByHeightDesc(startBlock.height)
-    }
 
 }
