@@ -5,17 +5,16 @@ import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.network.serialization.Serializable
 
 @NoArgConstructor
-data class SyncResponseMessage(
-    var genesisBlockMessage: GenesisBlockMessage
+class EpochRequestMessage(
+    var epochIndex: Long
 ) : Serializable {
 
     override fun read(buf: ByteBuf) {
-        genesisBlockMessage = GenesisBlockMessage::class.java.getConstructor().newInstance()
-        genesisBlockMessage.read(buf)
+        epochIndex = buf.readLong()
     }
 
     override fun write(buf: ByteBuf) {
-        genesisBlockMessage.write(buf)
+        buf.writeLong(epochIndex)
     }
 
 }
