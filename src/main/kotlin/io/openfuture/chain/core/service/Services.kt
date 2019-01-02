@@ -47,6 +47,8 @@ interface BlockService {
 
     fun getLast(): Block
 
+    fun saveUnique(block: Block)
+
     fun getAfterCurrentHash(hash: String): List<Block>
 
     fun isExists(hash: String): Boolean
@@ -57,8 +59,6 @@ interface BlockService {
 
     fun isExists(hash: String, height: Long): Boolean
 
-    fun getCarcassForBlockSync(hash: String): List<Block>
-
 }
 
 interface GenesisBlockService {
@@ -68,6 +68,8 @@ interface GenesisBlockService {
     fun getAll(request: PageRequest): Page<GenesisBlock>
 
     fun getLast(): GenesisBlock
+
+    fun getByEpochIndex(epochIndex: Long): GenesisBlock?
 
     fun create(): GenesisBlockMessage
 
@@ -83,6 +85,7 @@ interface GenesisBlockService {
 
 }
 
+
 interface MainBlockService {
 
     fun getByHash(hash: String): MainBlock
@@ -93,11 +96,18 @@ interface MainBlockService {
 
     fun add(message: BaseMainBlockMessage)
 
+    fun saveUniqueBlocks(blocks: List<MainBlock>)
+
     fun verify(message: PendingBlockMessage): Boolean
 
     fun getPreviousBlock(hash: String): MainBlock
 
     fun getNextBlock(hash: String): MainBlock
+
+    fun getBlocksByEpochIndex(epochIndex: Long): List<MainBlock>
+
+    fun isPreviousBlockValid(previousBlock: Block, block: Block): Boolean
+
 }
 
 /** Common base transaction service */

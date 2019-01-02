@@ -17,7 +17,7 @@ interface NetworkApiService {
 
     fun sendRandom(message: Serializable)
 
-    fun sendToAddress(message: Serializable, nodeInfo: NodeInfo)
+    fun sendToAddress(message: Serializable, nodeInfo: NodeInfo): Boolean
 
     fun getNetworkSize(): Int
 
