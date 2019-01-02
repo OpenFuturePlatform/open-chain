@@ -3,6 +3,7 @@ package io.openfuture.chain.core.model.entity.block
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
+import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import javax.persistence.Embedded
 import javax.persistence.Entity
@@ -33,6 +34,19 @@ class GenesisBlock(
             message.publicKey,
             GenesisBlockPayload(message.epochIndex, delegates)
         )
+
+        fun of(message: GenesisBlockMessage, delegateService: DelegateService): GenesisBlock {
+            val delegates = message.delegates.asSequence().map { delegateService.getByPublicKey(it) }.toMutableList()
+            return GenesisBlock(
+                message.timestamp,
+                message.height,
+                message.previousHash,
+                message.hash,
+                message.signature,
+                message.publicKey,
+                GenesisBlockPayload(message.epochIndex, delegates)
+            )
+        }
     }
 
 
@@ -48,5 +62,4 @@ class GenesisBlock(
         payload.epochIndex,
         payload.activeDelegates.map { it.publicKey }
     )
-
 }
