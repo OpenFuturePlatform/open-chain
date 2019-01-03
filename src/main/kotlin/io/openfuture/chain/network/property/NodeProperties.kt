@@ -73,8 +73,8 @@ class NodeProperties(
     @field:NotNull
     var expiry: Long? = null,
 
-    /** Max chain synchronization time in milliseconds. Min value 10000 millis*/
-    @field:Min(10 * 1000)
+    /** Max epoch synchronization time in milliseconds.*/
+    @field:Min(1000)
     @field:NotNull
     var syncExpiry: Long? = null,
 

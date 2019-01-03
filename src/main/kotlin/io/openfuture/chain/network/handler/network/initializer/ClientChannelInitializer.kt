@@ -29,6 +29,8 @@ class ClientChannelInitializer(
     private val networkStatusHandler: NetworkStatusHandler,
     private val syncRequestHandler: SyncRequestHandler,
     private val syncResponseHandler: SyncResponseHandler,
+    private val epochRequestHandler: EpochRequestHandler,
+    private val epochResponseHandler: EpochResponseHandler,
     private val syncBlockRequestHandler: SyncBlockRequestHandler,
     private val mainBlockHandler: MainBlockHandler,
     private val genesisBlockHandler: GenesisBlockHandler,
@@ -53,10 +55,12 @@ class ClientChannelInitializer(
             heartBeatHandler,
             greetingResponseHandler,
             newClientHandler,
-            networkStatusHandler,
             //        sync
             syncRequestHandler,
             syncResponseHandler,
+            epochRequestHandler,
+            epochResponseHandler,
+            networkStatusHandler,// blocking
             syncBlockRequestHandler,
             mainBlockHandler,
             genesisBlockHandler,
