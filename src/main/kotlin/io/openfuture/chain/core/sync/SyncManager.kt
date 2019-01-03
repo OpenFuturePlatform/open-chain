@@ -9,6 +9,7 @@ import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.block.DefaultMainBlockService
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.entity.NetworkAddress
@@ -33,6 +34,7 @@ class SyncManager(
     private val blockService: BlockService,
     private val properties: NodeProperties,
     private val channelsHolder: ChannelsHolder,
+    private val addressesHolder: AddressesHolder,
     private val delegateService: DelegateService,
     private val networkApiService: NetworkApiService,
     private val consensusProperties: ConsensusProperties,
@@ -95,18 +97,12 @@ class SyncManager(
         }
         if (null == activeDelegateNodeInfo) {
             val uid = ByteUtils.toHexString(HashUtils.sha256(ByteUtils.fromHexString(publicKey)))
-            activeDelegateNodeInfo = channelsHolder.getNodesInfo().firstOrNull { it.uid == uid }
+            activeDelegateNodeInfo = addressesHolder.getNodeInfos().firstOrNull { it.uid == uid }
         }
     }
 
     @Synchronized
     fun sync() {
-        if (null == activeDelegateNodeInfo) {
-//set sync, because activeDelegateNodeInfo didn't have in channelsHolder
-            status = SYNCHRONIZED
-            return
-        }
-
         if (NOT_SYNCHRONIZED == status && null == latestGenesisBlock) {
             status = PROCESSING
             networkApiService.sendToAddress(SyncRequestMessage(), activeDelegateNodeInfo!!)
