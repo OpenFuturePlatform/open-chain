@@ -6,9 +6,10 @@ import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DelegateService
-import io.openfuture.chain.core.service.block.DefaultMainBlockService
-import io.openfuture.chain.core.sync.SyncStatus.*
-import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.MainBlockService
+import io.openfuture.chain.core.sync.SyncStatus.PROCESSING
+import io.openfuture.chain.core.sync.SyncStatus.SYNCHRONIZED
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.entity.NetworkAddress
@@ -20,15 +21,13 @@ import io.openfuture.chain.network.message.sync.SyncRequestMessage
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.serialization.Serializable
 import io.openfuture.chain.network.service.NetworkApiService
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.net.InetAddress
 
 @Component
-class SyncManager(
+class ChainSynchronizer(
     private val clock: Clock,
     private val blockService: BlockService,
     private val properties: NodeProperties,
@@ -36,76 +35,44 @@ class SyncManager(
     private val delegateService: DelegateService,
     private val networkApiService: NetworkApiService,
     private val consensusProperties: ConsensusProperties,
-    private val currentGenesisBlock: CurrentGenesisBlock,
-    private val mainBlockService: DefaultMainBlockService
+    private val genesisBlockService: GenesisBlockService,
+    private val mainBlockService: MainBlockService
 ) {
 
     companion object {
-        private val log: Logger = LoggerFactory.getLogger(SyncManager::class.java)
+        private val log: Logger = LoggerFactory.getLogger(ChainSynchronizer::class.java)
     }
-
-    @Volatile
-    private var lastResponseTime: Long = 0L
 
     @Volatile
     private var status: SyncStatus = SYNCHRONIZED
 
-    @Volatile
-    private var activeDelegateNodeInfo: NodeInfo? = null
-
-    @Volatile
-    private lateinit var delegateNodeInfo: List<NodeInfo>
-
-    @Volatile
-    private var cursorGenesisBlock: GenesisBlock? = null
-
-    /**
-     * Latest genesis block from delegates
-     * */
-    @Volatile
-    private var latestGenesisBlock: GenesisBlock? = null
-
-    /**
-     * Native genesis block on start up
-     * */
-    @Volatile
-    var currentLastGenesisBlock: GenesisBlock = currentGenesisBlock.block
-
     fun getStatus(): SyncStatus = status
 
-    fun resetCursorAndLastBlock() {
-        this.cursorGenesisBlock = null
-        this.latestGenesisBlock = null
-    }
 
-    @Scheduled(fixedRateString = "\${node.sync-interval}")
-    fun syncBlock() {
-        if (status != SYNCHRONIZED) {
-            log.debug("Ledger in $status")
-            sync()
-        }
-    }
+//    @Scheduled(fixedRateString = "\${node.sync-interval}")
+//    fun syncBlock() {
+//        if (status != SYNCHRONIZED) {
+//            log.debug("Ledger in $status")
+//            sync()
+//        }
+//    }
+
 
     @Synchronized
-    fun outOfSync(publicKey: String) {
-        if (PROCESSING != status) {
-            status = NOT_SYNCHRONIZED
-        }
+    fun sync(publicKey: String) {
 
-        if (null == activeDelegateNodeInfo) {
-            val uid = ByteUtils.toHexString(HashUtils.sha256(ByteUtils.fromHexString(publicKey)))
-            activeDelegateNodeInfo = addressesHolder.getNodeInfos().firstOrNull { it.uid == uid }
-            log.debug("set NOT_SYNCHRONIZED in outOfSync")
-        }
-    }
-
-    @Synchronized
-    fun sync() {
-        if (NOT_SYNCHRONIZED == status && null == latestGenesisBlock) {
-            status = PROCESSING
-            networkApiService.sendToAddress(SyncRequestMessage(), activeDelegateNodeInfo!!)
+        if (PROCESSING == status) {
             return
         }
+
+        status = PROCESSING
+
+        delegateService.getByPublicKey(publicKey)
+//        if (NOT_SYNCHRONIZED == status && null == latestGenesisBlock) {
+//            status = PROCESSING
+//            networkApiService.sendToAddress(SyncRequestMessage(), activeDelegateNodeInfo!!)
+//            return
+//        }
 
         if (isLongAnswer(lastResponseTime)) {
             when {
@@ -198,7 +165,6 @@ class SyncManager(
 
     @Synchronized
     private fun setSynchronized() {
-        currentGenesisBlock.block = currentLastGenesisBlock
         resetCursorAndLastBlock()
         activeDelegateNodeInfo = null
         status = SYNCHRONIZED
@@ -261,6 +227,9 @@ class SyncManager(
     private fun isValidBlocks(blockIterator: Iterator<Block>, isStraight: Boolean): Boolean {
         var currentMainBlock = blockIterator.next()
         while (blockIterator.hasNext()) {
+            if (latestGenesisBlock!!.height == currentMainBlock.height + 1) {
+                isPreviousBlockValid(latestGenesisBlock, currentMainBlock)
+            }
             val nextBlock = blockIterator.next()
             if (!isPreviousBlockValid(nextBlock, currentMainBlock, isStraight)) {
                 return false

@@ -4,7 +4,7 @@ import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 
-import io.openfuture.chain.core.sync.SyncManager
+import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.network.message.sync.EpochResponseMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -14,7 +14,7 @@ import java.net.InetSocketAddress
 @Component
 @Sharable
 class EpochResponseHandler(
-    private val syncManager: SyncManager
+    private val chainSynchronizer: ChainSynchronizer
 ) : SimpleChannelInboundHandler<EpochResponseMessage>() {
 
     companion object {
@@ -25,7 +25,7 @@ class EpochResponseHandler(
     override fun channelRead0(ctx: ChannelHandlerContext, msg: EpochResponseMessage) {
         val inetAddress = (ctx.channel().remoteAddress() as InetSocketAddress).address
         log.debug("Get EpochResponseMessage from ${inetAddress.hostName}")
-        syncManager.epochResponse(inetAddress, msg)
+        chainSynchronizer.epochResponse(inetAddress, msg)
     }
 
 }

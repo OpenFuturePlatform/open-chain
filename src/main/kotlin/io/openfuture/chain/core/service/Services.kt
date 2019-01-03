@@ -71,9 +71,9 @@ interface GenesisBlockService {
 
     fun getByEpochIndex(epochIndex: Long): GenesisBlock?
 
-    fun create(): GenesisBlockMessage
+    fun create(): GenesisBlock
 
-    fun add(message: GenesisBlockMessage)
+    fun add(block: GenesisBlock)
 
     fun getPreviousByHeight(height: Long): GenesisBlock
 
@@ -82,6 +82,8 @@ interface GenesisBlockService {
     fun getPreviousBlock(hash: String): GenesisBlock
 
     fun isGenesisBlockRequired(): Boolean
+
+    fun add(message: GenesisBlockMessage)
 
 }
 
@@ -93,7 +95,7 @@ interface MainBlockService {
 
     fun create(): PendingBlockMessage
 
-    fun add(message: BaseMainBlockMessage)
+    fun add(block: BaseMainBlockMessage)
 
     fun saveUniqueBlocks(blocks: List<MainBlock>)
 
@@ -106,6 +108,8 @@ interface MainBlockService {
     fun getBlocksByEpochIndex(epochIndex: Long): List<MainBlock>
 
     fun isPreviousBlockValid(previousBlock: Block, block: Block): Boolean
+
+    fun checkSync(block: Block)
 
 }
 

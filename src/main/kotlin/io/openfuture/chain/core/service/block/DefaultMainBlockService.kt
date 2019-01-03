@@ -4,6 +4,7 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.component.TransactionThroughput
+import io.openfuture.chain.core.exception.ChainOutOfSyncException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -17,7 +18,6 @@ import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.BlockchainLock
-import io.openfuture.chain.core.sync.SyncManager
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.time.Clock
@@ -27,7 +27,6 @@ import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -41,7 +40,6 @@ class DefaultMainBlockService(
     delegateService: DelegateService,
     private val clock: Clock,
     private val keyHolder: NodeKeyHolder,
-    @Lazy private val syncManager: SyncManager,
     private val throughput: TransactionThroughput,
     private val walletVoteService: WalletVoteService,
     private val consensusProperties: ConsensusProperties,
@@ -119,15 +117,13 @@ class DefaultMainBlockService(
     override fun verify(message: PendingBlockMessage): Boolean {
         BlockchainLock.readLock.lock()
         try {
-            if (!isSync(MainBlock.of(message))) {
-                syncManager.outOfSync(message.publicKey)
-                return false
-            }
-
+            checkSync(MainBlock.of(message))//?????????
             validate(message)
             return true
-        } catch (e: ValidationException) {
-            log.warn(e.message)
+        } catch (ex: ChainOutOfSyncException) {
+            return false
+        } catch (ex: ValidationException) {
+            log.warn(ex.message)
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -145,12 +141,10 @@ class DefaultMainBlockService(
             }
 
             val block = MainBlock.of(message)
-            if (!isSync(block)) {
-                syncManager.outOfSync(message.publicKey)
-                return
-            }
+            checkSync(block)
 
             val savedBlock = super.save(block)
+
             message.getAllTransactions().forEach {
                 when (it) {
                     is RewardTransactionMessage -> rewardTransactionService.toBlock(it, savedBlock)

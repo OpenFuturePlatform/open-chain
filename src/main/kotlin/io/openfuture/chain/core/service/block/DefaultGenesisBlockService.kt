@@ -12,8 +12,6 @@ import io.openfuture.chain.core.service.DefaultDelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.sync.BlockchainLock
-import io.openfuture.chain.core.sync.CurrentGenesisBlock
-import io.openfuture.chain.core.sync.SyncManager
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -28,9 +26,7 @@ class DefaultGenesisBlockService(
     walletService: WalletService,
     delegateService: DefaultDelegateService,
     private val keyHolder: NodeKeyHolder,
-    private val syncManager: SyncManager,
     private val consensusProperties: ConsensusProperties,
-    private val currentGenesisBlock: CurrentGenesisBlock,
     private val genesisBlockRepository: GenesisBlockRepository
 ) : BaseBlockService<GenesisBlock>(genesisBlockRepository, blockService, walletService, delegateService), GenesisBlockService {
 
@@ -60,7 +56,7 @@ class DefaultGenesisBlockService(
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<GenesisBlock> = repository.findAll(request)
 
-    override fun getLast(): GenesisBlock = currentGenesisBlock.block
+    override fun getLast(): GenesisBlock = genesisBlockRepository.findFirstByOrderByHeightDesc()!!
 
     @Transactional(readOnly = true)
     override fun getByEpochIndex(epochIndex: Long): GenesisBlock? =
@@ -68,7 +64,7 @@ class DefaultGenesisBlockService(
 
     @BlockchainSynchronized
     @Transactional
-    override fun create(): GenesisBlockMessage {
+    override fun create(): GenesisBlock {
         val lastBlock = blockService.getLast()
         val timestamp = getTimestamp()
         val height = lastBlock.height + 1
@@ -78,8 +74,14 @@ class DefaultGenesisBlockService(
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKeyAsHexString()
 
-        return GenesisBlockMessage(height, previousHash, timestamp, ByteUtils.toHexString(hash), signature,
-            publicKey, payload.epochIndex, payload.activeDelegates.map { it.publicKey })
+        return GenesisBlock(timestamp, height, previousHash, ByteUtils.toHexString(hash), signature, publicKey, payload)
+    }
+
+    @Transactional
+    @Synchronized
+    override fun add(block: GenesisBlock) {
+        checkSync(block)
+        super.save(block)
     }
 
     @Transactional
@@ -92,13 +94,7 @@ class DefaultGenesisBlockService(
         val delegates = message.delegates.asSequence().map { delegateService.getByPublicKey(it) }.toMutableList()
         val block = GenesisBlock.of(message, delegates)
 
-        if (!isSync(block)) {
-            syncManager.outOfSync(message.publicKey)
-            return
-        }
-
-        super.save(block)
-        currentGenesisBlock.block = block
+        add(block)
     }
 
     override fun isGenesisBlockRequired(): Boolean {

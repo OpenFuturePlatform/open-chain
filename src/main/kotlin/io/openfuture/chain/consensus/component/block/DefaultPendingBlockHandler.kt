@@ -4,8 +4,11 @@ import io.openfuture.chain.consensus.component.block.BlockApprovalStage.*
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
+import io.openfuture.chain.core.exception.ChainOutOfSyncException
 import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.MainBlockService
+import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
@@ -21,7 +24,8 @@ class DefaultPendingBlockHandler(
     private val epochService: EpochService,
     private val mainBlockService: MainBlockService,
     private val keyHolder: NodeKeyHolder,
-    private val networkService: NetworkApiService
+    private val networkService: NetworkApiService,
+    private val chainSynchronizer: ChainSynchronizer
 ) : PendingBlockHandler {
 
     companion object {
@@ -42,6 +46,8 @@ class DefaultPendingBlockHandler(
     @Synchronized
     override fun addBlock(block: PendingBlockMessage) {
         val blockSlotNumber = epochService.getSlotNumber(block.timestamp)
+        val slotOwner = epochService.getCurrentSlotOwner()
+
         if (blockSlotNumber > timeSlotNumber || epochService.isInIntermission(block.timestamp)) {
             this.reset()
         }
@@ -50,17 +56,28 @@ class DefaultPendingBlockHandler(
             return
         }
 
-        val slotOwner = epochService.getCurrentSlotOwner()
-        if (slotOwner.publicKey == block.publicKey && mainBlockService.verify(block)) {
-            networkService.broadcast(block)
-            this.timeSlotNumber = blockSlotNumber
-            if (IDLE == stage && isActiveDelegate()) {
-                this.observable = block
-                this.stage = PREPARE
-                val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKeyAsHexString())
-                vote.signature = SignatureUtils.sign(vote.getBytes(), keyHolder.getPrivateKey())
-                networkService.broadcast(vote)
-            }
+        if (slotOwner.publicKey != block.publicKey) {
+            return
+        }
+
+        try {
+            mainBlockService.checkSync(MainBlock.of(block))
+        } catch (ex: ChainOutOfSyncException) {
+            chainSynchronizer.outOfSync(block.publicKey)
+        }
+
+        if (!mainBlockService.verify(block)) {
+            return
+        }
+
+        networkService.broadcast(block)
+        this.timeSlotNumber = blockSlotNumber
+        if (IDLE == stage && isActiveDelegate()) {
+            this.observable = block
+            this.stage = PREPARE
+            val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKeyAsHexString())
+            vote.signature = SignatureUtils.sign(vote.getBytes(), keyHolder.getPrivateKey())
+            networkService.broadcast(vote)
         }
     }
 
@@ -110,8 +127,12 @@ class DefaultPendingBlockHandler(
                 networkService.broadcast(message)
                 if (blockCommits.size > (delegates.size / 3 * 2) && !blockAddedFlag) {
                     pendingBlocks.find { it.hash == message.hash }?.let {
-                        log.debug("CONSENSUS: Saving main block ${it.hash}")
-                        mainBlockService.add(it)
+                        try {
+                            log.debug("CONSENSUS: Saving main block ${it.hash}")
+                            mainBlockService.add(it)
+                        } catch (e: ChainOutOfSyncException) {
+                            chainSynchronizer.outOfSync(it.publicKey)
+                        }
                     }
                     blockAddedFlag = true
                 }
