@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
-- Smart contracts: restore contract's previous variables values
+- Smart contracts: contract object serialization
+- Smart contracts: contract object deserialization
 
 ## [1.5.0] - 2018-12-14
 ### Added
