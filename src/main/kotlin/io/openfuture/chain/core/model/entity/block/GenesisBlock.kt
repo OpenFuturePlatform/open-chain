@@ -33,8 +33,8 @@ class GenesisBlock(
             message.publicKey,
             GenesisBlockPayload(message.epochIndex, delegates)
         )
-
     }
+
 
     override fun getPayload(): BlockPayload = payload
 
@@ -48,4 +48,5 @@ class GenesisBlock(
         payload.epochIndex,
         payload.activeDelegates.map { it.publicKey }
     )
+
 }
