@@ -169,20 +169,12 @@ class DefaultMainBlockService(
     @Transactional
     @Synchronized
     override fun saveUniqueBlocks(blocks: List<MainBlock>) {
-        val blocksToSave = ArrayList<MainBlock>(blocks.size)
-        for (block in blocks) {
-            val blockFound = repository.findOneByHash(block.hash)
-
-            if (null == blockFound) {
-                blocksToSave.add(block)
-            }
-        }
-        repository.saveAll(blocksToSave)
+        repository.saveAll(blocks.filter { null == repository.findOneByHash(it.hash) })
     }
 
     @Transactional(readOnly = true)
     override fun getBlocksByEpochIndex(epochIndex: Long): List<MainBlock> {
-        val genesisBlock = genesisBlockRepository.findByPayloadEpochIndex(epochIndex) ?: return emptyList()
+        val genesisBlock = genesisBlockRepository.findOneByPayloadEpochIndex(epochIndex) ?: return emptyList()
         val beginHeight = genesisBlock.height + 1
         val endEpochHeight = beginHeight + consensusProperties.epochHeight!! - 1
         return repository.findAllByHeightBetween(beginHeight, endEpochHeight)

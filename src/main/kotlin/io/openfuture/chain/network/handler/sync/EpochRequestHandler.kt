@@ -24,6 +24,7 @@ class EpochRequestHandler(
         private val log: Logger = LoggerFactory.getLogger(EpochRequestHandler::class.java)
     }
 
+
     override fun channelRead0(ctx: ChannelHandlerContext, msg: EpochRequestMessage) {
         val nodeId: String = keyHolder.getUid()
         val epochIndex = msg.epochIndex
@@ -34,8 +35,9 @@ class EpochRequestHandler(
             return
         }
 
-        val blocks = mainBlockService.getBlocksByEpochIndex(epochIndex)
-        val mainBlockMassages = blocks.map { it.toMessage() }
+        val mainBlockMassages = mainBlockService.getBlocksByEpochIndex(epochIndex)
+            .map { it.toMessage() }
+
         mainBlockMassages.forEach {
             it.delegateTransactions = emptyList()
             it.transferTransactions = emptyList()

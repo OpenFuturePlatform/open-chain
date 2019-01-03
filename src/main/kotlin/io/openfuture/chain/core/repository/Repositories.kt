@@ -51,8 +51,6 @@ interface MainBlockRepository : BlockRepository<MainBlock>
 @Repository
 interface GenesisBlockRepository : BlockRepository<GenesisBlock> {
 
-    fun findByPayloadEpochIndex(epochIndex: Long): GenesisBlock?
-
     fun findOneByPayloadEpochIndex(epochIndex: Long): GenesisBlock?
 
 }

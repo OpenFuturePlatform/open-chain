@@ -48,4 +48,5 @@ class GenesisBlock(
         payload.epochIndex,
         payload.activeDelegates.map { it.publicKey }
     )
+
 }
