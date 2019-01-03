@@ -8,11 +8,11 @@ import io.openfuture.chain.network.serialization.Serializable
 class SyncRequestMessage : Serializable {
 
     override fun read(buf: ByteBuf) {
-
+        //nothing to do
     }
 
     override fun write(buf: ByteBuf) {
-
+        //nothing to do
     }
 
 }
