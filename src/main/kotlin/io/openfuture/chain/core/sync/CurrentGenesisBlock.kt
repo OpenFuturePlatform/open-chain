@@ -9,10 +9,13 @@ import javax.annotation.PostConstruct
 class CurrentGenesisBlock(
     private val genesisBlockRepository: GenesisBlockRepository
 ) {
+
     @Volatile lateinit var block: GenesisBlock
+
 
     @PostConstruct
     private fun init() {
         block = genesisBlockRepository.findFirstByOrderByHeightDesc()!!
     }
+
 }
