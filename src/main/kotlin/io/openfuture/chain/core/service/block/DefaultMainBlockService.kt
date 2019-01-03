@@ -169,15 +169,7 @@ class DefaultMainBlockService(
     @Transactional
     @Synchronized
     override fun saveUniqueBlocks(blocks: List<MainBlock>) {
-        val blocksToSave = ArrayList<MainBlock>(blocks.size)
-        for (block in blocks) {
-            val blockFound = repository.findOneByHash(block.hash)
-
-            if (null == blockFound) {
-                blocksToSave.add(block)
-            }
-        }
-        repository.saveAll(blocksToSave)
+        repository.saveAll(blocks.filter { null == repository.findOneByHash(it.hash) })
     }
 
     @Transactional(readOnly = true)
