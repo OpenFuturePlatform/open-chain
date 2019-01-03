@@ -21,9 +21,11 @@ class EpochResponseHandler(
         private val log: Logger = LoggerFactory.getLogger(EpochResponseHandler::class.java)
     }
 
+
     override fun channelRead0(ctx: ChannelHandlerContext, msg: EpochResponseMessage) {
         val inetAddress = (ctx.channel().remoteAddress() as InetSocketAddress).address
         log.debug("Get EpochResponseMessage from ${inetAddress.hostName}")
         syncManager.epochResponse(inetAddress, msg)
     }
+
 }
