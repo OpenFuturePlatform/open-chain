@@ -122,7 +122,8 @@ class SyncManager(
     }
 
     fun setReceivedLastGenesisBlock(receivedLastGenesisBlock: GenesisBlockMessage) {
-        val block = GenesisBlock.of(receivedLastGenesisBlock, delegateService)
+        val delegates = receivedLastGenesisBlock.delegates.asSequence().map { delegateService.getByPublicKey(it) }.toMutableList()
+        val block = GenesisBlock.of(receivedLastGenesisBlock, delegates)
 
         if (block.hash == currentLastGenesisBlock.hash) {
             latestGenesisBlock = block
@@ -154,8 +155,10 @@ class SyncManager(
             return
         }
 
+        val delegates = msg.genesisBlock!!.delegates.asSequence().map { delegateService.getByPublicKey(it) }.toMutableList()
+
         val genesisBlockMessage = msg.genesisBlock!!
-        val genesisBlock = GenesisBlock.of(genesisBlockMessage, delegateService)
+        val genesisBlock = GenesisBlock.of(genesisBlockMessage, delegates)
         val mainBlockMessages = msg.mainBlocks
 
         if (mainBlockMessages.isEmpty() && isLatestEpochForSync(genesisBlockMessage.hash, address, msg.nodeId)) {
