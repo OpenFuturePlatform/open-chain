@@ -85,7 +85,6 @@ interface GenesisBlockService {
 
 }
 
-
 interface MainBlockService {
 
     fun getByHash(hash: String): MainBlock
