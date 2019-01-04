@@ -66,7 +66,6 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         given(epochService.getDelegates()).willReturn(
             listOf(Delegate("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4", "nodeId", "address", "host", 1111, 1)))
         given(mainBlockService.verify(pendingBlock)).willReturn(true)
-        given(epochService.getSlotOwner(1)).willReturn(delegate)
 
         defaultPendingBlockHandler.addBlock(pendingBlock)
 
@@ -104,7 +103,6 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         given(mainBlockService.verify(pendingBlock)).willReturn(true)
         given(epochService.getDelegates()).willReturn(
             listOf(Delegate("020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948", "nodeId", "address", "host", 1111,  1)))
-        given(epochService.getSlotOwner(1)).willReturn(delegate)
         defaultPendingBlockHandler.addBlock(pendingBlock)
 
         given(epochService.getDelegates()).willReturn(listOf(delegate))
