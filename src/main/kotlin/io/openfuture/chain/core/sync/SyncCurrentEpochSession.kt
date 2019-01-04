@@ -9,9 +9,13 @@ class SyncCurrentEpochSession(
     currentGenesisBlock: GenesisBlock
 ) : SyncSession {
 
-    private val storage: MutableList<Block> = mutableListOf(currentGenesisBlock)
+    private val storage: MutableSet<Block> = mutableSetOf(currentGenesisBlock)
 
-    override fun getStorage(): List<Block> = storage.subList(1, storage.size)
+    override fun getLastBlock(): Block {
+        return storage.last()
+    }
+
+    override fun getStorage(): List<Block> = storage.drop(1)
 
     override fun isComplete(): Boolean = true
 
@@ -34,15 +38,15 @@ class SyncCurrentEpochSession(
     private fun isValid(block: Block): Boolean {
         val last = storage.last()
 
-        if (last.previousHash != block.hash) {
+        if (last.hash != block.previousHash) {
             return false
         }
 
-        if (last.height != block.height + 1) {
+        if (last.height + 1 != block.height) {
             return false
         }
 
-        if (last.timestamp < block.timestamp) {
+        if (last.timestamp > block.timestamp) {
             return false
         }
 

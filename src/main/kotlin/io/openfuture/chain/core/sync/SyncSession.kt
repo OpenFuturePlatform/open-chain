@@ -6,6 +6,8 @@ interface SyncSession {
 
     fun isComplete(): Boolean
 
+    fun getLastBlock(): Block
+
     fun getStorage(): List<Block>
 
     fun add(epochBlocks: List<Block>): Boolean

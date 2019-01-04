@@ -119,7 +119,7 @@ class ChainSynchronizer(
     }
 
     private fun getEpochIndex(): Long {
-        return (syncSession.getStorage().last() as GenesisBlock).payload.epochIndex
+        return (syncSession.getLastBlock() as GenesisBlock).payload.epochIndex
     }
 
     @Synchronized

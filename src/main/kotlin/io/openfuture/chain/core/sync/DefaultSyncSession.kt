@@ -10,14 +10,20 @@ open class DefaultSyncSession(
     val currentGenesisBlock: GenesisBlock
 ) : SyncSession {
 
-    private val storage: MutableList<Block> = mutableListOf(latestGenesisBlock)
+
+    private val storage: MutableSet<Block> = mutableSetOf(latestGenesisBlock)
 
     override fun isComplete(): Boolean = storage.last().height == currentGenesisBlock.height
 
-    override fun getStorage(): List<Block> = storage.subList(0, storage.lastIndex)
+    override fun getLastBlock(): Block {
+        return storage.last()
+    }
+
+    override fun getStorage(): List<Block> = storage.toList().dropLast(1)
 
     override fun add(epochBlocks: List<Block>): Boolean {
-        epochBlocks.forEach {
+        val list = epochBlocks.sortedByDescending { it.height }
+        list.forEach {
             if (!isValid(it)) {
                 rollback(epochBlocks)
                 return false
