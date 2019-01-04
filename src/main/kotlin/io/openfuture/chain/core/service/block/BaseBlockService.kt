@@ -35,7 +35,7 @@ abstract class BaseBlockService<T : Block>(
 
     fun checkSync(block: Block) {
         val lastBlock = blockService.getLast()
-        if (!isValidHeight(block, lastBlock) && isValidPreviousHash(block, lastBlock)) {
+        if (!isValidHeight(block, lastBlock) || !isValidPreviousHash(block, lastBlock)) {
             throw ChainOutOfSyncException()
         }
     }
