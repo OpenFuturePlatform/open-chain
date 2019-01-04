@@ -47,7 +47,7 @@ interface BlockService {
 
     fun getLast(): Block
 
-    fun saveUnique(block: Block)
+    fun save(block: Block)
 
     fun getAfterCurrentHash(hash: String): List<Block>
 

@@ -32,11 +32,8 @@ class DefaultBlockService(
         repository.findFirstByOrderByHeightDesc() ?: throw NotFoundException("Last block not found!")
 
     @Transactional
-    @Synchronized
-    override fun saveUnique(block: Block) {
-        if (null == repository.findOneByHash(block.hash)) {
-            repository.save(block)
-        }
+    override fun save(block: Block) {
+        repository.save(block)
     }
 
     @Transactional(readOnly = true)

@@ -19,7 +19,7 @@ class SyncResponseHandler(
         private val log: Logger = LoggerFactory.getLogger(SyncResponseHandler::class.java)
     }
     override fun channelRead0(ctx: ChannelHandlerContext, msg: SyncResponseMessage) {
-        chainSynchronizer.setReceivedLastGenesisBlock(msg.genesisBlockMessage)
+        chainSynchronizer.latestGenesisBlockResponse(msg.genesisBlockMessage)
         log.debug("Get SyncResponseMessage from ${ctx.channel().remoteAddress()}")
     }
 

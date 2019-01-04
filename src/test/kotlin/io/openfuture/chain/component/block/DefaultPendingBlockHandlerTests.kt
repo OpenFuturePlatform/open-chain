@@ -9,6 +9,7 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.service.MainBlockService
+import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
@@ -29,6 +30,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
     @Mock private lateinit var mainBlockService: MainBlockService
     @Mock private lateinit var keyHolder: NodeKeyHolder
     @Mock private lateinit var networkService: NetworkApiService
+    @Mock private lateinit var chainSynchronizer: ChainSynchronizer
 
     private lateinit var defaultPendingBlockHandler: DefaultPendingBlockHandler
 
@@ -39,7 +41,8 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
             epochService,
             mainBlockService,
             keyHolder,
-            networkService
+            networkService,
+            chainSynchronizer
         )
     }
 

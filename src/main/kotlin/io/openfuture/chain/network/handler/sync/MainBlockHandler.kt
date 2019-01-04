@@ -28,7 +28,7 @@ class MainBlockHandler(
         try {
             mainBlockService.add(msg)
         } catch (e: ChainOutOfSyncException) {
-            chainSynchronizer.outOfSync(msg.publicKey)
+            chainSynchronizer.sync()
         }
     }
 

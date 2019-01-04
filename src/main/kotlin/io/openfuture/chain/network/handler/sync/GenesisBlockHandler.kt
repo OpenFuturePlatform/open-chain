@@ -28,7 +28,7 @@ class GenesisBlockHandler(
         try {
             genesisBlockService.add(msg)
         } catch (ex: ChainOutOfSyncException) {
-            chainSynchronizer.outOfSync(msg.publicKey)
+            chainSynchronizer.sync()
         }
     }
 

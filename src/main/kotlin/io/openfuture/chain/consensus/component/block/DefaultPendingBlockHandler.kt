@@ -63,7 +63,7 @@ class DefaultPendingBlockHandler(
         try {
             mainBlockService.checkSync(MainBlock.of(block))
         } catch (ex: ChainOutOfSyncException) {
-            chainSynchronizer.outOfSync(block.publicKey)
+            chainSynchronizer.sync()
         }
 
         if (!mainBlockService.verify(block)) {
@@ -131,7 +131,7 @@ class DefaultPendingBlockHandler(
                             log.debug("CONSENSUS: Saving main block ${it.hash}")
                             mainBlockService.add(it)
                         } catch (e: ChainOutOfSyncException) {
-                            chainSynchronizer.outOfSync(it.publicKey)
+                            chainSynchronizer.sync()
                         }
                     }
                     blockAddedFlag = true

@@ -43,9 +43,14 @@ class BlockProductionScheduler(
 
     private fun proceedProductionLoop() {
         try {
-            if (SYNCHRONIZED != clockSynchronizer.getStatus() || SYNCHRONIZED != chainSynchronizer.getStatus()) {
+            if (SYNCHRONIZED != clockSynchronizer.getStatus()) {
                 log.debug("----------------Clock is ${clockSynchronizer.getStatus()}----------------")
+                return
+            }
+
+            if (SYNCHRONIZED != chainSynchronizer.getStatus()) {
                 log.debug("----------------Ledger is ${chainSynchronizer.getStatus()}----------------")
+                chainSynchronizer.sync()
                 return
             }
 
@@ -60,7 +65,7 @@ class BlockProductionScheduler(
                 pendingBlockHandler.addBlock(block)
             }
         } catch (ex: ChainOutOfSyncException) {
-            chainSynchronizer.sync(keyHolder.getPublicKeyAsHexString())
+            chainSynchronizer.sync()
         } catch (ex: Exception) {
             log.error("Block creation failure inbound: ${ex.message}")
         } finally {
