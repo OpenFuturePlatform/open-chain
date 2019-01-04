@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.sync
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
+import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -48,6 +49,7 @@ class ChainSynchronizer(
 
     fun getStatus(): SyncStatus = status
 
+    private lateinit var syncSession: SyncSession
 
 //    @Scheduled(fixedRateString = "\${node.sync-interval}")
 //    fun syncBlock() {
@@ -59,7 +61,7 @@ class ChainSynchronizer(
 
 
     @Synchronized
-    fun sync(publicKey: String) {
+    fun sync() {
 
         if (PROCESSING == status) {
             return
@@ -67,73 +69,95 @@ class ChainSynchronizer(
 
         status = PROCESSING
 
-        delegateService.getByPublicKey(publicKey)
+        val delegate = delegateService.getActiveDelegates().first() // exception
+
+        networkApiService.sendToAddress(SyncRequestMessage(), getNodeInfo(delegate))
+
 //        if (NOT_SYNCHRONIZED == status && null == latestGenesisBlock) {
 //            status = PROCESSING
 //            networkApiService.sendToAddress(SyncRequestMessage(), activeDelegateNodeInfo!!)
 //            return
 //        }
 
-        if (isLongAnswer(lastResponseTime)) {
-            when {
-                null == cursorGenesisBlock -> {
-                    status = PROCESSING
-                    networkApiService.sendToAddress(SyncRequestMessage(), activeDelegateNodeInfo!!)
-                }
-                isNotLatestGenesisHash() -> sendMessageToRandomDelegate(
-                    EpochRequestMessage(cursorGenesisBlock!!.payload.epochIndex - 1), delegateNodeInfo)
-                else -> resetCursorAndLastBlock()
-            }
-            return
-        }
+//        if (isLongAnswer(lastResponseTime)) {
+//            when {
+//                null == cursorGenesisBlock -> {
+//                    status = PROCESSING
+//                    networkApiService.sendToAddress(SyncRequestMessage(), activeDelegateNodeInfo!!)
+//                }
+//                isNotLatestGenesisHash() -> sendMessageToRandomDelegate(
+//                    EpochRequestMessage(cursorGenesisBlock!!.payload.epochIndex - 1), delegateNodeInfo)
+//                else -> resetCursorAndLastBlock()
+//            }
+//            return
+//        }
     }
 
     fun setReceivedLastGenesisBlock(receivedLastGenesisBlock: GenesisBlockMessage) {
-        val delegates = receivedLastGenesisBlock.delegates.asSequence().map { delegateService.getByPublicKey(it) }.toMutableList()
-        val block = GenesisBlock.of(receivedLastGenesisBlock, delegates)
+        val latestGenesisBlock = getGenesisBlockFromMessage(receivedLastGenesisBlock)
 
-        if (block.hash == currentLastGenesisBlock.hash) {
-            latestGenesisBlock = block
-            cursorGenesisBlock = block
-            val nodesInfo = currentLastGenesisBlock.payload
-                .activeDelegates.map { NodeInfo(it.nodeId, NetworkAddress(it.host, it.port)) }
-            sendMessageToRandomDelegate(EpochRequestMessage(block.payload.epochIndex), nodesInfo)
-            return
-        }
+        syncSession = SyncSession(latestGenesisBlock, genesisBlockService.getLast())
+        val payload = latestGenesisBlock.payload
 
-        if (latestGenesisBlock == null) {
-            cursorGenesisBlock = block
-            latestGenesisBlock = block
-            delegateNodeInfo = block.payload
-                .activeDelegates.map { NodeInfo(it.nodeId, NetworkAddress(it.host, it.port)) }
+        networkApiService.sendToAddress(EpochRequestMessage(payload.epochIndex - 1), getNodeInfo(payload.activeDelegates.first()))
 
-            blockService.saveUnique(block)
-            sendMessageToRandomDelegate(EpochRequestMessage(block.payload.epochIndex - 1), delegateNodeInfo)
-        }
+//        if (block.hash == currentLastGenesisBlock.hash) {
+//            latestGenesisBlock = block
+//            cursorGenesisBlock = block
+//            val nodesInfo = currentLastGenesisBlock.payload
+//                .activeDelegates.map { NodeInfo(it.nodeId, NetworkAddress(it.host, it.port)) }
+//            sendMessageToRandomDelegate(EpochRequestMessage(block.payload.epochIndex), nodesInfo)
+//            return
+//        }
+//
+//        if (latestGenesisBlock == null) {
+//            cursorGenesisBlock = block
+//            latestGenesisBlock = block
+//            delegateNodeInfo = block.payload
+//                .activeDelegates.map { NodeInfo(it.nodeId, NetworkAddress(it.host, it.port)) }
+//
+//            blockService.saveUnique(block)
+//            sendMessageToRandomDelegate(EpochRequestMessage(block.payload.epochIndex - 1), delegateNodeInfo)
+//        }
+    }
+
+    private fun getNodeInfo(delegate: Delegate): NodeInfo = NodeInfo(delegate.nodeId, NetworkAddress(delegate.host, delegate.port))
+
+    private fun getGenesisBlockFromMessage(message: GenesisBlockMessage): GenesisBlock {
+        val delegates = message.delegates.asSequence().map { delegateService.getByPublicKey(it) }.toMutableList()
+        return GenesisBlock.of(message, delegates)
     }
 
     fun epochResponse(address: InetAddress, msg: EpochResponseMessage) {
-        latestGenesisBlock ?: return
 
-        lastResponseTime = clock.currentTimeMillis() + properties.expiry!!
+        val genesisBlock = getGenesisBlockFromMessage(msg.genesisBlock!!)
+        val listBlocks: MutableList<Block> = mutableListOf()
 
-        if (!msg.isEpochExists) {
-            sendEpochRequestToFilteredNodes(cursorGenesisBlock!!.payload.epochIndex, address, msg.nodeId)
-            return
+        listBlocks.addAll(msg.mainBlocks.map { MainBlock.of(it) })
+        listBlocks.add(genesisBlock)
+
+        if(syncSession.add(listBlocks)){
+
         }
 
-        val delegates = msg.genesisBlock!!.delegates.asSequence().map { delegateService.getByPublicKey(it) }.toMutableList()
-
-        val genesisBlockMessage = msg.genesisBlock!!
-        val genesisBlock = GenesisBlock.of(genesisBlockMessage, delegates)
-        val mainBlockMessages = msg.mainBlocks
-
-        if (mainBlockMessages.isEmpty() && isLatestEpochForSync(genesisBlockMessage.hash, address, msg.nodeId)) {
-            setSynchronized()
-            return
-        }
-
-        epochSync(msg, genesisBlock, address)
+//        lastResponseTime = clock.currentTimeMillis() + properties.expiry!!
+//
+//        if (!msg.isEpochExists) {
+//            sendEpochRequestToFilteredNodes(cursorGenesisBlock!!.payload.epochIndex, address, msg.nodeId)
+//            return
+//        }
+//
+//
+//
+//
+//        val mainBlockMessages = msg.mainBlocks
+//
+//        if (mainBlockMessages.isEmpty() && isLatestEpochForSync(genesisBlockMessage.hash, address, msg.nodeId)) {
+//            setSynchronized()
+//            return
+//        }
+//
+//        epochSync(msg, genesisBlock, address)
     }
 
     private fun epochSync(msg: EpochResponseMessage, genesisBlock: GenesisBlock, address: InetAddress) {

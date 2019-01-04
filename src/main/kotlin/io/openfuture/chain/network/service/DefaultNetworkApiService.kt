@@ -23,14 +23,15 @@ class DefaultNetworkApiService(
     override fun getConnectionSize(): Int = channelsHolder.size()
 
     override fun sendToAddress(message: Serializable, nodeInfo: NodeInfo): Boolean {
-        return if (!channelsHolder.send(message, nodeInfo)) {
-            connectionService.connect(nodeInfo.address, Consumer {
+        var isSent = channelsHolder.send(message, nodeInfo)
+        if (!isSent) {
+            isSent = connectionService.connect(nodeInfo.address, Consumer {
                 it.attr(ChannelsHolder.NODE_INFO_KEY).set(nodeInfo)
                 it.writeAndFlush(message)
             })
-        } else {
-            true
         }
+        return isSent
+
     }
 
     override fun getNetworkSize(): Int = addressesHolder.getNodeInfos().size + 1
