@@ -49,10 +49,10 @@ class ChainSynchronizer(
 
     @Synchronized
     fun sync() {
+        log.debug("Chain in status=$status")
         if (PROCESSING == status) {
             return
         }
-
         status = PROCESSING
 
         startSynchronization()
@@ -125,6 +125,7 @@ class ChainSynchronizer(
     @Synchronized
     private fun setSynchronized() {
         status = SYNCHRONIZED
+        log.debug("Chain in status=$status")
     }
 
     private fun startSynchronization() {

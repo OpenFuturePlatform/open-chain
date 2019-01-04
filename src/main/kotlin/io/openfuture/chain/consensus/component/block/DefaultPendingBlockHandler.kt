@@ -45,6 +45,11 @@ class DefaultPendingBlockHandler(
     @BlockchainSynchronized
     @Synchronized
     override fun addBlock(block: PendingBlockMessage) {
+        val delegate = epochService.getSlotOwner(block.timestamp)
+        if (block.publicKey != delegate.publicKey) {
+            return
+        }
+
         val blockSlotNumber = epochService.getSlotNumber(block.timestamp)
         val slotOwner = epochService.getCurrentSlotOwner()
 
