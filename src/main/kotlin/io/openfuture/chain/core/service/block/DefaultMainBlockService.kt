@@ -18,6 +18,7 @@ import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.BlockchainLock
+import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.time.Clock
@@ -38,6 +39,7 @@ class DefaultMainBlockService(
     repository: MainBlockRepository,
     walletService: WalletService,
     delegateService: DelegateService,
+    private val chainSynchronizer: ChainSynchronizer,
     private val clock: Clock,
     private val keyHolder: NodeKeyHolder,
     private val throughput: TransactionThroughput,
@@ -117,7 +119,7 @@ class DefaultMainBlockService(
     override fun verify(message: PendingBlockMessage): Boolean {
         BlockchainLock.readLock.lock()
         try {
-            checkSync(MainBlock.of(message))//?????????
+            chainSynchronizer.checkSync(MainBlock.of(message))//?????????
             validate(message)
             return true
         } catch (ex: ChainOutOfSyncException) {
@@ -141,7 +143,7 @@ class DefaultMainBlockService(
             }
 
             val block = MainBlock.of(message)
-            checkSync(block)
+            chainSynchronizer.checkSync(block)
 
             val savedBlock = super.save(block)
 

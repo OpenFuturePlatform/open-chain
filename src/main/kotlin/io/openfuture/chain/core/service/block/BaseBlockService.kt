@@ -1,7 +1,6 @@
 package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.core.annotation.OpenClass
-import io.openfuture.chain.core.exception.ChainOutOfSyncException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
@@ -31,13 +30,6 @@ abstract class BaseBlockService<T : Block>(
         if (previousBlock.height != 1L
             && !isValidSignature(previousBlock.hash, previousBlock.signature, previousBlock.publicKey)) return false
         return true
-    }
-
-    fun checkSync(block: Block) {
-        val lastBlock = blockService.getLast()
-        if (!isValidHeight(block, lastBlock) || !isValidPreviousHash(block, lastBlock)) {
-            throw ChainOutOfSyncException()
-        }
     }
 
     protected fun save(block: T): T {

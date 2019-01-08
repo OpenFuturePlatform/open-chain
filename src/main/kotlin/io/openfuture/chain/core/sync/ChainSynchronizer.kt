@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.sync
 
 import io.openfuture.chain.core.component.SyncFetchBlockScheduler
+import io.openfuture.chain.core.exception.ChainOutOfSyncException
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
@@ -117,6 +118,18 @@ class ChainSynchronizer(
 //            SET_SYNC?
         setSynchronized()
     }
+
+    fun checkSync(block: Block) {
+        val lastBlock = blockService.getLast()
+        if (!isValidHeight(block, lastBlock) || !isValidPreviousHash(block, lastBlock)) {
+            sync()
+            throw ChainOutOfSyncException()
+        }
+    }
+
+    private fun isValidPreviousHash(block: Block, lastBlock: Block): Boolean = block.previousHash == lastBlock.hash
+
+    private fun isValidHeight(block: Block, lastBlock: Block): Boolean = block.height == lastBlock.height + 1
 
     private fun getEpochIndex(): Long {
         return (syncSession.getLastBlock() as GenesisBlock).payload.epochIndex

@@ -60,11 +60,7 @@ class DefaultPendingBlockHandler(
             return
         }
 
-        try {
-            mainBlockService.checkSync(MainBlock.of(block))
-        } catch (ex: ChainOutOfSyncException) {
-            chainSynchronizer.sync()
-        }
+        chainSynchronizer.checkSync(MainBlock.of(block))
 
         if (!mainBlockService.verify(block)) {
             return
