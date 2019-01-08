@@ -155,14 +155,14 @@ class ChainSynchronizer(
     private fun fetchLatestGenesisBlock(listNodeInfo: List<NodeInfo>) {
         val message = SyncRequestMessage()
 
-        networkApiService.sendToAddress(message, listNodeInfo.first())
+        networkApiService.sendToAddress(message, listNodeInfo.shuffled().first())
         syncFetchBlockScheduler.activate(message, listNodeInfo, properties.syncExpiry!!)
     }
 
     private fun fetchEpoch(epochIndex: Long, listNodeInfo: List<NodeInfo>) {
         val message = EpochRequestMessage(epochIndex)
 
-        networkApiService.sendToAddress(message, listNodeInfo.first())
+        networkApiService.sendToAddress(message, listNodeInfo.shuffled().first())
         syncFetchBlockScheduler.activate(message, listNodeInfo, properties.syncExpiry!!)
     }
 
