@@ -5,14 +5,16 @@ import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.network.serialization.Serializable
 
 @NoArgConstructor
-class SyncRequestMessage : Serializable {
+class EpochRequestMessage(
+    var epochIndex: Long
+) : Serializable {
 
     override fun read(buf: ByteBuf) {
-        //nothing to do
+        epochIndex = buf.readLong()
     }
 
     override fun write(buf: ByteBuf) {
-        //nothing to do
+        buf.writeLong(epochIndex)
     }
 
 }

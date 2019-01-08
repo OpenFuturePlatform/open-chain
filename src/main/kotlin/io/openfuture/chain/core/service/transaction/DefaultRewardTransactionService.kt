@@ -90,6 +90,11 @@ class DefaultRewardTransactionService(
         }
     }
 
+    @Transactional
+    override fun save(transaction: RewardTransaction) {
+        repository.save(transaction)
+    }
+
     private fun updateTransferBalance(to: String, amount: Long) {
         walletService.increaseBalance(to, amount)
 

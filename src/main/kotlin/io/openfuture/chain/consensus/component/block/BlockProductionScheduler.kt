@@ -1,11 +1,11 @@
 package io.openfuture.chain.consensus.component.block
 
-import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
+import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
-import io.openfuture.chain.core.sync.SyncManager
+import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.sync.SyncStatus.SYNCHRONIZED
 import io.openfuture.chain.network.component.time.ClockSynchronizer
 import org.slf4j.Logger
@@ -23,8 +23,9 @@ class BlockProductionScheduler(
     private val mainBlockService: MainBlockService,
     private val genesisBlockService: GenesisBlockService,
     private val pendingBlockHandler: PendingBlockHandler,
-    private val syncManager: SyncManager,
-    private val clockSynchronizer: ClockSynchronizer
+    private val chainSynchronizer: ChainSynchronizer,
+    private val clockSynchronizer: ClockSynchronizer,
+    private val delegateService: DelegateService
 ) {
 
     companion object {
@@ -41,9 +42,14 @@ class BlockProductionScheduler(
 
     private fun proceedProductionLoop() {
         try {
-            if (SYNCHRONIZED != clockSynchronizer.getStatus() || SYNCHRONIZED != syncManager.getStatus()) {
+            if (SYNCHRONIZED != clockSynchronizer.getStatus()) {
                 log.debug("----------------Clock is ${clockSynchronizer.getStatus()}----------------")
-                log.debug("----------------Ledger is ${syncManager.getStatus()}----------------")
+                return
+            }
+
+            if (SYNCHRONIZED != chainSynchronizer.getStatus()) {
+                log.debug("----------------Ledger is ${chainSynchronizer.getStatus()}----------------")
+                chainSynchronizer.sync()
                 return
             }
 

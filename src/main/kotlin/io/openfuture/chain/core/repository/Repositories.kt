@@ -38,10 +38,10 @@ interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
 
     fun findAllByHeightGreaterThan(height: Long): List<Entity>
 
+    fun findAllByHeightBetween(beginHeight: Long, endHeight: Long): List<Entity>
+
     @Query(value = "Select HEIGHT From BLOCKS Order By HEIGHT Desc Limit 1", nativeQuery = true)
     fun getCurrentHeight(): Long
-
-    fun findTop30ByHeightGreaterThanOrderByHeightDesc(height: Long): List<Entity>
 
 }
 
@@ -49,7 +49,11 @@ interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
 interface MainBlockRepository : BlockRepository<MainBlock>
 
 @Repository
-interface GenesisBlockRepository : BlockRepository<GenesisBlock>
+interface GenesisBlockRepository : BlockRepository<GenesisBlock> {
+
+    fun findOneByPayloadEpochIndex(epochIndex: Long): GenesisBlock?
+
+}
 
 @Repository
 interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {

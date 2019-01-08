@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Sync: blocks synchronization (Light - only carcase) based on epoch
+
 ## [1.5.0] - 2018-12-14
 ### Added
 - Smart contracts: contract basic executor

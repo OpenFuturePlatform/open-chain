@@ -51,11 +51,6 @@ abstract class BaseBlockService<T : Block>(
         }
     }
 
-    protected fun isSync(block: Block): Boolean {
-        val lastBlock = blockService.getLast()
-        return isValidHeight(block, lastBlock) && isValidPreviousHash(block, lastBlock)
-    }
-
     protected fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray {
         val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + previousHash.toByteArray(UTF_8).size + payload.getBytes().size)
             .putLong(timestamp)

@@ -22,10 +22,6 @@ class DefaultNetworkApiService(
 
     override fun getConnectionSize(): Int = channelsHolder.size()
 
-    override fun sendRandom(message: Serializable) {
-        channelsHolder.sendRandom(message)
-    }
-
     override fun sendToAddress(message: Serializable, nodeInfo: NodeInfo) {
         if (!channelsHolder.send(message, nodeInfo)) {
             connectionService.connect(nodeInfo.address, Consumer {

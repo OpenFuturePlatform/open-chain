@@ -4,6 +4,7 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.component.TransactionThroughput
+import io.openfuture.chain.core.exception.ChainOutOfSyncException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -13,10 +14,11 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
+import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.BlockchainLock
-import io.openfuture.chain.core.sync.SyncManager
+import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.time.Clock
@@ -39,14 +41,15 @@ class DefaultMainBlockService(
     delegateService: DelegateService,
     private val clock: Clock,
     private val keyHolder: NodeKeyHolder,
+    private val throughput: TransactionThroughput,
     private val walletVoteService: WalletVoteService,
-    private val voteTransactionService: VoteTransactionService,
-    private val delegateTransactionService: DelegateTransactionService,
-    private val transferTransactionService: TransferTransactionService,
-    private val rewardTransactionService: RewardTransactionService,
+    private val chainSynchronizer: ChainSynchronizer,
     private val consensusProperties: ConsensusProperties,
-    private val syncManager: SyncManager,
-    private val throughput: TransactionThroughput
+    private val genesisBlockRepository: GenesisBlockRepository,
+    private val voteTransactionService: VoteTransactionService,
+    private val rewardTransactionService: RewardTransactionService,
+    private val delegateTransactionService: DelegateTransactionService,
+    private val transferTransactionService: TransferTransactionService
 ) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
 
     companion object {
@@ -116,15 +119,13 @@ class DefaultMainBlockService(
     override fun verify(message: PendingBlockMessage): Boolean {
         BlockchainLock.readLock.lock()
         try {
-            if (!isSync(MainBlock.of(message))) {
-                syncManager.outOfSync()
-                return false
-            }
-
+            chainSynchronizer.checkSync(MainBlock.of(message))
             validate(message)
             return true
-        } catch (e: ValidationException) {
-            log.warn(e.message)
+        } catch (ex: ChainOutOfSyncException) {
+            return false
+        } catch (ex: ValidationException) {
+            log.warn(ex.message)
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -142,12 +143,10 @@ class DefaultMainBlockService(
             }
 
             val block = MainBlock.of(message)
-            if (!isSync(block)) {
-                syncManager.outOfSync()
-                return
-            }
+            chainSynchronizer.checkSync(block)
 
             val savedBlock = super.save(block)
+
             message.getAllTransactions().forEach {
                 when (it) {
                     is RewardTransactionMessage -> rewardTransactionService.toBlock(it, savedBlock)
@@ -161,6 +160,14 @@ class DefaultMainBlockService(
         } finally {
             BlockchainLock.writeLock.unlock()
         }
+    }
+
+    @Transactional(readOnly = true)
+    override fun getBlocksByEpochIndex(epochIndex: Long): List<MainBlock> {
+        val genesisBlock = genesisBlockRepository.findOneByPayloadEpochIndex(epochIndex) ?: return emptyList()
+        val beginHeight = genesisBlock.height + 1
+        val endEpochHeight = beginHeight + consensusProperties.epochHeight!! - 1
+        return repository.findAllByHeightBetween(beginHeight, endEpochHeight)
     }
 
     private fun validate(message: PendingBlockMessage) {
