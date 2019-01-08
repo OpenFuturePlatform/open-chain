@@ -65,8 +65,8 @@ class ChainSynchronizer(
         val currentGenesisBlock = genesisBlockService.getLast()
 
         if (currentGenesisBlock.hash == latestGenesisBlock.hash) {
-            fetchEpoch(getEpochIndex(), listNodeInfo)
             syncSession = SyncCurrentEpochSession(currentGenesisBlock)
+            fetchEpoch(getEpochIndex(), listNodeInfo)
             return
         }
 
