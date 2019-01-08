@@ -60,64 +60,69 @@ class ChainSynchronizer(
 
     fun latestGenesisBlockResponse(receivedLastGenesisBlock: GenesisBlockMessage) {
         syncFetchBlockScheduler.deactivate()
+        try {
 
-        val latestGenesisBlock = getGenesisBlockFromMessage(receivedLastGenesisBlock)
-        val currentGenesisBlock = genesisBlockService.getLast()
 
-        if (currentGenesisBlock.hash == latestGenesisBlock.hash) {
-            syncSession = SyncCurrentEpochSession(currentGenesisBlock)
-            fetchEpoch(getEpochIndex(), listNodeInfo)
-            return
+            val latestGenesisBlock = getGenesisBlockFromMessage(receivedLastGenesisBlock)
+            val currentGenesisBlock = genesisBlockService.getLast()
+
+            if (currentGenesisBlock.hash == latestGenesisBlock.hash) {
+                syncSession = SyncCurrentEpochSession(currentGenesisBlock)
+                fetchEpoch(getEpochIndex(), listNodeInfo)
+                return
+            }
+
+            syncSession = DefaultSyncSession(latestGenesisBlock, currentGenesisBlock)
+            listNodeInfo = latestGenesisBlock.payload.activeDelegates.map { getNodeInfo(it) }
+
+            fetchEpoch(getEpochIndex() - 1, listNodeInfo)
+        } catch (e: Throwable) {
+            log.error(e.message)
         }
-
-        syncSession = DefaultSyncSession(latestGenesisBlock, currentGenesisBlock)
-        listNodeInfo = latestGenesisBlock.payload.activeDelegates.map { getNodeInfo(it) }
-
-        fetchEpoch(getEpochIndex() - 1, listNodeInfo)
     }
 
     fun epochResponse(address: InetAddress, msg: EpochResponseMessage) {
         syncFetchBlockScheduler.deactivate()
+        try {
 
-        if (!msg.isEpochExists) {
-            fetchEpoch(getEpochIndex(), listNodeInfo.filter { it.uid != msg.nodeId })
-            return
-        }
+            if (!msg.isEpochExists) {
+                fetchEpoch(getEpochIndex(), listNodeInfo.filter { it.uid != msg.nodeId })
+                return
+            }
 
-        val genesisBlock = getGenesisBlockFromMessage(msg.genesisBlock!!)
-        val listBlocks: MutableList<Block> = mutableListOf()
+            val genesisBlock = getGenesisBlockFromMessage(msg.genesisBlock!!)
+            val listBlocks: MutableList<Block> = mutableListOf()
 
-        listBlocks.addAll(msg.mainBlocks.map {
-            val mainBlock = MainBlock.of(it)
-            mainBlock.payload.rewardTransaction = mutableListOf(RewardTransaction.of(it.rewardTransaction, mainBlock))
-            mainBlock
-        })
+            listBlocks.addAll(msg.mainBlocks.map {
+                val mainBlock = MainBlock.of(it)
+                mainBlock.payload.rewardTransaction = mutableListOf(RewardTransaction.of(it.rewardTransaction, mainBlock))
+                mainBlock
+            })
 
-        if (syncSession is SyncCurrentEpochSession) {
+            if (syncSession is SyncCurrentEpochSession) {
+
+                if (!syncSession.add(listBlocks)) {
+                    fetchEpoch(getEpochIndex(), listNodeInfo.filter { it.uid != msg.nodeId })
+                } else {
+                    saveBlocks()
+                }
+                return
+            }
+
+            listBlocks.add(genesisBlock)
 
             if (!syncSession.add(listBlocks)) {
-                fetchEpoch(
-                    (syncSession as SyncCurrentEpochSession).currentGenesisBlock.payload.epochIndex,
-                    listNodeInfo.filter { it.uid != msg.nodeId }
-                )
-            } else {
-                saveBlocks()
+                fetchEpoch(getEpochIndex(), listNodeInfo.filter { it.uid != msg.nodeId })
+                return
             }
-            return
+
+            if (!syncSession.isComplete()) {
+                fetchEpoch(getEpochIndex() - 1, listNodeInfo)
+                return
+            }
+        } catch (e: Throwable) {
+            log.error(e.message)
         }
-
-        listBlocks.add(genesisBlock)
-
-        if (!syncSession.add(listBlocks)) {
-            fetchEpoch(getEpochIndex(), listNodeInfo.filter { it.uid != msg.nodeId })
-            return
-        }
-
-        if (!syncSession.isComplete()) {
-            fetchEpoch(getEpochIndex() - 1, listNodeInfo)
-            return
-        }
-
         saveBlocks()
     }
 
@@ -133,7 +138,7 @@ class ChainSynchronizer(
 
     private fun isValidHeight(block: Block, lastBlock: Block): Boolean = block.height == lastBlock.height + 1
 
-    private fun getEpochIndex(): Long = (syncSession.getLastBlock() as GenesisBlock).payload.epochIndex
+    private fun getEpochIndex(): Long = syncSession.getEpochForSync()
 
     @Synchronized
     private fun setSynchronized() {
