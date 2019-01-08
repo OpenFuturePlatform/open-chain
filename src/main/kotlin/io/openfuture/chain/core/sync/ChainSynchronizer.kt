@@ -96,7 +96,10 @@ class ChainSynchronizer(
         if (syncSession is SyncCurrentEpochSession) {
 
             if (!syncSession.add(listBlocks)) {
-                fetchEpoch(getEpochIndex(), listNodeInfo.filter { it.uid != msg.nodeId })
+                fetchEpoch(
+                    (syncSession as SyncCurrentEpochSession).currentGenesisBlock.payload.epochIndex,
+                    listNodeInfo.filter { it.uid != msg.nodeId }
+                )
             } else {
                 saveBlocks()
             }
