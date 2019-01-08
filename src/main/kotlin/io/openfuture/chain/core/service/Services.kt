@@ -109,8 +109,6 @@ interface MainBlockService {
 
     fun isPreviousBlockValid(previousBlock: Block, block: Block): Boolean
 
-    fun checkSync(block: Block)
-
 }
 
 /** Common base transaction service */

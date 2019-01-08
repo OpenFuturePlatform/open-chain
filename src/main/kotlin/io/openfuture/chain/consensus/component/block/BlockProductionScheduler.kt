@@ -2,7 +2,6 @@ package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.exception.ChainOutOfSyncException
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
@@ -64,8 +63,6 @@ class BlockProductionScheduler(
                 val block = mainBlockService.create()
                 pendingBlockHandler.addBlock(block)
             }
-        } catch (ex: ChainOutOfSyncException) {
-            chainSynchronizer.sync()
         } catch (ex: Exception) {
             log.error("Block creation failure inbound: ${ex.message}")
         } finally {

@@ -80,7 +80,6 @@ class DefaultGenesisBlockService(
     @Transactional
     @Synchronized
     override fun add(block: GenesisBlock) {
-        checkSync(block)
         super.save(block)
     }
 
