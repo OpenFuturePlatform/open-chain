@@ -2,6 +2,7 @@ package io.openfuture.chain.core.model.entity.block
 
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
+import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.network.message.core.BaseMainBlockMessage
 import io.openfuture.chain.network.message.sync.MainBlockMessage
 import javax.persistence.Embedded

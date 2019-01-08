@@ -6,9 +6,8 @@ import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.service.BlockService
-import io.openfuture.chain.core.service.DelegateService
-import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
+import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
@@ -16,7 +15,6 @@ import io.openfuture.chain.network.message.sync.EpochRequestMessage
 import io.openfuture.chain.network.message.sync.EpochResponseMessage
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.network.message.sync.SyncRequestMessage
-import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.NetworkApiService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -26,11 +24,11 @@ import java.net.InetAddress
 @Component
 class ChainSynchronizer(
     private val blockService: BlockService,
-    private val properties: NodeProperties,
     private val syncFetchBlockScheduler: SyncFetchBlockScheduler,
     private val delegateService: DelegateService,
     private val networkApiService: NetworkApiService,
-    private val genesisBlockService: GenesisBlockService
+    private val genesisBlockService: GenesisBlockService,
+    private val rewardTransactionService: RewardTransactionService
 ) {
 
     companion object {
@@ -86,7 +84,11 @@ class ChainSynchronizer(
         val genesisBlock = getGenesisBlockFromMessage(msg.genesisBlock!!)
         val listBlocks: MutableList<Block> = mutableListOf()
 
-        listBlocks.addAll(msg.mainBlocks.map { MainBlock.of(it) })
+        listBlocks.addAll(msg.mainBlocks.map {
+            val mainBlock = MainBlock.of(it)
+            mainBlock.payload.rewardTransaction = mutableListOf(RewardTransaction.of(it.rewardTransaction, mainBlock))
+            mainBlock
+        })
 
         if (syncSession is SyncCurrentEpochSession) {
 
@@ -150,14 +152,14 @@ class ChainSynchronizer(
         val message = SyncRequestMessage()
 
         networkApiService.sendToAddress(message, listNodeInfo.shuffled().first())
-        syncFetchBlockScheduler.activate(message, listNodeInfo, properties.syncExpiry!!)
+        syncFetchBlockScheduler.activate(message, listNodeInfo)
     }
 
     private fun fetchEpoch(epochIndex: Long, listNodeInfo: List<NodeInfo>) {
         val message = EpochRequestMessage(epochIndex)
 
         networkApiService.sendToAddress(message, listNodeInfo.shuffled().first())
-        syncFetchBlockScheduler.activate(message, listNodeInfo, properties.syncExpiry!!)
+        syncFetchBlockScheduler.activate(message, listNodeInfo)
     }
 
     private fun getNodeInfo(delegate: Delegate): NodeInfo = NodeInfo(delegate.nodeId, NetworkAddress(delegate.host, delegate.port))
@@ -177,7 +179,17 @@ class ChainSynchronizer(
                 syncSession.getStorage().subList(nextIndex, syncSession.getStorage().size)
             } ?: syncSession.getStorage()
 
-            filteredStorage.forEach { blockService.save(it) }
+            filteredStorage.forEach {
+                if (it is MainBlock) {
+                    val rewardTransaction = it.payload.rewardTransaction.first()
+                    it.payload.rewardTransaction.clear()
+                    blockService.save(it)
+                    rewardTransaction.block = it
+                    rewardTransactionService.save(rewardTransaction)
+                } else {
+                    blockService.save(it)
+                }
+            }
             setSynchronized()
         } catch (e: Exception) {
             log.error("Save block is failed: $e")

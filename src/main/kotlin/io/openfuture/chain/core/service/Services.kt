@@ -154,6 +154,8 @@ interface RewardTransactionService {
 
     fun verify(message: RewardTransactionMessage): Boolean
 
+    fun save(transaction: RewardTransaction)
+
 }
 
 interface VoteTransactionService {
