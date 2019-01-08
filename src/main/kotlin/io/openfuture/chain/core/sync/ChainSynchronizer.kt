@@ -8,8 +8,7 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
-import io.openfuture.chain.core.sync.SyncStatus.PROCESSING
-import io.openfuture.chain.core.sync.SyncStatus.SYNCHRONIZED
+import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.sync.EpochRequestMessage
@@ -82,6 +81,11 @@ class ChainSynchronizer(
     fun epochResponse(address: InetAddress, msg: EpochResponseMessage) {
         syncFetchBlockScheduler.deactivate()
 
+        if (!msg.isEpochExists) {
+            fetchEpoch(getEpochIndex(), listNodeInfo.filter { it.uid != msg.nodeId })
+            return
+        }
+
         val genesisBlock = getGenesisBlockFromMessage(msg.genesisBlock!!)
         val listBlocks: MutableList<Block> = mutableListOf()
 
@@ -92,10 +96,7 @@ class ChainSynchronizer(
             if (!syncSession.add(listBlocks)) {
                 fetchEpoch(getEpochIndex(), listNodeInfo.filter { it.uid != msg.nodeId })
             } else {
-                syncSession.getStorage().forEach { blockService.save(it) }
-
-//            SET_SYNC?
-                setSynchronized()
+                saveBlocks()
             }
             return
         }
@@ -112,10 +113,7 @@ class ChainSynchronizer(
             return
         }
 
-        syncSession.getStorage().forEach { blockService.save(it) }
-
-//            SET_SYNC?
-        setSynchronized()
+        saveBlocks()
     }
 
     private fun getEpochIndex(): Long {
@@ -127,6 +125,13 @@ class ChainSynchronizer(
         status = SYNCHRONIZED
         log.debug("Chain in status=$status")
     }
+
+    @Synchronized
+    private fun setNotSynchronized() {
+        status = NOT_SYNCHRONIZED
+        log.debug("Chain in status=$status")
+    }
+
 
     private fun startSynchronization() {
         listNodeInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
@@ -155,4 +160,23 @@ class ChainSynchronizer(
         return GenesisBlock.of(message, delegates)
     }
 
+
+    private fun saveBlocks() {
+        try {
+            val currentLastBlock = blockService.getLast()
+            val existedBlock = syncSession.getStorage().find { it.hash == currentLastBlock.hash }
+
+            val filteredStorage = existedBlock?.let {
+                val nextIndex = syncSession.getStorage().indexOf(existedBlock) + 1
+                syncSession.getStorage().subList(nextIndex, syncSession.getStorage().size)
+            } ?: syncSession.getStorage()
+
+            filteredStorage.forEach { blockService.save(it) }
+            setSynchronized()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            setNotSynchronized()
+        }
+
+    }
 }

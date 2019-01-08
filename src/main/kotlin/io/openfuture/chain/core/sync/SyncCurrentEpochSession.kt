@@ -15,7 +15,7 @@ class SyncCurrentEpochSession(
         return storage.last()
     }
 
-    override fun getStorage(): List<Block> = storage.drop(1)
+    override fun getStorage(): List<Block> = storage.toList()
 
     override fun isComplete(): Boolean = true
 
