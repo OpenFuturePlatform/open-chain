@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.component
 
 import io.openfuture.chain.network.entity.NodeInfo
+import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.serialization.Serializable
 import io.openfuture.chain.network.service.NetworkApiService
 import org.apache.commons.lang3.builder.ToStringBuilder
@@ -15,7 +16,8 @@ import java.util.concurrent.TimeUnit
 
 @Component
 class SyncFetchBlockScheduler(
-    private val networkApiService: NetworkApiService
+    private val networkApiService: NetworkApiService,
+    private val properties: NodeProperties
 ) {
 
     companion object {
@@ -30,10 +32,10 @@ class SyncFetchBlockScheduler(
     private var future: ScheduledFuture<*>? = null
 
 
-    fun activate(message: Serializable, listNodeInfo: List<NodeInfo>, delay: Long, initialDelay: Long = delay) {
+    fun activate(message: Serializable, listNodeInfo: List<NodeInfo>) {
         deactivate()
-        this.listNodeInfo = listNodeInfo
-        future = executor.scheduleWithFixedDelay({ execute(message) }, initialDelay, delay, TimeUnit.MILLISECONDS)
+        this.listNodeInfo = properties.getMe()?.let { me -> listNodeInfo.filter { it.uid != me.uid } } ?: listNodeInfo
+        future = executor.scheduleWithFixedDelay({ execute(message) }, properties.syncExpiry!!, properties.syncExpiry!!, TimeUnit.MILLISECONDS)
     }
 
     fun deactivate() {

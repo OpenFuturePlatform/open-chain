@@ -16,7 +16,6 @@ import io.openfuture.chain.network.message.sync.EpochRequestMessage
 import io.openfuture.chain.network.message.sync.EpochResponseMessage
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.network.message.sync.SyncRequestMessage
-import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.NetworkApiService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -26,11 +25,10 @@ import java.net.InetAddress
 @Component
 class ChainSynchronizer(
     private val blockService: BlockService,
-    private val properties: NodeProperties,
-    private val syncFetchBlockScheduler: SyncFetchBlockScheduler,
     private val delegateService: DelegateService,
     private val networkApiService: NetworkApiService,
-    private val genesisBlockService: GenesisBlockService
+    private val genesisBlockService: GenesisBlockService,
+    private val syncFetchBlockScheduler: SyncFetchBlockScheduler
 ) {
 
     companion object {
@@ -150,14 +148,14 @@ class ChainSynchronizer(
         val message = SyncRequestMessage()
 
         networkApiService.sendToAddress(message, listNodeInfo.shuffled().first())
-        syncFetchBlockScheduler.activate(message, listNodeInfo, properties.syncExpiry!!)
+        syncFetchBlockScheduler.activate(message, listNodeInfo)
     }
 
     private fun fetchEpoch(epochIndex: Long, listNodeInfo: List<NodeInfo>) {
         val message = EpochRequestMessage(epochIndex)
 
         networkApiService.sendToAddress(message, listNodeInfo.shuffled().first())
-        syncFetchBlockScheduler.activate(message, listNodeInfo, properties.syncExpiry!!)
+        syncFetchBlockScheduler.activate(message, listNodeInfo)
     }
 
     private fun getNodeInfo(delegate: Delegate): NodeInfo = NodeInfo(delegate.nodeId, NetworkAddress(delegate.host, delegate.port))
@@ -179,7 +177,7 @@ class ChainSynchronizer(
 
             filteredStorage.forEach { blockService.save(it) }
             setSynchronized()
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             log.error("Save block is failed: $e")
             setNotSynchronized()
         }
