@@ -39,11 +39,11 @@ class DefaultMainBlockService(
     repository: MainBlockRepository,
     walletService: WalletService,
     delegateService: DelegateService,
-    private val chainSynchronizer: ChainSynchronizer,
     private val clock: Clock,
     private val keyHolder: NodeKeyHolder,
     private val throughput: TransactionThroughput,
     private val walletVoteService: WalletVoteService,
+    private val chainSynchronizer: ChainSynchronizer,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository,
     private val voteTransactionService: VoteTransactionService,
@@ -160,12 +160,6 @@ class DefaultMainBlockService(
         } finally {
             BlockchainLock.writeLock.unlock()
         }
-    }
-
-    @Transactional
-    @Synchronized
-    override fun saveUniqueBlocks(blocks: List<MainBlock>) {
-        repository.saveAll(blocks.filter { null == repository.findOneByHash(it.hash) })
     }
 
     @Transactional(readOnly = true)

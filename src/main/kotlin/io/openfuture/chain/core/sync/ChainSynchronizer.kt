@@ -142,7 +142,7 @@ class ChainSynchronizer(
     @Synchronized
     private fun setNotSynchronized() {
         status = NOT_SYNCHRONIZED
-        log.debug("Chain in status=$status")
+        log.debug("Set status=$status")
     }
 
 

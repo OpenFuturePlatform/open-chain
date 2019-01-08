@@ -97,8 +97,6 @@ interface MainBlockService {
 
     fun add(block: BaseMainBlockMessage)
 
-    fun saveUniqueBlocks(blocks: List<MainBlock>)
-
     fun verify(message: PendingBlockMessage): Boolean
 
     fun getPreviousBlock(hash: String): MainBlock
@@ -106,8 +104,6 @@ interface MainBlockService {
     fun getNextBlock(hash: String): MainBlock
 
     fun getBlocksByEpochIndex(epochIndex: Long): List<MainBlock>
-
-    fun isPreviousBlockValid(previousBlock: Block, block: Block): Boolean
 
 }
 

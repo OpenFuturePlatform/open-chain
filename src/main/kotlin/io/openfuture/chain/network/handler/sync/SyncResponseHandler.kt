@@ -20,7 +20,7 @@ class SyncResponseHandler(
     }
     override fun channelRead0(ctx: ChannelHandlerContext, msg: SyncResponseMessage) {
         chainSynchronizer.latestGenesisBlockResponse(msg.genesisBlockMessage)
-        log.debug("Get SyncResponseMessage from ${ctx.channel().remoteAddress()}")
+        log.debug("SyncResponseMessage FROM ${ctx.channel().remoteAddress()}")
     }
 
 }
