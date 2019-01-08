@@ -187,7 +187,7 @@ class ChainSynchronizer(
             filteredStorage.forEach { blockService.save(it) }
             setSynchronized()
         } catch (e: Exception) {
-            e.printStackTrace()
+            log.error("Save block is failed: $e")
             setNotSynchronized()
         }
 
