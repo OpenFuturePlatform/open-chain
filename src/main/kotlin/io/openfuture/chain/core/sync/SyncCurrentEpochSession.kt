@@ -11,9 +11,8 @@ class SyncCurrentEpochSession(
 
     private val storage: MutableSet<Block> = mutableSetOf(currentGenesisBlock)
 
-    override fun getLastBlock(): Block {
-        return storage.last()
-    }
+
+    override fun getLastBlock(): Block = storage.last()
 
     override fun getStorage(): List<Block> = storage.toList()
 

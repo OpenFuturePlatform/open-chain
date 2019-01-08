@@ -10,14 +10,12 @@ open class DefaultSyncSession(
     val currentGenesisBlock: GenesisBlock
 ) : SyncSession {
 
-
     private val storage: MutableSet<Block> = mutableSetOf(latestGenesisBlock)
+
 
     override fun isComplete(): Boolean = storage.last().height == currentGenesisBlock.height
 
-    override fun getLastBlock(): Block {
-        return storage.last()
-    }
+    override fun getLastBlock(): Block = storage.last()
 
     override fun getStorage(): List<Block> = storage.reversed()
 

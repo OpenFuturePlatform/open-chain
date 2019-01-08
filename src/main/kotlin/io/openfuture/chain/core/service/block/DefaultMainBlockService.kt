@@ -119,7 +119,7 @@ class DefaultMainBlockService(
     override fun verify(message: PendingBlockMessage): Boolean {
         BlockchainLock.readLock.lock()
         try {
-            chainSynchronizer.checkSync(MainBlock.of(message))//?????????
+            chainSynchronizer.checkSync(MainBlock.of(message))
             validate(message)
             return true
         } catch (ex: ChainOutOfSyncException) {

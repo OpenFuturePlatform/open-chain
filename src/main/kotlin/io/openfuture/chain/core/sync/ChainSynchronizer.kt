@@ -40,12 +40,11 @@ class ChainSynchronizer(
     @Volatile
     private var status: SyncStatus = SYNCHRONIZED
 
-    fun getStatus(): SyncStatus = status
-
     private lateinit var syncSession: SyncSession
 
     private lateinit var listNodeInfo: List<NodeInfo>
 
+    fun getStatus(): SyncStatus = status
 
     @Synchronized
     fun sync() {
@@ -62,7 +61,6 @@ class ChainSynchronizer(
         syncFetchBlockScheduler.deactivate()
 
         val latestGenesisBlock = getGenesisBlockFromMessage(receivedLastGenesisBlock)
-
         val currentGenesisBlock = genesisBlockService.getLast()
 
         if (currentGenesisBlock.hash == latestGenesisBlock.hash) {
@@ -72,12 +70,10 @@ class ChainSynchronizer(
         }
 
         syncSession = DefaultSyncSession(latestGenesisBlock, currentGenesisBlock)
-
         listNodeInfo = latestGenesisBlock.payload.activeDelegates.map { getNodeInfo(it) }
 
         fetchEpoch(getEpochIndex() - 1, listNodeInfo)
     }
-
 
     fun epochResponse(address: InetAddress, msg: EpochResponseMessage) {
         syncFetchBlockScheduler.deactivate()
@@ -129,9 +125,7 @@ class ChainSynchronizer(
 
     private fun isValidHeight(block: Block, lastBlock: Block): Boolean = block.height == lastBlock.height + 1
 
-    private fun getEpochIndex(): Long {
-        return (syncSession.getLastBlock() as GenesisBlock).payload.epochIndex
-    }
+    private fun getEpochIndex(): Long = (syncSession.getLastBlock() as GenesisBlock).payload.epochIndex
 
     @Synchronized
     private fun setSynchronized() {
@@ -172,7 +166,6 @@ class ChainSynchronizer(
         val delegates = message.delegates.asSequence().map { delegateService.getByPublicKey(it) }.toMutableList()
         return GenesisBlock.of(message, delegates)
     }
-
 
     private fun saveBlocks() {
         try {

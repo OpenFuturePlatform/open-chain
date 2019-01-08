@@ -95,7 +95,7 @@ interface MainBlockService {
 
     fun create(): PendingBlockMessage
 
-    fun add(block: BaseMainBlockMessage)
+    fun add(message: BaseMainBlockMessage)
 
     fun verify(message: PendingBlockMessage): Boolean
 

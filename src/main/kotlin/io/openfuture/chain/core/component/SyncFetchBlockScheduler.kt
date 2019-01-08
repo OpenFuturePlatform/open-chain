@@ -54,4 +54,5 @@ class SyncFetchBlockScheduler(
         networkApiService.sendToAddress(message, listNodeInfo[index])
         log.debug("Send ${ToStringBuilder.reflectionToString(message, ToStringStyle.SHORT_PREFIX_STYLE)}")
     }
+
 }
