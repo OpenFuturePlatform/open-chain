@@ -6,7 +6,7 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 
 class SyncCurrentEpochSession(
-    currentGenesisBlock: GenesisBlock
+    val currentGenesisBlock: GenesisBlock
 ) : SyncSession {
 
     private val storage: MutableSet<Block> = mutableSetOf(currentGenesisBlock)
