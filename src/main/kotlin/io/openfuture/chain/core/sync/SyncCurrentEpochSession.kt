@@ -31,7 +31,8 @@ class SyncCurrentEpochSession(
     }
 
     private fun rollback(epochBlocks: List<Block>) {
-        storage.removeAll(epochBlocks)
+        val hashes = epochBlocks.map { it.hash }
+        storage.removeIf { hashes.contains(it.hash) }
     }
 
     private fun isValid(block: Block): Boolean {
