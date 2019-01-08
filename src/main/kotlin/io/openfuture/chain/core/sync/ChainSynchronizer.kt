@@ -6,9 +6,11 @@ import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.RewardTransactionService
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
@@ -28,7 +30,8 @@ class ChainSynchronizer(
     private val delegateService: DelegateService,
     private val networkApiService: NetworkApiService,
     private val genesisBlockService: GenesisBlockService,
-    private val syncFetchBlockScheduler: SyncFetchBlockScheduler
+    private val syncFetchBlockScheduler: SyncFetchBlockScheduler,
+    private val rewardTransactionService: RewardTransactionService
 ) {
 
     companion object {
@@ -84,7 +87,11 @@ class ChainSynchronizer(
         val genesisBlock = getGenesisBlockFromMessage(msg.genesisBlock!!)
         val listBlocks: MutableList<Block> = mutableListOf()
 
-        listBlocks.addAll(msg.mainBlocks.map { MainBlock.of(it) })
+        listBlocks.addAll(msg.mainBlocks.map {
+            val mainBlock = MainBlock.of(it)
+            mainBlock.payload.rewardTransaction = mutableListOf(RewardTransaction.of(it.rewardTransaction, mainBlock))
+            mainBlock
+        })
 
         if (syncSession is SyncCurrentEpochSession) {
 
@@ -175,7 +182,17 @@ class ChainSynchronizer(
                 syncSession.getStorage().subList(nextIndex, syncSession.getStorage().size)
             } ?: syncSession.getStorage()
 
-            filteredStorage.forEach { blockService.save(it) }
+            filteredStorage.forEach {
+                if (it is MainBlock) {
+                    val rewardTransaction = it.payload.rewardTransaction.first()
+                    it.payload.rewardTransaction.clear()
+                    blockService.save(it)
+                    rewardTransaction.block = it
+                    rewardTransactionService.save(rewardTransaction)
+                } else {
+                    blockService.save(it)
+                }
+            }
             setSynchronized()
         } catch (e: Throwable) {
             log.error("Save block is failed: $e")

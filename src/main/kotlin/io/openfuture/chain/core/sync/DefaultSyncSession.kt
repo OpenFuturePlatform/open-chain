@@ -7,7 +7,7 @@ import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 
 open class DefaultSyncSession(
     latestGenesisBlock: GenesisBlock,
-    val currentGenesisBlock: GenesisBlock
+    private val currentGenesisBlock: GenesisBlock
 ) : SyncSession {
 
     private val storage: MutableSet<Block> = mutableSetOf(latestGenesisBlock)
