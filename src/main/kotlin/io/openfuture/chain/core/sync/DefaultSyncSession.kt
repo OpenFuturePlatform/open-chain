@@ -17,7 +17,7 @@ open class DefaultSyncSession(
 
     override fun getLastBlock(): Block = storage.last()
 
-    override fun getStorage(): List<Block> = storage.reversed()
+    override fun getStorage(): List<Block> = storage.filter { currentGenesisBlock.hash != it.hash  }.reversed()
 
     override fun add(epochBlocks: List<Block>): Boolean {
         val list = epochBlocks.sortedByDescending { it.height }

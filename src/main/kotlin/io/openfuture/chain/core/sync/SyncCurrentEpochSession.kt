@@ -14,7 +14,7 @@ class SyncCurrentEpochSession(
 
     override fun getLastBlock(): Block = storage.last()
 
-    override fun getStorage(): List<Block> = storage.toList()
+    override fun getStorage(): List<Block> = storage.filter { currentGenesisBlock.hash != it.hash }.toList()
 
     override fun isComplete(): Boolean = true
 
