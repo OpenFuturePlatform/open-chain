@@ -6,7 +6,7 @@ interface SyncSession {
 
     fun isComplete(): Boolean
 
-    fun getLastBlock(): Block
+    fun getEpochForSync(): Long
 
     fun getStorage(): List<Block>
 

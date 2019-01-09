@@ -15,29 +15,35 @@ open class DefaultSyncSession(
 
     override fun isComplete(): Boolean = storage.last().height == currentGenesisBlock.height
 
-    override fun getLastBlock(): Block = storage.last()
+    override fun getEpochForSync(): Long = (storage.last() as GenesisBlock).payload.epochIndex
 
-    override fun getStorage(): List<Block> = storage.filter { currentGenesisBlock.hash != it.hash  }.reversed()
+    override fun getStorage(): List<Block> = storage.filter { it.hash != currentGenesisBlock.hash }.sortedBy { it.height }
 
+    @Synchronized
     override fun add(epochBlocks: List<Block>): Boolean {
         val list = epochBlocks.sortedByDescending { it.height }
-        list.forEach {
-            if (!isValid(it)) {
-                rollback(epochBlocks)
-                return false
-            }
-            storage.add(it)
+
+        if (!isValid(storage.last(), list.first())) {
+            return false
         }
 
+        if (isChainValid(list)) {
+            storage.addAll(list)
+            return true
+        }
+        return false
+    }
+
+    private fun isChainValid(chain: List<Block>): Boolean {
+        for (index in 0 until chain.size - 1) {
+            if (!isValid(chain[index], chain[index + 1])) {
+                return false
+            }
+        }
         return true
     }
 
-    private fun rollback(epochBlocks: List<Block>) {
-        storage.removeAll(epochBlocks)
-    }
-
-    private fun isValid(block: Block): Boolean {
-        val last = storage.last()
+    private fun isValid(last: Block, block: Block): Boolean {
 
         if (last.previousHash != block.hash) {
             return false
