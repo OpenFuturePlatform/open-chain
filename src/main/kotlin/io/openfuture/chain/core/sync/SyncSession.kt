@@ -1,15 +1,78 @@
 package io.openfuture.chain.core.sync
 
 import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
+import io.openfuture.chain.crypto.util.SignatureUtils
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import java.util.*
 
-interface SyncSession {
+class SyncSession(
+    private val lastLocalGenesisBlock: GenesisBlock,
+    private val currentGenesisBlock: GenesisBlock
+) {
 
-    fun isComplete(): Boolean
+    private val storage: SortedSet<Block> = TreeSet(kotlin.Comparator { o1, o2 -> (o2.height - o1.height).toInt() })
 
-    fun getEpochForSync(): Long
+    fun isEpochSynced(): Boolean = storage.last().hash == lastLocalGenesisBlock.hash
 
-    fun getStorage(): List<Block>
+    fun isComplete(): Boolean = storage.first().height > currentGenesisBlock.height
 
-    fun add(epochBlocks: List<Block>): Boolean
+    fun getStorage(): SortedSet<Block> = storage
+
+    fun getCurrentGenesisBlock(): GenesisBlock = currentGenesisBlock
+
+    init {
+        storage.add(currentGenesisBlock)
+    }
+
+    @Synchronized
+    fun add(epochBlocks: List<Block>): Boolean {
+        if (isChainValid(epochBlocks)) {
+            storage.addAll(epochBlocks)
+            return true
+        }
+
+        return false
+    }
+
+    private fun isChainValid(chain: List<Block>): Boolean {
+        val list = if (chain.first().hash != currentGenesisBlock.hash) {
+            chain.sortedByDescending { it.height }.toMutableList().apply { add(0, storage.last()) }
+        } else {
+            chain.sortedByDescending { it.height }
+        }
+
+        for (idx in 0 until list.size - 2) {
+            if (!isValid(list[idx], list[idx + 1])) {
+                return false
+            }
+        }
+
+        return true
+    }
+
+    private fun isValid(last: Block, block: Block): Boolean {
+
+        if (last.previousHash != block.hash) {
+            return false
+        }
+
+        if (last.height != block.height + 1) {
+            return false
+        }
+
+        if (last.timestamp < block.timestamp) {
+            return false
+        }
+
+        val hash = ByteUtils.fromHexString(block.hash)
+        val publicKey = ByteUtils.fromHexString(block.publicKey)
+
+        if (block.height != 1L && !SignatureUtils.verify(hash, block.signature, publicKey)) {
+            return false
+        }
+
+        return true
+    }
 
 }

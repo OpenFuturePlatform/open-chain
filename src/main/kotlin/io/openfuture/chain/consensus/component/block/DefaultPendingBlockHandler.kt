@@ -4,7 +4,6 @@ import io.openfuture.chain.consensus.component.block.BlockApprovalStage.*
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.exception.ChainOutOfSyncException
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.MainBlockService
@@ -39,7 +38,8 @@ class DefaultPendingBlockHandler(
     private var observable: PendingBlockMessage? = null
     private var timeSlotNumber: Long = 0
     private var stage: BlockApprovalStage = IDLE
-    @Volatile private var blockAddedFlag = false
+    @Volatile
+    private var blockAddedFlag = false
 
 
     @BlockchainSynchronized
@@ -123,12 +123,9 @@ class DefaultPendingBlockHandler(
                 networkService.broadcast(message)
                 if (blockCommits.size > (delegates.size / 3 * 2) && !blockAddedFlag) {
                     pendingBlocks.find { it.hash == message.hash }?.let {
-                        try {
-                            log.debug("CONSENSUS: Saving main block ${it.hash}")
-                            mainBlockService.add(it)
-                        } catch (e: ChainOutOfSyncException) {
-                            chainSynchronizer.sync()
-                        }
+                        log.debug("CONSENSUS: Saving main block ${it.hash}")
+                        chainSynchronizer.checkSync(MainBlock.of(it))
+                        mainBlockService.add(it)
                     }
                     blockAddedFlag = true
                 }

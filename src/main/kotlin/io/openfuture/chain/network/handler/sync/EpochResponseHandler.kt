@@ -9,7 +9,6 @@ import io.openfuture.chain.network.message.sync.EpochResponseMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.net.InetSocketAddress
 
 @Component
 @Sharable
@@ -23,9 +22,8 @@ class EpochResponseHandler(
 
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: EpochResponseMessage) {
-        val inetAddress = (ctx.channel().remoteAddress() as InetSocketAddress).address
-        log.debug("EpochResponseMessage FROM ${inetAddress.hostName}")
-        chainSynchronizer.epochResponse(inetAddress, msg)
+        log.debug("EpochResponseMessage FROM ${msg.nodeId}")
+        chainSynchronizer.onEpochResponse(msg)
     }
 
 }

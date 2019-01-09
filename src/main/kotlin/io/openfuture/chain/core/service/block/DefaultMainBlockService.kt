@@ -43,7 +43,6 @@ class DefaultMainBlockService(
     private val keyHolder: NodeKeyHolder,
     private val throughput: TransactionThroughput,
     private val walletVoteService: WalletVoteService,
-    private val chainSynchronizer: ChainSynchronizer,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository,
     private val voteTransactionService: VoteTransactionService,
@@ -119,7 +118,6 @@ class DefaultMainBlockService(
     override fun verify(message: PendingBlockMessage): Boolean {
         BlockchainLock.readLock.lock()
         try {
-            chainSynchronizer.checkSync(MainBlock.of(message))
             validate(message)
             return true
         } catch (ex: ChainOutOfSyncException) {
@@ -143,7 +141,6 @@ class DefaultMainBlockService(
             }
 
             val block = MainBlock.of(message)
-            chainSynchronizer.checkSync(block)
 
             val savedBlock = super.save(block)
 
