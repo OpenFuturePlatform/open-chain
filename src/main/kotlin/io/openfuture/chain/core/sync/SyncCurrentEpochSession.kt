@@ -26,14 +26,20 @@ class SyncCurrentEpochSession(
             return false
         }
 
-        for (index in 0 until list.size - 1) {
-            if (!isValid(list[index], list[index + 1])) {
+        if (isChainValid(list)) {
+            storage.addAll(list)
+            return true
+        }
+
+        return false
+    }
+
+    private fun isChainValid(chain: List<Block>): Boolean {
+        for (index in 0 until chain.size - 1) {
+            if (!isValid(chain[index], chain[index + 1])) {
                 return false
             }
         }
-
-        list.forEach { storage.add(it) }
-
         return true
     }
 
