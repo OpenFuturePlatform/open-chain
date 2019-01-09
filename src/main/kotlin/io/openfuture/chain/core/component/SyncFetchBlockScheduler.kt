@@ -35,7 +35,6 @@ class SyncFetchBlockScheduler(
     fun activate(message: Serializable, listNodeInfo: List<NodeInfo>) {
         deactivate()
         this.listNodeInfo = properties.getMe()?.let { me -> listNodeInfo.filter { it.uid != me.uid } } ?: listNodeInfo
-        this.listNodeInfo = listNodeInfo
         future = executor.scheduleWithFixedDelay(
             { execute(message) },
             properties.syncExpiry!!,
