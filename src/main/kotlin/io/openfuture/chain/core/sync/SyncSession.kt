@@ -6,31 +6,29 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.util.*
 
-open class SyncSession(
+class SyncSession(
     private val lastLocalGenesisBlock: GenesisBlock,
     private val currentGenesisBlock: GenesisBlock
 ) {
 
-    private val storage: SortedSet<Block> = TreeSet(kotlin.Comparator { o1, o2 -> (o1.height - o2.height).toInt() })
+    private val storage: SortedSet<Block> = TreeSet(kotlin.Comparator { o1, o2 -> (o2.height - o1.height).toInt() })
 
     fun isEpochSynced(): Boolean = storage.last().hash == lastLocalGenesisBlock.hash
 
-    fun isComplete(): Boolean = storage.last().height > currentGenesisBlock.height
+    fun isComplete(): Boolean = storage.first().height > currentGenesisBlock.height
 
     fun getStorage(): SortedSet<Block> = storage
 
     fun getCurrentGenesisBlock(): GenesisBlock = currentGenesisBlock
 
+    init {
+        storage.add(currentGenesisBlock)
+    }
+
     @Synchronized
     fun add(epochBlocks: List<Block>): Boolean {
-        val list = epochBlocks.sortedByDescending { it.height }
-
-        if (list.first() is GenesisBlock) {
-
-        }
-
-        if (isChainValid(list)) {
-            storage.addAll(list)
+        if (isChainValid(epochBlocks)) {
+            storage.addAll(epochBlocks)
             return true
         }
 
@@ -38,12 +36,14 @@ open class SyncSession(
     }
 
     private fun isChainValid(chain: List<Block>): Boolean {
-        if (!isValid(storage.last(), chain.first())) {
-            return false
+        val list = if (chain.first().hash != currentGenesisBlock.hash) {
+            chain.sortedByDescending { it.height }.toMutableList().apply { add(0, storage.last()) }
+        } else {
+            chain.sortedByDescending { it.height }
         }
 
-        chain.forEachIndexed { idx, it ->
-            if (!isValid(it, chain[idx + 1])) {
+        for (idx in 0 until list.size - 2) {
+            if (!isValid(list[idx], list[idx + 1])) {
                 return false
             }
         }

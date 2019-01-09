@@ -57,7 +57,7 @@ class ChainSynchronizer(
     @Synchronized
     fun sync() {
         log.debug("Chain in status=$status")
-        if (null != syncSession && PROCESSING == status) {
+        if (PROCESSING == status) {
             return
         }
         status = PROCESSING
@@ -66,27 +66,24 @@ class ChainSynchronizer(
     }
 
     fun onGenesisBlockResponse(message: GenesisBlockMessage) {
+        resetRequestScheduler()
+        val nodesInfo = channelsHolder.getNodesInfo()
         try {
-            val nodesInfo = channelsHolder.getNodesInfo()
             val currentGenesisBlock = fromMessage(message)
             val lastLocalGenesisBlock = genesisBlockService.getLast()
 
-            syncSession = SyncSession(currentGenesisBlock, lastLocalGenesisBlock)
-
+            syncSession = SyncSession(lastLocalGenesisBlock, currentGenesisBlock)
             requestEpoch(nodesInfo)
-
         } catch (e: Throwable) {
             log.error(e.message)
             syncFailed()
-        } finally {
-            resetRequestScheduler()
         }
     }
 
     fun onEpochResponse(message: EpochResponseMessage) {
+        resetRequestScheduler()
+        val nodesInfo = channelsHolder.getNodesInfo()
         try {
-            val nodesInfo = channelsHolder.getNodesInfo()
-
             if (!message.isEpochExists) {
                 requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
                 return
@@ -115,8 +112,6 @@ class ChainSynchronizer(
         } catch (e: Throwable) {
             log.error(e.message)
             syncFailed()
-        } finally {
-            resetRequestScheduler()
         }
     }
 
@@ -187,18 +182,20 @@ class ChainSynchronizer(
         }
     }
 
+    private fun syncFailed() {
+        syncSession = null
+        status = NOT_SYNCHRONIZED
+        log.debug("Sync is failed")
+    }
+
     private fun startRequestScheduler() {
-        future = executor.scheduleWithFixedDelay(
+        if (future == null || future!!.isDone) {
+            future = executor.scheduleWithFixedDelay(
                 { expired() },
                 properties.syncExpiry!!,
                 properties.syncExpiry!!,
                 TimeUnit.MILLISECONDS)
-    }
-
-    private fun syncFailed() {
-        syncSession =null
-        status = NOT_SYNCHRONIZED
-        log.debug("Sync is failed")
+        }
     }
 
     private fun resetRequestScheduler() = future?.cancel(true)
