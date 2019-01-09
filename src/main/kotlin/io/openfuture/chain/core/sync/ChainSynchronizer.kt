@@ -101,7 +101,7 @@ class ChainSynchronizer(
                 return
             }
 
-            if (!syncSession!!.isComplete()) {
+            if (!syncSession!!.isCompleted()) {
                 requestEpoch(nodesInfo)
                 return
             }
