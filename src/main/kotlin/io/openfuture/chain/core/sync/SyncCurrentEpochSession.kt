@@ -12,31 +12,38 @@ class SyncCurrentEpochSession(
     private val storage: MutableSet<Block> = mutableSetOf(currentGenesisBlock)
 
 
-    override fun getLastBlock(): Block = storage.last()
+    override fun getEpochForSync(): Long = currentGenesisBlock.payload.epochIndex
 
-    override fun getStorage(): List<Block> = storage.filter { currentGenesisBlock.hash != it.hash }.toList()
+    override fun getStorage(): List<Block> = storage.filter { it.hash != currentGenesisBlock.hash }.sortedBy { it.height }
 
     override fun isComplete(): Boolean = true
 
+    @Synchronized
     override fun add(epochBlocks: List<Block>): Boolean {
-        epochBlocks.forEach {
-            if (!isValid(it)) {
-                rollback(epochBlocks)
-                return false
-            }
-            storage.add(it)
+        val list = epochBlocks.sortedBy { it.height }
+
+        if (!isValid(storage.last(), list.first())) {
+            return false
         }
 
+        if (isChainValid(list)) {
+            storage.addAll(list)
+            return true
+        }
+
+        return false
+    }
+
+    private fun isChainValid(chain: List<Block>): Boolean {
+        for (index in 0 until chain.size - 1) {
+            if (!isValid(chain[index], chain[index + 1])) {
+                return false
+            }
+        }
         return true
     }
 
-    private fun rollback(epochBlocks: List<Block>) {
-        val hashes = epochBlocks.map { it.hash }
-        storage.removeIf { hashes.contains(it.hash) }
-    }
-
-    private fun isValid(block: Block): Boolean {
-        val last = storage.last()
+    private fun isValid(last: Block, block: Block): Boolean {
 
         if (last.hash != block.previousHash) {
             return false
