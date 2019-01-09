@@ -24,8 +24,7 @@ class BlockProductionScheduler(
     private val genesisBlockService: GenesisBlockService,
     private val pendingBlockHandler: PendingBlockHandler,
     private val chainSynchronizer: ChainSynchronizer,
-    private val clockSynchronizer: ClockSynchronizer,
-    private val delegateService: DelegateService
+    private val clockSynchronizer: ClockSynchronizer
 ) {
 
     companion object {
