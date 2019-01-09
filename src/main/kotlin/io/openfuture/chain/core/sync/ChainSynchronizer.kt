@@ -11,7 +11,6 @@ import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.RewardTransactionService
 import io.openfuture.chain.core.sync.SyncStatus.*
-import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.sync.EpochRequestMessage
@@ -35,7 +34,6 @@ class ChainSynchronizer(
     private val networkApiService: NetworkApiService,
     private val genesisBlockService: GenesisBlockService,
     private val rewardTransactionService: RewardTransactionService,
-    private val channelsHolder: ChannelsHolder,
     private val properties: NodeProperties
 ) {
 
@@ -67,7 +65,7 @@ class ChainSynchronizer(
 
     fun onGenesisBlockResponse(message: GenesisBlockMessage) {
         resetRequestScheduler()
-        val nodesInfo = channelsHolder.getNodesInfo()
+        val nodesInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
         try {
             val currentGenesisBlock = fromMessage(message)
             val lastLocalGenesisBlock = genesisBlockService.getLast()
@@ -82,7 +80,7 @@ class ChainSynchronizer(
 
     fun onEpochResponse(message: EpochResponseMessage) {
         resetRequestScheduler()
-        val nodesInfo = channelsHolder.getNodesInfo()
+        val nodesInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
         try {
             if (!message.isEpochExists) {
                 requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
@@ -204,7 +202,7 @@ class ChainSynchronizer(
         if (null == syncSession) {
             requestLatestGenesisBlock()
         } else {
-            requestEpoch(channelsHolder.getNodesInfo())
+            requestEpoch(genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList())
         }
     }
 }
