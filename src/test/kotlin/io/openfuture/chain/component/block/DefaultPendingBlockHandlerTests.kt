@@ -7,6 +7,7 @@ import io.openfuture.chain.consensus.component.block.DefaultPendingBlockHandler
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
@@ -66,6 +67,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         given(epochService.getDelegates()).willReturn(
             listOf(Delegate("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4", "nodeId", "address", "host", 1111, 1)))
         given(mainBlockService.verify(pendingBlock)).willReturn(true)
+        given(chainSynchronizer.isInSync(any(MainBlock::class.java))).willReturn(true)
 
         defaultPendingBlockHandler.addBlock(pendingBlock)
 
@@ -103,6 +105,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         given(mainBlockService.verify(pendingBlock)).willReturn(true)
         given(epochService.getDelegates()).willReturn(
             listOf(Delegate("020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948", "nodeId", "address", "host", 1111,  1)))
+        given(chainSynchronizer.isInSync(any(MainBlock::class.java))).willReturn(true)
         defaultPendingBlockHandler.addBlock(pendingBlock)
 
         given(epochService.getDelegates()).willReturn(listOf(delegate))
