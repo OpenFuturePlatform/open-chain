@@ -60,7 +60,11 @@ class DefaultPendingBlockHandler(
             return
         }
 
-        chainSynchronizer.checkSync(MainBlock.of(block))
+        if (!chainSynchronizer.isInSync(MainBlock.of(block))) {
+            chainSynchronizer.sync()
+            return
+        }
+
 
         if (!mainBlockService.verify(block)) {
             return
@@ -124,7 +128,10 @@ class DefaultPendingBlockHandler(
                 if (blockCommits.size > (delegates.size / 3 * 2) && !blockAddedFlag) {
                     pendingBlocks.find { it.hash == message.hash }?.let {
                         log.debug("CONSENSUS: Saving main block ${it.hash}")
-                        chainSynchronizer.checkSync(MainBlock.of(it))
+                        if (!chainSynchronizer.isInSync(MainBlock.of(it))) {
+                            chainSynchronizer.sync()
+                            return
+                        }
                         mainBlockService.add(it)
                     }
                     blockAddedFlag = true
