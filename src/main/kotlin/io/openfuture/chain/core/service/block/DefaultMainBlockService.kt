@@ -4,7 +4,6 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.component.TransactionThroughput
-import io.openfuture.chain.core.exception.ChainOutOfSyncException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -18,7 +17,6 @@ import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.BlockchainLock
-import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.time.Clock
@@ -120,8 +118,6 @@ class DefaultMainBlockService(
         try {
             validate(message)
             return true
-        } catch (ex: ChainOutOfSyncException) {
-            return false
         } catch (ex: ValidationException) {
             log.warn(ex.message)
         } finally {

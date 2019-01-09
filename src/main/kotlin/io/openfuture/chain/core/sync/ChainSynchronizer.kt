@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.sync
 
-import io.openfuture.chain.core.exception.ChainOutOfSyncException
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
@@ -113,12 +112,9 @@ class ChainSynchronizer(
         }
     }
 
-    fun checkSync(block: Block) {
+    fun isInSync(block: Block): Boolean {
         val lastBlock = blockService.getLast()
-        if (!isValidHeight(block, lastBlock) || !isValidPreviousHash(block, lastBlock)) {
-            sync()
-            throw ChainOutOfSyncException()
-        }
+        return isValidHeight(block, lastBlock) && isValidPreviousHash(block, lastBlock)
     }
 
     private fun isValidPreviousHash(block: Block, lastBlock: Block): Boolean = block.previousHash == lastBlock.hash
