@@ -1,30 +1,14 @@
 package io.openfuture.chain.smartcontract.deploy
 
-import io.openfuture.chain.ResourceUtils.getResource
 import io.openfuture.chain.ResourceUtils.getResourceBytes
 import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
 import io.openfuture.chain.smartcontract.deploy.exception.ContractLoadingException
 import io.openfuture.chain.smartcontract.deploy.load.SourceClassLoader
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import java.nio.file.Paths
 
 class ClassLoadingTests {
-
-    @Test
-    fun loadClassFromFile() {
-        val path = "/classes/CalculatorContract.class"
-        val loader = SourceClassLoader(listOf(Paths.get(getResource(path).toURI())))
-
-        val clazz = loader.loadClass("io.openfuture.chain.smartcontract.templates.CalculatorContract")
-        val contract = clazz.newInstance()
-
-        assertThat(contract).isNotNull
-        assertThat(clazz.getDeclaredMethod("result").invoke(contract)).isEqualTo(0L)
-        clazz.getDeclaredMethod("add", Long::class.java).invoke(contract, 10L)
-        assertThat(clazz.getDeclaredMethod("result").invoke(contract)).isEqualTo(10L)
-    }
-
+    
 
     @Test
     fun loadBytesWhenValidJavaContractClass() {
