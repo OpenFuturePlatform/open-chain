@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.6.0] - 2019-01-10
 ### Added
 - Smart contracts: contract object serialization
 - Smart contracts: contract object deserialization
@@ -279,6 +281,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[1.6.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.2.0...v1.3.0
