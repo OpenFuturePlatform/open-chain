@@ -11,6 +11,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
+import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 @Service
@@ -24,9 +25,9 @@ class DefaultConnectionService(
     }
 
     override fun connect(networkAddress: NetworkAddress, onConnect: Consumer<Channel>?): Boolean {
-        var result = true
+        var result: Boolean
         try {
-            bootstrap.connect(networkAddress.host, networkAddress.port).addListener { future ->
+            result = bootstrap.connect(networkAddress.host, networkAddress.port).addListener { future ->
                 if (future.isSuccess) {
                     onConnect?.let {
                         val channel = (future as ChannelFuture).channel()
@@ -37,7 +38,7 @@ class DefaultConnectionService(
                     addressesHolder.removeNodeInfo(networkAddress)
                     result = false
                 }
-            }.sync()
+            }.await(5, TimeUnit.SECONDS)
         } catch (ex: Exception) {
             result = false
         }
