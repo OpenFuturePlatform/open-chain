@@ -154,7 +154,7 @@ class ChainSynchronizer(
             val lastLocalBlock = blockService.getLast()
             val filteredStorage = syncSession!!.getStorage().filter { it.height > lastLocalBlock.height }
 
-            filteredStorage.forEach {
+            filteredStorage.asReversed().forEach {
                 if (it is MainBlock) {
                     val rewardTransaction = it.payload.rewardTransaction.first()
                     it.payload.rewardTransaction.clear()
