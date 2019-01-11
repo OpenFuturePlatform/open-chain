@@ -41,7 +41,7 @@ class DefaultBlockService(
     }
 
     @Transactional
-    fun removeEpoch(genesisBlock: GenesisBlock) {
+    override fun removeEpoch(genesisBlock: GenesisBlock) {
         val fromHeight = genesisBlock.height
         val toHeight = fromHeight + properties.epochHeight!!
         repository.deleteAllByHeightBetween(fromHeight, toHeight)

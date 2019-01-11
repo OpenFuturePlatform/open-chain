@@ -49,6 +49,8 @@ interface BlockService {
 
     fun save(block: Block)
 
+    fun removeEpoch(genesisBlock: GenesisBlock)
+
     fun getAfterCurrentHash(hash: String): List<Block>
 
     fun isExists(hash: String): Boolean
