@@ -1,15 +1,19 @@
 package io.openfuture.chain.core.service.block
 
+import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.BlockService
+import io.openfuture.chain.network.property.NodeProperties
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultBlockService(
-    private val repository: BlockRepository<Block>
+    private val repository: BlockRepository<Block>,
+    private val properties: ConsensusProperties
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -34,6 +38,13 @@ class DefaultBlockService(
     @Transactional
     override fun save(block: Block) {
         repository.save(block)
+    }
+
+    @Transactional
+    fun removeEpoch(genesisBlock: GenesisBlock) {
+        val fromHeight = genesisBlock.height
+        val toHeight = fromHeight + properties.epochHeight!!
+        repository.deleteAllByHeightBetween(fromHeight, toHeight)
     }
 
     @Transactional(readOnly = true)

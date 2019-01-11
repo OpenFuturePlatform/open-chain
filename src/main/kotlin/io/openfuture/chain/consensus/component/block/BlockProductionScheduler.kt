@@ -2,7 +2,6 @@ package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer

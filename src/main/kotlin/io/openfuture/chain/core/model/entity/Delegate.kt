@@ -1,6 +1,8 @@
 package io.openfuture.chain.core.model.entity
 
 import io.openfuture.chain.core.model.entity.base.BaseModel
+import io.openfuture.chain.network.entity.NetworkAddress
+import io.openfuture.chain.network.entity.NodeInfo
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Table
@@ -29,4 +31,8 @@ class Delegate(
 
     id: Long = 0L
 
-) : BaseModel(id)
+) : BaseModel(id) {
+
+    fun toNodeInfo(): NodeInfo = NodeInfo(nodeId, NetworkAddress(host, port))
+
+}
