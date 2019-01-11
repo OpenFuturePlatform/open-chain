@@ -16,15 +16,11 @@ import io.openfuture.chain.network.message.sync.EpochRequestMessage
 import io.openfuture.chain.network.message.sync.EpochResponseMessage
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.network.message.sync.SyncRequestMessage
-import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.NetworkApiService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
-import java.util.concurrent.TimeUnit
 
 @Component
 class ChainSynchronizer(
@@ -33,10 +29,9 @@ class ChainSynchronizer(
     private val networkApiService: NetworkApiService,
     private val genesisBlockService: GenesisBlockService,
     private val rewardTransactionService: RewardTransactionService,
-    private val properties: NodeProperties
+    private val scheduledSynchronizer: ScheduledSynchronizer
 ) {
 
-    private val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
     private var future: ScheduledFuture<*>? = null
 
     companion object {
@@ -126,7 +121,7 @@ class ChainSynchronizer(
         val message = SyncRequestMessage()
 
         networkApiService.sendToAddress(message, knownActiveDelegates.shuffled().first())
-        startRequestScheduler()
+        scheduledSynchronizer.startRequestScheduler(future, Runnable { expired() })
     }
 
     private fun requestEpoch(listNodeInfo: List<NodeInfo>) {
@@ -139,7 +134,7 @@ class ChainSynchronizer(
         val message = EpochRequestMessage(targetEpoch)
 
         networkApiService.sendToAddress(message, listNodeInfo.shuffled().first())
-        startRequestScheduler()
+        scheduledSynchronizer.startRequestScheduler(future, Runnable { expired() })
     }
 
     private fun getNodeInfo(delegate: Delegate): NodeInfo = NodeInfo(delegate.nodeId, NetworkAddress(delegate.host, delegate.port))
@@ -182,16 +177,6 @@ class ChainSynchronizer(
         log.debug("Sync is failed")
     }
 
-    private fun startRequestScheduler() {
-        if (future == null || future!!.isDone) {
-            future = executor.scheduleWithFixedDelay(
-                { expired() },
-                properties.syncExpiry!!,
-                properties.syncExpiry!!,
-                TimeUnit.MILLISECONDS)
-        }
-    }
-
     private fun resetRequestScheduler() = future?.cancel(true)
 
     private fun expired() {
@@ -201,4 +186,5 @@ class ChainSynchronizer(
             requestEpoch(genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList())
         }
     }
+
 }
