@@ -55,12 +55,13 @@ class ServerChannelInitializer(
             heartBeatHandler,
             greetingHandler,
             newClientHandler,
+
+            networkStatusHandler,// blocking
             //        sync
             syncRequestHandler,
             syncResponseHandler,
             epochRequestHandler,
             epochResponseHandler,
-            networkStatusHandler,// blocking
             syncBlockRequestHandler,
             mainBlockHandler,
             genesisBlockHandler,
