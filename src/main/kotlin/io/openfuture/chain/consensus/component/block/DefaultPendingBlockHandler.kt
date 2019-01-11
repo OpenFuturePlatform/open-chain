@@ -24,7 +24,8 @@ class DefaultPendingBlockHandler(
     private val mainBlockService: MainBlockService,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService,
-    private val chainSynchronizer: ChainSynchronizer
+    private val chainSynchronizer: ChainSynchronizer,
+    private val conflictedBlockResolver: ConflictedBlockResolver
 ) : PendingBlockHandler {
 
     companion object {
@@ -132,7 +133,11 @@ class DefaultPendingBlockHandler(
                             chainSynchronizer.sync()
                             return
                         }
-                        mainBlockService.add(it)
+                        if (it.hash != observable!!.hash) {
+                            conflictedBlockResolver.checkConflictedBlock(it, observable!!)
+                        } else {
+                            mainBlockService.add(it)
+                        }
                     }
                     blockAddedFlag = true
                 }

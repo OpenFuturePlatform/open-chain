@@ -10,6 +10,8 @@ import io.openfuture.chain.network.message.consensus.BlockAvailabilityRequest
 import io.openfuture.chain.network.message.consensus.BlockAvailabilityResponse
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.service.NetworkApiService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -22,6 +24,10 @@ class ConflictedBlockResolver(
     private val chainSynchronizer: ChainSynchronizer
 ) {
 
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(ConflictedBlockResolver::class.java)
+    }
+
     fun checkConflictedBlock(accepted: PendingBlockMessage, conflicted: PendingBlockMessage) {
         if (!mainBlockService.verify(accepted)) {
             val delegate = epochService.getDelegates().random().toNodeInfo()
@@ -33,6 +39,7 @@ class ConflictedBlockResolver(
     fun onBlockAvailabilityResponse(response: BlockAvailabilityResponse) {
         if (-1 == response.height) {
             val invalidGenesisBlock = genesisBlockService.getLast()
+            log.info("Rolling back epoch # ${invalidGenesisBlock.payload.epochIndex}")
             blockService.removeEpoch(invalidGenesisBlock)
             val lastGenesisBlock = genesisBlockService.getLast()
             val delegate = epochService.getDelegates().random().toNodeInfo()
