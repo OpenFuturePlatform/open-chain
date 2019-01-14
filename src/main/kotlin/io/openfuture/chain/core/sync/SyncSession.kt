@@ -23,9 +23,6 @@ class SyncSession(
     fun getCurrentGenesisBlock(): GenesisBlock = currentGenesisBlock
 
     init {
-        if (lastLocalGenesisBlock.height > currentGenesisBlock.height) {
-            throw IllegalArgumentException("Invalid current genesis block: height should be greater than last local one")
-        }
         storage.add(currentGenesisBlock)
     }
 
