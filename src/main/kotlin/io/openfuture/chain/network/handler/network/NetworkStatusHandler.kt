@@ -16,7 +16,7 @@ class NetworkStatusHandler(
 ) : SimpleChannelInboundHandler<Serializable>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: Serializable) {
-        if (channelsHolder.size() >= nodeProperties.peersNumber!!) {
+        if (channelsHolder.size() >= nodeProperties.peersNumber!! / 2) {
             ctx.fireChannelRead(msg)
         }
     }
