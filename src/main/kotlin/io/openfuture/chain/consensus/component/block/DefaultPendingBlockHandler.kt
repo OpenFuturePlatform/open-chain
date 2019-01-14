@@ -134,7 +134,7 @@ class DefaultPendingBlockHandler(
                             return
                         }
                         if (it.hash != observable!!.hash) {
-                            conflictedBlockResolver.checkConflictedBlock(it, observable!!)
+                            conflictedBlockResolver.checkConflictedBlock(it)
                         } else {
                             mainBlockService.add(it)
                         }

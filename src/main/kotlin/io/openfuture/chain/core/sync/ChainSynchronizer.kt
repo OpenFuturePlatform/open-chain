@@ -121,7 +121,7 @@ class ChainSynchronizer(
         val message = SyncRequestMessage()
 
         networkApiService.sendToAddress(message, knownActiveDelegates.shuffled().first())
-        scheduledSynchronizer.startRequestScheduler(future, Runnable { expired() })
+        future = scheduledSynchronizer.startRequestScheduler(future, Runnable { expired() })
     }
 
     private fun requestEpoch(listNodeInfo: List<NodeInfo>) {
@@ -134,7 +134,7 @@ class ChainSynchronizer(
         val message = EpochRequestMessage(targetEpoch)
 
         networkApiService.sendToAddress(message, listNodeInfo.shuffled().first())
-        scheduledSynchronizer.startRequestScheduler(future, Runnable { expired() })
+        future = scheduledSynchronizer.startRequestScheduler(future, Runnable { expired() })
     }
 
     private fun getNodeInfo(delegate: Delegate): NodeInfo = NodeInfo(delegate.nodeId, NetworkAddress(delegate.host, delegate.port))

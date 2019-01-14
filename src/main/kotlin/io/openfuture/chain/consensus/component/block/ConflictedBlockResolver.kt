@@ -1,7 +1,6 @@
 package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.consensus.service.EpochService
-import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
@@ -28,10 +27,11 @@ class ConflictedBlockResolver(
         private val log: Logger = LoggerFactory.getLogger(ConflictedBlockResolver::class.java)
     }
 
-    fun checkConflictedBlock(accepted: PendingBlockMessage, conflicted: PendingBlockMessage) {
+    fun checkConflictedBlock(accepted: PendingBlockMessage) {
         if (!mainBlockService.verify(accepted)) {
             val delegate = epochService.getDelegates().random().toNodeInfo()
-            val message = BlockAvailabilityRequest(conflicted.hash)
+            val block = blockService.getLast()
+            val message = BlockAvailabilityRequest(block.hash)
             networkApiService.sendToAddress(message, delegate)
         }
     }
