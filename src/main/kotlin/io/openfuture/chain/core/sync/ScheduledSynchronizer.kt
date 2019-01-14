@@ -17,7 +17,7 @@ class ScheduledSynchronizer(
     fun startRequestScheduler(future: ScheduledFuture<*>?, action: Runnable): ScheduledFuture<*>? {
         return if (future == null || future.isDone) {
             executor.scheduleWithFixedDelay(
-                { action.run() },
+                action,
                 properties.syncExpiry!!,
                 properties.syncExpiry!!,
                 TimeUnit.MILLISECONDS)
