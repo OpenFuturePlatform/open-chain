@@ -4,6 +4,7 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.repository.GenesisBlockRepository
@@ -90,8 +91,7 @@ class DefaultGenesisBlockService(
             return
         }
 
-        val delegates = message.delegates.asSequence().map { delegateService.getByPublicKey(it) }.toMutableList()
-        val block = GenesisBlock.of(message, delegates)
+        val block = GenesisBlock.of(message)
 
         add(block)
     }

@@ -21,6 +21,7 @@ import io.openfuture.chain.network.service.NetworkApiService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
@@ -29,11 +30,11 @@ import java.util.concurrent.TimeUnit
 @Component
 class ChainSynchronizer(
     private val blockService: BlockService,
-    private val delegateService: DelegateService,
     private val networkApiService: NetworkApiService,
     private val genesisBlockService: GenesisBlockService,
     private val rewardTransactionService: RewardTransactionService,
-    private val properties: NodeProperties
+    private val properties: NodeProperties,
+    private val delegateService: DelegateService
 ) {
 
     private val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
@@ -66,7 +67,7 @@ class ChainSynchronizer(
         resetRequestScheduler()
         val nodesInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
         try {
-            val currentGenesisBlock = fromMessage(message)
+            val currentGenesisBlock = GenesisBlock.of(message)
             val lastLocalGenesisBlock = genesisBlockService.getLast()
 
             if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
@@ -81,6 +82,7 @@ class ChainSynchronizer(
         }
     }
 
+    @Transactional
     fun onEpochResponse(message: EpochResponseMessage) {
         resetRequestScheduler()
         val nodesInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
@@ -90,7 +92,7 @@ class ChainSynchronizer(
                 return
             }
 
-            val genesisBlock = fromMessage(message.genesisBlock!!)
+            val genesisBlock = GenesisBlock.of(message.genesisBlock!!)
             val listBlocks: MutableList<Block> = mutableListOf(genesisBlock)
 
             listBlocks.addAll(message.mainBlocks.map {
@@ -148,11 +150,6 @@ class ChainSynchronizer(
 
     private fun getNodeInfo(delegate: Delegate): NodeInfo = NodeInfo(delegate.nodeId, NetworkAddress(delegate.host, delegate.port))
 
-    private fun fromMessage(message: GenesisBlockMessage): GenesisBlock {
-        val delegates = message.delegates.asSequence().map { delegateService.getByPublicKey(it) }.toMutableList()
-        return GenesisBlock.of(message, delegates)
-    }
-
     private fun saveBlocks() {
         try {
             val lastLocalBlock = blockService.getLast()
@@ -165,7 +162,16 @@ class ChainSynchronizer(
                     blockService.save(it)
                     rewardTransaction.block = it
                     rewardTransactionService.save(rewardTransaction)
-                } else {
+                } else if (it is GenesisBlock) {
+                    val delegates = it.payload.activeDelegates.toMutableList()
+                    it.payload.activeDelegates.clear()
+                    delegates.forEach { delegate ->
+                        if (delegateService.isExistsByPublicKey(delegate.publicKey)) {
+                            it.payload.activeDelegates.add(delegateService.getByPublicKey(delegate.publicKey))
+                        } else {
+                            it.payload.activeDelegates.add(delegateService.save(delegate))
+                        }
+                    }
                     blockService.save(it)
                 }
             }
