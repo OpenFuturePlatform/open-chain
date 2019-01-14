@@ -63,9 +63,12 @@ class ChainSynchronizer(
         try {
             val currentGenesisBlock = fromMessage(message)
             val lastLocalGenesisBlock = genesisBlockService.getLast()
-
-            syncSession = SyncSession(lastLocalGenesisBlock, currentGenesisBlock)
-            requestEpoch(nodesInfo)
+            if (currentGenesisBlock.height > lastLocalGenesisBlock.height) {
+                syncSession = SyncSession(lastLocalGenesisBlock, currentGenesisBlock)
+                requestEpoch(nodesInfo)
+            } else {
+                requestLatestGenesisBlock()
+            }
         } catch (e: Throwable) {
             log.error(e.message)
             syncFailed()
