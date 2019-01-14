@@ -1,5 +1,6 @@
 package io.openfuture.chain.smartcontract.deploy.execution
 
+import io.openfuture.chain.smartcontract.core.model.SmartContract
 import io.openfuture.chain.smartcontract.deploy.ContractProperties
 import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
 import io.openfuture.chain.smartcontract.deploy.domain.ContractDto
@@ -40,9 +41,8 @@ class ContractExecutor(
             Thread.currentThread().name = threadName
             try {
                 val instance = loadClassAndState(contract)
-                result.instance = instance
-                result.output = MethodUtils.invokeExactMethod(instance, method.name, method.params,
-                    method.params.map { it.javaClass }.toTypedArray())
+                result.instance = instance as SmartContract
+                result.output = executeMethod(instance, method)
             } catch (ex: Throwable) {
                 log.debug("Error while executing (${contract.clazz} - ${method.name}): ${ex.message}")
                 exception = ex
@@ -62,16 +62,23 @@ class ContractExecutor(
         }
     }
 
+    private fun executeMethod(instance: SmartContract, method: ContractMethod): Any? {
+        val paramTypes = instance.javaClass.declaredMethods.firstOrNull { it.name == method.name }?.parameterTypes
+        return MethodUtils.invokeExactMethod(instance, method.name, method.params, paramTypes)
+    }
+
     private fun loadClassAndState(contract: ContractDto): Any {
         try {
             var instance = classLoader.getLoadedClass(contract.clazz)?.newInstance()
 
             if (null == instance) {
                 instance = classLoader.loadBytes(ClassSource(contract.bytes)).clazz.newInstance()
-                ContractInjector(instance).injectFields(contract.address, contract.owner)
             }
-            //todo load state
-            return instance!!
+
+            val injector = ContractInjector(instance as SmartContract, classLoader)
+            injector.injectState(contract.state)
+            injector.injectFields(contract.address, contract.owner)
+            return instance
         } catch (ex: Throwable) {
             throw ContractLoadingException("Error while loading contract and state: ${ex.message}", ex)
         }
@@ -79,7 +86,7 @@ class ContractExecutor(
 
     data class ExecutionResult(
         var identifier: String,
-        var instance: Any?,
+        var instance: SmartContract?,
         var output: Any?
     )
 

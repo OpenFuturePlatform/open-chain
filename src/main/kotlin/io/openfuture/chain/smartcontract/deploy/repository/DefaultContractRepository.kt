@@ -10,4 +10,9 @@ class DefaultContractRepository : ContractRepository {
         TODO("not implemented")
     }
 
+    override fun save(contact: ContractDto) {
+        TODO("not implemented")
+    }
+
+
 }

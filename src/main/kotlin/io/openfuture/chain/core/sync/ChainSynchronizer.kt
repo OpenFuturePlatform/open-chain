@@ -69,8 +69,12 @@ class ChainSynchronizer(
             val currentGenesisBlock = fromMessage(message)
             val lastLocalGenesisBlock = genesisBlockService.getLast()
 
-            syncSession = SyncSession(lastLocalGenesisBlock, currentGenesisBlock)
-            requestEpoch(nodesInfo)
+            if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
+                syncSession = SyncSession(lastLocalGenesisBlock, currentGenesisBlock)
+                requestEpoch(nodesInfo)
+            } else {
+                requestLatestGenesisBlock()
+            }
         } catch (e: Throwable) {
             log.error(e.message)
             syncFailed()
@@ -125,7 +129,7 @@ class ChainSynchronizer(
         val knownActiveDelegates = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
         val message = SyncRequestMessage()
 
-        networkApiService.sendToAddress(message, knownActiveDelegates.shuffled().first())
+        networkApiService.sendToAddress(message, knownActiveDelegates.random())
         startRequestScheduler()
     }
 
@@ -154,7 +158,7 @@ class ChainSynchronizer(
             val lastLocalBlock = blockService.getLast()
             val filteredStorage = syncSession!!.getStorage().filter { it.height > lastLocalBlock.height }
 
-            filteredStorage.forEach {
+            filteredStorage.asReversed().forEach {
                 if (it is MainBlock) {
                     val rewardTransaction = it.payload.rewardTransaction.first()
                     it.payload.rewardTransaction.clear()

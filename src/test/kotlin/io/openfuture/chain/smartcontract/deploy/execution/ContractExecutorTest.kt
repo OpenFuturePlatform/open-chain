@@ -7,6 +7,7 @@ import io.openfuture.chain.smartcontract.deploy.ContractProperties
 import io.openfuture.chain.smartcontract.deploy.domain.ContractDto
 import io.openfuture.chain.smartcontract.deploy.domain.ContractMethod
 import io.openfuture.chain.smartcontract.deploy.exception.ContractExecutionException
+import io.openfuture.chain.smartcontract.deploy.utils.SerializationUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.mockito.BDDMockito.given
@@ -52,6 +53,29 @@ class ContractExecutorTest : ContractTests() {
             ContractDto("0xOwNeR", "0xAdDrEsS", ByteArray(0), bytes, "io.test.HelloClass"),
             ContractMethod("helloSleep")
         )
+    }
+
+    @Test
+    fun executeWhenStateChangesShouldRestorePrevState() {
+        val bytes = getResourceBytes("/classes/CalculatorContract.class")
+        val clazz = "io.openfuture.chain.smartcontract.templates.CalculatorContract"
+        val contractAddress = "0xAdDrEsS"
+        val contractOwner = "0xOwNeR"
+
+        given(contractProperties.executionTimeout).willReturn(10000)
+
+        var result = executor.run(
+            ContractDto(contractAddress, contractOwner, ByteArray(0), bytes, clazz),
+            ContractMethod("add", arrayOf(20L))
+        )
+
+        result = executor.run(
+            ContractDto(contractAddress, contractOwner, SerializationUtils.serialize(result.instance!!), bytes, clazz),
+            ContractMethod("result")
+        )
+
+        assertThat(result).isNotNull
+        assertThat(result.output).isEqualTo(20L)
     }
 
 }
