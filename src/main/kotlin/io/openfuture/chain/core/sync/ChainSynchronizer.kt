@@ -70,7 +70,7 @@ class ChainSynchronizer(
             val lastLocalGenesisBlock = genesisBlockService.getLast()
 
             if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
-                syncSession = SyncSession(lastLocalGenesisBlock, currentGenesisBlock)
+                syncSession = SyncSession(properties.syncMode!!, lastLocalGenesisBlock, currentGenesisBlock)
                 requestEpoch(nodesInfo)
             } else {
                 requestLatestGenesisBlock()
@@ -140,7 +140,7 @@ class ChainSynchronizer(
             (syncSession!!.getStorage().last() as GenesisBlock).payload.epochIndex - 1
         }
 
-        val message = EpochRequestMessage(targetEpoch)
+        val message = EpochRequestMessage(targetEpoch, syncSession!!.syncMode)
 
         networkApiService.sendToAddress(message, listNodeInfo.shuffled().first())
         startRequestScheduler()
