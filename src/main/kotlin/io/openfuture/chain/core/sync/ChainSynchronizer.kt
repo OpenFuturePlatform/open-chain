@@ -8,11 +8,8 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTrans
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.service.*
-import io.openfuture.chain.core.service.transaction.ExternalTransactionService
+import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
@@ -102,7 +99,7 @@ class ChainSynchronizer(
             val genesisBlock = fromMessage(message.genesisBlock!!)
             val listBlocks: MutableList<Block> = mutableListOf(genesisBlock)
 
-            if (syncSession!!.syncMode == SyncMode.FULL && !isValidTransactions(message.mainBlocks)) {
+            if (syncSession!!.syncMode == FULL && !isValidTransactions(message.mainBlocks)) {
                 requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
                 return
             }
@@ -110,7 +107,7 @@ class ChainSynchronizer(
             val mainBlocks = message.mainBlocks.map {
                 val mainBlock = MainBlock.of(it)
                 mainBlock.payload.rewardTransaction = mutableListOf(RewardTransaction.of(it.rewardTransaction, mainBlock))
-                if (syncSession!!.syncMode == SyncMode.FULL) {
+                if (syncSession!!.syncMode == FULL) {
                     it.voteTransactions.forEach { vTx -> mainBlock.payload.voteTransactions.add(VoteTransaction.of(vTx, mainBlock)) }
                     it.delegateTransactions.forEach { dTx -> mainBlock.payload.delegateTransactions.add(DelegateTransaction.of(dTx, mainBlock)) }
                     it.transferTransactions.forEach { vTx -> mainBlock.payload.transferTransactions.add(TransferTransaction.of(vTx, mainBlock)) }
@@ -118,7 +115,7 @@ class ChainSynchronizer(
                 mainBlock
             }
 
-            if (syncSession!!.syncMode == SyncMode.FULL && !isValidMerkleRoot(mainBlocks)) {
+            if (syncSession!!.syncMode == FULL && !isValidMerkleRoot(mainBlocks)) {
                 requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
                 return
             }
@@ -238,42 +235,16 @@ class ChainSynchronizer(
 
             filteredStorage.asReversed().forEach { block ->
                 if (block is MainBlock) {
+
                     val rewardTransaction = block.payload.rewardTransaction.first()
                     block.payload.rewardTransaction.clear()
-
-                    var transferTransactions = listOf<TransferTransaction>()
-                    var voteTransactions = listOf<VoteTransaction>()
-                    var delegateTransactions = listOf<DelegateTransaction>()
-
-                    if (syncSession!!.syncMode == SyncMode.FULL) {
-                        transferTransactions = block.payload.transferTransactions.toList()
-                        voteTransactions = block.payload.voteTransactions.toList()
-                        delegateTransactions = block.payload.delegateTransactions.toList()
-
-                        block.payload.transferTransactions.clear()
-                        block.payload.voteTransactions.clear()
-                        block.payload.delegateTransactions.clear()
-                    }
 
                     blockService.save(block)
                     rewardTransaction.block = block
                     rewardTransactionService.save(rewardTransaction)
 
-                    if (syncSession!!.syncMode == SyncMode.FULL) {
-                        transferTransactions.forEach {
-                            it.block = block
-                            (transferTransactionService as ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>).save(it)
-                        }
-
-                        voteTransactions.forEach {
-                            it.block = block
-                            (voteTransactionService as ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction>).save(it)
-                        }
-
-                        delegateTransactions.forEach {
-                            it.block = block
-                            (delegateTransactionService as ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>).save(it)
-                        }
+                    if (syncSession!!.syncMode == FULL) {
+                        saveTransactions(block)
                     }
                 } else {
                     blockService.save(block)
@@ -287,6 +258,31 @@ class ChainSynchronizer(
         } catch (e: Throwable) {
             log.error("Save block is failed: $e")
             syncFailed()
+        }
+    }
+
+    fun saveTransactions(block: MainBlock) {
+        val transferTransactions: List<TransferTransaction> = block.payload.transferTransactions.toList()
+        val voteTransactions: List<VoteTransaction> = block.payload.voteTransactions.toList()
+        val delegateTransactions: List<DelegateTransaction> = block.payload.delegateTransactions.toList()
+
+        block.payload.transferTransactions.clear()
+        block.payload.voteTransactions.clear()
+        block.payload.delegateTransactions.clear()
+
+        transferTransactions.forEach {
+            it.block = block
+            transferTransactionService.toBlock(it.toMessage(), block)
+        }
+
+        voteTransactions.forEach {
+            it.block = block
+            voteTransactionService.toBlock(it.toMessage(), block)
+        }
+
+        delegateTransactions.forEach {
+            it.block = block
+            delegateTransactionService.toBlock(it.toMessage(), block)
         }
     }
 
