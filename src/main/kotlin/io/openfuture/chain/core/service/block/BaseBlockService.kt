@@ -7,7 +7,6 @@ import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DelegateService
-import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -19,7 +18,6 @@ import java.nio.charset.StandardCharsets.UTF_8
 abstract class BaseBlockService<T : Block>(
     protected val repository: BlockRepository<T>,
     protected val blockService: BlockService,
-    protected val walletService: WalletService,
     protected val delegateService: DelegateService
 ) {
 

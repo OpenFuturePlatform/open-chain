@@ -1,8 +1,7 @@
 package io.openfuture.chain.core.service
 
 import io.openfuture.chain.core.model.entity.Delegate
-import io.openfuture.chain.core.model.entity.Wallet
-import io.openfuture.chain.core.model.entity.WalletVote
+import io.openfuture.chain.core.model.entity.State
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -230,28 +229,20 @@ interface ViewDelegateService {
 
 }
 
-interface WalletService {
+interface StateService {
 
-    fun getByAddress(address: String): Wallet
+    fun getLastByAddress(address: String): State?
 
-    fun getActualBalanceByAddress(address: String): Long
+    fun getByAddress(address: String): List<State>
+
+    fun getByAddressAndBlock(address: String, block: Block): State?
 
     fun getBalanceByAddress(address: String): Long
 
-    fun save(wallet: Wallet)
+    fun getActualBalanceByAddress(address: String): Long
 
-    fun increaseBalance(address: String, amount: Long)
+    fun getVotesByAddress(address: String): List<String>
 
-    fun decreaseBalance(address: String, amount: Long)
-
-}
-
-interface WalletVoteService {
-
-    fun getVotesByAddress(address: String): List<WalletVote>
-
-    fun add(address: String, nodeId: String): WalletVote
-
-    fun remove(address: String, nodeId: String)
+    fun create(state: State): State
 
 }

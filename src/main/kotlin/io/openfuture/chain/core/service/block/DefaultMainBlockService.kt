@@ -35,19 +35,18 @@ import kotlin.math.max
 class DefaultMainBlockService(
     blockService: BlockService,
     repository: MainBlockRepository,
-    walletService: WalletService,
     delegateService: DelegateService,
     private val clock: Clock,
     private val keyHolder: NodeKeyHolder,
     private val throughput: TransactionThroughput,
-    private val walletVoteService: WalletVoteService,
+    private val stateService: StateService,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository,
     private val voteTransactionService: VoteTransactionService,
     private val rewardTransactionService: RewardTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService
-) : BaseBlockService<MainBlock>(repository, blockService, walletService, delegateService), MainBlockService {
+) : BaseBlockService<MainBlock>(repository, blockService, delegateService), MainBlockService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultMainBlockService::class.java)
@@ -202,7 +201,7 @@ class DefaultMainBlockService(
                         else -> 0
                     }
                 }
-                .sum() <= walletService.getBalanceByAddress(sender.key)
+                .sum() <= stateService.getBalanceByAddress(sender.key)
         }
 
     private fun isValidRewardTransaction(message: PendingBlockMessage): Boolean =
@@ -215,7 +214,7 @@ class DefaultMainBlockService(
         }
 
         val validVotes = transactions.groupBy { it.senderAddress }.entries.all { sender ->
-            val persistVotes = walletVoteService.getVotesByAddress(sender.key).map { it.id.nodeId }
+            val persistVotes = stateService.getVotesByAddress(sender.key)
             val pendingVotes = sender.value.asSequence().filter { VoteType.FOR.getId() == it.voteTypeId }.map { it.nodeId }.toList()
 
             val hasDuplicates = pendingVotes.intersect(persistVotes).isNotEmpty()
@@ -250,7 +249,7 @@ class DefaultMainBlockService(
 
     private fun isValidReward(fees: Long, reward: Long): Boolean {
         val senderAddress = consensusProperties.genesisAddress!!
-        val bank = walletService.getActualBalanceByAddress(senderAddress)
+        val bank = stateService.getActualBalanceByAddress(senderAddress)
         val rewardBlock = consensusProperties.rewardBlock!!
 
         return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)
@@ -317,7 +316,7 @@ class DefaultMainBlockService(
         val transactionsBySender = transactions.groupBy { it.header.senderAddress }
 
         transactionsBySender.forEach {
-            var balance = walletService.getBalanceByAddress(it.key)
+            var balance = stateService.getBalanceByAddress(it.key)
             val list = it.value.filter { tx ->
                 balance -= when (tx) {
                     is UnconfirmedTransferTransaction -> tx.header.fee + tx.payload.amount

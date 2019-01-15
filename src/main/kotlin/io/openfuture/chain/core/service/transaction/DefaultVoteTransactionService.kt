@@ -13,7 +13,6 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransacti
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.repository.UVoteTransactionRepository
 import io.openfuture.chain.core.repository.VoteTransactionRepository
-import io.openfuture.chain.core.service.DefaultWalletVoteService
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
@@ -30,7 +29,6 @@ internal class DefaultVoteTransactionService(
     repository: VoteTransactionRepository,
     uRepository: UVoteTransactionRepository,
     private val delegateService: DelegateService,
-    private val walletVoteService: DefaultWalletVoteService,
     private val consensusProperties: ConsensusProperties
 ) : ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository), VoteTransactionService {
 
@@ -178,7 +176,7 @@ internal class DefaultVoteTransactionService(
     private fun isExistsDelegate(nodeId: String): Boolean = delegateService.isExistsByNodeId(nodeId)
 
     private fun isVoteLeft(senderAddress: String): Boolean {
-        val confirmedVotes = walletVoteService.getVotesByAddress(senderAddress).count()
+        val confirmedVotes = stateService.getLastByAddress(senderAddress)?.data?.votes?.size ?: 0
         val unconfirmedForVotes = unconfirmedRepository.findAllByHeaderSenderAddress(senderAddress).asSequence()
             .filter { VoteType.FOR == it.payload.getVoteType() }
             .count()
@@ -187,7 +185,7 @@ internal class DefaultVoteTransactionService(
     }
 
     private fun isAlreadyVoted(senderAddress: String, nodeId: String): Boolean =
-        walletVoteService.getVotesByAddress(senderAddress).any { it.id.nodeId == nodeId }
+        stateService.getVotesByAddress(senderAddress).contains(nodeId)
 
     private fun isAlreadySentVote(senderAddress: String, nodeId: String, voteTypeId: Int): Boolean {
         val unconfirmed = unconfirmedRepository.findAllByHeaderSenderAddress(senderAddress)

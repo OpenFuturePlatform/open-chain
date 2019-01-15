@@ -10,7 +10,6 @@ import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DefaultDelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
-import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
@@ -23,12 +22,11 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultGenesisBlockService(
     blockService: BlockService,
-    walletService: WalletService,
     delegateService: DefaultDelegateService,
     private val keyHolder: NodeKeyHolder,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository
-) : BaseBlockService<GenesisBlock>(genesisBlockRepository, blockService, walletService, delegateService), GenesisBlockService {
+) : BaseBlockService<GenesisBlock>(genesisBlockRepository, blockService, delegateService), GenesisBlockService {
 
     @Transactional(readOnly = true)
     override fun getPreviousByHeight(height: Long): GenesisBlock = repository.findFirstByHeightLessThanOrderByHeightDesc(height)

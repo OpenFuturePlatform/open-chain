@@ -1,83 +1,85 @@
 package io.openfuture.chain.core.service
 
-import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.model.entity.State
+import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
+import io.openfuture.chain.core.repository.StateRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.sync.BlockchainLock
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class DefaultWalletService(
-    private val repository: WalletRepository,
+@Transactional(readOnly = true)
+class DefaultStateService(
+    private val repository: StateRepository,
     private val unconfirmedTransactionRepository: UTransactionRepository<UnconfirmedTransaction>
-) : WalletService {
+) : StateService {
 
     companion object {
         private const val DEFAULT_WALLET_BALANCE = 0L
     }
 
 
-    @Transactional(readOnly = true)
-    override fun getByAddress(address: String): Wallet {
+    override fun getLastByAddress(address: String): State? {
         BlockchainLock.readLock.lock()
         try {
-            return repository.findOneByAddress(address)
-                ?: throw NotFoundException("Wallet with address: $address not found")
+            return repository.findLastByAddress(address)
         } finally {
             BlockchainLock.readLock.unlock()
         }
     }
 
-    @Transactional(readOnly = true)
-    override fun getActualBalanceByAddress(address: String): Long {
+    override fun getByAddress(address: String): List<State> {
         BlockchainLock.readLock.lock()
         try {
-            val wallet = repository.findOneByAddress(address) ?: return DEFAULT_WALLET_BALANCE
-            return wallet.balance - getUnconfirmedBalance(address)
+            return repository.findByAddress(address)
         } finally {
             BlockchainLock.readLock.unlock()
         }
     }
 
-    @Transactional(readOnly = true)
+    override fun getByAddressAndBlock(address: String, block: Block): State? {
+        BlockchainLock.readLock.lock()
+        try {
+            return repository.findByAddressAndBlock(address, block)
+        } finally {
+            BlockchainLock.readLock.unlock()
+        }
+    }
+
     override fun getBalanceByAddress(address: String): Long {
         BlockchainLock.readLock.lock()
         try {
-            val wallet = repository.findOneByAddress(address) ?: return DEFAULT_WALLET_BALANCE
-            return wallet.balance
+            return getLastByAddress(address)?.data?.balance ?: DEFAULT_WALLET_BALANCE
+        } finally {
+            BlockchainLock.readLock.unlock()
+        }
+    }
+
+    override fun getActualBalanceByAddress(address: String): Long {
+        BlockchainLock.readLock.lock()
+        try {
+            val balance = getLastByAddress(address)?.data?.balance ?: DEFAULT_WALLET_BALANCE
+            return balance - getUnconfirmedBalance(address)
+        } finally {
+            BlockchainLock.readLock.unlock()
+        }
+    }
+
+    override fun getVotesByAddress(address: String): List<String> {
+        BlockchainLock.readLock.lock()
+        try {
+            return getLastByAddress(address)?.data?.votes ?: emptyList()
         } finally {
             BlockchainLock.readLock.unlock()
         }
     }
 
     @Transactional
-    override fun save(wallet: Wallet) {
-        repository.save(wallet)
-    }
-
-    @Transactional
-    override fun increaseBalance(address: String, amount: Long) {
-        updateByAddress(address, amount)
-    }
-
-    @Transactional
-    override fun decreaseBalance(address: String, amount: Long) {
-        updateByAddress(address, -amount)
-    }
-
-    private fun updateByAddress(address: String, amount: Long) {
-        BlockchainLock.writeLock.lock()
-        try {
-            val wallet = repository.findOneByAddress(address) ?: Wallet(address)
-            wallet.balance += amount
-            repository.save(wallet)
-        } finally {
-            BlockchainLock.writeLock.unlock()
-        }
-    }
+    override fun create(state: State): State = repository.save(state)
 
     private fun getUnconfirmedBalance(address: String): Long =
         unconfirmedTransactionRepository.findAllByHeaderSenderAddress(address).asSequence().map {
