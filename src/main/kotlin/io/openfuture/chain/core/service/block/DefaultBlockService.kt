@@ -56,7 +56,7 @@ class DefaultBlockService(
                 transactionService.delete(payload.rewardTransaction)
                 transactionService.delete(payload.voteTransactions)
             }
-            val blockToRemove = repository.findOneByHash(block.hash)
+            val blockToRemove = repository.findOneByHash(block.hash)!!
             repository.delete(blockToRemove)
         }
     }

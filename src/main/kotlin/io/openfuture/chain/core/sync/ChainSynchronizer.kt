@@ -51,7 +51,7 @@ class ChainSynchronizer(
     fun getStatus(): SyncStatus = status
 
     fun onGenesisBlockResponse(message: GenesisBlockMessage) {
-        resetRequestScheduler()
+        future?.cancel(true)
         val nodesInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
         try {
             val currentGenesisBlock = fromMessage(message)
@@ -70,7 +70,7 @@ class ChainSynchronizer(
     }
 
     fun onEpochResponse(message: EpochResponseMessage) {
-        resetRequestScheduler()
+        future?.cancel(true)
         val nodesInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
         try {
             if (!message.isEpochExists) {
@@ -134,12 +134,6 @@ class ChainSynchronizer(
         } else {
             requestLatestGenesisBlock()
         }
-    }
-
-    private fun checkBlock(block: Block) {
-        val delegate = epochService.getDelegates().random().toNodeInfo()
-        val message = BlockAvailabilityRequest(block.hash)
-        networkApiService.sendToAddress(message, delegate)
     }
 
     private fun isValidPreviousHash(block: Block, lastBlock: Block): Boolean = block.previousHash == lastBlock.hash
@@ -207,7 +201,11 @@ class ChainSynchronizer(
         log.debug("Sync is failed")
     }
 
-    private fun resetRequestScheduler() = future?.cancel(true)
+    private fun checkBlock(block: Block) {
+        val delegate = epochService.getDelegates().random().toNodeInfo()
+        val message = BlockAvailabilityRequest(block.hash)
+        networkApiService.sendToAddress(message, delegate)
+    }
 
     private fun expired() {
         if (null == syncSession) {
