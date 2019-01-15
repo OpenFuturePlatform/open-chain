@@ -21,7 +21,7 @@ import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @NoRepositoryBean
-interface BaseRepository<T> : JpaRepository<T, Int>
+interface BaseRepository<T> : JpaRepository<T, Long>
 
 @Repository
 interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
@@ -42,8 +42,6 @@ interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
 
     @Query(value = "Select HEIGHT From BLOCKS Order By HEIGHT Desc Limit 1", nativeQuery = true)
     fun getCurrentHeight(): Long
-
-    fun deleteAllByHeightBetween(fromHeight: Long, toHeight: Long)
 
 }
 
