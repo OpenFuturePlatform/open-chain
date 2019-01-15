@@ -62,7 +62,7 @@ class DefaultPendingBlockHandler(
         }
 
         if (!chainSynchronizer.isInSync(MainBlock.of(block))) {
-            chainSynchronizer.sync()
+            conflictedBlockResolver.checkLastBlock()
             return
         }
 
@@ -130,14 +130,10 @@ class DefaultPendingBlockHandler(
                     pendingBlocks.find { it.hash == message.hash }?.let {
                         log.debug("CONSENSUS: Saving main block ${it.hash}")
                         if (!chainSynchronizer.isInSync(MainBlock.of(it))) {
-                            chainSynchronizer.sync()
+                            conflictedBlockResolver.checkLastBlock()
                             return
                         }
-                        if (it.hash != observable!!.hash) {
-                            conflictedBlockResolver.checkConflictedBlock(it)
-                        } else {
-                            mainBlockService.add(it)
-                        }
+                        mainBlockService.add(it)
                     }
                     blockAddedFlag = true
                 }
