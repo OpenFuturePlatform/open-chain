@@ -8,6 +8,11 @@
       docker_container:
         name: openchain
         state: absent
+    - name: Remove the embedded DB volume
+      docker_volume:
+        name: db_volume
+        state: absent
+      when: del_volume
     - name: Create a volume for embedded DB
       docker_volume:
         name: db_volume
