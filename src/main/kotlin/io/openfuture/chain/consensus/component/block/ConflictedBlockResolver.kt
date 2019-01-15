@@ -36,7 +36,7 @@ class ConflictedBlockResolver(
 
     fun onBlockAvailabilityResponse(response: BlockAvailabilityResponse) {
         future?.cancel(true)
-        if (-1 == response.height) {
+        if (-1L == response.height) {
             val invalidGenesisBlock = genesisBlockService.getLast()
             log.info("Rolling back epoch # ${invalidGenesisBlock.payload.epochIndex}")
             blockService.removeEpoch(invalidGenesisBlock)
@@ -44,7 +44,7 @@ class ConflictedBlockResolver(
             checkBlock(lastGenesisBlock)
             future = scheduledSynchronizer.startRequestScheduler(future, Runnable { checkBlock(lastGenesisBlock) })
         } else {
-            chainSynchronizer.sync()
+//            chainSynchronizer.sync()
         }
     }
 

@@ -1,6 +1,8 @@
 package io.openfuture.chain.network.message.base
 
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
+import io.openfuture.chain.network.message.consensus.BlockAvailabilityRequest
+import io.openfuture.chain.network.message.consensus.BlockAvailabilityResponse
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
@@ -37,7 +39,9 @@ enum class MessageType(
     MAIN_BLOCK(13, MainBlockMessage::class),
     GENESIS_BLOCK(14, GenesisBlockMessage::class),
     EPOCH_REQUEST(15, EpochRequestMessage::class),
-    EPOCH_RESPONSE(16, EpochResponseMessage::class);
+    EPOCH_RESPONSE(16, EpochResponseMessage::class),
+    BLOCK_AVAILABILITY_REQUEST(17, BlockAvailabilityRequest::class),
+    BLOCK_AVAILABILITY_RESPONSE(18, BlockAvailabilityResponse::class);
 
 
     companion object {

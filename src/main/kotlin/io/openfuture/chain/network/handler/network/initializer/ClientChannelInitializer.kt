@@ -4,6 +4,8 @@ import io.netty.channel.Channel
 import io.netty.channel.ChannelInitializer
 import io.netty.handler.timeout.IdleStateHandler
 import io.openfuture.chain.network.handler.consensus.BlockApprovalHandler
+import io.openfuture.chain.network.handler.consensus.BlockAvailabilityRequestHandler
+import io.openfuture.chain.network.handler.consensus.BlockAvailabilityResponseHandler
 import io.openfuture.chain.network.handler.consensus.PendingBlockNetworkHandler
 import io.openfuture.chain.network.handler.core.DelegateTransactionHandler
 import io.openfuture.chain.network.handler.core.TransferTransactionHandler
@@ -39,7 +41,9 @@ class ClientChannelInitializer(
     private val delegateTransactionHandler: DelegateTransactionHandler,
     private val voteTransactionHandler: VoteTransactionHandler,
     private val pendingBlockNetworkHandler: PendingBlockNetworkHandler,
-    private val blockApprovalHandler: BlockApprovalHandler
+    private val blockApprovalHandler: BlockApprovalHandler,
+    private val blockAvailabilityRequestHandler: BlockAvailabilityRequestHandler,
+    private val blockAvailabilityResponseHandler: BlockAvailabilityResponseHandler
 ) : ChannelInitializer<Channel>() {
 
     override fun initChannel(channel: Channel) {
@@ -65,7 +69,9 @@ class ClientChannelInitializer(
             syncBlockRequestHandler,
             mainBlockHandler,
             genesisBlockHandler,
+            blockAvailabilityResponseHandler,
             syncStatusHandler,
+            blockAvailabilityRequestHandler,
             //        core
             transferTransactionHandler,
             delegateTransactionHandler,

@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.sync
 
+import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
@@ -12,6 +13,8 @@ import io.openfuture.chain.core.service.RewardTransactionService
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
+import io.openfuture.chain.network.message.consensus.BlockAvailabilityRequest
+import io.openfuture.chain.network.message.consensus.BlockAvailabilityResponse
 import io.openfuture.chain.network.message.sync.EpochRequestMessage
 import io.openfuture.chain.network.message.sync.EpochResponseMessage
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
@@ -29,6 +32,7 @@ class ChainSynchronizer(
     private val networkApiService: NetworkApiService,
     private val genesisBlockService: GenesisBlockService,
     private val rewardTransactionService: RewardTransactionService,
+    private val epochService: EpochService,
     private val scheduledSynchronizer: ScheduledSynchronizer
 ) {
 
@@ -45,17 +49,6 @@ class ChainSynchronizer(
 
 
     fun getStatus(): SyncStatus = status
-
-    @Synchronized
-    fun sync() {
-        log.debug("Chain in status=$status")
-        if (PROCESSING == status) {
-            return
-        }
-        status = PROCESSING
-
-        requestLatestGenesisBlock()
-    }
 
     fun onGenesisBlockResponse(message: GenesisBlockMessage) {
         resetRequestScheduler()
@@ -114,6 +107,39 @@ class ChainSynchronizer(
     fun isInSync(block: Block): Boolean {
         val lastBlock = blockService.getLast()
         return isValidHeight(block, lastBlock) && isValidPreviousHash(block, lastBlock)
+    }
+
+
+    @Synchronized
+    fun checkLastBlock() {
+        log.debug("Chain in status=$status")
+        if (PROCESSING == status) {
+            return
+        }
+        status = PROCESSING
+        val block = blockService.getLast()
+        checkBlock(block)
+        future = scheduledSynchronizer.startRequestScheduler(future, Runnable { checkBlock(block) })
+    }
+
+    fun onBlockAvailabilityResponse(response: BlockAvailabilityResponse) {
+        future?.cancel(true)
+        if (-1L == response.height) {
+            val invalidGenesisBlock = genesisBlockService.getLast()
+            log.info("Rolling back epoch # ${invalidGenesisBlock.payload.epochIndex}")
+            blockService.removeEpoch(invalidGenesisBlock)
+            val lastGenesisBlock = genesisBlockService.getLast()
+            checkBlock(lastGenesisBlock)
+            future = scheduledSynchronizer.startRequestScheduler(future, Runnable { checkBlock(lastGenesisBlock) })
+        } else {
+            requestLatestGenesisBlock()
+        }
+    }
+
+    private fun checkBlock(block: Block) {
+        val delegate = epochService.getDelegates().random().toNodeInfo()
+        val message = BlockAvailabilityRequest(block.hash)
+        networkApiService.sendToAddress(message, delegate)
     }
 
     private fun isValidPreviousHash(block: Block, lastBlock: Block): Boolean = block.previousHash == lastBlock.hash

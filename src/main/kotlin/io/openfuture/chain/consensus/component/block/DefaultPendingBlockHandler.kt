@@ -24,8 +24,7 @@ class DefaultPendingBlockHandler(
     private val mainBlockService: MainBlockService,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService,
-    private val chainSynchronizer: ChainSynchronizer,
-    private val conflictedBlockResolver: ConflictedBlockResolver
+    private val chainSynchronizer: ChainSynchronizer
 ) : PendingBlockHandler {
 
     companion object {
@@ -62,7 +61,7 @@ class DefaultPendingBlockHandler(
         }
 
         if (!chainSynchronizer.isInSync(MainBlock.of(block))) {
-            conflictedBlockResolver.checkLastBlock()
+            chainSynchronizer.checkLastBlock()
             return
         }
 
@@ -130,7 +129,7 @@ class DefaultPendingBlockHandler(
                     pendingBlocks.find { it.hash == message.hash }?.let {
                         log.debug("CONSENSUS: Saving main block ${it.hash}")
                         if (!chainSynchronizer.isInSync(MainBlock.of(it))) {
-                            conflictedBlockResolver.checkLastBlock()
+                            chainSynchronizer.checkLastBlock()
                             return
                         }
                         mainBlockService.add(it)

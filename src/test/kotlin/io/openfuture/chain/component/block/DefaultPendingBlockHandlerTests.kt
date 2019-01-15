@@ -33,7 +33,6 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
     @Mock private lateinit var keyHolder: NodeKeyHolder
     @Mock private lateinit var networkService: NetworkApiService
     @Mock private lateinit var chainSynchronizer: ChainSynchronizer
-    @Mock private lateinit var conflictedBlockResolver: ConflictedBlockResolver
 
     private lateinit var defaultPendingBlockHandler: DefaultPendingBlockHandler
 
@@ -45,8 +44,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
             mainBlockService,
             keyHolder,
             networkService,
-            chainSynchronizer,
-            conflictedBlockResolver
+            chainSynchronizer
         )
     }
 

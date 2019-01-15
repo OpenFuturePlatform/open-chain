@@ -14,10 +14,10 @@ class BlockAvailabilityRequestHandler(
     private val blockService: BlockService
 ) : SimpleChannelInboundHandler<BlockAvailabilityRequest>() {
 
-        override fun channelRead0(ctx: ChannelHandlerContext, msg: BlockAvailabilityRequest) {
-            val block = blockService.findByHash(msg.hash)
-            val height = block?.height ?: -1
-            ctx.writeAndFlush(BlockAvailabilityResponse(msg.hash, height))
-        }
-
+    override fun channelRead0(ctx: ChannelHandlerContext, msg: BlockAvailabilityRequest) {
+        val block = blockService.findByHash(msg.hash)
+        val height = block?.height ?: -1
+        ctx.writeAndFlush(BlockAvailabilityResponse(msg.hash, height))
     }
+
+}
