@@ -235,16 +235,42 @@ class ChainSynchronizer(
 
             filteredStorage.asReversed().forEach { block ->
                 if (block is MainBlock) {
-
                     val rewardTransaction = block.payload.rewardTransaction.first()
                     block.payload.rewardTransaction.clear()
+
+                    var transferTransactions = listOf<TransferTransaction>()
+                    var voteTransactions = listOf<VoteTransaction>()
+                    var delegateTransactions = listOf<DelegateTransaction>()
+
+                    if (syncSession!!.syncMode == SyncMode.FULL) {
+                        transferTransactions = block.payload.transferTransactions.toList()
+                        voteTransactions = block.payload.voteTransactions.toList()
+                        delegateTransactions = block.payload.delegateTransactions.toList()
+
+                        block.payload.transferTransactions.clear()
+                        block.payload.voteTransactions.clear()
+                        block.payload.delegateTransactions.clear()
+                    }
 
                     blockService.save(block)
                     rewardTransaction.block = block
                     rewardTransactionService.save(rewardTransaction)
 
-                    if (syncSession!!.syncMode == FULL) {
-                        saveTransactions(block)
+                    if (syncSession!!.syncMode == SyncMode.FULL) {
+                        transferTransactions.forEach {
+                            it.block = block
+                            transferTransactionService.toBlock(it.toMessage(), block)
+                        }
+
+                        voteTransactions.forEach {
+                            it.block = block
+                            voteTransactionService.toBlock(it.toMessage(), block)
+                        }
+
+                        delegateTransactions.forEach {
+                            it.block = block
+                            delegateTransactionService.toBlock(it.toMessage(), block)
+                        }
                     }
                 } else {
                     blockService.save(block)
