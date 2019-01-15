@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @EnableScheduling
 class Application {
 
-//    @Bean
+    @Bean
     fun flywayMigrationStrategy(): FlywayMigrationStrategy {
         return FlywayMigrationStrategy { flyway ->
             flyway.clean()

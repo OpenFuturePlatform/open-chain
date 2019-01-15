@@ -3,7 +3,6 @@ package io.openfuture.chain.component.block
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.config.any
 import io.openfuture.chain.consensus.component.block.BlockApprovalStage
-import io.openfuture.chain.consensus.component.block.ConflictedBlockResolver
 import io.openfuture.chain.consensus.component.block.DefaultPendingBlockHandler
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
