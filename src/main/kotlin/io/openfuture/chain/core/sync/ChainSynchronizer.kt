@@ -4,18 +4,23 @@ import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
-import io.openfuture.chain.core.service.BlockService
-import io.openfuture.chain.core.service.DelegateService
-import io.openfuture.chain.core.service.GenesisBlockService
-import io.openfuture.chain.core.service.RewardTransactionService
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
+import io.openfuture.chain.core.service.*
+import io.openfuture.chain.core.service.transaction.ExternalTransactionService
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
-import io.openfuture.chain.network.message.sync.EpochRequestMessage
-import io.openfuture.chain.network.message.sync.EpochResponseMessage
-import io.openfuture.chain.network.message.sync.GenesisBlockMessage
-import io.openfuture.chain.network.message.sync.SyncRequestMessage
+import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.network.message.core.RewardTransactionMessage
+import io.openfuture.chain.network.message.core.TransferTransactionMessage
+import io.openfuture.chain.network.message.core.VoteTransactionMessage
+import io.openfuture.chain.network.message.sync.*
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.NetworkApiService
 import org.slf4j.Logger
@@ -25,15 +30,19 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
+import javax.xml.bind.ValidationException
 
 @Component
 class ChainSynchronizer(
+    private val properties: NodeProperties,
     private val blockService: BlockService,
     private val delegateService: DelegateService,
     private val networkApiService: NetworkApiService,
     private val genesisBlockService: GenesisBlockService,
+    private val voteTransactionService: VoteTransactionService,
     private val rewardTransactionService: RewardTransactionService,
-    private val properties: NodeProperties
+    private val delegateTransactionService: DelegateTransactionService,
+    private val transferTransactionService: TransferTransactionService
 ) {
 
     private val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
@@ -93,11 +102,28 @@ class ChainSynchronizer(
             val genesisBlock = fromMessage(message.genesisBlock!!)
             val listBlocks: MutableList<Block> = mutableListOf(genesisBlock)
 
-            listBlocks.addAll(message.mainBlocks.map {
+            if (syncSession!!.syncMode == SyncMode.FULL && !isValidTransactions(message.mainBlocks)) {
+                requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
+                return
+            }
+
+            val mainBlocks = message.mainBlocks.map {
                 val mainBlock = MainBlock.of(it)
                 mainBlock.payload.rewardTransaction = mutableListOf(RewardTransaction.of(it.rewardTransaction, mainBlock))
+                if (syncSession!!.syncMode == SyncMode.FULL) {
+                    it.voteTransactions.forEach { vTx -> mainBlock.payload.voteTransactions.add(VoteTransaction.of(vTx, mainBlock)) }
+                    it.delegateTransactions.forEach { dTx -> mainBlock.payload.delegateTransactions.add(DelegateTransaction.of(dTx, mainBlock)) }
+                    it.transferTransactions.forEach { vTx -> mainBlock.payload.transferTransactions.add(TransferTransaction.of(vTx, mainBlock)) }
+                }
                 mainBlock
-            })
+            }
+
+            if (syncSession!!.syncMode == SyncMode.FULL && !isValidMerkleRoot(mainBlocks)) {
+                requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
+                return
+            }
+
+            listBlocks.addAll(mainBlocks)
 
             if (!syncSession!!.add(listBlocks)) {
                 requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
@@ -116,10 +142,62 @@ class ChainSynchronizer(
         }
     }
 
+
     fun isInSync(block: Block): Boolean {
         val lastBlock = blockService.getLast()
         return isValidHeight(block, lastBlock) && isValidPreviousHash(block, lastBlock)
     }
+
+    private fun isValidRewardTransactions(message: RewardTransactionMessage): Boolean = rewardTransactionService.verify(message)
+
+    private fun isValidVoteTransactions(list: List<VoteTransactionMessage>): Boolean = !list
+        .any { !voteTransactionService.verify(it) }
+
+    private fun isValidDelegateTransactions(list: List<DelegateTransactionMessage>): Boolean = !list
+        .any { !delegateTransactionService.verify(it) }
+
+    private fun isValidTransferTransactions(list: List<TransferTransactionMessage>): Boolean = !list
+        .any { !transferTransactionService.verify(it) }
+
+
+    private fun isValidTransactions(blocks: List<MainBlockMessage>): Boolean {
+        try {
+            for (block in blocks) {
+                if (!isValidRewardTransactions(block.rewardTransaction)) {
+                    throw ValidationException("Invalid reward transaction")
+                }
+                if (!isValidDelegateTransactions(block.delegateTransactions)) {
+                    throw ValidationException("Invalid delegate transactions")
+                }
+                if (!isValidTransferTransactions(block.transferTransactions)) {
+                    throw ValidationException("Invalid transfer transactions")
+                }
+                if (!isValidVoteTransactions(block.voteTransactions)) {
+                    throw ValidationException("Invalid vote transactions")
+                }
+            }
+        } catch (e: ValidationException) {
+            log.debug("BlockTransactionsResponseMessage is invalid cause: ${e.message}")
+            return false
+        }
+        return true
+    }
+
+    private fun isValidMerkleRoot(mainBlocks: List<MainBlock>): Boolean {
+        mainBlocks.forEach { block ->
+            val hashes = mutableListOf<String>()
+            hashes.addAll(block.payload.transferTransactions.map { it.footer.hash })
+            hashes.addAll(block.payload.voteTransactions.map { it.footer.hash })
+            hashes.addAll(block.payload.delegateTransactions.map { it.footer.hash })
+            hashes.addAll(block.payload.rewardTransaction.map { it.footer.hash })
+            if (block.payload.merkleHash != block.payload.calculateMerkleRoot(hashes)) {
+                return false
+            }
+        }
+
+        return true
+    }
+
 
     private fun isValidPreviousHash(block: Block, lastBlock: Block): Boolean = block.previousHash == lastBlock.hash
 
@@ -158,15 +236,47 @@ class ChainSynchronizer(
             val lastLocalBlock = blockService.getLast()
             val filteredStorage = syncSession!!.getStorage().filter { it.height > lastLocalBlock.height }
 
-            filteredStorage.asReversed().forEach {
-                if (it is MainBlock) {
-                    val rewardTransaction = it.payload.rewardTransaction.first()
-                    it.payload.rewardTransaction.clear()
-                    blockService.save(it)
-                    rewardTransaction.block = it
+            filteredStorage.asReversed().forEach { block ->
+                if (block is MainBlock) {
+                    val rewardTransaction = block.payload.rewardTransaction.first()
+                    block.payload.rewardTransaction.clear()
+
+                    var transferTransactions = listOf<TransferTransaction>()
+                    var voteTransactions = listOf<VoteTransaction>()
+                    var delegateTransactions = listOf<DelegateTransaction>()
+
+                    if (syncSession!!.syncMode == SyncMode.FULL) {
+                        transferTransactions = block.payload.transferTransactions.toList()
+                        voteTransactions = block.payload.voteTransactions.toList()
+                        delegateTransactions = block.payload.delegateTransactions.toList()
+
+                        block.payload.transferTransactions.clear()
+                        block.payload.voteTransactions.clear()
+                        block.payload.delegateTransactions.clear()
+                    }
+
+                    blockService.save(block)
+                    rewardTransaction.block = block
                     rewardTransactionService.save(rewardTransaction)
+
+                    if (syncSession!!.syncMode == SyncMode.FULL) {
+                        transferTransactions.forEach {
+                            it.block = block
+                            (transferTransactionService as ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>).save(it)
+                        }
+
+                        voteTransactions.forEach {
+                            it.block = block
+                            (voteTransactionService as ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction>).save(it)
+                        }
+
+                        delegateTransactions.forEach {
+                            it.block = block
+                            (delegateTransactionService as ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>).save(it)
+                        }
+                    }
                 } else {
-                    blockService.save(it)
+                    blockService.save(block)
                 }
             }
 

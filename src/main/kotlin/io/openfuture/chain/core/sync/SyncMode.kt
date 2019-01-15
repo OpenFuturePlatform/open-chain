@@ -9,10 +9,10 @@ enum class SyncMode {
 
         fun ofByte(id: Byte): SyncMode = values()[id.toInt()]
 
-        fun toByte(name: SyncMode): Byte {
+        fun toByte(name: SyncMode): Int {
             for (i in 0..values().size) {
                 if (values()[i] == name) {
-                    return i.toByte()
+                    return i
                 }
             }
             throw IllegalArgumentException("Sync mode by name: $name not found")
