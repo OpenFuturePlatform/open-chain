@@ -4,6 +4,7 @@ import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -99,7 +100,8 @@ class ChainSynchronizer(
             val genesisBlock = fromMessage(message.genesisBlock!!)
             val listBlocks: MutableList<Block> = mutableListOf(genesisBlock)
 
-            if (syncSession!!.syncMode == FULL && !isValidTransactions(message.mainBlocks)) {
+            if (syncSession!!.syncMode == FULL &&
+                !isValidTransactions(message.mainBlocks) && !isValidMerkleRoot(message.mainBlocks)) {
                 requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
                 return
             }
@@ -113,11 +115,6 @@ class ChainSynchronizer(
                     it.transferTransactions.forEach { vTx -> mainBlock.payload.transferTransactions.add(TransferTransaction.of(vTx, mainBlock)) }
                 }
                 mainBlock
-            }
-
-            if (syncSession!!.syncMode == FULL && !isValidMerkleRoot(mainBlocks)) {
-                requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
-                return
             }
 
             listBlocks.addAll(mainBlocks)
@@ -139,7 +136,6 @@ class ChainSynchronizer(
         }
     }
 
-
     fun isInSync(block: Block): Boolean {
         val lastBlock = blockService.getLast()
         return isValidHeight(block, lastBlock) && isValidPreviousHash(block, lastBlock)
@@ -155,7 +151,6 @@ class ChainSynchronizer(
 
     private fun isValidTransferTransactions(list: List<TransferTransactionMessage>): Boolean = !list
         .any { !transferTransactionService.verify(it) }
-
 
     private fun isValidTransactions(blocks: List<MainBlockMessage>): Boolean {
         try {
@@ -180,21 +175,19 @@ class ChainSynchronizer(
         return true
     }
 
-    private fun isValidMerkleRoot(mainBlocks: List<MainBlock>): Boolean {
+    private fun isValidMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
         mainBlocks.forEach { block ->
             val hashes = mutableListOf<String>()
-            hashes.addAll(block.payload.transferTransactions.map { it.footer.hash })
-            hashes.addAll(block.payload.voteTransactions.map { it.footer.hash })
-            hashes.addAll(block.payload.delegateTransactions.map { it.footer.hash })
-            hashes.addAll(block.payload.rewardTransaction.map { it.footer.hash })
-            if (block.payload.merkleHash != block.payload.calculateMerkleRoot(hashes)) {
+            hashes.addAll(block.transferTransactions.map { it.hash })
+            hashes.addAll(block.voteTransactions.map { it.hash })
+            hashes.addAll(block.delegateTransactions.map { it.hash })
+            hashes.add(block.rewardTransaction.hash)
+            if (block.merkleHash != MainBlockPayload.calculateMerkleRoot(hashes)) {
                 return false
             }
         }
-
         return true
     }
-
 
     private fun isValidPreviousHash(block: Block, lastBlock: Block): Boolean = block.previousHash == lastBlock.hash
 
@@ -284,31 +277,6 @@ class ChainSynchronizer(
         } catch (e: Throwable) {
             log.error("Save block is failed: $e")
             syncFailed()
-        }
-    }
-
-    fun saveTransactions(block: MainBlock) {
-        val transferTransactions: List<TransferTransaction> = block.payload.transferTransactions.toList()
-        val voteTransactions: List<VoteTransaction> = block.payload.voteTransactions.toList()
-        val delegateTransactions: List<DelegateTransaction> = block.payload.delegateTransactions.toList()
-
-        block.payload.transferTransactions.clear()
-        block.payload.voteTransactions.clear()
-        block.payload.delegateTransactions.clear()
-
-        transferTransactions.forEach {
-            it.block = block
-            transferTransactionService.toBlock(it.toMessage(), block)
-        }
-
-        voteTransactions.forEach {
-            it.block = block
-            voteTransactionService.toBlock(it.toMessage(), block)
-        }
-
-        delegateTransactions.forEach {
-            it.block = block
-            delegateTransactionService.toBlock(it.toMessage(), block)
         }
     }
 

@@ -56,27 +56,31 @@ class MainBlockPayload(
 
     override fun getBytes(): ByteArray = merkleHash.toByteArray(UTF_8)
 
-    fun calculateMerkleRoot(hashes: List<String>): String {
-        if (hashes.size == 1) {
-            return hashes.single()
-        }
+    companion object {
 
-        var previousTreeLayout = hashes.asSequence().sortedByDescending { it }.map { it.toByteArray() }.toList()
-        var treeLayout = mutableListOf<ByteArray>()
-        while (previousTreeLayout.size != 2) {
-            for (i in 0 until previousTreeLayout.size step 2) {
-                val leftHash = previousTreeLayout[i]
-                val rightHash = if (i + 1 == previousTreeLayout.size) {
-                    previousTreeLayout[i]
-                } else {
-                    previousTreeLayout[i + 1]
-                }
-                treeLayout.add(HashUtils.sha256(leftHash + rightHash))
+        fun calculateMerkleRoot(transactions: List<String>): String {
+            if (transactions.size == 1) {
+                return transactions.single()
             }
-            previousTreeLayout = treeLayout
-            treeLayout = mutableListOf()
+
+            var previousTreeLayout = transactions.asSequence().sortedByDescending { it }.map { it.toByteArray() }.toList()
+            var treeLayout = mutableListOf<ByteArray>()
+            while (previousTreeLayout.size != 2) {
+                for (i in 0 until previousTreeLayout.size step 2) {
+                    val leftHash = previousTreeLayout[i]
+                    val rightHash = if (i + 1 == previousTreeLayout.size) {
+                        previousTreeLayout[i]
+                    } else {
+                        previousTreeLayout[i + 1]
+                    }
+                    treeLayout.add(HashUtils.sha256(leftHash + rightHash))
+                }
+                previousTreeLayout = treeLayout
+                treeLayout = mutableListOf()
+            }
+            return ByteUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
         }
-        return ByteUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
     }
+
 
 }
