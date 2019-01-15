@@ -7,20 +7,17 @@ import io.openfuture.chain.network.serialization.Serializable
 
 class BlockAvailabilityResponse(
     var hash: String,
-    var height: Int,
-    var publicKey: String
+    var height: Long
 ): Serializable {
 
     override fun read(buf: ByteBuf) {
         hash = buf.readString()
-        height = buf.readInt()
-        publicKey = buf.readString()
+        height = buf.readLong()
     }
 
     override fun write(buf: ByteBuf) {
         buf.writeString(hash)
-        buf.writeInt(height)
-        buf.writeString(publicKey)
+        buf.writeLong(height)
     }
 
 }

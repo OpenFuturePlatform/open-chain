@@ -55,6 +55,8 @@ interface BlockService {
 
     fun isExists(hash: String): Boolean
 
+    fun findByHash(hash: String): Block?
+
     fun getAvgProductionTime(): Long
 
     fun getCurrentHeight(): Long

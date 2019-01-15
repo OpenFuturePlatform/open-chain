@@ -6,7 +6,6 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.BlockService
-import io.openfuture.chain.network.property.NodeProperties
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -49,6 +48,9 @@ class DefaultBlockService(
 
     @Transactional(readOnly = true)
     override fun isExists(hash: String): Boolean = repository.findOneByHash(hash)?.let { true } ?: false
+
+    @Transactional(readOnly = true)
+    override fun findByHash(hash: String): Block?  = repository.findOneByHash(hash)
 
     @Transactional(readOnly = true)
     override fun isExists(hash: String, height: Long): Boolean =

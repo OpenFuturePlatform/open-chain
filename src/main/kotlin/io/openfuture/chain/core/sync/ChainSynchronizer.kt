@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.sync
 
-import io.openfuture.chain.consensus.component.block.ConflictedBlockResolver
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
