@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.repository
 
 import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.model.entity.State
 import io.openfuture.chain.core.model.entity.Wallet
 import io.openfuture.chain.core.model.entity.WalletVote
 import io.openfuture.chain.core.model.entity.block.Block
@@ -139,6 +140,13 @@ interface ViewDelegateRepository : BaseRepository<ViewDelegate> {
 interface WalletRepository : BaseRepository<Wallet> {
 
     fun findOneByAddress(address: String): Wallet?
+
+}
+
+@Repository
+interface StateRepository : BaseRepository<State> {
+
+    fun findOneByAddress(address: String): State?
 
 }
 
