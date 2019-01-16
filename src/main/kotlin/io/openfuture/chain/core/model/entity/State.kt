@@ -14,7 +14,7 @@ class State(
 
     @Convert(converter = StateConverter::class)
     @Column(name = "data", nullable = false)
-    var data: Snapshot,
+    var data: Data,
 
     @ManyToOne
     @JoinColumn(name = "block_id")
@@ -24,9 +24,9 @@ class State(
 
 ) : BaseModel(id) {
 
-    data class Snapshot(
+    data class Data(
         var balance: Long = 0L,
-        var votes: List<String> = emptyList(),
+        var votes: MutableList<String> = mutableListOf(),
         var isDelegate: Boolean = false
     )
 

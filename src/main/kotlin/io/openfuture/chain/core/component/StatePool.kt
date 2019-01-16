@@ -12,7 +12,7 @@ class StatePool {
 
     fun getPool(): Map<String, State> = pool
 
-    fun getByAddress(address: String): State? = pool[address]
+    fun get(address: String): State? = pool[address]
 
     fun update(state: State): State? = pool.put(state.address, state)
 
