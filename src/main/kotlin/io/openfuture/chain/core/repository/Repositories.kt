@@ -1,11 +1,13 @@
 package io.openfuture.chain.core.repository
 
 import io.openfuture.chain.core.model.entity.Delegate
-import io.openfuture.chain.core.model.entity.State
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
+import io.openfuture.chain.core.model.entity.state.NodeState
+import io.openfuture.chain.core.model.entity.state.State
+import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -135,12 +137,18 @@ interface ViewDelegateRepository : BaseRepository<ViewDelegate> {
 }
 
 @Repository
-interface StateRepository : BaseRepository<State> {
+interface StateRepository<T : State> : BaseRepository<T> {
 
-    fun findLastByAddress(address: String): State?
+    fun findLastByAddress(address: String): T?
 
-    fun findByAddress(address: String): List<State>
+    fun findByAddress(address: String): List<T>
 
-    fun findByAddressAndHeightBlock(address: String, heightBlock: Long): State?
+    fun findByAddressAndHeightBlock(address: String, heightBlock: Long): T?
 
 }
+
+@Repository
+interface NodeStateRepository : StateRepository<NodeState>
+
+@Repository
+interface WalletStateRepository : StateRepository<WalletState>

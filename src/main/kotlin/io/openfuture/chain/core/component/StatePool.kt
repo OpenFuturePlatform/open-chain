@@ -1,6 +1,6 @@
 package io.openfuture.chain.core.component
 
-import io.openfuture.chain.core.model.entity.State
+import io.openfuture.chain.core.model.entity.state.State
 import org.springframework.stereotype.Component
 import java.io.Closeable
 import java.util.concurrent.ConcurrentHashMap
