@@ -111,7 +111,7 @@ class TransferTransactionControllerTests : ControllerTests() {
 
     private fun createTransferTransaction(): TransferTransaction {
         val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature",
-            "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
+            "publicKey", MainBlockPayload("merkleHash", "stateHash")).apply { id = 1 }
         val header = TransactionHeader(1, 1, WALLET_ADDRESS)
         val footer = TransactionFooter("hash", "senderSignature", "senderPublicKey")
         val payload = TransferTransactionPayload(1, WALLET_ADDRESS)

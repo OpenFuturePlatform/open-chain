@@ -91,13 +91,18 @@ class DefaultStateService(
     }
 
     override fun updateVote(address: String, nodeId: String, type: VoteType) {
-        val state = getCurrentState(address)
-        when(type) {
-            VoteType.FOR -> state.data.votes.add(nodeId)
-            VoteType.AGAINST -> state.data.votes.remove(nodeId)
+        updateState(address) {
+            when (type) {
+                VoteType.FOR -> data.votes.add(nodeId)
+                VoteType.AGAINST -> data.votes.remove(nodeId)
+            }
         }
+    }
 
-        statePool.update(state)
+    override fun updateDelegateStatus(address: String, isDelegate: Boolean) {
+        updateState(address) {
+            data.isDelegate = isDelegate
+        }
     }
 
     @Transactional
@@ -114,8 +119,14 @@ class DefaultStateService(
 
 
     private fun updateBalanceByAddress(address: String, amount: Long) {
+        updateState(address) {
+            data.balance += amount
+        }
+    }
+
+    private fun updateState(address: String, action: State.() -> Unit) {
         val state = getCurrentState(address)
-        state.data.balance += amount
+        action(state)
         statePool.update(state)
     }
 
