@@ -304,28 +304,30 @@ class DefaultMainBlockService(
     private fun calculateStateHash(txMessages: List<TransactionMessage>): String {
         val hashes = mutableListOf<String>()
 
-        txMessages.forEach {
-            when (it) {
-                is TransferTransactionMessage -> {
-                    stateService.increaseBalance(it.recipientAddress, it.amount)
-                    stateService.decreaseBalance(it.senderAddress, it.amount + it.fee)
-                }
-                is VoteTransactionMessage -> {
-                    stateService.decreaseBalance(it.senderAddress, it.fee)
-                    stateService.updateVote(it.senderAddress, it.nodeId, VoteType.getById(it.voteTypeId))
-                }
-                is DelegateTransactionMessage -> {
-                    stateService.decreaseBalance(it.senderAddress, it.amount + it.fee)
-                    stateService.increaseBalance(consensusProperties.genesisAddress!!, it.amount)
-                    stateService.updateDelegateStatus(it.senderAddress, true)
-                }
-                is RewardTransactionMessage -> {
-                    rewardTransactionService.updateTransferBalance(it.recipientAddress, it.reward)
+        statePool.use { pool ->
+            txMessages.forEach {
+                when (it) {
+                    is TransferTransactionMessage -> {
+                        stateService.increaseBalance(it.recipientAddress, it.amount)
+                        stateService.decreaseBalance(it.senderAddress, it.amount + it.fee)
+                    }
+                    is VoteTransactionMessage -> {
+                        stateService.decreaseBalance(it.senderAddress, it.fee)
+                        stateService.updateVote(it.senderAddress, it.nodeId, VoteType.getById(it.voteTypeId))
+                    }
+                    is DelegateTransactionMessage -> {
+                        stateService.decreaseBalance(it.senderAddress, it.amount + it.fee)
+                        stateService.increaseBalance(consensusProperties.genesisAddress!!, it.amount)
+                        stateService.updateDelegateStatus(it.senderAddress, true)
+                    }
+                    is RewardTransactionMessage -> {
+                        rewardTransactionService.updateTransferBalance(it.recipientAddress, it.reward)
+                    }
                 }
             }
-        }
 
-        statePool.getPool().values.forEach { hashes.add(toHexString(sha256(it.getBytes()))) }
+            pool.getPool().values.forEach { hashes.add(toHexString(sha256(it.getBytes()))) }
+        }
 
         return calculateMerkleRoot(hashes)
     }
