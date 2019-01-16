@@ -169,7 +169,7 @@ class ChainSynchronizer(
                 }
             }
         } catch (e: ValidationException) {
-            log.debug("Transactions are invalid cause: ${e.message}")
+            log.debug("Transactions are invalid, cause: ${e.message}")
             return false
         }
         return true
@@ -183,6 +183,7 @@ class ChainSynchronizer(
             hashes.addAll(block.delegateTransactions.map { it.hash })
             hashes.add(block.rewardTransaction.hash)
             if (block.merkleHash != MainBlockPayload.calculateMerkleRoot(hashes)) {
+                log.debug("MerkleRoot is invalid")
                 return false
             }
         }
