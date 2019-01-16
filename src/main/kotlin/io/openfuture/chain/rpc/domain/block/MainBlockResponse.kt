@@ -10,7 +10,6 @@ class MainBlockResponse(
     signature: String,
     publicKey: String,
     val merkleHash: String,
-    val stateHash: String,
     val transactionsCount: Int,
     val epochIndex: Long
 ) : BaseBlockResponse(timestamp, height, previousHash, hash, signature, publicKey) {
@@ -23,7 +22,6 @@ class MainBlockResponse(
         block.signature,
         block.publicKey,
         block.payload.merkleHash,
-        block.payload.stateHash,
         block.getTransactionsCount(),
         epochIndex
     )
