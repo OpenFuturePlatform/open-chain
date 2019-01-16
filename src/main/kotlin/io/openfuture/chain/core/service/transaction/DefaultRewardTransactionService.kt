@@ -69,11 +69,22 @@ class DefaultRewardTransactionService(
                 return
             }
 
-            updateTransferBalance(message.recipientAddress, message.reward)
+            updateState(message)
+
             repository.save(RewardTransaction.of(message, block))
         } finally {
             BlockchainLock.writeLock.unlock()
         }
+    }
+
+    override fun updateState(message: RewardTransactionMessage) {
+        stateService.increaseBalance(message.recipientAddress, message.reward)
+
+        val senderAddress = consensusProperties.genesisAddress!!
+        val bank = stateService.getActualBalanceByAddress(senderAddress)
+        val reward = if (consensusProperties.rewardBlock!! > bank) bank else consensusProperties.rewardBlock!!
+
+        stateService.decreaseBalance(senderAddress, reward)
     }
 
     @Transactional(readOnly = true)
@@ -93,17 +104,6 @@ class DefaultRewardTransactionService(
     @Transactional
     override fun save(transaction: RewardTransaction) {
         repository.save(transaction)
-    }
-
-    @Transactional
-    override fun updateTransferBalance(to: String, amount: Long) {
-        stateService.increaseBalance(to, amount)
-
-        val senderAddress = consensusProperties.genesisAddress!!
-        val bank = stateService.getActualBalanceByAddress(senderAddress)
-        val reward = if (consensusProperties.rewardBlock!! > bank) bank else consensusProperties.rewardBlock!!
-
-        stateService.decreaseBalance(senderAddress, reward)
     }
 
 }

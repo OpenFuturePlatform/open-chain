@@ -105,6 +105,15 @@ class DefaultStateService(
         }
     }
 
+    override fun updateOwnVoteCount(address: String, type: VoteType) {
+        updateState(address) {
+            when (type) {
+                VoteType.FOR -> data.ownVotesCount++
+                VoteType.AGAINST -> data.ownVotesCount--
+            }
+        }
+    }
+
     @Transactional
     override fun create(state: State): State = repository.save(state)
 

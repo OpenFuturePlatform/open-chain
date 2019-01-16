@@ -40,6 +40,7 @@ class State(
     data class Data(
         var balance: Long = 0L,
         val votes: MutableList<String> = mutableListOf(),
+        var ownVotesCount: Int = 0,
         var isDelegate: Boolean = false
     ) {
 
@@ -48,6 +49,7 @@ class State(
             return ByteBuffer.allocate(LONG_BYTES + voteBytes.size + BYTE)
                 .putLong(balance)
                 .put(voteBytes)
+                .putInt(ownVotesCount)
                 .put((if (isDelegate) 1 else 0).toByte())
                 .array()
         }

@@ -307,22 +307,10 @@ class DefaultMainBlockService(
         statePool.use { pool ->
             txMessages.forEach {
                 when (it) {
-                    is TransferTransactionMessage -> {
-                        stateService.increaseBalance(it.recipientAddress, it.amount)
-                        stateService.decreaseBalance(it.senderAddress, it.amount + it.fee)
-                    }
-                    is VoteTransactionMessage -> {
-                        stateService.decreaseBalance(it.senderAddress, it.fee)
-                        stateService.updateVote(it.senderAddress, it.nodeId, VoteType.getById(it.voteTypeId))
-                    }
-                    is DelegateTransactionMessage -> {
-                        stateService.decreaseBalance(it.senderAddress, it.amount + it.fee)
-                        stateService.increaseBalance(consensusProperties.genesisAddress!!, it.amount)
-                        stateService.updateDelegateStatus(it.senderAddress, true)
-                    }
-                    is RewardTransactionMessage -> {
-                        rewardTransactionService.updateTransferBalance(it.recipientAddress, it.reward)
-                    }
+                    is TransferTransactionMessage -> transferTransactionService.updateState(it)
+                    is VoteTransactionMessage -> voteTransactionService.updateState(it)
+                    is DelegateTransactionMessage -> delegateTransactionService.updateState(it)
+                    is RewardTransactionMessage -> rewardTransactionService.updateState(it)
                 }
             }
 

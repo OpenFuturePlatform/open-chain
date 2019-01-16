@@ -138,6 +138,8 @@ interface TransferTransactionService {
 
     fun toBlock(message: TransferTransactionMessage, block: MainBlock): TransferTransaction
 
+    fun updateState(message: TransferTransactionMessage)
+
     fun verify(message: TransferTransactionMessage): Boolean
 
 }
@@ -152,11 +154,11 @@ interface RewardTransactionService {
 
     fun toBlock(message: RewardTransactionMessage, block: MainBlock)
 
+    fun updateState(message: RewardTransactionMessage)
+
     fun verify(message: RewardTransactionMessage): Boolean
 
     fun save(transaction: RewardTransaction)
-
-    fun updateTransferBalance(to: String, amount: Long)
 
 }
 
@@ -180,6 +182,8 @@ interface VoteTransactionService {
 
     fun toBlock(message: VoteTransactionMessage, block: MainBlock): VoteTransaction
 
+    fun updateState(message: VoteTransactionMessage)
+
     fun verify(message: VoteTransactionMessage): Boolean
 
 }
@@ -199,6 +203,8 @@ interface DelegateTransactionService {
     fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction
 
     fun toBlock(message: DelegateTransactionMessage, block: MainBlock): DelegateTransaction
+
+    fun updateState(message: DelegateTransactionMessage)
 
     fun verify(message: DelegateTransactionMessage): Boolean
 
@@ -251,6 +257,8 @@ interface StateService {
     fun getVotesByAddress(address: String): List<String>
 
     fun updateVote(address: String, nodeId: String, type: VoteType)
+
+    fun updateOwnVoteCount(address: String, type: VoteType)
 
     fun updateDelegateStatus(address: String, isDelegate: Boolean)
 

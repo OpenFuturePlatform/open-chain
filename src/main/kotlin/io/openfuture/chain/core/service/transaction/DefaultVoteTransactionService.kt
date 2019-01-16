@@ -97,7 +97,7 @@ internal class DefaultVoteTransactionService(
                 return tx
             }
 
-            stateService.decreaseBalance(message.senderAddress, message.fee)
+            updateState(message)
 
             val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
             if (null != utx) {
@@ -108,6 +108,13 @@ internal class DefaultVoteTransactionService(
         } finally {
             BlockchainLock.writeLock.unlock()
         }
+    }
+
+    override fun updateState(message: VoteTransactionMessage) {
+        val type = VoteType.getById(message.voteTypeId)
+        stateService.updateVote(message.senderAddress, message.nodeId, type)
+        stateService.updateOwnVoteCount(delegateService.getByNodeId(message.nodeId).address, type)
+        stateService.decreaseBalance(message.senderAddress, message.fee)
     }
 
     override fun verify(message: VoteTransactionMessage): Boolean {
@@ -121,11 +128,7 @@ internal class DefaultVoteTransactionService(
     }
 
     @Transactional
-    override fun save(tx: VoteTransaction): VoteTransaction {
-        val type = tx.payload.getVoteType()
-        stateService.updateVote(tx.header.senderAddress, tx.payload.nodeId, type)
-        return super.save(tx)
-    }
+    override fun save(tx: VoteTransaction): VoteTransaction = super.save(tx)
 
     override fun validate(utx: UnconfirmedVoteTransaction) {
         super.validate(utx)

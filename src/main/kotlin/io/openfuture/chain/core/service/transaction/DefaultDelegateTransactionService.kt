@@ -88,8 +88,7 @@ class DefaultDelegateTransactionService(
                 return tx
             }
 
-            stateService.decreaseBalance(message.senderAddress, message.amount + message.fee)
-            stateService.increaseBalance(consensusProperties.genesisAddress!!, message.amount)
+            updateState(message)
 
             val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
             if (null != utx) {
@@ -100,6 +99,12 @@ class DefaultDelegateTransactionService(
         } finally {
             BlockchainLock.writeLock.unlock()
         }
+    }
+
+    override fun updateState(message: DelegateTransactionMessage) {
+        stateService.decreaseBalance(message.senderAddress, message.amount + message.fee)
+        stateService.increaseBalance(consensusProperties.genesisAddress!!, message.amount)
+        stateService.updateDelegateStatus(message.senderAddress, true)
     }
 
     override fun verify(message: DelegateTransactionMessage): Boolean {
