@@ -18,7 +18,7 @@ CREATE TABLE states (
   UNIQUE (address, block_id)
 );
 
-INSERT INTO states (id, address, data, block_id)
+INSERT INTO states (id, address, data, height_block)
 VALUES (1, '0x0000000000000000000000000000000000000000',
 '{"balance":10000000000000000, "votes": [], "ownVotesCount": 0, "isDelegate":false}'
 , 1);
