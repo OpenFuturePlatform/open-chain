@@ -241,7 +241,15 @@ interface StateService {
 
     fun getActualBalanceByAddress(address: String): Long
 
+    fun increaseBalance(address: String, amount: Long)
+
+    fun decreaseBalance(address: String, amount: Long)
+
     fun getVotesByAddress(address: String): List<String>
+
+    fun addVote(address: String, nodeId: String)
+
+    fun removeVote(address: String, nodeId: String)
 
     fun create(state: State): State
 

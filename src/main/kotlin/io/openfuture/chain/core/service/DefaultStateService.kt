@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service
 
+import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.model.entity.State
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
@@ -15,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional(readOnly = true)
 class DefaultStateService(
     private val repository: StateRepository,
-    private val unconfirmedTransactionRepository: UTransactionRepository<UnconfirmedTransaction>
+    private val statePool: StatePool,
+    private val unconfirmedTransactionRepository: UTransactionRepository<UnconfirmedTransaction>,
+    private val blockService: BlockService
 ) : StateService {
 
     companion object {
@@ -59,6 +62,14 @@ class DefaultStateService(
         }
     }
 
+    override fun increaseBalance(address: String, amount: Long) {
+        updateBalanceByAddress(address, amount)
+    }
+
+    override fun decreaseBalance(address: String, amount: Long) {
+        updateBalanceByAddress(address, -amount)
+    }
+
     override fun getActualBalanceByAddress(address: String): Long {
         BlockchainLock.readLock.lock()
         try {
@@ -78,6 +89,18 @@ class DefaultStateService(
         }
     }
 
+    override fun addVote(address: String, nodeId: String) {
+        val state = getCurrentState(address)
+        state.data.votes.add(nodeId)
+        statePool.update(state)
+    }
+
+    override fun removeVote(address: String, nodeId: String) {
+        val state = getCurrentState(address)
+        state.data.votes.remove(nodeId)
+        statePool.update(state)
+    }
+
     @Transactional
     override fun create(state: State): State = repository.save(state)
 
@@ -89,5 +112,23 @@ class DefaultStateService(
                 else -> 0
             }
         }.sum()
+
+
+    private fun updateBalanceByAddress(address: String, amount: Long) {
+        val state = getCurrentState(address)
+        state.data.balance += amount
+        statePool.update(state)
+    }
+
+    private fun getCurrentState(address: String): State {
+        BlockchainLock.readLock.lock()
+        try {
+            return statePool.get(address)
+                ?: repository.findLastByAddress(address)
+                ?: State(address, State.Data(), blockService.getLast())
+        } finally {
+            BlockchainLock.readLock.unlock()
+        }
+    }
 
 }
