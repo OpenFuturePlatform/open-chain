@@ -47,7 +47,7 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
 
     abstract fun validateNew(utx: U)
 
-    open fun validate(utx: U) {
+    fun validate(utx: U) {
 
         validateBase(utx.header, utx.externalPayload, utx.footer)
 
@@ -56,9 +56,9 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         }
     }
 
-    open fun save(utx: U): U = unconfirmedRepository.save(utx)
+    fun save(utx: U): U = unconfirmedRepository.save(utx)
 
-    open fun save(tx: T): T = repository.save(tx)
+    fun save(tx: T): T = repository.save(tx)
 
     protected fun confirm(utx: U, tx: T): T {
         unconfirmedRepository.delete(utx)
