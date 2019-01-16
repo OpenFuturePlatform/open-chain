@@ -250,6 +250,8 @@ interface StateService {
 
     fun updateVote(address: String, nodeId: String, type: VoteType)
 
+    fun updateDelegateStatus(address: String, isDelegate: Boolean)
+
     fun create(state: State): State
 
 }
