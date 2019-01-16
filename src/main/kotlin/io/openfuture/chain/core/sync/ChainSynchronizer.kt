@@ -97,29 +97,13 @@ class ChainSynchronizer(
                 return
             }
 
-            val genesisBlock = fromMessage(message.genesisBlock!!)
-            val listBlocks: MutableList<Block> = mutableListOf(genesisBlock)
-
             if (syncSession!!.syncMode == FULL &&
                 !isValidMerkleRoot(message.mainBlocks) && !isValidTransactions(message.mainBlocks)) {
                 requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
                 return
             }
 
-            val mainBlocks = message.mainBlocks.map {
-                val mainBlock = MainBlock.of(it)
-                mainBlock.payload.rewardTransaction = mutableListOf(RewardTransaction.of(it.rewardTransaction, mainBlock))
-                if (syncSession!!.syncMode == FULL) {
-                    it.voteTransactions.forEach { vTx -> mainBlock.payload.voteTransactions.add(VoteTransaction.of(vTx, mainBlock)) }
-                    it.delegateTransactions.forEach { dTx -> mainBlock.payload.delegateTransactions.add(DelegateTransaction.of(dTx, mainBlock)) }
-                    it.transferTransactions.forEach { vTx -> mainBlock.payload.transferTransactions.add(TransferTransaction.of(vTx, mainBlock)) }
-                }
-                mainBlock
-            }
-
-            listBlocks.addAll(mainBlocks)
-
-            if (!syncSession!!.add(listBlocks)) {
+            if (!syncSession!!.add(convertToBlocks(message))) {
                 requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
                 return
             }
@@ -139,6 +123,22 @@ class ChainSynchronizer(
     fun isInSync(block: Block): Boolean {
         val lastBlock = blockService.getLast()
         return isValidHeight(block, lastBlock) && isValidPreviousHash(block, lastBlock)
+    }
+
+    private fun convertToBlocks(message: EpochResponseMessage): List<Block> {
+        val listBlocks: MutableList<Block> = mutableListOf(fromMessage(message.genesisBlock!!))
+        val mainBlocks = message.mainBlocks.map {
+            val mainBlock = MainBlock.of(it)
+            mainBlock.payload.rewardTransaction = mutableListOf(RewardTransaction.of(it.rewardTransaction, mainBlock))
+            if (syncSession!!.syncMode == FULL) {
+                it.voteTransactions.forEach { vTx -> mainBlock.payload.voteTransactions.add(VoteTransaction.of(vTx, mainBlock)) }
+                it.delegateTransactions.forEach { dTx -> mainBlock.payload.delegateTransactions.add(DelegateTransaction.of(dTx, mainBlock)) }
+                it.transferTransactions.forEach { vTx -> mainBlock.payload.transferTransactions.add(TransferTransaction.of(vTx, mainBlock)) }
+            }
+            mainBlock
+        }
+        listBlocks.addAll(mainBlocks)
+        return listBlocks
     }
 
     private fun isValidRewardTransactions(message: RewardTransactionMessage): Boolean = rewardTransactionService.verify(message)
@@ -230,7 +230,7 @@ class ChainSynchronizer(
             filteredStorage.asReversed().forEach { block ->
                 if (block is MainBlock) {
                     val rewardTransaction = block.payload.rewardTransaction.first()
-                    block.payload.rewardTransaction.clear()
+                    block.payload.rewardTransaction = mutableListOf()
 
                     var transferTransactions: List<TransferTransaction>? = null
                     var voteTransactions: List<VoteTransaction>? = null
