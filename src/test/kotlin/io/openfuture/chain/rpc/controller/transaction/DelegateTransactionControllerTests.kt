@@ -57,7 +57,8 @@ class DelegateTransactionControllerTests : ControllerTests() {
     @Test
     fun getTransactionByHashShouldReturnTransaction() {
         val hash = "hash"
-        val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
+        val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
+            MainBlockPayload("merkleHash", "stateHash")).apply { id = 1 }
         val header = TransactionHeader(1L, 1L, WALLET_ADDRESS)
         val footer = TransactionFooter("senderPublicKey", "senderSignature", "hash")
         val payload = DelegateTransactionPayload("nodeId", "delegateKey", "delegateHost", 8080, 1)
