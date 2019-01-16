@@ -169,7 +169,7 @@ class ChainSynchronizer(
                 }
             }
         } catch (e: ValidationException) {
-            log.debug("BlockTransactionsResponseMessage is invalid cause: ${e.message}")
+            log.debug("Transactions are invalid cause: ${e.message}")
             return false
         }
         return true
