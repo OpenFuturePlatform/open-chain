@@ -14,11 +14,11 @@ data class WalletPayload(
 
     @Convert(converter = WalletPayloadConverter::class)
     @Column(name = "data", nullable = false)
-    val date: Data
+    val data: Data
 
 ) : StatePayload {
 
-    override fun getBytes(): ByteArray = date.getBytes()
+    override fun getBytes(): ByteArray = data.getBytes()
 
     data class Data(
         var balance: Long = 0L,

@@ -15,11 +15,11 @@ data class NodePayload(
 
     @Convert(converter = NodePayloadConverter::class)
     @Column(name = "data", nullable = false)
-    val date: Data
+    val data: Data
 
 ) : StatePayload {
 
-    override fun getBytes(): ByteArray = date.getBytes()
+    override fun getBytes(): ByteArray = data.getBytes()
 
     data class Data(
         var address: String,
