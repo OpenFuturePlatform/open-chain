@@ -1,9 +1,8 @@
 package io.openfuture.chain.rpc.controller
 
+import io.openfuture.chain.core.service.StateService
 import io.openfuture.chain.core.service.ViewDelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
-import io.openfuture.chain.core.service.WalletService
-import io.openfuture.chain.core.service.WalletVoteService
 import io.openfuture.chain.crypto.annotation.AddressChecksum
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -27,8 +26,7 @@ import javax.validation.Valid
 @RequestMapping("/rpc/accounts")
 class AccountController(
     private val cryptoService: CryptoService,
-    private val walletService: WalletService,
-    private val walletVoteService: WalletVoteService,
+    private val stateService: StateService,
     private val viewDelegateService: ViewDelegateService,
     private val voteTransactionService: VoteTransactionService
 ) {
@@ -44,16 +42,16 @@ class AccountController(
 
     @GetMapping("/wallets/{address}/balance")
     fun getBalance(@PathVariable @AddressChecksum address: String): Long =
-        walletService.getActualBalanceByAddress(address)
+        stateService.getActualBalanceByAddress(address)
 
     @GetMapping("/wallets/{address}/delegates")
     fun getDelegates(@PathVariable @AddressChecksum address: String, request: PageRequest): PageResponse<VotesResponse> {
-        val delegates = walletVoteService.getVotesByAddress(address)
+        val delegates = stateService.getVotesByAddress(address)
             .map {
                 VotesResponse(
-                    viewDelegateService.getByNodeId(it.id.nodeId),
-                    voteTransactionService.getLastVoteForDelegate(address, it.id.nodeId).header.timestamp,
-                    voteTransactionService.getUnconfirmedBySenderAgainstDelegate(address, it.id.nodeId) != null
+                    viewDelegateService.getByNodeId(it),
+                    voteTransactionService.getLastVoteForDelegate(address, it).header.timestamp,
+                    voteTransactionService.getUnconfirmedBySenderAgainstDelegate(address, it) != null
                 )
             }
 

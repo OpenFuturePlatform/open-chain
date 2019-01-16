@@ -11,7 +11,7 @@ import io.openfuture.chain.core.model.entity.transaction.payload.RewardTransacti
 import io.openfuture.chain.core.repository.RewardTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.RewardTransactionService
-import io.openfuture.chain.core.service.WalletService
+import io.openfuture.chain.core.service.StateService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.core.RewardTransactionMessage
@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultRewardTransactionService(
     private val repository: RewardTransactionRepository,
-    private val walletService: WalletService,
+    private val stateService: StateService,
     private val consensusProperties: ConsensusProperties,
     private val delegateService: DelegateService,
     private val keyHolder: NodeKeyHolder
@@ -49,7 +49,7 @@ class DefaultRewardTransactionService(
     override fun create(timestamp: Long, fees: Long): RewardTransactionMessage {
         val senderAddress = consensusProperties.genesisAddress!!
         val rewardBlock = consensusProperties.rewardBlock!!
-        val bank = walletService.getActualBalanceByAddress(senderAddress)
+        val bank = stateService.getActualBalanceByAddress(senderAddress)
         val reward = fees + if (rewardBlock > bank) bank else rewardBlock
         val fee = 0L
         val publicKey = keyHolder.getPublicKeyAsHexString()
@@ -96,13 +96,13 @@ class DefaultRewardTransactionService(
     }
 
     private fun updateTransferBalance(to: String, amount: Long) {
-        walletService.increaseBalance(to, amount)
+        stateService.increaseBalance(to, amount)
 
         val senderAddress = consensusProperties.genesisAddress!!
-        val bank = walletService.getActualBalanceByAddress(senderAddress)
+        val bank = stateService.getActualBalanceByAddress(senderAddress)
         val reward = if (consensusProperties.rewardBlock!! > bank) bank else consensusProperties.rewardBlock!!
 
-        walletService.decreaseBalance(senderAddress, reward)
+        stateService.decreaseBalance(senderAddress, reward)
     }
 
 }

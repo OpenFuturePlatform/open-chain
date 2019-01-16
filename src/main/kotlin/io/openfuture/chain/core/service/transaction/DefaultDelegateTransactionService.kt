@@ -88,8 +88,8 @@ class DefaultDelegateTransactionService(
                 return tx
             }
 
-            walletService.decreaseBalance(message.senderAddress, message.amount + message.fee)
-            walletService.increaseBalance(consensusProperties.genesisAddress!!, message.amount)
+            stateService.decreaseBalance(message.senderAddress, message.amount + message.fee)
+            stateService.increaseBalance(consensusProperties.genesisAddress!!, message.amount)
 
             val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
             if (null != utx) {

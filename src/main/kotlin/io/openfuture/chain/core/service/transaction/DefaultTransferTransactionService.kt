@@ -90,8 +90,8 @@ class DefaultTransferTransactionService(
                 return tx
             }
 
-            walletService.increaseBalance(message.recipientAddress, message.amount)
-            walletService.decreaseBalance(message.senderAddress, message.amount + message.fee)
+            stateService.increaseBalance(message.recipientAddress, message.amount)
+            stateService.decreaseBalance(message.senderAddress, message.amount + message.fee)
 
             val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
             if (null != utx) {

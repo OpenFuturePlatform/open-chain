@@ -97,7 +97,7 @@ internal class DefaultVoteTransactionService(
                 return tx
             }
 
-            walletService.decreaseBalance(message.senderAddress, message.fee)
+            stateService.decreaseBalance(message.senderAddress, message.fee)
 
             val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
             if (null != utx) {
@@ -168,8 +168,8 @@ internal class DefaultVoteTransactionService(
 
     private fun updateWalletVotes(senderAddress: String, nodeId: String, type: VoteType) {
         when (type) {
-            VoteType.FOR -> walletVoteService.add(senderAddress, nodeId)
-            VoteType.AGAINST -> walletVoteService.remove(senderAddress, nodeId)
+            VoteType.FOR -> stateService.addVote(senderAddress, nodeId)
+            VoteType.AGAINST -> stateService.removeVote(senderAddress, nodeId)
         }
     }
 
