@@ -101,8 +101,15 @@ class DefaultMainBlockService(
             }
 
             val rewardTransactionMessage = rewardTransactionService.create(timestamp, fees)
+            val txMessages = listOf(
+                *voteTransactions.toTypedArray(),
+                *delegateTransactions.toTypedArray(),
+                *transferTransactions.toTypedArray(),
+                rewardTransactionMessage
+            )
+
             val merkleHash = calculateMerkleRoot(hashes + rewardTransactionMessage.hash)
-            val stateHash = calculateStateHash(transactionsForBlock, rewardTransactionMessage)
+            val stateHash = calculateStateHash(txMessages)
             val payload = MainBlockPayload(merkleHash, stateHash)
             val hash = createHash(timestamp, height, previousHash, payload)
             val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
@@ -173,8 +180,6 @@ class DefaultMainBlockService(
             throw ValidationException("Invalid merkle hash: ${message.merkleHash}")
         }
 
-        //todo add isValidStateHash
-
         if (!isValidBalances(message.getExternalTransactions())) {
             throw ValidationException("Invalid balances")
         }
@@ -193,6 +198,10 @@ class DefaultMainBlockService(
 
         if (!isValidTransferTransactions(message.transferTransactions)) {
             throw ValidationException("Invalid transfer transactions")
+        }
+
+        if (!isValidStateHash(message.stateHash, message.getAllTransactions())) {
+            throw ValidationException("Invalid state hash: ${message.stateHash}")
         }
     }
 
@@ -253,6 +262,14 @@ class DefaultMainBlockService(
         return merkleHash == calculateMerkleRoot(transactions)
     }
 
+    private fun isValidStateHash(stateHash: String, txMessages: List<TransactionMessage>): Boolean {
+        if (txMessages.isEmpty()) {
+            return false
+        }
+
+        return stateHash == calculateStateHash(txMessages)
+    }
+
     private fun isValidReward(fees: Long, reward: Long): Boolean {
         val senderAddress = consensusProperties.genesisAddress!!
         val bank = stateService.getActualBalanceByAddress(senderAddress)
@@ -284,27 +301,29 @@ class DefaultMainBlockService(
         return toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
     }
 
-    private fun calculateStateHash(utransactions: List<UnconfirmedTransaction>, rewardTransactionMessage: RewardTransactionMessage): String {
+    private fun calculateStateHash(txMessages: List<TransactionMessage>): String {
         val hashes = mutableListOf<String>()
 
-        utransactions.forEach {
+        txMessages.forEach {
             when (it) {
-                is UnconfirmedTransferTransaction -> {
-                    stateService.increaseBalance(it.payload.recipientAddress, it.payload.amount)
-                    stateService.decreaseBalance(it.header.senderAddress, it.payload.amount + it.header.fee)
+                is TransferTransactionMessage -> {
+                    stateService.increaseBalance(it.recipientAddress, it.amount)
+                    stateService.decreaseBalance(it.senderAddress, it.amount + it.fee)
                 }
-                is UnconfirmedVoteTransaction -> {
-                    stateService.decreaseBalance(it.header.senderAddress, it.header.fee)
-                    stateService.updateVote(it.header.senderAddress, it.payload.nodeId, it.payload.getVoteType())
+                is VoteTransactionMessage -> {
+                    stateService.decreaseBalance(it.senderAddress, it.fee)
+                    stateService.updateVote(it.senderAddress, it.nodeId, VoteType.getById(it.voteTypeId))
                 }
-                is UnconfirmedDelegateTransaction -> {
-                    stateService.decreaseBalance(it.header.senderAddress, it.payload.amount + it.header.fee)
-                    stateService.increaseBalance(consensusProperties.genesisAddress!!, it.payload.amount)
+                is DelegateTransactionMessage -> {
+                    stateService.decreaseBalance(it.senderAddress, it.amount + it.fee)
+                    stateService.increaseBalance(consensusProperties.genesisAddress!!, it.amount)
+                    stateService.updateDelegateStatus(it.senderAddress, true)
+                }
+                is RewardTransactionMessage -> {
+                    rewardTransactionService.updateTransferBalance(it.recipientAddress, it.reward)
                 }
             }
         }
-
-        rewardTransactionService.updateTransferBalance(rewardTransactionMessage.recipientAddress, rewardTransactionMessage.reward)
 
         statePool.getPool().values.forEach { hashes.add(toHexString(sha256(it.getBytes()))) }
 
