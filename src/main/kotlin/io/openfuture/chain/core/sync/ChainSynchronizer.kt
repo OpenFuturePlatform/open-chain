@@ -5,10 +5,7 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
-import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncStatus.*
@@ -24,6 +21,7 @@ import io.openfuture.chain.network.service.NetworkApiService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
@@ -73,7 +71,7 @@ class ChainSynchronizer(
         resetRequestScheduler()
         val nodesInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
         try {
-            val currentGenesisBlock = fromMessage(message)
+            val currentGenesisBlock = GenesisBlock.of(message)
             val lastLocalGenesisBlock = genesisBlockService.getLast()
 
             if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
@@ -88,6 +86,7 @@ class ChainSynchronizer(
         }
     }
 
+    @Transactional
     fun onEpochResponse(message: EpochResponseMessage) {
         resetRequestScheduler()
         val nodesInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
@@ -126,7 +125,7 @@ class ChainSynchronizer(
     }
 
     private fun convertToBlocks(message: EpochResponseMessage): List<Block> {
-        val listBlocks: MutableList<Block> = mutableListOf(fromMessage(message.genesisBlock!!))
+        val listBlocks: MutableList<Block> = mutableListOf(GenesisBlock.of(message.genesisBlock!!))
         val mainBlocks = message.mainBlocks.map {
             val mainBlock = MainBlock.of(it)
             mainBlock.payload.rewardTransaction = mutableListOf(RewardTransaction.of(it.rewardTransaction, mainBlock))
@@ -217,11 +216,6 @@ class ChainSynchronizer(
 
     private fun getNodeInfo(delegate: Delegate): NodeInfo = NodeInfo(delegate.nodeId, NetworkAddress(delegate.host, delegate.port))
 
-    private fun fromMessage(message: GenesisBlockMessage): GenesisBlock {
-        val delegates = message.delegates.asSequence().map { delegateService.getByPublicKey(it) }.toMutableList()
-        return GenesisBlock.of(message, delegates)
-    }
-
     private fun saveBlocks() {
         try {
             val lastLocalBlock = blockService.getLast()
@@ -232,14 +226,12 @@ class ChainSynchronizer(
                     val rewardTransaction = block.payload.rewardTransaction.first()
                     block.payload.rewardTransaction = mutableListOf()
 
-                    var transferTransactions: List<TransferTransaction>? = null
-                    var voteTransactions: List<VoteTransaction>? = null
-                    var delegateTransactions: List<DelegateTransaction>? = null
+                    val transactions = mutableListOf<Transaction>()
 
                     if (syncSession!!.syncMode == SyncMode.FULL) {
-                        transferTransactions = block.payload.transferTransactions.toList()
-                        voteTransactions = block.payload.voteTransactions.toList()
-                        delegateTransactions = block.payload.delegateTransactions.toList()
+                        transactions.addAll(block.payload.transferTransactions)
+                        transactions.addAll(block.payload.voteTransactions)
+                        transactions.addAll(block.payload.delegateTransactions)
 
                         block.payload.transferTransactions = mutableListOf()
                         block.payload.voteTransactions = mutableListOf()
@@ -248,25 +240,34 @@ class ChainSynchronizer(
 
                     blockService.save(block)
                     rewardTransaction.block = block
-                    rewardTransactionService.save(rewardTransaction)
+                    rewardTransactionService.toBlock(rewardTransaction.toMessage(), block)
 
                     if (syncSession!!.syncMode == SyncMode.FULL) {
-                        transferTransactions!!.forEach {
-                            it.block = block
-                            transferTransactionService.toBlock(it.toMessage(), block)
-                        }
-
-                        voteTransactions!!.forEach {
-                            it.block = block
-                            voteTransactionService.toBlock(it.toMessage(), block)
-                        }
-
-                        delegateTransactions!!.forEach {
-                            it.block = block
-                            delegateTransactionService.toBlock(it.toMessage(), block)
+                        transactions.forEach {
+                            if (it is TransferTransaction) {
+                                it.block = block
+                                transferTransactionService.toBlock(it.toMessage(), block)
+                            }
+                            if (it is DelegateTransaction) {
+                                it.block = block
+                                delegateTransactionService.toBlock(it.toMessage(), block)
+                            }
+                            if (it is VoteTransaction) {
+                                it.block = block
+                                voteTransactionService.toBlock(it.toMessage(), block)
+                            }
                         }
                     }
-                } else {
+                } else if (block is GenesisBlock) {
+                    val delegates = block.payload.activeDelegates.toMutableList()
+                    block.payload.activeDelegates.clear()
+                    delegates.forEach { delegate ->
+                        if (delegateService.isExistsByPublicKey(delegate.publicKey)) {
+                            block.payload.activeDelegates.add(delegateService.getByPublicKey(delegate.publicKey))
+                        } else {
+                            block.payload.activeDelegates.add(delegateService.save(delegate))
+                        }
+                    }
                     blockService.save(block)
                 }
             }
