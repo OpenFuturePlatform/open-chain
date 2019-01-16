@@ -99,13 +99,14 @@ class DefaultMainBlockService(
 
             val rewardTransactionMessage = rewardTransactionService.create(timestamp, fees)
             val merkleHash = calculateMerkleRoot(hashes + rewardTransactionMessage.hash)
-            val payload = MainBlockPayload(merkleHash)
+            val stateHash = ""//todo calculate state hash
+            val payload = MainBlockPayload(merkleHash, stateHash)
             val hash = createHash(timestamp, height, previousHash, payload)
             val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
             val publicKey = keyHolder.getPublicKeyAsHexString()
 
             return PendingBlockMessage(height, previousHash, timestamp, ByteUtils.toHexString(hash), signature, publicKey,
-                merkleHash, rewardTransactionMessage, voteTransactions, delegateTransactions, transferTransactions)
+                merkleHash, stateHash, rewardTransactionMessage, voteTransactions, delegateTransactions, transferTransactions)
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -168,6 +169,8 @@ class DefaultMainBlockService(
         if (!isValidMerkleHash(message.merkleHash, message.getAllTransactions().map { it.hash })) {
             throw ValidationException("Invalid merkle hash: ${message.merkleHash}")
         }
+
+        //todo add isValidStateHash
 
         if (!isValidBalances(message.getExternalTransactions())) {
             throw ValidationException("Invalid balances")

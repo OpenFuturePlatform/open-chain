@@ -13,7 +13,8 @@ CREATE INDEX block_height
 --
 CREATE TABLE main_blocks (
   id          BIGINT PRIMARY KEY REFERENCES blocks,
-  merkle_hash VARCHAR NOT NULL
+  merkle_hash VARCHAR NOT NULL,
+  state_hash  VARCHAR NOT NULL
 );
 --
 CREATE TABLE genesis_blocks (

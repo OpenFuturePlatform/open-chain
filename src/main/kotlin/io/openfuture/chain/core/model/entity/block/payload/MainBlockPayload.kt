@@ -14,6 +14,9 @@ class MainBlockPayload(
     @Column(name = "merkle_hash", nullable = false)
     var merkleHash: String,
 
+    @Column(name = "state_hash", nullable = false)
+    var stateHash: String,
+
     @JsonIgnore
     @OneToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -52,6 +55,6 @@ class MainBlockPayload(
 
 ) : BlockPayload {
 
-    override fun getBytes(): ByteArray = merkleHash.toByteArray(UTF_8)
+    override fun getBytes(): ByteArray = merkleHash.toByteArray(UTF_8) + stateHash.toByteArray(UTF_8)
 
 }
