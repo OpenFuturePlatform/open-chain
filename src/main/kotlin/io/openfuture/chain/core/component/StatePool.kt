@@ -2,10 +2,11 @@ package io.openfuture.chain.core.component
 
 import io.openfuture.chain.core.model.entity.State
 import org.springframework.stereotype.Component
+import java.io.Closeable
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
-class StatePool {
+class StatePool : Closeable {
 
     private val pool: MutableMap<String, State> = ConcurrentHashMap()
 
@@ -18,6 +19,10 @@ class StatePool {
 
     fun clear() {
         pool.clear()
+    }
+
+    override fun close() {
+        clear()
     }
 
 }
