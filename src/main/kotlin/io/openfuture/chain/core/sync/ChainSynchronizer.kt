@@ -232,9 +232,9 @@ class ChainSynchronizer(
                     val rewardTransaction = block.payload.rewardTransaction.first()
                     block.payload.rewardTransaction.clear()
 
-                    var transferTransactions = listOf<TransferTransaction>()
-                    var voteTransactions = listOf<VoteTransaction>()
-                    var delegateTransactions = listOf<DelegateTransaction>()
+                    var transferTransactions: List<TransferTransaction>? = null
+                    var voteTransactions: List<VoteTransaction>? = null
+                    var delegateTransactions: List<DelegateTransaction>? = null
 
                     if (syncSession!!.syncMode == SyncMode.FULL) {
                         transferTransactions = block.payload.transferTransactions.toList()
@@ -251,17 +251,17 @@ class ChainSynchronizer(
                     rewardTransactionService.save(rewardTransaction)
 
                     if (syncSession!!.syncMode == SyncMode.FULL) {
-                        transferTransactions.forEach {
+                        transferTransactions!!.forEach {
                             it.block = block
                             transferTransactionService.toBlock(it.toMessage(), block)
                         }
 
-                        voteTransactions.forEach {
+                        voteTransactions!!.forEach {
                             it.block = block
                             voteTransactionService.toBlock(it.toMessage(), block)
                         }
 
-                        delegateTransactions.forEach {
+                        delegateTransactions!!.forEach {
                             it.block = block
                             delegateTransactionService.toBlock(it.toMessage(), block)
                         }
