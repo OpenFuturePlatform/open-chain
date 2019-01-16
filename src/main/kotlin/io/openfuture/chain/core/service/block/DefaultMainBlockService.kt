@@ -3,6 +3,7 @@ package io.openfuture.chain.core.service.block
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
+import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.component.TransactionThroughput
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
@@ -18,12 +19,13 @@ import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.crypto.util.HashUtils.sha256
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.rpc.domain.base.PageRequest
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.toHexString
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -40,6 +42,7 @@ class DefaultMainBlockService(
     private val keyHolder: NodeKeyHolder,
     private val throughput: TransactionThroughput,
     private val stateService: StateService,
+    private val statePool: StatePool,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository,
     private val voteTransactionService: VoteTransactionService,
@@ -99,13 +102,13 @@ class DefaultMainBlockService(
 
             val rewardTransactionMessage = rewardTransactionService.create(timestamp, fees)
             val merkleHash = calculateMerkleRoot(hashes + rewardTransactionMessage.hash)
-            val stateHash = ""//todo calculate state hash
+            val stateHash = calculateStateHash(transactionsForBlock, rewardTransactionMessage)
             val payload = MainBlockPayload(merkleHash, stateHash)
             val hash = createHash(timestamp, height, previousHash, payload)
             val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
             val publicKey = keyHolder.getPublicKeyAsHexString()
 
-            return PendingBlockMessage(height, previousHash, timestamp, ByteUtils.toHexString(hash), signature, publicKey,
+            return PendingBlockMessage(height, previousHash, timestamp, toHexString(hash), signature, publicKey,
                 merkleHash, stateHash, rewardTransactionMessage, voteTransactions, delegateTransactions, transferTransactions)
         } finally {
             BlockchainLock.readLock.unlock()
@@ -278,7 +281,34 @@ class DefaultMainBlockService(
             previousTreeLayout = treeLayout
             treeLayout = mutableListOf()
         }
-        return ByteUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
+        return toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
+    }
+
+    private fun calculateStateHash(utransactions: List<UnconfirmedTransaction>, rewardTransactionMessage: RewardTransactionMessage): String {
+        val hashes = mutableListOf<String>()
+
+        utransactions.forEach {
+            when (it) {
+                is UnconfirmedTransferTransaction -> {
+                    stateService.increaseBalance(it.payload.recipientAddress, it.payload.amount)
+                    stateService.decreaseBalance(it.header.senderAddress, it.payload.amount + it.header.fee)
+                }
+                is UnconfirmedVoteTransaction -> {
+                    stateService.decreaseBalance(it.header.senderAddress, it.header.fee)
+                    stateService.updateVote(it.header.senderAddress, it.payload.nodeId, it.payload.getVoteType())
+                }
+                is UnconfirmedDelegateTransaction -> {
+                    stateService.decreaseBalance(it.header.senderAddress, it.payload.amount + it.header.fee)
+                    stateService.increaseBalance(consensusProperties.genesisAddress!!, it.payload.amount)
+                }
+            }
+        }
+
+        rewardTransactionService.updateTransferBalance(rewardTransactionMessage.recipientAddress, rewardTransactionMessage.reward)
+
+        statePool.getPool().values.forEach { hashes.add(toHexString(sha256(it.getBytes()))) }
+
+        return calculateMerkleRoot(hashes)
     }
 
     private fun getTransactions(): List<UnconfirmedTransaction> {

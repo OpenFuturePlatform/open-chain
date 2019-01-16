@@ -95,7 +95,8 @@ class DefaultRewardTransactionService(
         repository.save(transaction)
     }
 
-    private fun updateTransferBalance(to: String, amount: Long) {
+    @Transactional
+    override fun updateTransferBalance(to: String, amount: Long) {
         stateService.increaseBalance(to, amount)
 
         val senderAddress = consensusProperties.genesisAddress!!

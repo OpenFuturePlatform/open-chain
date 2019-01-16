@@ -156,6 +156,8 @@ interface RewardTransactionService {
 
     fun save(transaction: RewardTransaction)
 
+    fun updateTransferBalance(to: String, amount: Long)
+
 }
 
 interface VoteTransactionService {
