@@ -2,13 +2,15 @@ package io.openfuture.chain.core.model.entity
 
 import io.openfuture.chain.core.model.converter.StateConverter
 import io.openfuture.chain.core.model.entity.base.BaseModel
-import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.util.ByteConstants.BYTE
 import io.openfuture.chain.core.util.ByteConstants.INT_BYTES
 import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import org.apache.commons.lang3.StringUtils
 import java.nio.ByteBuffer
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Convert
+import javax.persistence.Entity
+import javax.persistence.Table
 import kotlin.text.Charsets.UTF_8
 
 @Entity
@@ -22,9 +24,8 @@ class State(
     @Column(name = "data", nullable = false)
     var data: Data,
 
-    @ManyToOne
-    @JoinColumn(name = "block_id")
-    var block: Block,
+    @Column(name = "height_block", nullable = false)
+    var heightBlock: Long,
 
     id: Long = 0L
 
@@ -34,7 +35,7 @@ class State(
         return ByteBuffer.allocate(address.toByteArray(UTF_8).size + data.getBytes().size + LONG_BYTES)
             .put(address.toByteArray(UTF_8))
             .put(data.getBytes())
-            .putLong(block.id)
+            .putLong(heightBlock)
             .array()
     }
 

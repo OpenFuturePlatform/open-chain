@@ -2,7 +2,6 @@ package io.openfuture.chain.core.service
 
 import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.model.entity.State
-import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -45,10 +44,10 @@ class DefaultStateService(
         }
     }
 
-    override fun getByAddressAndBlock(address: String, block: Block): State? {
+    override fun getByAddressAndHeightBlock(address: String, heightBlock: Long): State? {
         BlockchainLock.readLock.lock()
         try {
-            return repository.findByAddressAndBlock(address, block)
+            return repository.findByAddressAndHeightBlock(address, heightBlock)
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -136,6 +135,7 @@ class DefaultStateService(
     private fun updateState(address: String, action: State.() -> Unit) {
         val state = getCurrentState(address)
         action(state)
+        state.heightBlock = blockService.getLast().height + 1
         statePool.update(state)
     }
 
@@ -144,7 +144,7 @@ class DefaultStateService(
         try {
             return statePool.get(address)
                 ?: repository.findLastByAddress(address)
-                ?: State(address, State.Data(), blockService.getLast())
+                ?: State(address, State.Data(), blockService.getLast().height + 1)
         } finally {
             BlockchainLock.readLock.unlock()
         }

@@ -244,7 +244,7 @@ interface StateService {
 
     fun getByAddress(address: String): List<State>
 
-    fun getByAddressAndBlock(address: String, block: Block): State?
+    fun getByAddressAndHeightBlock(address: String, heightBlock: Long): State?
 
     fun getBalanceByAddress(address: String): Long
 

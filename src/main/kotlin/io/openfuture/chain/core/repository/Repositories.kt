@@ -141,6 +141,6 @@ interface StateRepository : BaseRepository<State> {
 
     fun findByAddress(address: String): List<State>
 
-    fun findByAddressAndBlock(address: String, block: Block): State?
+    fun findByAddressAndHeightBlock(address: String, heightBlock: Long): State?
 
 }
