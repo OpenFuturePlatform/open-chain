@@ -10,14 +10,6 @@ VALUES (1,
 INSERT INTO genesis_blocks (id, epoch_index)
 VALUES (1, 1);
 
-CREATE TABLE states (
-  id       BIGINT AUTO_INCREMENT PRIMARY KEY,
-  address  VARCHAR NOT NULL,
-  data     VARCHAR NOT NULL,
-  block_id BIGINT REFERENCES blocks (id),
-  UNIQUE (address, block_id)
-);
-
 INSERT INTO states (id, address, data, height_block)
 VALUES (1, '0x0000000000000000000000000000000000000000',
 '{"balance":10000000000000000, "votes": [], "ownVotesCount": 0, "isDelegate":false}'
