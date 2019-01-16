@@ -14,6 +14,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.repository.UVoteTransactionRepository
 import io.openfuture.chain.core.repository.VoteTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
+import io.openfuture.chain.core.service.NodeStateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
@@ -29,7 +30,8 @@ internal class DefaultVoteTransactionService(
     repository: VoteTransactionRepository,
     uRepository: UVoteTransactionRepository,
     private val delegateService: DelegateService,
-    private val consensusProperties: ConsensusProperties
+    private val consensusProperties: ConsensusProperties,
+    private val nodeStateService: NodeStateService
 ) : ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository), VoteTransactionService {
 
     companion object {
@@ -112,9 +114,9 @@ internal class DefaultVoteTransactionService(
 
     override fun updateState(message: VoteTransactionMessage) {
         val type = VoteType.getById(message.voteTypeId)
-        stateService.updateVote(message.senderAddress, message.nodeId, type)
-        stateService.updateOwnVoteCount(delegateService.getByNodeId(message.nodeId).address, type)
-        stateService.decreaseBalance(message.senderAddress, message.fee)
+        walletStateService.updateVoteByAddress(message.senderAddress, message.nodeId, type)
+        nodeStateService.updateOwnVotesByNodeId(message.nodeId, message.senderAddress, type)
+        walletStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
     }
 
     override fun verify(message: VoteTransactionMessage): Boolean {
@@ -172,7 +174,7 @@ internal class DefaultVoteTransactionService(
     private fun isExistsDelegate(nodeId: String): Boolean = delegateService.isExistsByNodeId(nodeId)
 
     private fun isVoteLeft(senderAddress: String): Boolean {
-        val confirmedVotes = stateService.getLastByAddress(senderAddress)?.data?.votes?.size ?: 0
+        val confirmedVotes = walletStateService.getVotesByAddress(senderAddress).size
         val unconfirmedForVotes = unconfirmedRepository.findAllByHeaderSenderAddress(senderAddress).asSequence()
             .filter { VoteType.FOR == it.payload.getVoteType() }
             .count()
@@ -181,7 +183,7 @@ internal class DefaultVoteTransactionService(
     }
 
     private fun isAlreadyVoted(senderAddress: String, nodeId: String): Boolean =
-        stateService.getVotesByAddress(senderAddress).contains(nodeId)
+        walletStateService.getVotesByAddress(senderAddress).contains(nodeId)
 
     private fun isAlreadySentVote(senderAddress: String, nodeId: String, voteTypeId: Int): Boolean {
         val unconfirmed = unconfirmedRepository.findAllByHeaderSenderAddress(senderAddress)

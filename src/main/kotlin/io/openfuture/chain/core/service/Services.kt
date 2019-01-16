@@ -6,7 +6,9 @@ import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
+import io.openfuture.chain.core.model.entity.state.NodeState
 import io.openfuture.chain.core.model.entity.state.State
+import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -238,30 +240,36 @@ interface ViewDelegateService {
 
 }
 
-interface StateService {
+interface StateService<T : State> {
 
-    fun getLastByAddress(address: String): State?
+    fun getLastByAddress(address: String): T?
 
-    fun getByAddress(address: String): List<State>
+    fun getByAddress(address: String): List<T>
 
-    fun getByAddressAndHeightBlock(address: String, heightBlock: Long): State?
+    fun getByAddressAndHeightBlock(address: String, heightBlock: Long): T?
+
+    fun create(state: T): T
+
+}
+
+interface NodeStateService : StateService<NodeState> {
+
+    fun updateOwnVotesByNodeId(nodeId: String, address: String, type: VoteType)
+
+    fun addDelegate(nodeId: String, address: String, timestamp: Long)
+
+}
+
+interface WalletStateService : StateService<WalletState> {
 
     fun getBalanceByAddress(address: String): Long
 
     fun getActualBalanceByAddress(address: String): Long
 
-    fun increaseBalance(address: String, amount: Long)
-
-    fun decreaseBalance(address: String, amount: Long)
+    fun updateBalanceByAddress(address: String, amount: Long)
 
     fun getVotesByAddress(address: String): List<String>
 
-    fun updateVote(address: String, nodeId: String, type: VoteType)
-
-    fun updateOwnVoteCount(address: String, type: VoteType)
-
-    fun updateDelegateStatus(address: String, isDelegate: Boolean)
-
-    fun create(state: State): State
+    fun updateVoteByAddress(address: String, nodeId: String, type: VoteType)
 
 }

@@ -16,6 +16,7 @@ import io.openfuture.chain.core.repository.DelegateTransactionRepository
 import io.openfuture.chain.core.repository.UDelegateTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateTransactionService
+import io.openfuture.chain.core.service.NodeStateService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
@@ -32,7 +33,8 @@ class DefaultDelegateTransactionService(
     repository: DelegateTransactionRepository,
     uRepository: UDelegateTransactionRepository,
     private val delegateService: DelegateService,
-    private val consensusProperties: ConsensusProperties
+    private val consensusProperties: ConsensusProperties,
+    private val nodeStateService: NodeStateService
 ) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository), DelegateTransactionService {
 
     companion object {
@@ -102,9 +104,9 @@ class DefaultDelegateTransactionService(
     }
 
     override fun updateState(message: DelegateTransactionMessage) {
-        stateService.decreaseBalance(message.senderAddress, message.amount + message.fee)
-        stateService.increaseBalance(consensusProperties.genesisAddress!!, message.amount)
-        stateService.updateDelegateStatus(message.senderAddress, true)
+        walletStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
+        walletStateService.updateBalanceByAddress(consensusProperties.genesisAddress!!, message.amount)
+        nodeStateService.addDelegate(message.nodeId, message.senderAddress, message.timestamp)
     }
 
     override fun verify(message: DelegateTransactionMessage): Boolean {

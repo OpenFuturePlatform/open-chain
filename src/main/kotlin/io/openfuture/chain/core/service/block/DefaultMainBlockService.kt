@@ -10,6 +10,8 @@ import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
+import io.openfuture.chain.core.model.entity.state.NodeState
+import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -41,7 +43,8 @@ class DefaultMainBlockService(
     private val clock: Clock,
     private val keyHolder: NodeKeyHolder,
     private val throughput: TransactionThroughput,
-    private val stateService: StateService,
+    private val walletStateService: WalletStateService,
+    private val nodeStateService: NodeStateService,
     private val statePool: StatePool,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository,
@@ -157,10 +160,17 @@ class DefaultMainBlockService(
                         is TransferTransactionMessage -> transferTransactionService.toBlock(it, savedBlock)
                         is DelegateTransactionMessage -> delegateTransactionService.toBlock(it, savedBlock)
                         is VoteTransactionMessage -> voteTransactionService.toBlock(it, savedBlock)
+                        else -> throw IllegalStateException("The type doesn`t handle")
                     }
                 }
 
-                statePool.getPool().values.forEach { stateService.create(it) }
+                statePool.getPool().values.forEach {
+                    when (it) {
+                        is WalletState -> walletStateService.create(it)
+                        is NodeState -> nodeStateService.create(it)
+                        else -> throw IllegalStateException("The type doesn`t handle")
+                    }
+                }
             }
 
             throughput.updateThroughput(message.getAllTransactions().size, savedBlock.height)
@@ -220,7 +230,7 @@ class DefaultMainBlockService(
                         else -> 0
                     }
                 }
-                .sum() <= stateService.getBalanceByAddress(sender.key)
+                .sum() <= walletStateService.getBalanceByAddress(sender.key)
         }
 
     private fun isValidRewardTransaction(message: PendingBlockMessage): Boolean =
@@ -233,7 +243,7 @@ class DefaultMainBlockService(
         }
 
         val validVotes = transactions.groupBy { it.senderAddress }.entries.all { sender ->
-            val persistVotes = stateService.getVotesByAddress(sender.key)
+            val persistVotes = walletStateService.getVotesByAddress(sender.key)
             val pendingVotes = sender.value.asSequence().filter { VoteType.FOR.getId() == it.voteTypeId }.map { it.nodeId }.toList()
 
             val hasDuplicates = pendingVotes.intersect(persistVotes).isNotEmpty()
@@ -276,7 +286,7 @@ class DefaultMainBlockService(
 
     private fun isValidReward(fees: Long, reward: Long): Boolean {
         val senderAddress = consensusProperties.genesisAddress!!
-        val bank = stateService.getActualBalanceByAddress(senderAddress)
+        val bank = walletStateService.getActualBalanceByAddress(senderAddress)
         val rewardBlock = consensusProperties.rewardBlock!!
 
         return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)
@@ -362,7 +372,7 @@ class DefaultMainBlockService(
         val transactionsBySender = transactions.groupBy { it.header.senderAddress }
 
         transactionsBySender.forEach {
-            var balance = stateService.getBalanceByAddress(it.key)
+            var balance = walletStateService.getBalanceByAddress(it.key)
             val list = it.value.filter { tx ->
                 balance -= when (tx) {
                     is UnconfirmedTransferTransaction -> tx.header.fee + tx.payload.amount

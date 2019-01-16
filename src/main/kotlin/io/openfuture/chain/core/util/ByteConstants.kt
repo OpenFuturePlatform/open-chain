@@ -4,6 +4,5 @@ object ByteConstants {
 
     const val LONG_BYTES: Int = 8
     const val INT_BYTES: Int = 4
-    const val BYTE: Int = 1
 
 }

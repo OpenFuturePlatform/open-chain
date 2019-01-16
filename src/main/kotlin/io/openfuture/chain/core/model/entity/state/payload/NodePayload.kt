@@ -1,7 +1,6 @@
 package io.openfuture.chain.core.model.entity.state.payload
 
 import io.openfuture.chain.core.model.converter.NodePayloadConverter
-import io.openfuture.chain.core.util.ByteConstants.BYTE
 import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import org.apache.commons.lang3.StringUtils.EMPTY
 import java.nio.ByteBuffer
@@ -24,17 +23,15 @@ data class NodePayload(
     data class Data(
         var address: String,
         val registrationDate: Long,
-        val ownVotes: MutableList<String> = mutableListOf(), // list of addresses
-        var isDelegate: Boolean = false
+        val ownVotes: MutableList<String> = mutableListOf() // list of addresses
     ) {
 
         fun getBytes(): ByteArray {
             val voteBytes = ownVotes.joinToString(EMPTY).toByteArray(UTF_8)
-            return ByteBuffer.allocate(address.toByteArray(UTF_8).size + LONG_BYTES + voteBytes.size + BYTE)
+            return ByteBuffer.allocate(address.toByteArray(UTF_8).size + LONG_BYTES + voteBytes.size)
                 .put(address.toByteArray(UTF_8))
                 .putLong(registrationDate)
                 .put(voteBytes)
-                .put((if (isDelegate) 1 else 0).toByte())
                 .array()
         }
 
