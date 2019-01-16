@@ -123,7 +123,7 @@ internal class DefaultVoteTransactionService(
     @Transactional
     override fun save(tx: VoteTransaction): VoteTransaction {
         val type = tx.payload.getVoteType()
-        updateWalletVotes(tx.header.senderAddress, tx.payload.nodeId, type)
+        stateService.updateVote(tx.header.senderAddress, tx.payload.nodeId, type)
         return super.save(tx)
     }
 
@@ -163,13 +163,6 @@ internal class DefaultVoteTransactionService(
             if (!isVoteLeft(utx.header.senderAddress)) {
                 throw ValidationException("No votes left", INCORRECT_VOTES_COUNT)
             }
-        }
-    }
-
-    private fun updateWalletVotes(senderAddress: String, nodeId: String, type: VoteType) {
-        when (type) {
-            VoteType.FOR -> stateService.addVote(senderAddress, nodeId)
-            VoteType.AGAINST -> stateService.removeVote(senderAddress, nodeId)
         }
     }
 
