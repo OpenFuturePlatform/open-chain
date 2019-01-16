@@ -6,6 +6,7 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
+import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -247,9 +248,7 @@ interface StateService {
 
     fun getVotesByAddress(address: String): List<String>
 
-    fun addVote(address: String, nodeId: String)
-
-    fun removeVote(address: String, nodeId: String)
+    fun updateVote(address: String, nodeId: String, type: VoteType)
 
     fun create(state: State): State
 

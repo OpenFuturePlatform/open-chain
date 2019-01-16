@@ -3,6 +3,7 @@ package io.openfuture.chain.core.service
 import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.model.entity.State
 import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -89,15 +90,13 @@ class DefaultStateService(
         }
     }
 
-    override fun addVote(address: String, nodeId: String) {
+    override fun updateVote(address: String, nodeId: String, type: VoteType) {
         val state = getCurrentState(address)
-        state.data.votes.add(nodeId)
-        statePool.update(state)
-    }
+        when(type) {
+            VoteType.FOR -> state.data.votes.add(nodeId)
+            VoteType.AGAINST -> state.data.votes.remove(nodeId)
+        }
 
-    override fun removeVote(address: String, nodeId: String) {
-        val state = getCurrentState(address)
-        state.data.votes.remove(nodeId)
         statePool.update(state)
     }
 
