@@ -4,6 +4,7 @@ import io.openfuture.chain.core.model.converter.StateConverter
 import io.openfuture.chain.core.model.entity.base.BaseModel
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.util.ByteConstants.BYTE
+import io.openfuture.chain.core.util.ByteConstants.INT_BYTES
 import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import org.apache.commons.lang3.StringUtils
 import java.nio.ByteBuffer
@@ -46,7 +47,7 @@ class State(
 
         fun getBytes(): ByteArray {
             val voteBytes = votes.joinToString(StringUtils.EMPTY).toByteArray(UTF_8)
-            return ByteBuffer.allocate(LONG_BYTES + voteBytes.size + BYTE)
+            return ByteBuffer.allocate(LONG_BYTES + voteBytes.size + INT_BYTES + BYTE)
                 .putLong(balance)
                 .put(voteBytes)
                 .putInt(ownVotesCount)
