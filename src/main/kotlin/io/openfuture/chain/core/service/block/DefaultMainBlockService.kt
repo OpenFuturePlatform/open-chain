@@ -150,13 +150,17 @@ class DefaultMainBlockService(
 
             val savedBlock = super.save(block)
 
-            message.getAllTransactions().forEach {
-                when (it) {
-                    is RewardTransactionMessage -> rewardTransactionService.toBlock(it, savedBlock)
-                    is TransferTransactionMessage -> transferTransactionService.toBlock(it, savedBlock)
-                    is DelegateTransactionMessage -> delegateTransactionService.toBlock(it, savedBlock)
-                    is VoteTransactionMessage -> voteTransactionService.toBlock(it, savedBlock)
+            statePool.use { pool ->
+                message.getAllTransactions().forEach {
+                    when (it) {
+                        is RewardTransactionMessage -> rewardTransactionService.toBlock(it, savedBlock)
+                        is TransferTransactionMessage -> transferTransactionService.toBlock(it, savedBlock)
+                        is DelegateTransactionMessage -> delegateTransactionService.toBlock(it, savedBlock)
+                        is VoteTransactionMessage -> voteTransactionService.toBlock(it, savedBlock)
+                    }
                 }
+
+                statePool.getPool().values.forEach { stateService.create(it) }
             }
 
             throughput.updateThroughput(message.getAllTransactions().size, savedBlock.height)
