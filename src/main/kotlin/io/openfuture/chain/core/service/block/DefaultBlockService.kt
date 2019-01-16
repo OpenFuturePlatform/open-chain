@@ -55,6 +55,8 @@ class DefaultBlockService(
                 transactionService.delete(payload.delegateTransactions)
                 transactionService.delete(payload.rewardTransaction)
                 transactionService.delete(payload.voteTransactions)
+            } else if (block is GenesisBlock && 1L == block.height) {
+                continue
             }
             val blockToRemove = repository.findOneByHash(block.hash)!!
             repository.delete(blockToRemove)
