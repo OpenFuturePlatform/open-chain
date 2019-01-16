@@ -18,7 +18,7 @@ class EpochRequestMessage(
 
     override fun write(buf: ByteBuf) {
         buf.writeLong(epochIndex)
-        buf.writeByte(SyncMode.toByte(syncMode))
+        buf.writeByte(SyncMode.toByte(syncMode).toInt())
     }
 
 }

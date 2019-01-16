@@ -101,7 +101,7 @@ class ChainSynchronizer(
             val listBlocks: MutableList<Block> = mutableListOf(genesisBlock)
 
             if (syncSession!!.syncMode == FULL &&
-                !isValidTransactions(message.mainBlocks) && !isValidMerkleRoot(message.mainBlocks)) {
+                !isValidMerkleRoot(message.mainBlocks) && !isValidTransactions(message.mainBlocks)) {
                 requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
                 return
             }
@@ -241,9 +241,9 @@ class ChainSynchronizer(
                         voteTransactions = block.payload.voteTransactions.toList()
                         delegateTransactions = block.payload.delegateTransactions.toList()
 
-                        block.payload.transferTransactions.clear()
-                        block.payload.voteTransactions.clear()
-                        block.payload.delegateTransactions.clear()
+                        block.payload.transferTransactions = mutableListOf()
+                        block.payload.voteTransactions = mutableListOf()
+                        block.payload.delegateTransactions = mutableListOf()
                     }
 
                     blockService.save(block)

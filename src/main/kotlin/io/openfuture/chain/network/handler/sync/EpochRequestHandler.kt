@@ -36,17 +36,18 @@ class EpochRequestHandler(
             return
         }
 
-        val mainBlockMassages = mainBlockService.getBlocksByEpochIndex(epochIndex)
-            .map { it.toMessage() }
+        val mainBlocks = mainBlockService.getBlocksByEpochIndex(epochIndex)
 
         if (msg.syncMode != SyncMode.FULL) {
-            mainBlockMassages.forEach {
-                it.delegateTransactions = emptyList()
-                it.transferTransactions = emptyList()
-                it.voteTransactions = emptyList()
+            mainBlocks.forEach {
+                it.payload.transferTransactions = mutableListOf()
+                it.payload.delegateTransactions = mutableListOf()
+                it.payload.voteTransactions = mutableListOf()
             }
         }
-        ctx.writeAndFlush(EpochResponseMessage(nodeId, true, genesisBlock.toMessage(), mainBlockMassages))
+        val mainBlockMessages = mainBlocks.map { it.toMessage() }
+
+        ctx.writeAndFlush(EpochResponseMessage(nodeId, true, genesisBlock.toMessage(), mainBlockMessages))
         log.debug("Send EpochResponseMessage to ${ctx.channel().remoteAddress()}")
     }
 
