@@ -124,7 +124,7 @@ copy-packages:
   only:
     - tags
 
-deploy-master:
+deploy:
   stage: deploy
   image: openplatform/ansible
   dependencies: []
@@ -136,21 +136,9 @@ deploy-master:
   when: manual
   only:
     - master
-
-deploy-tags:
-  stage: deploy
-  image: openplatform/ansible
-  dependencies: []
-  variables:
-    ANSIBLE_HOST_KEY_CHECKING: "False"
-    DELETE_VOLUME: "false"
-  script:
-    - *deploy_to_host
-  when: manual
-  only:
     - tags
 
-deploy-master-delete-volume:
+deploy-delete-volume:
   stage: deploy
   image: openplatform/ansible
   dependencies: []
@@ -162,16 +150,4 @@ deploy-master-delete-volume:
   when: manual
   only:
     - master
-
-deploy-tags-delete-volume:
-  stage: deploy
-  image: openplatform/ansible
-  dependencies: []
-  variables:
-    ANSIBLE_HOST_KEY_CHECKING: "False"
-    DELETE_VOLUME: "true"
-  script:
-    - *deploy_to_host
-  when: manual
-  only:
     - tags
