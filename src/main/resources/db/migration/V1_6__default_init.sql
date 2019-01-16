@@ -10,8 +10,18 @@ VALUES (1,
 INSERT INTO genesis_blocks (id, epoch_index)
 VALUES (1, 1);
 
-INSERT INTO wallets (id, address, balance)
-VALUES (1, '0x0000000000000000000000000000000000000000', 10000000000000000);
+CREATE TABLE states (
+  id       BIGINT AUTO_INCREMENT PRIMARY KEY,
+  address  VARCHAR NOT NULL,
+  data     VARCHAR NOT NULL,
+  block_id BIGINT REFERENCES blocks (id),
+  UNIQUE (address, block_id)
+);
+
+INSERT INTO states (id, address, data, block_id)
+VALUES (1, '0x0000000000000000000000000000000000000000',
+'{"balance":10000000000000000, "votes": [], "ownVotesCount": 0, "isDelegate":false}'
+, 1);
 
 INSERT INTO delegates (id, public_key, node_id, address, host, port, registration_date)
 VALUES (1, '02b04aa1832e799503000a6b8da1cdbb737c167fc829472c726a12ad9a4ccf24eb',
