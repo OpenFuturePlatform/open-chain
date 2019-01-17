@@ -2,12 +2,8 @@ package io.openfuture.chain.core.model.entity.state
 
 import io.openfuture.chain.core.model.entity.base.BaseModel
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.state.payload.StatePayload
-import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import io.openfuture.chain.network.message.core.StateMessage
-import java.nio.ByteBuffer
 import javax.persistence.*
-import kotlin.text.Charsets.UTF_8
 
 @Entity
 @Table(name = "states")
@@ -23,17 +19,7 @@ abstract class State(
 
 ) : BaseModel() {
 
-    abstract fun getStatePayload(): StatePayload
-
     abstract fun toMessage(): StateMessage
-
-    fun getBytes(): ByteArray {
-        return ByteBuffer.allocate(address.toByteArray(UTF_8).size + getStatePayload().getBytes().size + LONG_BYTES)
-            .put(address.toByteArray(UTF_8))
-            .put(getStatePayload().getBytes())
-            .putLong(block.id)
-            .array()
-    }
 
 }
 

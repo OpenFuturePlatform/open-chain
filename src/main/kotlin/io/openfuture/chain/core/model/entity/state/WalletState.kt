@@ -1,10 +1,8 @@
 package io.openfuture.chain.core.model.entity.state
 
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.state.payload.StatePayload
-import io.openfuture.chain.core.model.entity.state.payload.WalletPayload
 import io.openfuture.chain.network.message.core.WalletStateMessage
-import javax.persistence.Embedded
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Table
 
@@ -14,19 +12,17 @@ class WalletState(
     address: String,
     block: MainBlock,
 
-    @Embedded
-    var payload: WalletPayload
+    @Column(name = "balance", nullable = false)
+    val balance: Long = 0
 
 ) : State(address, block) {
 
     companion object {
         fun of(message: WalletStateMessage, block: MainBlock): WalletState =
-            WalletState(message.address, block, WalletPayload(message.balance))
+            WalletState(message.address, block, message.balance)
     }
 
 
-    override fun getStatePayload(): StatePayload = payload
-
-    override fun toMessage(): WalletStateMessage = WalletStateMessage(address, payload.balance)
+    override fun toMessage(): WalletStateMessage = WalletStateMessage(address, balance)
 
 }
