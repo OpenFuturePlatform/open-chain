@@ -14,7 +14,7 @@ abstract class StateMessage(
     var address: String
 ) : Serializable {
 
-    abstract fun getBytes(): ByteArray
+    protected abstract fun getBytes(): ByteArray
 
     fun getHash(): String {
         val bytes = ByteBuffer.allocate(address.toByteArray(Charsets.UTF_8).size + getBytes().size)
