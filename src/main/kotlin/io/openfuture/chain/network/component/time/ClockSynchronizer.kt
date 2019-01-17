@@ -78,7 +78,7 @@ class ClockSynchronizer(
     }
 
     private fun isThreshold(offset: Long): Long {
-        lastOffset = if (Math.abs(lastOffset) > Math.abs(offset) || Math.abs(offset) > properties.ntpOffsetThreshold!!) {
+        lastOffset = if (Math.abs(lastOffset) > Math.abs(offset) || Math.abs(offset) < properties.ntpOffsetThreshold!!) {
             offset
         } else {
             lastOffset
@@ -105,7 +105,7 @@ class ClockSynchronizer(
             }
         } while (tryQuiz)
 
-        val minOffset = result.minBy { it.offset }?.offset ?: return lastOffset
+        val minOffset = result.minBy { Math.abs(it.offset) }?.offset ?: return lastOffset
         return isThreshold(minOffset)
     }
 
