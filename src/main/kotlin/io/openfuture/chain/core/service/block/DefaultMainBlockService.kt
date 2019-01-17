@@ -21,7 +21,6 @@ import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.HashUtils
-import io.openfuture.chain.crypto.util.HashUtils.sha256
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
@@ -86,7 +85,7 @@ class DefaultMainBlockService(
             val previousHash = lastBlock.hash
 
             var fees = 0L
-            val hashes = mutableListOf<String>()
+            val transactionHashes = mutableListOf<String>()
             val transactionsForBlock = getTransactions()
 
             val voteTransactions = mutableListOf<VoteTransactionMessage>()
@@ -95,7 +94,7 @@ class DefaultMainBlockService(
 
             transactionsForBlock.asSequence().forEach {
                 fees += it.header.fee
-                hashes.add(it.footer.hash)
+                transactionHashes.add(it.footer.hash)
                 when (it) {
                     is UnconfirmedVoteTransaction -> voteTransactions.add(it.toMessage())
                     is UnconfirmedDelegateTransaction -> delegateTransactions.add(it.toMessage())
@@ -111,15 +110,29 @@ class DefaultMainBlockService(
                 rewardTransactionMessage
             )
 
-            val merkleHash = calculateMerkleRoot(hashes + rewardTransactionMessage.hash)
-            val stateHash = calculateStateHash(txMessages)
+            val stateHashes = mutableListOf<String>()
+            val states = getStates(txMessages)
+            val delegateStates = mutableListOf<DelegateStateMessage>()
+            val walletStates = mutableListOf<WalletStateMessage>()
+
+            states.asSequence().forEach {
+                stateHashes.add(it.getHash())
+                when (it) {
+                    is DelegateStateMessage -> delegateStates.add(it)
+                    is WalletStateMessage -> walletStates.add(it)
+                }
+            }
+
+            val merkleHash = calculateMerkleRoot(transactionHashes + rewardTransactionMessage.hash)
+            val stateHash = calculateMerkleRoot(stateHashes)
             val payload = MainBlockPayload(merkleHash, stateHash)
             val hash = createHash(timestamp, height, previousHash, payload)
             val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
             val publicKey = keyHolder.getPublicKeyAsHexString()
 
             return PendingBlockMessage(height, previousHash, timestamp, toHexString(hash), signature, publicKey,
-                merkleHash, stateHash, rewardTransactionMessage, voteTransactions, delegateTransactions, transferTransactions)
+                merkleHash, stateHash, rewardTransactionMessage, voteTransactions, delegateTransactions,
+                transferTransactions, delegateStates, walletStates)
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -281,7 +294,7 @@ class DefaultMainBlockService(
             return false
         }
 
-        return stateHash == calculateStateHash(txMessages)
+        return stateHash == getStates(txMessages)
     }
 
     private fun isValidReward(fees: Long, reward: Long): Boolean {
@@ -292,12 +305,12 @@ class DefaultMainBlockService(
         return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)
     }
 
-    private fun calculateMerkleRoot(transactions: List<String>): String {
-        if (transactions.size == 1) {
-            return transactions.single()
+    private fun calculateMerkleRoot(hashes: List<String>): String {
+        if (hashes.size == 1) {
+            return hashes.single()
         }
 
-        var previousTreeLayout = transactions.asSequence().sortedByDescending { it }.map { it.toByteArray() }.toList()
+        var previousTreeLayout = hashes.asSequence().sortedByDescending { it }.map { it.toByteArray() }.toList()
         var treeLayout = mutableListOf<ByteArray>()
         while (previousTreeLayout.size != 2) {
             for (i in 0 until previousTreeLayout.size step 2) {
@@ -315,23 +328,17 @@ class DefaultMainBlockService(
         return toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
     }
 
-    private fun calculateStateHash(txMessages: List<TransactionMessage>): String {
-        val hashes = mutableListOf<String>()
-
-        statePool.use { pool ->
-            txMessages.forEach {
-                when (it) {
-                    is TransferTransactionMessage -> transferTransactionService.updateState(it)
-                    is VoteTransactionMessage -> voteTransactionService.updateState(it)
-                    is DelegateTransactionMessage -> delegateTransactionService.updateState(it)
-                    is RewardTransactionMessage -> rewardTransactionService.updateState(it)
-                }
+    private fun getStates(txMessages: List<TransactionMessage>): List<StateMessage> {
+        txMessages.forEach {
+            when (it) {
+                is TransferTransactionMessage -> transferTransactionService.updateState(it)
+                is VoteTransactionMessage -> voteTransactionService.updateState(it)
+                is DelegateTransactionMessage -> delegateTransactionService.updateState(it)
+                is RewardTransactionMessage -> rewardTransactionService.updateState(it)
             }
-
-            pool.getPool().values.forEach { hashes.add(toHexString(sha256(it.getBytes()))) }
         }
 
-        return calculateMerkleRoot(hashes)
+        return statePool.getPool().values.toList()
     }
 
     private fun getTransactions(): List<UnconfirmedTransaction> {
