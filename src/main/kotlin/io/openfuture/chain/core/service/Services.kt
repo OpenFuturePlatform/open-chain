@@ -254,7 +254,9 @@ interface StateService<T : State> {
 
 interface NodeStateService : StateService<NodeState> {
 
-    fun updateOwnVotesByNodeId(nodeId: String, address: String, type: VoteType)
+    fun getOwnVotesByNodeId(nodeId: String): List<String>
+
+    fun updateOwnVoteByNodeId(nodeId: String, address: String, type: VoteType)
 
     fun addDelegate(nodeId: String, address: String, timestamp: Long)
 

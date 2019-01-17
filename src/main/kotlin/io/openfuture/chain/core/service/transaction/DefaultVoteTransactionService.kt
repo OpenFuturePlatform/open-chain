@@ -115,7 +115,7 @@ internal class DefaultVoteTransactionService(
     override fun updateState(message: VoteTransactionMessage) {
         val type = VoteType.getById(message.voteTypeId)
         walletStateService.updateVoteByAddress(message.senderAddress, message.nodeId, type)
-        nodeStateService.updateOwnVotesByNodeId(message.nodeId, message.senderAddress, type)
+        nodeStateService.updateOwnVoteByNodeId(message.nodeId, message.senderAddress, type)
         walletStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
     }
 

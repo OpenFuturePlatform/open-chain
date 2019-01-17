@@ -19,7 +19,16 @@ class DefaultNodeStateService(
     private val blockService: BlockService
 ) : BaseStateService<NodeState>(repository), NodeStateService {
 
-    override fun updateOwnVotesByNodeId(nodeId: String, address: String, type: VoteType) {
+    override fun getOwnVotesByNodeId(nodeId: String): List<String> {
+        BlockchainLock.readLock.lock()
+        try {
+            return getLastByAddress(nodeId)?.payload?.data?.ownVotes ?: emptyList()
+        } finally {
+            BlockchainLock.readLock.unlock()
+        }
+    }
+
+    override fun updateOwnVoteByNodeId(nodeId: String, address: String, type: VoteType) {
         val state = getCurrentState(nodeId)
 
         val ownVotes = state.payload.data.ownVotes
