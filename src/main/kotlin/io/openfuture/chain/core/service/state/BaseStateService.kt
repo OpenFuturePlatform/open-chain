@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.state
 
+import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.repository.StateRepository
 import io.openfuture.chain.core.service.StateService
@@ -29,10 +30,10 @@ abstract class BaseStateService<T : State>(
         }
     }
 
-    override fun getByAddressAndBlockId(address: String, blockId: Long): T? {
+    override fun getByAddressAndBlock(address: String, block: Block): T? {
         BlockchainLock.readLock.lock()
         try {
-            return repository.findByAddressAndBlockId(address, blockId)
+            return repository.findByAddressAndBlock(address, block)
         } finally {
             BlockchainLock.readLock.unlock()
         }

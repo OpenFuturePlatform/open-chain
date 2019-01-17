@@ -144,7 +144,7 @@ interface StateRepository<T : State> : BaseRepository<T> {
 
     fun findByAddress(address: String): List<T>
 
-    fun findByAddressAndBlockId(address: String, blockId: Long): T?
+    fun findByAddressAndBlock(address: String, block: Block): T?
 
 }
 
