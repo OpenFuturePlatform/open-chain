@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.repository
 
 import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.model.entity.WalletVote
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -158,3 +159,12 @@ interface DelegateStateRepository : StateRepository<DelegateState> {
 
 @Repository
 interface WalletStateRepository : StateRepository<WalletState>
+
+@Repository
+interface WalletVoteRepository : BaseRepository<WalletVote> {
+
+    fun findAllByIdAddress(address: String): List<WalletVote>
+
+    fun deleteByIdAddressAndIdNodeId(address: String, nodeId: String)
+
+}

@@ -18,8 +18,8 @@ CREATE TABLE wallet_states (
 );
 
 --
-CREATE TABLE wallet_states_votes (
+CREATE TABLE wallet_votes (
   address VARCHAR NOT NULL,
-  node_id VARCHAR NOT NULL REFERENCES delegates (node_id),
+  node_id VARCHAR NOT NULL REFERENCES delegates(node_id),
   PRIMARY KEY (address, node_id)
 );
