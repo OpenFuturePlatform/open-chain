@@ -118,7 +118,7 @@ class DefaultMainBlockService(
             validate(message)
             return true
         } catch (ex: ValidationException) {
-            log.warn(ex.message)
+            log.warn("Block is invalid cause: ${ex.message}")
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -149,6 +149,7 @@ class DefaultMainBlockService(
             }
 
             throughput.updateThroughput(message.getAllTransactions().size, savedBlock.height)
+            log.debug("CONSENSUS: Saving main block with hash = ${block.hash}")
         } finally {
             BlockchainLock.writeLock.unlock()
         }
@@ -188,6 +189,8 @@ class DefaultMainBlockService(
         if (!isValidTransferTransactions(message.transferTransactions)) {
             throw ValidationException("Invalid transfer transactions")
         }
+
+
     }
 
     private fun isValidBalances(transactions: List<TransactionMessage>): Boolean =

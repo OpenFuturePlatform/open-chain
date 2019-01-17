@@ -127,7 +127,6 @@ class DefaultPendingBlockHandler(
                 networkService.broadcast(message)
                 if (blockCommits.size > (delegates.size / 3 * 2) && !blockAddedFlag) {
                     pendingBlocks.find { it.hash == message.hash }?.let {
-                        log.debug("CONSENSUS: Saving main block ${it.hash}")
                         if (!chainSynchronizer.isInSync(MainBlock.of(it))) {
                             chainSynchronizer.sync()
                             return
