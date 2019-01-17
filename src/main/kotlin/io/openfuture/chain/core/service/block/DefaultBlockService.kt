@@ -5,21 +5,19 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.repository.*
+import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.TransactionService
-import io.openfuture.chain.core.service.TransferTransactionService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import javax.persistence.EntityManager
 
 @Service
 class DefaultBlockService(
     private val repository: BlockRepository<Block>,
     private val properties: ConsensusProperties,
-    private val transferTransactionRepository: TransferTransactionRepository,
-    private val voteTransactionRepository: VoteTransactionRepository,
-    private val delegateTransactionRepository: DelegateTransactionRepository,
-    private val rewardTransactionRepository: RewardTransactionRepository
+    private val transactionService: TransactionService,
+    private val entityManager: EntityManager
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -58,22 +56,21 @@ class DefaultBlockService(
         for (block in blocks) {
             if (block is MainBlock) {
                 val payload = block.payload
-
-                transferTransactionRepository.deleteAll(payload.transferTransactions)
-                delegateTransactionRepository.deleteAll(payload.delegateTransactions)
-                voteTransactionRepository.deleteAll(payload.voteTransactions)
-                rewardTransactionRepository.deleteAll(payload.rewardTransaction)
+                transactionService.delete(payload.transferTransactions)
+                transactionService.delete(payload.delegateTransactions)
+                transactionService.delete(payload.voteTransactions)
+                transactionService.delete(payload.rewardTransaction)
+                entityManager.flush()
             }
-            val blockToRemove = repository.findOneByHash(block.hash)!!
-            repository.delete(blockToRemove)
         }
+        repository.deleteAll(blocks)
     }
 
     @Transactional(readOnly = true)
     override fun isExists(hash: String): Boolean = repository.findOneByHash(hash)?.let { true } ?: false
 
     @Transactional(readOnly = true)
-    override fun findByHash(hash: String): Block?  = repository.findOneByHash(hash)
+    override fun findByHash(hash: String): Block? = repository.findOneByHash(hash)
 
     @Transactional(readOnly = true)
     override fun isExists(hash: String, height: Long): Boolean =
