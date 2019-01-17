@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Sync: full synchronization, all types of transactions are saved
+- Sync: wallet balances also synchronized
+
+### Changed
+- Sync: general stability improvements
+- Network: operational number of connections is lowered - even if node has not sufficient amount of connections, it still operates with blocks and transactions 
 
 ## [1.6.0] - 2019-01-10
 ### Added
