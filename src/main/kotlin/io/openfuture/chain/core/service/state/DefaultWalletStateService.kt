@@ -1,17 +1,15 @@
 package io.openfuture.chain.core.service.state
 
 import io.openfuture.chain.core.component.StatePool
-import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.state.WalletState
-import io.openfuture.chain.core.model.entity.state.payload.WalletPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.repository.WalletStateRepository
-import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.WalletStateService
 import io.openfuture.chain.core.sync.BlockchainLock
+import io.openfuture.chain.network.message.core.WalletStateMessage
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultWalletStateService(
     private val repository: WalletStateRepository,
     private val statePool: StatePool,
-    private val blockService: BlockService,
     private val unconfirmedTransactionRepository: UTransactionRepository<UnconfirmedTransaction>
 ) : BaseStateService<WalletState>(repository), WalletStateService {
 
@@ -32,7 +29,7 @@ class DefaultWalletStateService(
     override fun getBalanceByAddress(address: String): Long {
         BlockchainLock.readLock.lock()
         try {
-            return getLastByAddress(address)?.payload?.data?.balance ?: DEFAULT_WALLET_BALANCE
+            return getLastByAddress(address)?.payload?.balance ?: DEFAULT_WALLET_BALANCE
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -41,7 +38,7 @@ class DefaultWalletStateService(
     override fun getActualBalanceByAddress(address: String): Long {
         BlockchainLock.readLock.lock()
         try {
-            val balance = getLastByAddress(address)?.payload?.data?.balance ?: DEFAULT_WALLET_BALANCE
+            val balance = getLastByAddress(address)?.payload?.balance ?: DEFAULT_WALLET_BALANCE
             return balance - getUnconfirmedBalance(address)
         } finally {
             BlockchainLock.readLock.unlock()
@@ -49,38 +46,7 @@ class DefaultWalletStateService(
     }
 
     override fun updateBalanceByAddress(address: String, amount: Long) {
-        val state = getCurrentState(address)
-
-        state.payload.data.balance += amount
-
-        val newState = createState(
-            address,
-            WalletPayload(WalletPayload.Data(state.payload.data.balance + amount, state.payload.data.votes))
-        )
-
-        statePool.update(newState)
-    }
-
-    override fun getVotesByAddress(address: String): List<String> {
-        BlockchainLock.readLock.lock()
-        try {
-            return getLastByAddress(address)?.payload?.data?.votes ?: emptyList()
-        } finally {
-            BlockchainLock.readLock.unlock()
-        }
-    }
-
-    override fun updateVoteByAddress(address: String, nodeId: String, type: VoteType) {
-        val state = getCurrentState(address)
-
-        val votes = state.payload.data.votes
-        when (type) {
-            VoteType.FOR -> votes.add(nodeId)
-            VoteType.AGAINST -> votes.remove(nodeId)
-        }
-
-        val newState = createState(address, WalletPayload(WalletPayload.Data(state.payload.data.balance, votes)))
-
+        val newState = WalletStateMessage(address, getCurrentState(address).balance + amount)
         statePool.update(newState)
     }
 
@@ -93,15 +59,12 @@ class DefaultWalletStateService(
             }
         }.sum()
 
-    private fun createState(address: String, payload: WalletPayload): WalletState =
-        WalletState(address, blockService.getLast().height + 1, payload)
-
-    private fun getCurrentState(address: String): WalletState {
+    private fun getCurrentState(address: String): WalletStateMessage {
         BlockchainLock.readLock.lock()
         try {
-            return statePool.get(address) as? WalletState
-                ?: repository.findLastByAddress(address)
-                ?: createState(address, WalletPayload(WalletPayload.Data()))
+            return statePool.get(address) as? WalletStateMessage
+                ?: repository.findLastByAddress(address)?.toMessage()
+                ?: WalletStateMessage(address, DEFAULT_WALLET_BALANCE)
         } finally {
             BlockchainLock.readLock.unlock()
         }

@@ -269,10 +269,6 @@ interface WalletStateService : StateService<WalletState> {
 
     fun updateBalanceByAddress(address: String, amount: Long)
 
-//    fun getVotesByAddress(address: String): List<String>
-
-//    fun updateVoteByAddress(address: String, nodeId: String, type: VoteType)
-
 }
 
 interface WalletVoteService {

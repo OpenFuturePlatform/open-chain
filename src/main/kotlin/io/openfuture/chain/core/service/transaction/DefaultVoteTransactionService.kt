@@ -14,8 +14,8 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.repository.UVoteTransactionRepository
 import io.openfuture.chain.core.repository.VoteTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
-import io.openfuture.chain.core.service.NodeStateService
 import io.openfuture.chain.core.service.VoteTransactionService
+import io.openfuture.chain.core.service.WalletVoteService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -31,7 +31,7 @@ internal class DefaultVoteTransactionService(
     uRepository: UVoteTransactionRepository,
     private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties,
-    private val nodeStateService: NodeStateService
+    private val walletVoteService: WalletVoteService
 ) : ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository), VoteTransactionService {
 
     companion object {
@@ -113,9 +113,6 @@ internal class DefaultVoteTransactionService(
     }
 
     override fun updateState(message: VoteTransactionMessage) {
-        val type = VoteType.getById(message.voteTypeId)
-        walletStateService.updateVoteByAddress(message.senderAddress, message.nodeId, type)
-        nodeStateService.updateOwnVoteByNodeId(message.nodeId, message.senderAddress, type)
         walletStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
     }
 
@@ -130,7 +127,10 @@ internal class DefaultVoteTransactionService(
     }
 
     @Transactional
-    override fun save(tx: VoteTransaction): VoteTransaction = super.save(tx)
+    override fun save(tx: VoteTransaction): VoteTransaction {
+        walletVoteService.updateVoteByAddress(tx.header.senderAddress, tx.payload.nodeId, tx.payload.getVoteType())
+        return super.save(tx)
+    }
 
     override fun validate(utx: UnconfirmedVoteTransaction) {
         super.validate(utx)
@@ -174,7 +174,7 @@ internal class DefaultVoteTransactionService(
     private fun isExistsDelegate(nodeId: String): Boolean = delegateService.isExistsByNodeId(nodeId)
 
     private fun isVoteLeft(senderAddress: String): Boolean {
-        val confirmedVotes = walletStateService.getVotesByAddress(senderAddress).size
+        val confirmedVotes = walletVoteService.getVotesByAddress(senderAddress).size
         val unconfirmedForVotes = unconfirmedRepository.findAllByHeaderSenderAddress(senderAddress).asSequence()
             .filter { VoteType.FOR == it.payload.getVoteType() }
             .count()
@@ -183,7 +183,7 @@ internal class DefaultVoteTransactionService(
     }
 
     private fun isAlreadyVoted(senderAddress: String, nodeId: String): Boolean =
-        walletStateService.getVotesByAddress(senderAddress).contains(nodeId)
+        walletVoteService.getVotesByAddress(senderAddress).any { it.id.nodeId == nodeId }
 
     private fun isAlreadySentVote(senderAddress: String, nodeId: String, voteTypeId: Int): Boolean {
         val unconfirmed = unconfirmedRepository.findAllByHeaderSenderAddress(senderAddress)

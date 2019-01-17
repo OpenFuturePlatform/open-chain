@@ -90,6 +90,8 @@ class DefaultTransferTransactionService(
                 return tx
             }
 
+            updateState(message)
+
             val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
             if (null != utx) {
                 return confirm(utx, TransferTransaction.of(utx, block))
