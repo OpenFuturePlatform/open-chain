@@ -1,14 +1,14 @@
 CREATE TABLE states (
-  id           BIGINT AUTO_INCREMENT PRIMARY KEY,
-  address      VARCHAR NOT NULL,
-  height_block BIGINT  NOT NULL,
-  UNIQUE (address, height_block)
+  id       BIGINT AUTO_INCREMENT PRIMARY KEY,
+  address  VARCHAR NOT NULL,
+  block_id BIGINT  NOT NULL REFERENCES main_blocks,
+  UNIQUE (address, block_id)
 );
 
 --
 CREATE TABLE delegate_states (
-  id       BIGINT PRIMARY KEY REFERENCES states,
-  rating   BIGINT NOT NULL,
+  id     BIGINT PRIMARY KEY REFERENCES states,
+  rating BIGINT NOT NULL,
 );
 
 --
@@ -19,7 +19,7 @@ CREATE TABLE wallet_states (
 
 --
 CREATE TABLE wallet_states_votes (
-  address   VARCHAR NOT NULL,
-  node_id   VARCHAR NOT NULL REFERENCES delegates(node_id),
+  address VARCHAR NOT NULL,
+  node_id VARCHAR NOT NULL REFERENCES delegates (node_id),
   PRIMARY KEY (address, node_id)
 );

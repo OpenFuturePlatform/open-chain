@@ -20,11 +20,15 @@ abstract class BaseMainBlockMessage(
     var rewardTransaction: RewardTransactionMessage,
     var voteTransactions: List<VoteTransactionMessage>,
     var delegateTransactions: List<DelegateTransactionMessage>,
-    var transferTransactions: List<TransferTransactionMessage>
+    var transferTransactions: List<TransferTransactionMessage>,
+    var delegateStates: List<DelegateStateMessage>,
+    var walletStates: List<WalletStateMessage>
 ) : BlockMessage(height, previousHash, timestamp, hash, signature, publicKey) {
 
     fun getAllTransactions(): List<TransactionMessage> =
         voteTransactions + delegateTransactions + transferTransactions + rewardTransaction
+
+    fun getAllStates(): List<StateMessage> = delegateStates + walletStates
 
     override fun read(buf: ByteBuf) {
         super.read(buf)
@@ -36,6 +40,8 @@ abstract class BaseMainBlockMessage(
         voteTransactions = buf.readList()
         delegateTransactions = buf.readList()
         transferTransactions = buf.readList()
+        delegateStates = buf.readList()
+        walletStates = buf.readList()
     }
 
     override fun write(buf: ByteBuf) {
@@ -47,6 +53,8 @@ abstract class BaseMainBlockMessage(
         buf.writeList(voteTransactions)
         buf.writeList(delegateTransactions)
         buf.writeList(transferTransactions)
+        buf.writeList(delegateStates)
+        buf.writeList(walletStates)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -67,6 +75,8 @@ abstract class BaseMainBlockMessage(
         if (voteTransactions != other.voteTransactions) return false
         if (delegateTransactions != other.delegateTransactions) return false
         if (transferTransactions != other.transferTransactions) return false
+        if (delegateStates != other.delegateStates) return false
+        if (walletStates != other.walletStates) return false
 
         return true
     }
@@ -84,6 +94,8 @@ abstract class BaseMainBlockMessage(
         result = 31 * result + voteTransactions.hashCode()
         result = 31 * result + delegateTransactions.hashCode()
         result = 31 * result + transferTransactions.hashCode()
+        result = 31 * result + delegateStates.hashCode()
+        result = 31 * result + walletStates.hashCode()
         return result
     }
 

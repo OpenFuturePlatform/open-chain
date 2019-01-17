@@ -53,7 +53,9 @@ class MainBlock(
         payload.rewardTransaction.first().toMessage(),
         payload.voteTransactions.map { it.toMessage() },
         payload.delegateTransactions.map { it.toMessage() },
-        payload.transferTransactions.map { it.toMessage() }
+        payload.transferTransactions.map { it.toMessage() },
+        payload.delegateStates.map { it.toMessage() },
+        payload.walletStates.map { it.toMessage() }
     )
 
 }
