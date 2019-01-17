@@ -29,10 +29,10 @@ abstract class BaseStateService<T : State>(
         }
     }
 
-    override fun getByAddressAndHeightBlock(address: String, heightBlock: Long): T? {
+    override fun getByAddressAndBlockId(address: String, blockId: Long): T? {
         BlockchainLock.readLock.lock()
         try {
-            return repository.findByAddressAndHeightBlock(address, heightBlock)
+            return repository.findByAddressAndBlockId(address, blockId)
         } finally {
             BlockchainLock.readLock.unlock()
         }

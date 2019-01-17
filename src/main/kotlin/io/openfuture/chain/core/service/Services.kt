@@ -247,7 +247,7 @@ interface StateService<T : State> {
 
     fun getByAddress(address: String): List<T>
 
-    fun getByAddressAndHeightBlock(address: String, heightBlock: Long): T?
+    fun getByAddressAndBlockId(address: String, blockId: Long): T?
 
     fun create(state: T): T
 
