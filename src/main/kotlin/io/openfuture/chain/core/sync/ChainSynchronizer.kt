@@ -129,7 +129,12 @@ class ChainSynchronizer(
             log.info("Rolling back epoch # ${invalidGenesisBlock.payload.epochIndex}")
             blockService.removeEpoch(invalidGenesisBlock)
             val lastGenesisBlock = genesisBlockService.getLast()
-            checkBlock(lastGenesisBlock)
+            val requestedBlock = if (1L == lastGenesisBlock.height) {
+                blockService.getLast()
+            } else {
+                lastGenesisBlock
+            }
+            checkBlock(requestedBlock)
             future = scheduledSynchronizer.startRequestScheduler(future, Runnable { checkBlock(lastGenesisBlock) })
         } else {
             requestLatestGenesisBlock()

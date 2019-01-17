@@ -5,9 +5,10 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.repository.BlockRepository
+import io.openfuture.chain.core.repository.*
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.TransactionService
+import io.openfuture.chain.core.service.TransferTransactionService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -15,7 +16,10 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultBlockService(
     private val repository: BlockRepository<Block>,
     private val properties: ConsensusProperties,
-    private val transactionService: TransactionService
+    private val transferTransactionRepository: TransferTransactionRepository,
+    private val voteTransactionRepository: VoteTransactionRepository,
+    private val delegateTransactionRepository: DelegateTransactionRepository,
+    private val rewardTransactionRepository: RewardTransactionRepository
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -44,19 +48,21 @@ class DefaultBlockService(
 
     @Transactional
     override fun removeEpoch(genesisBlock: GenesisBlock) {
-        val fromHeight = genesisBlock.height
+        val fromHeight = if (1L == genesisBlock.height) {
+            genesisBlock.height + 1
+        } else {
+            genesisBlock.height
+        }
         val toHeight = fromHeight + properties.epochHeight!!
         val blocks = repository.findAllByHeightBetween(fromHeight, toHeight)
         for (block in blocks) {
             if (block is MainBlock) {
                 val payload = block.payload
 
-                transactionService.delete(payload.transferTransactions)
-                transactionService.delete(payload.delegateTransactions)
-                transactionService.delete(payload.rewardTransaction)
-                transactionService.delete(payload.voteTransactions)
-            } else if (block is GenesisBlock && 1L == block.height) {
-                continue
+                transferTransactionRepository.deleteAll(payload.transferTransactions)
+                delegateTransactionRepository.deleteAll(payload.delegateTransactions)
+                voteTransactionRepository.deleteAll(payload.voteTransactions)
+                rewardTransactionRepository.deleteAll(payload.rewardTransaction)
             }
             val blockToRemove = repository.findOneByHash(block.hash)!!
             repository.delete(blockToRemove)
