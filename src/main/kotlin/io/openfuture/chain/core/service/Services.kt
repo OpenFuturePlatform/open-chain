@@ -6,7 +6,7 @@ import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
-import io.openfuture.chain.core.model.entity.state.NodeState
+import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -252,11 +252,13 @@ interface StateService<T : State> {
 
 }
 
-interface NodeStateService : StateService<NodeState> {
+interface DelegateStateService : StateService<DelegateState> {
 
     fun getOwnVotesByNodeId(nodeId: String): List<String>
 
     fun updateOwnVoteByNodeId(nodeId: String, address: String, type: VoteType)
+
+    fun getAllDelegates(): List<DelegateState>
 
     fun addDelegate(nodeId: String, address: String, timestamp: Long)
 

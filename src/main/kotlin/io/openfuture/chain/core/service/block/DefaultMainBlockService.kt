@@ -10,7 +10,7 @@ import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
-import io.openfuture.chain.core.model.entity.state.NodeState
+import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -167,7 +167,7 @@ class DefaultMainBlockService(
                 statePool.getPool().values.forEach {
                     when (it) {
                         is WalletState -> walletStateService.create(it)
-                        is NodeState -> nodeStateService.create(it)
+                        is DelegateState -> nodeStateService.create(it)
                         else -> throw IllegalStateException("The type doesn`t handle")
                     }
                 }

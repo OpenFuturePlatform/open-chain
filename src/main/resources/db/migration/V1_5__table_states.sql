@@ -6,13 +6,20 @@ CREATE TABLE states (
 );
 
 --
-CREATE TABLE node_states (
-  id   BIGINT PRIMARY KEY REFERENCES states,
-  data VARCHAR NOT NULL,
+CREATE TABLE delegate_states (
+  id       BIGINT PRIMARY KEY REFERENCES states,
+  rating   BIGINT NOT NULL,
 );
 
 --
 CREATE TABLE wallet_states (
-  id   BIGINT PRIMARY KEY REFERENCES states,
-  data VARCHAR NOT NULL,
+  id      BIGINT PRIMARY KEY REFERENCES states,
+  balance BIGINT NOT NULL,
+);
+
+--
+CREATE TABLE wallet_states_votes (
+  address   VARCHAR NOT NULL,
+  node_id   VARCHAR NOT NULL REFERENCES delegates(node_id),
+  PRIMARY KEY (address, node_id)
 );

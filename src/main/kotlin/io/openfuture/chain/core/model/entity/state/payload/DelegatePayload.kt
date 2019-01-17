@@ -6,13 +6,13 @@ import javax.persistence.Column
 import javax.persistence.Embeddable
 
 @Embeddable
-data class WalletPayload(
+data class DelegatePayload(
 
-    @Column(name = "balance", nullable = false)
-    val balance: Long = 0
+    @Column(name = "rating", nullable = false)
+    val rating: Long = 0
 
 ) : StatePayload {
 
-    override fun getBytes(): ByteArray = ByteBuffer.allocate(LONG_BYTES).putLong(balance).array()
+    override fun getBytes(): ByteArray = ByteBuffer.allocate(LONG_BYTES).putLong(rating).array()
 
 }

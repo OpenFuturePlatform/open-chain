@@ -1,6 +1,7 @@
 package io.openfuture.chain.rpc.domain
 
 import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.model.entity.state.DelegateState
 
 data class DelegateResponse(
     val address: String,
@@ -12,6 +13,12 @@ data class DelegateResponse(
         delegate.address,
         delegate.publicKey,
         delegate.nodeId
+    )
+
+    constructor(state: DelegateState) : this(
+        state.payload.data.walletAddress,
+        state.address, //todo publivKey
+        state.address
     )
 
 }

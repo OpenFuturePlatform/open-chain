@@ -5,7 +5,7 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
-import io.openfuture.chain.core.model.entity.state.NodeState
+import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.*
@@ -148,7 +148,13 @@ interface StateRepository<T : State> : BaseRepository<T> {
 }
 
 @Repository
-interface NodeStateRepository : StateRepository<NodeState>
+interface DelegateStateRepository : StateRepository<DelegateState> {
+
+    @Query("Select * From DELEGATE_STATES NS Join STATES S Using(ID) Group By S.NODE_ID Having Max(S.HEIGHT_BLOCK)",
+        nativeQuery = true)
+    fun findLastAll(): List<DelegateState>
+
+}
 
 @Repository
 interface WalletStateRepository : StateRepository<WalletState>

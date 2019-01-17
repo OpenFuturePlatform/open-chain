@@ -1,19 +1,19 @@
 package io.openfuture.chain.core.model.entity.state
 
-import io.openfuture.chain.core.model.entity.state.payload.NodePayload
+import io.openfuture.chain.core.model.entity.state.payload.DelegatePayload
 import io.openfuture.chain.core.model.entity.state.payload.StatePayload
 import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.Table
 
 @Entity
-@Table(name = "node_states")
-class NodeState(
+@Table(name = "delegate_states")
+class DelegateState(
     address: String,
     heightBlock: Long,
 
     @Embedded
-    var payload: NodePayload
+    var payload: DelegatePayload
 
 ) : State(address, heightBlock) {
 
