@@ -1,8 +1,8 @@
 package io.openfuture.chain.rpc.controller
 
-import io.openfuture.chain.core.service.StateService
 import io.openfuture.chain.core.service.ViewDelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
+import io.openfuture.chain.core.service.WalletStateService
 import io.openfuture.chain.crypto.annotation.AddressChecksum
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -26,7 +26,7 @@ import javax.validation.Valid
 @RequestMapping("/rpc/accounts")
 class AccountController(
     private val cryptoService: CryptoService,
-    private val stateService: StateService,
+    private val stateService: WalletStateService,
     private val viewDelegateService: ViewDelegateService,
     private val voteTransactionService: VoteTransactionService
 ) {
