@@ -81,12 +81,12 @@ class MainBlockPayload(
 
     companion object {
 
-        fun calculateMerkleRoot(transactions: List<String>): String {
-            if (transactions.size == 1) {
-                return transactions.single()
+        fun calculateMerkleRoot(hashes: List<String>): String {
+            if (hashes.size == 1) {
+                return hashes.single()
             }
 
-            var previousTreeLayout = transactions.asSequence().sortedByDescending { it }.map { it.toByteArray() }.toList()
+            var previousTreeLayout = hashes.asSequence().sortedByDescending { it }.map { it.toByteArray() }.toList()
             var treeLayout = mutableListOf<ByteArray>()
             while (previousTreeLayout.size != 2) {
                 for (i in 0 until previousTreeLayout.size step 2) {
@@ -103,7 +103,7 @@ class MainBlockPayload(
             }
             return ByteUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
         }
-    }
 
+    }
 
 }
