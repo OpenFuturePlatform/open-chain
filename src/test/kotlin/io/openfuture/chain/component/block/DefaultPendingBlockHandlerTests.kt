@@ -58,7 +58,8 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         val privateKey = "529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"
         val rewardTransactionMessage = createRewardTransactionMessage(1L)
         val pendingBlock = PendingBlockMessage(2L, "previousHash", 1L,
-            "hash", "signature", "publicKey", payload.merkleHash, payload.stateHash, rewardTransactionMessage, listOf(), listOf(), listOf())
+            "hash", "signature", "publicKey", payload.merkleHash, payload.stateHash,
+            rewardTransactionMessage, listOf(), listOf(), listOf(), listOf(), listOf())
 
         given(keyHolder.getPrivateKey()).willReturn(
             ByteUtils.fromHexString(privateKey))
@@ -66,7 +67,8 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         given(epochService.getSlotNumber(pendingBlock.timestamp)).willReturn(2L)
         given(epochService.getCurrentSlotOwner()).willReturn(delegate)
         given(epochService.getDelegates()).willReturn(
-            listOf(Delegate("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4", "nodeId", "address", "host", 1111, 1)))
+            listOf(Delegate("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4",
+                "nodeId", "address", "host", 1111, 1)))
         given(mainBlockService.verify(pendingBlock)).willReturn(true)
         given(chainSynchronizer.isInSync(any(MainBlock::class.java))).willReturn(true)
 
@@ -88,7 +90,8 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         )
         val rewardTransactionMessage = createRewardTransactionMessage(1L)
         val pendingBlock = PendingBlockMessage(2L, "previousHash", 1L,
-            hash, "signature", publicKey, payload.merkleHash, payload.stateHash, rewardTransactionMessage, listOf(), listOf(), listOf())
+            hash, "signature", publicKey, payload.merkleHash, payload.stateHash, rewardTransactionMessage,
+            listOf(), listOf(), listOf(), listOf(), listOf())
 
         val message = BlockApprovalMessage(
             BlockApprovalStage.PREPARE.value,

@@ -6,7 +6,6 @@ import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
-import io.openfuture.chain.rpc.domain.DelegateResponse
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -47,10 +46,10 @@ class DelegateControllerTests : ControllerTests() {
 
     @Test
     fun getAllActiveShouldReturnActiveDelegatesListTest() {
-        val delegate = Delegate("publicKey", "nodeId", "address", "host", 1, 1)
-        val genesisBlock = GenesisBlock(1, 1,   "previousHash", "hash", "signature", "publicKey",
-            GenesisBlockPayload(1, mutableListOf(delegate)))
-        val expectedPageResponse = PageResponse(PageImpl(listOf(DelegateResponse(delegate))))
+        val publicKey = "publicKey"
+        val genesisBlock = GenesisBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
+            GenesisBlockPayload(1, mutableListOf(publicKey)))
+        val expectedPageResponse = PageResponse(PageImpl(listOf(publicKey)))
 
         given(genesisBlockService.getLast()).willReturn(genesisBlock)
 
@@ -61,8 +60,7 @@ class DelegateControllerTests : ControllerTests() {
             .returnResult().responseBody!!
 
         assertThat(actualPageResponse.totalCount).isEqualTo(expectedPageResponse.totalCount)
-        assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["address"]).isEqualTo(expectedPageResponse.list.first().address)
-        assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["publicKey"]).isEqualTo(expectedPageResponse.list.first().publicKey)
+        assertThat(actualPageResponse.list[0]).isEqualTo(publicKey)
     }
 
 }
