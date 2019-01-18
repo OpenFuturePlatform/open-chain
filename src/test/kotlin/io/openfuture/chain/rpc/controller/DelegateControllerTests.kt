@@ -7,6 +7,7 @@ import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.WalletVoteService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -25,6 +26,9 @@ class DelegateControllerTests : ControllerTests() {
 
     @MockBean
     private lateinit var delegateStateService: DelegateStateService
+
+    @MockBean
+    private lateinit var  walletVoteService: WalletVoteService
 
     @MockBean
     private lateinit var genesisBlockService: GenesisBlockService
@@ -51,11 +55,13 @@ class DelegateControllerTests : ControllerTests() {
     @Test
     fun getAllActiveShouldReturnActiveDelegatesListTest() {
         val publicKey = "publicKey"
+        val delegate = Delegate(publicKey, "nodeId", "address", "host", 1, 1)
         val genesisBlock = GenesisBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
             GenesisBlockPayload(1, mutableListOf(publicKey)))
-        val expectedPageResponse = PageResponse(PageImpl(listOf(publicKey)))
+        val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
 
         given(genesisBlockService.getLast()).willReturn(genesisBlock)
+        given(delegateService.getByPublicKey(publicKey)).willReturn(delegate)
 
         val actualPageResponse = webClient.get().uri("/rpc/delegates/active")
             .exchange()
@@ -64,7 +70,9 @@ class DelegateControllerTests : ControllerTests() {
             .returnResult().responseBody!!
 
         assertThat(actualPageResponse.totalCount).isEqualTo(expectedPageResponse.totalCount)
-        assertThat(actualPageResponse.list[0]).isEqualTo(publicKey)
+        assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["address"]).isEqualTo(expectedPageResponse.list.first().address)
+        assertThat((actualPageResponse.list[0] as LinkedHashMap<*, *>)["publicKey"]).isEqualTo(expectedPageResponse.list.first().publicKey)
+
     }
 
 }
