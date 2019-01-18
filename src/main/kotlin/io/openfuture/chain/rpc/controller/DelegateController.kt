@@ -4,7 +4,6 @@ package io.openfuture.chain.rpc.controller
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.GenesisBlockService
-import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.service.state.DefaultDelegateStateService.Companion.DEFAULT_DELEGATE_RATING
 import io.openfuture.chain.rpc.domain.DelegateResponse
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -24,14 +23,13 @@ import javax.validation.Valid
 @RequestMapping("/rpc/delegates")
 class DelegateController(
     private val delegateService: DelegateService,
-    private val stateService: DelegateStateService,
-    private val voteTransactionService: VoteTransactionService,
+    private val delegateStateService: DelegateStateService,
     private val genesisBlockService: GenesisBlockService
 ) {
 
     @GetMapping
     fun getAll(request: PageRequest): PageResponse<DelegateResponse> {
-        val delegates = stateService.getAllDelegates().map { DelegateResponse(delegateService.getByNodeId(it.address)) }
+        val delegates = delegateStateService.getAllDelegates().map { DelegateResponse(delegateService.getByNodeId(it.address)) }
         val pageActiveDelegate = delegates.stream()
             .skip(request.offset)
             .limit(request.getLimit().toLong())
@@ -56,9 +54,9 @@ class DelegateController(
 
     @GetMapping("/view")
     fun getAll(@Valid request: ViewDelegatePageRequest): PageResponse<ViewDelegateResponse> {
-        val activeDelegates = genesisBlockService.getLast().payload.activeDelegates.map {publicKey ->
+        val activeDelegates = genesisBlockService.getLast().payload.activeDelegates.map { publicKey ->
             val delegate = delegateService.getByPublicKey(publicKey)
-            val state = stateService.getLastByAddress(publicKey)
+            val state = delegateStateService.getLastByAddress(publicKey)
 
             ViewDelegateResponse(
                 delegate.address,

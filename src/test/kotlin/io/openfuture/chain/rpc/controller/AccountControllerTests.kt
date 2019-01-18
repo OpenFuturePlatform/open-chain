@@ -4,6 +4,7 @@ import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.service.ViewDelegateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.service.WalletStateService
+import io.openfuture.chain.core.service.WalletVoteService
 import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import io.openfuture.chain.crypto.service.CryptoService
@@ -29,6 +30,9 @@ class AccountControllerTests : ControllerTests() {
 
     @MockBean
     private lateinit var walletStateService: WalletStateService
+
+    @MockBean
+    private lateinit var walletVoteService: WalletVoteService
 
     @MockBean
     private lateinit var viewDelegateService: ViewDelegateService

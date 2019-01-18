@@ -5,6 +5,7 @@ import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.service.DelegateService
+import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
@@ -21,6 +22,9 @@ class DelegateControllerTests : ControllerTests() {
 
     @MockBean
     private lateinit var delegateService: DelegateService
+
+    @MockBean
+    private lateinit var delegateStateService: DelegateStateService
 
     @MockBean
     private lateinit var genesisBlockService: GenesisBlockService

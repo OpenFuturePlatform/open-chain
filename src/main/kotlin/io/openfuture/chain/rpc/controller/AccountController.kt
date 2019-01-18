@@ -27,7 +27,7 @@ import javax.validation.Valid
 @RequestMapping("/rpc/accounts")
 class AccountController(
     private val cryptoService: CryptoService,
-    private val stateService: WalletStateService,
+    private val walletStateService: WalletStateService,
     private val walletVoteService: WalletVoteService,
     private val viewDelegateService: ViewDelegateService,
     private val voteTransactionService: VoteTransactionService
@@ -44,7 +44,7 @@ class AccountController(
 
     @GetMapping("/wallets/{address}/balance")
     fun getBalance(@PathVariable @AddressChecksum address: String): Long =
-        stateService.getActualBalanceByAddress(address)
+        walletStateService.getActualBalanceByAddress(address)
 
     @GetMapping("/wallets/{address}/delegates")
     fun getDelegates(@PathVariable @AddressChecksum address: String, request: PageRequest): PageResponse<VotesResponse> {
