@@ -10,10 +10,11 @@ VALUES (1,
 INSERT INTO genesis_blocks (id, epoch_index)
 VALUES (1, 1);
 
-INSERT INTO states (id, address, data, height_block)
-VALUES (1, '0x0000000000000000000000000000000000000000',
-'{"balance":10000000000000000, "votes": [], "ownVotesCount": 0, "isDelegate":false}'
-, 1);
+INSERT INTO states (id, address, block_id)
+VALUES (1, '0x0000000000000000000000000000000000000000', 1);
+
+INSERT INTO wallet_states (id, balance)
+VALUES (1, 10000000000000000)
 
 INSERT INTO delegates (id, public_key, node_id, address, host, port, registration_date)
 VALUES (1, '02b04aa1832e799503000a6b8da1cdbb737c167fc829472c726a12ad9a4ccf24eb',
