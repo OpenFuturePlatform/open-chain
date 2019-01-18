@@ -1,7 +1,7 @@
 CREATE TABLE states (
   id       BIGINT AUTO_INCREMENT PRIMARY KEY,
   address  VARCHAR NOT NULL,
-  block_id BIGINT  NOT NULL REFERENCES main_blocks,
+  block_id BIGINT  NOT NULL REFERENCES blocks,
   UNIQUE (address, block_id)
 );
 
