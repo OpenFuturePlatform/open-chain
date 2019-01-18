@@ -3,10 +3,7 @@ package io.openfuture.chain.core.model.entity.block.payload
 import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets.UTF_8
-import javax.persistence.CollectionTable
-import javax.persistence.Column
-import javax.persistence.ElementCollection
-import javax.persistence.Embeddable
+import javax.persistence.*
 
 @Embeddable
 class GenesisBlockPayload(
@@ -15,7 +12,8 @@ class GenesisBlockPayload(
     var epochIndex: Long,
 
     @ElementCollection
-    @CollectionTable(name = "delegate2genesis")
+    @CollectionTable(name = "delegate2genesis", joinColumns = [JoinColumn(name = "genesis_id")])
+    @Column(name = "public_key")
     var activeDelegates: MutableList<String>
 
 ) : BlockPayload {
