@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.model.entity.block
 
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
@@ -24,14 +23,14 @@ class GenesisBlock(
 ) : Block(timestamp, height, previousHash, hash, signature, publicKey) {
 
     companion object {
-        fun of(message: GenesisBlockMessage, delegates: MutableList<Delegate>): GenesisBlock = GenesisBlock(
+        fun of(message: GenesisBlockMessage): GenesisBlock = GenesisBlock(
             message.timestamp,
             message.height,
             message.previousHash,
             message.hash,
             message.signature,
             message.publicKey,
-            GenesisBlockPayload(message.epochIndex, delegates)
+            GenesisBlockPayload(message.epochIndex, message.delegates.toMutableList())
         )
     }
 
@@ -46,7 +45,7 @@ class GenesisBlock(
         signature,
         publicKey,
         payload.epochIndex,
-        payload.activeDelegates.map { it.publicKey }
+        payload.activeDelegates
     )
 
 }

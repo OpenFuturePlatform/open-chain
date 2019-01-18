@@ -221,8 +221,6 @@ interface DelegateService {
 
     fun getByNodeId(nodeId: String): Delegate
 
-    fun getActiveDelegates(): List<Delegate>
-
     fun isExistsByPublicKey(key: String): Boolean
 
     fun isExistsByNodeId(nodeId: String): Boolean
@@ -257,7 +255,9 @@ interface DelegateStateService : StateService<DelegateState> {
 
     fun getAllDelegates(): List<DelegateState>
 
-    fun addDelegate(nodeId: String)
+    fun getActiveDelegates(): List<DelegateState>
+
+    fun addDelegate(publicKey: String)
 
 }
 

@@ -29,7 +29,7 @@ class DefaultWalletStateService(
     override fun getBalanceByAddress(address: String): Long {
         BlockchainLock.readLock.lock()
         try {
-            return getLastByAddress(address)?.payload?.balance ?: DEFAULT_WALLET_BALANCE
+            return getLastByAddress(address)?.balance ?: DEFAULT_WALLET_BALANCE
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -38,7 +38,7 @@ class DefaultWalletStateService(
     override fun getActualBalanceByAddress(address: String): Long {
         BlockchainLock.readLock.lock()
         try {
-            val balance = getLastByAddress(address)?.payload?.balance ?: DEFAULT_WALLET_BALANCE
+            val balance = getLastByAddress(address)?.balance ?: DEFAULT_WALLET_BALANCE
             return balance - getUnconfirmedBalance(address)
         } finally {
             BlockchainLock.readLock.unlock()

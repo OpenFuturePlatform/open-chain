@@ -107,7 +107,7 @@ class DefaultDelegateTransactionService(
     override fun updateState(message: DelegateTransactionMessage) {
         walletStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
         walletStateService.updateBalanceByAddress(consensusProperties.genesisAddress!!, message.amount)
-        delegateStateService.addDelegate(message.nodeId)
+        delegateStateService.addDelegate(message.senderPublicKey)
     }
 
     override fun verify(message: DelegateTransactionMessage): Boolean {

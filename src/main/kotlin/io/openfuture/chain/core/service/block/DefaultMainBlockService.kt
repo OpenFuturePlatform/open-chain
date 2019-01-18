@@ -43,8 +43,8 @@ class DefaultMainBlockService(
     private val keyHolder: NodeKeyHolder,
     private val throughput: TransactionThroughput,
     private val walletStateService: WalletStateService,
+    private val delegateStateService: DelegateStateService,
     private val walletVoteService: WalletVoteService,
-//    private val nodeStateService: NodeStateService,
     private val statePool: StatePool,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository,
@@ -181,7 +181,7 @@ class DefaultMainBlockService(
                 statePool.getPool().values.forEach {
                     when (it) {
                         is WalletState -> walletStateService.create(it)
-                        is DelegateState -> nodeStateService.create(it)
+                        is DelegateState -> delegateStateService.create(it)
                         else -> throw IllegalStateException("The type doesn`t handle")
                     }
                 }

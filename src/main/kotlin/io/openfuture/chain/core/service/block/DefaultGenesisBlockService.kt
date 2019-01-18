@@ -9,6 +9,7 @@ import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DefaultDelegateService
+import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultGenesisBlockService(
     blockService: BlockService,
     delegateService: DefaultDelegateService,
+    private val delegateStateService: DelegateStateService,
     private val keyHolder: NodeKeyHolder,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository
@@ -88,10 +90,7 @@ class DefaultGenesisBlockService(
             return
         }
 
-        val delegates = message.delegates.asSequence().map { delegateService.getByPublicKey(it) }.toMutableList()
-        val block = GenesisBlock.of(message, delegates)
-
-        add(block)
+        add(GenesisBlock.of(message))
     }
 
     override fun isGenesisBlockRequired(): Boolean {
@@ -112,7 +111,7 @@ class DefaultGenesisBlockService(
 
     private fun createPayload(): GenesisBlockPayload {
         val epochIndex = getLast().payload.epochIndex + 1
-        val delegates = delegateService.getActiveDelegates().toMutableList()
+        val delegates = delegateStateService.getActiveDelegates().map { it.address }.toMutableList()
         return GenesisBlockPayload(epochIndex, delegates)
     }
 

@@ -9,7 +9,7 @@ CREATE TABLE delegates (
 );
 
 CREATE TABLE delegate2genesis (
-  delegate_id BIGINT NOT NULL REFERENCES delegates,
+  public_key     VARCHAR NOT NULL,
   genesis_id  BIGINT NOT NULL REFERENCES genesis_blocks,
-  PRIMARY KEY (delegate_id, genesis_id)
+  PRIMARY KEY (public_key, genesis_id)
 );

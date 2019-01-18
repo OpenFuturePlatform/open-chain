@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.model.entity.block.payload
 
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets.UTF_8
@@ -12,21 +11,17 @@ class GenesisBlockPayload(
     @Column(name = "epoch_index", nullable = false)
     var epochIndex: Long,
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "delegate2genesis",
-        joinColumns = [(JoinColumn(name = "genesis_id"))],
-        inverseJoinColumns = [(JoinColumn(name = "delegate_id"))])
-    var activeDelegates: MutableList<Delegate>
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "public_key")
+    var activeDelegates: MutableList<String>
 
 ) : BlockPayload {
 
     override fun getBytes(): ByteArray {
-        val keys = activeDelegates.map { it.publicKey }
-        val keysLength = keys.asSequence().map { it.toByteArray(UTF_8).size }.sum()
-
-        val buffer = ByteBuffer.allocate(LONG_BYTES + keysLength)
+        val length = activeDelegates.asSequence().map { it.toByteArray(UTF_8).size }.sum()
+        val buffer = ByteBuffer.allocate(LONG_BYTES + length)
         buffer.putLong(epochIndex)
-        keys.forEach { buffer.put(it.toByteArray(UTF_8)) }
+        activeDelegates.forEach { buffer.put(it.toByteArray(UTF_8)) }
         return buffer.array()
     }
 
