@@ -9,6 +9,9 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncStatus.*
+import io.openfuture.chain.crypto.util.HashUtils
+import io.openfuture.chain.crypto.util.HashUtils.sha256
+import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
@@ -18,6 +21,7 @@ import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.network.message.sync.*
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.NetworkApiService
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.toHexString
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -31,8 +35,8 @@ import javax.xml.bind.ValidationException
 @Component
 class ChainSynchronizer(
     private val properties: NodeProperties,
+    private val addressesHolder: AddressesHolder,
     private val blockService: BlockService,
-    private val delegateService: DelegateService,
     private val networkApiService: NetworkApiService,
     private val genesisBlockService: GenesisBlockService,
     private val voteTransactionService: VoteTransactionService,
@@ -69,14 +73,14 @@ class ChainSynchronizer(
 
     fun onGenesisBlockResponse(message: GenesisBlockMessage) {
         resetRequestScheduler()
-        val nodesInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
+        val delegates = genesisBlockService.getLast().payload.activeDelegates
         try {
             val currentGenesisBlock = GenesisBlock.of(message)
             val lastLocalGenesisBlock = genesisBlockService.getLast()
 
             if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
                 syncSession = SyncSession(properties.syncMode!!, lastLocalGenesisBlock, currentGenesisBlock)
-                requestEpoch(nodesInfo)
+                requestEpoch(delegates)
             } else {
                 requestLatestGenesisBlock()
             }
@@ -89,26 +93,26 @@ class ChainSynchronizer(
     @Transactional
     fun onEpochResponse(message: EpochResponseMessage) {
         resetRequestScheduler()
-        val nodesInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
+        val delegates = genesisBlockService.getLast().payload.activeDelegates.map { toHexString(sha256(it.toByteArray())) }
         try {
             if (!message.isEpochExists) {
-                requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
+                requestEpoch(delegates.filter { it != message.nodeId })
                 return
             }
 
             if (syncSession!!.syncMode == FULL &&
                 !isValidMerkleRoot(message.mainBlocks) && !isValidTransactions(message.mainBlocks)) {
-                requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
+                requestEpoch(delegates.filter { it != message.nodeId })
                 return
             }
 
             if (!syncSession!!.add(convertToBlocks(message))) {
-                requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
+                requestEpoch(delegates.filter { it != message.nodeId })
                 return
             }
 
             if (!syncSession!!.isCompleted()) {
-                requestEpoch(nodesInfo)
+                requestEpoch(delegates)
                 return
             }
 
@@ -194,14 +198,16 @@ class ChainSynchronizer(
     private fun isValidHeight(block: Block, lastBlock: Block): Boolean = block.height == lastBlock.height + 1
 
     private fun requestLatestGenesisBlock() {
-        val knownActiveDelegates = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
         val message = SyncRequestMessage()
+        val knownActiveDelegates = genesisBlockService.getLast().payload.activeDelegates.mapNotNull { publicKey ->
+            addressesHolder.getNodeInfoByUid(toHexString(HashUtils.sha256(publicKey.toByteArray())))
+        }
 
         networkApiService.sendToAddress(message, knownActiveDelegates.random())
         startRequestScheduler()
     }
 
-    private fun requestEpoch(listNodeInfo: List<NodeInfo>) {
+    private fun requestEpoch(delegates: List<String>) {
         val targetEpoch = if (syncSession!!.isEpochSynced()) {
             syncSession!!.getCurrentGenesisBlock().payload.epochIndex
         } else {
@@ -209,6 +215,10 @@ class ChainSynchronizer(
         }
 
         val message = EpochRequestMessage(targetEpoch, syncSession!!.syncMode)
+
+        val listNodeInfo = delegates.mapNotNull { publicKey ->
+            addressesHolder.getNodeInfoByUid(toHexString(HashUtils.sha256(publicKey.toByteArray())))
+        }
 
         networkApiService.sendToAddress(message, listNodeInfo.shuffled().first())
         startRequestScheduler()
@@ -244,30 +254,16 @@ class ChainSynchronizer(
 
                     if (syncSession!!.syncMode == SyncMode.FULL) {
                         transactions.forEach {
-                            if (it is TransferTransaction) {
-                                it.block = block
-                                transferTransactionService.toBlock(it.toMessage(), block)
-                            }
-                            if (it is DelegateTransaction) {
-                                it.block = block
-                                delegateTransactionService.toBlock(it.toMessage(), block)
-                            }
-                            if (it is VoteTransaction) {
-                                it.block = block
-                                voteTransactionService.toBlock(it.toMessage(), block)
+                            it.block = block
+                            when (it) {
+                                is TransferTransaction -> transferTransactionService.toBlock(it.toMessage(), block)
+                                is DelegateTransaction -> delegateTransactionService.toBlock(it.toMessage(), block)
+                                is VoteTransaction -> voteTransactionService.toBlock(it.toMessage(), block)
+
                             }
                         }
                     }
                 } else if (block is GenesisBlock) {
-                    val delegates = block.payload.activeDelegates.toMutableList()
-                    block.payload.activeDelegates.clear()
-                    delegates.forEach { delegate ->
-                        if (delegateService.isExistsByPublicKey(delegate.publicKey)) {
-                            block.payload.activeDelegates.add(delegateService.getByPublicKey(delegate.publicKey))
-                        } else {
-                            block.payload.activeDelegates.add(delegateService.save(delegate))
-                        }
-                    }
                     blockService.save(block)
                 }
             }
@@ -304,7 +300,7 @@ class ChainSynchronizer(
         if (null == syncSession) {
             requestLatestGenesisBlock()
         } else {
-            requestEpoch(genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList())
+            requestEpoch(genesisBlockService.getLast().payload.activeDelegates)
         }
     }
 }

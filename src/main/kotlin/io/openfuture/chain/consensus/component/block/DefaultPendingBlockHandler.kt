@@ -4,7 +4,6 @@ import io.openfuture.chain.consensus.component.block.BlockApprovalStage.*
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
@@ -32,8 +31,8 @@ class DefaultPendingBlockHandler(
     }
 
     private val pendingBlocks: MutableSet<PendingBlockMessage> = mutableSetOf()
-    private val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
-    private val commits: MutableMap<String, MutableList<Delegate>> = mutableMapOf()
+    private val prepareVotes: MutableList<String> = mutableListOf()
+    private val commits: MutableMap<String, MutableList<String>> = mutableMapOf()
 
     private var observable: PendingBlockMessage? = null
     private var timeSlotNumber: Long = 0
@@ -56,7 +55,7 @@ class DefaultPendingBlockHandler(
             return
         }
 
-        if (slotOwner.publicKey != block.publicKey) {
+        if (slotOwner != block.publicKey) {
             return
         }
 
@@ -97,15 +96,15 @@ class DefaultPendingBlockHandler(
     }
 
     private fun handlePrevote(message: BlockApprovalMessage) {
-        val delegates = epochService.getDelegates()
-        val delegate = delegates.find { message.publicKey == it.publicKey }
+        val delegates = epochService.getDelegatesPublicKeys()
+        val delegate = delegates.find { message.publicKey == it } ?: return
 
-        if (null == delegate || null == observable || message.hash != observable!!.hash || !isActiveDelegate()) {
+        if (null == observable || message.hash != observable!!.hash || !isActiveDelegate()) {
             return
         }
 
-        if (!prepareVotes.containsKey(message.publicKey) && isValidApprovalSignature(message)) {
-            prepareVotes[message.publicKey] = delegate
+        if (!prepareVotes.contains(delegate) && isValidApprovalSignature(message)) {
+            prepareVotes.add(delegate)
             networkService.broadcast(message)
             if (prepareVotes.size > (delegates.size - 1) / 3) {
                 this.stage = COMMIT
@@ -117,8 +116,8 @@ class DefaultPendingBlockHandler(
     }
 
     private fun handleCommit(message: BlockApprovalMessage) {
-        val delegates = epochService.getDelegates()
-        val delegate = delegates.find { message.publicKey == it.publicKey } ?: return
+        val delegates = epochService.getDelegatesPublicKeys()
+        val delegate = delegates.find { message.publicKey == it } ?: return
 
         val blockCommits = commits[message.hash]
         if (null != blockCommits) {
@@ -154,6 +153,6 @@ class DefaultPendingBlockHandler(
         SignatureUtils.verify(message.getBytes(), message.signature!!, ByteUtils.fromHexString(message.publicKey))
 
     private fun isActiveDelegate(): Boolean =
-        epochService.getDelegates().any { it.publicKey == keyHolder.getPublicKeyAsHexString() }
+        epochService.getDelegatesPublicKeys().contains(keyHolder.getPublicKeyAsHexString())
 
 }

@@ -29,7 +29,7 @@ class ExplorerController(
         val nodesCount = networkApiService.getNetworkSize()
         val epochNumber = epochService.getEpochIndex()
         val epochDate = epochService.getEpochStart()
-        val delegatesCount = epochService.getDelegates().size
+        val delegatesCount = epochService.getDelegatesPublicKeys().size
 
         return ExplorerResponse(nodesCount, blocksCount, transactionsCount, blockProductionTime, transactionsPerSecond, epochNumber,
             epochDate, delegatesCount.toByte())

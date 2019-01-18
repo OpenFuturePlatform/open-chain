@@ -1,7 +1,6 @@
 package io.openfuture.chain.consensus.service
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.network.component.time.Clock
@@ -18,14 +17,14 @@ class DefaultEpochService(
 
     override fun getEpochStart(): Long = genesisBlockService.getLast().timestamp
 
-    override fun getDelegates(): List<Delegate> = genesisBlockService.getLast().payload.activeDelegates
+    override fun getDelegatesPublicKeys(): List<String> = genesisBlockService.getLast().payload.activeDelegates
 
     override fun getEpochIndex(): Long = genesisBlockService.getLast().payload.epochIndex
 
     override fun getGenesisBlockHeight(): Long = genesisBlockService.getLast().height
 
     @Transactional(readOnly = true)
-    override fun getCurrentSlotOwner(): Delegate {
+    override fun getCurrentSlotOwner(): String {
         val genesisBlock = genesisBlockService.getLast()
         val random = Random(genesisBlock.height + getSlotNumber(clock.currentTimeMillis()))
         return genesisBlock.payload.activeDelegates.shuffled(random).first()

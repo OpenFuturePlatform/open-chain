@@ -2,7 +2,6 @@ package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
@@ -53,12 +52,12 @@ class BlockProductionScheduler(
             }
 
             val slotOwner = epochService.getCurrentSlotOwner()
-            log.debug("CONSENSUS: Slot owner ${slotOwner.id}")
+            log.debug("CONSENSUS: Slot owner $slotOwner")
             if (genesisBlockService.isGenesisBlockRequired()) {
                 val genesisBlock = genesisBlockService.create()
                 genesisBlockService.add(genesisBlock)
                 pendingBlockHandler.resetSlotNumber()
-            } else if (keyHolder.getPublicKeyAsHexString() == slotOwner.publicKey) {
+            } else if (keyHolder.getPublicKeyAsHexString() == slotOwner) {
                 val block = mainBlockService.create()
                 pendingBlockHandler.addBlock(block)
             }

@@ -26,6 +26,10 @@ class AddressesHolder(
         return nodesInfo.keys
     }
 
+    fun getNodeInfoByUid(uid: String): NodeInfo? {
+        return nodesInfo.keys.find { it.uid == uid }
+    }
+
     fun addNodeInfo(nodeInfo: NodeInfo) {
         val uid = nodeKeyHolder.getUid()
         if (uid != nodeInfo.uid) {
