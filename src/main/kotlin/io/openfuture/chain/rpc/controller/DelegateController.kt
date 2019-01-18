@@ -4,6 +4,7 @@ package io.openfuture.chain.rpc.controller
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.WalletVoteService
 import io.openfuture.chain.core.service.state.DefaultDelegateStateService.Companion.DEFAULT_DELEGATE_RATING
 import io.openfuture.chain.rpc.domain.DelegateResponse
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -24,19 +25,13 @@ import javax.validation.Valid
 class DelegateController(
     private val delegateService: DelegateService,
     private val delegateStateService: DelegateStateService,
+    private val walletVoteService: WalletVoteService,
     private val genesisBlockService: GenesisBlockService
 ) {
 
     @GetMapping
-    fun getAll(request: PageRequest): PageResponse<DelegateResponse> {
-        val delegates = delegateStateService.getAllDelegates().map { DelegateResponse(delegateService.getByNodeId(it.address)) }
-        val pageActiveDelegate = delegates.stream()
-            .skip(request.offset)
-            .limit(request.getLimit().toLong())
-            .collect(Collectors.toList())
-
-        return PageResponse(PageImpl(pageActiveDelegate, request, delegates.size.toLong()))
-    }
+    fun getAll(request: PageRequest): PageResponse<DelegateResponse> =
+        PageResponse(delegateService.getAll(request).map { DelegateResponse(it) })
 
     @GetMapping("/active")
     fun getAllActive(request: PageRequest): PageResponse<DelegateResponse> {
@@ -63,7 +58,7 @@ class DelegateController(
                 delegate.publicKey,
                 delegate.nodeId,
                 state?.rating ?: DEFAULT_DELEGATE_RATING,
-                0, // todo votecount
+                walletVoteService.getVotesForNode(delegate.nodeId).size,
                 delegate.registrationDate
             )
         }

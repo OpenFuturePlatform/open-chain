@@ -164,6 +164,8 @@ interface WalletVoteRepository : BaseRepository<WalletVote> {
 
     fun findAllByIdAddress(address: String): List<WalletVote>
 
+    fun findAllByIdNodeId(nodeId: String): List<WalletVote>
+
     fun deleteByIdAddressAndIdNodeId(address: String, nodeId: String)
 
 }
