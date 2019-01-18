@@ -132,7 +132,7 @@ interface DelegateRepository : BaseRepository<Delegate> {
 @Repository
 interface StateRepository<T : State> : BaseRepository<T> {
 
-    fun findLastByAddress(address: String): T?
+    fun findFirstByAddressOrderByBlockIdDesc(address: String): T?
 
     fun findByAddress(address: String): List<T>
 

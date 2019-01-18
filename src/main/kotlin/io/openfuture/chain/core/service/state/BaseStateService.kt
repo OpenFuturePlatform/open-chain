@@ -15,7 +15,7 @@ abstract class BaseStateService<T : State>(
     override fun getLastByAddress(address: String): T? {
         BlockchainLock.readLock.lock()
         try {
-            return repository.findLastByAddress(address)
+            return repository.findFirstByAddressOrderByBlockIdDesc(address)
         } finally {
             BlockchainLock.readLock.unlock()
         }

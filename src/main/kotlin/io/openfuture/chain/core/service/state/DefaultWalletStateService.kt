@@ -64,7 +64,7 @@ class DefaultWalletStateService(
         BlockchainLock.readLock.lock()
         try {
             return statePool.get(address) as? WalletStateMessage
-                ?: repository.findLastByAddress(address)?.toMessage()
+                ?: repository.findFirstByAddressOrderByBlockIdDesc(address)?.toMessage()
                 ?: WalletStateMessage(address, DEFAULT_WALLET_BALANCE)
         } finally {
             BlockchainLock.readLock.unlock()
