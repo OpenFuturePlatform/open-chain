@@ -5,7 +5,6 @@ import io.openfuture.chain.core.model.entity.WalletVote
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
@@ -228,14 +227,6 @@ interface DelegateService {
     fun isExistsByNodeIds(nodeIds: List<String>): Boolean
 
     fun save(delegate: Delegate): Delegate
-
-}
-
-interface ViewDelegateService {
-
-    fun getAll(request: PageRequest): Page<ViewDelegate>
-
-    fun getByNodeId(nodeId: String): ViewDelegate
 
 }
 

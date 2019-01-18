@@ -5,7 +5,6 @@ import io.openfuture.chain.core.model.entity.WalletVote
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.state.WalletState
@@ -127,13 +126,6 @@ interface DelegateRepository : BaseRepository<Delegate> {
 
     @Query("Select * From DELEGATES Where NODE_ID In :ids ", nativeQuery = true)
     fun findByNodeIds(@Param("ids") nodeIds: List<String>): List<Delegate>
-
-}
-
-@Repository
-interface ViewDelegateRepository : BaseRepository<ViewDelegate> {
-
-    fun findOneByNodeId(nodeId: String): ViewDelegate?
 
 }
 

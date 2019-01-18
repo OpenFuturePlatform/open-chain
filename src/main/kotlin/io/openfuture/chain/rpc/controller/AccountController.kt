@@ -1,6 +1,6 @@
 package io.openfuture.chain.rpc.controller
 
-import io.openfuture.chain.core.service.ViewDelegateService
+import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.service.WalletStateService
 import io.openfuture.chain.core.service.WalletVoteService
@@ -29,7 +29,6 @@ class AccountController(
     private val cryptoService: CryptoService,
     private val walletStateService: WalletStateService,
     private val walletVoteService: WalletVoteService,
-    private val viewDelegateService: ViewDelegateService,
     private val voteTransactionService: VoteTransactionService
 ) {
 
@@ -51,7 +50,7 @@ class AccountController(
         val delegates = walletVoteService.getVotesByAddress(address)
             .map {
                 VotesResponse(
-                    viewDelegateService.getByNodeId(it.id.nodeId),
+                    ViewDelegate(),// todo viewDelegateService.getByNodeId(it.id.nodeId),
                     voteTransactionService.getLastVoteForDelegate(address, it.id.nodeId).header.timestamp,
                     voteTransactionService.getUnconfirmedBySenderAgainstDelegate(address, it.id.nodeId) != null
                 )
