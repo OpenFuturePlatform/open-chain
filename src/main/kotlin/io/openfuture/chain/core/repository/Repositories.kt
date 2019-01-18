@@ -148,7 +148,7 @@ interface DelegateStateRepository : StateRepository<DelegateState> {
         Select * From DELEGATE_STATES DS
         Join STATES S ON(DS.ID=S.ID)
         Join BLOCKS B ON(S.block_id=B.ID)
-        Group By S.NODE_ID
+        Group By S.ADDRESS
         Having Max(B.HEIGHT)
         """,
         nativeQuery = true)
