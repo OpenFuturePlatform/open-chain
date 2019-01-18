@@ -7,7 +7,9 @@ interface EpochService {
 
     fun getEpochStart(): Long
 
-    fun getDelegates(): List<Delegate>
+//    fun getDelegates(): List<Delegate>
+
+    fun getDelegatesPublicKeys(): List<String>
 
     fun getGenesisBlockHeight(): Long
 
