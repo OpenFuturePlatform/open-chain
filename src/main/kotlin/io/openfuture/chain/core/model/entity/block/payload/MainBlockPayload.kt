@@ -9,6 +9,8 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTrans
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.crypto.util.HashUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.hibernate.annotations.Fetch
+import org.hibernate.annotations.FetchMode
 import java.nio.charset.StandardCharsets.UTF_8
 import javax.persistence.*
 
@@ -28,6 +30,7 @@ class MainBlockPayload(
         joinColumns = [JoinColumn(name = "block_id")],
         inverseJoinColumns = [JoinColumn(name = "id")]
     )
+    @Fetch(value = FetchMode.SUBSELECT)
     var rewardTransaction: MutableList<RewardTransaction> = mutableListOf(),
 
     @JsonIgnore
@@ -37,6 +40,7 @@ class MainBlockPayload(
         joinColumns = [JoinColumn(name = "block_id")],
         inverseJoinColumns = [JoinColumn(name = "id")]
     )
+    @Fetch(value = FetchMode.SUBSELECT)
     var voteTransactions: MutableList<VoteTransaction> = mutableListOf(),
 
     @JsonIgnore
@@ -46,6 +50,7 @@ class MainBlockPayload(
         joinColumns = [JoinColumn(name = "block_id")],
         inverseJoinColumns = [JoinColumn(name = "id")]
     )
+    @Fetch(value = FetchMode.SUBSELECT)
     var delegateTransactions: MutableList<DelegateTransaction> = mutableListOf(),
 
     @JsonIgnore
@@ -55,6 +60,7 @@ class MainBlockPayload(
         joinColumns = [JoinColumn(name = "block_id")],
         inverseJoinColumns = [JoinColumn(name = "id")]
     )
+    @Fetch(value = FetchMode.SUBSELECT)
     var transferTransactions: MutableList<TransferTransaction> = mutableListOf(),
 
     @JsonIgnore
@@ -64,6 +70,7 @@ class MainBlockPayload(
         joinColumns = [JoinColumn(name = "block_id")],
         inverseJoinColumns = [JoinColumn(name = "id")]
     )
+    @Fetch(value = FetchMode.SUBSELECT)
     var delegateStates: MutableList<DelegateState> = mutableListOf(),
 
     @JsonIgnore
@@ -73,6 +80,7 @@ class MainBlockPayload(
         joinColumns = [JoinColumn(name = "block_id")],
         inverseJoinColumns = [JoinColumn(name = "id")]
     )
+    @Fetch(value = FetchMode.SUBSELECT)
     var walletStates: MutableList<WalletState> = mutableListOf()
 
 ) : BlockPayload {
