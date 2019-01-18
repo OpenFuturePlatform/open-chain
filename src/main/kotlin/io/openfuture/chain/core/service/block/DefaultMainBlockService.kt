@@ -43,7 +43,8 @@ class DefaultMainBlockService(
     private val keyHolder: NodeKeyHolder,
     private val throughput: TransactionThroughput,
     private val walletStateService: WalletStateService,
-    private val nodeStateService: NodeStateService,
+    private val walletVoteService: WalletVoteService,
+//    private val nodeStateService: NodeStateService,
     private val statePool: StatePool,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository,
@@ -203,8 +204,12 @@ class DefaultMainBlockService(
     private fun validate(message: PendingBlockMessage) {
         super.validateBase(MainBlock.of(message))
 
-        if (!isValidMerkleHash(message.merkleHash, message.getAllTransactions().map { it.hash })) {
+        if (!isValidRootHash(message.merkleHash, message.getAllTransactions().map { it.hash })) {
             throw ValidationException("Invalid merkle hash: ${message.merkleHash}")
+        }
+
+        if (!isValidRootHash(message.stateHash, message.getAllStates().map { it.getHash() })) {
+            throw ValidationException("Invalid state hash: ${message.stateHash}")
         }
 
         if (!isValidBalances(message.getExternalTransactions())) {
@@ -227,9 +232,10 @@ class DefaultMainBlockService(
             throw ValidationException("Invalid transfer transactions")
         }
 
-        if (!isValidStateHash(message.stateHash, message.getAllTransactions())) {
-            throw ValidationException("Invalid state hash: ${message.stateHash}")
+        if (!isValidStates(message.getAllTransactions(), message.getAllStates())) {
+            throw ValidationException("Invalid states")
         }
+
     }
 
     private fun isValidBalances(transactions: List<TransactionMessage>): Boolean =
@@ -256,7 +262,7 @@ class DefaultMainBlockService(
         }
 
         val validVotes = transactions.groupBy { it.senderAddress }.entries.all { sender ->
-            val persistVotes = walletStateService.getVotesByAddress(sender.key)
+            val persistVotes = walletVoteService.getVotesByAddress(sender.key)
             val pendingVotes = sender.value.asSequence().filter { VoteType.FOR.getId() == it.voteTypeId }.map { it.nodeId }.toList()
 
             val hasDuplicates = pendingVotes.intersect(persistVotes).isNotEmpty()
@@ -281,20 +287,12 @@ class DefaultMainBlockService(
     private fun isValidTransferTransactions(transactions: List<TransferTransactionMessage>): Boolean =
         transactions.all { transferTransactionService.verify(it) }
 
-    private fun isValidMerkleHash(merkleHash: String, transactions: List<String>): Boolean {
-        if (transactions.isEmpty()) {
+    private fun isValidRootHash(rootHash: String, hashes: List<String>): Boolean {
+        if (hashes.isEmpty()) {
             return false
         }
 
-        return merkleHash == calculateMerkleRoot(transactions)
-    }
-
-    private fun isValidStateHash(stateHash: String, txMessages: List<TransactionMessage>): Boolean {
-        if (txMessages.isEmpty()) {
-            return false
-        }
-
-        return stateHash == getStates(txMessages)
+        return rootHash == calculateMerkleRoot(hashes)
     }
 
     private fun isValidReward(fees: Long, reward: Long): Boolean {
@@ -303,6 +301,16 @@ class DefaultMainBlockService(
         val rewardBlock = consensusProperties.rewardBlock!!
 
         return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)
+    }
+
+    private fun isValidStates(txMessages: List<TransactionMessage>, blockStates: List<StateMessage>): Boolean {
+        val states = getStates(txMessages)
+
+        if (blockStates.size != states.size) {
+            return false
+        }
+
+        return states.all { blockStates.contains(it) }
     }
 
     private fun calculateMerkleRoot(hashes: List<String>): String {
@@ -329,16 +337,18 @@ class DefaultMainBlockService(
     }
 
     private fun getStates(txMessages: List<TransactionMessage>): List<StateMessage> {
-        txMessages.forEach {
-            when (it) {
-                is TransferTransactionMessage -> transferTransactionService.updateState(it)
-                is VoteTransactionMessage -> voteTransactionService.updateState(it)
-                is DelegateTransactionMessage -> delegateTransactionService.updateState(it)
-                is RewardTransactionMessage -> rewardTransactionService.updateState(it)
+        return statePool.use {
+            txMessages.forEach { tx ->
+                when (tx) {
+                    is TransferTransactionMessage -> transferTransactionService.updateState(tx)
+                    is VoteTransactionMessage -> voteTransactionService.updateState(tx)
+                    is DelegateTransactionMessage -> delegateTransactionService.updateState(tx)
+                    is RewardTransactionMessage -> rewardTransactionService.updateState(tx)
+                }
             }
-        }
 
-        return statePool.getPool().values.toList()
+            statePool.getPool().values.toList()
+        }
     }
 
     private fun getTransactions(): List<UnconfirmedTransaction> {
