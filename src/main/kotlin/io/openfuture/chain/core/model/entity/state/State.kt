@@ -1,7 +1,7 @@
 package io.openfuture.chain.core.model.entity.state
 
 import io.openfuture.chain.core.model.entity.base.BaseModel
-import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.network.message.core.StateMessage
 import javax.persistence.*
 
@@ -15,7 +15,7 @@ abstract class State(
 
     @ManyToOne
     @JoinColumn(name = "block_id", nullable = false)
-    var block: MainBlock
+    var block: Block
 
 ) : BaseModel() {
 

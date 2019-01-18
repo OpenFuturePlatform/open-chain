@@ -11,7 +11,7 @@ class GenesisBlockPayload(
     @Column(name = "epoch_index", nullable = false)
     var epochIndex: Long,
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "delegate2genesis", joinColumns = [JoinColumn(name = "genesis_id")])
     @Column(name = "public_key")
     var activeDelegates: MutableList<String>

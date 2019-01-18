@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.model.entity.state
 
+import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.network.message.core.WalletStateMessage
 import javax.persistence.Column
@@ -10,7 +11,7 @@ import javax.persistence.Table
 @Table(name = "wallet_states")
 class WalletState(
     address: String,
-    block: MainBlock,
+    block: Block,
 
     @Column(name = "balance", nullable = false)
     val balance: Long = 0
