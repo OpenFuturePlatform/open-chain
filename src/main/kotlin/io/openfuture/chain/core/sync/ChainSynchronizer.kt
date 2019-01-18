@@ -106,6 +106,9 @@ class ChainSynchronizer(
 
     fun isInSync(block: Block): Boolean {
         val lastBlock = blockService.getLast()
+        if (lastBlock.hash == block.hash) {
+            return true
+        }
         return isValidHeight(block, lastBlock) && isValidPreviousHash(block, lastBlock)
     }
 
