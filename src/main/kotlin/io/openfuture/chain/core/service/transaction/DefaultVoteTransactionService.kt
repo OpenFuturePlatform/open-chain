@@ -14,6 +14,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.repository.UVoteTransactionRepository
 import io.openfuture.chain.core.repository.VoteTransactionRepository
 import io.openfuture.chain.core.service.DelegateService
+import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.service.WalletVoteService
 import io.openfuture.chain.core.sync.BlockchainLock
@@ -30,6 +31,7 @@ internal class DefaultVoteTransactionService(
     repository: VoteTransactionRepository,
     uRepository: UVoteTransactionRepository,
     private val delegateService: DelegateService,
+    private val delegateStateService: DelegateStateService,
     private val consensusProperties: ConsensusProperties,
     private val walletVoteService: WalletVoteService
 ) : ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository), VoteTransactionService {
@@ -112,6 +114,9 @@ internal class DefaultVoteTransactionService(
 
     override fun updateState(message: VoteTransactionMessage) {
         walletStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
+
+        //todo public key
+        delegateStateService.updateRating(message.nodeId)
     }
 
     override fun verify(message: VoteTransactionMessage): Boolean {
