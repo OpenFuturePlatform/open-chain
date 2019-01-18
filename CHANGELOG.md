@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.7.0] - 2019-01-17
+### Added
+- Sync: full synchronization, all types of transactions are saved
+- Sync: wallet balances also synchronized
+
+### Changed
+- Sync: general stability improvements
+- Network: operational number of connections is lowered - even if node has not sufficient amount of connections, it still operates with blocks and transactions 
+
 ## [1.6.0] - 2019-01-10
 ### Added
 - Smart contracts: contract object serialization
@@ -281,6 +290,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[1.7.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.3.0...v1.4.0
