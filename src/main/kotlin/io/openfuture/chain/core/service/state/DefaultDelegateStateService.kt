@@ -6,6 +6,8 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.repository.DelegateStateRepository
 import io.openfuture.chain.core.service.DelegateStateService
+import io.openfuture.chain.core.service.WalletStateService
+import io.openfuture.chain.core.service.WalletVoteService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.DelegateStateMessage
 import org.springframework.stereotype.Service
@@ -15,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional(readOnly = true)
 class DefaultDelegateStateService(
     private val repository: DelegateStateRepository,
+    private val walletVoteService: WalletVoteService,
+    private val walletStateService: WalletStateService,
     private val consensusProperties: ConsensusProperties,
     private val statePool: StatePool
 ) : BaseStateService<DelegateState>(repository), DelegateStateService {
@@ -28,6 +32,15 @@ class DefaultDelegateStateService(
 
     override fun getActiveDelegates(): List<DelegateState> =
         getAllDelegates().sortedBy { it.rating }.take(consensusProperties.delegatesCount!!)
+
+    //todo change
+    override fun updateRating(publicKey: String) {
+        val rating = walletVoteService.getVotesForNode(publicKey).map {
+            walletStateService.getBalanceByAddress(it.id.address)
+        }.sum()
+
+        statePool.update(DelegateStateMessage(publicKey, rating))
+    }
 
     override fun addDelegate(publicKey: String) {
         statePool.update(DelegateStateMessage(publicKey, DEFAULT_DELEGATE_RATING))
