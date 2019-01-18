@@ -69,8 +69,6 @@ class DefaultRewardTransactionService(
                 return
             }
 
-            updateState(message)
-
             repository.save(RewardTransaction.of(message, block))
         } finally {
             BlockchainLock.writeLock.unlock()

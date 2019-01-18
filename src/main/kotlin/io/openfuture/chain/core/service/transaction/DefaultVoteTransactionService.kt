@@ -99,8 +99,6 @@ internal class DefaultVoteTransactionService(
                 return tx
             }
 
-            updateState(message)
-
             val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
             if (null != utx) {
                 return confirm(utx, VoteTransaction.of(utx, block))

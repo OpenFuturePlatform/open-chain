@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.state
 
 import io.openfuture.chain.core.component.StatePool
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -67,6 +68,16 @@ class DefaultWalletStateService(
                 ?: WalletStateMessage(address, DEFAULT_WALLET_BALANCE)
         } finally {
             BlockchainLock.readLock.unlock()
+        }
+    }
+
+    @Transactional
+    override fun toBlock(message: WalletStateMessage, block: MainBlock) {
+        BlockchainLock.writeLock.lock()
+        try {
+            repository.save(WalletState.of(message, block))
+        } finally {
+            BlockchainLock.writeLock.unlock()
         }
     }
 

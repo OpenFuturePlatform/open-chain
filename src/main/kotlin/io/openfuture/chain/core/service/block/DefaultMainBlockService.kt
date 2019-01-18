@@ -11,8 +11,6 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload.Companion.calculateMerkleRoot
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
-import io.openfuture.chain.core.model.entity.state.DelegateState
-import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -167,23 +165,21 @@ class DefaultMainBlockService(
 
             val savedBlock = super.save(block)
 
-            statePool.use { pool ->
-                message.getAllTransactions().forEach {
-                    when (it) {
-                        is RewardTransactionMessage -> rewardTransactionService.toBlock(it, savedBlock)
-                        is TransferTransactionMessage -> transferTransactionService.toBlock(it, savedBlock)
-                        is DelegateTransactionMessage -> delegateTransactionService.toBlock(it, savedBlock)
-                        is VoteTransactionMessage -> voteTransactionService.toBlock(it, savedBlock)
-                        else -> throw IllegalStateException("The type doesn`t handle")
-                    }
+            message.getAllTransactions().forEach {
+                when (it) {
+                    is RewardTransactionMessage -> rewardTransactionService.toBlock(it, savedBlock)
+                    is TransferTransactionMessage -> transferTransactionService.toBlock(it, savedBlock)
+                    is DelegateTransactionMessage -> delegateTransactionService.toBlock(it, savedBlock)
+                    is VoteTransactionMessage -> voteTransactionService.toBlock(it, savedBlock)
+                    else -> throw IllegalStateException("The type doesn`t handle")
                 }
+            }
 
-                statePool.getPool().values.forEach {
-                    when (it) {
-                        is WalletState -> walletStateService.create(it)
-                        is DelegateState -> delegateStateService.create(it)
-                        else -> throw IllegalStateException("The type doesn`t handle")
-                    }
+            message.getAllStates().forEach {
+                when (it) {
+                    is DelegateStateMessage -> delegateStateService.toBlock(it, savedBlock)
+                    is WalletStateMessage -> walletStateService.toBlock(it, savedBlock)
+                    else -> throw IllegalStateException("The type doesn`t handle")
                 }
             }
 

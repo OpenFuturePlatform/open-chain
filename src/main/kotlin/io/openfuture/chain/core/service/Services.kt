@@ -247,8 +247,6 @@ interface StateService<T : State> {
 
     fun getByAddressAndBlock(address: String, block: Block): T?
 
-    fun create(state: T): T
-
 }
 
 interface DelegateStateService : StateService<DelegateState> {
@@ -259,6 +257,8 @@ interface DelegateStateService : StateService<DelegateState> {
 
     fun addDelegate(publicKey: String)
 
+    fun toBlock(message: DelegateStateMessage, block: MainBlock)
+
 }
 
 interface WalletStateService : StateService<WalletState> {
@@ -268,6 +268,8 @@ interface WalletStateService : StateService<WalletState> {
     fun getActualBalanceByAddress(address: String): Long
 
     fun updateBalanceByAddress(address: String, amount: Long)
+
+    fun toBlock(message: WalletStateMessage, block: MainBlock)
 
 }
 

@@ -39,7 +39,4 @@ abstract class BaseStateService<T : State>(
         }
     }
 
-    @Transactional
-    override fun create(state: T): T = repository.save(state)
-
 }
