@@ -1,6 +1,7 @@
 package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.consensus.component.block.BlockApprovalStage.*
+import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
@@ -24,7 +25,8 @@ class DefaultPendingBlockHandler(
     private val mainBlockService: MainBlockService,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService,
-    private val chainSynchronizer: ChainSynchronizer
+    private val chainSynchronizer: ChainSynchronizer,
+    private val properties: ConsensusProperties
 ) : PendingBlockHandler {
 
     companion object {
@@ -125,7 +127,7 @@ class DefaultPendingBlockHandler(
             if (!blockCommits.contains(delegate) && isValidApprovalSignature(message)) {
                 blockCommits.add(delegate)
                 networkService.broadcast(message)
-                if (blockCommits.size > (delegates.size / 3 * 2) && !blockAddedFlag) {
+                if (blockCommits.size > (properties.delegatesCount!! / 3 * 2) && !blockAddedFlag) {
                     pendingBlocks.find { it.hash == message.hash }?.let {
                         log.debug("CONSENSUS: Saving main block ${it.hash}")
                         if (!chainSynchronizer.isInSync(MainBlock.of(it))) {
