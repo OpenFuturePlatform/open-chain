@@ -92,26 +92,21 @@ internal class DefaultVoteTransactionService(
 
     @Transactional
     override fun toBlock(transaction: VoteTransaction, block: MainBlock): VoteTransaction {
-        return toBlock(transaction.toMessage(), block)
-    }
-
-    @Transactional
-    override fun toBlock(message: VoteTransactionMessage, block: MainBlock): VoteTransaction {
         BlockchainLock.writeLock.lock()
         try {
-            val tx = repository.findOneByFooterHash(message.hash)
+            val tx = repository.findOneByFooterHash(transaction.footer.hash)
             if (null != tx) {
                 return tx
             }
 
-            walletService.decreaseBalance(message.senderAddress, message.fee)
+            walletService.decreaseBalance(transaction.header.senderAddress, transaction.header.fee)
 
-            val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
+            val utx = unconfirmedRepository.findOneByFooterHash(transaction.footer.hash)
             if (null != utx) {
-                return confirm(utx, VoteTransaction.of(utx, block))
+                return confirm(utx, transaction)
             }
 
-            return this.save(VoteTransaction.of(message, block))
+            return this.save(transaction)
         } finally {
             BlockchainLock.writeLock.unlock()
         }
