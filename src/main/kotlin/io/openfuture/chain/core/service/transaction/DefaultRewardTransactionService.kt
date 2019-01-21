@@ -64,8 +64,8 @@ class DefaultRewardTransactionService(
     override fun toBlock(transaction: RewardTransaction, block: MainBlock) {
         BlockchainLock.writeLock.lock()
         try {
-            val transaction = repository.findOneByFooterHash(transaction.footer.hash)
-            if (null != transaction) {
+            val persistedTransaction = repository.findOneByFooterHash(transaction.footer.hash)
+            if (null != persistedTransaction) {
                 return
             }
 

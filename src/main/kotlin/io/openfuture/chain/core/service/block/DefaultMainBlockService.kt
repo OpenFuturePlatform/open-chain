@@ -9,6 +9,10 @@ import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
+import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -141,10 +145,10 @@ class DefaultMainBlockService(
 
             message.getAllTransactions().forEach {
                 when (it) {
-                    is RewardTransactionMessage -> rewardTransactionService.toBlock(it, savedBlock)
-                    is TransferTransactionMessage -> transferTransactionService.toBlock(it, savedBlock)
-                    is DelegateTransactionMessage -> delegateTransactionService.toBlock(it, savedBlock)
-                    is VoteTransactionMessage -> voteTransactionService.toBlock(it, savedBlock)
+                    is RewardTransactionMessage -> rewardTransactionService.toBlock(RewardTransaction.of(it, savedBlock), savedBlock)
+                    is TransferTransactionMessage -> transferTransactionService.toBlock(TransferTransaction.of(it, savedBlock), savedBlock)
+                    is DelegateTransactionMessage -> delegateTransactionService.toBlock(DelegateTransaction.of(it, savedBlock), savedBlock)
+                    is VoteTransactionMessage -> voteTransactionService.toBlock(VoteTransaction.of(it, savedBlock), savedBlock)
                 }
             }
 
