@@ -22,7 +22,7 @@ class DelegateTransactionResponse(
         tx.footer.senderSignature,
         tx.footer.senderPublicKey,
         tx.footer.hash,
-        tx.payload.nodeId,
+        tx.payload.delegateKey,
         tx.payload.amount
     )
 
@@ -33,7 +33,7 @@ class DelegateTransactionResponse(
         tx.footer.senderSignature,
         tx.footer.senderPublicKey,
         tx.footer.hash,
-        tx.payload.nodeId,
+        tx.payload.delegateKey,
         tx.payload.amount,
         tx.block.hash
     )

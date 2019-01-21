@@ -15,7 +15,7 @@ class DefaultWalletVoteService(
     override fun getVotesByAddress(address: String): List<WalletVote> = repository.findAllByIdAddress(address)
 
     @Transactional(readOnly = true)
-    override fun getVotesForNode(nodeId: String): List<WalletVote> = repository.findAllByIdNodeId(nodeId)
+    override fun getVotesForDelegate(delegateKey: String): List<WalletVote> = repository.findAllByIdDelegateKey(delegateKey)
 
     @Transactional
     override fun updateVoteByAddress(address: String, nodeId: String, type: VoteType) {

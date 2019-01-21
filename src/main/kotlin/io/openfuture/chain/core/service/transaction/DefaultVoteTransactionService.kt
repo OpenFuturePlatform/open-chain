@@ -114,7 +114,6 @@ internal class DefaultVoteTransactionService(
 
     override fun updateState(message: VoteTransactionMessage) {
         walletStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
-
         delegateStateService.updateRating(message.delegateKey)
     }
 
@@ -185,7 +184,7 @@ internal class DefaultVoteTransactionService(
     }
 
     private fun isAlreadyVoted(senderAddress: String, delegateKey: String): Boolean =
-        walletVoteService.getVotesByAddress(senderAddress).any { it.id.nodeId == delegateKey }
+        walletVoteService.getVotesByAddress(senderAddress).any { it.id.delegateKey == delegateKey }
 
     private fun isAlreadySentVote(senderAddress: String, delegateKey: String, voteTypeId: Int): Boolean {
         val unconfirmed = unconfirmedRepository.findAllByHeaderSenderAddress(senderAddress)

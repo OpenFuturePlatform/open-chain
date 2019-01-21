@@ -49,16 +49,16 @@ class AccountController(
     fun getDelegates(@PathVariable @AddressChecksum address: String, request: PageRequest): PageResponse<VotesResponse> {
         val delegates = walletVoteService.getVotesByAddress(address)
             .map {
-                val state = delegateStateService.getLastByAddress(it.id.nodeId)
-                val delegate = delegateService.getByNodeId(it.id.nodeId)
+                val state = delegateStateService.getLastByAddress(it.id.delegateKey)
+                val delegate = delegateService.getByPublicKey(it.id.delegateKey)
                 VotesResponse(
                     delegate.address,
                     delegate.publicKey,
-                    delegate.nodeId,
+                    delegate.publicKey, //todo remove for front
                     state?.rating ?: DEFAULT_DELEGATE_RATING,
-                    walletVoteService.getVotesForNode(it.id.nodeId).size,
-                    voteTransactionService.getLastVoteForDelegate(address, it.id.nodeId).header.timestamp,
-                    voteTransactionService.getUnconfirmedBySenderAgainstDelegate(address, it.id.nodeId) != null
+                    walletVoteService.getVotesForDelegate(it.id.delegateKey).size,
+                    voteTransactionService.getLastVoteForDelegate(address, it.id.delegateKey).header.timestamp,
+                    voteTransactionService.getUnconfirmedBySenderAgainstDelegate(address, it.id.delegateKey) != null
                 )
             }
 

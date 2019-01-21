@@ -51,7 +51,7 @@ VALUES (1, 'FOR'),
 CREATE TABLE vote_transactions (
   id           BIGINT PRIMARY KEY REFERENCES transactions,
   vote_type_id INTEGER NOT NULL REFERENCES vote_types,
-  node_id      VARCHAR NOT NULL
+  delegate_key      VARCHAR NOT NULL
 );
 
 -- UNCONFIRMED TABLES
@@ -86,5 +86,5 @@ CREATE MEMORY TABLE u_delegate_transactions (
 CREATE MEMORY TABLE u_vote_transactions (
   id           BIGINT PRIMARY KEY REFERENCES u_transactions,
   vote_type_id INTEGER NOT NULL REFERENCES vote_types,
-  node_id      VARCHAR NOT NULL
+  delegate_key      VARCHAR NOT NULL
 );

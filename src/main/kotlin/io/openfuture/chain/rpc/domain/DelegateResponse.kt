@@ -11,7 +11,7 @@ data class DelegateResponse(
     constructor(delegate: Delegate) : this(
         delegate.address,
         delegate.publicKey,
-        delegate.nodeId
+        delegate.publicKey //todo remove for from
     )
 
 }

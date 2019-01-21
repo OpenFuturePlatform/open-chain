@@ -259,13 +259,15 @@ class DefaultMainBlockService(
 
         val validVotes = transactions.groupBy { it.senderAddress }.entries.all { sender ->
             val persistVotes = walletVoteService.getVotesByAddress(sender.key)
-            val pendingVotes = sender.value.asSequence().filter { VoteType.FOR.getId() == it.voteTypeId }.map { it.nodeId }.toList()
+            val pendingVotes = sender.value.asSequence()
+                .filter { VoteType.FOR.getId() == it.voteTypeId }
+                .map { it.delegateKey }.toList()
 
             val hasDuplicates = pendingVotes.intersect(persistVotes).isNotEmpty()
             !hasDuplicates && consensusProperties.delegatesCount!! >= persistVotes.size + pendingVotes.size
         }
 
-        val existDelegates = delegateService.isExistsByNodeIds(transactions.map { it.nodeId })
+        val existDelegates = delegateService.isExistsByPublicKeys(transactions.map { it.delegateKey })
 
         return transactions.all { voteTransactionService.verify(it) } && validVotes && existDelegates
     }
@@ -276,8 +278,8 @@ class DefaultMainBlockService(
         }
 
         return transactions.all { delegateTransactionService.verify(it) } &&
-            !delegateService.isExistsByNodeIds(transactions.map { it.nodeId }) &&
-            transactions.distinctBy { it.nodeId }.size == transactions.size
+            !delegateService.isExistsByPublicKeys(transactions.map { it.delegateKey }) &&
+            transactions.distinctBy { it.delegateKey }.size == transactions.size
     }
 
     private fun isValidTransferTransactions(transactions: List<TransferTransactionMessage>): Boolean =

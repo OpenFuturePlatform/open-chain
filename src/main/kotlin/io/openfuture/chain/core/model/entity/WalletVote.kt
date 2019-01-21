@@ -22,7 +22,7 @@ data class WalletVoteId(
     @Column(name = "address", nullable = false)
     var address: String,
 
-    @Column(name = "node_id", nullable = false)
-    var nodeId: String
+    @Column(name = "delegate_key", nullable = false)
+    var delegateKey: String
 
 ) : Serializable

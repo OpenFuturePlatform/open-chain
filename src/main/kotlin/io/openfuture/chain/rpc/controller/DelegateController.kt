@@ -56,9 +56,9 @@ class DelegateController(
             ViewDelegateResponse(
                 delegate.address,
                 delegate.publicKey,
-                delegate.nodeId,
+                delegate.publicKey, // todo remove for front
                 state?.rating ?: DEFAULT_DELEGATE_RATING,
-                walletVoteService.getVotesForNode(delegate.nodeId).size,
+                walletVoteService.getVotesForDelegate(delegate.publicKey).size,
                 delegate.registrationDate
             )
         }

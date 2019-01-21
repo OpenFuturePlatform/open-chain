@@ -35,7 +35,7 @@ class DefaultDelegateStateService(
 
     //todo change
     override fun updateRating(publicKey: String) {
-        val rating = walletVoteService.getVotesForNode(publicKey).map {
+        val rating = walletVoteService.getVotesForDelegate(publicKey).map {
             walletStateService.getBalanceByAddress(it.id.address)
         }.sum()
 
