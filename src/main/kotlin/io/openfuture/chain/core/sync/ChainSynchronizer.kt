@@ -34,7 +34,6 @@ import javax.xml.bind.ValidationException
 @Component
 class ChainSynchronizer(
     private val properties: NodeProperties,
-    private val consensusProperties: ConsensusProperties,
     private val blockService: BlockService,
     private val networkApiService: NetworkApiService,
     private val genesisBlockService: GenesisBlockService,
@@ -223,7 +222,7 @@ class ChainSynchronizer(
             val lastLocalBlock = blockService.getLast()
             val filteredStorage = syncSession!!.getStorage().filter { it.height > lastLocalBlock.height }
 
-            filteredStorage.asReversed().chunked(consensusProperties.epochHeight!!.plus(1)).forEach {
+            filteredStorage.asReversed().chunked(properties.syncBatchSize!!).forEach {
                 blockService.saveChunk(it, syncSession!!.syncMode)
                 log.debug("Blocks saved from ${it.first().height} to ${it.last().height}")
             }
