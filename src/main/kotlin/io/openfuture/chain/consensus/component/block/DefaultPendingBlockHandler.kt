@@ -109,7 +109,7 @@ class DefaultPendingBlockHandler(
         if (!prepareVotes.containsKey(message.publicKey) && isValidApprovalSignature(message)) {
             prepareVotes[message.publicKey] = delegate
             networkService.broadcast(message)
-            if (prepareVotes.size > (delegates.size - 1) / 3) {
+            if (prepareVotes.size > (properties.delegatesCount!! - 1) / 3) {
                 this.stage = COMMIT
                 val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKeyAsHexString())
                 commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())
