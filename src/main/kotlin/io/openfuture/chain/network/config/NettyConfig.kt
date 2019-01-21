@@ -9,6 +9,7 @@ import io.netty.channel.socket.nio.NioSocketChannel
 import io.openfuture.chain.network.handler.network.initializer.ClientChannelInitializer
 import io.openfuture.chain.network.handler.network.initializer.ServerChannelInitializer
 import io.openfuture.chain.network.property.NodeProperties
+import org.apache.commons.net.ntp.NTPUDPClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.util.concurrent.Executors
@@ -46,4 +47,6 @@ class NettyConfig(
         .handler(clientChannelInitializer)
         .option(SO_KEEPALIVE, properties.keepAlive!!)
 
+    @Bean
+    fun ntpClient(): NTPUDPClient = NTPUDPClient().apply { defaultTimeout = 10000 }
 }

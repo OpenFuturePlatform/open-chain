@@ -17,18 +17,18 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 @Component
 class ClockSynchronizer(
     private val clock: Clock,
-    private val properties: NodeProperties
+    private val properties: NodeProperties,
+    private val ntpClient: NTPUDPClient
 ) {
 
     companion object {
         private val log = LoggerFactory.getLogger(Clock::class.java)
     }
 
+
     private var lastOffset = 0L
     private var nextQuizTime: Long? = null
     private var nearestNtpServer: InetAddress? = null
-    private var quizResult = mutableMapOf<InetAddress, TimeInfo>()
-    private val ntpClient = NTPUDPClient().apply { defaultTimeout = 3000 }
     private val ntpsInetAddress = properties.ntpServers.map { InetAddress.getByName(it) }.toList()
 
 
@@ -46,12 +46,29 @@ class ClockSynchronizer(
             if (SYNCHRONIZED != status) {
                 status = PROCESSING
             }
-            offset = if (isQuizTime()) {
-                startNtpQuiz()
-            } else {
-                syncByNearestNtpServer()
-            }
+            if (isQuizTime()) {
+                nextQuizTime = clock.currentTimeMillis().plus(properties.nextNtpServerInterval!!)
 
+                val quizResult = startNtpQuiz(ntpsInetAddress)
+                val minDelay = quizResult.minBy { it.value.delay }
+
+                if (minDelay == null) {
+                    status = NOT_SYNCHRONIZED
+                    return
+                }
+                nearestNtpServer = minDelay.key
+
+                offset = isThreshold(minDelay.value.offset)
+            } else {
+                val result = syncByNearestNtpServer(nearestNtpServer)
+                val minOffset = result.minBy { Math.abs(it.offset) }?.offset
+
+                if (minOffset == null) {
+                    status = NOT_SYNCHRONIZED
+                    return
+                }
+                offset = isThreshold(minOffset)
+            }
         } finally {
             lock.writeLock().unlock()
 
@@ -68,25 +85,16 @@ class ClockSynchronizer(
         }
     }
 
-    private fun isQuizTime(): Boolean {
-        if (nextQuizTime == null) {
-            return true
-        } else if (clock.currentTimeMillis() > nextQuizTime!!) {
-            return true
-        }
-        return false
-    }
+    private fun isQuizTime(): Boolean = (nextQuizTime == null || clock.currentTimeMillis() > nextQuizTime!!)
 
     private fun isThreshold(offset: Long): Long {
-        lastOffset = if (Math.abs(lastOffset) > Math.abs(offset) || Math.abs(offset) < properties.ntpOffsetThreshold!!) {
-            offset
-        } else {
-            lastOffset
+        if (Math.abs(lastOffset) > Math.abs(offset) || Math.abs(offset) > properties.ntpOffsetThreshold!! && syncRound.get() < 3) {
+            lastOffset = offset
         }
         return lastOffset
     }
 
-    private fun syncByNearestNtpServer(): Long {
+    private fun syncByNearestNtpServer(nearestNtpServer: InetAddress?): MutableList<TimeInfo> {
         var info: TimeInfo?
         var tryQuiz: Boolean
         var attempt = 0
@@ -98,21 +106,19 @@ class ClockSynchronizer(
                 info.computeDetails()
                 log.debug("Ntp server delay = ${info.delay} offset = ${info.offset}")
                 result.add(info)
-                tryQuiz = result.size != 3
+                tryQuiz = result.size < 3
             } catch (e: SocketTimeoutException) {
-                tryQuiz = ++attempt != 6
+                tryQuiz = ++attempt < 6
                 log.debug("Ntp server ${nearestNtpServer!!.hostName} answers too long")
+            } finally {
+                ntpClient.close()
             }
         } while (tryQuiz)
-
-        val minOffset = result.minBy { Math.abs(it.offset) }?.offset ?: return lastOffset
-        return isThreshold(minOffset)
+        return result
     }
 
-    private fun startNtpQuiz(): Long {
-        nextQuizTime = clock.currentTimeMillis().plus(properties.nextNtpServerInterval!!)
-        quizResult.clear()
-
+    private fun startNtpQuiz(ntpsInetAddress: List<InetAddress>): MutableMap<InetAddress, TimeInfo> {
+        val quizResult = mutableMapOf<InetAddress, TimeInfo>()
         for (address in ntpsInetAddress) {
             try {
                 log.debug("Ask ${address.hostName} server")
@@ -122,14 +128,11 @@ class ClockSynchronizer(
                 quizResult[address] = info
             } catch (e: SocketTimeoutException) {
                 log.debug("Ntp server ${address.hostName} answers too long")
+            } finally {
+                ntpClient.close()
             }
         }
-
-        val minDelay = quizResult.minBy { it.value.delay }!!
-        nearestNtpServer = minDelay.key
-        lastOffset = minDelay.value.offset
-
-        return isThreshold(lastOffset)
+        return quizResult
     }
 
     private fun mitigate(offset: Long) {
