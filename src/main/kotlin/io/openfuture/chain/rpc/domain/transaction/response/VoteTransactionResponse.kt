@@ -11,7 +11,7 @@ class VoteTransactionResponse(
     senderPublicKey: String,
     hash: String,
     val voteTypeId: Int,
-    val nodeId: String,
+    val nodeId: String, //todo rename front
     blockHash: String? = null
 ) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey, hash, blockHash) {
 

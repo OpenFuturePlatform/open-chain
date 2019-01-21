@@ -49,7 +49,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
     @Test
     fun addBlockShouldAddMainBlockAndBroadcast() {
-        val delegate = Delegate("publicKey", "address", "host", 1111, 1)
+        val delegate = Delegate("publicKey", "address",  1)
         val payload = MainBlockPayload(
             "merkleHash",
             "stateHash"
