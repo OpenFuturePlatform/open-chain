@@ -11,6 +11,9 @@ CREATE TABLE blocks (
 CREATE INDEX block_height
   ON blocks (height);
 --
+CREATE INDEX block_hash
+  ON blocks (hash);
+--
 CREATE TABLE main_blocks (
   id          BIGINT PRIMARY KEY REFERENCES blocks,
   merkle_hash VARCHAR NOT NULL
@@ -20,3 +23,6 @@ CREATE TABLE genesis_blocks (
   id          BIGINT PRIMARY KEY REFERENCES blocks,
   epoch_index BIGINT NOT NULL
 );
+CREATE INDEX genesis_blocks_epoch_index
+  ON genesis_blocks (epoch_index);
+--
