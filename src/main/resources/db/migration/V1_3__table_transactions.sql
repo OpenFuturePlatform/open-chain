@@ -32,7 +32,6 @@ CREATE INDEX reward_transactions_recipient_address
 --
 CREATE TABLE delegate_transactions (
   id            BIGINT PRIMARY KEY REFERENCES transactions,
-  node_id       VARCHAR NOT NULL UNIQUE,
   delegate_key  VARCHAR NOT NULL UNIQUE,
   delegate_host VARCHAR NOT NULL,
   delegate_port INTEGER NOT NULL,
@@ -51,7 +50,7 @@ VALUES (1, 'FOR'),
 CREATE TABLE vote_transactions (
   id           BIGINT PRIMARY KEY REFERENCES transactions,
   vote_type_id INTEGER NOT NULL REFERENCES vote_types,
-  delegate_key      VARCHAR NOT NULL
+  delegate_key VARCHAR NOT NULL
 );
 
 -- UNCONFIRMED TABLES
@@ -76,7 +75,6 @@ CREATE MEMORY TABLE u_transfer_transactions (
 --
 CREATE MEMORY TABLE u_delegate_transactions (
   id            BIGINT PRIMARY KEY REFERENCES u_transactions,
-  node_id       VARCHAR NOT NULL UNIQUE,
   delegate_key  VARCHAR NOT NULL UNIQUE,
   delegate_host VARCHAR NOT NULL,
   delegate_port INTEGER NOT NULL,
@@ -86,5 +84,5 @@ CREATE MEMORY TABLE u_delegate_transactions (
 CREATE MEMORY TABLE u_vote_transactions (
   id           BIGINT PRIMARY KEY REFERENCES u_transactions,
   vote_type_id INTEGER NOT NULL REFERENCES vote_types,
-  delegate_key      VARCHAR NOT NULL
+  delegate_key VARCHAR NOT NULL
 );
