@@ -90,8 +90,7 @@ class DefaultGenesisBlockService(
             return
         }
 
-        val delegates = message.delegates.asSequence().map { delegateService.getByPublicKey(it) }.toMutableList()
-        val block = GenesisBlock.of(message, delegates)
+        val block = GenesisBlock.of(message)
 
         add(block)
     }

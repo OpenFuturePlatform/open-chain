@@ -7,6 +7,7 @@ import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.util.*
 
 class SyncSession(
+    val syncMode: SyncMode,
     private val lastLocalGenesisBlock: GenesisBlock,
     private val currentGenesisBlock: GenesisBlock
 ) {
