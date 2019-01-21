@@ -9,10 +9,10 @@ CREATE TABLE transactions (
   block_id         BIGINT  NOT NULL REFERENCES main_blocks
 );
 --
-CREATE INDEX transaction_sender_address
+CREATE HASH INDEX transaction_sender_address
   ON transactions (sender_address);
 --
-CREATE INDEX transaction_hash
+CREATE HASH INDEX transaction_hash
   ON transactions (hash);
 --
 CREATE TABLE transfer_transactions (
@@ -21,7 +21,7 @@ CREATE TABLE transfer_transactions (
   recipient_address VARCHAR NOT NULL
 );
 --
-CREATE INDEX transfer_transaction_recipient_address
+CREATE HASH INDEX transfer_transaction_recipient_address
   ON transfer_transactions (recipient_address);
 --
 CREATE TABLE reward_transactions (
@@ -30,7 +30,7 @@ CREATE TABLE reward_transactions (
   recipient_address VARCHAR NOT NULL
 );
 --
-CREATE INDEX reward_transactions_recipient_address
+CREATE HASH INDEX reward_transactions_recipient_address
   ON reward_transactions (recipient_address);
 --
 CREATE TABLE delegate_transactions (
@@ -56,7 +56,7 @@ CREATE TABLE vote_transactions (
   vote_type_id INTEGER NOT NULL REFERENCES vote_types,
   node_id      VARCHAR NOT NULL
 );
-CREATE INDEX vote_transactions_vote_type_id_node_id
+CREATE HASH INDEX vote_transactions_vote_type_id_node_id
   ON vote_transactions (vote_type_id, node_id);
 --
 
@@ -70,14 +70,14 @@ CREATE MEMORY TABLE u_transactions (
   sender_signature VARCHAR NOT NULL,
   sender_key       VARCHAR NOT NULL
 );
-CREATE INDEX u_transactions_sender_address
+CREATE HASH INDEX u_transactions_sender_address
   ON u_transactions (sender_address);
 --
 --
-CREATE INDEX u_transactions_fee
+CREATE HASH INDEX u_transactions_fee
   ON u_transactions (fee);
 --
-CREATE INDEX u_transactions_hash
+CREATE HASH INDEX u_transactions_hash
   ON u_transactions (hash);
 --
 CREATE MEMORY TABLE u_transfer_transactions (
@@ -101,6 +101,6 @@ CREATE MEMORY TABLE u_vote_transactions (
   node_id      VARCHAR NOT NULL
 );
 --
-CREATE INDEX u_vote_transactions_vote_type_id_node_id
+CREATE HASH INDEX u_vote_transactions_vote_type_id_node_id
   ON u_vote_transactions (vote_type_id, node_id);
 --
