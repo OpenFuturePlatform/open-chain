@@ -27,8 +27,7 @@ class DelegateTransaction(
             TransactionHeader(message.timestamp, message.fee, message.senderAddress),
             TransactionFooter(message.hash, message.senderSignature, message.senderPublicKey),
             block,
-            DelegateTransactionPayload(message.nodeId, message.delegateKey, message.delegateHost, message.delegatePort,
-                message.amount)
+            DelegateTransactionPayload(message.delegateKey, message.delegateHost, message.delegatePort, message.amount)
         )
 
         fun of(utx: UnconfirmedDelegateTransaction, block: MainBlock): DelegateTransaction = DelegateTransaction(
@@ -47,7 +46,6 @@ class DelegateTransaction(
         footer.hash,
         footer.senderSignature,
         footer.senderPublicKey,
-        payload.nodeId,
         payload.delegateKey,
         payload.delegateHost,
         payload.delegatePort,

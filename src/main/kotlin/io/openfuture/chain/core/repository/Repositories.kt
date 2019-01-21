@@ -118,14 +118,10 @@ interface DelegateRepository : BaseRepository<Delegate> {
 
     fun findOneByPublicKey(key: String): Delegate?
 
-    fun findOneByNodeId(nodeId: String): Delegate?
-
     fun existsByPublicKey(key: String): Boolean
 
-    fun existsByNodeId(nodeId: String): Boolean
-
-    @Query("Select * From DELEGATES Where NODE_ID In :ids ", nativeQuery = true)
-    fun findByNodeIds(@Param("ids") nodeIds: List<String>): List<Delegate>
+    @Query("Select * From DELEGATES Where PUBLIC_KEY In :ids ", nativeQuery = true)
+    fun findByPublicKeys(@Param("ids") publicKeys: List<String>): List<Delegate>
 
 }
 

@@ -115,8 +115,7 @@ internal class DefaultVoteTransactionService(
     override fun updateState(message: VoteTransactionMessage) {
         walletStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
 
-        //todo public key
-        delegateStateService.updateRating(message.nodeId)
+        delegateStateService.updateRating(message.delegateKey)
     }
 
     override fun verify(message: VoteTransactionMessage): Boolean {
@@ -131,7 +130,7 @@ internal class DefaultVoteTransactionService(
 
     @Transactional
     override fun save(tx: VoteTransaction): VoteTransaction {
-        walletVoteService.updateVoteByAddress(tx.header.senderAddress, tx.payload.nodeId, tx.payload.getVoteType())
+        walletVoteService.updateVoteByAddress(tx.header.senderAddress, tx.payload.delegateKey, tx.payload.getVoteType())
         return super.save(tx)
     }
 
@@ -153,18 +152,18 @@ internal class DefaultVoteTransactionService(
             throw ValidationException("Insufficient actual balance", ExceptionType.INSUFFICIENT_ACTUAL_BALANCE)
         }
 
-        if (!isExistsDelegate(utx.payload.nodeId)) {
+        if (!isExistsDelegate(utx.payload.delegateKey)) {
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
 
-        if (isAlreadySentVote(utx.header.senderAddress, utx.payload.nodeId, utx.payload.voteTypeId)) {
-            throw ValidationException("Address ${utx.header.senderAddress} has already sent vote for delegate ${utx.payload.nodeId}",
+        if (isAlreadySentVote(utx.header.senderAddress, utx.payload.delegateKey, utx.payload.voteTypeId)) {
+            throw ValidationException("Address ${utx.header.senderAddress} has already sent vote for delegate ${utx.payload.delegateKey}",
                 ALREADY_SENT_VOTE)
         }
 
         if (VoteType.FOR.getId() == utx.payload.voteTypeId) {
-            if (isAlreadyVoted(utx.header.senderAddress, utx.payload.nodeId)) {
-                throw ValidationException("Address ${utx.header.senderAddress} has already voted for delegate ${utx.payload.nodeId}",
+            if (isAlreadyVoted(utx.header.senderAddress, utx.payload.delegateKey)) {
+                throw ValidationException("Address ${utx.header.senderAddress} has already voted for delegate ${utx.payload.delegateKey}",
                     ALREADY_VOTED_FOR_DELEGATE)
             }
 
@@ -174,7 +173,7 @@ internal class DefaultVoteTransactionService(
         }
     }
 
-    private fun isExistsDelegate(nodeId: String): Boolean = delegateService.isExistsByNodeId(nodeId)
+    private fun isExistsDelegate(delegateKey: String): Boolean = delegateService.isExistsByPublicKey(delegateKey)
 
     private fun isVoteLeft(senderAddress: String): Boolean {
         val confirmedVotes = walletVoteService.getVotesByAddress(senderAddress).size
@@ -185,12 +184,12 @@ internal class DefaultVoteTransactionService(
         return consensusProperties.delegatesCount!! > confirmedVotes + unconfirmedForVotes
     }
 
-    private fun isAlreadyVoted(senderAddress: String, nodeId: String): Boolean =
-        walletVoteService.getVotesByAddress(senderAddress).any { it.id.nodeId == nodeId }
+    private fun isAlreadyVoted(senderAddress: String, delegateKey: String): Boolean =
+        walletVoteService.getVotesByAddress(senderAddress).any { it.id.nodeId == delegateKey }
 
-    private fun isAlreadySentVote(senderAddress: String, nodeId: String, voteTypeId: Int): Boolean {
+    private fun isAlreadySentVote(senderAddress: String, delegateKey: String, voteTypeId: Int): Boolean {
         val unconfirmed = unconfirmedRepository.findAllByHeaderSenderAddress(senderAddress)
-        return unconfirmed.any { it.payload.nodeId == nodeId && it.payload.voteTypeId == voteTypeId }
+        return unconfirmed.any { it.payload.delegateKey == delegateKey && it.payload.voteTypeId == voteTypeId }
     }
 
     private fun isValidFee(typeId: Int, fee: Long): Boolean = when {
