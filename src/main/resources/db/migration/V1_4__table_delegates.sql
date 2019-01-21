@@ -2,8 +2,6 @@ CREATE TABLE delegates (
   id                BIGINT AUTO_INCREMENT PRIMARY KEY,
   public_key        VARCHAR NOT NULL UNIQUE,
   address           VARCHAR NOT NULL,
-  host              VARCHAR NOT NULL,
-  port              INTEGER NOT NULL,
   registration_date BIGINT  NOT NULL
 );
 

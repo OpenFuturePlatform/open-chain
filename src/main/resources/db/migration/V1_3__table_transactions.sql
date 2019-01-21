@@ -33,8 +33,6 @@ CREATE INDEX reward_transactions_recipient_address
 CREATE TABLE delegate_transactions (
   id            BIGINT PRIMARY KEY REFERENCES transactions,
   delegate_key  VARCHAR NOT NULL UNIQUE,
-  delegate_host VARCHAR NOT NULL,
-  delegate_port INTEGER NOT NULL,
   amount        BIGINT  NOT NULL
 );
 --
@@ -76,8 +74,6 @@ CREATE MEMORY TABLE u_transfer_transactions (
 CREATE MEMORY TABLE u_delegate_transactions (
   id            BIGINT PRIMARY KEY REFERENCES u_transactions,
   delegate_key  VARCHAR NOT NULL UNIQUE,
-  delegate_host VARCHAR NOT NULL,
-  delegate_port INTEGER NOT NULL,
   amount        BIGINT  NOT NULL
 );
 --
