@@ -27,7 +27,7 @@ class EpochRequestHandler(
 
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: EpochRequestMessage) {
-        val nodeId: String = keyHolder.getUid()
+        val nodeId: String = keyHolder.getPublicKeyAsHexString()
         val epochIndex = msg.epochIndex
         val genesisBlock = genesisBlockService.getByEpochIndex(epochIndex)
 

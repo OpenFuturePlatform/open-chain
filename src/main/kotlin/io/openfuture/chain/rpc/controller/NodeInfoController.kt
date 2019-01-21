@@ -25,7 +25,7 @@ class NodeInfoController(
     @GetMapping
     fun getInfo(): NodeInfoResponse = NodeInfoResponse(
         nodeKeyHolder.getPublicKeyAsHexString(),
-        nodeKeyHolder.getUid(),
+        nodeKeyHolder.getPublicKeyAsHexString(),//todo remove for front end
         nodeConfigurator.getConfig().externalHost,
         nodeConfigurator.getConfig().externalPort
     )

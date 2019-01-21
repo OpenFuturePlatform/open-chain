@@ -8,8 +8,8 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncStatus.*
-import io.openfuture.chain.crypto.util.HashUtils.sha256
 import io.openfuture.chain.network.component.AddressesHolder
+import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.network.message.core.RewardTransactionMessage
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
@@ -17,8 +17,6 @@ import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.network.message.sync.*
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.NetworkApiService
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.fromHexString
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.toHexString
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -90,7 +88,7 @@ class ChainSynchronizer(
     @Transactional
     fun onEpochResponse(message: EpochResponseMessage) {
         resetRequestScheduler()
-        val delegates = genesisBlockService.getLast().payload.activeDelegates.map { toHexString(sha256(fromHexString(it))) }
+        val delegates = genesisBlockService.getLast().payload.activeDelegates
         try {
             if (!message.isEpochExists) {
                 requestEpoch(delegates.filter { it != message.nodeId })
@@ -196,11 +194,9 @@ class ChainSynchronizer(
 
     private fun requestLatestGenesisBlock() {
         val message = SyncRequestMessage()
-        val knownActiveDelegates = genesisBlockService.getLast().payload.activeDelegates.mapNotNull { publicKey ->
-            addressesHolder.getNodeInfoByUid(toHexString(sha256(fromHexString(publicKey))))
-        }
+        val knownActiveDelegates = genesisBlockService.getLast().payload.activeDelegates
 
-        networkApiService.sendToAddress(message, knownActiveDelegates.random())
+        networkApiService.sendToAddress(message, getNodeInfos(knownActiveDelegates).random())
         startRequestScheduler()
     }
 
@@ -212,12 +208,7 @@ class ChainSynchronizer(
         }
 
         val message = EpochRequestMessage(targetEpoch, syncSession!!.syncMode)
-
-        val listNodeInfo = delegates.mapNotNull { publicKey ->
-            addressesHolder.getNodeInfoByUid(toHexString(sha256(fromHexString(publicKey))))
-        }
-
-        networkApiService.sendToAddress(message, listNodeInfo.shuffled().first())
+        networkApiService.sendToAddress(message, getNodeInfos(delegates).shuffled().first())
         startRequestScheduler()
     }
 
@@ -298,5 +289,8 @@ class ChainSynchronizer(
             requestEpoch(genesisBlockService.getLast().payload.activeDelegates)
         }
     }
+
+    private fun getNodeInfos(delegates: List<String>): List<NodeInfo> =
+        delegates.mapNotNull { publicKey -> addressesHolder.getNodeInfoByUid(publicKey) }
 
 }

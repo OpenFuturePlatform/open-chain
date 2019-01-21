@@ -23,4 +23,8 @@ data class NodeInfo(
         address.write(buf)
     }
 
+    override fun toString(): String {
+        return "NodeInfo(uid='$uid', address=(${address.host}:${address.port}))"
+    }
+
 }

@@ -31,14 +31,14 @@ class AddressesHolder(
     }
 
     fun addNodeInfo(nodeInfo: NodeInfo) {
-        val uid = nodeKeyHolder.getUid()
+        val uid = nodeKeyHolder.getPublicKeyAsHexString()
         if (uid != nodeInfo.uid) {
             this.nodesInfo.putIfAbsent(nodeInfo, ConnectionMark())
         }
     }
 
     fun addNodeInfos(nodesInfo: Set<NodeInfo>) {
-        val uid = nodeKeyHolder.getUid()
+        val uid = nodeKeyHolder.getPublicKeyAsHexString()
         val nodesInfoWithoutMe = nodesInfo.filter { uid != it.uid }
         for (nodeInfo in nodesInfoWithoutMe) {
             this.nodesInfo.putIfAbsent(nodeInfo, ConnectionMark())
