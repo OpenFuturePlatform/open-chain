@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.sync
 
+import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
@@ -24,7 +25,6 @@ import io.openfuture.chain.network.service.NetworkApiService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
@@ -34,6 +34,7 @@ import javax.xml.bind.ValidationException
 @Component
 class ChainSynchronizer(
     private val properties: NodeProperties,
+    private val consensusProperties: ConsensusProperties,
     private val blockService: BlockService,
     private val networkApiService: NetworkApiService,
     private val genesisBlockService: GenesisBlockService,
@@ -88,7 +89,6 @@ class ChainSynchronizer(
         }
     }
 
-    @Transactional
     fun onEpochResponse(message: EpochResponseMessage) {
         resetRequestScheduler()
         val nodesInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
@@ -223,7 +223,7 @@ class ChainSynchronizer(
             val lastLocalBlock = blockService.getLast()
             val filteredStorage = syncSession!!.getStorage().filter { it.height > lastLocalBlock.height }
 
-            filteredStorage.asReversed().chunked(500).forEach {
+            filteredStorage.asReversed().chunked(consensusProperties.epochHeight!!.plus(1)).forEach {
                 blockService.saveChunk(it, syncSession!!.syncMode)
                 log.debug("Blocks saved from ${it.first().height} to ${it.last().height}")
             }
