@@ -268,6 +268,6 @@ interface WalletVoteService {
 
     fun getVotesForDelegate(delegateKey: String): List<WalletVote>
 
-    fun updateVoteByAddress(address: String, nodeId: String, type: VoteType)
+    fun updateVoteByAddress(address: String, delegateKey: String, type: VoteType)
 
 }

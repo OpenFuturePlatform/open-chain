@@ -162,6 +162,6 @@ interface WalletVoteRepository : BaseRepository<WalletVote> {
 
     fun findAllByIdDelegateKey(delegateKey: String): List<WalletVote>
 
-    fun deleteByIdAddressAndIdNodeId(address: String, nodeId: String)
+    fun deleteByIdAddressAndIdDelegateKey(address: String, delegateKey: String)
 
 }
