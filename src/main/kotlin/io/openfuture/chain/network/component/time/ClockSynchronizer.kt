@@ -10,7 +10,6 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.net.InetAddress
 import java.net.SocketTimeoutException
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReadWriteLock
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
@@ -31,9 +30,7 @@ class ClockSynchronizer(
     private var nearestNtpServer: InetAddress? = null
     private val ntpsInetAddress = properties.ntpServers.map { InetAddress.getByName(it) }.toList()
 
-
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
-    private val syncRound: AtomicInteger = AtomicInteger()
 
     @Volatile
     private var status: SyncStatus = NOT_SYNCHRONIZED
@@ -57,8 +54,14 @@ class ClockSynchronizer(
                     return
                 }
                 nearestNtpServer = minDelay.key
+                val minOffset = minDelay.value.offset
 
-                offset = isThreshold(minDelay.value.offset)
+                offset = if (getDeviation(lastOffset, quizResult.values.toList()) < 2 && Math.abs(minOffset) > properties.ntpOffsetThreshold!!) {
+                    minOffset
+                } else {
+                    lastOffset
+                }
+
             } else {
                 val result = syncByNearestNtpServer(nearestNtpServer)
                 val minOffset = result.minBy { Math.abs(it.offset) }?.offset
@@ -67,7 +70,12 @@ class ClockSynchronizer(
                     status = NOT_SYNCHRONIZED
                     return
                 }
-                offset = isThreshold(minOffset)
+
+                if (getDeviation(lastOffset, result) < 2 && Math.abs(minOffset) > properties.ntpOffsetThreshold!!) {
+                    lastOffset = minOffset
+                }
+                offset = lastOffset
+
             }
         } finally {
             lock.writeLock().unlock()
@@ -87,11 +95,11 @@ class ClockSynchronizer(
 
     private fun isQuizTime(): Boolean = (nextQuizTime == null || clock.currentTimeMillis() > nextQuizTime!!)
 
-    private fun isThreshold(offset: Long): Long {
-        if (Math.abs(lastOffset) > Math.abs(offset) || Math.abs(offset) > properties.ntpOffsetThreshold!! && syncRound.get() < 3) {
-            lastOffset = offset
-        }
-        return lastOffset
+    private fun getDeviation(lastOffset: Long, ntpResponses: List<TimeInfo>): Double {
+        val mediana = (ntpResponses.sumBy { it.offset.toInt() } + lastOffset) / (ntpResponses.size + 1)
+        var differencesMediana = 0.0
+        ntpResponses.forEach { differencesMediana += Math.pow(((it.offset - mediana).toDouble()), 2.0) }
+        return Math.sqrt(differencesMediana / ntpResponses.size)
     }
 
     private fun syncByNearestNtpServer(nearestNtpServer: InetAddress?): MutableList<TimeInfo> {
@@ -140,7 +148,6 @@ class ClockSynchronizer(
         try {
             clock.adjust(offset)
 
-            syncRound.getAndIncrement()
             log.debug("CLOCK: Effective offset $offset")
 
             if (SYNCHRONIZED != status) {
