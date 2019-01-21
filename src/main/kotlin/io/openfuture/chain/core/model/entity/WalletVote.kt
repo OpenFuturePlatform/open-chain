@@ -12,7 +12,7 @@ class WalletVote(
 
 ) {
 
-    constructor(address: String, nodeId: String) : this(WalletVoteId(address, nodeId))
+    constructor(address: String, delegateKey: String) : this(WalletVoteId(address, delegateKey))
 
 }
 
