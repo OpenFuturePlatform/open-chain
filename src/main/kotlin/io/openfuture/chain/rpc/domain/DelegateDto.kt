@@ -1,6 +1,6 @@
-package io.openfuture.chain.core.model.entity.delegate
+package io.openfuture.chain.rpc.domain
 
-class ViewDelegate(
+class DelegateDto(
     var publicKey: String = "",
     var address: String = "",
     var host: String = "",

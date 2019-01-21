@@ -97,7 +97,7 @@ class DefaultPendingBlockHandler(
 
     private fun handlePrevote(message: BlockApprovalMessage) {
         val delegates = epochService.getDelegatesPublicKeys()
-        val delegate = delegates.find { message.publicKey == it } ?: return
+        val delegate = delegates.find { it == message.publicKey } ?: return
 
         if (null == observable || message.hash != observable!!.hash || !isActiveDelegate()) {
             return
@@ -117,7 +117,7 @@ class DefaultPendingBlockHandler(
 
     private fun handleCommit(message: BlockApprovalMessage) {
         val delegates = epochService.getDelegatesPublicKeys()
-        val delegate = delegates.find { message.publicKey == it } ?: return
+        val delegate = delegates.find { it == message.publicKey } ?: return
 
         val blockCommits = commits[message.hash]
         if (null != blockCommits) {
