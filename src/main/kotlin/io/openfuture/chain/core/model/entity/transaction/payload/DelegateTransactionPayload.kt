@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.model.entity.transaction.payload
 
-import io.openfuture.chain.core.util.ByteConstants.INT_BYTES
 import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets.UTF_8
@@ -19,7 +18,7 @@ class DelegateTransactionPayload(
 ) : TransactionPayload {
 
     override fun getBytes(): ByteArray {
-        val buffer = ByteBuffer.allocate(delegateKey.toByteArray(UTF_8).size + INT_BYTES + LONG_BYTES)
+        val buffer = ByteBuffer.allocate(delegateKey.toByteArray(UTF_8).size + LONG_BYTES)
 
         buffer.put(delegateKey.toByteArray(UTF_8))
         buffer.putLong(amount)

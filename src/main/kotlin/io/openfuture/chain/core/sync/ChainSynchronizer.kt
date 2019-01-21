@@ -1,19 +1,20 @@
 package io.openfuture.chain.core.sync
 
+import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
+import io.openfuture.chain.core.model.entity.state.DelegateState
+import io.openfuture.chain.core.model.entity.state.State
+import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.entity.NodeInfo
-import io.openfuture.chain.network.message.core.DelegateTransactionMessage
-import io.openfuture.chain.network.message.core.RewardTransactionMessage
-import io.openfuture.chain.network.message.core.TransferTransactionMessage
-import io.openfuture.chain.network.message.core.VoteTransactionMessage
+import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.sync.*
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.NetworkApiService
@@ -37,7 +38,10 @@ class ChainSynchronizer(
     private val voteTransactionService: VoteTransactionService,
     private val rewardTransactionService: RewardTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
-    private val transferTransactionService: TransferTransactionService
+    private val transferTransactionService: TransferTransactionService,
+    private val statePool: StatePool,
+    private val delegateStateService: DelegateStateService,
+    private val walletStateService: WalletStateService
 ) {
 
     private val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
@@ -95,8 +99,11 @@ class ChainSynchronizer(
                 return
             }
 
-            if (syncSession!!.syncMode == FULL &&
-                !isValidMerkleRoot(message.mainBlocks) && !isValidTransactions(message.mainBlocks)) {
+            if (syncSession!!.syncMode == FULL
+                && !isValidTransactionMerkleRoot(message.mainBlocks)
+                && !isValidStateMerkleRoot(message.mainBlocks)
+                && !isValidTransactions(message.mainBlocks)
+                && !isValidStates(message.mainBlocks)) {
                 requestEpoch(delegates.filter { it != message.delegateKey })
                 return
             }
@@ -133,6 +140,8 @@ class ChainSynchronizer(
                 it.delegateTransactions.forEach { dTx -> mainBlock.payload.delegateTransactions.add(DelegateTransaction.of(dTx, mainBlock)) }
                 it.transferTransactions.forEach { vTx -> mainBlock.payload.transferTransactions.add(TransferTransaction.of(vTx, mainBlock)) }
             }
+            it.delegateStates.forEach { ds -> mainBlock.payload.delegateStates.add(DelegateState.of(ds, mainBlock)) }
+            it.walletStates.forEach { ws -> mainBlock.payload.walletStates.add(WalletState.of(ws, mainBlock)) }
             mainBlock
         }
         listBlocks.addAll(mainBlocks)
@@ -173,19 +182,71 @@ class ChainSynchronizer(
         return true
     }
 
-    private fun isValidMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
+    private fun isValidStates(blocks: List<MainBlockMessage>): Boolean {
+        try {
+            for (block in blocks) {
+                if (!isValidStates(block.getAllTransactions(), block.getAllStates())) {
+                    throw ValidationException("Invalid states")
+                }
+            }
+        } catch (e: ValidationException) {
+            log.debug("States are invalid, cause: ${e.message}")
+            return false
+        }
+        return true
+    }
+
+    private fun isValidStates(txMessages: List<TransactionMessage>, blockStates: List<StateMessage>): Boolean {
+        val states = getStates(txMessages)
+
+        if (blockStates.size != states.size) {
+            return false
+        }
+
+        return states.all { blockStates.contains(it) }
+    }
+
+    private fun getStates(txMessages: List<TransactionMessage>): List<StateMessage> {
+        return statePool.use {
+            txMessages.forEach { tx ->
+                when (tx) {
+                    is TransferTransactionMessage -> transferTransactionService.updateState(tx)
+                    is VoteTransactionMessage -> voteTransactionService.updateState(tx)
+                    is DelegateTransactionMessage -> delegateTransactionService.updateState(tx)
+                    is RewardTransactionMessage -> rewardTransactionService.updateState(tx)
+                }
+            }
+
+            statePool.getPool().values.toList()
+        }
+    }
+
+    private fun isValidStateMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
         mainBlocks.forEach { block ->
-            val hashes = mutableListOf<String>()
-            hashes.addAll(block.transferTransactions.map { it.hash })
-            hashes.addAll(block.voteTransactions.map { it.hash })
-            hashes.addAll(block.delegateTransactions.map { it.hash })
-            hashes.add(block.rewardTransaction.hash)
-            if (block.merkleHash != MainBlockPayload.calculateMerkleRoot(hashes)) {
-                log.debug("MerkleRoot is invalid")
+            if (!isValidRootHash(block.stateHash, block.getAllStates().map { it.getHash() })) {
+                log.debug("Invalid state hash: ${block.stateHash}")
                 return false
             }
         }
         return true
+    }
+
+    private fun isValidTransactionMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
+        mainBlocks.forEach { block ->
+            if (!isValidRootHash(block.stateHash, block.getAllTransactions().map { it.hash })) {
+                log.debug("Invalid transaction hash: ${block.stateHash}")
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun isValidRootHash(rootHash: String, hashes: List<String>): Boolean {
+        if (hashes.isEmpty()) {
+            return false
+        }
+
+        return rootHash == MainBlockPayload.calculateMerkleRoot(hashes)
     }
 
     private fun isValidPreviousHash(block: Block, lastBlock: Block): Boolean = block.previousHash == lastBlock.hash
@@ -223,6 +284,7 @@ class ChainSynchronizer(
                     block.payload.rewardTransaction = mutableListOf()
 
                     val transactions = mutableListOf<Transaction>()
+                    val states = mutableListOf<State>()
 
                     if (syncSession!!.syncMode == SyncMode.FULL) {
                         transactions.addAll(block.payload.transferTransactions)
@@ -233,6 +295,12 @@ class ChainSynchronizer(
                         block.payload.voteTransactions = mutableListOf()
                         block.payload.delegateTransactions = mutableListOf()
                     }
+
+                    states.addAll(block.payload.delegateStates)
+                    states.addAll(block.payload.walletStates)
+
+                    block.payload.delegateStates = mutableListOf()
+                    block.payload.walletStates = mutableListOf()
 
                     blockService.save(block)
                     rewardTransaction.block = block
@@ -247,6 +315,13 @@ class ChainSynchronizer(
                                 is VoteTransaction -> voteTransactionService.toBlock(it.toMessage(), block)
 
                             }
+                        }
+                    }
+                    states.forEach {
+                        when (it) {
+                            is DelegateState -> delegateStateService.toBlock(it.toMessage(), block)
+                            is WalletState -> walletStateService.toBlock(it.toMessage(), block)
+                            else -> throw IllegalStateException("The type doesn`t handle")
                         }
                     }
                 } else if (block is GenesisBlock) {
