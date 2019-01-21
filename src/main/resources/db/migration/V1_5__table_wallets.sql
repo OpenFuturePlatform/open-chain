@@ -4,7 +4,7 @@ CREATE TABLE wallets (
   balance            BIGINT DEFAULT 0
 );
 --
-CREATE INDEX wallets_address
+CREATE HASH INDEX wallets_address
   ON wallets (address);
 --
 
