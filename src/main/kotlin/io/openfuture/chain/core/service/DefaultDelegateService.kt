@@ -21,17 +21,10 @@ class DefaultDelegateService(
         ?: throw NotFoundException("Delegate with key: $key not exist!")
 
     @Transactional(readOnly = true)
-    override fun getByNodeId(nodeId: String): Delegate = repository.findOneByNodeId(nodeId)
-        ?: throw NotFoundException("Delegate with nodeId: $nodeId not exist!")
-
-    @Transactional(readOnly = true)
     override fun isExistsByPublicKey(key: String): Boolean = repository.existsByPublicKey(key)
 
     @Transactional(readOnly = true)
-    override fun isExistsByNodeId(nodeId: String): Boolean = repository.existsByNodeId(nodeId)
-
-    @Transactional(readOnly = true)
-    override fun isExistsByNodeIds(nodeIds: List<String>): Boolean = repository.findByNodeIds(nodeIds).isNotEmpty()
+    override fun isExistsByPublicKeys(publicKeys: List<String>): Boolean = repository.findByPublicKeys(publicKeys).isNotEmpty()
 
     @Transactional
     override fun save(delegate: Delegate): Delegate = repository.save(delegate)
