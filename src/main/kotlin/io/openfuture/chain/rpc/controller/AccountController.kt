@@ -1,9 +1,7 @@
 package io.openfuture.chain.rpc.controller
 
-import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
-import io.openfuture.chain.core.service.VoteTransactionService
-import io.openfuture.chain.core.service.WalletStateService
-import io.openfuture.chain.core.service.WalletVoteService
+import io.openfuture.chain.core.service.*
+import io.openfuture.chain.core.service.state.DefaultDelegateStateService.Companion.DEFAULT_DELEGATE_RATING
 import io.openfuture.chain.crypto.annotation.AddressChecksum
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -29,6 +27,8 @@ class AccountController(
     private val cryptoService: CryptoService,
     private val walletStateService: WalletStateService,
     private val walletVoteService: WalletVoteService,
+    private val delegateStateService: DelegateStateService,
+    private val delegateService: DelegateService,
     private val voteTransactionService: VoteTransactionService
 ) {
 
@@ -49,8 +49,14 @@ class AccountController(
     fun getDelegates(@PathVariable @AddressChecksum address: String, request: PageRequest): PageResponse<VotesResponse> {
         val delegates = walletVoteService.getVotesByAddress(address)
             .map {
+                val state = delegateStateService.getLastByAddress(it.id.nodeId)
+                val delegate = delegateService.getByNodeId(it.id.nodeId)
                 VotesResponse(
-                    ViewDelegate(),// todo viewDelegateService.getByNodeId(it.id.nodeId),
+                    delegate.address,
+                    delegate.publicKey,
+                    delegate.nodeId,
+                    state?.rating ?: DEFAULT_DELEGATE_RATING,
+                    walletVoteService.getVotesForNode(it.id.nodeId).size,
                     voteTransactionService.getLastVoteForDelegate(address, it.id.nodeId).header.timestamp,
                     voteTransactionService.getUnconfirmedBySenderAgainstDelegate(address, it.id.nodeId) != null
                 )
