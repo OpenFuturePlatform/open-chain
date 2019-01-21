@@ -22,7 +22,7 @@ class EpochResponseHandler(
 
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: EpochResponseMessage) {
-        log.debug("EpochResponseMessage FROM ${msg.nodeId}")
+        log.debug("EpochResponseMessage FROM ${msg.delegateKey}")
         chainSynchronizer.onEpochResponse(msg)
     }
 
