@@ -16,6 +16,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.node.*
+import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
@@ -48,6 +49,8 @@ interface BlockService {
     fun getLast(): Block
 
     fun save(block: Block)
+
+    fun saveChunk(blocksChunk: List<Block>, syncMode: SyncMode)
 
     fun getAfterCurrentHash(hash: String): List<Block>
 
