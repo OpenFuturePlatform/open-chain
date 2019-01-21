@@ -57,15 +57,15 @@ internal class DefaultVoteTransactionService(
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional(readOnly = true)
-    override fun getUnconfirmedBySenderAgainstDelegate(senderAddress: String, nodeId: String): UnconfirmedVoteTransaction? =
+    override fun getUnconfirmedBySenderAgainstDelegate(senderAddress: String, delegateKey: String): UnconfirmedVoteTransaction? =
         (unconfirmedRepository as UVoteTransactionRepository)
-            .findOneByHeaderSenderAddressAndPayloadNodeIdAndPayloadVoteTypeId(senderAddress, nodeId, VoteType.AGAINST.getId())
+            .findOneByHeaderSenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeId(senderAddress, delegateKey, VoteType.AGAINST.getId())
 
 
     @Transactional(readOnly = true)
-    override fun getLastVoteForDelegate(senderAddress: String, nodeId: String): VoteTransaction =
+    override fun getLastVoteForDelegate(senderAddress: String, delegateKey: String): VoteTransaction =
         (repository as VoteTransactionRepository)
-            .findFirstByHeaderSenderAddressAndPayloadNodeIdAndPayloadVoteTypeIdOrderByHeaderTimestampDesc(senderAddress, nodeId, VoteType.FOR.getId())
+            .findFirstByHeaderSenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeIdOrderByHeaderTimestampDesc(senderAddress, delegateKey, VoteType.FOR.getId())
             ?: throw NotFoundException("Last vote for delegate transaction not found")
 
     @BlockchainSynchronized

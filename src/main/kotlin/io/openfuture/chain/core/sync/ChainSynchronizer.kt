@@ -91,18 +91,18 @@ class ChainSynchronizer(
         val delegates = genesisBlockService.getLast().payload.activeDelegates
         try {
             if (!message.isEpochExists) {
-                requestEpoch(delegates.filter { it != message.nodeId })
+                requestEpoch(delegates.filter { it != message.delegateKey })
                 return
             }
 
             if (syncSession!!.syncMode == FULL &&
                 !isValidMerkleRoot(message.mainBlocks) && !isValidTransactions(message.mainBlocks)) {
-                requestEpoch(delegates.filter { it != message.nodeId })
+                requestEpoch(delegates.filter { it != message.delegateKey })
                 return
             }
 
             if (!syncSession!!.add(convertToBlocks(message))) {
-                requestEpoch(delegates.filter { it != message.nodeId })
+                requestEpoch(delegates.filter { it != message.delegateKey })
                 return
             }
 

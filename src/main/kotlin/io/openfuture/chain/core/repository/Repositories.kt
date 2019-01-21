@@ -66,7 +66,7 @@ interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 @Repository
 interface VoteTransactionRepository : TransactionRepository<VoteTransaction> {
 
-    fun findFirstByHeaderSenderAddressAndPayloadNodeIdAndPayloadVoteTypeIdOrderByHeaderTimestampDesc(senderAddress: String, nodeId: String, typeId: Int): VoteTransaction?
+    fun findFirstByHeaderSenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeIdOrderByHeaderTimestampDesc(senderAddress: String, delegateKey: String, typeId: Int): VoteTransaction?
 
 }
 
@@ -103,7 +103,7 @@ interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseReposit
 @Repository
 interface UVoteTransactionRepository : UTransactionRepository<UnconfirmedVoteTransaction> {
 
-    fun findOneByHeaderSenderAddressAndPayloadNodeIdAndPayloadVoteTypeId(senderAddress: String, nodeId: String, typeId: Int): UnconfirmedVoteTransaction?
+    fun findOneByHeaderSenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeId(senderAddress: String, delegateKey: String, typeId: Int): UnconfirmedVoteTransaction?
 
 }
 
