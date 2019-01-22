@@ -132,8 +132,14 @@ interface StateRepository<T : State> : BaseRepository<T> {
 
     fun findByAddress(address: String): List<T>
 
-    //todo return last
-    fun findByAddressAndBlock(address: String, block: Block): T?
+    @Query("""
+        Select * From DELEGATE_STATES DS
+        Join STATES S On(DS.ID=S.ID)
+        Join BLOCKS B On(S.block_id=B.ID)
+        Where B.HEIGHT=:height AND S.ADDRESS=:address
+        """,
+        nativeQuery = true)
+    fun findByAddressAndBlockHeight(@Param("address") address: String, @Param("height") height: Long): T?
 
 }
 
@@ -141,11 +147,15 @@ interface StateRepository<T : State> : BaseRepository<T> {
 interface DelegateStateRepository : StateRepository<DelegateState> {
 
     @Query("""
-        Select * From DELEGATE_STATES DS
-        Join STATES S ON(DS.ID=S.ID)
-        Join BLOCKS B ON(S.block_id=B.ID)
-        Group By S.ADDRESS
-        Having Max(B.HEIGHT)
+        Select * From DELEGATE_STATES DS1
+        Join STATES S1 On(DS1.ID=S1.ID)
+        Join BLOCKS B1 On(S1.block_id=B1.ID)
+        Where B1.HEIGHT = (
+            Select Max(B2.HEIGHT) From DELEGATE_STATES DS2
+            Join STATES S2 ON(DS2.ID=S2.ID)
+            Join BLOCKS B2 ON(S2.BLOCK_ID=B2.ID)
+            Where S1.address=S2.address
+        )
         """,
         nativeQuery = true)
     fun findLastAll(): List<DelegateState>
