@@ -91,7 +91,7 @@ internal class DefaultVoteTransactionService(
     }
 
     @Transactional
-    override fun toBlock(transaction: VoteTransaction, block: MainBlock): VoteTransaction {
+    override fun toBlock(transaction: VoteTransaction): VoteTransaction {
         BlockchainLock.writeLock.lock()
         try {
             val tx = repository.findOneByFooterHash(transaction.footer.hash)

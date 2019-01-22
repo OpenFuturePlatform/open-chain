@@ -79,21 +79,21 @@ class DefaultBlockService(
 
                 this.save(block)
                 rewardTransaction.block = block
-                rewardTransactionService.toBlock(rewardTransaction, block)
+                rewardTransactionService.toBlock(rewardTransaction)
 
                 if (syncMode == SyncMode.FULL) {
                     transactions.forEach {
                         if (it is TransferTransaction) {
                             it.block = block
-                            transferTransactionService.toBlock(it, block)
+                            transferTransactionService.toBlock(it)
                         }
                         if (it is DelegateTransaction) {
                             it.block = block
-                            delegateTransactionService.toBlock(it, block)
+                            delegateTransactionService.toBlock(it)
                         }
                         if (it is VoteTransaction) {
                             it.block = block
-                            voteTransactionService.toBlock(it, block)
+                            voteTransactionService.toBlock(it)
                         }
                     }
                 }

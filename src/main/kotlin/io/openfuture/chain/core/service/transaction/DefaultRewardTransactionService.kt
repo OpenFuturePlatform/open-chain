@@ -61,7 +61,7 @@ class DefaultRewardTransactionService(
     }
 
     @Transactional
-    override fun toBlock(transaction: RewardTransaction, block: MainBlock) {
+    override fun toBlock(transaction: RewardTransaction) {
         BlockchainLock.writeLock.lock()
         try {
             val persistedTransaction = repository.findOneByFooterHash(transaction.footer.hash)
@@ -88,11 +88,6 @@ class DefaultRewardTransactionService(
             log.warn(e.message)
             false
         }
-    }
-
-    @Transactional
-    override fun save(transaction: RewardTransaction) {
-        repository.save(transaction)
     }
 
     private fun updateTransferBalance(to: String, amount: Long) {
