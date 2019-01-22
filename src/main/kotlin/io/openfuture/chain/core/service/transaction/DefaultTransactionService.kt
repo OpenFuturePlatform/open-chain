@@ -28,6 +28,7 @@ class DefaultTransactionService(
 
     override fun delete(transactions: Collection<Transaction>) {
         repository.deleteAll(transactions)
+        repository.flush()
     }
 
 }

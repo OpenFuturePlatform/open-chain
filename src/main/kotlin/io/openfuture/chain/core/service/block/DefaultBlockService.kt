@@ -16,8 +16,7 @@ import javax.persistence.EntityManager
 class DefaultBlockService(
     private val repository: BlockRepository<Block>,
     private val properties: ConsensusProperties,
-    private val transactionService: TransactionService,
-    private val entityManager: EntityManager
+    private val transactionService: TransactionService
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -60,7 +59,6 @@ class DefaultBlockService(
                 transactionService.delete(payload.delegateTransactions)
                 transactionService.delete(payload.voteTransactions)
                 transactionService.delete(payload.rewardTransaction)
-                entityManager.flush()
             }
         }
         repository.deleteAll(blocks)
