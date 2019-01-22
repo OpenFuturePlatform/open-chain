@@ -231,8 +231,8 @@ class ChainSynchronizer(
 
     private fun isValidTransactionMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
         mainBlocks.forEach { block ->
-            if (!isValidRootHash(block.stateHash, block.getAllTransactions().map { it.hash })) {
-                log.debug("Invalid transaction hash: ${block.stateHash}")
+            if (!isValidRootHash(block.merkleHash, block.getAllTransactions().map { it.hash })) {
+                log.debug("Invalid transaction hash: ${block.merkleHash}")
                 return false
             }
         }
