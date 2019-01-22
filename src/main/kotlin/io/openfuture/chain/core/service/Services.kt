@@ -16,6 +16,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.node.*
+import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
@@ -48,6 +49,8 @@ interface BlockService {
     fun getLast(): Block
 
     fun save(block: Block)
+
+    fun saveChunk(blocksChunk: List<Block>, syncMode: SyncMode)
 
     fun getAfterCurrentHash(hash: String): List<Block>
 
@@ -136,6 +139,8 @@ interface TransferTransactionService {
 
     fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction
 
+    fun toBlock(transaction: TransferTransaction, block: MainBlock): TransferTransaction
+
     fun toBlock(message: TransferTransactionMessage, block: MainBlock): TransferTransaction
 
     fun verify(message: TransferTransactionMessage): Boolean
@@ -149,6 +154,8 @@ interface RewardTransactionService {
     fun getByRecipientAddress(address: String): List<RewardTransaction>
 
     fun create(timestamp: Long, fees: Long): RewardTransactionMessage
+
+    fun toBlock(transaction: RewardTransaction, block: MainBlock)
 
     fun toBlock(message: RewardTransactionMessage, block: MainBlock)
 
@@ -176,6 +183,8 @@ interface VoteTransactionService {
 
     fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction
 
+    fun toBlock(transaction: VoteTransaction, block: MainBlock): VoteTransaction
+
     fun toBlock(message: VoteTransactionMessage, block: MainBlock): VoteTransaction
 
     fun verify(message: VoteTransactionMessage): Boolean
@@ -195,6 +204,8 @@ interface DelegateTransactionService {
     fun add(message: DelegateTransactionMessage)
 
     fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction
+
+    fun toBlock(transaction: DelegateTransaction, block: MainBlock): DelegateTransaction
 
     fun toBlock(message: DelegateTransactionMessage, block: MainBlock): DelegateTransaction
 
