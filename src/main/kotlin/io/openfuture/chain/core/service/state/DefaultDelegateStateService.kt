@@ -33,7 +33,7 @@ class DefaultDelegateStateService(
     override fun getAllDelegates(): List<DelegateState> = repository.findLastAll()
 
     override fun getActiveDelegates(): List<DelegateState> =
-        getAllDelegates().sortedBy { it.rating }.take(consensusProperties.delegatesCount!!)
+        getAllDelegates().sortedByDescending { it.rating }.take(consensusProperties.delegatesCount!!)
 
     //todo change
     override fun updateRating(message: VoteTransactionMessage) {

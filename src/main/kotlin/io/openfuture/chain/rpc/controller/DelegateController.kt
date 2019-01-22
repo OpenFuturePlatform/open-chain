@@ -63,7 +63,6 @@ class DelegateController(
         val delegates = delegateStateService.getAllDelegates().map {
             val delegate = delegateService.getByPublicKey(it.address)
             val state = delegateStateService.getLastByAddress(it.address)
-
             ViewDelegateResponse(
                 delegate.address,
                 delegate.publicKey,
@@ -72,7 +71,7 @@ class DelegateController(
                 walletVoteService.getVotesForDelegate(delegate.publicKey).size,
                 delegate.registrationDate
             )
-        }
+        }.sortedByDescending { it.rating }
 
         val pageActiveDelegate = delegates.stream()
             .skip(request.offset)
