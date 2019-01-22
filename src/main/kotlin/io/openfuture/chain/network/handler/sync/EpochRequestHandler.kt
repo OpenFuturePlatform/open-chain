@@ -9,8 +9,6 @@ import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.network.message.sync.EpochRequestMessage
 import io.openfuture.chain.network.message.sync.EpochResponseMessage
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -20,10 +18,6 @@ class EpochRequestHandler(
     private val mainBlockService: MainBlockService,
     private val keyHolder: NodeKeyHolder
 ) : SimpleChannelInboundHandler<EpochRequestMessage>() {
-
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(EpochRequestHandler::class.java)
-    }
 
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: EpochRequestMessage) {
@@ -48,7 +42,6 @@ class EpochRequestHandler(
         val mainBlockMessages = mainBlocks.map { it.toMessage() }
 
         ctx.writeAndFlush(EpochResponseMessage(delegateKey, true, genesisBlock.toMessage(), mainBlockMessages))
-        log.debug("Send EpochResponseMessage to ${ctx.channel().remoteAddress()}")
     }
 
 }

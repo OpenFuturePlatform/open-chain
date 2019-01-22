@@ -65,7 +65,7 @@ class ChannelsHolder(
     fun send(message: Serializable, nodeInfo: NodeInfo): Boolean {
         val channel = channelGroup.firstOrNull { nodeInfo == it.attr(NODE_INFO_KEY).get() } ?: return false
         channel.writeAndFlush(message)
-        log.debug("Send ${message::class.java.simpleName} to ${nodeInfo.address.port}")
+        log.trace("Send ${message::class.java.simpleName} to ${nodeInfo.address.port}")
         return true
     }
 
@@ -87,8 +87,11 @@ class ChannelsHolder(
             return false
         }
         channel.attr(NODE_INFO_KEY).setIfAbsent(nodeInfo)
-        log.debug("${channel.remoteAddress()} connected, operating peers count is ${channelGroup.size}")
-        return channelGroup.add(channel)
+        if (channelGroup.add(channel)) {
+            log.debug("${channel.remoteAddress()} connected, operating peers count: ${channelGroup.size}")
+            return true
+        }
+        return false
     }
 
     @Synchronized

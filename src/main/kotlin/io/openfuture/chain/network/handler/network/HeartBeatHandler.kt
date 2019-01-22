@@ -36,7 +36,7 @@ class HeartBeatHandler(
         val eventState = event.state()
         if (READER_IDLE == eventState) {
             if (null != channelsHolder.getNodeInfoByChannelId(ctx.channel().id())) {
-                log.info("Removed idle node - ${ctx.channel().remoteAddress()}")
+                log.debug("Removed idle node - ${ctx.channel().remoteAddress()}")
             }
             ctx.close()
         } else if (WRITER_IDLE == eventState && null != channelsHolder.getNodeInfoByChannelId(ctx.channel().id())) {

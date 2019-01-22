@@ -1,11 +1,13 @@
 package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.consensus.component.block.BlockApprovalStage.*
+import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.MainBlockService
+import io.openfuture.chain.core.service.block.DefaultMainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -23,7 +25,8 @@ class DefaultPendingBlockHandler(
     private val mainBlockService: MainBlockService,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService,
-    private val chainSynchronizer: ChainSynchronizer
+    private val chainSynchronizer: ChainSynchronizer,
+    private val properties: ConsensusProperties
 ) : PendingBlockHandler {
 
     companion object {
@@ -105,7 +108,7 @@ class DefaultPendingBlockHandler(
         if (!prepareVotes.contains(delegate) && isValidApprovalSignature(message)) {
             prepareVotes.add(delegate)
             networkService.broadcast(message)
-            if (prepareVotes.size > (delegates.size - 1) / 3) {
+            if (prepareVotes.size > (properties.delegatesCount!! - 1) / 3) {
                 this.stage = COMMIT
                 val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKeyAsHexString())
                 commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())
@@ -123,14 +126,14 @@ class DefaultPendingBlockHandler(
             if (!blockCommits.contains(delegate) && isValidApprovalSignature(message)) {
                 blockCommits.add(delegate)
                 networkService.broadcast(message)
-                if (blockCommits.size > (delegates.size / 3 * 2) && !blockAddedFlag) {
+                if (blockCommits.size > (properties.delegatesCount!! / 3 * 2) && !blockAddedFlag) {
                     pendingBlocks.find { it.hash == message.hash }?.let {
-                        log.debug("CONSENSUS: Saving main block ${it.hash}")
                         if (!chainSynchronizer.isInSync(MainBlock.of(it))) {
                             chainSynchronizer.sync()
                             return
                         }
                         mainBlockService.add(it)
+                        log.debug("CONSENSUS: Saved main block with hash = ${it.hash}")
                     }
                     blockAddedFlag = true
                 }

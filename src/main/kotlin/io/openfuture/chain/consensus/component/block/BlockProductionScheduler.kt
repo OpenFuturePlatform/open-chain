@@ -4,6 +4,7 @@ import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
+import io.openfuture.chain.core.service.block.DefaultGenesisBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.sync.SyncStatus.SYNCHRONIZED
 import io.openfuture.chain.network.component.time.ClockSynchronizer
@@ -41,12 +42,12 @@ class BlockProductionScheduler(
     private fun proceedProductionLoop() {
         try {
             if (SYNCHRONIZED != clockSynchronizer.getStatus()) {
-                log.debug("----------------Clock is ${clockSynchronizer.getStatus()}----------------")
+                log.debug("Clock is ${clockSynchronizer.getStatus()}")
                 return
             }
 
             if (SYNCHRONIZED != chainSynchronizer.getStatus()) {
-                log.debug("----------------Ledger is ${chainSynchronizer.getStatus()}----------------")
+                log.debug("Ledger is ${chainSynchronizer.getStatus()}")
                 chainSynchronizer.sync()
                 return
             }
@@ -56,6 +57,7 @@ class BlockProductionScheduler(
             if (genesisBlockService.isGenesisBlockRequired()) {
                 val genesisBlock = genesisBlockService.create()
                 genesisBlockService.add(genesisBlock)
+                log.debug("CONSENSUS: Saving genesis block with hash = ${genesisBlock.hash}")
                 pendingBlockHandler.resetSlotNumber()
             } else if (keyHolder.getPublicKeyAsHexString() == slotOwner) {
                 val block = mainBlockService.create()

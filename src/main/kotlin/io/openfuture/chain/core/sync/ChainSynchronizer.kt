@@ -43,24 +43,23 @@ class ChainSynchronizer(
     private val statePool: StatePool
 ) {
 
-    private val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
-    private var future: ScheduledFuture<*>? = null
-
     companion object {
         private val log: Logger = LoggerFactory.getLogger(ChainSynchronizer::class.java)
     }
 
+    private val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
+    private var future: ScheduledFuture<*>? = null
+    private var syncSession: SyncSession? = null
+
     @Volatile
     private var status: SyncStatus = SYNCHRONIZED
-
-    private var syncSession: SyncSession? = null
 
 
     fun getStatus(): SyncStatus = status
 
     @Synchronized
     fun sync() {
-        log.debug("Chain in status=$status")
+        log.info("Chain is $status")
         if (PROCESSING == status) {
             return
         }
@@ -107,6 +106,7 @@ class ChainSynchronizer(
             }
 
             if (!syncSession!!.add(convertToBlocks(message))) {
+                log.warn("Epoch #${message.genesisBlock!!.epochIndex} is invalid, requesting another node...")
                 requestEpoch(delegates.filter { it != message.delegateKey })
                 return
             }
@@ -174,7 +174,7 @@ class ChainSynchronizer(
                 }
             }
         } catch (e: ValidationException) {
-            log.debug("Transactions are invalid, cause: ${e.message}")
+            log.warn("Transactions are invalid: ${e.message}")
             return false
         }
         return true
@@ -283,7 +283,7 @@ class ChainSynchronizer(
 
             syncSession = null
             status = SYNCHRONIZED
-            log.debug("Chain is SYNCHRONIZED")
+            log.info("Chain is $status")
 
         } catch (e: Throwable) {
             log.error("Save block is failed: $e")
@@ -294,7 +294,7 @@ class ChainSynchronizer(
     private fun syncFailed() {
         syncSession = null
         status = NOT_SYNCHRONIZED
-        log.debug("Sync is failed")
+        log.error("Sync is FAILED")
     }
 
     private fun startRequestScheduler() {

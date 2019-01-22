@@ -144,7 +144,7 @@ class DefaultMainBlockService(
             validate(message)
             return true
         } catch (ex: ValidationException) {
-            log.warn(ex.message)
+            log.warn("Block is invalid: ${ex.message}")
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -201,11 +201,11 @@ class DefaultMainBlockService(
         super.validateBase(MainBlock.of(message))
 
         if (!isValidRootHash(message.merkleHash, message.getAllTransactions().map { it.hash })) {
-            throw ValidationException("Invalid merkle hash: ${message.merkleHash}")
+            throw ValidationException("Invalid merkle hash - ${message.merkleHash}")
         }
 
         if (!isValidRootHash(message.stateHash, message.getAllStates().map { it.getHash() })) {
-            throw ValidationException("Invalid state hash: ${message.stateHash}")
+            throw ValidationException("Invalid state hash - ${message.stateHash}")
         }
 
         if (!isValidBalances(message.getExternalTransactions())) {

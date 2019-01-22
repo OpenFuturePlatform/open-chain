@@ -41,7 +41,6 @@ class GreetingHandler(
         val channel = ctx.channel()
         if (isConnectionAcceptable(nodeInfo, channel)) {
             channelHolder.addChannel(channel, nodeInfo)
-            log.info("Accepted connection from ${ctx.channel().remoteAddress()}")
             ctx.writeAndFlush(response)
             addressesHolder.addNodeInfo(nodeInfo)
             channelHolder.broadcast(NewClient(nodeInfo))

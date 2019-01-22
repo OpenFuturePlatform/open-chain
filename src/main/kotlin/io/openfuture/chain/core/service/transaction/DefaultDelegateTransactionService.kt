@@ -114,7 +114,7 @@ class DefaultDelegateTransactionService(
             validate(UnconfirmedDelegateTransaction.of(message))
             true
         } catch (e: ValidationException) {
-            log.warn(e.message)
+            log.error(e.message)
             false
         }
     }
