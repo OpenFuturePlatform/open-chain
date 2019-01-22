@@ -41,7 +41,7 @@ interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
 
     fun findAllByHeightBetween(beginHeight: Long, endHeight: Long): List<Entity>
 
-    @Query(value = "Select HEIGHT From BLOCKS Order By HEIGHT Desc Limit 1", nativeQuery = true)
+    @Query(value = "SELECT height FROM blocks ORDER BY height DESC LIMIT 1", nativeQuery = true)
     fun getCurrentHeight(): Long
 
 }
@@ -120,7 +120,7 @@ interface DelegateRepository : BaseRepository<Delegate> {
 
     fun existsByPublicKey(key: String): Boolean
 
-    @Query("Select * From DELEGATES Where PUBLIC_KEY In :ids ", nativeQuery = true)
+    @Query("SELECT * FROM delegates WHERE public_key IN :ids", nativeQuery = true)
     fun findByPublicKeys(@Param("ids") publicKeys: List<String>): List<Delegate>
 
 }
@@ -133,10 +133,10 @@ interface StateRepository<T : State> : BaseRepository<T> {
     fun findByAddress(address: String): List<T>
 
     @Query("""
-        Select * From DELEGATE_STATES DS
-        Join STATES S On(DS.ID=S.ID)
-        Join BLOCKS B On(S.block_id=B.ID)
-        Where B.HEIGHT=:height AND S.ADDRESS=:address
+        SELECT * FROM delegate_states ds
+        JOIN states s ON(ds.id=s.id)
+        JOIN blocks b ON(s.block_id=b.id)
+        WHERE b.height=:height AND s.address=:address
         """,
         nativeQuery = true)
     fun findByAddressAndBlockHeight(@Param("address") address: String, @Param("height") height: Long): T?
@@ -147,14 +147,14 @@ interface StateRepository<T : State> : BaseRepository<T> {
 interface DelegateStateRepository : StateRepository<DelegateState> {
 
     @Query("""
-        Select * From DELEGATE_STATES DS1
-        Join STATES S1 On(DS1.ID=S1.ID)
-        Join BLOCKS B1 On(S1.block_id=B1.ID)
-        Where B1.HEIGHT = (
-            Select Max(B2.HEIGHT) From DELEGATE_STATES DS2
-            Join STATES S2 ON(DS2.ID=S2.ID)
-            Join BLOCKS B2 ON(S2.BLOCK_ID=B2.ID)
-            Where S1.address=S2.address
+        SELECT * FROM delegate_states ds1
+        JOIN states s1 ON(ds1.id=s1.id)
+        JOIN blocks b1 ON(s1.block_id=b1.id)
+        WHERE b1.height = (
+            ELECT MAX(b2.height) FROM delegate_states ds2
+            JOIN states s2 ON(ds2.id=s2.id)
+            JOIN blocks b2 ON(s2.block_id=b2.id)
+            WHERE s1.address=s2.address
         )
         """,
         nativeQuery = true)
