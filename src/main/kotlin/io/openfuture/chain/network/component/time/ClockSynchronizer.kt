@@ -45,6 +45,11 @@ class ClockSynchronizer(
     fun sync() {
         lock.writeLock().lock()
         try {
+            if (PROCESSING == status) {
+                log.debug("Clock synchronization in PROCESSING")
+                return
+            }
+
             if (SYNCHRONIZED != status) {
                 status = PROCESSING
             }
@@ -57,8 +62,10 @@ class ClockSynchronizer(
 
                 if (minDelay == null) {
                     status = NOT_SYNCHRONIZED
+                    nextQuizTime = null
                     return
                 }
+
                 nearestNtpServer = minDelay.key
                 lastOffset = getOffset(nearestNtpServer) ?: return
             } else {
@@ -96,6 +103,11 @@ class ClockSynchronizer(
 
     private fun getOffset(nearestNtpServer: InetAddress?): Long? {
         val result = syncByNearestNtpServer(nearestNtpServer)
+        if (result.size < 2) {
+            nextQuizTime = null
+            status = NOT_SYNCHRONIZED
+            return null
+        }
         val minOffset = result.minBy { Math.abs(it.offset) }?.offset
 
         if (minOffset == null || getDeviation(lastOffset, result) > deviationThreshold) {
@@ -108,6 +120,7 @@ class ClockSynchronizer(
             ntpSynced = false
             return null
         }
+        ntpSynced = true
         return minOffset
     }
 

@@ -48,5 +48,5 @@ class NettyConfig(
         .option(SO_KEEPALIVE, properties.keepAlive!!)
 
     @Bean
-    fun ntpClient(): NTPUDPClient = NTPUDPClient().apply { defaultTimeout = 10000 }
+    fun ntpClient(): NTPUDPClient = NTPUDPClient().apply { defaultTimeout = 3000 }
 }

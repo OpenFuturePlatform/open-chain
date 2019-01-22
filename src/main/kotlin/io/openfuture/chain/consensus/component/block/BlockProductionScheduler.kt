@@ -42,6 +42,8 @@ class BlockProductionScheduler(
         try {
             if (SYNCHRONIZED != clockSynchronizer.getStatus()) {
                 log.debug("Clock is ${clockSynchronizer.getStatus()}")
+                clockSynchronizer.sync()
+
                 if (!clockSynchronizer.isSyncByNtp()) {
                     log.warn("The clock on this computer is not synchronized! Please set up synchronization by the ntp servers")
                 }
