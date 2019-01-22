@@ -3,12 +3,14 @@ package io.openfuture.chain.rpc.controller
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
+import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
+import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.WalletVoteService
-import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -36,10 +38,14 @@ class DelegateControllerTests : ControllerTests() {
 
     @Test
     fun getAllShouldReturnDelegatesListTest() {
-        val pageDelegates = PageImpl(listOf(Delegate("publicKey", "address",  1)))
-        val expectedPageResponse = PageResponse(pageDelegates)
+        val delegate = Delegate("publicKey", "address",  1)
+        val block = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
+            MainBlockPayload("merkleHash", "stateHash"))
+        val delegates = listOf(DelegateState("publicKey", block,  1))
+        val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
 
-        given(delegateService.getAll(PageRequest())).willReturn(pageDelegates)
+        given(delegateStateService.getAllDelegates()).willReturn(delegates)
+        given(delegateService.getByPublicKey("publicKey")).willReturn(delegate)
 
         val actualPageResponse = webClient.get().uri("/rpc/delegates")
             .exchange()
