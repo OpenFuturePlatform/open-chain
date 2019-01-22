@@ -5,13 +5,11 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.repository.BlockRepository
-import io.openfuture.chain.core.service.BlockService
-import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncMode
 import org.springframework.stereotype.Service
