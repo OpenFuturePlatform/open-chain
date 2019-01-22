@@ -113,10 +113,10 @@ class DefaultGenesisBlockService(
 
     private fun createPayload(): GenesisBlockPayload {
         val firstGenesisBlock = genesisBlockRepository.findOneByPayloadEpochIndex(1)!!
-        val bootDelegates = firstGenesisBlock.payload.activeDelegates
+        val genesisDelegates = firstGenesisBlock.payload.activeDelegates
         val epochIndex = getLast().payload.epochIndex + 1
         val delegates = delegateService.getActiveDelegates().toMutableSet()
-        delegates.addAll(bootDelegates)
+        delegates.addAll(genesisDelegates)
         return GenesisBlockPayload(epochIndex, delegates.toMutableList())
     }
 
