@@ -56,7 +56,7 @@ CREATE TABLE vote_transactions (
   vote_type_id INTEGER NOT NULL REFERENCES vote_types,
   node_id      VARCHAR NOT NULL
 );
-CREATE HASH INDEX vote_transactions_vote_type_id_node_id
+CREATE INDEX vote_transactions_vote_type_id_node_id
   ON vote_transactions (vote_type_id, node_id);
 --
 
@@ -74,7 +74,7 @@ CREATE HASH INDEX u_transactions_sender_address
   ON u_transactions (sender_address);
 --
 --
-CREATE HASH INDEX u_transactions_fee
+CREATE INDEX u_transactions_fee
   ON u_transactions (fee);
 --
 CREATE HASH INDEX u_transactions_hash
