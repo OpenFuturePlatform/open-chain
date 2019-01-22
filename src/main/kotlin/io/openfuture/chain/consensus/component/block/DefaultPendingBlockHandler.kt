@@ -1,6 +1,7 @@
 package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.consensus.component.block.BlockApprovalStage.*
+import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
@@ -25,7 +26,8 @@ class DefaultPendingBlockHandler(
     private val mainBlockService: MainBlockService,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService,
-    private val chainSynchronizer: ChainSynchronizer
+    private val chainSynchronizer: ChainSynchronizer,
+    private val properties: ConsensusProperties
 ) : PendingBlockHandler {
 
     companion object {
@@ -108,7 +110,7 @@ class DefaultPendingBlockHandler(
         if (!prepareVotes.containsKey(message.publicKey) && isValidApprovalSignature(message)) {
             prepareVotes[message.publicKey] = delegate
             networkService.broadcast(message)
-            if (prepareVotes.size > (delegates.size - 1) / 3) {
+            if (prepareVotes.size > (properties.delegatesCount!! - 1) / 3) {
                 this.stage = COMMIT
                 val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKeyAsHexString())
                 commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())
@@ -126,7 +128,7 @@ class DefaultPendingBlockHandler(
             if (!blockCommits.contains(delegate) && isValidApprovalSignature(message)) {
                 blockCommits.add(delegate)
                 networkService.broadcast(message)
-                if (blockCommits.size > (delegates.size / 3 * 2) && !blockAddedFlag) {
+                if (blockCommits.size > (properties.delegatesCount!! / 3 * 2) && !blockAddedFlag) {
                     pendingBlocks.find { it.hash == message.hash }?.let {
                         if (!chainSynchronizer.isInSync(MainBlock.of(it))) {
                             chainSynchronizer.sync()
