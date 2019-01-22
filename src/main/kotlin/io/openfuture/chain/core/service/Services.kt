@@ -255,7 +255,7 @@ interface DelegateStateService : StateService<DelegateState> {
 
     fun addDelegate(publicKey: String)
 
-    fun updateRating(publicKey: String)
+    fun updateRating(message: VoteTransactionMessage)
 
     fun toBlock(message: DelegateStateMessage, block: MainBlock)
 

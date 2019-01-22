@@ -119,7 +119,7 @@ internal class DefaultVoteTransactionService(
 
     override fun updateState(message: VoteTransactionMessage) {
         walletStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
-        delegateStateService.updateRating(message.delegateKey)
+        delegateStateService.updateRating(message)
     }
 
     override fun verify(message: VoteTransactionMessage): Boolean {
