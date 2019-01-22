@@ -82,6 +82,9 @@ class NodeProperties(
     @field:NotNull
     var peerPenalty: Long? = null,
 
+    @field:NotNull
+    var syncBatchSize: Int? = null,
+
     @field:NotEmpty
     var ntpServers: List<String> = emptyList(),
 

@@ -1,12 +1,16 @@
 package io.openfuture.chain.core.sync
 
 import io.openfuture.chain.consensus.service.EpochService
+import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
-import io.openfuture.chain.core.model.entity.transaction.confirmed.*
+import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncStatus.*
@@ -24,7 +28,8 @@ import io.openfuture.chain.network.service.NetworkApiService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import javax.xml.bind.ValidationException
 
@@ -32,7 +37,6 @@ import javax.xml.bind.ValidationException
 class ChainSynchronizer(
     private val properties: NodeProperties,
     private val blockService: BlockService,
-    private val delegateService: DelegateService,
     private val networkApiService: NetworkApiService,
     private val genesisBlockService: GenesisBlockService,
     private val voteTransactionService: VoteTransactionService,
@@ -76,7 +80,6 @@ class ChainSynchronizer(
         }
     }
 
-    @Transactional
     fun onEpochResponse(message: EpochResponseMessage) {
         future?.cancel(true)
         val nodesInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
@@ -245,55 +248,9 @@ class ChainSynchronizer(
             val lastLocalBlock = blockService.getLast()
             val filteredStorage = syncSession!!.getStorage().filter { it.height > lastLocalBlock.height }
 
-            filteredStorage.asReversed().forEach { block ->
-                if (block is MainBlock) {
-                    val rewardTransaction = block.payload.rewardTransaction.first()
-                    block.payload.rewardTransaction = mutableListOf()
-
-                    val transactions = mutableListOf<Transaction>()
-
-                    if (syncSession!!.syncMode == SyncMode.FULL) {
-                        transactions.addAll(block.payload.transferTransactions)
-                        transactions.addAll(block.payload.voteTransactions)
-                        transactions.addAll(block.payload.delegateTransactions)
-
-                        block.payload.transferTransactions = mutableListOf()
-                        block.payload.voteTransactions = mutableListOf()
-                        block.payload.delegateTransactions = mutableListOf()
-                    }
-
-                    blockService.save(block)
-                    rewardTransaction.block = block
-                    rewardTransactionService.toBlock(rewardTransaction.toMessage(), block)
-
-                    if (syncSession!!.syncMode == SyncMode.FULL) {
-                        transactions.forEach {
-                            if (it is TransferTransaction) {
-                                it.block = block
-                                transferTransactionService.toBlock(it.toMessage(), block)
-                            }
-                            if (it is DelegateTransaction) {
-                                it.block = block
-                                delegateTransactionService.toBlock(it.toMessage(), block)
-                            }
-                            if (it is VoteTransaction) {
-                                it.block = block
-                                voteTransactionService.toBlock(it.toMessage(), block)
-                            }
-                        }
-                    }
-                } else if (block is GenesisBlock) {
-                    val delegates = block.payload.activeDelegates.toMutableList()
-                    block.payload.activeDelegates.clear()
-                    delegates.forEach { delegate ->
-                        if (delegateService.isExistsByPublicKey(delegate.publicKey)) {
-                            block.payload.activeDelegates.add(delegateService.getByPublicKey(delegate.publicKey))
-                        } else {
-                            block.payload.activeDelegates.add(delegateService.save(delegate))
-                        }
-                    }
-                    blockService.save(block)
-                }
+            filteredStorage.asReversed().chunked(properties.syncBatchSize!!).forEach {
+                blockService.saveChunk(it, syncSession!!.syncMode)
+                log.debug("Blocks saved from ${it.first().height} to ${it.last().height}")
             }
 
             syncSession = null

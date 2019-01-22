@@ -8,6 +8,12 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.TransactionService
+import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.service.*
+import io.openfuture.chain.core.sync.SyncMode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
@@ -17,7 +23,12 @@ class DefaultBlockService(
     private val repository: BlockRepository<Block>,
     private val properties: ConsensusProperties,
     private val transactionService: TransactionService,
-    private val entityManager: EntityManager
+    private val entityManager: EntityManager,
+    private val delegateService: DelegateService,
+    private val voteTransactionService: VoteTransactionService,
+    private val rewardTransactionService: RewardTransactionService,
+    private val delegateTransactionService: DelegateTransactionService,
+    private val transferTransactionService: TransferTransactionService
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -78,5 +89,59 @@ class DefaultBlockService(
 
     @Transactional(readOnly = true)
     override fun getCurrentHeight(): Long = repository.getCurrentHeight()
+
+    @Transactional
+    override fun saveChunk(blocksChunk: List<Block>, syncMode: SyncMode) {
+        blocksChunk.forEach { block ->
+            if (block is MainBlock) {
+                val rewardTransaction = block.payload.rewardTransaction.first()
+                block.payload.rewardTransaction = mutableListOf()
+
+                val transactions = mutableListOf<Transaction>()
+
+                if (syncMode == SyncMode.FULL) {
+                    transactions.addAll(block.payload.transferTransactions)
+                    transactions.addAll(block.payload.voteTransactions)
+                    transactions.addAll(block.payload.delegateTransactions)
+
+                    block.payload.transferTransactions = mutableListOf()
+                    block.payload.voteTransactions = mutableListOf()
+                    block.payload.delegateTransactions = mutableListOf()
+                }
+
+                this.save(block)
+                rewardTransaction.block = block
+                rewardTransactionService.toBlock(rewardTransaction, block)
+
+                if (syncMode == SyncMode.FULL) {
+                    transactions.forEach {
+                        if (it is TransferTransaction) {
+                            it.block = block
+                            transferTransactionService.toBlock(it, block)
+                        }
+                        if (it is DelegateTransaction) {
+                            it.block = block
+                            delegateTransactionService.toBlock(it, block)
+                        }
+                        if (it is VoteTransaction) {
+                            it.block = block
+                            voteTransactionService.toBlock(it, block)
+                        }
+                    }
+                }
+            } else if (block is GenesisBlock) {
+                val delegates = block.payload.activeDelegates.toMutableList()
+                block.payload.activeDelegates.clear()
+                delegates.forEach { delegate ->
+                    if (delegateService.isExistsByPublicKey(delegate.publicKey)) {
+                        block.payload.activeDelegates.add(delegateService.getByPublicKey(delegate.publicKey))
+                    } else {
+                        block.payload.activeDelegates.add(delegateService.save(delegate))
+                    }
+                }
+                this.save(block)
+            }
+        }
+    }
 
 }
