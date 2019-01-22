@@ -82,6 +82,11 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
+    override fun toBlock(transaction: TransferTransaction, block: MainBlock): TransferTransaction {
+        return toBlock(transaction.toMessage(), block)
+    }
+
+    @Transactional
     override fun toBlock(message: TransferTransactionMessage, block: MainBlock): TransferTransaction {
         BlockchainLock.writeLock.lock()
         try {

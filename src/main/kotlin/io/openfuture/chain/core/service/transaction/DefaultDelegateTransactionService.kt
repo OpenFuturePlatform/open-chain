@@ -79,6 +79,11 @@ class DefaultDelegateTransactionService(
     }
 
     @Transactional
+    override fun toBlock(transaction: DelegateTransaction, block: MainBlock): DelegateTransaction {
+        return toBlock(transaction.toMessage(), block)
+    }
+
+    @Transactional
     override fun toBlock(message: DelegateTransactionMessage, block: MainBlock): DelegateTransaction {
         BlockchainLock.writeLock.lock()
         try {

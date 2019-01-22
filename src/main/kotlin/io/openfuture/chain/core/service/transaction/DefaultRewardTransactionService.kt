@@ -61,6 +61,11 @@ class DefaultRewardTransactionService(
     }
 
     @Transactional
+    override fun toBlock(transaction: RewardTransaction, block: MainBlock) {
+        return toBlock(transaction.toMessage(), block)
+    }
+
+    @Transactional
     override fun toBlock(message: RewardTransactionMessage, block: MainBlock) {
         BlockchainLock.writeLock.lock()
         try {

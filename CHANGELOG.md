@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.7.1] - 2019-01-21
+### Fixed
+ - Sync: persistence a large number of blocks
+
 ## [1.7.0] - 2019-01-17
 ### Added
 - Sync: full synchronization, all types of transactions are saved
@@ -290,6 +294,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[1.7.1]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.4.0...v1.5.0

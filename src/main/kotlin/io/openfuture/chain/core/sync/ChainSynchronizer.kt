@@ -6,9 +6,11 @@ import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.state.DelegateState
-import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.state.WalletState
-import io.openfuture.chain.core.model.entity.transaction.confirmed.*
+import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncStatus.*
@@ -21,7 +23,6 @@ import io.openfuture.chain.network.service.NetworkApiService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
@@ -39,9 +40,7 @@ class ChainSynchronizer(
     private val rewardTransactionService: RewardTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
-    private val statePool: StatePool,
-    private val delegateStateService: DelegateStateService,
-    private val walletStateService: WalletStateService
+    private val statePool: StatePool
 ) {
 
     private val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
@@ -89,7 +88,6 @@ class ChainSynchronizer(
         }
     }
 
-    @Transactional
     fun onEpochResponse(message: EpochResponseMessage) {
         resetRequestScheduler()
         val delegates = genesisBlockService.getLast().payload.activeDelegates
@@ -278,55 +276,9 @@ class ChainSynchronizer(
             val lastLocalBlock = blockService.getLast()
             val filteredStorage = syncSession!!.getStorage().filter { it.height > lastLocalBlock.height }
 
-            filteredStorage.asReversed().forEach { block ->
-                if (block is MainBlock) {
-                    val rewardTransaction = block.payload.rewardTransaction.first()
-                    block.payload.rewardTransaction = mutableListOf()
-
-                    val transactions = mutableListOf<Transaction>()
-                    val states = mutableListOf<State>()
-
-                    if (syncSession!!.syncMode == SyncMode.FULL) {
-                        transactions.addAll(block.payload.transferTransactions)
-                        transactions.addAll(block.payload.voteTransactions)
-                        transactions.addAll(block.payload.delegateTransactions)
-
-                        block.payload.transferTransactions = mutableListOf()
-                        block.payload.voteTransactions = mutableListOf()
-                        block.payload.delegateTransactions = mutableListOf()
-                    }
-
-                    states.addAll(block.payload.delegateStates)
-                    states.addAll(block.payload.walletStates)
-
-                    block.payload.delegateStates = mutableListOf()
-                    block.payload.walletStates = mutableListOf()
-
-                    blockService.save(block)
-                    rewardTransaction.block = block
-                    rewardTransactionService.toBlock(rewardTransaction.toMessage(), block)
-
-                    if (syncSession!!.syncMode == SyncMode.FULL) {
-                        transactions.forEach {
-                            it.block = block
-                            when (it) {
-                                is TransferTransaction -> transferTransactionService.toBlock(it.toMessage(), block)
-                                is DelegateTransaction -> delegateTransactionService.toBlock(it.toMessage(), block)
-                                is VoteTransaction -> voteTransactionService.toBlock(it.toMessage(), block)
-
-                            }
-                        }
-                    }
-                    states.forEach {
-                        when (it) {
-                            is DelegateState -> delegateStateService.toBlock(it.toMessage(), block)
-                            is WalletState -> walletStateService.toBlock(it.toMessage(), block)
-                            else -> throw IllegalStateException("The type doesn`t handle")
-                        }
-                    }
-                } else if (block is GenesisBlock) {
-                    blockService.save(block)
-                }
+            filteredStorage.asReversed().chunked(properties.syncBatchSize!!).forEach {
+                blockService.saveChunk(it, syncSession!!.syncMode)
+                log.debug("Blocks saved from ${it.first().height} to ${it.last().height}")
             }
 
             syncSession = null
