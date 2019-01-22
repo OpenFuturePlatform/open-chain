@@ -3,17 +3,17 @@ CREATE TABLE transactions (
   timestamp        BIGINT  NOT NULL,
   fee              BIGINT  NOT NULL,
   sender_address   VARCHAR NOT NULL,
-  hash             VARCHAR NOT NULL UNIQUE,
+  hash             VARCHAR NOT NULL,
   sender_signature VARCHAR NOT NULL,
   sender_key       VARCHAR NOT NULL,
   block_id         BIGINT  NOT NULL REFERENCES main_blocks
 );
 --
+CREATE UNIQUE HASH INDEX transaction_hash
+  ON transactions (hash);
+--
 CREATE HASH INDEX transaction_sender_address
   ON transactions (sender_address);
---
-CREATE HASH INDEX transaction_hash
-  ON transactions (hash);
 --
 CREATE TABLE transfer_transactions (
   id                BIGINT PRIMARY KEY REFERENCES transactions,
@@ -56,8 +56,9 @@ CREATE TABLE vote_transactions (
   vote_type_id INTEGER NOT NULL REFERENCES vote_types,
   node_id      VARCHAR NOT NULL
 );
-CREATE INDEX vote_transactions_vote_type_id_node_id
-  ON vote_transactions (vote_type_id, node_id);
+--
+CREATE HASH INDEX vote_transactions_node_id
+  ON vote_transactions (node_id);
 --
 
 -- UNCONFIRMED TABLES
@@ -73,12 +74,8 @@ CREATE MEMORY TABLE u_transactions (
 CREATE HASH INDEX u_transactions_sender_address
   ON u_transactions (sender_address);
 --
---
 CREATE INDEX u_transactions_fee
   ON u_transactions (fee);
---
-CREATE HASH INDEX u_transactions_hash
-  ON u_transactions (hash);
 --
 CREATE MEMORY TABLE u_transfer_transactions (
   id                BIGINT PRIMARY KEY REFERENCES u_transactions,
@@ -101,6 +98,6 @@ CREATE MEMORY TABLE u_vote_transactions (
   node_id      VARCHAR NOT NULL
 );
 --
-CREATE INDEX u_vote_transactions_vote_type_id_node_id
-  ON u_vote_transactions (vote_type_id, node_id);
+CREATE INDEX u_vote_transactions_node_id
+  ON u_vote_transactions (node_id);
 --
