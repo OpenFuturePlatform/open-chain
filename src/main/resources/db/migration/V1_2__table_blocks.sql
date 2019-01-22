@@ -28,4 +28,3 @@ CREATE TABLE genesis_blocks (
 --
 CREATE HASH INDEX genesis_blocks_epoch_index
   ON genesis_blocks (epoch_index);
---
