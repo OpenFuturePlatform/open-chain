@@ -10,8 +10,6 @@ import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.network.message.sync.MainBlockMessage
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.serialization.Serializable
-import org.apache.commons.lang3.builder.ToStringBuilder
-import org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE
@@ -38,12 +36,8 @@ class MessageDecoder(
 
         message.read(buf)
         if (isExpired(message, originTime)) {
-            log.debug("Message $type from ${ctx.channel().remoteAddress()} decline by expiration")
             return
         }
-
-        log.debug("Decoded ${ToStringBuilder.reflectionToString(message, SHORT_PREFIX_STYLE)} " +
-            "from ${ctx.channel().remoteAddress()}")
 
         out.add(message)
     }

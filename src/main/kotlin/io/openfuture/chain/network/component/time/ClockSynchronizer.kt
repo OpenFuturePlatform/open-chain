@@ -93,15 +93,13 @@ class ClockSynchronizer(
         val result = mutableListOf<TimeInfo>()
         do {
             try {
-                log.debug("Ask ${nearestNtpServer!!.hostName} server")
                 info = ntpClient.getTime(nearestNtpServer)
                 info.computeDetails()
-                log.debug("Ntp server delay = ${info.delay} offset = ${info.offset}")
+                log.trace("Ntp server delay = ${info.delay} offset = ${info.offset}")
                 result.add(info)
                 tryQuiz = result.size != 3
             } catch (e: SocketTimeoutException) {
                 tryQuiz = ++attempt != 6
-                log.debug("Ntp server ${nearestNtpServer!!.hostName} answers too long")
             }
         } while (tryQuiz)
 
@@ -115,13 +113,12 @@ class ClockSynchronizer(
 
         for (address in ntpsInetAddress) {
             try {
-                log.debug("Ask ${address.hostName} server")
                 val info = ntpClient.getTime(address)
                 info.computeDetails()
-                log.debug("Ntp server ${address.hostName} delay = ${info.delay} offset = ${info.offset}")
+                log.trace("Ntp server ${address.hostName} delay = ${info.delay} offset = ${info.offset}")
                 quizResult[address] = info
             } catch (e: SocketTimeoutException) {
-                log.debug("Ntp server ${address.hostName} answers too long")
+                log.trace("Ntp server ${address.hostName} answers too long")
             }
         }
 
@@ -138,7 +135,7 @@ class ClockSynchronizer(
             clock.adjust(offset)
 
             syncRound.getAndIncrement()
-            log.debug("CLOCK: Effective offset $offset")
+            log.trace("CLOCK: Effective offset $offset")
 
             if (SYNCHRONIZED != status) {
                 status = SYNCHRONIZED
