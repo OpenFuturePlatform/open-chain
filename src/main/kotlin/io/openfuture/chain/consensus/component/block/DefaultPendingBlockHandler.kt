@@ -64,7 +64,6 @@ class DefaultPendingBlockHandler(
             return
         }
 
-
         if (!mainBlockService.verify(block)) {
             return
         }

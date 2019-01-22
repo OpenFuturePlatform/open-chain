@@ -132,14 +132,7 @@ interface StateRepository<T : State> : BaseRepository<T> {
 
     fun findByAddress(address: String): List<T>
 
-    @Query("""
-        SELECT * FROM delegate_states ds
-        JOIN states s ON(ds.id=s.id)
-        JOIN blocks b ON(s.block_id=b.id)
-        WHERE b.height=:height AND s.address=:address
-        """,
-        nativeQuery = true)
-    fun findByAddressAndBlockHeight(@Param("address") address: String, @Param("height") height: Long): T?
+    fun findFirstByAddressAndBlockHeightLessThanEqualOrderByBlockHeightDesc(address: String, height: Long): T?
 
 }
 
@@ -147,17 +140,12 @@ interface StateRepository<T : State> : BaseRepository<T> {
 interface DelegateStateRepository : StateRepository<DelegateState> {
 
     @Query("""
-        SELECT * FROM delegate_states ds1
-        JOIN states s1 ON(ds1.id=s1.id)
-        JOIN blocks b1 ON(s1.block_id=b1.id)
-        WHERE b1.height = (
-            SELECT MAX(b2.height) FROM delegate_states ds2
-            JOIN states s2 ON(ds2.id=s2.id)
-            JOIN blocks b2 ON(s2.block_id=b2.id)
-            WHERE s1.address=s2.address
+        SELECT ds1 FROM DelegateState ds1
+        WHERE ds1.block.height = (
+            SELECT MAX(ds2.block.height) FROM DelegateState ds2
+            WHERE ds1.address=ds2.address
         )
-        """,
-        nativeQuery = true)
+        """)
     fun findLastAll(): List<DelegateState>
 
 }

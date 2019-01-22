@@ -33,7 +33,7 @@ abstract class BaseStateService<T : State>(
     override fun getByAddressAndBlock(address: String, block: Block): T? {
         BlockchainLock.readLock.lock()
         try {
-            return repository.findByAddressAndBlockHeight(address, block.height)
+            return repository.findFirstByAddressAndBlockHeightLessThanEqualOrderByBlockHeightDesc(address, block.height)
         } finally {
             BlockchainLock.readLock.unlock()
         }
