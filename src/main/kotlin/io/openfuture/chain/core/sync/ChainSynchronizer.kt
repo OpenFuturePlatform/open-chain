@@ -39,7 +39,7 @@ class ChainSynchronizer(
     private val voteTransactionService: VoteTransactionService,
     private val rewardTransactionService: RewardTransactionService,
     private val epochService: EpochService,
-    private val scheduledSynchronizer: ScheduledSynchronizer,
+    private val requestRetryScheduler: RequestRetryScheduler,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService
 ) {
@@ -126,7 +126,7 @@ class ChainSynchronizer(
         status = PROCESSING
         val block = blockService.getLast()
         checkBlock(block)
-        future = scheduledSynchronizer.startRequestScheduler(future, Runnable { checkBlock(block) })
+        future = requestRetryScheduler.startRequestScheduler(future, Runnable { checkBlock(block) })
     }
 
     fun onBlockAvailabilityResponse(response: BlockAvailabilityResponse) {
@@ -142,7 +142,7 @@ class ChainSynchronizer(
                 lastGenesisBlock
             }
             checkBlock(requestedBlock)
-            future = scheduledSynchronizer.startRequestScheduler(future, Runnable { checkBlock(lastGenesisBlock) })
+            future = requestRetryScheduler.startRequestScheduler(future, Runnable { checkBlock(lastGenesisBlock) })
         } else {
             requestLatestGenesisBlock()
         }
@@ -222,7 +222,7 @@ class ChainSynchronizer(
         val message = SyncRequestMessage()
 
         networkApiService.sendToAddress(message, knownActiveDelegates.shuffled().first())
-        future = scheduledSynchronizer.startRequestScheduler(future, Runnable { expired() })
+        future = requestRetryScheduler.startRequestScheduler(future, Runnable { expired() })
     }
 
     private fun requestEpoch(listNodeInfo: List<NodeInfo>) {
@@ -235,7 +235,7 @@ class ChainSynchronizer(
         val message = EpochRequestMessage(targetEpoch, syncSession!!.syncMode)
 
         networkApiService.sendToAddress(message, listNodeInfo.shuffled().first())
-        future = scheduledSynchronizer.startRequestScheduler(future, Runnable { expired() })
+        future = requestRetryScheduler.startRequestScheduler(future, Runnable { expired() })
     }
 
     private fun getNodeInfo(delegate: Delegate): NodeInfo = NodeInfo(delegate.nodeId, NetworkAddress(delegate.host, delegate.port))

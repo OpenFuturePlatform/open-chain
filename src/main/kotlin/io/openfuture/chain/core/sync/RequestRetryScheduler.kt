@@ -8,7 +8,7 @@ import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 
 @Component
-class ScheduledSynchronizer(
+class RequestRetryScheduler(
     private val properties: NodeProperties
 ) {
 
