@@ -151,7 +151,7 @@ interface DelegateStateRepository : StateRepository<DelegateState> {
         JOIN states s1 ON(ds1.id=s1.id)
         JOIN blocks b1 ON(s1.block_id=b1.id)
         WHERE b1.height = (
-            ELECT MAX(b2.height) FROM delegate_states ds2
+            SELECT MAX(b2.height) FROM delegate_states ds2
             JOIN states s2 ON(ds2.id=s2.id)
             JOIN blocks b2 ON(s2.block_id=b2.id)
             WHERE s1.address=s2.address
