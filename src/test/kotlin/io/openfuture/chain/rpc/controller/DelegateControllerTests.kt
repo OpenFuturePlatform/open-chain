@@ -11,6 +11,7 @@ import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.WalletVoteService
+import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -44,7 +45,7 @@ class DelegateControllerTests : ControllerTests() {
         val delegates = listOf(DelegateState("publicKey", block,  1))
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
 
-        given(delegateStateService.getAllDelegates()).willReturn(delegates)
+        given(delegateStateService.getAllDelegates(PageRequest())).willReturn(delegates)
         given(delegateService.getByPublicKey("publicKey")).willReturn(delegate)
 
         val actualPageResponse = webClient.get().uri("/rpc/delegates")
