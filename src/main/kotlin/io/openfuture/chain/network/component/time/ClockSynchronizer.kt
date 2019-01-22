@@ -31,7 +31,7 @@ class ClockSynchronizer(
     private var lastOffset = 0L
     private var ntpSynced: Boolean = true
     private var nextQuizTime: Long? = null
-    private val deviationThreshold = 2.0
+    private val percentThreshold = 5.0
     private var nearestNtpServer: InetAddress? = null
     private val ntpsInetAddress = properties.ntpServers.map { InetAddress.getByName(it) }
 
@@ -71,10 +71,9 @@ class ClockSynchronizer(
             } else {
                 lastOffset = getOffset(nearestNtpServer) ?: return
             }
+            mitigate(lastOffset)
         } finally {
             lock.writeLock().unlock()
-
-            mitigate(lastOffset)
         }
     }
 
@@ -98,7 +97,9 @@ class ClockSynchronizer(
         val median = (ntpResponses.sumBy { it.offset.toInt() } + lastOffset) / (ntpResponses.size + 1)
         var sumDiff = 0.0
         ntpResponses.forEach { sumDiff += Math.pow(((it.offset - median).toDouble()), square) }
-        return Math.sqrt(sumDiff / ntpResponses.size)
+        val dev = Math.sqrt(sumDiff / ntpResponses.size)
+        log.debug("Deviation = $dev")
+        return dev
     }
 
     private fun getOffset(nearestNtpServer: InetAddress?): Long? {
@@ -110,14 +111,12 @@ class ClockSynchronizer(
         }
         val minOffset = result.minBy { Math.abs(it.offset) }?.offset
 
-        if (minOffset == null || getDeviation(lastOffset, result) > deviationThreshold) {
+        if (minOffset == null || getDeviation(lastOffset, result) > percentThreshold) {
             status = NOT_SYNCHRONIZED
-            return null
-        }
-
-        if (Math.abs(minOffset) > properties.ntpOffsetThreshold!!) {
-            status = NOT_SYNCHRONIZED
-            ntpSynced = false
+            if (minOffset != null && Math.abs(minOffset) > properties.ntpOffsetThreshold!!) {
+                ntpSynced = false
+                nextQuizTime = null
+            }
             return null
         }
         ntpSynced = true
@@ -130,18 +129,19 @@ class ClockSynchronizer(
         var attempt = 0
         var message: NtpV3Packet
         val result = mutableListOf<TimeInfo>()
+        log.debug("Start send request to ${nearestNtpServer!!.hostName}")
         do {
             try {
                 info = ntpClient.getTime(nearestNtpServer)
+                Thread.sleep(1000)
                 info.computeDetails()
                 message = info.message
                 log.debug("Ntp stratum = ${message.stratum}, precision = ${getPrecision(message.precision)} ms, delay = ${info.delay}, offset = ${info.offset} ")
                 result.add(info)
                 tryQuiz = result.size < 7
             } catch (e: SocketTimeoutException) {
-                Thread.sleep(1000)
                 tryQuiz = ++attempt < 6
-                log.debug("Ntp server ${nearestNtpServer!!.hostName} answers too long")
+                log.debug("Ntp server ${nearestNtpServer.hostName} answers too long")
             } finally {
                 ntpClient.close()
             }
