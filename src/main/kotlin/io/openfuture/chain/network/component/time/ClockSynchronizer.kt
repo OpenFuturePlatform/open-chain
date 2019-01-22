@@ -4,10 +4,13 @@ import io.openfuture.chain.core.sync.SyncStatus
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.property.NodeProperties
 import org.apache.commons.net.ntp.NTPUDPClient
+import org.apache.commons.net.ntp.NtpV3Packet
 import org.apache.commons.net.ntp.TimeInfo
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
+import java.math.MathContext
 import java.net.InetAddress
 import java.net.SocketTimeoutException
 import java.util.concurrent.locks.ReadWriteLock
@@ -26,24 +29,27 @@ class ClockSynchronizer(
 
 
     private var lastOffset = 0L
+    private var ntpSynced: Boolean = true
     private var nextQuizTime: Long? = null
+    private val deviationThreshold = 2.0
     private var nearestNtpServer: InetAddress? = null
-    private val ntpsInetAddress = properties.ntpServers.map { InetAddress.getByName(it) }.toList()
+    private val ntpsInetAddress = properties.ntpServers.map { InetAddress.getByName(it) }
 
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
 
     @Volatile
     private var status: SyncStatus = NOT_SYNCHRONIZED
 
+
     @Scheduled(fixedDelayString = "\${node.time-sync-interval}")
     fun sync() {
         lock.writeLock().lock()
-        var offset = 0L
         try {
             if (SYNCHRONIZED != status) {
                 status = PROCESSING
             }
-            if (isQuizTime()) {
+
+            if (nextQuizTime == null || clock.currentTimeMillis() > nextQuizTime!!) {
                 nextQuizTime = clock.currentTimeMillis().plus(properties.nextNtpServerInterval!!)
 
                 val quizResult = startNtpQuiz(ntpsInetAddress)
@@ -54,35 +60,18 @@ class ClockSynchronizer(
                     return
                 }
                 nearestNtpServer = minDelay.key
-                val minOffset = minDelay.value.offset
-
-                offset = if (getDeviation(lastOffset, quizResult.values.toList()) < 2 && Math.abs(minOffset) > properties.ntpOffsetThreshold!!) {
-                    minOffset
-                } else {
-                    lastOffset
-                }
-
+                lastOffset = getOffset(nearestNtpServer) ?: return
             } else {
-                val result = syncByNearestNtpServer(nearestNtpServer)
-                val minOffset = result.minBy { Math.abs(it.offset) }?.offset
-
-                if (minOffset == null) {
-                    status = NOT_SYNCHRONIZED
-                    return
-                }
-
-                if (getDeviation(lastOffset, result) < 2 && Math.abs(minOffset) > properties.ntpOffsetThreshold!!) {
-                    lastOffset = minOffset
-                }
-                offset = lastOffset
-
+                lastOffset = getOffset(nearestNtpServer) ?: return
             }
         } finally {
             lock.writeLock().unlock()
 
-            mitigate(offset)
+            mitigate(lastOffset)
         }
     }
+
+    fun isSyncByNtp(): Boolean = this.ntpSynced
 
     fun getStatus(): SyncStatus {
         lock.readLock().lock()
@@ -93,28 +82,50 @@ class ClockSynchronizer(
         }
     }
 
-    private fun isQuizTime(): Boolean = (nextQuizTime == null || clock.currentTimeMillis() > nextQuizTime!!)
+    private fun getPrecision(rawPrecision: Int): Double =
+        BigDecimal(2).pow(rawPrecision, MathContext(3))
+            .multiply(BigDecimal(1000), MathContext(4)).toDouble()
 
     private fun getDeviation(lastOffset: Long, ntpResponses: List<TimeInfo>): Double {
+        val square = 2.0
         val mediana = (ntpResponses.sumBy { it.offset.toInt() } + lastOffset) / (ntpResponses.size + 1)
-        var differencesMediana = 0.0
-        ntpResponses.forEach { differencesMediana += Math.pow(((it.offset - mediana).toDouble()), 2.0) }
-        return Math.sqrt(differencesMediana / ntpResponses.size)
+        var sumDiff = 0.0
+        ntpResponses.forEach { sumDiff += Math.pow(((it.offset - mediana).toDouble()), square) }
+        return Math.sqrt(sumDiff / ntpResponses.size)
+    }
+
+    private fun getOffset(nearestNtpServer: InetAddress?): Long? {
+        val result = syncByNearestNtpServer(nearestNtpServer)
+        val minOffset = result.minBy { Math.abs(it.offset) }?.offset
+
+        if (minOffset == null || getDeviation(lastOffset, result) > deviationThreshold) {
+            status = NOT_SYNCHRONIZED
+            return null
+        }
+
+        if (Math.abs(minOffset) > properties.ntpOffsetThreshold!!) {
+            status = NOT_SYNCHRONIZED
+            ntpSynced = false
+            return null
+        }
+        return minOffset
     }
 
     private fun syncByNearestNtpServer(nearestNtpServer: InetAddress?): MutableList<TimeInfo> {
         var info: TimeInfo?
         var tryQuiz: Boolean
         var attempt = 0
+        var message: NtpV3Packet
         val result = mutableListOf<TimeInfo>()
         do {
             try {
                 log.debug("Ask ${nearestNtpServer!!.hostName} server")
                 info = ntpClient.getTime(nearestNtpServer)
                 info.computeDetails()
-                log.debug("Ntp server delay = ${info.delay} offset = ${info.offset}")
+                message = info.message
+                log.debug("Ntp stratum = ${message.stratum}, precision = ${getPrecision(message.precision)} ms, delay = ${info.delay}, offset = ${info.offset} ")
                 result.add(info)
-                tryQuiz = result.size < 3
+                tryQuiz = result.size < 7
             } catch (e: SocketTimeoutException) {
                 tryQuiz = ++attempt < 6
                 log.debug("Ntp server ${nearestNtpServer!!.hostName} answers too long")
@@ -127,12 +138,14 @@ class ClockSynchronizer(
 
     private fun startNtpQuiz(ntpsInetAddress: List<InetAddress>): MutableMap<InetAddress, TimeInfo> {
         val quizResult = mutableMapOf<InetAddress, TimeInfo>()
+        var info: TimeInfo
+        var message: NtpV3Packet
         for (address in ntpsInetAddress) {
             try {
-                log.debug("Ask ${address.hostName} server")
-                val info = ntpClient.getTime(address)
+                info = ntpClient.getTime(address)
                 info.computeDetails()
-                log.debug("Ntp server ${address.hostName} delay = ${info.delay} offset = ${info.offset}")
+                message = info.message
+                log.debug("Ntp stratum = ${message.stratum}, precision = ${getPrecision(message.precision)} ms, delay = ${info.delay}, offset = ${info.offset} ")
                 quizResult[address] = info
             } catch (e: SocketTimeoutException) {
                 log.debug("Ntp server ${address.hostName} answers too long")

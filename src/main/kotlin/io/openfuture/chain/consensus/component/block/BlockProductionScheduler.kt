@@ -2,7 +2,6 @@ package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
@@ -43,6 +42,9 @@ class BlockProductionScheduler(
         try {
             if (SYNCHRONIZED != clockSynchronizer.getStatus()) {
                 log.debug("----------------Clock is ${clockSynchronizer.getStatus()}----------------")
+                if (!clockSynchronizer.isSyncByNtp()) {
+                    log.warn("The clock on this computer is not synchronized! Please set up synchronization by the ntp servers")
+                }
                 return
             }
 
