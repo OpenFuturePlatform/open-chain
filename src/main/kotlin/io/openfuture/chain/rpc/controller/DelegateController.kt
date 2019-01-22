@@ -29,9 +29,20 @@ class DelegateController(
     private val genesisBlockService: GenesisBlockService
 ) {
 
+    //todo pagerequest
     @GetMapping
-    fun getAll(request: PageRequest): PageResponse<DelegateResponse> =
-        PageResponse(delegateService.getAll(request).map { DelegateResponse(it) })
+    fun getAll(request: PageRequest): PageResponse<DelegateResponse> {
+        val delegates = delegateStateService.getAllDelegates().map {
+            DelegateResponse(delegateService.getByPublicKey(it.address))
+        }
+
+        val pageDelegate = delegates.stream()
+            .skip(request.offset)
+            .limit(request.getLimit().toLong())
+            .collect(Collectors.toList())
+
+        return PageResponse(PageImpl(pageDelegate, request, delegates.size.toLong()))
+    }
 
     @GetMapping("/active")
     fun getAllActive(request: PageRequest): PageResponse<DelegateResponse> {
@@ -49,9 +60,9 @@ class DelegateController(
 
     @GetMapping("/view")
     fun getAll(@Valid request: ViewDelegatePageRequest): PageResponse<ViewDelegateResponse> {
-        val activeDelegates = genesisBlockService.getLast().payload.activeDelegates.map { publicKey ->
-            val delegate = delegateService.getByPublicKey(publicKey)
-            val state = delegateStateService.getLastByAddress(publicKey)
+        val delegates = delegateStateService.getAllDelegates().map {
+            val delegate = delegateService.getByPublicKey(it.address)
+            val state = delegateStateService.getLastByAddress(it.address)
 
             ViewDelegateResponse(
                 delegate.address,
@@ -63,12 +74,12 @@ class DelegateController(
             )
         }
 
-        val pageActiveDelegate = activeDelegates.stream()
+        val pageActiveDelegate = delegates.stream()
             .skip(request.offset)
             .limit(request.getLimit().toLong())
             .collect(Collectors.toList())
 
-        return PageResponse(PageImpl(pageActiveDelegate, request, activeDelegates.size.toLong()))
+        return PageResponse(PageImpl(pageActiveDelegate, request, delegates.size.toLong()))
     }
 
 }
