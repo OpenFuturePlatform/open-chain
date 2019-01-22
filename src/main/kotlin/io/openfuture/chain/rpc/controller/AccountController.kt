@@ -54,7 +54,6 @@ class AccountController(
                 VotesResponse(
                     delegate.address,
                     delegate.publicKey,
-                    delegate.publicKey, //todo remove for front
                     state?.rating ?: DEFAULT_DELEGATE_RATING,
                     walletVoteService.getVotesForDelegate(it.id.delegateKey).size,
                     voteTransactionService.getLastVoteForDelegate(address, it.id.delegateKey).header.timestamp,

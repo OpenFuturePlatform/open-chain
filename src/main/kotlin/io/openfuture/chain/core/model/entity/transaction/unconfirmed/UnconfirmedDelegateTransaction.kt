@@ -30,7 +30,7 @@ class UnconfirmedDelegateTransaction(
         fun of(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
             TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
             TransactionFooter(request.hash!!, request.senderSignature!!, request.senderPublicKey!!),
-            DelegateTransactionPayload(request.nodeKey!!, request.amount!!)
+            DelegateTransactionPayload(request.delegateKey!!, request.amount!!)
         )
     }
 

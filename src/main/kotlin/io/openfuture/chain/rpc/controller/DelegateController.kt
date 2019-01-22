@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.stream.Collectors
 import javax.validation.Valid
 
 @CrossOrigin
@@ -56,7 +55,6 @@ class DelegateController(
             ViewDelegateResponse(
                 delegate.address,
                 delegate.publicKey,
-                delegate.publicKey, // todo remove for front
                 state?.rating ?: DEFAULT_DELEGATE_RATING,
                 walletVoteService.getVotesForDelegate(delegate.publicKey).size,
                 delegate.registrationDate

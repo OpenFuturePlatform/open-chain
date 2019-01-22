@@ -10,7 +10,7 @@ class DelegateTransactionResponse(
     senderSignature: String,
     senderPublicKey: String,
     hash: String,
-    val nodeId: String,  // todo rename delegateKey
+    val delegateKey: String,
     val amount: Long? = null,
     blockHash: String? = null
 ) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey, hash, blockHash) {
