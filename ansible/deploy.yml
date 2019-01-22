@@ -8,6 +8,14 @@
       docker_container:
         name: openchain
         state: absent
+    - name: Remove the embedded DB volume
+      docker_volume:
+        name: db_volume
+        state: absent
+      when: del_volume
+    - name: Create a volume for embedded DB
+      docker_volume:
+        name: db_volume
     - name: Re-create openchain container
       docker_container:
         name: openchain
@@ -25,6 +33,8 @@
           - "{{ item.api_port }}:{{ item.api_port }}"
           - 7000:7000
           - 8000:8000
+        volumes:
+          - db_volume:/root/db
         restart_policy: always
       with_items:
         - { app_port: 9090, api_port: 9190, secret_key: "{{ key }}" }
