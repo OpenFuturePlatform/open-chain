@@ -101,6 +101,6 @@ CREATE MEMORY TABLE u_vote_transactions (
   node_id      VARCHAR NOT NULL
 );
 --
-CREATE HASH INDEX u_vote_transactions_vote_type_id_node_id
+CREATE INDEX u_vote_transactions_vote_type_id_node_id
   ON u_vote_transactions (vote_type_id, node_id);
 --
