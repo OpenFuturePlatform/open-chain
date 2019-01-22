@@ -249,7 +249,7 @@ interface StateService<T : State> {
 
 interface DelegateStateService : StateService<DelegateState> {
 
-    fun getAllDelegates(): List<DelegateState>
+    fun getAllDelegates(request: PageRequest): List<DelegateState>
 
     fun getActiveDelegates(): List<DelegateState>
 

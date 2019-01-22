@@ -12,6 +12,7 @@ import io.openfuture.chain.core.service.WalletVoteService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.DelegateStateMessage
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
+import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -30,10 +31,10 @@ class DefaultDelegateStateService(
     }
 
 
-    override fun getAllDelegates(): List<DelegateState> = repository.findLastAll()
+    override fun getAllDelegates(request: PageRequest): List<DelegateState> = repository.findLastAll(request)
 
     override fun getActiveDelegates(): List<DelegateState> =
-        getAllDelegates().sortedByDescending { it.rating }.take(consensusProperties.delegatesCount!!)
+        getAllDelegates(PageRequest(0, consensusProperties.delegatesCount!!)).sortedByDescending { it.rating }
 
     //todo change
     override fun updateRating(message: VoteTransactionMessage) {
