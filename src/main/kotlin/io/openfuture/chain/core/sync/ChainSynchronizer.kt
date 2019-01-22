@@ -103,7 +103,7 @@ class ChainSynchronizer(
             }
 
             if (!syncSession!!.add(convertToBlocks(message))) {
-                log.warn("Chain is invalid, request another chain")
+                log.warn("Epoch #${message.genesisBlock!!.epochIndex} is invalid, requesting another node...")
                 requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
                 return
             }
@@ -169,7 +169,7 @@ class ChainSynchronizer(
                 }
             }
         } catch (e: ValidationException) {
-            log.warn("Transactions are invalid, cause: ${e.message}")
+            log.warn("Transactions are invalid: ${e.message}")
             return false
         }
         return true
@@ -286,7 +286,7 @@ class ChainSynchronizer(
     private fun syncFailed() {
         syncSession = null
         status = NOT_SYNCHRONIZED
-        log.error("Sync is FAILED: status = $status")
+        log.error("Sync is FAILED")
     }
 
     private fun startRequestScheduler() {

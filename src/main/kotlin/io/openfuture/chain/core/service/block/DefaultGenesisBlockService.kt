@@ -88,8 +88,6 @@ class DefaultGenesisBlockService(
     @Synchronized
     override fun add(block: GenesisBlock) {
         super.save(block)
-        log.debug("CONSENSUS: Saving genesis block with hash = ${block.hash}")
-
     }
 
     @Transactional

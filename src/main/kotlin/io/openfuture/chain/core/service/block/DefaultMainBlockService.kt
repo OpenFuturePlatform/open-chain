@@ -118,7 +118,7 @@ class DefaultMainBlockService(
             validate(message)
             return true
         } catch (ex: ValidationException) {
-            log.warn("Block is invalid cause: ${ex.message}")
+            log.warn("Block is invalid: ${ex.message}")
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -149,7 +149,6 @@ class DefaultMainBlockService(
             }
 
             throughput.updateThroughput(message.getAllTransactions().size, savedBlock.height)
-            log.debug("CONSENSUS: Saving main block with hash = ${block.hash}")
         } finally {
             BlockchainLock.writeLock.unlock()
         }
@@ -167,7 +166,7 @@ class DefaultMainBlockService(
         super.validateBase(MainBlock.of(message))
 
         if (!isValidMerkleHash(message.merkleHash, message.getAllTransactions().map { it.hash })) {
-            throw ValidationException("Invalid merkle hash: ${message.merkleHash}")
+            throw ValidationException("Invalid merkle hash - ${message.merkleHash}")
         }
 
         if (!isValidBalances(message.getExternalTransactions())) {
@@ -189,8 +188,6 @@ class DefaultMainBlockService(
         if (!isValidTransferTransactions(message.transferTransactions)) {
             throw ValidationException("Invalid transfer transactions")
         }
-
-
     }
 
     private fun isValidBalances(transactions: List<TransactionMessage>): Boolean =

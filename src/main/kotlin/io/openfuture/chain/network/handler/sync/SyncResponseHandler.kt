@@ -13,7 +13,6 @@ class SyncResponseHandler(
     private val chainSynchronizer: ChainSynchronizer
 ) : SimpleChannelInboundHandler<SyncResponseMessage>() {
 
-
     override fun channelRead0(ctx: ChannelHandlerContext, msg: SyncResponseMessage) {
         chainSynchronizer.onGenesisBlockResponse(msg.genesisBlockMessage)
     }

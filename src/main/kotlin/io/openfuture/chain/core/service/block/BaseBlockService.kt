@@ -25,7 +25,6 @@ abstract class BaseBlockService<T : Block>(
 
     protected fun save(block: T): T {
         return repository.save(block)
-
     }
 
     protected fun validateBase(block: Block) {
