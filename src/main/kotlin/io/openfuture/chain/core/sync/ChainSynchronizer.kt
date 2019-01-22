@@ -60,7 +60,7 @@ class ChainSynchronizer(
 
     @Synchronized
     fun sync() {
-        log.debug("Chain in status=$status")
+        log.info("Chain is $status")
         if (PROCESSING == status) {
             return
         }
@@ -104,6 +104,7 @@ class ChainSynchronizer(
             }
 
             if (!syncSession!!.add(convertToBlocks(message))) {
+                log.warn("Epoch #${message.genesisBlock!!.epochIndex} is invalid, requesting another node...")
                 requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
                 return
             }
@@ -169,7 +170,7 @@ class ChainSynchronizer(
                 }
             }
         } catch (e: ValidationException) {
-            log.debug("Transactions are invalid, cause: ${e.message}")
+            log.warn("Transactions are invalid: ${e.message}")
             return false
         }
         return true
@@ -183,7 +184,7 @@ class ChainSynchronizer(
             hashes.addAll(block.delegateTransactions.map { it.hash })
             hashes.add(block.rewardTransaction.hash)
             if (block.merkleHash != MainBlockPayload.calculateMerkleRoot(hashes)) {
-                log.debug("MerkleRoot is invalid")
+                log.warn("MerkleRoot is invalid")
                 return false
             }
         }
@@ -229,7 +230,7 @@ class ChainSynchronizer(
 
             syncSession = null
             status = SYNCHRONIZED
-            log.debug("Chain is SYNCHRONIZED")
+            log.info("Chain is $status")
 
         } catch (e: Throwable) {
             log.error("Save block is failed: $e")
@@ -240,7 +241,7 @@ class ChainSynchronizer(
     private fun syncFailed() {
         syncSession = null
         status = NOT_SYNCHRONIZED
-        log.debug("Sync is failed")
+        log.error("Sync is FAILED")
     }
 
     private fun startRequestScheduler() {
