@@ -80,6 +80,11 @@ class DefaultDelegateTransactionService(
     }
 
     @Transactional
+    override fun toBlock(transaction: DelegateTransaction, block: MainBlock): DelegateTransaction {
+        return toBlock(transaction.toMessage(), block)
+    }
+
+    @Transactional
     override fun toBlock(message: DelegateTransactionMessage, block: MainBlock): DelegateTransaction {
         BlockchainLock.writeLock.lock()
         try {
@@ -107,7 +112,7 @@ class DefaultDelegateTransactionService(
             validate(UnconfirmedDelegateTransaction.of(message))
             true
         } catch (e: ValidationException) {
-            log.warn(e.message)
+            log.error(e.message)
             false
         }
     }

@@ -88,9 +88,9 @@ class ClockSynchronizer(
 
     private fun getDeviation(lastOffset: Long, ntpResponses: List<TimeInfo>): Double {
         val square = 2.0
-        val mediana = (ntpResponses.sumBy { it.offset.toInt() } + lastOffset) / (ntpResponses.size + 1)
+        val median = (ntpResponses.sumBy { it.offset.toInt() } + lastOffset) / (ntpResponses.size + 1)
         var sumDiff = 0.0
-        ntpResponses.forEach { sumDiff += Math.pow(((it.offset - mediana).toDouble()), square) }
+        ntpResponses.forEach { sumDiff += Math.pow(((it.offset - median).toDouble()), square) }
         return Math.sqrt(sumDiff / ntpResponses.size)
     }
 
@@ -119,7 +119,6 @@ class ClockSynchronizer(
         val result = mutableListOf<TimeInfo>()
         do {
             try {
-                log.debug("Ask ${nearestNtpServer!!.hostName} server")
                 info = ntpClient.getTime(nearestNtpServer)
                 info.computeDetails()
                 message = info.message
@@ -127,6 +126,7 @@ class ClockSynchronizer(
                 result.add(info)
                 tryQuiz = result.size < 7
             } catch (e: SocketTimeoutException) {
+                Thread.sleep(1000)
                 tryQuiz = ++attempt < 6
                 log.debug("Ntp server ${nearestNtpServer!!.hostName} answers too long")
             } finally {
@@ -160,13 +160,10 @@ class ClockSynchronizer(
         lock.writeLock().lock()
         try {
             clock.adjust(offset)
-
             log.debug("CLOCK: Effective offset $offset")
-
             if (SYNCHRONIZED != status) {
                 status = SYNCHRONIZED
             }
-
         } finally {
             lock.writeLock().unlock()
         }

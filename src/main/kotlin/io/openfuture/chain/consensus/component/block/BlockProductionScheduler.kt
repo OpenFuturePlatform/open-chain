@@ -41,7 +41,7 @@ class BlockProductionScheduler(
     private fun proceedProductionLoop() {
         try {
             if (SYNCHRONIZED != clockSynchronizer.getStatus()) {
-                log.debug("----------------Clock is ${clockSynchronizer.getStatus()}----------------")
+                log.debug("Clock is ${clockSynchronizer.getStatus()}")
                 if (!clockSynchronizer.isSyncByNtp()) {
                     log.warn("The clock on this computer is not synchronized! Please set up synchronization by the ntp servers")
                 }
@@ -49,7 +49,7 @@ class BlockProductionScheduler(
             }
 
             if (SYNCHRONIZED != chainSynchronizer.getStatus()) {
-                log.debug("----------------Ledger is ${chainSynchronizer.getStatus()}----------------")
+                log.debug("Ledger is ${chainSynchronizer.getStatus()}")
                 chainSynchronizer.sync()
                 return
             }
@@ -59,6 +59,7 @@ class BlockProductionScheduler(
             if (genesisBlockService.isGenesisBlockRequired()) {
                 val genesisBlock = genesisBlockService.create()
                 genesisBlockService.add(genesisBlock)
+                log.debug("CONSENSUS: Saving genesis block with hash = ${genesisBlock.hash}")
                 pendingBlockHandler.resetSlotNumber()
             } else if (keyHolder.getPublicKeyAsHexString() == slotOwner.publicKey) {
                 val block = mainBlockService.create()

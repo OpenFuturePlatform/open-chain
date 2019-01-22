@@ -13,9 +13,12 @@ import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.SignatureUtils
+import io.openfuture.chain.network.handler.sync.EpochResponseHandler
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,6 +32,10 @@ class DefaultGenesisBlockService(
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository
 ) : BaseBlockService<GenesisBlock>(genesisBlockRepository, blockService, walletService, delegateService), GenesisBlockService {
+
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(EpochResponseHandler::class.java)
+    }
 
     @Transactional(readOnly = true)
     override fun getPreviousByHeight(height: Long): GenesisBlock = repository.findFirstByHeightLessThanOrderByHeightDesc(height)
@@ -112,9 +119,12 @@ class DefaultGenesisBlockService(
     }
 
     private fun createPayload(): GenesisBlockPayload {
+        val firstGenesisBlock = genesisBlockRepository.findOneByPayloadEpochIndex(1)!!
+        val genesisDelegates = firstGenesisBlock.payload.activeDelegates
         val epochIndex = getLast().payload.epochIndex + 1
-        val delegates = delegateService.getActiveDelegates().toMutableList()
-        return GenesisBlockPayload(epochIndex, delegates)
+        val delegates = delegateService.getActiveDelegates().toMutableSet()
+        delegates.addAll(genesisDelegates)
+        return GenesisBlockPayload(epochIndex, delegates.toMutableList())
     }
 
 }

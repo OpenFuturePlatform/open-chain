@@ -91,6 +91,11 @@ internal class DefaultVoteTransactionService(
     }
 
     @Transactional
+    override fun toBlock(transaction: VoteTransaction, block: MainBlock): VoteTransaction {
+        return toBlock(transaction.toMessage(), block)
+    }
+
+    @Transactional
     override fun toBlock(message: VoteTransactionMessage, block: MainBlock): VoteTransaction {
         BlockchainLock.writeLock.lock()
         try {
