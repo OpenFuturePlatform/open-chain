@@ -7,7 +7,6 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.message.network.NewClient
-import io.openfuture.chain.network.service.ConnectionService
 import org.springframework.stereotype.Component
 
 @Component
