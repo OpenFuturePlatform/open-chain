@@ -1,7 +1,7 @@
 CREATE TABLE blocks (
   id            BIGINT AUTO_INCREMENT PRIMARY KEY,
   timestamp     BIGINT  NOT NULL,
-  height        BIGINT  NOT NULL,
+  height        BIGINT  NOT NULL UNIQUE,
   previous_hash VARCHAR NOT NULL,
   hash          VARCHAR NOT NULL UNIQUE,
   signature     VARCHAR NOT NULL,
