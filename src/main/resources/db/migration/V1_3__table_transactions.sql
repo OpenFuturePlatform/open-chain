@@ -35,12 +35,18 @@ CREATE HASH INDEX reward_transactions_recipient_address
 --
 CREATE TABLE delegate_transactions (
   id            BIGINT PRIMARY KEY REFERENCES transactions,
-  node_id       VARCHAR NOT NULL UNIQUE,
-  delegate_key  VARCHAR NOT NULL UNIQUE,
+  node_id       VARCHAR NOT NULL,
+  delegate_key  VARCHAR NOT NULL,
   delegate_host VARCHAR NOT NULL,
   delegate_port INTEGER NOT NULL,
   amount        BIGINT  NOT NULL
 );
+--
+CREATE UNIQUE HASH INDEX delegate_transactions_node_id
+  ON delegate_transactions (node_id);
+--
+CREATE UNIQUE HASH INDEX delegate_transactions_delegate_key
+  ON delegate_transactions (delegate_key);
 --
 CREATE TABLE vote_types (
   id  INTEGER AUTO_INCREMENT PRIMARY KEY HASH,
@@ -89,12 +95,18 @@ CREATE MEMORY TABLE u_transfer_transactions (
 --
 CREATE MEMORY TABLE u_delegate_transactions (
   id            BIGINT PRIMARY KEY REFERENCES u_transactions,
-  node_id       VARCHAR NOT NULL UNIQUE,
-  delegate_key  VARCHAR NOT NULL UNIQUE,
+  node_id       VARCHAR NOT NULL,
+  delegate_key  VARCHAR NOT NULL,
   delegate_host VARCHAR NOT NULL,
   delegate_port INTEGER NOT NULL,
   amount        BIGINT  NOT NULL
 );
+--
+CREATE UNIQUE HASH INDEX u_delegate_transactions_node_id
+  ON u_delegate_transactions (node_id);
+--
+CREATE UNIQUE HASH INDEX u_delegate_transactions_delegate_key
+  ON u_delegate_transactions (delegate_key);
 --
 CREATE MEMORY TABLE u_vote_transactions (
   id           BIGINT PRIMARY KEY REFERENCES u_transactions,
