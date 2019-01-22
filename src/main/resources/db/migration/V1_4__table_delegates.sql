@@ -1,17 +1,17 @@
 CREATE TABLE delegates (
-  id                BIGINT AUTO_INCREMENT PRIMARY KEY,
-  public_key        VARCHAR NOT NULL UNIQUE,
-  node_id           VARCHAR NOT NULL UNIQUE,
+  id                BIGINT AUTO_INCREMENT PRIMARY KEY HASH,
+  public_key        VARCHAR NOT NULL,
+  node_id           VARCHAR NOT NULL,
   address           VARCHAR NOT NULL,
   host              VARCHAR NOT NULL,
   port              INTEGER NOT NULL,
   registration_date BIGINT  NOT NULL
 );
 --
-CREATE HASH INDEX delegates_public_key
+CREATE UNIQUE HASH INDEX delegates_public_key
   ON delegates (public_key);
 --
-CREATE HASH INDEX delegates_node_id
+CREATE UNIQUE HASH INDEX delegates_node_id
   ON delegates (node_id);
 --
 CREATE TABLE delegate2genesis (

@@ -1,5 +1,5 @@
 CREATE TABLE transactions (
-  id               BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id               BIGINT AUTO_INCREMENT PRIMARY KEY HASH,
   timestamp        BIGINT  NOT NULL,
   fee              BIGINT  NOT NULL,
   sender_address   VARCHAR NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE delegate_transactions (
 );
 --
 CREATE TABLE vote_types (
-  id  INTEGER AUTO_INCREMENT PRIMARY KEY,
+  id  INTEGER AUTO_INCREMENT PRIMARY KEY HASH,
   key VARCHAR NOT NULL UNIQUE
 );
 
@@ -63,14 +63,18 @@ CREATE HASH INDEX vote_transactions_node_id
 
 -- UNCONFIRMED TABLES
 CREATE MEMORY TABLE u_transactions (
-  id               BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id               BIGINT AUTO_INCREMENT PRIMARY KEY HASH,
   timestamp        BIGINT  NOT NULL,
   fee              BIGINT  NOT NULL,
   sender_address   VARCHAR NOT NULL,
-  hash             VARCHAR NOT NULL UNIQUE,
+  hash             VARCHAR NOT NULL,
   sender_signature VARCHAR NOT NULL,
   sender_key       VARCHAR NOT NULL
 );
+--
+CREATE UNIQUE HASH INDEX u_transactions_hash
+  ON u_transactions (hash);
+--
 CREATE HASH INDEX u_transactions_sender_address
   ON u_transactions (sender_address);
 --
