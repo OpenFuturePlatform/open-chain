@@ -7,14 +7,17 @@ import org.apache.commons.net.ntp.NTPUDPClient
 import org.apache.commons.net.ntp.NtpV3Packet
 import org.apache.commons.net.ntp.TimeInfo
 import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 import java.math.MathContext
 import java.net.InetAddress
 import java.net.SocketTimeoutException
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReadWriteLock
 import java.util.concurrent.locks.ReentrantReadWriteLock
+import javax.annotation.PostConstruct
 
 @Component
 class ClockSynchronizer(
@@ -29,29 +32,31 @@ class ClockSynchronizer(
 
 
     private val percentThreshold = 5.0f
+    private val ntpInetAddresses = properties.ntpServers.map { InetAddress.getByName(it) }
+    private val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
+    private val lock: ReadWriteLock = ReentrantReadWriteLock()
+
     private var lastOffset = 0L
     private var ntpSynced: Boolean = true
     private var nextQuizTime: Long? = null
     private var nearestNtpServer: InetAddress? = null
-    private val ntpInetAddresses = properties.ntpServers.map { InetAddress.getByName(it) }
-    private val lock: ReadWriteLock = ReentrantReadWriteLock()
+    private var nextSyncTime: Long = 0
 
     @Volatile
     private var status: SyncStatus = NOT_SYNCHRONIZED
 
-    @Scheduled(fixedDelayString = "\${node.time-sync-interval}")
-    fun sync() {
+    @PostConstruct
+    fun init() {
+        executor.schedule({ sync() }, nextSyncTime, TimeUnit.MILLISECONDS)
+    }
+
+    private fun sync() {
         lock.writeLock().lock()
         try {
-            if (PROCESSING == status) {
-                log.debug("Clock synchronization in PROCESSING")
-                return
-            }
-
             if (SYNCHRONIZED != status) {
                 status = PROCESSING
             }
-
+            log.debug("Clock synchronization in PROCESSING")
             if (nextQuizTime == null || clock.currentTimeMillis() > nextQuizTime!!) {
                 nextQuizTime = clock.currentTimeMillis().plus(properties.nextNtpServerInterval!!)
 
@@ -59,8 +64,7 @@ class ClockSynchronizer(
                 val nearestNtp = quizResult.minBy { it.value.delay }
 
                 if (nearestNtp == null) {
-                    status = NOT_SYNCHRONIZED
-                    nextQuizTime = null
+                    setNotSync()
                     return
                 }
 
@@ -76,6 +80,7 @@ class ClockSynchronizer(
             }
             mitigate(lastOffset)
         } finally {
+            executor.schedule({ sync() }, nextSyncTime, TimeUnit.MILLISECONDS)
             lock.writeLock().unlock()
         }
     }
@@ -89,6 +94,12 @@ class ClockSynchronizer(
         } finally {
             lock.readLock().unlock()
         }
+    }
+
+    private fun setNotSync() {
+        nextQuizTime = null
+        status = NOT_SYNCHRONIZED
+        nextSyncTime = properties.timeFailedSyncInterval!!
     }
 
     private fun getPrecision(rawPrecision: Int): Float =
@@ -108,17 +119,15 @@ class ClockSynchronizer(
     private fun getOffset(nearestNtpServer: InetAddress?): Long? {
         val result = syncByNearestNtpServer(nearestNtpServer)
         if (result.size < 2) {
-            nextQuizTime = null
-            status = NOT_SYNCHRONIZED
+            setNotSync()
             return null
         }
         val minOffset = result.minBy { Math.abs(it.offset) }!!.offset
 
         if (getDeviation(lastOffset, result) > percentThreshold) {
-            status = NOT_SYNCHRONIZED
+            setNotSync()
             if (Math.abs(minOffset) > properties.ntpOffsetThreshold!!) {
                 ntpSynced = false
-                nextQuizTime = null
             }
             return null
         }
@@ -129,11 +138,12 @@ class ClockSynchronizer(
     private fun syncByNearestNtpServer(nearestNtpServer: InetAddress?): MutableList<TimeInfo> {
         val requiredResponses = 6
         val maxAttempts = 6
+        val result = mutableListOf<TimeInfo>()
+
         var info: TimeInfo?
         var tryQuiz: Boolean
         var attempt = 0
         var message: NtpV3Packet
-        val result = mutableListOf<TimeInfo>()
         log.debug("Start send request to ${nearestNtpServer!!.hostName}")
         do {
             try {
@@ -143,7 +153,7 @@ class ClockSynchronizer(
                 message = info.message
                 log.debug("Ntp stratum = ${message.stratum}, precision = ${getPrecision(message.precision)} ms, delay = ${info.delay}, offset = ${info.offset} ")
                 result.add(info)
-                tryQuiz = result.size == requiredResponses
+                tryQuiz = result.size < requiredResponses
             } catch (e: SocketTimeoutException) {
                 tryQuiz = ++attempt < maxAttempts
                 log.debug("Ntp server ${nearestNtpServer.hostName} answers too long")
@@ -156,6 +166,7 @@ class ClockSynchronizer(
 
     private fun startNtpQuiz(ntpInetAddresses: List<InetAddress>): MutableMap<InetAddress, TimeInfo> {
         val quizResult = mutableMapOf<InetAddress, TimeInfo>()
+
         var info: TimeInfo
         var message: NtpV3Packet
         for (address in ntpInetAddresses) {
@@ -182,6 +193,7 @@ class ClockSynchronizer(
             if (SYNCHRONIZED != status) {
                 status = SYNCHRONIZED
             }
+            nextSyncTime = properties.timeSyncInterval!!
         } finally {
             lock.writeLock().unlock()
         }

@@ -60,11 +60,12 @@ class NodeProperties(
     @field:NotNull
     var explorerInterval: Long? = null,
 
-    /** Interval for synchronization blocks in milliseconds */
+    /** Interval for failed time synchronization. Min value 60000 millis*/
+    @field:Min(60 * 1000)
     @field:NotNull
-    var syncInterval: Long? = null,
+    var timeFailedSyncInterval: Long? = null,
 
-    /** Interval for time synchronization in milliseconds. Min value 60000 millis*/
+    /** Interval for time synchronization in milliseconds. Min value 15000 millis*/
     @field:Min(15 * 1000)
     @field:NotNull
     var timeSyncInterval: Long? = null,
