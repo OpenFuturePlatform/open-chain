@@ -1,6 +1,6 @@
 package io.openfuture.chain.rpc.domain.vote
 
-data class VotesResponse(
+data class VoteResponse(
     val address: String,
     val delegateKey: String,
     val rating: Long,

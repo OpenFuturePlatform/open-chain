@@ -14,6 +14,7 @@ CREATE TABLE delegate_states (
 
 --
 CREATE TABLE wallet_states (
-  id      BIGINT PRIMARY KEY REFERENCES states,
-  balance BIGINT NOT NULL,
+  id       BIGINT PRIMARY KEY REFERENCES states,
+  balance  BIGINT NOT NULL,
+  vote_for VARCHAR,
 );

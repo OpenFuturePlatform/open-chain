@@ -1,11 +1,9 @@
 package io.openfuture.chain.core.service
 
 import io.openfuture.chain.core.model.entity.Delegate
-import io.openfuture.chain.core.model.entity.WalletVote
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.state.WalletState
@@ -243,9 +241,9 @@ interface DelegateStateService : StateService<DelegateState> {
 
     fun getActiveDelegates(): List<DelegateState>
 
-    fun addDelegate(publicKey: String)
+    fun addDelegate(delegateKey: String): DelegateStateMessage
 
-    fun updateRating(message: VoteTransactionMessage)
+    fun updateRating(delegateKey: String, amount: Long): DelegateStateMessage
 
     fun toBlock(message: DelegateStateMessage, block: MainBlock)
 
@@ -257,18 +255,12 @@ interface WalletStateService : StateService<WalletState> {
 
     fun getActualBalanceByAddress(address: String): Long
 
-    fun updateBalanceByAddress(address: String, amount: Long)
+    fun getVotesForDelegate(delegateKey: String): List<WalletState>
+
+    fun updateBalanceByAddress(address: String, amount: Long): WalletStateMessage
+
+    fun updateVoteByAddress(address: String, delegateKey: String?): WalletStateMessage
 
     fun toBlock(message: WalletStateMessage, block: MainBlock)
-
-}
-
-interface WalletVoteService {
-
-    fun getVotesByAddress(address: String): List<WalletVote>
-
-    fun getVotesForDelegate(delegateKey: String): List<WalletVote>
-
-    fun updateVoteByAddress(address: String, delegateKey: String, type: VoteType)
 
 }

@@ -10,7 +10,7 @@ import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.GenesisBlockService
-import io.openfuture.chain.core.service.WalletVoteService
+import io.openfuture.chain.core.service.WalletStateService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -31,7 +31,7 @@ class DelegateControllerTests : ControllerTests() {
     private lateinit var delegateStateService: DelegateStateService
 
     @MockBean
-    private lateinit var  walletVoteService: WalletVoteService
+    private lateinit var walletStateService: WalletStateService
 
     @MockBean
     private lateinit var genesisBlockService: GenesisBlockService
@@ -39,10 +39,10 @@ class DelegateControllerTests : ControllerTests() {
 
     @Test
     fun getAllShouldReturnDelegatesListTest() {
-        val delegate = Delegate("publicKey", "address",  1)
+        val delegate = Delegate("publicKey", "address", 1)
         val block = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
             MainBlockPayload("merkleHash", "stateHash"))
-        val delegates = listOf(DelegateState("publicKey", block,  1))
+        val delegates = listOf(DelegateState("publicKey", block, 1))
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
 
         given(delegateStateService.getAllDelegates(PageRequest())).willReturn(delegates)
@@ -62,7 +62,7 @@ class DelegateControllerTests : ControllerTests() {
     @Test
     fun getAllActiveShouldReturnActiveDelegatesListTest() {
         val publicKey = "publicKey"
-        val delegate = Delegate(publicKey, "address",  1)
+        val delegate = Delegate(publicKey, "address", 1)
         val genesisBlock = GenesisBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
             GenesisBlockPayload(1, mutableListOf(publicKey)))
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))

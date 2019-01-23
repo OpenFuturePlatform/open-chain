@@ -11,6 +11,8 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload.Companion.calculateMerkleRoot
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
+import io.openfuture.chain.core.model.entity.dictionary.VoteType.AGAINST
+import io.openfuture.chain.core.model.entity.dictionary.VoteType.FOR
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -46,7 +48,6 @@ class DefaultMainBlockService(
     private val throughput: TransactionThroughput,
     private val walletStateService: WalletStateService,
     private val delegateStateService: DelegateStateService,
-    private val walletVoteService: WalletVoteService,
     private val statePool: StatePool,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository,
@@ -262,18 +263,19 @@ class DefaultMainBlockService(
         }
 
         val validVotes = transactions.groupBy { it.senderAddress }.entries.all { sender ->
-            val persistVotes = walletVoteService.getVotesByAddress(sender.key)
-            val pendingVotes = sender.value.asSequence()
-                .filter { VoteType.FOR.getId() == it.voteTypeId }
-                .map { it.delegateKey }.toList()
+            if (sender.value.size != 1) {
+                return false
+            }
 
-            val hasDuplicates = pendingVotes.intersect(persistVotes).isNotEmpty()
-            !hasDuplicates && consensusProperties.delegatesCount!! >= persistVotes.size + pendingVotes.size
+            val persistVote = walletStateService.getLastByAddress(sender.key)
+            val vote = sender.value.first()
+            return when (VoteType.getById(vote.voteTypeId)) {
+                FOR -> persistVote?.voteFor == null
+                AGAINST -> persistVote?.voteFor != null && vote.delegateKey == persistVote.voteFor
+            }
         }
 
-        val existDelegates = delegateService.isExistsByPublicKeys(transactions.map { it.delegateKey })
-
-        return transactions.all { voteTransactionService.verify(it) } && validVotes && existDelegates
+        return validVotes && transactions.all { voteTransactionService.verify(it) }
     }
 
     private fun isValidDelegateTransactions(transactions: List<DelegateTransactionMessage>): Boolean {

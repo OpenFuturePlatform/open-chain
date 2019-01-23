@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultWalletStateService(
     private val repository: WalletStateRepository,
     private val statePool: StatePool,
+    private val delegateStateService: DefaultDelegateStateService,
     private val unconfirmedTransactionRepository: UTransactionRepository<UnconfirmedTransaction>
 ) : BaseStateService<WalletState>(repository), WalletStateService {
 
@@ -46,9 +47,24 @@ class DefaultWalletStateService(
         }
     }
 
-    override fun updateBalanceByAddress(address: String, amount: Long) {
-        val newState = WalletStateMessage(address, getCurrentState(address).balance + amount)
-        statePool.update(newState)
+    override fun getVotesForDelegate(delegateKey: String): List<WalletState> = repository.findAllByVoteFor(delegateKey)
+
+    override fun updateBalanceByAddress(address: String, amount: Long): WalletStateMessage {
+        val walletState = getCurrentState(address)
+
+        if (null != walletState.voteFor) {
+            delegateStateService.updateRating(walletState.voteFor!!, amount)
+        }
+
+        val newWalletState = WalletStateMessage(address, walletState.balance + amount)
+        statePool.update(newWalletState)
+        return newWalletState
+    }
+
+    override fun updateVoteByAddress(address: String, delegateKey: String?): WalletStateMessage {
+        val newWalletState = WalletStateMessage(address, getCurrentState(address).balance, delegateKey)
+        statePool.update(newWalletState)
+        return newWalletState
     }
 
     private fun getUnconfirmedBalance(address: String): Long =
