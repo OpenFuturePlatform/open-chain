@@ -82,28 +82,23 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun toBlock(transaction: TransferTransaction, block: MainBlock): TransferTransaction {
-        return toBlock(transaction.toMessage(), block)
-    }
-
-    @Transactional
-    override fun toBlock(message: TransferTransactionMessage, block: MainBlock): TransferTransaction {
+    override fun commit(transaction: TransferTransaction): TransferTransaction {
         BlockchainLock.writeLock.lock()
         try {
-            val tx = repository.findOneByFooterHash(message.hash)
+            val tx = repository.findOneByFooterHash(transaction.footer.hash)
             if (null != tx) {
                 return tx
             }
 
-            walletService.increaseBalance(message.recipientAddress, message.amount)
-            walletService.decreaseBalance(message.senderAddress, message.amount + message.fee)
+            walletService.increaseBalance(transaction.payload.recipientAddress, transaction.payload.amount)
+            walletService.decreaseBalance(transaction.header.senderAddress, transaction.payload.amount + transaction.header.fee)
 
-            val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
+            val utx = unconfirmedRepository.findOneByFooterHash(transaction.footer.hash)
             if (null != utx) {
-                return confirm(utx, TransferTransaction.of(utx, block))
+                return confirm(utx, transaction)
             }
 
-            return save(TransferTransaction.of(message, block))
+            return save(transaction)
         } finally {
             BlockchainLock.writeLock.unlock()
         }
