@@ -44,11 +44,11 @@ class ChainSynchronizer(
     private val transferTransactionService: TransferTransactionService
 ) {
 
-    private var future: ScheduledFuture<*>? = null
-
     companion object {
         private val log: Logger = LoggerFactory.getLogger(ChainSynchronizer::class.java)
     }
+
+    private var future: ScheduledFuture<*>? = null
 
     @Volatile
     private var status: SyncStatus = SYNCHRONIZED
@@ -57,25 +57,6 @@ class ChainSynchronizer(
 
 
     fun getStatus(): SyncStatus = status
-
-    fun onGenesisBlockResponse(message: GenesisBlockMessage) {
-        future?.cancel(true)
-        val nodesInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
-        try {
-            val currentGenesisBlock = GenesisBlock.of(message)
-            val lastLocalGenesisBlock = genesisBlockService.getLast()
-
-            if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
-                syncSession = SyncSession(properties.syncMode!!, lastLocalGenesisBlock, currentGenesisBlock)
-                requestEpoch(nodesInfo)
-            } else {
-                requestLatestGenesisBlock()
-            }
-        } catch (e: Throwable) {
-            log.error(e.message)
-            syncFailed()
-        }
-    }
 
     fun onEpochResponse(message: EpochResponseMessage) {
         future?.cancel(true)
@@ -125,7 +106,7 @@ class ChainSynchronizer(
             return
         }
         status = PROCESSING
-        val block = blockService.getLast()
+        val block = genesisBlockService.getLast()
         checkBlock(block)
         future = requestRetryScheduler.startRequestScheduler(future, Runnable { checkBlock(block) })
     }
@@ -134,7 +115,7 @@ class ChainSynchronizer(
         future?.cancel(true)
         if (-1L == response.height) {
             val invalidGenesisBlock = genesisBlockService.getLast()
-            log.info("Rolling back epoch # ${invalidGenesisBlock.payload.epochIndex}")
+            log.info("Rolling back epoch #${invalidGenesisBlock.payload.epochIndex}")
             blockService.removeEpoch(invalidGenesisBlock)
             val lastGenesisBlock = genesisBlockService.getLast()
             val requestedBlock = if (1L == lastGenesisBlock.height) {
@@ -145,7 +126,26 @@ class ChainSynchronizer(
             checkBlock(requestedBlock)
             future = requestRetryScheduler.startRequestScheduler(future, Runnable { checkBlock(lastGenesisBlock) })
         } else {
-            requestLatestGenesisBlock()
+            val lastGenesisBlock = response.genesisBlock ?: genesisBlockService.getLast().toMessage()
+            initSync(lastGenesisBlock)
+        }
+    }
+
+    private fun initSync(message: GenesisBlockMessage) {
+        val nodesInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
+        try {
+            val currentGenesisBlock = GenesisBlock.of(message)
+            val lastLocalGenesisBlock = genesisBlockService.getLast()
+
+            if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
+                syncSession = SyncSession(properties.syncMode!!, lastLocalGenesisBlock, currentGenesisBlock)
+                requestEpoch(nodesInfo)
+            } else {
+                checkBlock(lastLocalGenesisBlock)
+            }
+        } catch (e: Throwable) {
+            log.error(e.message)
+            syncFailed()
         }
     }
 
@@ -218,14 +218,6 @@ class ChainSynchronizer(
 
     private fun isValidHeight(block: Block, lastBlock: Block): Boolean = block.height == lastBlock.height + 1
 
-    private fun requestLatestGenesisBlock() {
-        val knownActiveDelegates = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
-        val message = SyncRequestMessage()
-
-        networkApiService.sendToAddress(message, knownActiveDelegates.shuffled().first())
-        future = requestRetryScheduler.startRequestScheduler(future, Runnable { expired() })
-    }
-
     private fun requestEpoch(listNodeInfo: List<NodeInfo>) {
         val targetEpoch = if (syncSession!!.isEpochSynced()) {
             syncSession!!.getCurrentGenesisBlock().payload.epochIndex
@@ -274,10 +266,11 @@ class ChainSynchronizer(
     }
 
     private fun expired() {
+        val lastGenesisBlock = genesisBlockService.getLast()
         if (null == syncSession) {
-            requestLatestGenesisBlock()
+            checkBlock(lastGenesisBlock)
         } else {
-            requestEpoch(genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList())
+            requestEpoch(lastGenesisBlock.payload.activeDelegates.map { getNodeInfo(it) }.toList())
         }
     }
 

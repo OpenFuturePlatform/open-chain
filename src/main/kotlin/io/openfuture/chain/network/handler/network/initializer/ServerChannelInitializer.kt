@@ -29,8 +29,6 @@ class ServerChannelInitializer(
     private val greetingHandler: GreetingHandler,
     private val newClientHandler: NewClientHandler,
     private val networkStatusHandler: NetworkStatusHandler,
-    private val syncRequestHandler: SyncRequestHandler,
-    private val syncResponseHandler: SyncResponseHandler,
     private val epochRequestHandler: EpochRequestHandler,
     private val epochResponseHandler: EpochResponseHandler,
     private val syncBlockRequestHandler: SyncBlockRequestHandler,
@@ -62,8 +60,6 @@ class ServerChannelInitializer(
 
             networkStatusHandler,// blocking
             //        sync
-            syncRequestHandler,
-            syncResponseHandler,
             epochRequestHandler,
             epochResponseHandler,
             syncBlockRequestHandler,

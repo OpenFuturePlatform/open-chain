@@ -59,16 +59,15 @@ class DefaultBlockService(
             genesisBlock.height
         }
         val toHeight = fromHeight + properties.epochHeight!!
-        val blocks = repository.findAllByHeightBetween(fromHeight, toHeight)
-        for (block in blocks) {
-            if (block is MainBlock) {
-                val payload = block.payload
-                transactionService.delete(payload.transferTransactions)
-                transactionService.delete(payload.delegateTransactions)
-                transactionService.delete(payload.voteTransactions)
-                transactionService.delete(payload.rewardTransaction)
-            }
+        val blocks = repository.findAllByHeightIn((fromHeight..toHeight).toList())
+        val transactions = blocks.filter { it is MainBlock }.flatMap {
+            it as MainBlock
+            it.payload.delegateTransactions
+                .plus(it.payload.voteTransactions)
+                .plus(it.payload.rewardTransaction)
+                .plus(it.payload.transferTransactions)
         }
+        transactionService.delete(transactions)
         repository.deleteAll(blocks)
     }
 

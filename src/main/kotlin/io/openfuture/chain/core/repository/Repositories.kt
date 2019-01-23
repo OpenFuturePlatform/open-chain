@@ -40,6 +40,8 @@ interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
 
     fun findAllByHeightBetween(beginHeight: Long, endHeight: Long): List<Entity>
 
+    fun findAllByHeightIn(heights: List<Long>): List<Entity>
+
     @Query(value = "Select HEIGHT From BLOCKS Order By HEIGHT Desc Limit 1", nativeQuery = true)
     fun getCurrentHeight(): Long
 
