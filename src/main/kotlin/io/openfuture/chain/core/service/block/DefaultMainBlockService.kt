@@ -189,8 +189,6 @@ class DefaultMainBlockService(
         if (!isValidTransferTransactions(message.transferTransactions)) {
             throw ValidationException("Invalid transfer transactions in block: height #${message.height}, hash ${message.hash}")
         }
-
-
     }
 
     private fun isValidBalances(transactions: List<TransactionMessage>): Boolean =
