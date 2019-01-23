@@ -28,18 +28,16 @@ class ClockSynchronizer(
     }
 
 
+    private val percentThreshold = 5.0
     private var lastOffset = 0L
     private var ntpSynced: Boolean = true
     private var nextQuizTime: Long? = null
-    private val percentThreshold = 5.0
     private var nearestNtpServer: InetAddress? = null
-    private val ntpsInetAddress = properties.ntpServers.map { InetAddress.getByName(it) }
-
+    private val ntpInetAddresses = properties.ntpServers.map { InetAddress.getByName(it) }
     private val lock: ReadWriteLock = ReentrantReadWriteLock()
 
     @Volatile
     private var status: SyncStatus = NOT_SYNCHRONIZED
-
 
     @Scheduled(fixedDelayString = "\${node.time-sync-interval}")
     fun sync() {
@@ -57,16 +55,16 @@ class ClockSynchronizer(
             if (nextQuizTime == null || clock.currentTimeMillis() > nextQuizTime!!) {
                 nextQuizTime = clock.currentTimeMillis().plus(properties.nextNtpServerInterval!!)
 
-                val quizResult = startNtpQuiz(ntpsInetAddress)
-                val minDelay = quizResult.minBy { it.value.delay }
+                val quizResult = startNtpQuiz(ntpInetAddresses)
+                val nearestNtp = quizResult.minBy { it.value.delay }
 
-                if (minDelay == null) {
+                if (nearestNtp == null) {
                     status = NOT_SYNCHRONIZED
                     nextQuizTime = null
                     return
                 }
 
-                nearestNtpServer = minDelay.key
+                nearestNtpServer = nearestNtp.key
                 lastOffset = getOffset(nearestNtpServer) ?: return
             } else {
                 lastOffset = getOffset(nearestNtpServer) ?: return
@@ -109,11 +107,11 @@ class ClockSynchronizer(
             status = NOT_SYNCHRONIZED
             return null
         }
-        val minOffset = result.minBy { Math.abs(it.offset) }?.offset
+        val minOffset = result.minBy { Math.abs(it.offset) }!!.offset
 
-        if (minOffset == null || getDeviation(lastOffset, result) > percentThreshold) {
+        if (getDeviation(lastOffset, result) > percentThreshold) {
             status = NOT_SYNCHRONIZED
-            if (minOffset != null && Math.abs(minOffset) > properties.ntpOffsetThreshold!!) {
+            if (Math.abs(minOffset) > properties.ntpOffsetThreshold!!) {
                 ntpSynced = false
                 nextQuizTime = null
             }
@@ -124,6 +122,8 @@ class ClockSynchronizer(
     }
 
     private fun syncByNearestNtpServer(nearestNtpServer: InetAddress?): MutableList<TimeInfo> {
+        val requiredResponses = 7
+        val maxAttempts = 6
         var info: TimeInfo?
         var tryQuiz: Boolean
         var attempt = 0
@@ -138,9 +138,9 @@ class ClockSynchronizer(
                 message = info.message
                 log.debug("Ntp stratum = ${message.stratum}, precision = ${getPrecision(message.precision)} ms, delay = ${info.delay}, offset = ${info.offset} ")
                 result.add(info)
-                tryQuiz = result.size < 7
+                tryQuiz = result.size == requiredResponses
             } catch (e: SocketTimeoutException) {
-                tryQuiz = ++attempt < 6
+                tryQuiz = ++attempt < maxAttempts
                 log.debug("Ntp server ${nearestNtpServer.hostName} answers too long")
             } finally {
                 ntpClient.close()
@@ -149,11 +149,11 @@ class ClockSynchronizer(
         return result
     }
 
-    private fun startNtpQuiz(ntpsInetAddress: List<InetAddress>): MutableMap<InetAddress, TimeInfo> {
+    private fun startNtpQuiz(ntpInetAddresses: List<InetAddress>): MutableMap<InetAddress, TimeInfo> {
         val quizResult = mutableMapOf<InetAddress, TimeInfo>()
         var info: TimeInfo
         var message: NtpV3Packet
-        for (address in ntpsInetAddress) {
+        for (address in ntpInetAddresses) {
             try {
                 info = ntpClient.getTime(address)
                 info.computeDetails()
