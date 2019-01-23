@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit
 class ServerChannelInitializer(
     private val nodeProperties: NodeProperties,
     private val applicationContext: ApplicationContext,
-    private val cacheHandler: CacheHandler,
     private val connectionHandler: ConnectionHandler,
     private val heartBeatHandler: HeartBeatHandler,
     private val greetingHandler: GreetingHandler,
@@ -31,7 +30,6 @@ class ServerChannelInitializer(
     private val networkStatusHandler: NetworkStatusHandler,
     private val epochRequestHandler: EpochRequestHandler,
     private val epochResponseHandler: EpochResponseHandler,
-    private val syncBlockRequestHandler: SyncBlockRequestHandler,
     private val mainBlockHandler: MainBlockHandler,
     private val genesisBlockHandler: GenesisBlockHandler,
     private val syncStatusHandler: SyncStatusHandler,
@@ -62,7 +60,6 @@ class ServerChannelInitializer(
             //        sync
             epochRequestHandler,
             epochResponseHandler,
-            syncBlockRequestHandler,
             mainBlockHandler,
             genesisBlockHandler,
             blockAvailabilityResponseHandler,

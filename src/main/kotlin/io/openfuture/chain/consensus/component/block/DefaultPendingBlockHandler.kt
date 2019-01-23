@@ -64,12 +64,6 @@ class DefaultPendingBlockHandler(
         }
 
         if (!chainSynchronizer.isInSync(MainBlock.of(block))) {
-            chainSynchronizer.checkLastBlock()
-            return
-        }
-
-
-        if (!mainBlockService.verify(block)) {
             return
         }
 
@@ -111,10 +105,14 @@ class DefaultPendingBlockHandler(
             prepareVotes[message.publicKey] = delegate
             networkService.broadcast(message)
             if (prepareVotes.size > (properties.delegatesCount!! - 1) / 3) {
-                this.stage = COMMIT
-                val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKeyAsHexString())
-                commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())
-                networkService.broadcast(commit)
+                pendingBlocks.find { it.hash == message.hash }?.let {
+                    if (mainBlockService.verify(it)) {
+                        this.stage = COMMIT
+                        val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKeyAsHexString())
+                        commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())
+                        networkService.broadcast(commit)
+                    }
+                }
             }
         }
     }
