@@ -91,7 +91,7 @@ class NodeProperties(
     @field:NotNull
     var syncMode: SyncMode? = null,
 
-    /** Time value for choosing next ntp server, which equals 24 hours*/
+    /** Time value for choosing next ntp server, which equals 4 hours*/
     @field:NotNull
     var nextNtpServerInterval: Long? = null,
 
