@@ -167,7 +167,7 @@ internal class DefaultVoteTransactionService(
     private fun isAlreadyVoted(senderAddress: String): Boolean {
         val unconfirmedVote = unconfirmedRepository.findAllByHeaderSenderAddress(senderAddress)
         if (unconfirmedVote.isNotEmpty()) {
-            return false
+            return true
         }
 
         return walletStateService.getLastByAddress(senderAddress)?.voteFor != null
