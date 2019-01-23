@@ -127,7 +127,7 @@ class ClockSynchronizer(
     }
 
     private fun syncByNearestNtpServer(nearestNtpServer: InetAddress?): MutableList<TimeInfo> {
-        val requiredResponses = 7
+        val requiredResponses = 6
         val maxAttempts = 6
         var info: TimeInfo?
         var tryQuiz: Boolean
