@@ -23,6 +23,8 @@ class SyncSession(
 
     fun getCurrentGenesisBlock(): GenesisBlock = currentGenesisBlock
 
+    fun getLastLocalGenesisBlock() = lastLocalGenesisBlock
+
     init {
         storage.add(currentGenesisBlock)
     }

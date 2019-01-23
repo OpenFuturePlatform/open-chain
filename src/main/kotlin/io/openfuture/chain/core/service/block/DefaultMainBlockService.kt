@@ -149,7 +149,7 @@ class DefaultMainBlockService(
             }
 
             throughput.updateThroughput(message.getAllTransactions().size, savedBlock.height)
-            log.debug("CONSENSUS: Saving main block with hash = ${block.hash}")
+            log.debug("CONSENSUS: Saving main block: height #${block.height}, hash ${block.hash}")
         } finally {
             BlockchainLock.writeLock.unlock()
         }
@@ -167,7 +167,7 @@ class DefaultMainBlockService(
         super.validateBase(MainBlock.of(message))
 
         if (!isValidMerkleHash(message.merkleHash, message.getAllTransactions().map { it.hash })) {
-            throw ValidationException("Invalid merkle hash: ${message.merkleHash}")
+            throw ValidationException("Invalid merkle hash in block: height #${message.height}, hash ${message.hash}")
         }
 
         if (!isValidBalances(message.getExternalTransactions())) {
@@ -175,19 +175,19 @@ class DefaultMainBlockService(
         }
 
         if (!isValidRewardTransaction(message)) {
-            throw ValidationException("Invalid reward transaction")
+            throw ValidationException("Invalid reward transaction in block: height #${message.height}, hash ${message.hash}")
         }
 
         if (!isValidVoteTransactions(message.voteTransactions)) {
-            throw ValidationException("Invalid vote transactions")
+            throw ValidationException("Invalid vote transactions in block: height #${message.height}, hash ${message.hash}")
         }
 
         if (!isValidDelegateTransactions(message.delegateTransactions)) {
-            throw ValidationException("Invalid delegate transactions")
+            throw ValidationException("Invalid delegate transactions in block: height #${message.height}, hash ${message.hash}")
         }
 
         if (!isValidTransferTransactions(message.transferTransactions)) {
-            throw ValidationException("Invalid transfer transactions")
+            throw ValidationException("Invalid transfer transactions in block: height #${message.height}, hash ${message.hash}")
         }
 
 
