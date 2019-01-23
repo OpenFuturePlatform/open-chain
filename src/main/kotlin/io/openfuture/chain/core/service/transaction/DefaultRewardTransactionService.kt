@@ -61,20 +61,15 @@ class DefaultRewardTransactionService(
     }
 
     @Transactional
-    override fun toBlock(transaction: RewardTransaction, block: MainBlock) {
-        return toBlock(transaction.toMessage(), block)
-    }
-
-    @Transactional
-    override fun toBlock(message: RewardTransactionMessage, block: MainBlock) {
+    override fun commit(transaction: RewardTransaction) {
         BlockchainLock.writeLock.lock()
         try {
-            val transaction = repository.findOneByFooterHash(message.hash)
-            if (null != transaction) {
+            val persistedTransaction = repository.findOneByFooterHash(transaction.footer.hash)
+            if (null != persistedTransaction) {
                 return
             }
 
-            repository.save(RewardTransaction.of(message, block))
+            repository.save(transaction)
         } finally {
             BlockchainLock.writeLock.unlock()
         }

@@ -7,7 +7,6 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType
 import io.openfuture.chain.core.exception.model.ExceptionType.*
-import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
@@ -93,25 +92,20 @@ internal class DefaultVoteTransactionService(
     }
 
     @Transactional
-    override fun toBlock(transaction: VoteTransaction, block: MainBlock): VoteTransaction {
-        return toBlock(transaction.toMessage(), block)
-    }
-
-    @Transactional
-    override fun toBlock(message: VoteTransactionMessage, block: MainBlock): VoteTransaction {
+    override fun commit(transaction: VoteTransaction): VoteTransaction {
         BlockchainLock.writeLock.lock()
         try {
-            val tx = repository.findOneByFooterHash(message.hash)
+            val tx = repository.findOneByFooterHash(transaction.footer.hash)
             if (null != tx) {
                 return tx
             }
 
             val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
             if (null != utx) {
-                return confirm(utx, VoteTransaction.of(utx, block))
+                return confirm(utx, transaction)
             }
 
-            return this.save(VoteTransaction.of(message, block))
+            return this.save(transaction)
         } finally {
             BlockchainLock.writeLock.unlock()
         }

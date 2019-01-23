@@ -89,14 +89,15 @@ class DefaultBlockService(
                 block.payload.walletStates = mutableListOf()
 
                 this.save(block)
-                rewardTransactionService.toBlock(rewardTransaction, block)
+                rewardTransactionService.commit(rewardTransaction)
 
                 if (syncMode == SyncMode.FULL) {
                     transactions.forEach {
+                        it.block = block
                         when (it) {
-                            is TransferTransaction -> transferTransactionService.toBlock(it, block)
-                            is DelegateTransaction -> delegateTransactionService.toBlock(it, block)
-                            is VoteTransaction -> voteTransactionService.toBlock(it, block)
+                            is TransferTransaction -> transferTransactionService.commit(it)
+                            is DelegateTransaction -> delegateTransactionService.commit(it)
+                            is VoteTransaction -> voteTransactionService.commit(it)
                             else -> throw IllegalStateException("The type doesn`t handle")
                         }
                     }

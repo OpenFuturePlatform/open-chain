@@ -8,7 +8,6 @@ import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType
 import io.openfuture.chain.core.exception.model.ExceptionType.ALREADY_DELEGATE
 import io.openfuture.chain.core.model.entity.Delegate
-import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.repository.DelegateTransactionRepository
@@ -79,25 +78,20 @@ class DefaultDelegateTransactionService(
     }
 
     @Transactional
-    override fun toBlock(transaction: DelegateTransaction, block: MainBlock): DelegateTransaction {
-        return toBlock(transaction.toMessage(), block)
-    }
-
-    @Transactional
-    override fun toBlock(message: DelegateTransactionMessage, block: MainBlock): DelegateTransaction {
+    override fun commit(transaction: DelegateTransaction): DelegateTransaction {
         BlockchainLock.writeLock.lock()
         try {
-            val tx = repository.findOneByFooterHash(message.hash)
+            val tx = repository.findOneByFooterHash(transaction.footer.hash)
             if (null != tx) {
                 return tx
             }
 
-            val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
+            val utx = unconfirmedRepository.findOneByFooterHash(transaction.footer.hash)
             if (null != utx) {
-                return confirm(utx, DelegateTransaction.of(utx, block))
+                return confirm(utx, transaction)
             }
 
-            return this.save(DelegateTransaction.of(message, block))
+            return this.save(transaction)
         } finally {
             BlockchainLock.writeLock.unlock()
         }
