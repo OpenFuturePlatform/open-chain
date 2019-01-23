@@ -40,7 +40,7 @@ interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
 
     fun findAllByHeightBetween(beginHeight: Long, endHeight: Long): List<Entity>
 
-    fun findAllByHeightIn(heights: List<Long>): List<Entity>
+    fun deleteAllByHeightIn(heights: List<Long>): List<Entity>
 
     @Query(value = "Select HEIGHT From BLOCKS Order By HEIGHT Desc Limit 1", nativeQuery = true)
     fun getCurrentHeight(): Long
@@ -61,6 +61,8 @@ interface GenesisBlockRepository : BlockRepository<GenesisBlock> {
 interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 
     fun findOneByFooterHash(hash: String): Entity?
+
+    fun deleteAllByBlockHeightIn(heights: List<Long>)
 
 }
 

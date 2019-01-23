@@ -26,8 +26,8 @@ class DefaultTransactionService(
 
     override fun getProducingPerSecond(): Long = throughput.getThroughput()
 
-    override fun delete(transactions: Collection<Transaction>) {
-        repository.deleteAll(transactions)
+    override fun deleteBlockTransactions(blockHeights: List<Long>) {
+        repository.deleteAllByBlockHeightIn(blockHeights)
         repository.flush()
     }
 

@@ -120,7 +120,7 @@ interface TransactionService {
 
     fun getProducingPerSecond(): Long
 
-    fun delete(transactions: Collection<Transaction>)
+    fun deleteBlockTransactions(blockHeights: List<Long>)
 
 }
 
