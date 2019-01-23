@@ -2,7 +2,6 @@ package io.openfuture.chain.core.service.state
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.StatePool
-import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.repository.DelegateStateRepository
 import io.openfuture.chain.core.service.DelegateStateService
@@ -44,10 +43,10 @@ class DefaultDelegateStateService(
     }
 
     @Transactional
-    override fun toBlock(message: DelegateStateMessage, block: MainBlock) {
+    override fun commit(state: DelegateState) {
         BlockchainLock.writeLock.lock()
         try {
-            repository.save(DelegateState.of(message, block))
+            repository.save(state)
         } finally {
             BlockchainLock.writeLock.unlock()
         }

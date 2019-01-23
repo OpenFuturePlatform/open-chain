@@ -103,9 +103,10 @@ class DefaultBlockService(
                     }
                 }
                 states.forEach {
+                    it.block = block
                     when (it) {
-                        is DelegateState -> delegateStateService.toBlock(it.toMessage(), block)
-                        is WalletState -> walletStateService.toBlock(it.toMessage(), block)
+                        is DelegateState -> delegateStateService.commit(it)
+                        is WalletState -> walletStateService.commit(it)
                         else -> throw IllegalStateException("The type doesn`t handle")
                     }
                 }

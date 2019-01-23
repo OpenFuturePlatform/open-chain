@@ -13,6 +13,8 @@ import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload.Comp
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.AGAINST
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.FOR
+import io.openfuture.chain.core.model.entity.state.DelegateState
+import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -182,8 +184,8 @@ class DefaultMainBlockService(
 
             message.getAllStates().forEach {
                 when (it) {
-                    is DelegateStateMessage -> delegateStateService.toBlock(it, savedBlock)
-                    is WalletStateMessage -> walletStateService.toBlock(it, savedBlock)
+                    is DelegateStateMessage -> delegateStateService.commit(DelegateState.of(it, block))
+                    is WalletStateMessage -> walletStateService.commit(WalletState.of(it, block))
                     else -> throw IllegalStateException("The type doesn`t handle")
                 }
             }

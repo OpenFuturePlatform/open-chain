@@ -245,7 +245,7 @@ interface DelegateStateService : StateService<DelegateState> {
 
     fun updateRating(delegateKey: String, amount: Long): DelegateStateMessage
 
-    fun toBlock(message: DelegateStateMessage, block: MainBlock)
+    fun commit(state: DelegateState)
 
 }
 
@@ -261,6 +261,6 @@ interface WalletStateService : StateService<WalletState> {
 
     fun updateVoteByAddress(address: String, delegateKey: String?): WalletStateMessage
 
-    fun toBlock(message: WalletStateMessage, block: MainBlock)
+    fun commit(state: WalletState)
 
 }
