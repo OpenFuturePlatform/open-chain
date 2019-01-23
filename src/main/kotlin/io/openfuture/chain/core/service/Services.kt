@@ -62,6 +62,8 @@ interface BlockService {
 
     fun isExists(hash: String, height: Long): Boolean
 
+    fun findAllByHeightBetween(beginHeight: Long, endHeight: Long): List<Block>
+
 }
 
 interface GenesisBlockService {
