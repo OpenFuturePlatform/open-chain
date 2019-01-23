@@ -100,7 +100,7 @@ internal class DefaultVoteTransactionService(
                 return tx
             }
 
-            val utx = unconfirmedRepository.findOneByFooterHash(message.hash)
+            val utx = unconfirmedRepository.findOneByFooterHash(transaction.footer.hash)
             if (null != utx) {
                 return confirm(utx, transaction)
             }
