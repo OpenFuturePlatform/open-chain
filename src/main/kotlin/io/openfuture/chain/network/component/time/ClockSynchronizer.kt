@@ -65,7 +65,12 @@ class ClockSynchronizer(
                 }
 
                 nearestNtpServer = nearestNtp.key
-                lastOffset = getOffset(nearestNtpServer) ?: return
+                lastOffset = if (getDeviation(lastOffset, quizResult.values.toList()) <= percentThreshold
+                    && Math.abs(nearestNtp.value.offset) < properties.ntpOffsetThreshold!!) {
+                    nearestNtp.value.offset
+                } else {
+                    getOffset(nearestNtpServer) ?: return
+                }
             } else {
                 lastOffset = getOffset(nearestNtpServer) ?: return
             }
