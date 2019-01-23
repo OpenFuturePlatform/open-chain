@@ -80,7 +80,7 @@ class DefaultDelegateTransactionService(
     }
 
     @Transactional
-    override fun toBlock(transaction: DelegateTransaction): DelegateTransaction {
+    override fun commit(transaction: DelegateTransaction): DelegateTransaction {
         BlockchainLock.writeLock.lock()
         try {
             val tx = repository.findOneByFooterHash(transaction.footer.hash)

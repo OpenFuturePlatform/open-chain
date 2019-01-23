@@ -82,7 +82,7 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun toBlock(transaction: TransferTransaction): TransferTransaction {
+    override fun commit(transaction: TransferTransaction): TransferTransaction {
         BlockchainLock.writeLock.lock()
         try {
             val tx = repository.findOneByFooterHash(transaction.footer.hash)

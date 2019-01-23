@@ -145,10 +145,10 @@ class DefaultMainBlockService(
 
             message.getAllTransactions().forEach {
                 when (it) {
-                    is RewardTransactionMessage -> rewardTransactionService.toBlock(RewardTransaction.of(it, savedBlock))
-                    is TransferTransactionMessage -> transferTransactionService.toBlock(TransferTransaction.of(it, savedBlock))
-                    is DelegateTransactionMessage -> delegateTransactionService.toBlock(DelegateTransaction.of(it, savedBlock))
-                    is VoteTransactionMessage -> voteTransactionService.toBlock(VoteTransaction.of(it, savedBlock))
+                    is RewardTransactionMessage -> rewardTransactionService.commit(RewardTransaction.of(it, savedBlock))
+                    is TransferTransactionMessage -> transferTransactionService.commit(TransferTransaction.of(it, savedBlock))
+                    is DelegateTransactionMessage -> delegateTransactionService.commit(DelegateTransaction.of(it, savedBlock))
+                    is VoteTransactionMessage -> voteTransactionService.commit(VoteTransaction.of(it, savedBlock))
                 }
             }
 

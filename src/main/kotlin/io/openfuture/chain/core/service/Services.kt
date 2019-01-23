@@ -139,7 +139,7 @@ interface TransferTransactionService {
 
     fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction
 
-    fun toBlock(transaction: TransferTransaction): TransferTransaction
+    fun commit(transaction: TransferTransaction): TransferTransaction
 
     fun verify(message: TransferTransactionMessage): Boolean
 
@@ -153,7 +153,7 @@ interface RewardTransactionService {
 
     fun create(timestamp: Long, fees: Long): RewardTransactionMessage
 
-    fun toBlock(transaction: RewardTransaction)
+    fun commit(transaction: RewardTransaction)
 
     fun verify(message: RewardTransactionMessage): Boolean
 
@@ -177,7 +177,7 @@ interface VoteTransactionService {
 
     fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction
 
-    fun toBlock(transaction: VoteTransaction): VoteTransaction
+    fun commit(transaction: VoteTransaction): VoteTransaction
 
     fun verify(message: VoteTransactionMessage): Boolean
 
@@ -197,7 +197,7 @@ interface DelegateTransactionService {
 
     fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction
 
-    fun toBlock(transaction: DelegateTransaction): DelegateTransaction
+    fun commit(transaction: DelegateTransaction): DelegateTransaction
 
     fun verify(message: DelegateTransactionMessage): Boolean
 
