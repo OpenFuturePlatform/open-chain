@@ -28,7 +28,7 @@ class ClockSynchronizer(
     }
 
 
-    private val percentThreshold = 5.0
+    private val percentThreshold = 5.0f
     private var lastOffset = 0L
     private var ntpSynced: Boolean = true
     private var nextQuizTime: Long? = null
@@ -91,16 +91,16 @@ class ClockSynchronizer(
         }
     }
 
-    private fun getPrecision(rawPrecision: Int): Double =
+    private fun getPrecision(rawPrecision: Int): Float =
         BigDecimal(2).pow(rawPrecision, MathContext(3))
-            .multiply(BigDecimal(1000), MathContext(4)).toDouble()
+            .multiply(BigDecimal(1000), MathContext(4)).toFloat()
 
-    private fun getDeviation(lastOffset: Long, ntpResponses: List<TimeInfo>): Double {
+    private fun getDeviation(lastOffset: Long, ntpResponses: List<TimeInfo>): Float {
         val square = 2.0
         val median = (ntpResponses.sumBy { it.offset.toInt() } + lastOffset) / (ntpResponses.size + 1)
         var sumDiff = 0.0
         ntpResponses.forEach { sumDiff += Math.pow(((it.offset - median).toDouble()), square) }
-        val dev = Math.sqrt(sumDiff / ntpResponses.size)
+        val dev = Math.sqrt(sumDiff / ntpResponses.size).toFloat()
         log.debug("Deviation = $dev")
         return dev
     }
