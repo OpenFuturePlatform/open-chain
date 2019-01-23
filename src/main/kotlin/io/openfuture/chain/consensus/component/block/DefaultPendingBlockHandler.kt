@@ -63,10 +63,6 @@ class DefaultPendingBlockHandler(
             return
         }
 
-        if (!chainSynchronizer.isInSync(MainBlock.of(block))) {
-            return
-        }
-
         networkService.broadcast(block)
         this.timeSlotNumber = blockSlotNumber
         if (IDLE == stage && isActiveDelegate()) {
@@ -104,7 +100,7 @@ class DefaultPendingBlockHandler(
         if (!prepareVotes.containsKey(message.publicKey) && isValidApprovalSignature(message)) {
             prepareVotes[message.publicKey] = delegate
             networkService.broadcast(message)
-            if (prepareVotes.size > (properties.delegatesCount!! - 1) / 3) {
+            if (prepareVotes.size > (properties.delegatesCount!! - 1) / 3 && this.stage == PREPARE) {
                 pendingBlocks.find { it.hash == message.hash }?.let {
                     if (mainBlockService.verify(it)) {
                         this.stage = COMMIT
