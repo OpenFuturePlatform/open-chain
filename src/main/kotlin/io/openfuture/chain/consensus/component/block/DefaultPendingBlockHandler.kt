@@ -8,7 +8,6 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.MainBlockService
-import io.openfuture.chain.core.service.block.DefaultMainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -65,7 +64,7 @@ class DefaultPendingBlockHandler(
 
         networkService.broadcast(block)
         this.timeSlotNumber = blockSlotNumber
-        if (IDLE == stage && isActiveDelegate()) {
+        if (IDLE == stage && isActiveDelegate() && mainBlockService.verify(block)) {
             this.observable = block
             this.stage = PREPARE
             val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKeyAsHexString())
@@ -102,7 +101,7 @@ class DefaultPendingBlockHandler(
             networkService.broadcast(message)
             if (prepareVotes.size > (properties.delegatesCount!! - 1) / 3 && this.stage == PREPARE) {
                 pendingBlocks.find { it.hash == message.hash }?.let {
-                    if (mainBlockService.verify(it)) {
+                    if (it.hash == observable?.hash) {
                         this.stage = COMMIT
                         val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKeyAsHexString())
                         commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())

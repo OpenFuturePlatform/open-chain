@@ -69,6 +69,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         given(epochService.getCurrentSlotOwner()).willReturn(delegate)
         given(epochService.getDelegates()).willReturn(
             listOf(Delegate("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4", "nodeId", "address", "host", 1111, 1)))
+        given(mainBlockService.verify(pendingBlock)).willReturn(true)
 
         defaultPendingBlockHandler.addBlock(pendingBlock)
 
