@@ -50,11 +50,15 @@ interface BlockService {
 
     fun save(block: Block)
 
+    fun removeEpoch(genesisBlock: GenesisBlock)
+
     fun saveChunk(blocksChunk: List<Block>, syncMode: SyncMode)
 
     fun getAfterCurrentHash(hash: String): List<Block>
 
     fun isExists(hash: String): Boolean
+
+    fun findByHash(hash: String): Block?
 
     fun getAvgProductionTime(): Long
 
@@ -118,6 +122,8 @@ interface TransactionService {
     fun getUnconfirmedTransactionByHash(hash: String): UnconfirmedTransaction
 
     fun getProducingPerSecond(): Long
+
+    fun deleteBlockTransactions(blockHeights: List<Long>)
 
 }
 

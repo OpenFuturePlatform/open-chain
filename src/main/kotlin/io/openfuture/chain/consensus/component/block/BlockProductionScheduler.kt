@@ -41,7 +41,7 @@ class BlockProductionScheduler(
 
             if (SYNCHRONIZED != chainSynchronizer.getStatus()) {
                 log.debug("Ledger is ${chainSynchronizer.getStatus()}")
-                chainSynchronizer.sync()
+                chainSynchronizer.checkLastBlock()
                 return
             }
 

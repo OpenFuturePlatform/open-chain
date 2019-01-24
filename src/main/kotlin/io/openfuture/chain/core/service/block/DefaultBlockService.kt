@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.block
 
+import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
@@ -17,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultBlockService(
     private val repository: BlockRepository<Block>,
+    private val properties: ConsensusProperties,
+    private val transactionService: TransactionService,
     private val delegateService: DelegateService,
     private val voteTransactionService: VoteTransactionService,
     private val rewardTransactionService: RewardTransactionService,
@@ -48,8 +51,24 @@ class DefaultBlockService(
         repository.save(block)
     }
 
+    @Transactional
+    override fun removeEpoch(genesisBlock: GenesisBlock) {
+        val fromHeight = if (1L == genesisBlock.height) {
+            genesisBlock.height + 1
+        } else {
+            genesisBlock.height
+        }
+        val toHeight = fromHeight + properties.epochHeight!!
+        val heightRange = (fromHeight..toHeight).toList()
+        transactionService.deleteBlockTransactions(heightRange)
+        repository.deleteAllByHeightIn(heightRange)
+    }
+
     @Transactional(readOnly = true)
     override fun isExists(hash: String): Boolean = repository.findOneByHash(hash)?.let { true } ?: false
+
+    @Transactional(readOnly = true)
+    override fun findByHash(hash: String): Block? = repository.findOneByHash(hash)
 
     @Transactional(readOnly = true)
     override fun isExists(hash: String, height: Long): Boolean =
