@@ -5,6 +5,7 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.service.BlockService
+import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.core.sync.SyncMode.FULL
@@ -19,8 +20,9 @@ import org.springframework.stereotype.Component
 class FlywayDBChecker(
     private val nodeProperties: NodeProperties,
     private val consensusProperties: ConsensusProperties,
+    private val genesisBlockService: GenesisBlockService,
     private val blockService: BlockService,
-    private val fullSyncCursor: FullSyncCursor,
+    private val fullSyncCursor: SyncCursor,
     private val chainSynchronizer: ChainSynchronizer
 ) : Callback {
 
@@ -36,9 +38,9 @@ class FlywayDBChecker(
 
     private fun isValidkDb(syncMode: SyncMode): Boolean {
         val epochHeight = consensusProperties.epochHeight!!
-        fullSyncCursor.cursor = 1L
-        var indexFrom = fullSyncCursor.cursor
-        var indexTo = indexFrom!! + epochHeight
+        fullSyncCursor.fullCursor = genesisBlockService.getByEpochIndex(1L)!!
+        var indexFrom = fullSyncCursor.fullCursor.height
+        var indexTo = indexFrom + epochHeight
         var block: Block? = null
         do {
             val blocks = blockService.findAllByHeightBetween(indexFrom, indexTo)
@@ -71,7 +73,7 @@ class FlywayDBChecker(
             return false
         }
         if (FULL == syncMode) {
-            fullSyncCursor.cursor = block.height
+            fullSyncCursor.fullCursor = block
         }
         return true
     }
@@ -94,7 +96,7 @@ class FlywayDBChecker(
             }
         }
 
-        fullSyncCursor.cursor = block.height
+        fullSyncCursor.fullCursor = block
         return true
     }
 
