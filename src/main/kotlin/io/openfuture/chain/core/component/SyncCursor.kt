@@ -6,5 +6,4 @@ import org.springframework.stereotype.Component
 @Component
 class SyncCursor {
     lateinit var fullCursor: Block
-    lateinit var lightCursor: Block
 }

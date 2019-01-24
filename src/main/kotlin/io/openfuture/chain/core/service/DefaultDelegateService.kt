@@ -30,6 +30,9 @@ class DefaultDelegateService(
         ?: throw NotFoundException("Delegate with nodeId: $nodeId not exist!")
 
     @Transactional(readOnly = true)
+    override fun findByNodeId(nodeId: String): Delegate? = repository.findOneByNodeId(nodeId)
+
+    @Transactional(readOnly = true)
     override fun getActiveDelegates(): List<Delegate> {
         val sortFields = setOf("rating", "registrationDate", "id")
         val pageRequest = PageRequest(0, consensusProperties.delegatesCount!!, sortFields, Sort.Direction.DESC)

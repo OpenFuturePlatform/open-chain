@@ -7,10 +7,6 @@ import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
-import io.openfuture.chain.core.sync.SyncMode
-import io.openfuture.chain.core.sync.SyncMode.FULL
-import io.openfuture.chain.core.sync.SyncMode.LIGHT
-import io.openfuture.chain.network.property.NodeProperties
 import org.flywaydb.core.api.callback.Callback
 import org.flywaydb.core.api.callback.Context
 import org.flywaydb.core.api.callback.Event
@@ -18,17 +14,18 @@ import org.springframework.stereotype.Component
 
 @Component
 class FlywayDBChecker(
-    private val nodeProperties: NodeProperties,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockService: GenesisBlockService,
     private val blockService: BlockService,
-    private val syncCursor: SyncCursor,
-    private val chainSynchronizer: ChainSynchronizer
+    private val syncCursor: SyncCursor,private val chainSynchronizer: ChainSynchronizer
 ) : Callback {
 
+    private var cursorFlag: Boolean = true
+
+
     override fun handle(event: Event?, context: Context?) {
-        if (!isValidkDb(nodeProperties.syncMode!!)) {
-            chainSynchronizer.sync()
+        if(!isValidDb()){
+           // rollback(syncCursor)
         }
     }
 
@@ -36,7 +33,7 @@ class FlywayDBChecker(
 
     override fun supports(event: Event?, context: Context?): Boolean = (Event.AFTER_MIGRATE == event)
 
-    private fun isValidkDb(syncMode: SyncMode): Boolean {
+    private fun isValidDb(): Boolean {
         val epochHeight = consensusProperties.epochHeight!!
         syncCursor.fullCursor = genesisBlockService.getByEpochIndex(1L)!!
         var indexFrom = syncCursor.fullCursor.height
@@ -53,37 +50,45 @@ class FlywayDBChecker(
             }
             while (blocksIterator.hasNext()) {
                 val nextBlock = blocksIterator.next()
-                when (syncMode) {
-                    LIGHT -> {
-                        if (!isValidLightBlocks(block!!, nextBlock)) {
-                            return false
-                        }
-                    }
-                    FULL -> {
-                        if (!isValidFullBlocks(block!!, nextBlock)) {
-                            return false
-                        }
-                    }
+
+                if (!isValidBlocks(block!!, nextBlock)) {
+                    return false
                 }
 
                 block = nextBlock
             }
         } while (!blocks.isEmpty())
-        if (!isValidBlockState(block!!)) {
+        if (!isValidBlock(block!!)) {
             return false
         }
-        if (FULL == syncMode) {
+        return true
+    }
+
+    private fun isValidBlocks(block: Block, nextBlock: Block): Boolean {
+        if (!isValidBlocksHashes(block, nextBlock)) {
+            return false
+        }
+        if (!isValidBlock(block)) {
+            return false
+        }
+        return true
+    }
+
+    private fun isValidBlock(block: Block): Boolean {
+        if (!isValidBlockState(block)) {
+            return false
+        }
+        if (!isValidTransactions(block)) {
+            cursorFlag = false
+        }
+        if (cursorFlag) {
             syncCursor.fullCursor = block
         }
         return true
     }
 
-    private fun isValidFullBlocks(block: Block, nextBlock: Block): Boolean {
-        if (!isValidBlocksHashes(block, nextBlock) || !isValidBlockState(block)) {
-            return false
-        }
-
-        if (block is MainBlock) {
+    private fun isValidTransactions(block: Block): Boolean {
+        return if (block is MainBlock) {
             val hashes = mutableListOf<String>()
             hashes.addAll(block.payload.transferTransactions.map { it.footer.hash })
             hashes.addAll(block.payload.voteTransactions.map { it.footer.hash })
@@ -91,18 +96,11 @@ class FlywayDBChecker(
             hashes.add(block.payload.rewardTransaction[0].footer.hash)
             val transactionsMerkleHash = MainBlockPayload.calculateMerkleRoot(hashes)
 
-            if (block.payload.merkleHash != transactionsMerkleHash) {
-                return false
-            }
+            block.payload.merkleHash == transactionsMerkleHash
+        } else {
+            true
         }
-
-        syncCursor.fullCursor = block
-        return true
     }
-
-    private fun isValidLightBlocks(block: Block, nextBlock: Block): Boolean =
-        isValidBlocksHashes(block, nextBlock) && isValidBlockState(block)
-
 
     private fun isValidBlocksHashes(block: Block, nextBlock: Block): Boolean = (block.hash == nextBlock.previousHash)
 

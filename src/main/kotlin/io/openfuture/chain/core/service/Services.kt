@@ -223,6 +223,8 @@ interface DelegateService {
 
     fun getByNodeId(nodeId: String): Delegate
 
+    fun findByNodeId(nodeId: String): Delegate?
+
     fun getActiveDelegates(): List<Delegate>
 
     fun isExistsByPublicKey(key: String): Boolean
