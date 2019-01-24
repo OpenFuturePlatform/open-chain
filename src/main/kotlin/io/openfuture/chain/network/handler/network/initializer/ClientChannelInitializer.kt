@@ -4,6 +4,8 @@ import io.netty.channel.Channel
 import io.netty.channel.ChannelInitializer
 import io.netty.handler.timeout.IdleStateHandler
 import io.openfuture.chain.network.handler.consensus.BlockApprovalHandler
+import io.openfuture.chain.network.handler.consensus.BlockAvailabilityRequestHandler
+import io.openfuture.chain.network.handler.consensus.BlockAvailabilityResponseHandler
 import io.openfuture.chain.network.handler.consensus.PendingBlockNetworkHandler
 import io.openfuture.chain.network.handler.core.DelegateTransactionHandler
 import io.openfuture.chain.network.handler.core.TransferTransactionHandler
@@ -21,17 +23,13 @@ import java.util.concurrent.TimeUnit
 class ClientChannelInitializer(
     private val nodeProperties: NodeProperties,
     private val applicationContext: ApplicationContext,
-    private val cacheHandler: CacheHandler,
     private val connectionHandler: ConnectionHandler,
     private val heartBeatHandler: HeartBeatHandler,
     private val greetingResponseHandler: GreetingResponseHandler,
     private val newClientHandler: NewClientHandler,
     private val networkStatusHandler: NetworkStatusHandler,
-    private val syncRequestHandler: SyncRequestHandler,
-    private val syncResponseHandler: SyncResponseHandler,
     private val epochRequestHandler: EpochRequestHandler,
     private val epochResponseHandler: EpochResponseHandler,
-    private val syncBlockRequestHandler: SyncBlockRequestHandler,
     private val mainBlockHandler: MainBlockHandler,
     private val genesisBlockHandler: GenesisBlockHandler,
     private val syncStatusHandler: SyncStatusHandler,
@@ -39,7 +37,9 @@ class ClientChannelInitializer(
     private val delegateTransactionHandler: DelegateTransactionHandler,
     private val voteTransactionHandler: VoteTransactionHandler,
     private val pendingBlockNetworkHandler: PendingBlockNetworkHandler,
-    private val blockApprovalHandler: BlockApprovalHandler
+    private val blockApprovalHandler: BlockApprovalHandler,
+    private val blockAvailabilityRequestHandler: BlockAvailabilityRequestHandler,
+    private val blockAvailabilityResponseHandler: BlockAvailabilityResponseHandler
 ) : ChannelInitializer<Channel>() {
 
     override fun initChannel(channel: Channel) {
@@ -58,14 +58,13 @@ class ClientChannelInitializer(
 
             networkStatusHandler,// blocking
             //        sync
-            syncRequestHandler,
-            syncResponseHandler,
             epochRequestHandler,
             epochResponseHandler,
-            syncBlockRequestHandler,
             mainBlockHandler,
             genesisBlockHandler,
+            blockAvailabilityResponseHandler,
             syncStatusHandler,
+            blockAvailabilityRequestHandler,
             //        core
             transferTransactionHandler,
             delegateTransactionHandler,
