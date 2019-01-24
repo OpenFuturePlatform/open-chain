@@ -4,7 +4,6 @@ import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.SynchronizationException
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.sync.SyncStatus.SYNCHRONIZED
-import io.openfuture.chain.network.component.time.ClockSynchronizer
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.Before
 import org.springframework.stereotype.Component
@@ -13,13 +12,12 @@ import org.springframework.stereotype.Component
 @Aspect
 @Component
 class NodeSyncAspect(
-    private val chainSynchronizer: ChainSynchronizer,
-    private val clockSynchronizer: ClockSynchronizer
+    private val chainSynchronizer: ChainSynchronizer
 ) {
 
     @Before("@annotation(annotation)")
     fun annotated(annotation: BlockchainSynchronized) {
-        if (SYNCHRONIZED != chainSynchronizer.getStatus() || SYNCHRONIZED != clockSynchronizer.getStatus()) {
+        if (SYNCHRONIZED != chainSynchronizer.getStatus()) {
             throw SynchronizationException("Application is not synchronized!")
         }
     }

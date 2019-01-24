@@ -60,16 +60,6 @@ class NodeProperties(
     @field:NotNull
     var explorerInterval: Long? = null,
 
-    /** Interval for failed time synchronization. Min value 60000 millis*/
-    @field:Min(60 * 1000)
-    @field:NotNull
-    var timeFailedSyncInterval: Long? = null,
-
-    /** Interval for time synchronization in milliseconds. Min value 15000 millis*/
-    @field:Min(15 * 1000)
-    @field:NotNull
-    var timeSyncInterval: Long? = null,
-
     /** Max synchronization response delay in milliseconds. Max value 10000 millis*/
     @field:Max(10 * 1000)
     @field:NotNull
@@ -91,10 +81,6 @@ class NodeProperties(
 
     @field:NotNull
     var syncMode: SyncMode? = null,
-
-    /** Time value for choosing next ntp server, which equals 4 hours*/
-    @field:NotNull
-    var nextNtpServerInterval: Long? = null,
 
     @field:NotNull
     var ntpOffsetThreshold: Long? = null

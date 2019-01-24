@@ -49,4 +49,5 @@ class NettyConfig(
 
     @Bean
     fun ntpClient(): NTPUDPClient = NTPUDPClient().apply { defaultTimeout = 3000 }
+
 }

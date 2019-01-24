@@ -1,6 +1,5 @@
 package io.openfuture.chain.rpc.controller.base
 
-import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.rpc.domain.RestResponse
 import org.springframework.core.MethodParameter
@@ -14,7 +13,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice
 
 @ControllerAdvice
 class RestResponseControllerAdvice(
-    private val clock: Clock,
     private val nodeProperties: NodeProperties
 ) : ResponseBodyAdvice<Any> {
 
@@ -27,7 +25,7 @@ class RestResponseControllerAdvice(
     override fun beforeBodyWrite(body: Any?, returnType: MethodParameter, selectedContentType: MediaType,
                                  selectedConverterType: Class<out HttpMessageConverter<*>>, request: ServerHttpRequest,
                                  response: ServerHttpResponse): RestResponse<Any?> {
-        return RestResponse(clock.currentTimeMillis(), nodeProperties.protocolVersion!!, body)
+        return RestResponse(System.currentTimeMillis(), nodeProperties.protocolVersion!!, body)
     }
 
 }

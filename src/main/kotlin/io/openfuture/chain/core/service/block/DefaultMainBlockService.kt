@@ -22,7 +22,6 @@ import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -40,7 +39,6 @@ class DefaultMainBlockService(
     repository: MainBlockRepository,
     walletService: WalletService,
     delegateService: DelegateService,
-    private val clock: Clock,
     private val keyHolder: NodeKeyHolder,
     private val throughput: TransactionThroughput,
     private val walletVoteService: WalletVoteService,
@@ -78,7 +76,7 @@ class DefaultMainBlockService(
     override fun create(): PendingBlockMessage {
         BlockchainLock.readLock.lock()
         try {
-            val timestamp = clock.currentTimeMillis()
+            val timestamp = System.currentTimeMillis()
             val lastBlock = blockService.getLast()
             val height = lastBlock.height + 1
             val previousHash = lastBlock.hash

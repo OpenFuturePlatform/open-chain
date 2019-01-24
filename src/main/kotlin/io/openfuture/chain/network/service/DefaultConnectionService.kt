@@ -4,9 +4,7 @@ import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
 import io.openfuture.chain.network.component.AddressesHolder
-import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.entity.NetworkAddress
-import io.openfuture.chain.network.property.NodeProperties
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Lazy
@@ -46,7 +44,5 @@ class DefaultConnectionService(
         }
         return result
     }
-
-
 
 }
