@@ -7,8 +7,6 @@ import io.openfuture.chain.core.service.WalletStateService
 import io.openfuture.chain.core.service.state.DefaultDelegateStateService.Companion.DEFAULT_DELEGATE_RATING
 import io.openfuture.chain.crypto.annotation.AddressChecksum
 import io.openfuture.chain.crypto.service.CryptoService
-import io.openfuture.chain.rpc.domain.base.PageRequest
-import io.openfuture.chain.rpc.domain.base.PageResponse
 import io.openfuture.chain.rpc.domain.crypto.AccountDto
 import io.openfuture.chain.rpc.domain.crypto.ValidateAddressRequest
 import io.openfuture.chain.rpc.domain.crypto.WalletDto
@@ -45,28 +43,24 @@ class AccountController(
     fun getBalance(@PathVariable @AddressChecksum address: String): Long =
         walletStateService.getActualBalanceByAddress(address)
 
-    // todo("delete list, return object")
     @GetMapping("/wallets/{address}/delegates")
-    fun getDelegates(@PathVariable @AddressChecksum address: String, pageRequest: PageRequest): PageResponse<VoteResponse> {
-        val votes = mutableListOf<VoteResponse>()
-
+    fun getDelegates(@PathVariable @AddressChecksum address: String): VoteResponse? {
         val walletState = walletStateService.getLastByAddress(address)
 
         if (null != walletState?.voteFor) {
             val delegateState = delegateStateService.getLastByAddress(walletState.voteFor!!)
             val delegate = delegateService.getByPublicKey(walletState.voteFor!!)
-            val voteResponse = VoteResponse(delegate.address,
+
+            return VoteResponse(delegate.address,
                 delegate.publicKey,
                 delegateState?.rating ?: DEFAULT_DELEGATE_RATING,
                 walletStateService.getVotesForDelegate(delegate.publicKey).size,
                 voteTransactionService.getLastVoteForDelegate(address, delegate.publicKey).header.timestamp,
                 voteTransactionService.getUnconfirmedBySenderAgainstDelegate(address, delegate.publicKey) != null
             )
-
-            votes.add(voteResponse)
         }
 
-        return PageResponse(votes.size.toLong(), votes)
+        return null
     }
 
     @PostMapping("/wallets/validateAddress")
