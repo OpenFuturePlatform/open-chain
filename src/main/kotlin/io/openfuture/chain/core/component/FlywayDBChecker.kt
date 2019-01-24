@@ -22,7 +22,7 @@ class FlywayDBChecker(
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockService: GenesisBlockService,
     private val blockService: BlockService,
-    private val fullSyncCursor: SyncCursor,
+    private val syncCursor: SyncCursor,
     private val chainSynchronizer: ChainSynchronizer
 ) : Callback {
 
@@ -38,8 +38,8 @@ class FlywayDBChecker(
 
     private fun isValidkDb(syncMode: SyncMode): Boolean {
         val epochHeight = consensusProperties.epochHeight!!
-        fullSyncCursor.fullCursor = genesisBlockService.getByEpochIndex(1L)!!
-        var indexFrom = fullSyncCursor.fullCursor.height
+        syncCursor.fullCursor = genesisBlockService.getByEpochIndex(1L)!!
+        var indexFrom = syncCursor.fullCursor.height
         var indexTo = indexFrom + epochHeight
         var block: Block? = null
         do {
@@ -73,7 +73,7 @@ class FlywayDBChecker(
             return false
         }
         if (FULL == syncMode) {
-            fullSyncCursor.fullCursor = block
+            syncCursor.fullCursor = block
         }
         return true
     }
@@ -96,7 +96,7 @@ class FlywayDBChecker(
             }
         }
 
-        fullSyncCursor.fullCursor = block
+        syncCursor.fullCursor = block
         return true
     }
 
