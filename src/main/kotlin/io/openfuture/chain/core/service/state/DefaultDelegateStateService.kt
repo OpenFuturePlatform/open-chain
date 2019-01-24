@@ -8,6 +8,7 @@ import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.DelegateStateMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -27,7 +28,7 @@ class DefaultDelegateStateService(
     override fun getAllDelegates(request: PageRequest): List<DelegateState> = repository.findLastAll(request)
 
     override fun getActiveDelegates(): List<DelegateState> =
-        getAllDelegates(PageRequest(0, consensusProperties.delegatesCount!!)).sortedByDescending { it.rating }
+        getAllDelegates(PageRequest(0, consensusProperties.delegatesCount!!, setOf("rating"), Sort.Direction.DESC))
 
     override fun updateRating(delegateKey: String, amount: Long): DelegateStateMessage {
         val delegateState = getCurrentState(delegateKey)
