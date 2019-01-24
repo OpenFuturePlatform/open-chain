@@ -15,6 +15,11 @@ class SyncSession(
     private val storage: SortedSet<Block> = TreeSet(kotlin.Comparator { o1, o2 -> (o2.height - o1.height).toInt() })
     private var completed: Boolean = false
 
+    init {
+        storage.add(currentGenesisBlock)
+    }
+
+
     fun isEpochSynced(): Boolean = storage.last().hash == lastLocalGenesisBlock.hash
 
     fun isCompleted(): Boolean = completed
@@ -24,10 +29,6 @@ class SyncSession(
     fun getCurrentGenesisBlock(): GenesisBlock = currentGenesisBlock
 
     fun getLastLocalGenesisBlock() = lastLocalGenesisBlock
-
-    init {
-        storage.add(currentGenesisBlock)
-    }
 
     @Synchronized
     fun add(epochBlocks: List<Block>): Boolean {
