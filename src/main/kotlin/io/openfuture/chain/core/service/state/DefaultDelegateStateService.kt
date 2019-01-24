@@ -28,7 +28,7 @@ class DefaultDelegateStateService(
     override fun getAllDelegates(request: PageRequest): List<DelegateState> = repository.findLastAll(request)
 
     override fun getActiveDelegates(): List<DelegateState> =
-        getAllDelegates(PageRequest(0, consensusProperties.delegatesCount!!, setOf("rating"), Sort.Direction.DESC))
+        getAllDelegates(PageRequest(0, consensusProperties.delegatesCount!!, setOf("rating", "id"), Sort.Direction.DESC))
 
     override fun updateRating(delegateKey: String, amount: Long): DelegateStateMessage {
         val delegateState = getCurrentState(delegateKey)
