@@ -8,7 +8,7 @@ import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.DelegateStateMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
-import org.springframework.data.domain.Sort
+import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -29,7 +29,7 @@ class DefaultDelegateStateService(
 
     override fun getActiveDelegates(): List<DelegateState> {
         val sortBy = setOf("rating", "id")
-        return getAllDelegates(PageRequest(0, consensusProperties.delegatesCount!!, sortBy, Sort.Direction.DESC))
+        return getAllDelegates(PageRequest(0, consensusProperties.delegatesCount!!, sortBy, DESC))
     }
 
     override fun isExistsByPublicKey(key: String): Boolean = null != getLastByAddress(key)
