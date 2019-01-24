@@ -55,10 +55,10 @@ class DefaultRewardTransactionService(
         val publicKey = keyHolder.getPublicKeyAsHexString()
         val delegate = delegateStateService.getLastByAddress(publicKey)
             ?: throw NotFoundException("Delegate not found with key $publicKey")
-        val hash = createHash(TransactionHeader(timestamp, fee, senderAddress), RewardTransactionPayload(reward, delegate.address))
+        val hash = createHash(TransactionHeader(timestamp, fee, senderAddress), RewardTransactionPayload(reward, delegate.walletAddress))
         val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())
 
-        return RewardTransactionMessage(timestamp, fee, senderAddress, hash, signature, publicKey, reward, delegate.address)
+        return RewardTransactionMessage(timestamp, fee, senderAddress, hash, signature, publicKey, reward, delegate.walletAddress)
     }
 
     @Transactional
