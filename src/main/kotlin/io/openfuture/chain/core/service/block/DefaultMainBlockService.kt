@@ -44,12 +44,11 @@ import kotlin.math.max
 class DefaultMainBlockService(
     blockService: BlockService,
     repository: MainBlockRepository,
-    delegateService: DelegateService,
+    delegateStateService: DelegateStateService,
     private val clock: Clock,
     private val keyHolder: NodeKeyHolder,
     private val throughput: TransactionThroughput,
     private val walletStateService: WalletStateService,
-    private val delegateStateService: DelegateStateService,
     private val statePool: StatePool,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository,
@@ -57,7 +56,7 @@ class DefaultMainBlockService(
     private val rewardTransactionService: RewardTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService
-) : BaseBlockService<MainBlock>(repository, blockService, delegateService), MainBlockService {
+) : BaseBlockService<MainBlock>(repository, blockService, delegateStateService), MainBlockService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultMainBlockService::class.java)
@@ -286,7 +285,7 @@ class DefaultMainBlockService(
         }
 
         return transactions.all { delegateTransactionService.verify(it) } &&
-            !delegateService.isExistsByPublicKeys(transactions.map { it.delegateKey }) &&
+            !delegateStateService.isExistsByPublicKeys(transactions.map { it.delegateKey }) &&
             transactions.distinctBy { it.delegateKey }.size == transactions.size
     }
 

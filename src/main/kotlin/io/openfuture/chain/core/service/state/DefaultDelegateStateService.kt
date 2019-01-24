@@ -21,26 +21,37 @@ class DefaultDelegateStateService(
 ) : BaseStateService<DelegateState>(repository), DelegateStateService {
 
     companion object {
-        const val DEFAULT_DELEGATE_RATING = 0L
+        private const val DEFAULT_DELEGATE_RATING = 0L
     }
 
 
+    @Transactional(readOnly = true)
     override fun getAllDelegates(request: PageRequest): List<DelegateState> = repository.findLastAll(request)
 
-    override fun getActiveDelegates(): List<DelegateState> =
-        getAllDelegates(PageRequest(0, consensusProperties.delegatesCount!!, setOf("rating", "id"), Sort.Direction.DESC))
-
-    override fun updateRating(delegateKey: String, amount: Long): DelegateStateMessage {
-        val delegateState = getCurrentState(delegateKey)
-        val newDelegateState = DelegateStateMessage(delegateState.address, delegateState.rating + amount)
-        statePool.update(newDelegateState)
-        return newDelegateState
+    @Transactional(readOnly = true)
+    override fun getActiveDelegates(): List<DelegateState> {
+        val sortBy = setOf("rating", "id")
+        return getAllDelegates(PageRequest(0, consensusProperties.delegatesCount!!, sortBy, Sort.Direction.DESC))
     }
 
-    override fun addDelegate(delegateKey: String): DelegateStateMessage {
-        val newDelegateState = DelegateStateMessage(delegateKey, DEFAULT_DELEGATE_RATING)
-        statePool.update(newDelegateState)
-        return newDelegateState
+    @Transactional(readOnly = true)
+    override fun isExistsByPublicKey(key: String): Boolean = null != getLastByAddress(key)
+
+    @Transactional(readOnly = true)
+    override fun isExistsByPublicKeys(publicKeys: List<String>): Boolean = publicKeys.all { isExistsByPublicKey(it) }
+
+    @Transactional(readOnly = true)
+    override fun updateRating(delegateKey: String, amount: Long): DelegateStateMessage {
+        val state = getCurrentState(delegateKey)
+        val newState = DelegateStateMessage(state.address, state.rating + amount, state.walletAddress, state.createDate)
+        statePool.update(newState)
+        return newState
+    }
+
+    override fun addDelegate(delegateKey: String, walletAddress: String, createDate: Long): DelegateStateMessage {
+        val newState = DelegateStateMessage(delegateKey, DEFAULT_DELEGATE_RATING, walletAddress, createDate)
+        statePool.update(newState)
+        return newState
     }
 
     @Transactional

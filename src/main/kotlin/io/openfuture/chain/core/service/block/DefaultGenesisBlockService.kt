@@ -8,7 +8,6 @@ import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.service.BlockService
-import io.openfuture.chain.core.service.DefaultDelegateService
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.sync.BlockchainLock
@@ -26,12 +25,11 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultGenesisBlockService(
     blockService: BlockService,
-    delegateService: DefaultDelegateService,
-    private val delegateStateService: DelegateStateService,
+    delegateStateService: DelegateStateService,
     private val keyHolder: NodeKeyHolder,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository
-) : BaseBlockService<GenesisBlock>(genesisBlockRepository, blockService, delegateService), GenesisBlockService {
+) : BaseBlockService<GenesisBlock>(genesisBlockRepository, blockService, delegateStateService), GenesisBlockService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(EpochResponseHandler::class.java)

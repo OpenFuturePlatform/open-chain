@@ -7,12 +7,10 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType
 import io.openfuture.chain.core.exception.model.ExceptionType.ALREADY_DELEGATE
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.repository.DelegateTransactionRepository
 import io.openfuture.chain.core.repository.UDelegateTransactionRepository
-import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
@@ -28,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultDelegateTransactionService(
     repository: DelegateTransactionRepository,
     uRepository: UDelegateTransactionRepository,
-    private val delegateService: DelegateService,
     private val consensusProperties: ConsensusProperties,
     private val delegateStateService: DelegateStateService
 ) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository), DelegateTransactionService {
@@ -100,7 +97,7 @@ class DefaultDelegateTransactionService(
     override fun updateState(message: DelegateTransactionMessage) {
         walletStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
         walletStateService.updateBalanceByAddress(consensusProperties.genesisAddress!!, message.amount)
-        delegateStateService.addDelegate(message.delegateKey)
+        delegateStateService.addDelegate(message.delegateKey, message.senderAddress, message.timestamp)
     }
 
     override fun verify(message: DelegateTransactionMessage): Boolean {
@@ -114,10 +111,7 @@ class DefaultDelegateTransactionService(
     }
 
     @Transactional
-    override fun save(tx: DelegateTransaction): DelegateTransaction {
-        delegateService.save(Delegate(tx.payload.delegateKey, tx.header.senderAddress, tx.header.timestamp))
-        return super.save(tx)
-    }
+    override fun save(tx: DelegateTransaction): DelegateTransaction = super.save(tx)
 
     override fun validate(utx: UnconfirmedDelegateTransaction) {
         super.validate(utx)
@@ -146,7 +140,7 @@ class DefaultDelegateTransactionService(
         }
     }
 
-    private fun isAlreadyDelegate(delegateKey: String): Boolean = delegateService.isExistsByPublicKey(delegateKey)
+    private fun isAlreadyDelegate(delegateKey: String): Boolean = delegateStateService.isExistsByPublicKey(delegateKey)
 
     private fun isAlreadySendRequest(delegateKey: String): Boolean =
         unconfirmedRepository.findAll().any { it.payload.delegateKey == delegateKey }

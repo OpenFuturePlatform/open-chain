@@ -13,16 +13,22 @@ class DelegateState(
     block: MainBlock,
 
     @Column(name = "rating", nullable = false)
-    val rating: Long = 0
+    val rating: Long,
+
+    @Column(name = "wallet_address", nullable = false)
+    var walletAddress: String,
+
+    @Column(name = "create_date", nullable = false)
+    var createDate: Long
 
 ) : State(address, block) {
 
     companion object {
         fun of(message: DelegateStateMessage, block: MainBlock): DelegateState =
-            DelegateState(message.address, block, message.rating)
+            DelegateState(message.address, block, message.rating, message.walletAddress, message.createDate)
     }
 
 
-    override fun toMessage(): DelegateStateMessage = DelegateStateMessage(address, rating)
+    override fun toMessage(): DelegateStateMessage = DelegateStateMessage(address, rating, walletAddress, createDate)
 
 }

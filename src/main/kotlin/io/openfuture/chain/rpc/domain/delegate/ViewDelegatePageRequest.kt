@@ -1,4 +1,4 @@
-package io.openfuture.chain.rpc.domain.view
+package io.openfuture.chain.rpc.domain.delegate
 
 import io.openfuture.chain.rpc.domain.base.PageRequest
 

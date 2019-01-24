@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.service
 
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -211,20 +210,6 @@ interface DelegateTransactionService {
 
 }
 
-interface DelegateService {
-
-    fun getAll(request: PageRequest): Page<Delegate>
-
-    fun getByPublicKey(key: String): Delegate
-
-    fun isExistsByPublicKey(key: String): Boolean
-
-    fun isExistsByPublicKeys(publicKeys: List<String>): Boolean
-
-    fun save(delegate: Delegate): Delegate
-
-}
-
 interface StateService<T : State> {
 
     fun getLastByAddress(address: String): T?
@@ -241,7 +226,11 @@ interface DelegateStateService : StateService<DelegateState> {
 
     fun getActiveDelegates(): List<DelegateState>
 
-    fun addDelegate(delegateKey: String): DelegateStateMessage
+    fun isExistsByPublicKey(key: String): Boolean
+
+    fun isExistsByPublicKeys(publicKeys: List<String>): Boolean
+
+    fun addDelegate(delegateKey: String, walletAddress: String, createDate: Long): DelegateStateMessage
 
     fun updateRating(delegateKey: String, amount: Long): DelegateStateMessage
 

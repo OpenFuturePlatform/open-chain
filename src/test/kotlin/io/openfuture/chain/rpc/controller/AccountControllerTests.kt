@@ -1,7 +1,6 @@
 package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
-import io.openfuture.chain.core.service.DelegateService
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.service.WalletStateService
@@ -33,9 +32,6 @@ class AccountControllerTests : ControllerTests() {
 
     @MockBean
     private lateinit var delegateStateService: DelegateStateService
-
-    @MockBean
-    private lateinit var delegateService: DelegateService
 
     @MockBean
     private lateinit var voteTransactionService: VoteTransactionService

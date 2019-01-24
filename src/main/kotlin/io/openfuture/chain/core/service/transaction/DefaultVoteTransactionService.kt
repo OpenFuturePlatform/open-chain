@@ -162,7 +162,7 @@ internal class DefaultVoteTransactionService(
         }
     }
 
-    private fun isExistsDelegate(delegateKey: String): Boolean = delegateStateService.getLastByAddress(delegateKey) != null
+    private fun isExistsDelegate(delegateKey: String): Boolean = delegateStateService.isExistsByPublicKey(delegateKey)
 
     private fun isVoted(senderAddress: String, delegateKey: String, voteType: VoteType): Boolean {
         val unconfirmedVote = unconfirmedRepository.findAllByHeaderSenderAddress(senderAddress)

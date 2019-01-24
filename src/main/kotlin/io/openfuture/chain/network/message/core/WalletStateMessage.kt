@@ -2,11 +2,11 @@ package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
+import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 import org.apache.commons.lang3.StringUtils.EMPTY
 import java.nio.ByteBuffer
-import kotlin.Long.Companion.SIZE_BYTES
 import kotlin.text.Charsets.UTF_8
 
 @NoArgConstructor
@@ -18,7 +18,7 @@ class WalletStateMessage(
 
     override fun getBytes(): ByteArray {
         val voteForTemp = voteFor ?: ""
-        return ByteBuffer.allocate(SIZE_BYTES + voteForTemp.toByteArray(UTF_8).size)
+        return ByteBuffer.allocate(LONG_BYTES + voteForTemp.toByteArray(UTF_8).size)
             .putLong(balance)
             .put(voteForTemp.toByteArray(UTF_8))
             .array()

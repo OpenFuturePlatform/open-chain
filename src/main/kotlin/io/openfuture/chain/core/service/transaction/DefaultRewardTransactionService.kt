@@ -2,13 +2,14 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
+import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.RewardTransactionPayload
 import io.openfuture.chain.core.repository.RewardTransactionRepository
-import io.openfuture.chain.core.service.DelegateService
+import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.RewardTransactionService
 import io.openfuture.chain.core.service.WalletStateService
 import io.openfuture.chain.core.sync.BlockchainLock
@@ -27,7 +28,7 @@ class DefaultRewardTransactionService(
     private val repository: RewardTransactionRepository,
     private val walletStateService: WalletStateService,
     private val consensusProperties: ConsensusProperties,
-    private val delegateService: DelegateService,
+    private val delegateStateService: DelegateStateService,
     private val keyHolder: NodeKeyHolder
 ) : BaseTransactionService(), RewardTransactionService {
 
@@ -52,7 +53,8 @@ class DefaultRewardTransactionService(
         val reward = fees + if (rewardBlock > bank) bank else rewardBlock
         val fee = 0L
         val publicKey = keyHolder.getPublicKeyAsHexString()
-        val delegate = delegateService.getByPublicKey(publicKey)
+        val delegate = delegateStateService.getLastByAddress(publicKey)
+            ?: throw NotFoundException("Delegate not found with key $publicKey")
         val hash = createHash(TransactionHeader(timestamp, fee, senderAddress), RewardTransactionPayload(reward, delegate.address))
         val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())
 

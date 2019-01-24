@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.repository
 
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -111,18 +110,6 @@ interface UDelegateTransactionRepository : UTransactionRepository<UnconfirmedDel
 
 @Repository
 interface UTransferTransactionRepository : UTransactionRepository<UnconfirmedTransferTransaction>
-
-@Repository
-interface DelegateRepository : BaseRepository<Delegate> {
-
-    fun findOneByPublicKey(key: String): Delegate?
-
-    fun existsByPublicKey(key: String): Boolean
-
-    @Query("SELECT * FROM delegates WHERE public_key IN :ids", nativeQuery = true)
-    fun findByPublicKeys(@Param("ids") publicKeys: List<String>): List<Delegate>
-
-}
 
 @Repository
 interface StateRepository<T : State> : BaseRepository<T> {

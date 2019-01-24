@@ -7,9 +7,9 @@ import io.openfuture.chain.consensus.component.block.DefaultPendingBlockHandler
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
+import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -52,7 +52,6 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
     @Test
     fun addBlockShouldAddMainBlockAndBroadcast() {
-        val delegate = Delegate("publicKey", "address",  1)
         val payload = MainBlockPayload(
             "merkleHash",
             "stateHash"
@@ -63,12 +62,14 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         val pendingBlock = PendingBlockMessage(2L, "previousHash", 1L,
             "hash", "signature", "publicKey", payload.merkleHash, payload.stateHash,
             rewardTransactionMessage, listOf(), listOf(), listOf(), listOf(), listOf())
+        val delegate = DelegateState("publicKey", MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
+            MainBlockPayload("merkleHash", "stateHash")), 1, "address",  1)
 
         given(keyHolder.getPrivateKey()).willReturn(
             ByteUtils.fromHexString(privateKey))
         given(keyHolder.getPublicKeyAsHexString()).willReturn("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4")
         given(epochService.getSlotNumber(pendingBlock.timestamp)).willReturn(2L)
-        given(epochService.getCurrentSlotOwner()).willReturn(delegate.publicKey)
+        given(epochService.getCurrentSlotOwner()).willReturn(delegate.address)
         given(epochService.getDelegatesPublicKeys()).willReturn(listOf("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"))
         given(mainBlockService.verify(pendingBlock)).willReturn(true)
         given(chainSynchronizer.isInSync(any(MainBlock::class.java))).willReturn(true)
