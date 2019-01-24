@@ -5,6 +5,7 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.service.BlockService
+import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncMode.LIGHT
@@ -18,22 +19,26 @@ import org.springframework.stereotype.Component
 class FlywayDBChecker(
     private val nodeProperties: NodeProperties,
     private val consensusProperties: ConsensusProperties,
-    private val blockService: BlockService
+    private val blockService: BlockService,
+    private val fullSyncCursor: FullSyncCursor,
+    private val chainSynchronizer: ChainSynchronizer
 ) : Callback {
 
-
     override fun handle(event: Event?, context: Context?) {
-        checkDb(nodeProperties.syncMode!!)
+        if (!isValidkDb(nodeProperties.syncMode!!)) {
+            chainSynchronizer.sync()
+        }
     }
 
     override fun canHandleInTransaction(event: Event?, context: Context?): Boolean = true
 
     override fun supports(event: Event?, context: Context?): Boolean = (Event.AFTER_MIGRATE == event)
 
-    private fun checkDb(syncMode: SyncMode): Boolean {
+    private fun isValidkDb(syncMode: SyncMode): Boolean {
         val epochHeight = consensusProperties.epochHeight!!
-        var indexFrom = 1L
-        var indexTo = indexFrom + epochHeight
+        fullSyncCursor.cursor = 1L
+        var indexFrom = fullSyncCursor.cursor
+        var indexTo = indexFrom!! + epochHeight
         var block: Block? = null
         do {
             val blocks = blockService.findAllByHeightBetween(indexFrom, indexTo)
@@ -62,11 +67,17 @@ class FlywayDBChecker(
                 block = nextBlock
             }
         } while (!blocks.isEmpty())
-        return isValidBlockState(block!!)
+        if (!isValidBlockState(block!!)) {
+            return false
+        }
+        if (FULL == syncMode) {
+            fullSyncCursor.cursor = block.height
+        }
+        return true
     }
 
     private fun isValidFullBlocks(block: Block, nextBlock: Block): Boolean {
-        if (!isValidBlocksHashes(block, nextBlock)) {
+        if (!isValidBlocksHashes(block, nextBlock) || !isValidBlockState(block)) {
             return false
         }
 
@@ -83,9 +94,7 @@ class FlywayDBChecker(
             }
         }
 
-        if (!isValidBlockState(block)) {
-            return false
-        }
+        fullSyncCursor.cursor = block.height
         return true
     }
 
