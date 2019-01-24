@@ -51,6 +51,7 @@ class DefaultPendingBlockHandler(
         val slotOwner = epochService.getCurrentSlotOwner()
 
         if (blockSlotNumber > timeSlotNumber || epochService.isInIntermission(block.timestamp)) {
+            this.timeSlotNumber = blockSlotNumber
             this.reset()
         }
 
@@ -62,13 +63,12 @@ class DefaultPendingBlockHandler(
             return
         }
 
-        networkService.broadcast(block)
-        this.timeSlotNumber = blockSlotNumber
         if (IDLE == stage && isActiveDelegate() && mainBlockService.verify(block)) {
             this.observable = block
             this.stage = PREPARE
             val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKeyAsHexString())
             vote.signature = SignatureUtils.sign(vote.getBytes(), keyHolder.getPrivateKey())
+            networkService.broadcast(block)
             networkService.broadcast(vote)
         }
     }
@@ -89,17 +89,21 @@ class DefaultPendingBlockHandler(
     }
 
     private fun handlePrevote(message: BlockApprovalMessage) {
+        if (!isActiveDelegate()) {
+            return
+        }
+
         val delegates = epochService.getDelegates()
         val delegate = delegates.find { message.publicKey == it.publicKey }
 
-        if (null == delegate || null == observable || message.hash != observable!!.hash || !isActiveDelegate()) {
+        if (null == delegate || message.hash != observable?.hash || this.stage != PREPARE) {
             return
         }
 
         if (!prepareVotes.containsKey(message.publicKey) && isValidApprovalSignature(message)) {
             prepareVotes[message.publicKey] = delegate
             networkService.broadcast(message)
-            if (prepareVotes.size > (properties.delegatesCount!! - 1) / 3 && this.stage == PREPARE) {
+            if (prepareVotes.size > (properties.delegatesCount!! - 1) / 3) {
                 pendingBlocks.find { it.hash == message.hash }?.let {
                     if (it.hash == observable?.hash) {
                         this.stage = COMMIT
@@ -123,7 +127,7 @@ class DefaultPendingBlockHandler(
                 networkService.broadcast(message)
                 if (blockCommits.size > (properties.delegatesCount!! / 3 * 2) && !blockAddedFlag) {
                     pendingBlocks.find { it.hash == message.hash }?.let {
-                        if (!chainSynchronizer.isInSync(MainBlock.of(it))) {
+                        if (!chainSynchronizer.isInSync(MainBlock.of(it)) && it.hash != observable?.hash) {
                             chainSynchronizer.checkLastBlock()
                             return
                         }
