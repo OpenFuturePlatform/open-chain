@@ -41,7 +41,7 @@ class DelegateController(
         return PageResponse(PageImpl(pageActiveDelegate, request, activeDelegates.size.toLong()))
     }
 
-    @GetMapping("/delegate")
+    @GetMapping("/view")
     fun getAll(@Valid request: ViewDelegatePageRequest): PageResponse<ViewDelegateResponse> {
         val delegates = delegateStateService.getAllDelegates(request).map { delegate ->
             ViewDelegateResponse(delegate, walletStateService.getVotesForDelegate(delegate.address).size)
