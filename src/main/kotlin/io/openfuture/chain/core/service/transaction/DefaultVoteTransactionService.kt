@@ -157,7 +157,7 @@ internal class DefaultVoteTransactionService(
         }
 
         if (isVoted(utx.header.senderAddress, utx.payload.delegateKey, utx.payload.getVoteType())) {
-            throw ValidationException("Address ${utx.header.senderAddress} has voted for delegate",
+            throw ValidationException("Address ${utx.header.senderAddress} has voted invalid",
                 ALREADY_VOTED_FOR_DELEGATE)
         }
     }
@@ -172,8 +172,8 @@ internal class DefaultVoteTransactionService(
 
         val persistVote = walletStateService.getLastByAddress(senderAddress)
         return when (voteType) {
-            FOR -> persistVote?.voteFor != null
-            AGAINST -> persistVote?.voteFor == null || delegateKey != persistVote.voteFor
+            FOR -> null != persistVote?.voteFor
+            AGAINST -> null == persistVote?.voteFor || delegateKey != persistVote.voteFor
         }
     }
 

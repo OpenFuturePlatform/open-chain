@@ -272,8 +272,8 @@ class DefaultMainBlockService(
             val persistVote = walletStateService.getLastByAddress(sender.key)
             val vote = sender.value.first()
             return when (VoteType.getById(vote.voteTypeId)) {
-                FOR -> persistVote?.voteFor == null
-                AGAINST -> persistVote?.voteFor != null && vote.delegateKey == persistVote.voteFor
+                FOR -> null == persistVote?.voteFor
+                AGAINST -> null != persistVote?.voteFor && vote.delegateKey == persistVote.voteFor
             }
         }
 
