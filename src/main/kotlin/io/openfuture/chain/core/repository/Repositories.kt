@@ -152,6 +152,14 @@ interface DelegateStateRepository : StateRepository<DelegateState> {
 @Repository
 interface WalletStateRepository : StateRepository<WalletState> {
 
-    fun findAllByVoteFor(delegateKey: String): List<WalletState>
+    @Query("""
+        SELECT ws1 FROM WalletState ws1
+        WHERE ws1.voteFor=:delegateKey
+        AND ws1.block.height = (
+            SELECT MAX(ws2.block.height) FROM WalletState ws2
+            WHERE ws1.address=ws2.address
+        )
+        """)
+    fun findVotesByDelegateKey(@Param("delegateKey") delegateKey: String): List<WalletState>
 
 }

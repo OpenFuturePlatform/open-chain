@@ -156,21 +156,25 @@ internal class DefaultVoteTransactionService(
             throw ValidationException("Insufficient actual balance", INSUFFICIENT_ACTUAL_BALANCE)
         }
 
-        if (isAlreadyVoted(utx.header.senderAddress)) {
-            throw ValidationException("Address ${utx.header.senderAddress} has already voted for delegate",
+        if (isVoted(utx.header.senderAddress, utx.payload.delegateKey, utx.payload.getVoteType())) {
+            throw ValidationException("Address ${utx.header.senderAddress} has voted for delegate",
                 ALREADY_VOTED_FOR_DELEGATE)
         }
     }
 
     private fun isExistsDelegate(delegateKey: String): Boolean = delegateStateService.getLastByAddress(delegateKey) != null
 
-    private fun isAlreadyVoted(senderAddress: String): Boolean {
+    private fun isVoted(senderAddress: String, delegateKey: String, voteType: VoteType): Boolean {
         val unconfirmedVote = unconfirmedRepository.findAllByHeaderSenderAddress(senderAddress)
         if (unconfirmedVote.isNotEmpty()) {
             return true
         }
 
-        return walletStateService.getLastByAddress(senderAddress)?.voteFor != null
+        val persistVote = walletStateService.getLastByAddress(senderAddress)
+        return when (voteType) {
+            FOR -> persistVote?.voteFor != null
+            AGAINST -> persistVote?.voteFor == null || delegateKey != persistVote.voteFor
+        }
     }
 
     private fun isValidFee(typeId: Int, fee: Long): Boolean = when {

@@ -46,7 +46,7 @@ class DefaultWalletStateService(
         }
     }
 
-    override fun getVotesForDelegate(delegateKey: String): List<WalletState> = repository.findAllByVoteFor(delegateKey)
+    override fun getVotesForDelegate(delegateKey: String): List<WalletState> = repository.findVotesByDelegateKey(delegateKey)
 
     override fun updateBalanceByAddress(address: String, amount: Long): WalletStateMessage {
         val walletState = getCurrentState(address)
