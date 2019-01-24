@@ -55,7 +55,7 @@ class DefaultWalletStateService(
             delegateStateService.updateRating(walletState.voteFor!!, amount)
         }
 
-        val newWalletState = WalletStateMessage(address, walletState.balance + amount)
+        val newWalletState = WalletStateMessage(address, walletState.balance + amount, walletState.voteFor)
         statePool.update(newWalletState)
         return newWalletState
     }
