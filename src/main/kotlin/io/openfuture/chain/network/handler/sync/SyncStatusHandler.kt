@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component
 @Sharable
 class SyncStatusHandler(
     private val chainSynchronizer: ChainSynchronizer
-
 ) : SimpleChannelInboundHandler<Serializable>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: Serializable) {

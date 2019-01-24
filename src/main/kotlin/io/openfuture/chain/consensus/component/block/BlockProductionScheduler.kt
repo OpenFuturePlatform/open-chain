@@ -4,7 +4,6 @@ import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
-import io.openfuture.chain.core.service.block.DefaultGenesisBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.sync.SyncStatus.SYNCHRONIZED
 import io.openfuture.chain.network.component.time.ClockSynchronizer
@@ -48,7 +47,7 @@ class BlockProductionScheduler(
 
             if (SYNCHRONIZED != chainSynchronizer.getStatus()) {
                 log.debug("Ledger is ${chainSynchronizer.getStatus()}")
-                chainSynchronizer.sync()
+                chainSynchronizer.checkLastBlock()
                 return
             }
 

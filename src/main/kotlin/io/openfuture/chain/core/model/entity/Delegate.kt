@@ -1,6 +1,8 @@
 package io.openfuture.chain.core.model.entity
 
 import io.openfuture.chain.core.model.entity.base.BaseModel
+import io.openfuture.chain.network.entity.NetworkAddress
+import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.sync.DelegateMessage
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -31,6 +33,8 @@ class Delegate(
     id: Long = 0L
 
 ) : BaseModel(id) {
+
+    fun toNodeInfo(): NodeInfo = NodeInfo(nodeId, NetworkAddress(host, port))
 
     fun toMessage() = DelegateMessage(publicKey, nodeId, address, host, port, registrationDate)
 

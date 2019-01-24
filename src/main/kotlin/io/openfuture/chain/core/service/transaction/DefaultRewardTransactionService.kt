@@ -3,7 +3,6 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
@@ -61,21 +60,16 @@ class DefaultRewardTransactionService(
     }
 
     @Transactional
-    override fun toBlock(transaction: RewardTransaction, block: MainBlock) {
-        return toBlock(transaction.toMessage(), block)
-    }
-
-    @Transactional
-    override fun toBlock(message: RewardTransactionMessage, block: MainBlock) {
+    override fun commit(transaction: RewardTransaction) {
         BlockchainLock.writeLock.lock()
         try {
-            val transaction = repository.findOneByFooterHash(message.hash)
-            if (null != transaction) {
+            val persistedTransaction = repository.findOneByFooterHash(transaction.footer.hash)
+            if (null != persistedTransaction) {
                 return
             }
 
-            updateTransferBalance(message.recipientAddress, message.reward)
-            repository.save(RewardTransaction.of(message, block))
+            updateTransferBalance(transaction.payload.recipientAddress, transaction.payload.reward)
+            repository.save(transaction)
         } finally {
             BlockchainLock.writeLock.unlock()
         }
@@ -93,11 +87,6 @@ class DefaultRewardTransactionService(
             log.warn(e.message)
             false
         }
-    }
-
-    @Transactional
-    override fun save(transaction: RewardTransaction) {
-        repository.save(transaction)
     }
 
     private fun updateTransferBalance(to: String, amount: Long) {
