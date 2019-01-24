@@ -5,7 +5,9 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
+import io.openfuture.chain.core.sync.SyncStatus.NOT_SYNCHRONIZED
 import io.openfuture.chain.core.sync.SyncStatus.SYNCHRONIZED
+import io.openfuture.chain.network.component.time.ClockChecker
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -21,7 +23,8 @@ class BlockProductionScheduler(
     private val mainBlockService: MainBlockService,
     private val genesisBlockService: GenesisBlockService,
     private val pendingBlockHandler: PendingBlockHandler,
-    private val chainSynchronizer: ChainSynchronizer
+    private val chainSynchronizer: ChainSynchronizer,
+    private val clockChecker: ClockChecker
 ) {
 
     companion object {
@@ -38,6 +41,10 @@ class BlockProductionScheduler(
 
     private fun proceedProductionLoop() {
         try {
+            if (NOT_SYNCHRONIZED == clockChecker.getStatus()) {
+                log.error("Please set up Time synchronization by the ntp servers, cause: Current time offset from ntp servers is ${clockChecker.getOffset()} ms.")
+                return
+            }
 
             if (SYNCHRONIZED != chainSynchronizer.getStatus()) {
                 log.debug("Ledger is ${chainSynchronizer.getStatus()}")

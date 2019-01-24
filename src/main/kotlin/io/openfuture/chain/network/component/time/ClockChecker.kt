@@ -1,6 +1,8 @@
 package io.openfuture.chain.network.component.time
 
-import io.openfuture.chain.network.component.time.exception.ClockException
+import io.openfuture.chain.core.sync.SyncStatus
+import io.openfuture.chain.core.sync.SyncStatus.NOT_SYNCHRONIZED
+import io.openfuture.chain.core.sync.SyncStatus.SYNCHRONIZED
 import io.openfuture.chain.network.property.NodeProperties
 import org.apache.commons.net.ntp.NTPUDPClient
 import org.apache.commons.net.ntp.TimeInfo
@@ -8,6 +10,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.net.InetAddress
 import java.net.SocketTimeoutException
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 import javax.annotation.PostConstruct
 import kotlin.math.absoluteValue
 
@@ -21,25 +26,34 @@ class ClockChecker(
         private val log = LoggerFactory.getLogger(ClockChecker::class.java)
     }
 
+    private val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
     private val ntpInetAddresses = properties.ntpServers.map { InetAddress.getByName(it) }
+    private var status = SYNCHRONIZED
+    private var offset: Long = 0L
 
 
     @PostConstruct
-    private fun sync() {
+    fun sync() {
         try {
             val quizResult = startNtpQuiz(ntpInetAddresses)
             val list = mutableListOf<Long>()
             list.addAll(quizResult.map { it.offset })
 
-            if (list.minBy { it.absoluteValue }!! >= properties.ntpOffsetThreshold!!) {
-                log.error("Time is not synchronized by ntp servers")
-                throw ClockException("Please set up Time synchronization by the ntp servers, cause: Current time offset from ntp servers is ${list.min()!!} ms.")
+            val minOffset = list.minBy { it.absoluteValue }!!
+            if (minOffset >= properties.ntpOffsetThreshold!!) {
+                status = NOT_SYNCHRONIZED
+                offset = minOffset
+                return
             }
-        } catch (ex: ClockException) {
-            log.error(ex.message!!)
-            System.exit(1)
+            status = SYNCHRONIZED
+        } finally {
+            executor.schedule({ sync() }, properties.checkTimeInterval!!, TimeUnit.MILLISECONDS)
         }
     }
+
+    fun getOffset(): Long = offset
+
+    fun getStatus(): SyncStatus = status
 
     private fun startNtpQuiz(ntpInetAddresses: List<InetAddress>): MutableList<TimeInfo> {
         val quizResult = mutableListOf<TimeInfo>()

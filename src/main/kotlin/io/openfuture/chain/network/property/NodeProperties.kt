@@ -83,7 +83,10 @@ class NodeProperties(
     var syncMode: SyncMode? = null,
 
     @field:NotNull
-    var ntpOffsetThreshold: Long? = null
+    var ntpOffsetThreshold: Long? = null,
+
+    @field:NotNull
+    var checkTimeInterval: Long? = null
 
 ) {
 
