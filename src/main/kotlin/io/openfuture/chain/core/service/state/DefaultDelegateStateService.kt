@@ -25,22 +25,17 @@ class DefaultDelegateStateService(
     }
 
 
-    @Transactional(readOnly = true)
     override fun getAllDelegates(request: PageRequest): List<DelegateState> = repository.findLastAll(request)
 
-    @Transactional(readOnly = true)
     override fun getActiveDelegates(): List<DelegateState> {
         val sortBy = setOf("rating", "id")
         return getAllDelegates(PageRequest(0, consensusProperties.delegatesCount!!, sortBy, Sort.Direction.DESC))
     }
 
-    @Transactional(readOnly = true)
     override fun isExistsByPublicKey(key: String): Boolean = null != getLastByAddress(key)
 
-    @Transactional(readOnly = true)
     override fun isExistsByPublicKeys(publicKeys: List<String>): Boolean = publicKeys.all { isExistsByPublicKey(it) }
 
-    @Transactional(readOnly = true)
     override fun updateRating(delegateKey: String, amount: Long): DelegateStateMessage {
         val state = getCurrentState(delegateKey)
         val newState = DelegateStateMessage(state.address, state.rating + amount, state.walletAddress, state.createDate)
