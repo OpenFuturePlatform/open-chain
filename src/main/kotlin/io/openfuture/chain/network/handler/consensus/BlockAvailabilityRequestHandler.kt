@@ -3,7 +3,6 @@ package io.openfuture.chain.network.handler.consensus
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
-import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.network.message.consensus.BlockAvailabilityRequest

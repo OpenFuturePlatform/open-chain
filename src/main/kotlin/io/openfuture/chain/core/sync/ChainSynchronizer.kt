@@ -21,7 +21,10 @@ import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.network.message.core.RewardTransactionMessage
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
-import io.openfuture.chain.network.message.sync.*
+import io.openfuture.chain.network.message.sync.EpochRequestMessage
+import io.openfuture.chain.network.message.sync.EpochResponseMessage
+import io.openfuture.chain.network.message.sync.GenesisBlockMessage
+import io.openfuture.chain.network.message.sync.MainBlockMessage
 import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.NetworkApiService
 import org.slf4j.Logger

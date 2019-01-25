@@ -11,7 +11,10 @@ import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.message.network.GreetingResponseMessage
 import io.openfuture.chain.network.message.network.HeartBeatMessage
 import io.openfuture.chain.network.message.network.NewClient
-import io.openfuture.chain.network.message.sync.*
+import io.openfuture.chain.network.message.sync.EpochRequestMessage
+import io.openfuture.chain.network.message.sync.EpochResponseMessage
+import io.openfuture.chain.network.message.sync.GenesisBlockMessage
+import io.openfuture.chain.network.message.sync.MainBlockMessage
 import io.openfuture.chain.network.serialization.Serializable
 import kotlin.reflect.KClass
 
