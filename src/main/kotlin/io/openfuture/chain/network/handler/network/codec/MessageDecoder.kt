@@ -3,7 +3,6 @@ package io.openfuture.chain.network.handler.network.codec
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.ReplayingDecoder
-import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.message.base.MessageType
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
@@ -19,8 +18,7 @@ import org.springframework.stereotype.Component
 @Component
 @Scope(SCOPE_PROTOTYPE)
 class MessageDecoder(
-    private val nodeProperties: NodeProperties,
-    private val clock: Clock
+    private val nodeProperties: NodeProperties
 ) : ReplayingDecoder<Nothing>() {
 
     companion object {
@@ -58,7 +56,7 @@ class MessageDecoder(
             return false
         }
 
-        return (clock.currentTimeMillis() - originTime) > nodeProperties.expiry!!
+        return (System.currentTimeMillis() - originTime) > nodeProperties.expiry!!
     }
 
 }

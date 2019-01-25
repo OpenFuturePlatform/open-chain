@@ -1,6 +1,5 @@
 package io.openfuture.chain.config
 
-import io.openfuture.chain.network.component.time.Clock
 import io.openfuture.chain.network.property.NodeProperties
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,9 +15,6 @@ import org.springframework.test.web.reactive.server.WebTestClient
 @RunWith(SpringRunner::class)
 @Import(NodeProperties::class)
 abstract class ControllerTests {
-
-    @MockBean
-    protected lateinit var clock: Clock
 
     @MockBean
     private lateinit var nodeProperties: NodeProperties
