@@ -63,7 +63,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
             "hash", "signature", "publicKey", payload.merkleHash, payload.stateHash,
             rewardTransactionMessage, listOf(), listOf(), listOf(), listOf(), listOf())
         val delegate = DelegateState("publicKey", MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
-            MainBlockPayload("merkleHash", "stateHash")), 1, "address",  1)
+            MainBlockPayload("merkleHash", "stateHash")), 1, "address", 1)
 
         given(keyHolder.getPrivateKey()).willReturn(
             ByteUtils.fromHexString(privateKey))
@@ -102,15 +102,13 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
         message.signature = SignatureUtils.sign(message.getBytes(), ByteUtils.fromHexString(privateKey))
 
-        given(keyHolder.getPrivateKey()).willReturn(
-            ByteUtils.fromHexString(privateKey))
+        given(keyHolder.getPrivateKey()).willReturn(ByteUtils.fromHexString(privateKey))
         given(keyHolder.getPublicKeyAsHexString()).willReturn(publicKey)
         given(epochService.getSlotNumber(pendingBlock.timestamp)).willReturn(2L)
         given(epochService.getCurrentSlotOwner()).willReturn(publicKey)
         given(mainBlockService.verify(pendingBlock)).willReturn(true)
         given(epochService.getDelegatesPublicKeys()).willReturn(
             listOf("020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948"))
-        given(chainSynchronizer.isInSync(any(MainBlock::class.java))).willReturn(true)
         defaultPendingBlockHandler.addBlock(pendingBlock)
 
         given(epochService.getDelegatesPublicKeys()).willReturn(listOf(publicKey))
