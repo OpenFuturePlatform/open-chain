@@ -1,11 +1,9 @@
 package io.openfuture.chain.network.component.time
 
-import io.openfuture.chain.core.sync.SyncStatus
-import io.openfuture.chain.core.sync.SyncStatus.NOT_SYNCHRONIZED
-import io.openfuture.chain.core.sync.SyncStatus.SYNCHRONIZED
+import io.openfuture.chain.network.component.time.ClockSyncStatus.NOT_SYNCHRONIZED
+import io.openfuture.chain.network.component.time.ClockSyncStatus.SYNCHRONIZED
 import io.openfuture.chain.network.property.NodeProperties
 import org.apache.commons.net.ntp.NTPUDPClient
-import org.apache.commons.net.ntp.TimeInfo
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.net.InetAddress
@@ -27,53 +25,51 @@ class ClockChecker(
     }
 
     private val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
-    private val ntpInetAddresses = properties.ntpServers.map { InetAddress.getByName(it) }
     private var status = SYNCHRONIZED
-    private var offset: Long = 0L
-
 
     @PostConstruct
-    fun sync() {
-        try {
-            val quizResult = startNtpQuiz(ntpInetAddresses)
-            val list = mutableListOf<Long>()
-            list.addAll(quizResult.map { it.offset })
-
-            val minOffset = list.minBy { it.absoluteValue }!!
-            if (minOffset >= properties.ntpOffsetThreshold!!) {
-                status = NOT_SYNCHRONIZED
-                offset = minOffset
-                return
-            }
-            status = SYNCHRONIZED
-        } finally {
-            executor.schedule({ sync() }, properties.checkTimeInterval!!, TimeUnit.MILLISECONDS)
-        }
+    fun init() {
+        check()
     }
 
-    fun getOffset(): Long = offset
+    fun getStatus(): ClockSyncStatus = status
 
-    fun getStatus(): SyncStatus = status
-
-    private fun startNtpQuiz(ntpInetAddresses: List<InetAddress>): MutableList<TimeInfo> {
-        val quizResult = mutableListOf<TimeInfo>()
-        var info: TimeInfo
-        do {
-            for (address in ntpInetAddresses) {
+    private fun check() {
+        try {
+            val absOffsets = mutableListOf<Long>()
+            for (address in properties.ntpServers) {
                 try {
-                    info = ntpClient.getTime(address)
-                    info.computeDetails()
-                    log.trace("Ntp server ${address.hostName} answer ${info.offset}")
-
-                    quizResult.add(info)
+                    val ntpResponse = ntpClient.getTime(InetAddress.getByName(address))
+                    ntpResponse.computeDetails()
+                    absOffsets.add(ntpResponse.offset.absoluteValue)
                 } catch (e: SocketTimeoutException) {
-                    log.trace("Ntp server ${address.hostName} answers too long")
+                    log.trace("Ntp server: $address is unavailable")
                 } finally {
                     ntpClient.close()
                 }
             }
-        } while (quizResult.size < 1)
-        return quizResult
+
+            if (absOffsets.isEmpty()) {
+                status = NOT_SYNCHRONIZED
+                log.error("Clock is not synchronised: nobody answered")
+                return
+            }
+
+            if (absOffsets.min()!! >= properties.ntpOffsetThreshold!!) {
+                status = NOT_SYNCHRONIZED
+                log.info("Clock is not synchronised: offset ${absOffsets.min()} is critical")
+                return
+            }
+
+            status = SYNCHRONIZED
+        } finally {
+            executor.schedule({ check() }, status.checkDelay, TimeUnit.MILLISECONDS)
+        }
     }
 
+}
+
+enum class ClockSyncStatus (val checkDelay: Long) {
+    SYNCHRONIZED(3600000),
+    NOT_SYNCHRONIZED(60000)
 }

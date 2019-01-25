@@ -5,9 +5,9 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
-import io.openfuture.chain.core.sync.SyncStatus.NOT_SYNCHRONIZED
 import io.openfuture.chain.core.sync.SyncStatus.SYNCHRONIZED
 import io.openfuture.chain.network.component.time.ClockChecker
+import io.openfuture.chain.network.component.time.ClockSyncStatus.NOT_SYNCHRONIZED
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -42,7 +42,7 @@ class BlockProductionScheduler(
     private fun proceedProductionLoop() {
         try {
             if (NOT_SYNCHRONIZED == clockChecker.getStatus()) {
-                log.error("Please set up Time synchronization by the ntp servers, cause: Current time offset from ntp servers is ${clockChecker.getOffset()} ms.")
+                log.error("Please set up Time synchronization by the ntp servers")
                 return
             }
 
