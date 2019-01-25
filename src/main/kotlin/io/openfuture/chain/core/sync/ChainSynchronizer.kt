@@ -61,38 +61,6 @@ class ChainSynchronizer(
 
     fun getStatus(): SyncStatus = status
 
-    /**
-    @Synchronized
-    fun sync() {
-    log.info("Chain is $status")
-    if (PROCESSING == status) {
-    return
-    }
-    status = PROCESSING
-
-    requestLatestGenesisBlock()
-    }
-
-    fun onGenesisBlockResponse(message: GenesisBlockMessage) {
-    resetRequestScheduler()
-    val delegates = genesisBlockService.getLast().payload.activeDelegates
-    try {
-    val currentGenesisBlock = GenesisBlock.of(message)
-    val lastLocalGenesisBlock = genesisBlockService.getLast()
-
-    if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
-    syncSession = SyncSession(properties.syncMode!!, lastLocalGenesisBlock, currentGenesisBlock)
-    requestEpoch(delegates)
-    } else {
-    requestLatestGenesisBlock()
-    }
-    } catch (e: Throwable) {
-    log.error(e.message)
-    syncFailed()
-    }
-    }
-     **/
-
     fun onEpochResponse(message: EpochResponseMessage) {
         future?.cancel(true)
         val delegates = genesisBlockService.getLast().payload.activeDelegates
@@ -170,14 +138,14 @@ class ChainSynchronizer(
     }
 
     private fun initSync(message: GenesisBlockMessage) {
-        val nodesInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
+        val delegates = genesisBlockService.getLast().payload.activeDelegates
         try {
             val currentGenesisBlock = GenesisBlock.of(message)
             val lastLocalGenesisBlock = genesisBlockService.getLast()
 
             if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
                 syncSession = SyncSession(properties.syncMode!!, lastLocalGenesisBlock, currentGenesisBlock)
-                requestEpoch(nodesInfo)
+                requestEpoch(delegates)
             } else {
                 checkBlock(lastLocalGenesisBlock)
             }
@@ -350,9 +318,11 @@ class ChainSynchronizer(
     }
 
     private fun checkBlock(block: Block) {
-        val delegate = epochService.getDelegates().random().toNodeInfo()
-        val message = BlockAvailabilityRequest(block.hash)
-        networkApiService.sendToAddress(message, delegate)
+        val delegate = epochService.getDelegatesPublicKeys().random()
+        val nodeInfo = addressesHolder.getNodeInfoByUid(delegate)
+        if (null != nodeInfo) {
+            networkApiService.sendToAddress(BlockAvailabilityRequest(block.hash), nodeInfo)
+        }
     }
 
     private fun expired() {
