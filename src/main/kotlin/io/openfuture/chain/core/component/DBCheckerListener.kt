@@ -27,7 +27,7 @@ class DBCheckerListener(
     }
 
     private fun deleteInvalidChainPart() {
-        val heightFrom = syncCursor.fullCursor.height
+        val heightFrom = syncCursor.fullCursor.height + 1
         val heightTo = blockService.getLast().height
         val heightsToDelete = ArrayList<Long>()
         for (i in heightFrom..heightTo) {
@@ -66,6 +66,7 @@ class DBCheckerListener(
 
     private fun isValidBlocks(block: Block, nextBlock: Block): Boolean {
         if (!isValidBlocksHashes(block, nextBlock)) {
+            syncCursor.fullCursor = block
             return false
         }
         if (!isValidBlock(block)) {
