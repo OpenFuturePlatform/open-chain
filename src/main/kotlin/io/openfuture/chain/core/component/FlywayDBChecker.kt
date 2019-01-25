@@ -6,42 +6,37 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
-import io.openfuture.chain.core.service.TransactionService
-import io.openfuture.chain.core.sync.ChainSynchronizer
 import org.flywaydb.core.api.callback.Callback
 import org.flywaydb.core.api.callback.Context
 import org.flywaydb.core.api.callback.Event
 import org.springframework.stereotype.Component
-import java.util.*
 
 @Component
 class FlywayDBChecker(
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockService: GenesisBlockService,
     private val blockService: BlockService,
-    private val transactionService: TransactionService,
-    private val syncCursor: SyncCursor,
-    private val chainSynchronizer: ChainSynchronizer
+    private val syncCursor: SyncCursor
 ) : Callback {
 
     private var cursorFlag: Boolean = true
 
 
-    override fun handle(event: Event?, context: Context?) {
+    override fun handle(event: Event, context: Context) {
         if (!isValidDb()) {
-            val hightFrom = syncCursor.fullCursor.height
-            val hightTo = blockService.getLast().height
+            val heightFrom = syncCursor.fullCursor.height
+            val heightTo = blockService.getLast().height
             val heightsToDelete = ArrayList<Long>()
-            for (i in hightFrom..hightTo) {
+            for (i in heightFrom..heightTo) {
                 heightsToDelete.add(i)
             }
             blockService.deleteByHeightIn(heightsToDelete)
         }
     }
 
-    override fun canHandleInTransaction(event: Event?, context: Context?): Boolean = true
+    override fun canHandleInTransaction(event: Event, context: Context): Boolean = true
 
-    override fun supports(event: Event?, context: Context?): Boolean = (Event.AFTER_MIGRATE == event)
+    override fun supports(event: Event, context: Context): Boolean = (Event.AFTER_MIGRATE == event)
 
     private fun isValidDb(): Boolean {
         val epochHeight = consensusProperties.epochHeight!!
