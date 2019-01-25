@@ -39,4 +39,14 @@ abstract class BaseStateService<T : State>(
         }
     }
 
+    override fun deleteBlockStates(blockHeights: List<Long>) {
+        BlockchainLock.writeLock.lock()
+        try {
+            repository.deleteAllByBlockHeightIn(blockHeights)
+            repository.flush()
+        } finally {
+            BlockchainLock.writeLock.unlock()
+        }
+    }
+
 }

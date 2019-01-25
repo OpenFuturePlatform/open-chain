@@ -224,6 +224,8 @@ interface StateService<T : State> {
 
     fun getByAddressAndBlock(address: String, block: Block): T?
 
+    fun deleteBlockStates(blockHeights: List<Long>)
+
 }
 
 interface DelegateStateService : StateService<DelegateState> {

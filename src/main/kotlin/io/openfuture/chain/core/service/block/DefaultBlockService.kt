@@ -65,6 +65,8 @@ class DefaultBlockService(
         val toHeight = fromHeight + properties.epochHeight!!
         val heightRange = (fromHeight..toHeight).toList()
         transactionService.deleteBlockTransactions(heightRange)
+        delegateStateService.deleteBlockStates(heightRange)
+        walletStateService.deleteBlockStates(heightRange)
         repository.deleteAllByHeightIn(heightRange)
     }
 
