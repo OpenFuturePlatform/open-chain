@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.sync
 
 import io.openfuture.chain.consensus.service.EpochService
+import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
@@ -41,6 +42,8 @@ class ChainSynchronizer(
     private val genesisBlockService: GenesisBlockService,
     private val voteTransactionService: VoteTransactionService,
     private val rewardTransactionService: RewardTransactionService,
+    private val delegateService: DelegateService,
+    private val nodeKeyHolder: NodeKeyHolder,
     private val epochService: EpochService,
     private val requestRetryScheduler: RequestRetryScheduler,
     private val delegateTransactionService: DelegateTransactionService,
@@ -61,6 +64,9 @@ class ChainSynchronizer(
 
     fun getStatus(): SyncStatus = status
 
+    fun isDelegate(): Boolean = (null == delegateService.findByNodeId(nodeKeyHolder.getUid()))
+
+
     fun onEpochResponse(message: EpochResponseMessage) {
         future?.cancel(true)
         val nodesInfo = genesisBlockService.getLast().payload.activeDelegates.map { getNodeInfo(it) }.toList()
@@ -70,7 +76,7 @@ class ChainSynchronizer(
                 return
             }
 
-            if (syncSession!!.syncMode == FULL &&
+            if (isDelegate() || syncSession!!.syncMode == FULL &&
                 !isValidMerkleRoot(message.mainBlocks) && !isValidTransactions(message.mainBlocks)) {
                 requestEpoch(nodesInfo.filter { it.uid != message.nodeId })
                 return
@@ -157,7 +163,7 @@ class ChainSynchronizer(
         val mainBlocks = message.mainBlocks.map {
             val mainBlock = MainBlock.of(it)
             mainBlock.payload.rewardTransaction = mutableListOf(RewardTransaction.of(it.rewardTransaction, mainBlock))
-            if (syncSession!!.syncMode == FULL) {
+            if (isDelegate() || syncSession!!.syncMode == FULL) {
                 it.voteTransactions.forEach { vTx -> mainBlock.payload.voteTransactions.add(VoteTransaction.of(vTx, mainBlock)) }
                 it.delegateTransactions.forEach { dTx -> mainBlock.payload.delegateTransactions.add(DelegateTransaction.of(dTx, mainBlock)) }
                 it.transferTransactions.forEach { vTx -> mainBlock.payload.transferTransactions.add(TransferTransaction.of(vTx, mainBlock)) }
