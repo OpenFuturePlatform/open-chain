@@ -78,6 +78,12 @@ class DefaultBlockService(
     override fun findAllByHeightBetween(beginHeight: Long, endHeight: Long): List<Block> =
         repository.findAllByHeightBetween(beginHeight, endHeight)
 
+    @Transactional
+    override fun deleteByHeightIn(heights: List<Long>) {
+        transactionService.deleteBlockTransactions(heights)
+        repository.deleteAllByHeightIn(heights)
+    }
+
     @Transactional(readOnly = true)
     override fun getCurrentHeight(): Long = repository.getCurrentHeight()
 

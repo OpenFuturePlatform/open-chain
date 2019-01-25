@@ -68,6 +68,8 @@ interface BlockService {
 
     fun findAllByHeightBetween(beginHeight: Long, endHeight: Long): List<Block>
 
+    fun deleteByHeightIn(heights: List<Long>)
+
 }
 
 interface GenesisBlockService {

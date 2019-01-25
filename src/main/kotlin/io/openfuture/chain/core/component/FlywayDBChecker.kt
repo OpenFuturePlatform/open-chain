@@ -6,26 +6,36 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import org.flywaydb.core.api.callback.Callback
 import org.flywaydb.core.api.callback.Context
 import org.flywaydb.core.api.callback.Event
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 class FlywayDBChecker(
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockService: GenesisBlockService,
     private val blockService: BlockService,
-    private val syncCursor: SyncCursor,private val chainSynchronizer: ChainSynchronizer
+    private val transactionService: TransactionService,
+    private val syncCursor: SyncCursor,
+    private val chainSynchronizer: ChainSynchronizer
 ) : Callback {
 
     private var cursorFlag: Boolean = true
 
 
     override fun handle(event: Event?, context: Context?) {
-        if(!isValidDb()){
-           // rollback(syncCursor)
+        if (!isValidDb()) {
+            val hightFrom = syncCursor.fullCursor.height
+            val hightTo = blockService.getLast().height
+            val heightsToDelete = ArrayList<Long>()
+            for (i in hightFrom..hightTo) {
+                heightsToDelete.add(i)
+            }
+            blockService.deleteByHeightIn(heightsToDelete)
         }
     }
 
@@ -58,10 +68,7 @@ class FlywayDBChecker(
                 block = nextBlock
             }
         } while (!blocks.isEmpty())
-        if (!isValidBlock(block!!)) {
-            return false
-        }
-        return true
+        return isValidBlock(block!!)
     }
 
     private fun isValidBlocks(block: Block, nextBlock: Block): Boolean {
@@ -80,6 +87,7 @@ class FlywayDBChecker(
         }
         if (!isValidTransactions(block)) {
             cursorFlag = false
+            return false
         }
         if (cursorFlag) {
             syncCursor.fullCursor = block
@@ -88,18 +96,23 @@ class FlywayDBChecker(
     }
 
     private fun isValidTransactions(block: Block): Boolean {
-        return if (block is MainBlock) {
+        if (block is MainBlock) {
             val hashes = mutableListOf<String>()
             hashes.addAll(block.payload.transferTransactions.map { it.footer.hash })
             hashes.addAll(block.payload.voteTransactions.map { it.footer.hash })
             hashes.addAll(block.payload.delegateTransactions.map { it.footer.hash })
             hashes.add(block.payload.rewardTransaction[0].footer.hash)
-            val transactionsMerkleHash = MainBlockPayload.calculateMerkleRoot(hashes)
 
-            block.payload.merkleHash == transactionsMerkleHash
-        } else {
-            true
+            if (hashes.isEmpty()) {
+                return true
+            }
+
+            val transactionsMerkleHash = MainBlockPayload.calculateMerkleRoot(hashes)
+            if (block.payload.merkleHash != transactionsMerkleHash) {
+                return false
+            }
         }
+        return true
     }
 
     private fun isValidBlocksHashes(block: Block, nextBlock: Block): Boolean = (block.hash == nextBlock.previousHash)
