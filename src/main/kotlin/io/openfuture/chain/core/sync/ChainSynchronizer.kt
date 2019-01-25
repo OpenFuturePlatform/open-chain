@@ -188,16 +188,16 @@ class ChainSynchronizer(
         try {
             for (block in blocks) {
                 if (!isValidRewardTransactions(block.rewardTransaction)) {
-                    throw ValidationException("Invalid reward transaction")
+                    throw ValidationException("Invalid reward transaction in block: height #${block.height}, hash ${block.hash} ")
                 }
                 if (!isValidDelegateTransactions(block.delegateTransactions)) {
-                    throw ValidationException("Invalid delegate transactions")
+                    throw ValidationException("Invalid delegate transactions in block: height #${block.height}, hash ${block.hash}")
                 }
                 if (!isValidTransferTransactions(block.transferTransactions)) {
-                    throw ValidationException("Invalid transfer transactions")
+                    throw ValidationException("Invalid transfer transactions in block: height #${block.height}, hash ${block.hash}")
                 }
                 if (!isValidVoteTransactions(block.voteTransactions)) {
-                    throw ValidationException("Invalid vote transactions")
+                    throw ValidationException("Invalid vote transactions in block: height #${block.height}, hash ${block.hash}")
                 }
             }
         } catch (e: ValidationException) {
@@ -249,7 +249,7 @@ class ChainSynchronizer(
     private fun isValidStateMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
         mainBlocks.forEach { block ->
             if (!isValidRootHash(block.stateHash, block.getAllStates().map { it.getHash() })) {
-                log.debug("Invalid state hash: ${block.stateHash}")
+                log.warn("State merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
                 return false
             }
         }
@@ -259,7 +259,7 @@ class ChainSynchronizer(
     private fun isValidTransactionMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
         mainBlocks.forEach { block ->
             if (!isValidRootHash(block.merkleHash, block.getAllTransactions().map { it.hash })) {
-                log.debug("Invalid transaction hash: ${block.merkleHash}")
+                log.warn("Transaction merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
                 return false
             }
         }
@@ -298,7 +298,7 @@ class ChainSynchronizer(
 
             filteredStorage.asReversed().chunked(properties.syncBatchSize!!).forEach {
                 blockService.saveChunk(it, syncSession!!.syncMode)
-                log.debug("Blocks saved from ${it.first().height} to ${it.last().height}")
+                log.info("Blocks saved till ${it.last().height} from ${filteredStorage.first().height}")
             }
 
             syncSession = null

@@ -87,6 +87,8 @@ class DefaultGenesisBlockService(
     @Synchronized
     override fun add(block: GenesisBlock) {
         super.save(block)
+        log.debug("Saving genesis block: height #${block.height}, hash ${block.hash}")
+
     }
 
     @Transactional

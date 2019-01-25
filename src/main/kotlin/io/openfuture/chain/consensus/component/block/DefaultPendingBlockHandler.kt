@@ -7,6 +7,7 @@ import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.MainBlockService
+import io.openfuture.chain.core.service.block.DefaultMainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -128,10 +129,11 @@ class DefaultPendingBlockHandler(
                     pendingBlocks.find { it.hash == message.hash }?.let {
                         if (!chainSynchronizer.isInSync(MainBlock.of(it)) && it.hash != observable?.hash) {
                             chainSynchronizer.checkLastBlock()
+                            reset()
                             return
                         }
                         mainBlockService.add(it)
-                        log.debug("CONSENSUS: Saved main block with hash = ${it.hash}")
+                        log.info("Saving main block: height #${it.height}, hash ${it.hash}")
                     }
                     blockAddedFlag = true
                 }
