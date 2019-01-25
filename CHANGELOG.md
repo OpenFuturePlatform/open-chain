@@ -6,13 +6,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Core: blocks rollback
 - Core: wallet states
 - Core: node states
+- Core: light synchronization
 
 ## Changed
-- Core: delegate info stores in state
-- Core: wallet balance stores in state
-- Core: account have one vote for delegate
+- Consensus: sequential ordering of active delegates
+- Consensus: in case active delegate does not produce block due to its possible unavailability, boot node will produce it
+- Consensus: invalid blocks are not broadcast across the network
+- Core: removed redundant logs
+- Core: delegate info is stored in state
+- Core: wallet balance is stored in state
+- Core: account has one vote for delegate
 
 ## [1.7.1] - 2019-01-21
 ### Fixed
