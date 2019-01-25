@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Changed
 - Core: delegate info stores in state
 - Core: wallet balance stores in state
+- Core: account have one vote for delegate
 
 ## [1.7.1] - 2019-01-21
 ### Fixed
