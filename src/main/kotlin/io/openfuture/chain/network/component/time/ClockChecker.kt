@@ -27,6 +27,7 @@ class ClockChecker(
     private val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
     private var status = SYNCHRONIZED
 
+
     @PostConstruct
     fun init() {
         check()
@@ -67,9 +68,4 @@ class ClockChecker(
         }
     }
 
-}
-
-enum class ClockSyncStatus (val checkDelay: Long) {
-    SYNCHRONIZED(3600000),
-    NOT_SYNCHRONIZED(60000)
 }
