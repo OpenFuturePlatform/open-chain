@@ -130,6 +130,7 @@ class DefaultPendingBlockHandler(
                     pendingBlocks.find { it.hash == message.hash }?.let {
                         if (!chainSynchronizer.isInSync(MainBlock.of(it)) && it.hash != observable?.hash) {
                             chainSynchronizer.checkLastBlock()
+                            reset()
                             return
                         }
                         mainBlockService.add(it)
