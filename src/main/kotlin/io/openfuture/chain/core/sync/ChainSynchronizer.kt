@@ -84,7 +84,7 @@ class ChainSynchronizer(
 
             val epochsFrom =  syncSession!!.getCurrentGenesisBlock().payload.epochIndex - syncSession!!.getLastLocalGenesisBlock().payload.epochIndex
             val epochsProcessed = syncSession!!.getCurrentGenesisBlock().payload.epochIndex - message.genesisBlock!!.epochIndex
-            log.info("EpochResponseMessage: №$epochsProcessed FROM $epochsFrom is processed")
+            log.info("EpochResponseMessage: #$epochsProcessed FROM $epochsFrom is processed")
             if (!syncSession!!.isCompleted()) {
                 requestEpoch(nodesInfo)
                 return
