@@ -153,7 +153,6 @@ class DefaultMainBlockService(
             }
 
             throughput.updateThroughput(message.getAllTransactions().size, savedBlock.height)
-            log.info("Saving main block: height #${block.height}, hash ${block.hash}")
         } finally {
             BlockchainLock.writeLock.unlock()
         }

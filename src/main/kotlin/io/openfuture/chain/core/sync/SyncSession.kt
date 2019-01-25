@@ -4,16 +4,24 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.*
 
 class SyncSession(
     val syncMode: SyncMode,
     private val lastLocalGenesisBlock: GenesisBlock,
-    private val currentGenesisBlock: GenesisBlock
+    private val currentGenesisBlock: GenesisBlock,
+    private val epochQuantity: Long = currentGenesisBlock.payload.epochIndex - lastLocalGenesisBlock.payload.epochIndex
 ) {
+
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(SyncSession::class.java)
+    }
 
     private val storage: SortedSet<Block> = TreeSet(kotlin.Comparator { o1, o2 -> (o2.height - o1.height).toInt() })
     private var completed: Boolean = false
+    private var epochAdded: Long = 0
 
     init {
         storage.add(currentGenesisBlock)
@@ -28,13 +36,13 @@ class SyncSession(
 
     fun getCurrentGenesisBlock(): GenesisBlock = currentGenesisBlock
 
-    fun getLastLocalGenesisBlock() = lastLocalGenesisBlock
-
     @Synchronized
     fun add(epochBlocks: List<Block>): Boolean {
         if (isChainValid(epochBlocks)) {
             storage.addAll(epochBlocks)
             completed = null != epochBlocks.firstOrNull { it.hash == currentGenesisBlock.hash }
+            epochAdded++
+            log.info("#$epochAdded epochs FROM ${epochQuantity + 1} is processed")
             return true
         }
 

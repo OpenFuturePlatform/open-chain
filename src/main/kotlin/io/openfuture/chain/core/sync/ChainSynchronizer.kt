@@ -82,9 +82,6 @@ class ChainSynchronizer(
                 return
             }
 
-            val epochsFrom =  syncSession!!.getCurrentGenesisBlock().payload.epochIndex - syncSession!!.getLastLocalGenesisBlock().payload.epochIndex
-            val epochsProcessed = syncSession!!.getCurrentGenesisBlock().payload.epochIndex - message.genesisBlock!!.epochIndex
-            log.info("EpochResponseMessage: #$epochsProcessed FROM $epochsFrom is processed")
             if (!syncSession!!.isCompleted()) {
                 requestEpoch(nodesInfo)
                 return
@@ -246,7 +243,7 @@ class ChainSynchronizer(
 
             filteredStorage.asReversed().chunked(properties.syncBatchSize!!).forEach {
                 blockService.saveChunk(it, syncSession!!.syncMode)
-                log.debug("Blocks saved from ${it.first().height} to ${it.last().height}")
+                log.info("Blocks saved till ${it.last().height} from ${filteredStorage.first().height}")
             }
 
             syncSession = null
