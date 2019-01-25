@@ -183,16 +183,16 @@ class ChainSynchronizer(
         try {
             for (block in blocks) {
                 if (!isValidRewardTransactions(block.rewardTransaction)) {
-                    throw ValidationException("Invalid reward transaction")
+                    throw ValidationException("Invalid reward transaction in block: height #${block.height}, hash ${block.hash} ")
                 }
                 if (!isValidDelegateTransactions(block.delegateTransactions)) {
-                    throw ValidationException("Invalid delegate transactions")
+                    throw ValidationException("Invalid delegate transactions in block: height #${block.height}, hash ${block.hash}")
                 }
                 if (!isValidTransferTransactions(block.transferTransactions)) {
-                    throw ValidationException("Invalid transfer transactions")
+                    throw ValidationException("Invalid transfer transactions in block: height #${block.height}, hash ${block.hash}")
                 }
                 if (!isValidVoteTransactions(block.voteTransactions)) {
-                    throw ValidationException("Invalid vote transactions")
+                    throw ValidationException("Invalid vote transactions in block: height #${block.height}, hash ${block.hash}")
                 }
             }
         } catch (e: ValidationException) {
@@ -210,7 +210,7 @@ class ChainSynchronizer(
             hashes.addAll(block.delegateTransactions.map { it.hash })
             hashes.add(block.rewardTransaction.hash)
             if (block.merkleHash != MainBlockPayload.calculateMerkleRoot(hashes)) {
-                log.warn("MerkleRoot is invalid")
+                log.warn("MerkleRoot is invalid in block: height #${block.height}, hash ${block.hash}")
                 return false
             }
         }
@@ -243,7 +243,7 @@ class ChainSynchronizer(
 
             filteredStorage.asReversed().chunked(properties.syncBatchSize!!).forEach {
                 blockService.saveChunk(it, syncSession!!.syncMode)
-                log.debug("Blocks saved from ${it.first().height} to ${it.last().height}")
+                log.info("Blocks saved till ${it.last().height} from ${filteredStorage.first().height}")
             }
 
             syncSession = null
