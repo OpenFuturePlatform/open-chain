@@ -22,14 +22,18 @@ class DBCheckerListener(
 
     override fun onApplicationEvent(event: DataSourceSchemaCreatedEvent) {
         if (!isValidDb()) {
-            val heightFrom = syncCursor.fullCursor.height
-            val heightTo = blockService.getLast().height
-            val heightsToDelete = ArrayList<Long>()
-            for (i in heightFrom..heightTo) {
-                heightsToDelete.add(i)
-            }
-            blockService.deleteByHeightIn(heightsToDelete)
+            deleteInvalidChainPart()
         }
+    }
+
+    private fun deleteInvalidChainPart() {
+        val heightFrom = syncCursor.fullCursor.height
+        val heightTo = blockService.getLast().height
+        val heightsToDelete = ArrayList<Long>()
+        for (i in heightFrom..heightTo) {
+            heightsToDelete.add(i)
+        }
+        blockService.deleteByHeightIn(heightsToDelete)
     }
 
     private fun isValidDb(): Boolean {
