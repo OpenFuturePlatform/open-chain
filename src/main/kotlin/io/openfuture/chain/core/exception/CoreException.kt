@@ -1,3 +1,5 @@
 package io.openfuture.chain.core.exception
 
-class CoreException(message: String) : RuntimeException(message)
+open class CoreException(message: String) : RuntimeException(message)
+
+class NotFoundVoteTypeException(message: String) : CoreException(message)

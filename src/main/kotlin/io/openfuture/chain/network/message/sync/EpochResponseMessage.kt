@@ -10,14 +10,14 @@ import io.openfuture.chain.network.serialization.Serializable
 
 @NoArgConstructor
 class EpochResponseMessage(
-    var nodeId: String,
+    var delegateKey: String,
     var isEpochExists: Boolean,
     var genesisBlock: GenesisBlockMessage?,
     var mainBlocks: List<MainBlockMessage>
 ) : Serializable {
 
     override fun read(buf: ByteBuf) {
-        nodeId = buf.readString()
+        delegateKey = buf.readString()
         isEpochExists = buf.readBoolean()
         mainBlocks = buf.readList()
         if (isEpochExists) {
@@ -27,7 +27,7 @@ class EpochResponseMessage(
     }
 
     override fun write(buf: ByteBuf) {
-        buf.writeString(nodeId)
+        buf.writeString(delegateKey)
         buf.writeBoolean(isEpochExists)
         buf.writeList(mainBlocks)
         if (isEpochExists) {

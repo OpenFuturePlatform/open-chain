@@ -55,7 +55,8 @@ class VoteTransactionControllerTests : ControllerTests() {
     @Test
     fun getTransactionByHashShouldReturnTransaction() {
         val hash = "hash"
-        val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey", MainBlockPayload("merkleHash")).apply { id = 1 }
+        val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
+            MainBlockPayload("merkleHash", "stateHash")).apply { id = 1 }
         val header = TransactionHeader(1L, 1L, WALLET_ADDRESS)
         val footer = TransactionFooter("hash", "senderSignature", "senderPublicKey")
         val payload = VoteTransactionPayload(1, "delegateKey")

@@ -19,7 +19,7 @@ class NewClientHandler(
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: NewClient) {
         val nodeInfo = msg.nodeInfo
-        if (nodeInfo.uid != nodeKeyHolder.getUid() && !addressesHolder.hasNodeInfo(nodeInfo)) {
+        if (nodeInfo.uid != nodeKeyHolder.getPublicKeyAsHexString() && !addressesHolder.hasNodeInfo(nodeInfo)) {
             addressesHolder.addNodeInfo(nodeInfo)
             channelsHolder.broadcast(msg)
             channelsHolder.findNewPeer()

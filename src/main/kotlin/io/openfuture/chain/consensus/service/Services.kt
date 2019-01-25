@@ -1,19 +1,18 @@
 package io.openfuture.chain.consensus.service
 
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 
 interface EpochService {
 
     fun getEpochStart(): Long
 
-    fun getDelegates(): List<Delegate>
+    fun getDelegatesPublicKeys(): List<String>
 
     fun getGenesisBlockHeight(): Long
 
     fun getEpochIndex(): Long
 
-    fun getCurrentSlotOwner(): Delegate
+    fun getCurrentSlotOwner(): String
 
     fun isInIntermission(time: Long): Boolean
 

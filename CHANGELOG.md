@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Core: wallet states
+- Core: node states
+
+## Changed
+- Core: delegate info stores in state
+- Core: wallet balance stores in state
+- Core: account have one vote for delegate
 
 ## [1.7.1] - 2019-01-21
 ### Fixed

@@ -24,15 +24,13 @@ class UnconfirmedDelegateTransaction(
         fun of(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
             TransactionHeader(message.timestamp, message.fee, message.senderAddress),
             TransactionFooter(message.hash, message.senderSignature, message.senderPublicKey),
-            DelegateTransactionPayload(message.nodeId, message.delegateKey, message.delegateHost, message.delegatePort,
-                message.amount)
+            DelegateTransactionPayload(message.delegateKey, message.amount)
         )
 
         fun of(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
             TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
             TransactionFooter(request.hash!!, request.senderSignature!!, request.senderPublicKey!!),
-            DelegateTransactionPayload(request.nodeId!!, request.nodeKey!!, request.nodeHost!!, request.nodePort!!,
-                request.amount!!)
+            DelegateTransactionPayload(request.delegateKey!!, request.amount!!)
         )
     }
 
@@ -43,10 +41,7 @@ class UnconfirmedDelegateTransaction(
         footer.hash,
         footer.senderSignature,
         footer.senderPublicKey,
-        payload.nodeId,
         payload.delegateKey,
-        payload.delegateHost,
-        payload.delegatePort,
         payload.amount
     )
 

@@ -21,12 +21,12 @@ class EpochRequestHandler(
 
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: EpochRequestMessage) {
-        val nodeId: String = keyHolder.getUid()
+        val delegateKey: String = keyHolder.getPublicKeyAsHexString()
         val epochIndex = msg.epochIndex
         val genesisBlock = genesisBlockService.getByEpochIndex(epochIndex)
 
         if (null == genesisBlock) {
-            ctx.writeAndFlush(EpochResponseMessage(nodeId, false, null, emptyList()))
+            ctx.writeAndFlush(EpochResponseMessage(delegateKey, false, null, emptyList()))
             return
         }
 
@@ -41,7 +41,7 @@ class EpochRequestHandler(
         }
         val mainBlockMessages = mainBlocks.map { it.toMessage() }
 
-        ctx.writeAndFlush(EpochResponseMessage(nodeId, true, genesisBlock.toMessage(), mainBlockMessages))
+        ctx.writeAndFlush(EpochResponseMessage(delegateKey, true, genesisBlock.toMessage(), mainBlockMessages))
     }
 
 }

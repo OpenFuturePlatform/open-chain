@@ -53,13 +53,13 @@ class BlockProductionScheduler(
             }
 
             val slotOwner = epochService.getCurrentSlotOwner()
-            log.debug("CONSENSUS: Slot owner ${slotOwner.id}")
+            log.debug("CONSENSUS: Slot owner $slotOwner")
             if (genesisBlockService.isGenesisBlockRequired()) {
                 val genesisBlock = genesisBlockService.create()
                 genesisBlockService.add(genesisBlock)
                 log.debug("CONSENSUS: Saving genesis block with hash = ${genesisBlock.hash}")
                 pendingBlockHandler.resetSlotNumber()
-            } else if (keyHolder.getPublicKeyAsHexString() == slotOwner.publicKey) {
+            } else if (keyHolder.getPublicKeyAsHexString() == slotOwner) {
                 val block = mainBlockService.create()
                 pendingBlockHandler.addBlock(block)
             }

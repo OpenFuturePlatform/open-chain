@@ -5,6 +5,9 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.state.DelegateState
+import io.openfuture.chain.core.model.entity.state.State
+import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -20,11 +23,12 @@ class DefaultBlockService(
     private val repository: BlockRepository<Block>,
     private val properties: ConsensusProperties,
     private val transactionService: TransactionService,
-    private val delegateService: DelegateService,
     private val voteTransactionService: VoteTransactionService,
     private val rewardTransactionService: RewardTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
-    private val transferTransactionService: TransferTransactionService
+    private val transferTransactionService: TransferTransactionService,
+    private val delegateStateService: DelegateStateService,
+    private val walletStateService: WalletStateService
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -61,6 +65,8 @@ class DefaultBlockService(
         val toHeight = fromHeight + properties.epochHeight!!
         val heightRange = (fromHeight..toHeight).toList()
         transactionService.deleteBlockTransactions(heightRange)
+        delegateStateService.deleteBlockStates(heightRange)
+        walletStateService.deleteBlockStates(heightRange)
         repository.deleteAllByHeightIn(heightRange)
     }
 
@@ -85,6 +91,7 @@ class DefaultBlockService(
                 block.payload.rewardTransaction = mutableListOf()
 
                 val transactions = mutableListOf<Transaction>()
+                val states = mutableListOf<State>()
 
                 if (syncMode == SyncMode.FULL) {
                     transactions.addAll(block.payload.transferTransactions)
@@ -96,36 +103,35 @@ class DefaultBlockService(
                     block.payload.delegateTransactions = mutableListOf()
                 }
 
+                states.addAll(block.payload.delegateStates)
+                states.addAll(block.payload.walletStates)
+
+                block.payload.delegateStates = mutableListOf()
+                block.payload.walletStates = mutableListOf()
+
                 this.save(block)
-                rewardTransaction.block = block
                 rewardTransactionService.commit(rewardTransaction)
 
                 if (syncMode == SyncMode.FULL) {
                     transactions.forEach {
-                        if (it is TransferTransaction) {
-                            it.block = block
-                            transferTransactionService.commit(it)
+                        it.block = block
+                        when (it) {
+                            is TransferTransaction -> transferTransactionService.commit(it)
+                            is DelegateTransaction -> delegateTransactionService.commit(it)
+                            is VoteTransaction -> voteTransactionService.commit(it)
+                            else -> throw IllegalStateException("The type doesn`t handle")
                         }
-                        if (it is DelegateTransaction) {
-                            it.block = block
-                            delegateTransactionService.commit(it)
-                        }
-                        if (it is VoteTransaction) {
-                            it.block = block
-                            voteTransactionService.commit(it)
-                        }
+                    }
+                }
+                states.forEach {
+                    it.block = block
+                    when (it) {
+                        is DelegateState -> delegateStateService.commit(it)
+                        is WalletState -> walletStateService.commit(it)
+                        else -> throw IllegalStateException("The type doesn`t handle")
                     }
                 }
             } else if (block is GenesisBlock) {
-                val delegates = block.payload.activeDelegates.toMutableList()
-                block.payload.activeDelegates.clear()
-                delegates.forEach { delegate ->
-                    if (delegateService.isExistsByPublicKey(delegate.publicKey)) {
-                        block.payload.activeDelegates.add(delegateService.getByPublicKey(delegate.publicKey))
-                    } else {
-                        block.payload.activeDelegates.add(delegateService.save(delegate))
-                    }
-                }
                 this.save(block)
             }
         }

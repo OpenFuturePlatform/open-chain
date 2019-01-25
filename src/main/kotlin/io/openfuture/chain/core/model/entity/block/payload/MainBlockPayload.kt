@@ -1,12 +1,16 @@
 package io.openfuture.chain.core.model.entity.block.payload
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import io.openfuture.chain.core.model.entity.state.DelegateState
+import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.crypto.util.HashUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.hibernate.annotations.Fetch
+import org.hibernate.annotations.FetchMode
 import java.nio.charset.StandardCharsets.UTF_8
 import javax.persistence.*
 
@@ -16,6 +20,9 @@ class MainBlockPayload(
     @Column(name = "merkle_hash", nullable = false)
     var merkleHash: String,
 
+    @Column(name = "state_hash", nullable = false)
+    var stateHash: String,
+
     @JsonIgnore
     @OneToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -23,6 +30,7 @@ class MainBlockPayload(
         joinColumns = [JoinColumn(name = "block_id")],
         inverseJoinColumns = [JoinColumn(name = "id")]
     )
+    @Fetch(value = FetchMode.SUBSELECT)
     var rewardTransaction: MutableList<RewardTransaction> = mutableListOf(),
 
     @JsonIgnore
@@ -32,6 +40,7 @@ class MainBlockPayload(
         joinColumns = [JoinColumn(name = "block_id")],
         inverseJoinColumns = [JoinColumn(name = "id")]
     )
+    @Fetch(value = FetchMode.SUBSELECT)
     var voteTransactions: MutableList<VoteTransaction> = mutableListOf(),
 
     @JsonIgnore
@@ -41,6 +50,7 @@ class MainBlockPayload(
         joinColumns = [JoinColumn(name = "block_id")],
         inverseJoinColumns = [JoinColumn(name = "id")]
     )
+    @Fetch(value = FetchMode.SUBSELECT)
     var delegateTransactions: MutableList<DelegateTransaction> = mutableListOf(),
 
     @JsonIgnore
@@ -50,20 +60,41 @@ class MainBlockPayload(
         joinColumns = [JoinColumn(name = "block_id")],
         inverseJoinColumns = [JoinColumn(name = "id")]
     )
-    var transferTransactions: MutableList<TransferTransaction> = mutableListOf()
+    @Fetch(value = FetchMode.SUBSELECT)
+    var transferTransactions: MutableList<TransferTransaction> = mutableListOf(),
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "states",
+        joinColumns = [JoinColumn(name = "block_id")],
+        inverseJoinColumns = [JoinColumn(name = "id")]
+    )
+    @Fetch(value = FetchMode.SUBSELECT)
+    var delegateStates: MutableList<DelegateState> = mutableListOf(),
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "states",
+        joinColumns = [JoinColumn(name = "block_id")],
+        inverseJoinColumns = [JoinColumn(name = "id")]
+    )
+    @Fetch(value = FetchMode.SUBSELECT)
+    var walletStates: MutableList<WalletState> = mutableListOf()
 
 ) : BlockPayload {
 
-    override fun getBytes(): ByteArray = merkleHash.toByteArray(UTF_8)
+    override fun getBytes(): ByteArray = merkleHash.toByteArray(UTF_8) + stateHash.toByteArray(UTF_8)
 
     companion object {
 
-        fun calculateMerkleRoot(transactions: List<String>): String {
-            if (transactions.size == 1) {
-                return transactions.single()
+        fun calculateMerkleRoot(hashes: List<String>): String {
+            if (hashes.size == 1) {
+                return hashes.single()
             }
 
-            var previousTreeLayout = transactions.asSequence().sortedByDescending { it }.map { it.toByteArray() }.toList()
+            var previousTreeLayout = hashes.asSequence().sortedByDescending { it }.map { it.toByteArray() }.toList()
             var treeLayout = mutableListOf<ByteArray>()
             while (previousTreeLayout.size != 2) {
                 for (i in 0 until previousTreeLayout.size step 2) {
@@ -80,7 +111,7 @@ class MainBlockPayload(
             }
             return ByteUtils.toHexString(HashUtils.doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
         }
-    }
 
+    }
 
 }

@@ -10,7 +10,7 @@ class DelegateTransactionResponse(
     senderSignature: String,
     senderPublicKey: String,
     hash: String,
-    val nodeId: String,
+    val delegateKey: String,
     val amount: Long? = null,
     blockHash: String? = null
 ) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey, hash, blockHash) {
@@ -22,7 +22,7 @@ class DelegateTransactionResponse(
         tx.footer.senderSignature,
         tx.footer.senderPublicKey,
         tx.footer.hash,
-        tx.payload.nodeId,
+        tx.payload.delegateKey,
         tx.payload.amount
     )
 
@@ -33,7 +33,7 @@ class DelegateTransactionResponse(
         tx.footer.senderSignature,
         tx.footer.senderPublicKey,
         tx.footer.hash,
-        tx.payload.nodeId,
+        tx.payload.delegateKey,
         tx.payload.amount,
         tx.block.hash
     )

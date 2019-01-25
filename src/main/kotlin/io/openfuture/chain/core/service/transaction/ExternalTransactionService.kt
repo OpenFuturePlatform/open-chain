@@ -8,7 +8,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.TransactionService
-import io.openfuture.chain.core.service.WalletService
+import io.openfuture.chain.core.service.WalletStateService
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.network.service.NetworkApiService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -19,7 +19,7 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
     protected val unconfirmedRepository: UTransactionRepository<U>
 ) : BaseTransactionService() {
 
-    @Autowired protected lateinit var walletService: WalletService
+    @Autowired protected lateinit var walletStateService: WalletStateService
     @Autowired protected lateinit var baseService: TransactionService
     @Autowired protected lateinit var transactionService: TransactionService
     @Autowired private lateinit var cryptoService: CryptoService
@@ -47,7 +47,7 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
 
     abstract fun validateNew(utx: U)
 
-    open fun validate(utx: U) {
+    fun validate(utx: U) {
 
         validateBase(utx.header, utx.externalPayload, utx.footer)
 
@@ -56,9 +56,9 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         }
     }
 
-    open fun save(utx: U): U = unconfirmedRepository.save(utx)
+    fun save(utx: U): U = unconfirmedRepository.save(utx)
 
-    open fun save(tx: T): T = repository.save(tx)
+    fun save(tx: T): T = repository.save(tx)
 
     protected fun confirm(utx: U, tx: T): T {
         unconfirmedRepository.delete(utx)
@@ -66,7 +66,7 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
     }
 
     protected fun isValidActualBalance(address: String, amount: Long): Boolean =
-        walletService.getActualBalanceByAddress(address) >= amount
+        walletStateService.getActualBalanceByAddress(address) >= amount
 
     private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean =
         cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
