@@ -10,6 +10,8 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTrans
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
+import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -49,11 +51,15 @@ interface BlockService {
 
     fun save(block: Block)
 
+    fun removeEpoch(genesisBlock: GenesisBlock)
+
     fun saveChunk(blocksChunk: List<Block>, syncMode: SyncMode)
 
     fun getAfterCurrentHash(hash: String): List<Block>
 
     fun isExists(hash: String): Boolean
+
+    fun findByHash(hash: String): Block?
 
     fun getAvgProductionTime(): Long
 
@@ -117,6 +123,8 @@ interface TransactionService {
     fun getUnconfirmedTransactionByHash(hash: String): UnconfirmedTransaction
 
     fun getProducingPerSecond(): Long
+
+    fun deleteBlockTransactions(blockHeights: List<Long>)
 
 }
 

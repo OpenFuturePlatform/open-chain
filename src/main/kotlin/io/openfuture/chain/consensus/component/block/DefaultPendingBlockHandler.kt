@@ -7,7 +7,6 @@ import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.MainBlockService
-import io.openfuture.chain.core.service.block.DefaultMainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -51,6 +50,7 @@ class DefaultPendingBlockHandler(
         val slotOwner = epochService.getCurrentSlotOwner()
 
         if (blockSlotNumber > timeSlotNumber || epochService.isInIntermission(block.timestamp)) {
+            this.timeSlotNumber = blockSlotNumber
             this.reset()
         }
 
@@ -62,22 +62,12 @@ class DefaultPendingBlockHandler(
             return
         }
 
-        if (!chainSynchronizer.isInSync(MainBlock.of(block))) {
-            chainSynchronizer.sync()
-            return
-        }
-
-        if (!mainBlockService.verify(block)) {
-            return
-        }
-
-        networkService.broadcast(block)
-        this.timeSlotNumber = blockSlotNumber
-        if (IDLE == stage && isActiveDelegate()) {
+        if (IDLE == stage && isActiveDelegate() && mainBlockService.verify(block)) {
             this.observable = block
             this.stage = PREPARE
             val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKeyAsHexString())
             vote.signature = SignatureUtils.sign(vote.getBytes(), keyHolder.getPrivateKey())
+            networkService.broadcast(block)
             networkService.broadcast(vote)
         }
     }
@@ -98,10 +88,14 @@ class DefaultPendingBlockHandler(
     }
 
     private fun handlePrevote(message: BlockApprovalMessage) {
+        if (!isActiveDelegate()) {
+            return
+        }
+
         val delegates = epochService.getDelegatesPublicKeys()
         val delegate = delegates.find { it == message.publicKey } ?: return
 
-        if (null == observable || message.hash != observable!!.hash || !isActiveDelegate()) {
+        if (message.hash != observable?.hash || this.stage != PREPARE) {
             return
         }
 
@@ -109,10 +103,14 @@ class DefaultPendingBlockHandler(
             prepareVotes.add(delegate)
             networkService.broadcast(message)
             if (prepareVotes.size > (properties.delegatesCount!! - 1) / 3) {
-                this.stage = COMMIT
-                val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKeyAsHexString())
-                commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())
-                networkService.broadcast(commit)
+                pendingBlocks.find { it.hash == message.hash }?.let {
+                    if (it.hash == observable?.hash) {
+                        this.stage = COMMIT
+                        val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKeyAsHexString())
+                        commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())
+                        networkService.broadcast(commit)
+                    }
+                }
             }
         }
     }
@@ -128,8 +126,8 @@ class DefaultPendingBlockHandler(
                 networkService.broadcast(message)
                 if (blockCommits.size > (properties.delegatesCount!! / 3 * 2) && !blockAddedFlag) {
                     pendingBlocks.find { it.hash == message.hash }?.let {
-                        if (!chainSynchronizer.isInSync(MainBlock.of(it))) {
-                            chainSynchronizer.sync()
+                        if (!chainSynchronizer.isInSync(MainBlock.of(it)) && it.hash != observable?.hash) {
+                            chainSynchronizer.checkLastBlock()
                             return
                         }
                         mainBlockService.add(it)

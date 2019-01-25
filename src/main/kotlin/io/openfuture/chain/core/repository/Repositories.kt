@@ -20,7 +20,7 @@ import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @NoRepositoryBean
-interface BaseRepository<T> : JpaRepository<T, Int>
+interface BaseRepository<T> : JpaRepository<T, Long>
 
 @Repository
 interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
@@ -38,6 +38,8 @@ interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
     fun findAllByHeightGreaterThan(height: Long): List<Entity>
 
     fun findAllByHeightBetween(beginHeight: Long, endHeight: Long): List<Entity>
+
+    fun deleteAllByHeightIn(heights: List<Long>): List<Entity>
 
     @Query(value = "SELECT height FROM blocks ORDER BY height DESC LIMIT 1", nativeQuery = true)
     fun getCurrentHeight(): Long
@@ -58,6 +60,8 @@ interface GenesisBlockRepository : BlockRepository<GenesisBlock> {
 interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 
     fun findOneByFooterHash(hash: String): Entity?
+
+    fun deleteAllByBlockHeightIn(heights: List<Long>)
 
 }
 
