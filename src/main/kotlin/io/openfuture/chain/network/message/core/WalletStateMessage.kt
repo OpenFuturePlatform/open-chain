@@ -39,4 +39,22 @@ class WalletStateMessage(
         buf.writeString(voteFor ?: "")
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is WalletStateMessage) return false
+        if (!super.equals(other)) return false
+
+        if (balance != other.balance) return false
+        if (voteFor != other.voteFor) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + balance.hashCode()
+        result = 31 * result + (voteFor?.hashCode() ?: 0)
+        return result
+    }
+
 }
