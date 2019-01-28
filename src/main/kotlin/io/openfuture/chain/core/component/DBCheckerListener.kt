@@ -9,6 +9,7 @@ import io.openfuture.chain.core.service.GenesisBlockService
 import org.springframework.boot.autoconfigure.jdbc.DataSourceSchemaCreatedEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 class DBCheckerListener(
@@ -103,6 +104,14 @@ class DBCheckerListener(
     private fun isValidBlocksHashes(block: Block, nextBlock: Block): Boolean = (block.hash == nextBlock.previousHash)
 
     //TODO: must to be implemented
-    private fun isValidBlockState(block: Block): Boolean = true
+    private fun isValidBlockState(block: Block): Boolean {
+
+        if (block is MainBlock) {
+            val states = block.payload.delegateStates + block.payload.walletStates
+        //    val stateHashes = states.map { it.get() }
+        //    MainBlockPayload.calculateMerkleRoot(Arrays.asList(block.payload.stateHash))
+        }
+        return true
+    }
 
 }
