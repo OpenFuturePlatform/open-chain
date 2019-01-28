@@ -112,7 +112,7 @@ CREATE INDEX u_vote_transactions_delegate_key
   ON u_vote_transactions (delegate_key)
 --
 CREATE MEMORY TABLE u_deploy_transactions (
-  id        BIGINT PRIMARY KEY REFERENCES transactions,
+  id        BIGINT PRIMARY KEY REFERENCES u_transactions,
   bytecode  BLOB NOT NULL
 );
 --
