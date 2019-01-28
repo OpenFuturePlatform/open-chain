@@ -60,6 +60,12 @@ CREATE TABLE vote_transactions (
 CREATE HASH INDEX vote_transactions_delegate_key
   ON vote_transactions (delegate_key);
 --
+CREATE TABLE deploy_transactions (
+  id        BIGINT PRIMARY KEY REFERENCES transactions,
+  bytecode  BLOB NOT NULL
+);
+--
+
 
 -- UNCONFIRMED TABLES
 CREATE MEMORY TABLE u_transactions (
@@ -104,3 +110,9 @@ CREATE MEMORY TABLE u_vote_transactions (
 --
 CREATE INDEX u_vote_transactions_delegate_key
   ON u_vote_transactions (delegate_key)
+--
+CREATE MEMORY TABLE u_deploy_transactions (
+  id        BIGINT PRIMARY KEY REFERENCES transactions,
+  bytecode  BLOB NOT NULL
+);
+--
