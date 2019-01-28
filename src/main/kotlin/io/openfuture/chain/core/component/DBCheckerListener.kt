@@ -110,9 +110,17 @@ class DBCheckerListener(
         return ByteUtils.toHexString(blockHash) == nextBlock.previousHash
     }
 
-    //TODO: must to be implemented
     private fun isValidBlockState(block: Block): Boolean {
-        return false
+        if (block is MainBlock) {
+            val payload = block.payload
+            val delegateHashes = payload.delegateStates.map { it.toMessage().getHash() }
+            val walletHashes = payload.walletStates.map { it.toMessage().getHash() }
+            val stateHash = MainBlockPayload.calculateMerkleRoot(delegateHashes + walletHashes)
+            if (stateHash != payload.stateHash) {
+                return false
+            }
+        }
+        return true
     }
 
 }
