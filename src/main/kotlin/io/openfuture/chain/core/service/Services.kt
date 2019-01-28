@@ -72,6 +72,8 @@ interface BlockService {
 
     fun deleteByHeightIn(heights: List<Long>)
 
+    fun isValidHash(block: Block): Boolean
+
     fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray
 }
 

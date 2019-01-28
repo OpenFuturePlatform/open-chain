@@ -18,6 +18,7 @@ import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.core.util.ByteConstants
 import io.openfuture.chain.crypto.util.HashUtils
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.nio.ByteBuffer
@@ -95,6 +96,11 @@ class DefaultBlockService(
         delegateStateService.deleteBlockStates(heights)
         transactionService.deleteBlockTransactions(heights)
         repository.deleteAllByHeightIn(heights)
+    }
+
+    override fun isValidHash(block: Block): Boolean {
+        val hash = createHash(block.timestamp, block.height, block.previousHash, block.getPayload())
+        return ByteUtils.toHexString(hash) == block.hash
     }
 
     override fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray {

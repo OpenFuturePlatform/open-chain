@@ -35,7 +35,7 @@ abstract class BaseBlockService<T : Block>(
             throw ValidationException("Invalid block timestamp: ${block.timestamp}")
         }
 
-        if (!isValidHash(block)) {
+        if (!blockService.isValidHash(block)) {
             throw ValidationException("Invalid block hash: ${block.hash}")
         }
 
@@ -50,11 +50,6 @@ abstract class BaseBlockService<T : Block>(
     private fun isValidTimeStamp(block: Block, lastBlock: Block): Boolean = block.timestamp > lastBlock.timestamp
 
     private fun isValidHeight(block: Block, lastBlock: Block): Boolean = block.height == lastBlock.height + 1
-
-    private fun isValidHash(block: Block): Boolean {
-        val hash = blockService.createHash(block.timestamp, block.height, block.previousHash, block.getPayload())
-        return ByteUtils.toHexString(hash) == block.hash
-    }
 
     private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean =
         SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
