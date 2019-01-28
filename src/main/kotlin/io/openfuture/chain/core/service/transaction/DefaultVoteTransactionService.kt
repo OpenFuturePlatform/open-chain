@@ -14,6 +14,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.repository.UVoteTransactionRepository
 import io.openfuture.chain.core.repository.VoteTransactionRepository
 import io.openfuture.chain.core.service.DelegateStateService
+import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
@@ -28,9 +29,10 @@ import org.springframework.transaction.annotation.Transactional
 internal class DefaultVoteTransactionService(
     repository: VoteTransactionRepository,
     uRepository: UVoteTransactionRepository,
+    transactionService: TransactionService,
     private val delegateStateService: DelegateStateService,
     private val consensusProperties: ConsensusProperties
-) : ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository), VoteTransactionService {
+) : ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(transactionService, repository, uRepository), VoteTransactionService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultVoteTransactionService::class.java)

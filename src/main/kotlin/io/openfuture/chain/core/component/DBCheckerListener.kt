@@ -6,6 +6,7 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.smartcontract.core.utils.ByteUtils
 import org.springframework.boot.autoconfigure.jdbc.DataSourceSchemaCreatedEvent
 import org.springframework.context.ApplicationListener
@@ -17,7 +18,8 @@ class DBCheckerListener(
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockService: GenesisBlockService,
     private val blockService: BlockService,
-    private val syncCursor: SyncCursor
+    private val syncCursor: SyncCursor,
+    private val transactionService: TransactionService
 ) : ApplicationListener<DataSourceSchemaCreatedEvent> {
 
     override fun onApplicationEvent(event: DataSourceSchemaCreatedEvent) {
@@ -89,10 +91,11 @@ class DBCheckerListener(
     private fun isValidTransactions(block: Block): Boolean {
         if (block is MainBlock) {
             val hashes = mutableListOf<String>()
-            hashes.addAll(block.payload.transferTransactions.map { it.footer.hash })
-            hashes.addAll(block.payload.voteTransactions.map { it.footer.hash })
-            hashes.addAll(block.payload.delegateTransactions.map { it.footer.hash })
-            hashes.add(block.payload.rewardTransaction[0].footer.hash)
+            hashes.addAll(block.payload.transferTransactions.map { transactionService.createHash(it.header, it.payload) })
+            hashes.addAll(block.payload.voteTransactions.map { transactionService.createHash(it.header, it.payload) })
+            hashes.addAll(block.payload.delegateTransactions.map { transactionService.createHash(it.header, it.payload) })
+            val rewardTransaction = block.payload.rewardTransaction[0]
+            hashes.add(transactionService.createHash(rewardTransaction.header, rewardTransaction.payload))
 
             val transactionsMerkleHash = MainBlockPayload.calculateMerkleRoot(hashes)
             if (block.payload.merkleHash != transactionsMerkleHash) {
