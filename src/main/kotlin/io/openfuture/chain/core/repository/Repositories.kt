@@ -1,12 +1,11 @@
 package io.openfuture.chain.core.repository
 
-import io.openfuture.chain.core.model.entity.Delegate
-import io.openfuture.chain.core.model.entity.Wallet
-import io.openfuture.chain.core.model.entity.WalletVote
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
+import io.openfuture.chain.core.model.entity.state.DelegateState
+import io.openfuture.chain.core.model.entity.state.State
+import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -42,7 +41,7 @@ interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
 
     fun deleteAllByHeightIn(heights: List<Long>): List<Entity>
 
-    @Query(value = "Select HEIGHT From BLOCKS Order By HEIGHT Desc Limit 1", nativeQuery = true)
+    @Query(value = "SELECT height FROM blocks ORDER BY height DESC LIMIT 1", nativeQuery = true)
     fun getCurrentHeight(): Long
 
 }
@@ -69,7 +68,7 @@ interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 @Repository
 interface VoteTransactionRepository : TransactionRepository<VoteTransaction> {
 
-    fun findFirstByHeaderSenderAddressAndPayloadNodeIdAndPayloadVoteTypeIdOrderByHeaderTimestampDesc(senderAddress: String, nodeId: String, typeId: Int): VoteTransaction?
+    fun findFirstByHeaderSenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeIdOrderByHeaderTimestampDesc(senderAddress: String, delegateKey: String, typeId: Int): VoteTransaction?
 
 }
 
@@ -106,7 +105,7 @@ interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseReposit
 @Repository
 interface UVoteTransactionRepository : UTransactionRepository<UnconfirmedVoteTransaction> {
 
-    fun findOneByHeaderSenderAddressAndPayloadNodeIdAndPayloadVoteTypeId(senderAddress: String, nodeId: String, typeId: Int): UnconfirmedVoteTransaction?
+    fun findOneByHeaderSenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeId(senderAddress: String, delegateKey: String, typeId: Int): UnconfirmedVoteTransaction?
 
 }
 
@@ -117,40 +116,43 @@ interface UDelegateTransactionRepository : UTransactionRepository<UnconfirmedDel
 interface UTransferTransactionRepository : UTransactionRepository<UnconfirmedTransferTransaction>
 
 @Repository
-interface DelegateRepository : BaseRepository<Delegate> {
+interface StateRepository<T : State> : BaseRepository<T> {
 
-    fun findOneByPublicKey(key: String): Delegate?
+    fun findFirstByAddressOrderByBlockIdDesc(address: String): T?
 
-    fun findOneByNodeId(nodeId: String): Delegate?
+    fun findByAddress(address: String): List<T>
 
-    fun existsByPublicKey(key: String): Boolean
+    fun findFirstByAddressAndBlockHeightLessThanEqualOrderByBlockHeightDesc(address: String, height: Long): T?
 
-    fun existsByNodeId(nodeId: String): Boolean
-
-    @Query("Select * From DELEGATES Where NODE_ID In :ids ", nativeQuery = true)
-    fun findByNodeIds(@Param("ids") nodeIds: List<String>): List<Delegate>
+    fun deleteAllByBlockHeightIn(heights: List<Long>)
 
 }
 
 @Repository
-interface ViewDelegateRepository : BaseRepository<ViewDelegate> {
+interface DelegateStateRepository : StateRepository<DelegateState> {
 
-    fun findOneByNodeId(nodeId: String): ViewDelegate?
+    @Query("""
+        SELECT ds1 FROM DelegateState ds1
+        WHERE ds1.block.height = (
+            SELECT MAX(ds2.block.height) FROM DelegateState ds2
+            WHERE ds1.address=ds2.address
+        )
+        """)
+    fun findLastAll(request: Pageable): List<DelegateState>
 
 }
 
 @Repository
-interface WalletRepository : BaseRepository<Wallet> {
+interface WalletStateRepository : StateRepository<WalletState> {
 
-    fun findOneByAddress(address: String): Wallet?
-
-}
-
-@Repository
-interface WalletVoteRepository : BaseRepository<WalletVote> {
-
-    fun findAllByIdAddress(address: String): List<WalletVote>
-
-    fun deleteByIdAddressAndIdNodeId(address: String, nodeId: String)
+    @Query("""
+        SELECT ws1 FROM WalletState ws1
+        WHERE ws1.voteFor=:delegateKey
+        AND ws1.block.height = (
+            SELECT MAX(ws2.block.height) FROM WalletState ws2
+            WHERE ws1.address=ws2.address
+        )
+        """)
+    fun findVotesByDelegateKey(@Param("delegateKey") delegateKey: String): List<WalletState>
 
 }

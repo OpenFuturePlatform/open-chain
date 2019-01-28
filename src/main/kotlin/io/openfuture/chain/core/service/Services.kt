@@ -1,12 +1,11 @@
 package io.openfuture.chain.core.service
 
-import io.openfuture.chain.core.model.entity.Delegate
-import io.openfuture.chain.core.model.entity.Wallet
-import io.openfuture.chain.core.model.entity.WalletVote
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.delegate.ViewDelegate
+import io.openfuture.chain.core.model.entity.state.DelegateState
+import io.openfuture.chain.core.model.entity.state.State
+import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -151,6 +150,8 @@ interface TransferTransactionService {
 
     fun commit(transaction: TransferTransaction): TransferTransaction
 
+    fun updateState(message: TransferTransactionMessage)
+
     fun verify(message: TransferTransactionMessage): Boolean
 
 }
@@ -164,6 +165,8 @@ interface RewardTransactionService {
     fun create(timestamp: Long, fees: Long): RewardTransactionMessage
 
     fun commit(transaction: RewardTransaction)
+
+    fun updateState(message: RewardTransactionMessage)
 
     fun verify(message: RewardTransactionMessage): Boolean
 
@@ -179,15 +182,17 @@ interface VoteTransactionService {
 
     fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction
 
-    fun getUnconfirmedBySenderAgainstDelegate(senderAddress: String, nodeId: String): UnconfirmedVoteTransaction?
+    fun getUnconfirmedBySenderAgainstDelegate(senderAddress: String, delegateKey: String): UnconfirmedVoteTransaction?
 
-    fun getLastVoteForDelegate(senderAddress: String, nodeId: String): VoteTransaction
+    fun getLastVoteForDelegate(senderAddress: String, delegateKey: String): VoteTransaction
 
     fun add(message: VoteTransactionMessage)
 
     fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction
 
     fun commit(transaction: VoteTransaction): VoteTransaction
+
+    fun updateState(message: VoteTransactionMessage)
 
     fun verify(message: VoteTransactionMessage): Boolean
 
@@ -209,62 +214,54 @@ interface DelegateTransactionService {
 
     fun commit(transaction: DelegateTransaction): DelegateTransaction
 
+    fun updateState(message: DelegateTransactionMessage)
+
     fun verify(message: DelegateTransactionMessage): Boolean
 
 }
 
-interface DelegateService {
+interface StateService<T : State> {
 
-    fun getAll(request: PageRequest): Page<Delegate>
+    fun getLastByAddress(address: String): T?
 
-    fun getByPublicKey(key: String): Delegate
+    fun getByAddress(address: String): List<T>
 
-    fun getByNodeId(nodeId: String): Delegate
+    fun getByAddressAndBlock(address: String, block: Block): T?
 
-    fun findByNodeId(nodeId: String): Delegate?
+    fun deleteBlockStates(blockHeights: List<Long>)
 
-    fun getActiveDelegates(): List<Delegate>
+}
+
+interface DelegateStateService : StateService<DelegateState> {
+
+    fun getAllDelegates(request: PageRequest): List<DelegateState>
+
+    fun getActiveDelegates(): List<DelegateState>
 
     fun isExistsByPublicKey(key: String): Boolean
 
-    fun isExistsByNodeId(nodeId: String): Boolean
+    fun isExistsByPublicKeys(publicKeys: List<String>): Boolean
 
-    fun isExistsByNodeIds(nodeIds: List<String>): Boolean
+    fun addDelegate(delegateKey: String, walletAddress: String, createDate: Long): DelegateStateMessage
 
-    fun save(delegate: Delegate): Delegate
+    fun updateRating(delegateKey: String, amount: Long): DelegateStateMessage
 
-}
-
-interface ViewDelegateService {
-
-    fun getAll(request: PageRequest): Page<ViewDelegate>
-
-    fun getByNodeId(nodeId: String): ViewDelegate
+    fun commit(state: DelegateState)
 
 }
 
-interface WalletService {
-
-    fun getByAddress(address: String): Wallet
-
-    fun getActualBalanceByAddress(address: String): Long
+interface WalletStateService : StateService<WalletState> {
 
     fun getBalanceByAddress(address: String): Long
 
-    fun save(wallet: Wallet)
+    fun getActualBalanceByAddress(address: String): Long
 
-    fun increaseBalance(address: String, amount: Long)
+    fun getVotesForDelegate(delegateKey: String): List<WalletState>
 
-    fun decreaseBalance(address: String, amount: Long)
+    fun updateBalanceByAddress(address: String, amount: Long): WalletStateMessage
 
-}
+    fun updateVoteByAddress(address: String, delegateKey: String?): WalletStateMessage
 
-interface WalletVoteService {
-
-    fun getVotesByAddress(address: String): List<WalletVote>
-
-    fun add(address: String, nodeId: String): WalletVote
-
-    fun remove(address: String, nodeId: String)
+    fun commit(state: WalletState)
 
 }

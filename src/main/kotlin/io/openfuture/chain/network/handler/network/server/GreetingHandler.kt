@@ -37,7 +37,7 @@ class GreetingHandler(
         val hostAddress = (ctx.channel().remoteAddress() as InetSocketAddress).address.hostAddress
         val nodeInfo = NodeInfo(msg.uid, NetworkAddress(hostAddress, msg.externalPort))
         val nodesInfo = addressesHolder.getNodeInfos()
-        val response = GreetingResponseMessage(nodeKeyHolder.getUid(), hostAddress, nodesInfo)
+        val response = GreetingResponseMessage(nodeKeyHolder.getPublicKeyAsHexString(), hostAddress, nodesInfo)
         val channel = ctx.channel()
         if (isConnectionAcceptable(nodeInfo, channel)) {
             channelHolder.addChannel(channel, nodeInfo)
@@ -47,7 +47,7 @@ class GreetingHandler(
         } else {
             log.info("Rejected connection from ${ctx.channel().remoteAddress()}")
             response.accepted = false
-            if (msg.uid == nodeKeyHolder.getUid()) {
+            if (msg.uid == nodeKeyHolder.getPublicKeyAsHexString()) {
                 nodeProperties.setMyself(nodeInfo)
             }
             ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE)
@@ -55,7 +55,7 @@ class GreetingHandler(
     }
 
     private fun isConnectionAcceptable(nodeInfo: NodeInfo, channel: Channel): Boolean {
-        return nodeInfo.uid != nodeKeyHolder.getUid()
+        return nodeInfo.uid != nodeKeyHolder.getPublicKeyAsHexString()
             && nodeProperties.getAllowedConnections() > channelHolder.size()
             && !channelHolder.hasChannel(channel)
     }

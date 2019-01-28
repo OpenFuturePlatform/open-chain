@@ -40,8 +40,7 @@ class HeartBeatHandler(
             }
             ctx.close()
         } else if (WRITER_IDLE == eventState && null != channelsHolder.getNodeInfoByChannelId(ctx.channel().id())) {
-            ctx.writeAndFlush(HeartBeatMessage())
-                .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
+            ctx.writeAndFlush(HeartBeatMessage()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
         }
     }
 

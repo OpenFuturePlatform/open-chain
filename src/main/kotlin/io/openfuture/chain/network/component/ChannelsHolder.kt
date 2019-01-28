@@ -126,7 +126,7 @@ class ChannelsHolder(
     }
 
     private fun greet(channel: Channel) {
-        val message = GreetingMessage(nodeProperties.port!!, nodeKeyHolder.getUid())
+        val message = GreetingMessage(nodeProperties.port!!, nodeKeyHolder.getPublicKeyAsHexString())
         channel.writeAndFlush(message)
     }
 

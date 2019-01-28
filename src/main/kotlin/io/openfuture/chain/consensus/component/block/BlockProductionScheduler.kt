@@ -6,7 +6,8 @@ import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.sync.SyncStatus.SYNCHRONIZED
-import io.openfuture.chain.network.component.time.ClockSynchronizer
+import io.openfuture.chain.network.component.time.ClockChecker
+import io.openfuture.chain.network.component.time.ClockSyncStatus.NOT_SYNCHRONIZED
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -23,7 +24,7 @@ class BlockProductionScheduler(
     private val genesisBlockService: GenesisBlockService,
     private val pendingBlockHandler: PendingBlockHandler,
     private val chainSynchronizer: ChainSynchronizer,
-    private val clockSynchronizer: ClockSynchronizer
+    private val clockChecker: ClockChecker
 ) {
 
     companion object {
@@ -40,8 +41,8 @@ class BlockProductionScheduler(
 
     private fun proceedProductionLoop() {
         try {
-            if (SYNCHRONIZED != clockSynchronizer.getStatus()) {
-                log.debug("Clock is ${clockSynchronizer.getStatus()}")
+            if (NOT_SYNCHRONIZED == clockChecker.getStatus()) {
+                log.error("Please set up Time synchronization by the ntp servers")
                 return
             }
 
@@ -52,13 +53,13 @@ class BlockProductionScheduler(
             }
 
             val slotOwner = epochService.getCurrentSlotOwner()
-            log.debug("CONSENSUS: Slot owner ${slotOwner.id}")
+            log.debug("CONSENSUS: Slot owner $slotOwner")
             if (genesisBlockService.isGenesisBlockRequired()) {
                 val genesisBlock = genesisBlockService.create()
                 genesisBlockService.add(genesisBlock)
                 log.debug("CONSENSUS: Saving genesis block with hash = ${genesisBlock.hash}")
                 pendingBlockHandler.resetSlotNumber()
-            } else if (keyHolder.getPublicKeyAsHexString() == slotOwner.publicKey) {
+            } else if (keyHolder.getPublicKeyAsHexString() == slotOwner) {
                 val block = mainBlockService.create()
                 pendingBlockHandler.addBlock(block)
             }

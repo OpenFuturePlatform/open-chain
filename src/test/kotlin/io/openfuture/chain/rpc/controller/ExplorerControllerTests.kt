@@ -2,7 +2,6 @@ package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.consensus.service.EpochService
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.network.service.NetworkApiService
@@ -49,7 +48,7 @@ class ExplorerControllerTests : ControllerTests() {
         given(transactionService.getCount()).willReturn(transactionsCount)
         given(blockService.getAvgProductionTime()).willReturn(blockProductionTime)
         given(transactionService.getProducingPerSecond()).willReturn(transactionsPerSecond)
-        given(epochService.getDelegates()).willReturn(listOf(Delegate("publicKey", "nodeId", "address", "host", 1000, 1)))
+        given(epochService.getDelegatesPublicKeys()).willReturn(listOf("publicKey"))
 
         val actualResponse = webClient.get().uri("/rpc/explorer/info")
             .exchange()

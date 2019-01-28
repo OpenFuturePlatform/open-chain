@@ -7,20 +7,16 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType
 import io.openfuture.chain.core.exception.model.ExceptionType.ALREADY_DELEGATE
-import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_DELEGATE_KEY
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.repository.DelegateTransactionRepository
 import io.openfuture.chain.core.repository.UDelegateTransactionRepository
-import io.openfuture.chain.core.service.DelegateService
+import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
-import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -30,8 +26,8 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultDelegateTransactionService(
     repository: DelegateTransactionRepository,
     uRepository: UDelegateTransactionRepository,
-    private val delegateService: DelegateService,
-    private val consensusProperties: ConsensusProperties
+    private val consensusProperties: ConsensusProperties,
+    private val delegateStateService: DelegateStateService
 ) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository), DelegateTransactionService {
 
     companion object {
@@ -87,9 +83,6 @@ class DefaultDelegateTransactionService(
                 return tx
             }
 
-            walletService.decreaseBalance(transaction.header.senderAddress, transaction.payload.amount + transaction.header.fee)
-            walletService.increaseBalance(consensusProperties.genesisAddress!!, transaction.payload.amount)
-
             val utx = unconfirmedRepository.findOneByFooterHash(transaction.footer.hash)
             if (null != utx) {
                 return confirm(utx, transaction)
@@ -99,6 +92,12 @@ class DefaultDelegateTransactionService(
         } finally {
             BlockchainLock.writeLock.unlock()
         }
+    }
+
+    override fun updateState(message: DelegateTransactionMessage) {
+        walletStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
+        walletStateService.updateBalanceByAddress(consensusProperties.genesisAddress!!, message.amount)
+        delegateStateService.addDelegate(message.delegateKey, message.senderAddress, message.timestamp)
     }
 
     override fun verify(message: DelegateTransactionMessage): Boolean {
@@ -112,11 +111,7 @@ class DefaultDelegateTransactionService(
     }
 
     @Transactional
-    override fun save(tx: DelegateTransaction): DelegateTransaction {
-        delegateService.save(Delegate(tx.payload.delegateKey, tx.payload.nodeId, tx.header.senderAddress,
-            tx.payload.delegateHost, tx.payload.delegatePort, tx.header.timestamp))
-        return super.save(tx)
-    }
+    override fun save(tx: DelegateTransaction): DelegateTransaction = super.save(tx)
 
     override fun validate(utx: UnconfirmedDelegateTransaction) {
         super.validate(utx)
@@ -128,10 +123,6 @@ class DefaultDelegateTransactionService(
         if (utx.payload.amount != consensusProperties.amountDelegateTx!!) {
             throw ValidationException("Amount should be ${consensusProperties.amountDelegateTx!!}")
         }
-
-        if (!isValidNodeId(utx.payload.nodeId, utx.payload.delegateKey)) {
-            throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
-        }
     }
 
     @Transactional(readOnly = true)
@@ -140,21 +131,18 @@ class DefaultDelegateTransactionService(
             throw ValidationException("Insufficient actual balance", ExceptionType.INSUFFICIENT_ACTUAL_BALANCE)
         }
 
-        if (isAlreadyDelegate(utx.payload.nodeId)) {
-            throw ValidationException("Node ${utx.payload.nodeId} already registered as delegate", ALREADY_DELEGATE)
+        if (isAlreadyDelegate(utx.payload.delegateKey)) {
+            throw ValidationException("Node ${utx.payload.delegateKey} already registered as delegate", ALREADY_DELEGATE)
         }
 
-        if (isAlreadySendRequest(utx.payload.nodeId)) {
-            throw ValidationException("Node ${utx.payload.nodeId} already send request to become delegate", ALREADY_DELEGATE)
+        if (isAlreadySendRequest(utx.payload.delegateKey)) {
+            throw ValidationException("Node ${utx.payload.delegateKey} already send request to become delegate", ALREADY_DELEGATE)
         }
     }
 
-    private fun isValidNodeId(nodeId: String, publicKey: String): Boolean =
-        nodeId == ByteUtils.toHexString(HashUtils.sha256(ByteUtils.fromHexString(publicKey)))
+    private fun isAlreadyDelegate(delegateKey: String): Boolean = delegateStateService.isExistsByPublicKey(delegateKey)
 
-    private fun isAlreadyDelegate(nodeId: String): Boolean = delegateService.isExistsByNodeId(nodeId)
-
-    private fun isAlreadySendRequest(nodeId: String): Boolean =
-        unconfirmedRepository.findAll().any { it.payload.nodeId == nodeId }
+    private fun isAlreadySendRequest(delegateKey: String): Boolean =
+        unconfirmedRepository.findAll().any { it.payload.delegateKey == delegateKey }
 
 }

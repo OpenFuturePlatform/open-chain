@@ -1,10 +1,9 @@
 package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
-import io.openfuture.chain.core.service.ViewDelegateService
+import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.VoteTransactionService
-import io.openfuture.chain.core.service.WalletService
-import io.openfuture.chain.core.service.WalletVoteService
+import io.openfuture.chain.core.service.WalletStateService
 import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import io.openfuture.chain.crypto.service.CryptoService
@@ -29,13 +28,10 @@ class AccountControllerTests : ControllerTests() {
     private lateinit var cryptoService: CryptoService
 
     @MockBean
-    private lateinit var walletService: WalletService
+    private lateinit var walletStateService: WalletStateService
 
     @MockBean
-    private lateinit var walletVoteService: WalletVoteService
-
-    @MockBean
-    private lateinit var viewDelegateService: ViewDelegateService
+    private lateinit var delegateStateService: DelegateStateService
 
     @MockBean
     private lateinit var voteTransactionService: VoteTransactionService
@@ -115,7 +111,7 @@ class AccountControllerTests : ControllerTests() {
         val address = "0x51c5311F25206De4A9C6ecAa1Bc2Be257B0bA1fb"
         val expectedBalance = 1L
 
-        given(walletService.getActualBalanceByAddress(address)).willReturn(expectedBalance)
+        given(walletStateService.getActualBalanceByAddress(address)).willReturn(expectedBalance)
 
         val actualBalance = webClient.get().uri("$ACCOUNT_URL/wallets/$address/balance")
             .exchange()

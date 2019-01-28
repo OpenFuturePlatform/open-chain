@@ -24,13 +24,13 @@ class UnconfirmedVoteTransaction(
         fun of(message: VoteTransactionMessage): UnconfirmedVoteTransaction = UnconfirmedVoteTransaction(
             TransactionHeader(message.timestamp, message.fee, message.senderAddress),
             TransactionFooter(message.hash, message.senderSignature, message.senderPublicKey),
-            VoteTransactionPayload(message.voteTypeId, message.nodeId)
+            VoteTransactionPayload(message.voteTypeId, message.delegateKey)
         )
 
         fun of(request: VoteTransactionRequest): UnconfirmedVoteTransaction = UnconfirmedVoteTransaction(
             TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
             TransactionFooter(request.hash!!, request.senderSignature!!, request.senderPublicKey!!),
-            VoteTransactionPayload(request.voteTypeId!!, request.nodeId!!)
+            VoteTransactionPayload(request.voteTypeId!!, request.delegateKey!!)
         )
     }
 
@@ -42,7 +42,7 @@ class UnconfirmedVoteTransaction(
         footer.senderSignature,
         footer.senderPublicKey,
         payload.voteTypeId,
-        payload.nodeId
+        payload.delegateKey
     )
 
 }

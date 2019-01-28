@@ -8,9 +8,8 @@ import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.service.BlockService
-import io.openfuture.chain.core.service.DefaultDelegateService
+import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.GenesisBlockService
-import io.openfuture.chain.core.service.WalletService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.handler.sync.EpochResponseHandler
@@ -26,16 +25,16 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultGenesisBlockService(
     blockService: BlockService,
-    walletService: WalletService,
-    delegateService: DefaultDelegateService,
+    delegateStateService: DelegateStateService,
     private val keyHolder: NodeKeyHolder,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository
-) : BaseBlockService<GenesisBlock>(genesisBlockRepository, blockService, walletService, delegateService), GenesisBlockService {
+) : BaseBlockService<GenesisBlock>(genesisBlockRepository, blockService, delegateStateService), GenesisBlockService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(EpochResponseHandler::class.java)
     }
+
 
     @Transactional(readOnly = true)
     override fun getPreviousByHeight(height: Long): GenesisBlock = repository.findFirstByHeightLessThanOrderByHeightDesc(height)
@@ -88,6 +87,8 @@ class DefaultGenesisBlockService(
     @Synchronized
     override fun add(block: GenesisBlock) {
         super.save(block)
+        log.debug("Saving genesis block: height #${block.height}, hash ${block.hash}")
+
     }
 
     @Transactional
@@ -97,9 +98,7 @@ class DefaultGenesisBlockService(
             return
         }
 
-        val block = GenesisBlock.of(message)
-
-        add(block)
+        add(GenesisBlock.of(message))
     }
 
     override fun isGenesisBlockRequired(): Boolean {
@@ -122,7 +121,7 @@ class DefaultGenesisBlockService(
         val firstGenesisBlock = genesisBlockRepository.findOneByPayloadEpochIndex(1)!!
         val genesisDelegates = firstGenesisBlock.payload.activeDelegates
         val epochIndex = getLast().payload.epochIndex + 1
-        val delegates = delegateService.getActiveDelegates().toMutableSet()
+        val delegates = delegateStateService.getActiveDelegates().map { it.address }.toMutableSet()
         delegates.addAll(genesisDelegates)
         return GenesisBlockPayload(epochIndex, delegates.toMutableList())
     }

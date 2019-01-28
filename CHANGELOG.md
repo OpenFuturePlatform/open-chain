@@ -6,6 +6,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.8.0] - 2019-01-25
+### Added
+- Core: blocks rollback
+- Core: wallet states
+- Core: delegate states
+- Core: light synchronization
+
+## Changed
+- Consensus: sequential ordering of active delegates
+- Consensus: in case active delegate does not produce block due to its possible unavailability, boot node will produce it
+- Consensus: invalid blocks are not broadcast across the network
+- Core: removed redundant logs
+- Core: delegate info is stored in state
+- Core: wallet balance is stored in state
+- Core: account has one vote for delegate
+
 ## [1.7.1] - 2019-01-21
 ### Fixed
  - Sync: persistence a large number of blocks
@@ -294,6 +310,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[1.8.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.7.1...v1.8.0
 [1.7.1]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.5.0...v1.6.0

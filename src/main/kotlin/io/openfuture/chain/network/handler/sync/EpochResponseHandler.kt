@@ -13,7 +13,6 @@ class EpochResponseHandler(
     private val chainSynchronizer: ChainSynchronizer
 ) : SimpleChannelInboundHandler<EpochResponseMessage>() {
 
-
     override fun channelRead0(ctx: ChannelHandlerContext, msg: EpochResponseMessage) {
         chainSynchronizer.onEpochResponse(msg)
     }

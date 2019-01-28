@@ -7,8 +7,9 @@ import io.openfuture.chain.consensus.component.block.DefaultPendingBlockHandler
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.model.entity.Delegate
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
+import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -51,23 +52,25 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
     @Test
     fun addBlockShouldAddMainBlockAndBroadcast() {
-        val delegate = Delegate("publicKey", "nodeId", "address", "host", 1111, 1)
         val payload = MainBlockPayload(
-            "merkleHash"
+            "merkleHash",
+            "stateHash"
         )
 
         val privateKey = "529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"
         val rewardTransactionMessage = createRewardTransactionMessage(1L)
         val pendingBlock = PendingBlockMessage(2L, "previousHash", 1L,
-            "hash", "signature", "publicKey", payload.merkleHash, rewardTransactionMessage, listOf(), listOf(), listOf())
+            "hash", "signature", "publicKey", payload.merkleHash, payload.stateHash,
+            rewardTransactionMessage, listOf(), listOf(), listOf(), listOf(), listOf())
+        val delegate = DelegateState("publicKey", MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
+            MainBlockPayload("merkleHash", "stateHash")), 1, "address", 1)
 
         given(keyHolder.getPrivateKey()).willReturn(
             ByteUtils.fromHexString(privateKey))
         given(keyHolder.getPublicKeyAsHexString()).willReturn("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4")
         given(epochService.getSlotNumber(pendingBlock.timestamp)).willReturn(2L)
-        given(epochService.getCurrentSlotOwner()).willReturn(delegate)
-        given(epochService.getDelegates()).willReturn(
-            listOf(Delegate("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4", "nodeId", "address", "host", 1111, 1)))
+        given(epochService.getCurrentSlotOwner()).willReturn(delegate.address)
+        given(epochService.getDelegatesPublicKeys()).willReturn(listOf("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"))
         given(mainBlockService.verify(pendingBlock)).willReturn(true)
 
         defaultPendingBlockHandler.addBlock(pendingBlock)
@@ -81,13 +84,14 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         val privateKey = "237a1f68f5e6ee331c2d1fac4107807f7eaf7eed2265490d9a9a330c3549a43d"
         val publicKey = "020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948"
         val hash = "22c626c74fdc7aa6b2809d88a60068e6017a3d7015113ebd0af18cdf9f3809c6"
-        val delegate = Delegate(publicKey, "nodeId", "address", "host", 1111,  1)
         val payload = MainBlockPayload(
-            "merkleHash"
+            "merkleHash",
+            "stateHash"
         )
         val rewardTransactionMessage = createRewardTransactionMessage(1L)
         val pendingBlock = PendingBlockMessage(2L, "previousHash", 1L,
-            hash, "signature", publicKey, payload.merkleHash, rewardTransactionMessage, listOf(), listOf(), listOf())
+            hash, "signature", publicKey, payload.merkleHash, payload.stateHash, rewardTransactionMessage,
+            listOf(), listOf(), listOf(), listOf(), listOf())
 
         val message = BlockApprovalMessage(
             BlockApprovalStage.PREPARE.value,
@@ -98,17 +102,16 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
         message.signature = SignatureUtils.sign(message.getBytes(), ByteUtils.fromHexString(privateKey))
 
-        given(keyHolder.getPrivateKey()).willReturn(
-            ByteUtils.fromHexString(privateKey))
+        given(keyHolder.getPrivateKey()).willReturn(ByteUtils.fromHexString(privateKey))
         given(keyHolder.getPublicKeyAsHexString()).willReturn(publicKey)
         given(epochService.getSlotNumber(pendingBlock.timestamp)).willReturn(2L)
-        given(epochService.getCurrentSlotOwner()).willReturn(delegate)
+        given(epochService.getCurrentSlotOwner()).willReturn(publicKey)
         given(mainBlockService.verify(pendingBlock)).willReturn(true)
-        given(epochService.getDelegates()).willReturn(
-            listOf(Delegate("020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948", "nodeId", "address", "host", 1111,  1)))
+        given(epochService.getDelegatesPublicKeys()).willReturn(
+            listOf("020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948"))
         defaultPendingBlockHandler.addBlock(pendingBlock)
 
-        given(epochService.getDelegates()).willReturn(listOf(delegate))
+        given(epochService.getDelegatesPublicKeys()).willReturn(listOf(publicKey))
 
         defaultPendingBlockHandler.handleApproveMessage(message)
 
@@ -118,7 +121,6 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
     @Test
     fun handleApproveMessageShouldCommitApproveMessage() {
         val publicKey = "037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"
-        val delegate = Delegate(publicKey, "nodeId", "address", "host", 1111,  1)
         val message = BlockApprovalMessage(
             BlockApprovalStage.COMMIT.value,
             "2a897fecaaaddcd924a9f562be1cdacf0c7cf3370d1d13c3209f0d05be6bd26f",
@@ -126,7 +128,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
             "MEYCIQCjcs54dZxldCIqIwpwKxsUAYIeMGNdlaBudCF7Ps7SYwIhAJiKsUUoOuTiVHZNePFDjPWF5sarUFguNqV+lMDnsieX"
         )
 
-        given(epochService.getDelegates()).willReturn(listOf(delegate))
+        given(epochService.getDelegatesPublicKeys()).willReturn(listOf(publicKey))
 
         defaultPendingBlockHandler.handleApproveMessage(message)
     }
@@ -139,8 +141,6 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         val privateKey2 = "a3ddaee50c7986bb95816b0d389eadbff39146af546fa795a6433c67af97c6c9"
         val publicKey = "020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948"
         val publicKey2 = "02fb3085f5f8bd7a095198211fb1d4781fd7f0643dec52328151b6cb46e46931fd"
-        val delegate = Delegate(publicKey, "nodeId", "address", "host", 1111,  1)
-        val delegate2 = Delegate(publicKey2, "nodeId", "address2", "host", 1111,  2)
         val message = BlockApprovalMessage(
             BlockApprovalStage.COMMIT.value,
             blockHash,
@@ -156,7 +156,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         )
         message2.signature = SignatureUtils.sign(message2.getBytes(), ByteUtils.fromHexString(privateKey2))
 
-        given(epochService.getDelegates()).willReturn(listOf(delegate, delegate2))
+        given(epochService.getDelegatesPublicKeys()).willReturn(listOf(publicKey, publicKey2))
 
         defaultPendingBlockHandler.handleApproveMessage(message)
         defaultPendingBlockHandler.handleApproveMessage(message2)

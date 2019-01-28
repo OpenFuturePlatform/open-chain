@@ -17,7 +17,8 @@ CREATE UNIQUE HASH INDEX blocks_height
 
 CREATE TABLE main_blocks (
   id          BIGINT PRIMARY KEY REFERENCES blocks,
-  merkle_hash VARCHAR NOT NULL
+  merkle_hash VARCHAR NOT NULL,
+  state_hash  VARCHAR NOT NULL
 );
 --
 CREATE TABLE genesis_blocks (
@@ -28,3 +29,8 @@ CREATE TABLE genesis_blocks (
 CREATE HASH INDEX genesis_blocks_epoch_index
   ON genesis_blocks (epoch_index);
 --
+CREATE TABLE delegate2genesis (
+  public_key     VARCHAR NOT NULL,
+  genesis_id  BIGINT NOT NULL REFERENCES genesis_blocks,
+  PRIMARY KEY (public_key, genesis_id)
+);

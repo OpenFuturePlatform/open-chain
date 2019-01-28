@@ -5,9 +5,9 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.model.entity.Delegate
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.MainBlockService
+import io.openfuture.chain.core.service.block.DefaultMainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -34,8 +34,8 @@ class DefaultPendingBlockHandler(
     }
 
     private val pendingBlocks: MutableSet<PendingBlockMessage> = mutableSetOf()
-    private val prepareVotes: MutableMap<String, Delegate> = mutableMapOf()
-    private val commits: MutableMap<String, MutableList<Delegate>> = mutableMapOf()
+    private val prepareVotes: MutableList<String> = mutableListOf()
+    private val commits: MutableMap<String, MutableList<String>> = mutableMapOf()
 
     private var observable: PendingBlockMessage? = null
     private var timeSlotNumber: Long = 0
@@ -59,7 +59,7 @@ class DefaultPendingBlockHandler(
             return
         }
 
-        if (slotOwner.publicKey != block.publicKey) {
+        if (slotOwner != block.publicKey) {
             return
         }
 
@@ -93,15 +93,15 @@ class DefaultPendingBlockHandler(
             return
         }
 
-        val delegates = epochService.getDelegates()
-        val delegate = delegates.find { message.publicKey == it.publicKey }
+        val delegates = epochService.getDelegatesPublicKeys()
+        val delegate = delegates.find { it == message.publicKey } ?: return
 
-        if (null == delegate || message.hash != observable?.hash || this.stage != PREPARE) {
+        if (message.hash != observable?.hash || this.stage != PREPARE) {
             return
         }
 
-        if (!prepareVotes.containsKey(message.publicKey) && isValidApprovalSignature(message)) {
-            prepareVotes[message.publicKey] = delegate
+        if (!prepareVotes.contains(delegate) && isValidApprovalSignature(message)) {
+            prepareVotes.add(delegate)
             networkService.broadcast(message)
             if (prepareVotes.size > (properties.delegatesCount!! - 1) / 3) {
                 pendingBlocks.find { it.hash == message.hash }?.let {
@@ -117,8 +117,8 @@ class DefaultPendingBlockHandler(
     }
 
     private fun handleCommit(message: BlockApprovalMessage) {
-        val delegates = epochService.getDelegates()
-        val delegate = delegates.find { message.publicKey == it.publicKey } ?: return
+        val delegates = epochService.getDelegatesPublicKeys()
+        val delegate = delegates.find { it == message.publicKey } ?: return
 
         val blockCommits = commits[message.hash]
         if (null != blockCommits) {
@@ -129,10 +129,11 @@ class DefaultPendingBlockHandler(
                     pendingBlocks.find { it.hash == message.hash }?.let {
                         if (!chainSynchronizer.isInSync(MainBlock.of(it)) && it.hash != observable?.hash) {
                             chainSynchronizer.checkLastBlock()
+                            reset()
                             return
                         }
                         mainBlockService.add(it)
-                        log.debug("CONSENSUS: Saved main block with hash = ${it.hash}")
+                        log.info("Saving main block: height #${it.height}, hash ${it.hash}")
                     }
                     blockAddedFlag = true
                 }
@@ -154,6 +155,6 @@ class DefaultPendingBlockHandler(
         SignatureUtils.verify(message.getBytes(), message.signature!!, ByteUtils.fromHexString(message.publicKey))
 
     private fun isActiveDelegate(): Boolean =
-        epochService.getDelegates().any { it.publicKey == keyHolder.getPublicKeyAsHexString() }
+        epochService.getDelegatesPublicKeys().contains(keyHolder.getPublicKeyAsHexString())
 
 }

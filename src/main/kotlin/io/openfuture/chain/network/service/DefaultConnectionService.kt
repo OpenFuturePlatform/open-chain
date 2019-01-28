@@ -45,6 +45,4 @@ class DefaultConnectionService(
         return result
     }
 
-
-
 }

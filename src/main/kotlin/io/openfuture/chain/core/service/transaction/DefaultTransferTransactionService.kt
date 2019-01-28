@@ -89,9 +89,6 @@ class DefaultTransferTransactionService(
                 return tx
             }
 
-            walletService.increaseBalance(transaction.payload.recipientAddress, transaction.payload.amount)
-            walletService.decreaseBalance(transaction.header.senderAddress, transaction.payload.amount + transaction.header.fee)
-
             val utx = unconfirmedRepository.findOneByFooterHash(transaction.footer.hash)
             if (null != utx) {
                 return confirm(utx, transaction)
@@ -101,6 +98,11 @@ class DefaultTransferTransactionService(
         } finally {
             BlockchainLock.writeLock.unlock()
         }
+    }
+
+    override fun updateState(message: TransferTransactionMessage) {
+        walletStateService.updateBalanceByAddress(message.recipientAddress, message.amount)
+        walletStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
     }
 
     override fun verify(message: TransferTransactionMessage): Boolean {

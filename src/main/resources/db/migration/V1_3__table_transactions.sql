@@ -35,15 +35,9 @@ CREATE HASH INDEX reward_transactions_recipient_address
 --
 CREATE TABLE delegate_transactions (
   id            BIGINT PRIMARY KEY REFERENCES transactions,
-  node_id       VARCHAR NOT NULL,
   delegate_key  VARCHAR NOT NULL,
-  delegate_host VARCHAR NOT NULL,
-  delegate_port INTEGER NOT NULL,
   amount        BIGINT  NOT NULL
 );
---
-CREATE UNIQUE HASH INDEX delegate_transactions_node_id
-  ON delegate_transactions (node_id);
 --
 CREATE UNIQUE HASH INDEX delegate_transactions_delegate_key
   ON delegate_transactions (delegate_key);
@@ -60,11 +54,11 @@ VALUES (1, 'FOR'),
 CREATE TABLE vote_transactions (
   id           BIGINT PRIMARY KEY REFERENCES transactions,
   vote_type_id INTEGER NOT NULL REFERENCES vote_types,
-  node_id      VARCHAR NOT NULL
+  delegate_key VARCHAR NOT NULL
 );
 --
-CREATE HASH INDEX vote_transactions_node_id
-  ON vote_transactions (node_id);
+CREATE HASH INDEX vote_transactions_delegate_key
+  ON vote_transactions (delegate_key);
 --
 
 -- UNCONFIRMED TABLES
@@ -95,15 +89,9 @@ CREATE MEMORY TABLE u_transfer_transactions (
 --
 CREATE MEMORY TABLE u_delegate_transactions (
   id            BIGINT PRIMARY KEY REFERENCES u_transactions,
-  node_id       VARCHAR NOT NULL,
   delegate_key  VARCHAR NOT NULL,
-  delegate_host VARCHAR NOT NULL,
-  delegate_port INTEGER NOT NULL,
   amount        BIGINT  NOT NULL
 );
---
-CREATE UNIQUE HASH INDEX u_delegate_transactions_node_id
-  ON u_delegate_transactions (node_id);
 --
 CREATE UNIQUE HASH INDEX u_delegate_transactions_delegate_key
   ON u_delegate_transactions (delegate_key);
@@ -111,9 +99,8 @@ CREATE UNIQUE HASH INDEX u_delegate_transactions_delegate_key
 CREATE MEMORY TABLE u_vote_transactions (
   id           BIGINT PRIMARY KEY REFERENCES u_transactions,
   vote_type_id INTEGER NOT NULL REFERENCES vote_types,
-  node_id      VARCHAR NOT NULL
+  delegate_key      VARCHAR NOT NULL
 );
 --
-CREATE INDEX u_vote_transactions_node_id
-  ON u_vote_transactions (node_id);
---
+CREATE INDEX u_vote_transactions_delegate_key
+  ON u_vote_transactions (delegate_key)
