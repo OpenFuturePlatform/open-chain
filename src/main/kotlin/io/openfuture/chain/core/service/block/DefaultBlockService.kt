@@ -86,6 +86,8 @@ class DefaultBlockService(
 
     @Transactional
     override fun deleteByHeightIn(heights: List<Long>) {
+        walletStateService.deleteBlockStates(heights)
+        delegateStateService.deleteBlockStates(heights)
         transactionService.deleteBlockTransactions(heights)
         repository.deleteAllByHeightIn(heights)
     }
