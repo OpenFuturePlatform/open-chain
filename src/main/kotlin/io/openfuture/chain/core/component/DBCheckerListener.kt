@@ -92,10 +92,6 @@ class DBCheckerListener(
             hashes.addAll(block.payload.delegateTransactions.map { it.footer.hash })
             hashes.add(block.payload.rewardTransaction[0].footer.hash)
 
-            if (hashes.isEmpty()) {
-                return true
-            }
-
             val transactionsMerkleHash = MainBlockPayload.calculateMerkleRoot(hashes)
             if (block.payload.merkleHash != transactionsMerkleHash) {
                 return false
