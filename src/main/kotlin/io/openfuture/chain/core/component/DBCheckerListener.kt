@@ -18,8 +18,6 @@ class DBCheckerListener(
     private val syncCursor: SyncCursor
 ) : ApplicationListener<DataSourceSchemaCreatedEvent> {
 
-    private var cursorFlag: Boolean = true
-
     override fun onApplicationEvent(event: DataSourceSchemaCreatedEvent) {
         if (!isValidDb()) {
             deleteInvalidChainPart()
@@ -80,12 +78,9 @@ class DBCheckerListener(
             return false
         }
         if (!isValidTransactions(block)) {
-            cursorFlag = false
             return false
         }
-        if (cursorFlag) {
-            syncCursor.fullCursor = block
-        }
+        syncCursor.fullCursor = block
         return true
     }
 
