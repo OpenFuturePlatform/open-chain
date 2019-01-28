@@ -5,6 +5,7 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.state.WalletState
@@ -15,8 +16,12 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransacti
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncMode
+import io.openfuture.chain.core.util.ByteConstants
+import io.openfuture.chain.crypto.util.HashUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets
 
 @Service
 class DefaultBlockService(
@@ -90,6 +95,17 @@ class DefaultBlockService(
         delegateStateService.deleteBlockStates(heights)
         transactionService.deleteBlockTransactions(heights)
         repository.deleteAllByHeightIn(heights)
+    }
+
+    override fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray {
+        val bytes = ByteBuffer.allocate(ByteConstants.LONG_BYTES + ByteConstants.LONG_BYTES + previousHash.toByteArray(StandardCharsets.UTF_8).size + payload.getBytes().size)
+            .putLong(timestamp)
+            .putLong(height)
+            .put(previousHash.toByteArray(StandardCharsets.UTF_8))
+            .put(payload.getBytes())
+            .array()
+
+        return HashUtils.doubleSha256(bytes)
     }
 
     @Transactional(readOnly = true)

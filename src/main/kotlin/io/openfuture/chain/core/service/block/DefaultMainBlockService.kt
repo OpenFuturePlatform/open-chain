@@ -129,7 +129,7 @@ class DefaultMainBlockService(
             val merkleHash = calculateMerkleRoot(transactionHashes + rewardTransactionMessage.hash)
             val stateHash = calculateMerkleRoot(stateHashes)
             val payload = MainBlockPayload(merkleHash, stateHash)
-            val hash = createHash(timestamp, height, previousHash, payload)
+            val hash = blockService.createHash(timestamp, height, previousHash, payload)
             val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
             val publicKey = keyHolder.getPublicKeyAsHexString()
 

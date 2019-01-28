@@ -6,6 +6,7 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.smartcontract.core.utils.ByteUtils
 import org.springframework.boot.autoconfigure.jdbc.DataSourceSchemaCreatedEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Component
@@ -101,17 +102,14 @@ class DBCheckerListener(
         return true
     }
 
-    private fun isValidBlocksHashes(block: Block, nextBlock: Block): Boolean = (block.hash == nextBlock.previousHash)
+    private fun isValidBlocksHashes(block: Block, nextBlock: Block): Boolean {
+        val blockHash = blockService.createHash(block.timestamp, block.height, block.previousHash, block.getPayload())
+        return ByteUtils.toHexString(blockHash) == nextBlock.previousHash
+    }
 
     //TODO: must to be implemented
     private fun isValidBlockState(block: Block): Boolean {
-
-        if (block is MainBlock) {
-            val states = block.payload.delegateStates + block.payload.walletStates
-        //    val stateHashes = states.map { it.get() }
-        //    MainBlockPayload.calculateMerkleRoot(Arrays.asList(block.payload.stateHash))
-        }
-        return true
+        return false
     }
 
 }

@@ -3,6 +3,7 @@ package io.openfuture.chain.core.service
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.state.WalletState
@@ -69,6 +70,7 @@ interface BlockService {
 
     fun deleteByHeightIn(heights: List<Long>)
 
+    fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray
 }
 
 interface GenesisBlockService {

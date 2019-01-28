@@ -76,7 +76,7 @@ class DefaultGenesisBlockService(
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
         val payload = createPayload()
-        val hash = createHash(timestamp, height, previousHash, payload)
+        val hash = blockService.createHash(timestamp, height, previousHash, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKeyAsHexString()
 
