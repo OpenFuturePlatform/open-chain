@@ -7,10 +7,7 @@ import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.*
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.*
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -92,6 +89,8 @@ interface RewardTransactionRepository : BaseRepository<RewardTransaction> {
 }
 
 @Repository
+interface DeployTransactionRepository : TransactionRepository<DeployTransaction>
+
 interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseRepository<UEntity> {
 
     fun findOneByFooterHash(hash: String): UEntity?
@@ -114,6 +113,9 @@ interface UDelegateTransactionRepository : UTransactionRepository<UnconfirmedDel
 
 @Repository
 interface UTransferTransactionRepository : UTransactionRepository<UnconfirmedTransferTransaction>
+
+@Repository
+interface UDeployTransactionRepository : UTransactionRepository<UnconfirmedDeployTransaction>
 
 @Repository
 interface StateRepository<T : State> : BaseRepository<T> {

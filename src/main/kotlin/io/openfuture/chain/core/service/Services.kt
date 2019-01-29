@@ -6,24 +6,16 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.state.WalletState
-import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.*
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.*
 import io.openfuture.chain.core.model.node.*
 import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
-import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
-import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
-import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
-import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
+import io.openfuture.chain.rpc.domain.transaction.request.*
+import io.openfuture.chain.rpc.domain.transaction.response.DeployTransactionResponse
 import org.springframework.data.domain.Page
 
 interface HardwareInfoService {
@@ -213,6 +205,28 @@ interface DelegateTransactionService {
     fun updateState(message: DelegateTransactionMessage)
 
     fun verify(message: DelegateTransactionMessage): Boolean
+
+}
+
+interface SmartContractTransactionService {
+
+    fun getUnconfirmedCount(): Long
+
+    fun getByHash(hash: String): DeployTransaction
+
+    fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedDeployTransaction>
+
+    fun getUnconfirmedByHash(hash: String): UnconfirmedDeployTransaction
+
+    fun add(message: DeployTransactionMessage)
+
+    fun add(request: DeployTransactionRequest): UnconfirmedDeployTransaction
+
+    fun commit(transaction: DeployTransaction): DeployTransaction
+
+    fun updateState(message: DeployTransactionMessage)
+
+    fun verify(message: DeployTransactionMessage): Boolean
 
 }
 
