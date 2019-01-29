@@ -21,8 +21,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultSmartContractTransactionService(
-        repository: DeployTransactionRepository,
-        uRepository: UDeployTransactionRepository
+    repository: DeployTransactionRepository,
+    uRepository: UDeployTransactionRepository
 ) : ExternalTransactionService<DeployTransaction, UnconfirmedDeployTransaction>(repository, uRepository), SmartContractTransactionService {
 
     companion object {
@@ -35,16 +35,16 @@ class DefaultSmartContractTransactionService(
 
     @Transactional(readOnly = true)
     override fun getByHash(hash: String): DeployTransaction = repository.findOneByFooterHash(hash)
-            ?: throw NotFoundException("Transaction with hash $hash not found")
+        ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedDeployTransaction> =
-            unconfirmedRepository.findAllByOrderByHeaderFeeDesc(request)
+        unconfirmedRepository.findAllByOrderByHeaderFeeDesc(request)
 
     @Transactional(readOnly = true)
     override fun getUnconfirmedByHash(hash: String): UnconfirmedDeployTransaction =
-            unconfirmedRepository.findOneByFooterHash(hash)
-                    ?: throw NotFoundException("Transaction with hash $hash not found")
+        unconfirmedRepository.findOneByFooterHash(hash)
+            ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @BlockchainSynchronized
     @Transactional

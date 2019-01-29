@@ -28,9 +28,9 @@ class UnconfirmedDeployTransaction(
         )
 
         fun of(request: DeployTransactionRequest): UnconfirmedDeployTransaction = UnconfirmedDeployTransaction(
-                TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
-                TransactionFooter(request.hash!!, request.senderSignature!!, request.senderPublicKey!!),
-                DeployTransactionPayload(request.bytecode!!)
+            TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
+            TransactionFooter(request.hash!!, request.senderSignature!!, request.senderPublicKey!!),
+            DeployTransactionPayload(request.bytecode!!)
         )
     }
 

@@ -8,6 +8,7 @@ import io.openfuture.chain.network.handler.consensus.BlockAvailabilityRequestHan
 import io.openfuture.chain.network.handler.consensus.BlockAvailabilityResponseHandler
 import io.openfuture.chain.network.handler.consensus.PendingBlockNetworkHandler
 import io.openfuture.chain.network.handler.core.DelegateTransactionHandler
+import io.openfuture.chain.network.handler.core.DeployTransactionHandler
 import io.openfuture.chain.network.handler.core.TransferTransactionHandler
 import io.openfuture.chain.network.handler.core.VoteTransactionHandler
 import io.openfuture.chain.network.handler.network.ConnectionHandler
@@ -39,6 +40,7 @@ class ServerChannelInitializer(
     private val transferTransactionHandler: TransferTransactionHandler,
     private val delegateTransactionHandler: DelegateTransactionHandler,
     private val voteTransactionHandler: VoteTransactionHandler,
+    private val deployTransactionHandler: DeployTransactionHandler,
     private val pendingBlockNetworkHandler: PendingBlockNetworkHandler,
     private val blockApprovalHandler: BlockApprovalHandler,
     private val blockAvailabilityRequestHandler: BlockAvailabilityRequestHandler,
@@ -72,6 +74,7 @@ class ServerChannelInitializer(
             transferTransactionHandler,
             delegateTransactionHandler,
             voteTransactionHandler,
+            deployTransactionHandler,
             //        consensus
             pendingBlockNetworkHandler,
             blockApprovalHandler
