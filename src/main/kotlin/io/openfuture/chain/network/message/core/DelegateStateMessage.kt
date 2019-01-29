@@ -37,4 +37,24 @@ class DelegateStateMessage(
         buf.writeLong(createDate)
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is DelegateStateMessage) return false
+        if (!super.equals(other)) return false
+
+        if (rating != other.rating) return false
+        if (walletAddress != other.walletAddress) return false
+        if (createDate != other.createDate) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + rating.hashCode()
+        result = 31 * result + walletAddress.hashCode()
+        result = 31 * result + createDate.hashCode()
+        return result
+    }
+
 }

@@ -19,3 +19,8 @@ CREATE TABLE wallet_states (
   balance  BIGINT NOT NULL,
   vote_for VARCHAR,
 );
+--
+CREATE TABLE contract_states (
+  id       BIGINT PRIMARY KEY REFERENCES states,
+  storage  BLOB NOT NULL,
+);
