@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.sync
 
 import io.openfuture.chain.consensus.service.EpochService
+import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
@@ -45,7 +46,9 @@ class ChainSynchronizer(
     private val requestRetryScheduler: RequestRetryScheduler,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
-    private val statePool: StatePool
+    private val delegateStateService: DelegateStateService,
+    private val statePool: StatePool,
+    private val nodeKeyHolder: NodeKeyHolder
 ) {
 
     companion object {
@@ -70,11 +73,12 @@ class ChainSynchronizer(
                 return
             }
 
-            if (syncSession!!.syncMode == FULL
-                && !isValidTransactionMerkleRoot(message.mainBlocks)
-                && !isValidStateMerkleRoot(message.mainBlocks)
-                && !isValidTransactions(message.mainBlocks)
-                && !isValidStates(message.mainBlocks)) {
+            if (delegateStateService.existsByAddress(nodeKeyHolder.getPublicKeyAsHexString())
+                || (FULL == syncSession!!.syncMode
+                    && !isValidTransactionMerkleRoot(message.mainBlocks)
+                    && !isValidStateMerkleRoot(message.mainBlocks)
+                    && !isValidTransactions(message.mainBlocks)
+                    && !isValidStates(message.mainBlocks))) {
                 requestEpoch(delegates.filter { it != message.delegateKey })
                 return
             }

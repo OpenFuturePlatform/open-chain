@@ -140,6 +140,8 @@ interface DelegateStateRepository : StateRepository<DelegateState> {
         """)
     fun findLastAll(request: Pageable): List<DelegateState>
 
+    fun existsByAddress(nodeKey: String): Boolean
+
 }
 
 @Repository

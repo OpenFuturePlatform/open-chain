@@ -59,6 +59,9 @@ class DefaultDelegateStateService(
         }
     }
 
+    @Transactional(readOnly = true)
+    override fun existsByAddress(nodeKey: String): Boolean = repository.existsByAddress(nodeKey)
+
     private fun getCurrentState(address: String): DelegateStateMessage {
         BlockchainLock.readLock.lock()
         try {

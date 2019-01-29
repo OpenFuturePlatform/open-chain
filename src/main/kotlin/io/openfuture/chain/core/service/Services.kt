@@ -256,6 +256,8 @@ interface DelegateStateService : StateService<DelegateState> {
 
     fun commit(state: DelegateState)
 
+    fun existsByAddress(nodeKey: String): Boolean
+
 }
 
 interface WalletStateService : StateService<WalletState> {
