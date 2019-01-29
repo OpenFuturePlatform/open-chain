@@ -66,11 +66,11 @@ class DBCheckerListener(
     }
 
     private fun isValidBlocks(block: Block, nextBlock: Block): Boolean {
-        if (!isValidBlocksHashes(block, nextBlock)) {
-            syncCursor.fullCursor = block
+        if (!isValidBlock(block)) {
             return false
         }
-        if (!isValidBlock(block)) {
+        if (!isValidBlocksHashes(block, nextBlock)) {
+            syncCursor.fullCursor = block
             return false
         }
         return true
