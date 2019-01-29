@@ -7,28 +7,30 @@ import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.TransactionService
-import org.springframework.boot.autoconfigure.jdbc.DataSourceSchemaCreatedEvent
-import org.springframework.context.ApplicationListener
+import io.openfuture.chain.core.sync.SyncMode
 import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class DBCheckerListener(
-    private val consensusProperties: ConsensusProperties,
-    private val genesisBlockService: GenesisBlockService,
+class DBChecker(
     private val blockService: BlockService,
-    private val syncCursor: SyncCursor,
+    private val genesisBlockService: GenesisBlockService,
+    private val consensusProperties: ConsensusProperties,
     private val transactionService: TransactionService
-) : ApplicationListener<DataSourceSchemaCreatedEvent> {
+) {
 
-    override fun onApplicationEvent(event: DataSourceSchemaCreatedEvent) {
-        if (!isValidDb()) {
-            deleteInvalidChainPart()
+    fun prepareDB(syncMode: SyncMode): Boolean {
+        val lastBlockHeight = blockService.getLast().height
+        val validBlockHeight = lastValidBlockHeight(syncMode)
+        if (validBlockHeight < lastBlockHeight) {
+            deleteInvalidChainPart(validBlockHeight)
+            return false
         }
+        return true
     }
 
-    private fun deleteInvalidChainPart() {
-        val heightFrom = syncCursor.fullCursor.height + 1
+    private fun deleteInvalidChainPart(height: Long) {
+        val heightFrom = height + 1
         val heightTo = blockService.getLast().height
         val heightsToDelete = ArrayList<Long>()
         for (i in heightFrom..heightTo) {
@@ -37,10 +39,10 @@ class DBCheckerListener(
         blockService.deleteByHeightIn(heightsToDelete)
     }
 
-    private fun isValidDb(): Boolean {
+    private fun lastValidBlockHeight(syncMode: SyncMode): Long {
+        val firstGenesisBlock = genesisBlockService.getByEpochIndex(1L)!!
         val epochHeight = consensusProperties.epochHeight!!
-        syncCursor.fullCursor = genesisBlockService.getByEpochIndex(1L)!!
-        var indexFrom = syncCursor.fullCursor.height
+        var indexFrom = firstGenesisBlock.height
         var indexTo = indexFrom + epochHeight
         var block: Block? = null
         do {
@@ -55,40 +57,43 @@ class DBCheckerListener(
             while (blocksIterator.hasNext()) {
                 val nextBlock = blocksIterator.next()
 
-                if (!isValidBlocks(block!!, nextBlock)) {
-                    return false
+                if (!isValidBlock(block!!, syncMode)) {
+                    return block.height - 1
+                }
+                if (!isValidBlocksHashes(block, nextBlock)) {
+                    return block.height
                 }
 
                 block = nextBlock
             }
         } while (!blocks.isEmpty())
-        return isValidBlock(block!!)
+        if (!isValidBlock(block!!, syncMode)) {
+            return block.height - 1
+        }
+        return block.height
     }
 
-    private fun isValidBlocks(block: Block, nextBlock: Block): Boolean {
-        if (!isValidBlock(block)) {
-            return false
-        }
-        if (!isValidBlocksHashes(block, nextBlock)) {
-            syncCursor.fullCursor = block
-            return false
-        }
-        return true
-    }
-
-    private fun isValidBlock(block: Block): Boolean {
+    private fun isValidBlock(block: Block, syncMode: SyncMode): Boolean {
         if (!isValidBlockState(block)) {
             return false
         }
         if (!blockService.isValidHash(block)) {
             return false
         }
-        if (!isValidTransactions(block)) {
-            return false
+        if (SyncMode.FULL == syncMode) {
+            return isValidTransactions(block)
         }
-        syncCursor.fullCursor = block
+        if (SyncMode.LIGHT == syncMode && block is MainBlock) {
+            val transactions =
+                block.payload.transferTransactions +
+                    block.payload.delegateTransactions +
+                    block.payload.voteTransactions
+            return transactions.isEmpty()
+        }
         return true
     }
+
+    private fun isValidBlocksHashes(block: Block, nextBlock: Block): Boolean = (block.hash == nextBlock.previousHash)
 
     private fun isValidTransactions(block: Block): Boolean {
         if (block is MainBlock) {
@@ -106,8 +111,6 @@ class DBCheckerListener(
         }
         return true
     }
-
-    private fun isValidBlocksHashes(block: Block, nextBlock: Block): Boolean = (block.hash == nextBlock.previousHash)
 
     private fun isValidBlockState(block: Block): Boolean {
         if (block is MainBlock) {
