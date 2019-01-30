@@ -15,14 +15,13 @@ object ByteCodeUtils {
     fun processByteArray(bytes: ByteArray, newName: String): ByteArray {
         val reader = ClassReader(bytes)
 
-        SmartContractValidator().use {
-            reader.accept(it, ClassReader.SKIP_DEBUG)
+        val validator = SmartContractValidator()
+        reader.accept(validator, ClassReader.SKIP_DEBUG)
 
-            val result = it.validationResult
-            if (result.hasErrors()) {
-                log.warn(result.getErrors().joinToString("\n\n"))
-                throw SmartContractValidationException("Contract class is invalid")
-            }
+        val result = validator.validationResult
+        if (result.hasErrors()) {
+            log.warn(result.getErrors().joinToString("\n\n"))
+            throw SmartContractValidationException("Contract class is invalid")
         }
 
         val writer = ClassWriter(0)

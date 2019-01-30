@@ -7,10 +7,9 @@ import io.openfuture.chain.smartcontract.validation.domain.ValidationResult
 import org.objectweb.asm.*
 import org.objectweb.asm.Opcodes.ASM6
 import org.slf4j.LoggerFactory
-import java.io.Closeable
 import java.lang.reflect.Modifier
 
-class SmartContractValidator : ClassVisitor(ASM6), Closeable {
+class SmartContractValidator : ClassVisitor(ASM6) {
 
     val validationResult = ValidationResult()
 
@@ -52,10 +51,6 @@ class SmartContractValidator : ClassVisitor(ASM6), Closeable {
 
         log.debug("METHOD: name-$name, descriptor-$descriptor, signature-$signature, exceptions-$exceptions")
         return SourceMethodVisitor()
-    }
-
-    override fun close() {
-        validationResult.clear()
     }
 
     private fun validateType(classType: String?) {
