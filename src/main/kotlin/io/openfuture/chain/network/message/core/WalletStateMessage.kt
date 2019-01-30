@@ -3,8 +3,8 @@ package io.openfuture.chain.network.message.core
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
-import io.openfuture.chain.network.extension.readString
-import io.openfuture.chain.network.extension.writeString
+import io.openfuture.chain.network.extension.readNullableString
+import io.openfuture.chain.network.extension.writeNullableString
 import org.apache.commons.lang3.StringUtils.EMPTY
 import java.nio.ByteBuffer
 import kotlin.text.Charsets.UTF_8
@@ -17,7 +17,7 @@ class WalletStateMessage(
 ) : StateMessage(address) {
 
     override fun getBytes(): ByteArray {
-        val voteForTemp = voteFor ?: ""
+        val voteForTemp = voteFor ?: EMPTY
         return ByteBuffer.allocate(LONG_BYTES + voteForTemp.toByteArray(UTF_8).size)
             .putLong(balance)
             .put(voteForTemp.toByteArray(UTF_8))
@@ -27,16 +27,13 @@ class WalletStateMessage(
     override fun read(buf: ByteBuf) {
         super.read(buf)
         balance = buf.readLong()
-        val voteForTemp = buf.readString()
-        if (voteForTemp != EMPTY) {
-            voteFor = voteForTemp
-        }
+        voteFor = buf.readNullableString()
     }
 
     override fun write(buf: ByteBuf) {
         super.write(buf)
         buf.writeLong(balance)
-        buf.writeString(voteFor ?: "")
+        buf.writeNullableString(voteFor)
     }
 
     override fun equals(other: Any?): Boolean {

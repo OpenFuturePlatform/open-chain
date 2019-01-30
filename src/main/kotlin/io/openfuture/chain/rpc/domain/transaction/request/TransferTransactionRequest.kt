@@ -9,8 +9,9 @@ data class TransferTransactionRequest(
     @field:NotNull var fee: Long? = null,
     @field:NotBlank var hash: String? = null,
     @field:NotBlank @field:AddressChecksum var senderAddress: String? = null,
-    @field:NotNull var amount: Long? = null,
-    @field:NotBlank @field:AddressChecksum var recipientAddress: String? = null,
     @field:NotBlank var senderSignature: String? = null,
-    @field:NotBlank var senderPublicKey: String? = null
+    @field:NotBlank var senderPublicKey: String? = null,
+    @field:NotNull var amount: Long? = null,
+    @field:AddressChecksum var recipientAddress: String? = null,
+    var data: String? = null
 )
