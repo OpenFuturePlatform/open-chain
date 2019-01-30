@@ -2,6 +2,7 @@ package io.openfuture.chain.core.model.entity
 
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.core.annotation.NoArgConstructor
+import io.openfuture.chain.core.model.entity.base.BaseModel
 import io.openfuture.chain.network.extension.readNullableString
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeNullableString
@@ -20,7 +21,7 @@ class Receipt(
     @Column(name = "result", nullable = false)
     var result: String
 
-)
+) : BaseModel()
 
 @NoArgConstructor
 class ReceiptResult(
