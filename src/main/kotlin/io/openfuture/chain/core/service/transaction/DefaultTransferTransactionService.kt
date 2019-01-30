@@ -5,10 +5,15 @@ import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.INSUFFICIENT_ACTUAL_BALANCE
+import io.openfuture.chain.core.model.entity.Contract
+import io.openfuture.chain.core.model.entity.dictionary.TransferTransactionType.*
+import io.openfuture.chain.core.model.entity.dictionary.TransferTransactionType.Companion.getType
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.repository.TransferTransactionRepository
 import io.openfuture.chain.core.repository.UTransferTransactionRepository
+import io.openfuture.chain.core.service.ContractService
+import io.openfuture.chain.core.service.ContractStateService
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
@@ -24,7 +29,9 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
-    uRepository: UTransferTransactionRepository
+    uRepository: UTransferTransactionRepository,
+    private val contractStateService: ContractStateService,
+    private val contractService: ContractService
 ) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
 
     companion object {
@@ -101,8 +108,15 @@ class DefaultTransferTransactionService(
     }
 
     override fun updateState(message: TransferTransactionMessage) {
-        walletStateService.updateBalanceByAddress(message.recipientAddress, message.amount)
         walletStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
+
+        if (FUND == getType(message)) {
+            walletStateService.updateBalanceByAddress(message.recipientAddress!!, message.amount)
+        }
+
+        if (DEPLOY == getType(message)) {
+            contractStateService.updateStorage(contractService.generateAddress(message.senderAddress), message.data!!)
+        }
     }
 
     override fun verify(message: TransferTransactionMessage): Boolean {
@@ -116,7 +130,14 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun save(tx: TransferTransaction): TransferTransaction = super.save(tx)
+    override fun save(tx: TransferTransaction): TransferTransaction {
+        if (DEPLOY == getType(tx.payload)) {
+            val address = contractService.generateAddress(tx.header.senderAddress)
+            contractService.save(Contract(address, tx.header.senderAddress, tx.payload.data!!))
+        }
+
+        return super.save(tx)
+    }
 
     override fun validate(utx: UnconfirmedTransferTransaction) {
         super.validate(utx)
@@ -127,6 +148,14 @@ class DefaultTransferTransactionService(
 
         if (utx.payload.amount <= 0) {
             throw ValidationException("Amount should not be less than or equal to 0")
+        }
+
+        if (DEPLOY == getType(utx.payload)) {
+            //todo validate bytecode
+        }
+
+        if (EXECUTE == getType(utx.payload)) {
+            //todo validate method
         }
 
     }

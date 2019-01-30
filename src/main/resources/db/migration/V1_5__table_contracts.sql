@@ -1,0 +1,6 @@
+CREATE TABLE contracts (
+  id       BIGINT AUTO_INCREMENT PRIMARY KEY HASH,
+  address  VARCHAR NOT NULL,
+  owner    VARCHAR NOT NULL,
+  bytecode VARCHAR NOT NULL
+);

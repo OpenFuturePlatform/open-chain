@@ -1,8 +1,10 @@
 package io.openfuture.chain.core.repository
 
+import io.openfuture.chain.core.model.entity.Contract
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.state.ContractState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.state.WalletState
@@ -154,5 +156,17 @@ interface WalletStateRepository : StateRepository<WalletState> {
         )
         """)
     fun findVotesByDelegateKey(@Param("delegateKey") delegateKey: String): List<WalletState>
+
+}
+
+@Repository
+interface ContractStateRepository : StateRepository<ContractState>
+
+@Repository
+interface ContractRepository : BaseRepository<Contract> {
+
+    fun findOneByAddress(address: String): Contract?
+
+    fun findAllByOwner(owner: String): List<Contract>
 
 }

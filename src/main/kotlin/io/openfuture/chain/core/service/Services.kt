@@ -1,8 +1,10 @@
 package io.openfuture.chain.core.service
 
+import io.openfuture.chain.core.model.entity.Contract
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.state.ContractState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.state.WalletState
@@ -25,6 +27,7 @@ import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import org.springframework.data.domain.Page
+import org.springframework.transaction.annotation.Transactional
 
 interface HardwareInfoService {
 
@@ -260,4 +263,23 @@ interface WalletStateService : StateService<WalletState> {
 
     fun commit(state: WalletState)
 
+}
+
+interface ContractStateService : StateService<ContractState> {
+
+    fun updateStorage(address: String, storage: String): ContractStateMessage
+
+    fun commit(state: ContractState)
+
+}
+
+interface ContractService {
+
+    fun getByAddress(address: String): Contract
+
+    fun getAllByOwner(owner: String): List<Contract>
+
+    fun save(contract: Contract): Contract
+    @Transactional(readOnly = true)
+    fun generateAddress(owner: String): String
 }

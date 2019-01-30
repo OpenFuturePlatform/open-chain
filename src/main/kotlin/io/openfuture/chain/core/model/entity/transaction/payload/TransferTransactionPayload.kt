@@ -14,10 +14,10 @@ class TransferTransactionPayload(
     var amount: Long,
 
     @Column(name = "recipient_address")
-    var recipientAddress: String?,
+    var recipientAddress: String? = null,
 
     @Column(name = "data")
-    var data: String?
+    var data: String? = null
 
 ) : TransactionPayload {
 
