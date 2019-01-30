@@ -16,7 +16,6 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTrans
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncMode.FULL
-import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.entity.NodeInfo
@@ -60,23 +59,20 @@ class ChainSynchronizer(
         private val log: Logger = LoggerFactory.getLogger(ChainSynchronizer::class.java)
     }
 
+    var syncSession: SyncSession? = null
     private var future: ScheduledFuture<*>? = null
-    private var syncSession: SyncSession? = null
 
     @Volatile
     private var status: SyncStatus = SYNCHRONIZED
 
 
     override fun onApplicationEvent(event: DataSourceSchemaCreatedEvent) {
+        prepareDB()
+    }
+
+    fun prepareDB() {
         status = SyncStatus.PROCESSING
-        val syncMode: SyncMode =
-            if (delegateStateService.existsByAddress(nodeKeyHolder.getPublicKeyAsHexString())
-                || FULL == properties.syncMode!!) {
-                FULL
-            } else {
-                LIGHT
-            }
-        status = if (dbChecker.prepareDB(syncMode)) {
+        status = if (dbChecker.prepareDB(getSyncMode())) {
             SYNCHRONIZED
         } else {
             NOT_SYNCHRONIZED
@@ -162,6 +158,16 @@ class ChainSynchronizer(
         }
     }
 
+    fun isDelegate(): Boolean = delegateStateService.existsByAddress(nodeKeyHolder.getPublicKeyAsHexString())
+
+    fun getSyncMode(): SyncMode {
+        return if (isDelegate()) {
+            FULL
+        } else {
+            properties.syncMode!!
+        }
+    }
+
     private fun initSync(message: GenesisBlockMessage) {
         val delegates = genesisBlockService.getLast().payload.activeDelegates
         try {
@@ -169,7 +175,7 @@ class ChainSynchronizer(
             val lastLocalGenesisBlock = genesisBlockService.getLast()
 
             if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
-                syncSession = SyncSession(properties.syncMode!!, lastLocalGenesisBlock, currentGenesisBlock)
+                syncSession = SyncSession(getSyncMode(), lastLocalGenesisBlock, currentGenesisBlock)
                 requestEpoch(delegates)
             } else {
                 checkBlock(lastLocalGenesisBlock)
