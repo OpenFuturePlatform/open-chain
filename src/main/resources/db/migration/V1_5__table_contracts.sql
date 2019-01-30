@@ -4,3 +4,7 @@ CREATE TABLE contracts (
   owner    VARCHAR NOT NULL,
   bytecode VARCHAR NOT NULL
 );
+--
+CREATE UNIQUE HASH INDEX contracts_address
+  ON contracts (address);
+--
