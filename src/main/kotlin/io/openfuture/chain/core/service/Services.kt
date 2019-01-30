@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service
 
 import io.openfuture.chain.core.model.entity.Contract
+import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -27,7 +28,6 @@ import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import org.springframework.data.domain.Page
-import org.springframework.transaction.annotation.Transactional
 
 interface HardwareInfoService {
 
@@ -280,6 +280,14 @@ interface ContractService {
     fun getAllByOwner(owner: String): List<Contract>
 
     fun save(contract: Contract): Contract
-    @Transactional(readOnly = true)
+
     fun generateAddress(owner: String): String
+}
+
+interface ReceiptService {
+
+    fun getByTransactionHash(hash: String): Receipt
+
+    fun save(receipt: Receipt): Receipt
+
 }

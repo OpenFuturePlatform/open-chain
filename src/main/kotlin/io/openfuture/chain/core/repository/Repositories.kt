@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.repository
 
 import io.openfuture.chain.core.model.entity.Contract
+import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -168,5 +169,12 @@ interface ContractRepository : BaseRepository<Contract> {
     fun findOneByAddress(address: String): Contract?
 
     fun findAllByOwner(owner: String): List<Contract>
+
+}
+
+@Repository
+interface ReceiptRepository : BaseRepository<Receipt> {
+
+    fun findOneByTransactionHash(hash: String): Receipt?
 
 }
