@@ -23,26 +23,22 @@ class DBChecker(
         val lastBlockHeight = blockService.getLast().height
         val validBlockHeight = lastValidBlockHeight(syncMode)
         if (validBlockHeight < lastBlockHeight) {
-            deleteInvalidChainPart(validBlockHeight)
+            deleteInvalidChainPart(validBlockHeight, lastBlockHeight)
             return false
         }
         return true
     }
 
-    private fun deleteInvalidChainPart(height: Long) {
+    private fun deleteInvalidChainPart(height: Long, heightTo: Long) {
         val heightFrom = height + 1
-        val heightTo = blockService.getLast().height
         val heightsToDelete = ArrayList<Long>()
-        for (i in heightFrom..heightTo) {
-            heightsToDelete.add(i)
-        }
+        heightsToDelete.addAll(heightFrom..heightTo)
         blockService.deleteByHeightIn(heightsToDelete)
     }
 
     private fun lastValidBlockHeight(syncMode: SyncMode): Long {
-        val firstGenesisBlock = genesisBlockService.getByEpochIndex(1L)!!
         val epochHeight = consensusProperties.epochHeight!!
-        var indexFrom = firstGenesisBlock.height
+        var indexFrom = genesisBlockService.getByEpochIndex(1L)!!.height
         var indexTo = indexFrom + epochHeight
         var block: Block? = null
         do {
@@ -98,14 +94,16 @@ class DBChecker(
     private fun isValidTransactions(block: Block): Boolean {
         if (block is MainBlock) {
             val hashes = mutableListOf<String>()
-            hashes.addAll(block.payload.transferTransactions.map { transactionService.createHash(it.header, it.payload) })
-            hashes.addAll(block.payload.voteTransactions.map { transactionService.createHash(it.header, it.payload) })
-            hashes.addAll(block.payload.delegateTransactions.map { transactionService.createHash(it.header, it.payload) })
-            val rewardTransaction = block.payload.rewardTransaction[0]
-            hashes.add(transactionService.createHash(rewardTransaction.header, rewardTransaction.payload))
+            val transactions = listOf(
+                *block.payload.transferTransactions.toTypedArray(),
+                *block.payload.voteTransactions.toTypedArray(),
+                *block.payload.delegateTransactions.toTypedArray(),
+                *block.payload.rewardTransaction.toTypedArray()
+            )
 
-            val transactionsMerkleHash = MainBlockPayload.calculateMerkleRoot(hashes)
-            if (block.payload.merkleHash != transactionsMerkleHash) {
+            hashes.addAll(transactions.map { transactionService.createHash(it.header, it.externalPayload) })
+
+            if (block.payload.merkleHash != MainBlockPayload.calculateMerkleRoot(hashes)) {
                 return false
             }
         }
@@ -114,11 +112,13 @@ class DBChecker(
 
     private fun isValidBlockState(block: Block): Boolean {
         if (block is MainBlock) {
-            val payload = block.payload
-            val delegateHashes = payload.delegateStates.map { it.toMessage().getHash() }
-            val walletHashes = payload.walletStates.map { it.toMessage().getHash() }
-            val stateHash = MainBlockPayload.calculateMerkleRoot(delegateHashes + walletHashes)
-            if (stateHash != payload.stateHash) {
+
+            val stateHashes = listOf(
+                *block.payload.delegateStates.toTypedArray(),
+                *block.payload.walletStates.toTypedArray()
+            ).map { it.toMessage().getHash() }
+
+            if (block.payload.stateHash != MainBlockPayload.calculateMerkleRoot(stateHashes)) {
                 return false
             }
         }
