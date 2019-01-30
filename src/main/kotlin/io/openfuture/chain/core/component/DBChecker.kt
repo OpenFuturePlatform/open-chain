@@ -94,16 +94,14 @@ class DBChecker(
     private fun isValidTransactions(block: Block): Boolean {
         if (block is MainBlock) {
             val hashes = mutableListOf<String>()
-            val transactions = listOf(
-                *block.payload.transferTransactions.toTypedArray(),
-                *block.payload.voteTransactions.toTypedArray(),
-                *block.payload.delegateTransactions.toTypedArray(),
-                *block.payload.rewardTransaction.toTypedArray()
-            )
+            hashes.addAll(block.payload.transferTransactions.map { transactionService.createHash(it.header, it.payload) })
+            hashes.addAll(block.payload.voteTransactions.map { transactionService.createHash(it.header, it.payload) })
+            hashes.addAll(block.payload.delegateTransactions.map { transactionService.createHash(it.header, it.payload) })
+            val rewardTransaction = block.payload.rewardTransaction[0]
+            hashes.add(transactionService.createHash(rewardTransaction.header, rewardTransaction.payload))
 
-            hashes.addAll(transactions.map { transactionService.createHash(it.header, it.externalPayload) })
-
-            if (block.payload.merkleHash != MainBlockPayload.calculateMerkleRoot(hashes)) {
+            val transactionsMerkleHash = MainBlockPayload.calculateMerkleRoot(hashes)
+            if (block.payload.merkleHash != transactionsMerkleHash) {
                 return false
             }
         }
