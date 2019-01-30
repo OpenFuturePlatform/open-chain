@@ -1,14 +1,12 @@
 package io.openfuture.chain.smartcontract.deploy.execution
 
 import io.openfuture.chain.smartcontract.core.model.SmartContract
-import io.openfuture.chain.smartcontract.deploy.ContractProperties
-import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
 import io.openfuture.chain.smartcontract.deploy.domain.ContractDto
 import io.openfuture.chain.smartcontract.deploy.domain.ContractMethod
 import io.openfuture.chain.smartcontract.deploy.exception.ContractExecutionException
-import io.openfuture.chain.smartcontract.deploy.exception.ContractLoadingException
-import io.openfuture.chain.smartcontract.deploy.load.ContractInjector
-import io.openfuture.chain.smartcontract.deploy.load.SourceClassLoader
+import io.openfuture.chain.smartcontract.load.SmartContractLoader
+import io.openfuture.chain.smartcontract.property.ContractProperties
+import io.openfuture.chain.smartcontract.util.SerializationUtils
 import org.apache.commons.lang3.reflect.MethodUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -29,10 +27,10 @@ class ContractExecutor(
     }
 
     private val pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1)
-    private val classLoader = SourceClassLoader()
 
 
     fun run(contract: ContractDto, method: ContractMethod): ExecutionResult {
+        SmartContractLoader().loadClass(contract.bytes)
         var exception: Throwable? = null
         val threadName = "${contract.clazz}-${uniqueIdentifier.getAndIncrement()}"
         val result = ExecutionResult(threadName, null, null)
@@ -41,7 +39,7 @@ class ContractExecutor(
             Thread.currentThread().name = threadName
             try {
                 val instance = loadClassAndState(contract)
-                result.instance = instance as SmartContract
+                result.instance = instance
                 result.output = executeMethod(instance, method)
             } catch (ex: Throwable) {
                 log.debug("Error while executing (${contract.clazz} - ${method.name}): ${ex.message}")
@@ -67,22 +65,8 @@ class ContractExecutor(
         return MethodUtils.invokeExactMethod(instance, method.name, method.params, paramTypes)
     }
 
-    private fun loadClassAndState(contract: ContractDto): Any {
-        try {
-            var instance = classLoader.getLoadedClass(contract.clazz)?.newInstance()
-
-            if (null == instance) {
-                instance = classLoader.loadBytes(ClassSource(contract.bytes)).clazz.newInstance()
-            }
-
-            val injector = ContractInjector(instance as SmartContract, classLoader)
-            injector.injectState(contract.state)
-            injector.injectFields(contract.address, contract.owner)
-            return instance
-        } catch (ex: Throwable) {
-            throw ContractLoadingException("Error while loading contract and state: ${ex.message}", ex)
-        }
-    }
+    private fun loadClassAndState(contract: ContractDto): SmartContract =
+        SerializationUtils.deserialize(contract.state)
 
     data class ExecutionResult(
         var identifier: String,
