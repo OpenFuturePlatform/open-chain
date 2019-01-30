@@ -22,5 +22,5 @@ CREATE TABLE wallet_states (
 --
 CREATE TABLE contract_states (
   id       BIGINT PRIMARY KEY REFERENCES states,
-  storage  BLOB NOT NULL,
+  storage  VARCHAR NOT NULL,
 );

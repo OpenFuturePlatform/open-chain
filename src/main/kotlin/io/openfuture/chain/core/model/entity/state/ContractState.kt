@@ -13,7 +13,7 @@ class ContractState(
     block: MainBlock,
 
     @Column(name = "storage", nullable = false)
-    val storage: ByteArray
+    val storage: String
 
 ) : State(address, block) {
 

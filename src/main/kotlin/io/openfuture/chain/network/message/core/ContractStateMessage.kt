@@ -2,24 +2,29 @@ package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
+import io.openfuture.chain.network.extension.readString
+import io.openfuture.chain.network.extension.writeString
 import java.nio.ByteBuffer
+import kotlin.text.Charsets.UTF_8
 
 @NoArgConstructor
 class ContractStateMessage(
     address: String,
-    var storage: ByteArray
+    var storage: String
 ) : StateMessage(address) {
 
-    override fun getBytes(): ByteArray = ByteBuffer.allocate(storage.size).put(storage).array()
+    override fun getBytes(): ByteArray = ByteBuffer
+        .allocate(storage.toByteArray(UTF_8).size)
+        .put(storage.toByteArray(UTF_8)).array()
 
     override fun read(buf: ByteBuf) {
         super.read(buf)
-        buf.readBytes(storage)
+        storage = buf.readString()
     }
 
     override fun write(buf: ByteBuf) {
         super.write(buf)
-        buf.writeBytes(storage)
+        buf.writeString(storage)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -27,14 +32,14 @@ class ContractStateMessage(
         if (other !is ContractStateMessage) return false
         if (!super.equals(other)) return false
 
-        if (!storage.contentEquals(other.storage)) return false
+        if (storage != other.storage) return false
 
         return true
     }
 
     override fun hashCode(): Int {
         var result = super.hashCode()
-        result = 31 * result + storage.contentHashCode()
+        result = 31 * result + storage.hashCode()
         return result
     }
 
