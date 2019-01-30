@@ -91,6 +91,7 @@ interface RewardTransactionRepository : BaseRepository<RewardTransaction> {
 
 }
 
+@Repository
 interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseRepository<UEntity> {
 
     fun findOneByFooterHash(hash: String): UEntity?
