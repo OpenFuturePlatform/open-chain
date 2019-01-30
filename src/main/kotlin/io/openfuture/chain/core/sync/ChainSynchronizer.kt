@@ -71,7 +71,7 @@ class ChainSynchronizer(
         status = SyncStatus.PROCESSING
         val syncMode: SyncMode =
             if (delegateStateService.existsByAddress(nodeKeyHolder.getPublicKeyAsHexString())
-                || FULL == syncSession!!.syncMode) {
+                || FULL == properties.syncMode!!) {
                 FULL
             } else {
                 LIGHT

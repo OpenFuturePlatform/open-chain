@@ -100,8 +100,7 @@ class DBChecker(
             val rewardTransaction = block.payload.rewardTransaction[0]
             hashes.add(transactionService.createHash(rewardTransaction.header, rewardTransaction.payload))
 
-            val transactionsMerkleHash = MainBlockPayload.calculateMerkleRoot(hashes)
-            if (block.payload.merkleHash != transactionsMerkleHash) {
+            if (block.payload.merkleHash != MainBlockPayload.calculateMerkleRoot(hashes)) {
                 return false
             }
         }
