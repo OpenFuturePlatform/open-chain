@@ -1,7 +1,8 @@
 package io.openfuture.chain.smartcontract.util
 
+import io.openfuture.chain.smartcontract.component.SmartContractUtils
+import io.openfuture.chain.smartcontract.component.load.SmartContractLoader
 import io.openfuture.chain.smartcontract.exception.SmartContractClassCastException
-import io.openfuture.chain.smartcontract.load.SmartContractLoader
 import org.assertj.core.api.Java6Assertions.assertThat
 import org.junit.Test
 

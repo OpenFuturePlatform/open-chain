@@ -1,7 +1,8 @@
-package io.openfuture.chain.smartcontract.util
+package io.openfuture.chain.smartcontract.component
 
+import io.openfuture.chain.smartcontract.component.validation.SmartContractValidator
 import io.openfuture.chain.smartcontract.exception.SmartContractValidationException
-import io.openfuture.chain.smartcontract.validation.SmartContractValidator
+import io.openfuture.chain.smartcontract.util.asResourcePath
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.commons.ClassRemapper

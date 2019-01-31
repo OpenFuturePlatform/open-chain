@@ -1,4 +1,4 @@
-package io.openfuture.chain.smartcontract.load
+package io.openfuture.chain.smartcontract.component.load
 
 import org.assertj.core.api.Java6Assertions.assertThat
 import org.junit.Test

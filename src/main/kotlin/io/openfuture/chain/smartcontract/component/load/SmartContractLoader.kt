@@ -1,6 +1,6 @@
-package io.openfuture.chain.smartcontract.load
+package io.openfuture.chain.smartcontract.component.load
 
-import io.openfuture.chain.smartcontract.util.ByteCodeUtils
+import io.openfuture.chain.smartcontract.component.ByteCodeUtils
 import io.openfuture.chain.smartcontract.util.asPackagePath
 
 class SmartContractLoader : ClassLoader() {

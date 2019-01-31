@@ -1,4 +1,4 @@
-package io.openfuture.chain.smartcontract.validation
+package io.openfuture.chain.smartcontract.component.validation
 
 import io.openfuture.chain.smartcontract.util.toOrRegex
 

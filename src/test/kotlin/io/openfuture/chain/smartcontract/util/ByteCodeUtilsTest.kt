@@ -1,5 +1,6 @@
 package io.openfuture.chain.smartcontract.util
 
+import io.openfuture.chain.smartcontract.component.ByteCodeUtils
 import io.openfuture.chain.smartcontract.exception.SmartContractValidationException
 import org.assertj.core.api.Java6Assertions.assertThat
 import org.junit.Test

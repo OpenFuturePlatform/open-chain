@@ -1,4 +1,4 @@
-package io.openfuture.chain.smartcontract.util
+package io.openfuture.chain.smartcontract.component
 
 import io.openfuture.chain.smartcontract.exception.SmartContractClassCastException
 import io.openfuture.chain.smartcontract.model.SmartContract
