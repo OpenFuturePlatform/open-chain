@@ -1,6 +1,5 @@
 package io.openfuture.chain.smartcontract.util
 
-import io.openfuture.chain.smartcontract.exception.SmartContractClassCastException
 import io.openfuture.chain.smartcontract.load.SmartContractLoader
 import org.assertj.core.api.Java6Assertions.assertThat
 import org.junit.Test
@@ -20,7 +19,7 @@ class SmartContractUtilsTest {
         assertThat(smartContract.address).isEqualTo(address)
     }
 
-    @Test(expected = SmartContractClassCastException::class)
+    @Test(expected = ClassCastException::class)
     fun initSmartContractWhenInstanceHasInvalidType() {
         val owner = "owner"
         val address = "address"

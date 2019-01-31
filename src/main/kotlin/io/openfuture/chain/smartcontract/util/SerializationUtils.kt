@@ -1,28 +1,19 @@
 package io.openfuture.chain.smartcontract.util
 
-import org.apache.commons.lang3.SerializationException
 import java.io.*
 
 object SerializationUtils {
 
+    @Throws(IOException::class)
     fun serialize(obj: Serializable): ByteArray {
         val out = ByteArrayOutputStream(512)
-        try {
-            ObjectOutputStream(out).writeObject(obj)
-        } catch (ex: IOException) {
-            throw SerializationException(ex.message)
-        }
+        ObjectOutputStream(out).writeObject(obj)
         return out.toByteArray()
     }
 
+    @Throws(IOException::class)
     @Suppress("UNCHECKED_CAST")
-    fun <T> deserialize(bytes: ByteArray): T {
-        try {
-            return ObjectInputStream(ByteArrayInputStream(bytes)).readObject() as T
-        } catch (ex: IOException) {
-            throw SerializationException(ex.message)
-        }
-    }
+    fun <T> deserialize(bytes: ByteArray): T = ObjectInputStream(ByteArrayInputStream(bytes)).readObject() as T
 
 }
 
