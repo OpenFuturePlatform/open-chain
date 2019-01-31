@@ -95,8 +95,8 @@ class DefaultDelegateTransactionService(
     }
 
     override fun updateState(message: DelegateTransactionMessage) {
-        walletStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
-        walletStateService.updateBalanceByAddress(consensusProperties.genesisAddress!!, message.amount)
+        accountStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
+        accountStateService.updateBalanceByAddress(consensusProperties.genesisAddress!!, message.amount)
         delegateStateService.addDelegate(message.delegateKey, message.senderAddress, message.timestamp)
     }
 

@@ -1,8 +1,8 @@
 package io.openfuture.chain.core.model.entity.block.payload
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
-import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -81,7 +81,7 @@ class MainBlockPayload(
         inverseJoinColumns = [JoinColumn(name = "id")]
     )
     @Fetch(value = FetchMode.SUBSELECT)
-    var walletStates: MutableList<WalletState> = mutableListOf()
+    var accountStates: MutableList<AccountState> = mutableListOf()
 
 ) : BlockPayload {
 

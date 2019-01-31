@@ -110,15 +110,15 @@ internal class DefaultVoteTransactionService(
     override fun updateState(message: VoteTransactionMessage) {
         when (VoteType.getById(message.voteTypeId)) {
             FOR -> {
-                val walletState = walletStateService.updateVoteByAddress(message.senderAddress, message.delegateKey)
-                delegateStateService.updateRating(message.delegateKey, walletState.balance)
+                val accountState = accountStateService.updateVoteByAddress(message.senderAddress, message.delegateKey)
+                delegateStateService.updateRating(message.delegateKey, accountState.balance)
             }
             AGAINST -> {
-                val walletState = walletStateService.updateVoteByAddress(message.senderAddress, null)
-                delegateStateService.updateRating(message.delegateKey, -walletState.balance)
+                val accountState = accountStateService.updateVoteByAddress(message.senderAddress, null)
+                delegateStateService.updateRating(message.delegateKey, -accountState.balance)
             }
         }
-        walletStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
+        accountStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
     }
 
     override fun verify(message: VoteTransactionMessage): Boolean {
@@ -170,7 +170,7 @@ internal class DefaultVoteTransactionService(
             return true
         }
 
-        val persistVote = walletStateService.getLastByAddress(senderAddress)
+        val persistVote = accountStateService.getLastByAddress(senderAddress)
         return when (voteType) {
             FOR -> null != persistVote?.voteFor
             AGAINST -> null == persistVote?.voteFor || delegateKey != persistVote.voteFor

@@ -1,8 +1,8 @@
 package io.openfuture.chain.rpc.controller
 
+import io.openfuture.chain.core.service.AccountStateService
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.VoteTransactionService
-import io.openfuture.chain.core.service.WalletStateService
 import io.openfuture.chain.crypto.annotation.AddressChecksum
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.rpc.domain.crypto.AccountDto
@@ -22,7 +22,7 @@ import javax.validation.Valid
 @RequestMapping("/rpc/accounts")
 class AccountController(
     private val cryptoService: CryptoService,
-    private val walletStateService: WalletStateService,
+    private val accountStateService: AccountStateService,
     private val delegateStateService: DelegateStateService,
     private val voteTransactionService: VoteTransactionService
 ) {
@@ -38,20 +38,20 @@ class AccountController(
 
     @GetMapping("/wallets/{address}/balance")
     fun getBalance(@PathVariable @AddressChecksum address: String): Long =
-        walletStateService.getActualBalanceByAddress(address)
+        accountStateService.getActualBalanceByAddress(address)
 
     @GetMapping("/wallets/{address}/delegate")
     fun getDelegates(@PathVariable @AddressChecksum address: String): VoteResponse? {
-        val walletState = walletStateService.getLastByAddress(address)
+        val accountState = accountStateService.getLastByAddress(address)
 
-        if (null != walletState?.voteFor) {
-            val delegate = delegateStateService.getLastByAddress(walletState.voteFor!!)!!
+        if (null != accountState?.voteFor) {
+            val delegate = delegateStateService.getLastByAddress(accountState.voteFor!!)!!
 
             return VoteResponse(
                 delegate.walletAddress,
                 delegate.address,
                 delegate.rating,
-                walletStateService.getVotesForDelegate(delegate.address).size,
+                accountStateService.getVotesForDelegate(delegate.address).size,
                 voteTransactionService.getLastVoteForDelegate(address, delegate.address).header.timestamp,
                 voteTransactionService.getUnconfirmedBySenderAgainstDelegate(address, delegate.address) != null
             )

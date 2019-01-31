@@ -5,9 +5,9 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
-import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -28,7 +28,7 @@ class DefaultBlockService(
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
     private val delegateStateService: DelegateStateService,
-    private val walletStateService: WalletStateService
+    private val accountStateService: AccountStateService
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -66,7 +66,7 @@ class DefaultBlockService(
         val heightRange = (fromHeight..toHeight).toList()
         transactionService.deleteBlockTransactions(heightRange)
         delegateStateService.deleteBlockStates(heightRange)
-        walletStateService.deleteBlockStates(heightRange)
+        accountStateService.deleteBlockStates(heightRange)
         repository.deleteAllByHeightIn(heightRange)
     }
 
@@ -104,10 +104,10 @@ class DefaultBlockService(
                 }
 
                 states.addAll(block.payload.delegateStates)
-                states.addAll(block.payload.walletStates)
+                states.addAll(block.payload.accountStates)
 
                 block.payload.delegateStates = mutableListOf()
-                block.payload.walletStates = mutableListOf()
+                block.payload.accountStates = mutableListOf()
 
                 this.save(block)
                 rewardTransactionService.commit(rewardTransaction)
@@ -127,7 +127,7 @@ class DefaultBlockService(
                     it.block = block
                     when (it) {
                         is DelegateState -> delegateStateService.commit(it)
-                        is WalletState -> walletStateService.commit(it)
+                        is AccountState -> accountStateService.commit(it)
                         else -> throw IllegalStateException("The type doesn`t handle")
                     }
                 }

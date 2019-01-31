@@ -5,10 +5,9 @@ import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.state.ContractState
+import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
-import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -146,22 +145,19 @@ interface DelegateStateRepository : StateRepository<DelegateState> {
 }
 
 @Repository
-interface WalletStateRepository : StateRepository<WalletState> {
+interface AccountStateRepository : StateRepository<AccountState> {
 
     @Query("""
-        SELECT ws1 FROM WalletState ws1
+        SELECT ws1 FROM AccountState ws1
         WHERE ws1.voteFor=:delegateKey
         AND ws1.block.height = (
-            SELECT MAX(ws2.block.height) FROM WalletState ws2
+            SELECT MAX(ws2.block.height) FROM AccountState ws2
             WHERE ws1.address=ws2.address
         )
         """)
-    fun findVotesByDelegateKey(@Param("delegateKey") delegateKey: String): List<WalletState>
+    fun findVotesByDelegateKey(@Param("delegateKey") delegateKey: String): List<AccountState>
 
 }
-
-@Repository
-interface ContractStateRepository : StateRepository<ContractState>
 
 @Repository
 interface ContractRepository : BaseRepository<Contract> {

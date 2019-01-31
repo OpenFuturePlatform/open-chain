@@ -1,26 +1,26 @@
 package io.openfuture.chain.core.service.state
 
 import io.openfuture.chain.core.component.StatePool
-import io.openfuture.chain.core.model.entity.state.WalletState
+import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
+import io.openfuture.chain.core.repository.AccountStateRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
-import io.openfuture.chain.core.repository.WalletStateRepository
-import io.openfuture.chain.core.service.WalletStateService
+import io.openfuture.chain.core.service.AccountStateService
 import io.openfuture.chain.core.sync.BlockchainLock
-import io.openfuture.chain.network.message.core.WalletStateMessage
+import io.openfuture.chain.network.message.core.AccountStateMessage
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional(readOnly = true)
-class DefaultWalletStateService(
-    private val repository: WalletStateRepository,
+class DefaultAccountStateService(
+    private val repository: AccountStateRepository,
     private val statePool: StatePool,
     private val delegateStateService: DefaultDelegateStateService,
     private val unconfirmedTransactionRepository: UTransactionRepository<UnconfirmedTransaction>
-) : BaseStateService<WalletState>(repository), WalletStateService {
+) : BaseStateService<AccountState>(repository), AccountStateService {
 
     companion object {
         private const val DEFAULT_WALLET_BALANCE = 0L
@@ -46,24 +46,32 @@ class DefaultWalletStateService(
         }
     }
 
-    override fun getVotesForDelegate(delegateKey: String): List<WalletState> = repository.findVotesByDelegateKey(delegateKey)
+    override fun getVotesForDelegate(delegateKey: String): List<AccountState> = repository.findVotesByDelegateKey(delegateKey)
 
-    override fun updateBalanceByAddress(address: String, amount: Long): WalletStateMessage {
-        val walletState = getCurrentState(address)
+    override fun updateBalanceByAddress(address: String, amount: Long): AccountStateMessage {
+        val state = getCurrentState(address)
 
-        if (null != walletState.voteFor) {
-            delegateStateService.updateRating(walletState.voteFor!!, amount)
+        if (null != state.voteFor) {
+            delegateStateService.updateRating(state.voteFor!!, amount)
         }
 
-        val newWalletState = WalletStateMessage(address, walletState.balance + amount, walletState.voteFor)
-        statePool.update(newWalletState)
-        return newWalletState
+        val newState = AccountStateMessage(address, state.balance + amount, state.voteFor, state.storage)
+        statePool.update(newState)
+        return newState
     }
 
-    override fun updateVoteByAddress(address: String, delegateKey: String?): WalletStateMessage {
-        val newWalletState = WalletStateMessage(address, getCurrentState(address).balance, delegateKey)
-        statePool.update(newWalletState)
-        return newWalletState
+    override fun updateVoteByAddress(address: String, delegateKey: String?): AccountStateMessage {
+        val state = AccountStateMessage(address, getCurrentState(address).balance, delegateKey)
+        statePool.update(state)
+        return state
+    }
+
+    override fun updateStorage(address: String, storage: String): AccountStateMessage {
+        val state = getCurrentState(address)
+
+        val newState = AccountStateMessage(address, state.balance, state.voteFor, storage)
+        statePool.update(newState)
+        return newState
     }
 
     private fun getUnconfirmedBalance(address: String): Long =
@@ -75,19 +83,19 @@ class DefaultWalletStateService(
             }
         }.sum()
 
-    private fun getCurrentState(address: String): WalletStateMessage {
+    private fun getCurrentState(address: String): AccountStateMessage {
         BlockchainLock.readLock.lock()
         try {
-            return statePool.get(address) as? WalletStateMessage
+            return statePool.get(address) as? AccountStateMessage
                 ?: repository.findFirstByAddressOrderByBlockIdDesc(address)?.toMessage()
-                ?: WalletStateMessage(address, DEFAULT_WALLET_BALANCE)
+                ?: AccountStateMessage(address, DEFAULT_WALLET_BALANCE)
         } finally {
             BlockchainLock.readLock.unlock()
         }
     }
 
     @Transactional
-    override fun commit(state: WalletState) {
+    override fun commit(state: AccountState) {
         BlockchainLock.writeLock.lock()
         try {
             repository.save(state)

@@ -5,10 +5,9 @@ import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.state.ContractState
+import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
-import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -249,27 +248,21 @@ interface DelegateStateService : StateService<DelegateState> {
 
 }
 
-interface WalletStateService : StateService<WalletState> {
+interface AccountStateService : StateService<AccountState> {
 
     fun getBalanceByAddress(address: String): Long
 
     fun getActualBalanceByAddress(address: String): Long
 
-    fun getVotesForDelegate(delegateKey: String): List<WalletState>
+    fun getVotesForDelegate(delegateKey: String): List<AccountState>
 
-    fun updateBalanceByAddress(address: String, amount: Long): WalletStateMessage
+    fun updateBalanceByAddress(address: String, amount: Long): AccountStateMessage
 
-    fun updateVoteByAddress(address: String, delegateKey: String?): WalletStateMessage
+    fun updateVoteByAddress(address: String, delegateKey: String?): AccountStateMessage
 
-    fun commit(state: WalletState)
+    fun updateStorage(address: String, storage: String): AccountStateMessage
 
-}
-
-interface ContractStateService : StateService<ContractState> {
-
-    fun updateStorage(address: String, storage: String): ContractStateMessage
-
-    fun commit(state: ContractState)
+    fun commit(state: AccountState)
 
 }
 

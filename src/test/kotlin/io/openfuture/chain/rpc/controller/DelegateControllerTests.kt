@@ -6,9 +6,9 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.state.DelegateState
+import io.openfuture.chain.core.service.AccountStateService
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.GenesisBlockService
-import io.openfuture.chain.core.service.WalletStateService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -26,7 +26,7 @@ class DelegateControllerTests : ControllerTests() {
     private lateinit var delegateStateService: DelegateStateService
 
     @MockBean
-    private lateinit var walletStateService: WalletStateService
+    private lateinit var accountStateService: AccountStateService
 
     @MockBean
     private lateinit var genesisBlockService: GenesisBlockService

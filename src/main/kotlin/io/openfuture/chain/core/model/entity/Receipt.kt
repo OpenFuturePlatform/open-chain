@@ -6,6 +6,7 @@ import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.core.model.entity.base.BaseModel
 import io.openfuture.chain.network.extension.*
 import io.openfuture.chain.network.serialization.Serializable
+import org.apache.commons.lang3.StringUtils.EMPTY
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -19,7 +20,7 @@ class Receipt(
     var transactionHash: String,
 
     @Column(name = "result", nullable = false)
-    var result: String
+    var result: String = EMPTY
 
 ) : BaseModel() {
 

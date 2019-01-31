@@ -13,8 +13,8 @@ import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload.Comp
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.AGAINST
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.FOR
+import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
-import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -46,7 +46,7 @@ class DefaultMainBlockService(
     delegateStateService: DelegateStateService,
     private val keyHolder: NodeKeyHolder,
     private val throughput: TransactionThroughput,
-    private val walletStateService: WalletStateService,
+    private val accountStateService: AccountStateService,
     private val statePool: StatePool,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository,
@@ -116,13 +116,13 @@ class DefaultMainBlockService(
             val stateHashes = mutableListOf<String>()
             val states = getStates(txMessages)
             val delegateStates = mutableListOf<DelegateStateMessage>()
-            val walletStates = mutableListOf<WalletStateMessage>()
+            val accountStates = mutableListOf<AccountStateMessage>()
 
             states.asSequence().forEach {
                 stateHashes.add(it.getHash())
                 when (it) {
                     is DelegateStateMessage -> delegateStates.add(it)
-                    is WalletStateMessage -> walletStates.add(it)
+                    is AccountStateMessage -> accountStates.add(it)
                 }
             }
 
@@ -135,7 +135,7 @@ class DefaultMainBlockService(
 
             return PendingBlockMessage(height, previousHash, timestamp, toHexString(hash), signature, publicKey,
                 merkleHash, stateHash, rewardTransactionMessage, voteTransactions, delegateTransactions,
-                transferTransactions, delegateStates, walletStates)
+                transferTransactions, delegateStates, accountStates)
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -182,7 +182,7 @@ class DefaultMainBlockService(
             message.getAllStates().forEach {
                 when (it) {
                     is DelegateStateMessage -> delegateStateService.commit(DelegateState.of(it, block))
-                    is WalletStateMessage -> walletStateService.commit(WalletState.of(it, block))
+                    is AccountStateMessage -> accountStateService.commit(AccountState.of(it, block))
                     else -> throw IllegalStateException("The type doesn`t handle")
                 }
             }
@@ -249,7 +249,7 @@ class DefaultMainBlockService(
                         else -> 0
                     }
                 }
-                .sum() <= walletStateService.getBalanceByAddress(sender.key)
+                .sum() <= accountStateService.getBalanceByAddress(sender.key)
         }
 
     private fun isValidRewardTransaction(message: PendingBlockMessage): Boolean =
@@ -266,7 +266,7 @@ class DefaultMainBlockService(
                 return false
             }
 
-            val persistVote = walletStateService.getLastByAddress(sender.key)
+            val persistVote = accountStateService.getLastByAddress(sender.key)
             val vote = sender.value.first()
             return when (VoteType.getById(vote.voteTypeId)) {
                 FOR -> null == persistVote?.voteFor
@@ -300,7 +300,7 @@ class DefaultMainBlockService(
 
     private fun isValidReward(fees: Long, reward: Long): Boolean {
         val senderAddress = consensusProperties.genesisAddress!!
-        val bank = walletStateService.getActualBalanceByAddress(senderAddress)
+        val bank = accountStateService.getActualBalanceByAddress(senderAddress)
         val rewardBlock = consensusProperties.rewardBlock!!
 
         return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)
@@ -370,7 +370,7 @@ class DefaultMainBlockService(
         val transactionsBySender = transactions.groupBy { it.header.senderAddress }
 
         transactionsBySender.forEach {
-            var balance = walletStateService.getBalanceByAddress(it.key)
+            var balance = accountStateService.getBalanceByAddress(it.key)
             val list = it.value.filter { tx ->
                 balance -= when (tx) {
                     is UnconfirmedTransferTransaction -> tx.header.fee + tx.payload.amount

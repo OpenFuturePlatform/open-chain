@@ -55,7 +55,7 @@ class MainBlock(
         payload.delegateTransactions.map { it.toMessage() },
         payload.transferTransactions.map { it.toMessage() },
         payload.delegateStates.map { it.toMessage() },
-        payload.walletStates.map { it.toMessage() }
+        payload.accountStates.map { it.toMessage() }
     )
 
 }

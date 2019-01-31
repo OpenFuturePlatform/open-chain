@@ -13,7 +13,6 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.repository.TransferTransactionRepository
 import io.openfuture.chain.core.repository.UTransferTransactionRepository
 import io.openfuture.chain.core.service.ContractService
-import io.openfuture.chain.core.service.ContractStateService
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
@@ -30,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
     uRepository: UTransferTransactionRepository,
-    private val contractStateService: ContractStateService,
     private val contractService: ContractService
 ) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
 
@@ -108,14 +106,14 @@ class DefaultTransferTransactionService(
     }
 
     override fun updateState(message: TransferTransactionMessage) {
-        walletStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
+        accountStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
 
         if (FUND == getType(message)) {
-            walletStateService.updateBalanceByAddress(message.recipientAddress!!, message.amount)
+            accountStateService.updateBalanceByAddress(message.recipientAddress!!, message.amount)
         }
 
         if (DEPLOY == getType(message)) {
-            contractStateService.updateStorage(contractService.generateAddress(message.senderAddress), message.data!!)
+            accountStateService.updateStorage(contractService.generateAddress(message.senderAddress), message.data!!)
         }
     }
 

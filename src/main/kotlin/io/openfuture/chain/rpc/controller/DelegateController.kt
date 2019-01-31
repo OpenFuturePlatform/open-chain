@@ -1,9 +1,9 @@
 package io.openfuture.chain.rpc.controller
 
 
+import io.openfuture.chain.core.service.AccountStateService
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.GenesisBlockService
-import io.openfuture.chain.core.service.WalletStateService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import io.openfuture.chain.rpc.domain.delegate.DelegateResponse
@@ -21,7 +21,7 @@ import javax.validation.Valid
 @RequestMapping("/rpc/delegates")
 class DelegateController(
     private val delegateStateService: DelegateStateService,
-    private val walletStateService: WalletStateService,
+    private val accountStateService: AccountStateService,
     private val genesisBlockService: GenesisBlockService
 ) {
 
@@ -44,7 +44,7 @@ class DelegateController(
     @GetMapping("/view")
     fun getAll(@Valid request: ViewDelegatePageRequest): PageResponse<ViewDelegateResponse> {
         val delegates = delegateStateService.getAllDelegates(request).map { delegate ->
-            ViewDelegateResponse(delegate, walletStateService.getVotesForDelegate(delegate.address).size)
+            ViewDelegateResponse(delegate, accountStateService.getVotesForDelegate(delegate.address).size)
         }.sortedByDescending { it.rating }
 
         return PageResponse(PageImpl(delegates, request, delegates.size.toLong()))

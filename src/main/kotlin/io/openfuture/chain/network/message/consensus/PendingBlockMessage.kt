@@ -18,9 +18,9 @@ class PendingBlockMessage(
     delegateTransactions: List<DelegateTransactionMessage>,
     transferTransactions: List<TransferTransactionMessage>,
     delegateStates: List<DelegateStateMessage>,
-    walletStates: List<WalletStateMessage>
+    accountStates: List<AccountStateMessage>
 ) : BaseMainBlockMessage(height, previousHash, timestamp, hash, signature, publicKey, merkleHash, stateHash,
-    rewardTransaction, voteTransactions, delegateTransactions, transferTransactions, delegateStates, walletStates) {
+    rewardTransaction, voteTransactions, delegateTransactions, transferTransactions, delegateStates, accountStates) {
 
     fun getExternalTransactions(): List<TransactionMessage> =
         voteTransactions + delegateTransactions + transferTransactions
