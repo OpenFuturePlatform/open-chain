@@ -4,7 +4,7 @@ import io.openfuture.chain.smartcontract.exception.SmartContractClassCastExcepti
 import io.openfuture.chain.smartcontract.model.SmartContract
 import org.springframework.util.ReflectionUtils
 
-object SmartContractUtils {
+object SmartContractInjector {
 
     private const val OWNER_FIELD = "owner"
     private const val ADDRESS_FIELD = "address"

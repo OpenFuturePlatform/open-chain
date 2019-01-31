@@ -1,21 +1,20 @@
-package io.openfuture.chain.smartcontract.util
+package io.openfuture.chain.smartcontract.component
 
-import io.openfuture.chain.smartcontract.component.SmartContractUtils
 import io.openfuture.chain.smartcontract.component.load.SmartContractLoader
 import io.openfuture.chain.smartcontract.exception.SmartContractClassCastException
 import org.assertj.core.api.Java6Assertions.assertThat
 import org.junit.Test
 
-class SmartContractUtilsTest {
+class SmartContractInjectorTest {
 
     @Test
     fun initSmartContractTest() {
         val owner = "owner"
         val address = "address"
-        val bytes = this::class.java.getResourceAsStream("/classes/HelloContract.class").readBytes()
+        val bytes = this::class.java.getResourceAsStream("/classes/JavaContract.class").readBytes()
         val clazz = SmartContractLoader().loadClass(bytes)
 
-        val smartContract = SmartContractUtils.initSmartContract(clazz, owner, address)
+        val smartContract = SmartContractInjector.initSmartContract(clazz, owner, address)
 
         assertThat(smartContract.owner).isEqualTo(owner)
         assertThat(smartContract.address).isEqualTo(address)
@@ -26,7 +25,7 @@ class SmartContractUtilsTest {
         val owner = "owner"
         val address = "address"
 
-        SmartContractUtils.initSmartContract(SmartContractUtilsTest::class.java, owner, address)
+        SmartContractInjector.initSmartContract(SmartContractInjectorTest::class.java, owner, address)
     }
 
 }

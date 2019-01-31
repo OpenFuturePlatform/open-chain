@@ -7,11 +7,11 @@ class SmartContractLoaderTest {
 
     @Test
     fun loadClassTest() {
-        val bytes = this::class.java.getResourceAsStream("/classes/HelloContract.class").readBytes()
+        val bytes = this::class.java.getResourceAsStream("/classes/JavaContract.class").readBytes()
 
         val clazz = SmartContractLoader().loadClass(bytes)
 
-        assertThat(clazz.name).isEqualTo("io.test.HelloContract")
+        assertThat(clazz.name).isEqualTo("io.openfuture.chain.test.JavaContract")
     }
 
 }

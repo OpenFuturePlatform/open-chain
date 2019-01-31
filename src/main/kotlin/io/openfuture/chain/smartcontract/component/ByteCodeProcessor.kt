@@ -9,7 +9,7 @@ import org.objectweb.asm.commons.ClassRemapper
 import org.objectweb.asm.commons.SimpleRemapper
 import org.slf4j.LoggerFactory
 
-object ByteCodeUtils {
+object ByteCodeProcessor {
 
     fun getClassName(bytes: ByteArray): String = ClassReader(bytes).className
 
@@ -43,6 +43,6 @@ object ByteCodeUtils {
         reader.accept(adapter, ClassReader.EXPAND_FRAMES)
     }
 
-    private val log = LoggerFactory.getLogger(ByteCodeUtils::class.java)
+    private val log = LoggerFactory.getLogger(ByteCodeProcessor::class.java)
 
 }
