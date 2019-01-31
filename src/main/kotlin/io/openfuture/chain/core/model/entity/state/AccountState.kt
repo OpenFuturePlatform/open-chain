@@ -8,7 +8,7 @@ import javax.persistence.Entity
 import javax.persistence.Table
 
 @Entity
-@Table(name = "wallet_states")
+@Table(name = "account_states")
 class AccountState(
     address: String,
     block: Block,
