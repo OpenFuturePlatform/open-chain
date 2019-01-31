@@ -16,6 +16,7 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTrans
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncMode.FULL
+import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.entity.NodeInfo
@@ -161,11 +162,11 @@ class ChainSynchronizer(
     fun isDelegate(): Boolean = delegateStateService.existsByAddress(nodeKeyHolder.getPublicKeyAsHexString())
 
     fun getSyncMode(): SyncMode {
-        return if (isDelegate()) {
-            FULL
-        } else {
-            properties.syncMode!!
+        if (LIGHT == properties.syncMode && isDelegate()) {
+            properties.syncMode = FULL
+            prepareDB()
         }
+        return properties.syncMode!!
     }
 
     private fun initSync(message: GenesisBlockMessage) {
