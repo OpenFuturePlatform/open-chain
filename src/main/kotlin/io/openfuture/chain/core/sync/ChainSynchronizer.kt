@@ -62,6 +62,7 @@ class ChainSynchronizer(
 
     var syncSession: SyncSession? = null
     private var future: ScheduledFuture<*>? = null
+    private var becomeDelegateFlag = false
 
     @Volatile
     private var status: SyncStatus = SYNCHRONIZED
@@ -73,7 +74,7 @@ class ChainSynchronizer(
 
     fun prepareDB() {
         status = SyncStatus.PROCESSING
-        status = if (dbChecker.prepareDB(getSyncMode())) {
+        status = if (dbChecker.prepareDB(prepareDbAndGetSyncMode())) {
             SYNCHRONIZED
         } else {
             NOT_SYNCHRONIZED
@@ -161,10 +162,13 @@ class ChainSynchronizer(
 
     fun isDelegate(): Boolean = delegateStateService.existsByAddress(nodeKeyHolder.getPublicKeyAsHexString())
 
-    fun getSyncMode(): SyncMode {
-        if (LIGHT == properties.syncMode && isDelegate()) {
-            properties.syncMode = FULL
-            prepareDB()
+    fun prepareDbAndGetSyncMode(): SyncMode {
+        if (isDelegate()) {
+            if (LIGHT == properties.syncMode && !becomeDelegateFlag) {
+                becomeDelegateFlag = true
+                prepareDB()
+            }
+            return FULL
         }
         return properties.syncMode!!
     }
@@ -176,7 +180,7 @@ class ChainSynchronizer(
             val lastLocalGenesisBlock = genesisBlockService.getLast()
 
             if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
-                syncSession = SyncSession(getSyncMode(), lastLocalGenesisBlock, currentGenesisBlock)
+                syncSession = SyncSession(prepareDbAndGetSyncMode(), lastLocalGenesisBlock, currentGenesisBlock)
                 requestEpoch(delegates)
             } else {
                 checkBlock(lastLocalGenesisBlock)
