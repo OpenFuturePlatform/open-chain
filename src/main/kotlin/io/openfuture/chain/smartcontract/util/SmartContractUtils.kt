@@ -12,16 +12,18 @@ object SmartContractUtils {
 
     fun initSmartContract(clazz: Class<*>, owner: String, address: String): SmartContract {
         val instance = clazz.newInstance()
+
+        instance as? SmartContract ?: throw SmartContractClassCastException("Instance has invalid type")
+
         injectField(instance, OWNER_FIELD, owner)
         injectField(instance, ADDRESS_FIELD, address)
 
-        return instance as? SmartContract ?: throw SmartContractClassCastException("Instatnce has invalid type")
+        return instance
     }
 
-    private fun injectField(instance: Any, fieldName: String, value: String) {
+    private fun injectField(instance: SmartContract, fieldName: String, value: String) {
         val field = ReflectionUtils.findField(instance::class.java, fieldName)
-            ?: throw SmartContractClassCastException("Instatnce has invalid type")
-        ReflectionUtils.makeAccessible(field)
+        ReflectionUtils.makeAccessible(field!!)
         ReflectionUtils.setField(field, instance, value)
     }
 
