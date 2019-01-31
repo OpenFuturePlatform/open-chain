@@ -4,6 +4,7 @@ import io.openfuture.chain.ResourceUtils.getResourceBytes
 import io.openfuture.chain.config.ContractTests
 import io.openfuture.chain.smartcontract.core.model.SmartContract
 import io.openfuture.chain.smartcontract.deploy.ContractProperties
+import io.openfuture.chain.smartcontract.deploy.calculation.ContractCostCalculator
 import io.openfuture.chain.smartcontract.deploy.domain.ContractDto
 import io.openfuture.chain.smartcontract.deploy.domain.ContractMethod
 import io.openfuture.chain.smartcontract.deploy.exception.ContractExecutionException
@@ -21,6 +22,9 @@ class ContractExecutorTest : ContractTests() {
     @InjectMocks
     private lateinit var executor: ContractExecutor
 
+    @InjectMocks
+    private lateinit var calculator: ContractCostCalculator
+
 
     @Test
     fun executeWhenValidMethodShouldReturnResult() {
@@ -29,29 +33,33 @@ class ContractExecutorTest : ContractTests() {
         val contractAddress = "0xAdDrEsS"
         val contractOwner = "0xOwNeR"
 
-        given(contractProperties.executionTimeout).willReturn(1000)
+        given(contractProperties.millisecondCost).willReturn(3)
+        given(contractProperties.maxExecutionTime).willReturn(2000)
 
         val result = executor.run(
             ContractDto(contractOwner, contractAddress, ByteArray(0), bytes, clazz),
-            ContractMethod("helloFromOwner")
-        )
+            ContractMethod("helloFromOwner"),
+            1500L)
 
         assertThat(result).isNotNull
         assertThat(result.instance).isNotNull
         assertThat(result.instance).isInstanceOf(SmartContract::class.java)
         assertThat(result.output).isNotNull
         assertThat(result.output).isEqualTo("Hello from $contractAddress ($contractOwner)")
+        assertThat(result.surplus).isGreaterThan(0L)
     }
 
     @Test(expected = ContractExecutionException::class)
     fun executeWhenMethodExecutionTakesTooLongShouldThrowContractExecutionException() {
         val bytes = getResourceBytes("/classes/HelloContract.class")
 
-        given(contractProperties.executionTimeout).willReturn(10)
+        given(contractProperties.millisecondCost).willReturn(3)
+        given(contractProperties.maxExecutionTime).willReturn(2000)
 
         executor.run(
             ContractDto("0xOwNeR", "0xAdDrEsS", ByteArray(0), bytes, "io.test.HelloClass"),
-            ContractMethod("helloSleep")
+            ContractMethod("helloSleep"),
+            3L
         )
     }
 
@@ -62,20 +70,33 @@ class ContractExecutorTest : ContractTests() {
         val contractAddress = "0xAdDrEsS"
         val contractOwner = "0xOwNeR"
 
-        given(contractProperties.executionTimeout).willReturn(10000)
+        given(contractProperties.millisecondCost).willReturn(3)
+        given(contractProperties.maxExecutionTime).willReturn(2000)
 
         var result = executor.run(
             ContractDto(contractAddress, contractOwner, ByteArray(0), bytes, clazz),
-            ContractMethod("add", arrayOf(20L))
+            ContractMethod("add", arrayOf(20L)),
+            1500L
         )
 
         result = executor.run(
             ContractDto(contractAddress, contractOwner, SerializationUtils.serialize(result.instance!!), bytes, clazz),
-            ContractMethod("result")
+            ContractMethod("result"),
+            1500L
         )
 
         assertThat(result).isNotNull
         assertThat(result.output).isEqualTo(20L)
+        assertThat(result.surplus).isGreaterThan(0L)
+    }
+
+    @Test
+    fun testCalculation() {
+        val bytes = getResourceBytes("/classes/SampleClass.class")
+
+        val result = calculator.calculateCost(bytes)
+
+        println(result)
     }
 
 }

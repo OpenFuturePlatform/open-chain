@@ -13,7 +13,9 @@ import org.apache.commons.lang3.reflect.MethodUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.util.concurrent.Callable
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -24,7 +26,6 @@ class ContractExecutor(
 ) {
 
     companion object {
-        private val log: Logger = LoggerFactory.getLogger(ContractExecutor::class.java)
         private val uniqueIdentifier = AtomicInteger(0)
     }
 
@@ -32,39 +33,33 @@ class ContractExecutor(
     private val classLoader = SourceClassLoader()
 
 
-    fun run(contract: ContractDto, method: ContractMethod): ExecutionResult {
-        var exception: Throwable? = null
-        val threadName = "${contract.clazz}-${uniqueIdentifier.getAndIncrement()}"
-        val result = ExecutionResult(threadName, null, null)
+    fun run(contract: ContractDto, method: ContractMethod, executionFee: Long): ExecutionResult {
+        val availableTime = executionFee / properties.millisecondCost!!
+        val executionTime = Math.min(availableTime, properties.maxExecutionTime!!)
+        val instance = loadClassAndState(contract)
+        val threadName = "${instance::class.java.simpleName}-${uniqueIdentifier.getAndIncrement()}"
+        val result = ExecutionResult(threadName, instance as SmartContract, null)
 
-        val task = pool.submit {
-            Thread.currentThread().name = threadName
-            try {
-                val instance = loadClassAndState(contract)
-                result.instance = instance as SmartContract
-                result.output = executeMethod(instance, method)
-            } catch (ex: Throwable) {
-                log.debug("Error while executing (${contract.clazz} - ${method.name}): ${ex.message}")
-                exception = ex
-            }
-        }
-
+        val task = executeMethod(instance, method, threadName)
         try {
-            task.get(properties.executionTimeout!!, MILLISECONDS)
-        } catch (ex: Exception) {
-            throw ContractExecutionException(ex.message, ex)
-        }
+            val startTime = System.currentTimeMillis()
+            result.output = task.get(executionTime, MILLISECONDS)
+            val endTime = System.currentTimeMillis()
 
-        if (null == exception) {
+            result.surplus = (availableTime - (endTime - startTime)) * properties.millisecondCost!!
             return result
-        } else {
-            throw ContractExecutionException(exception!!.message, exception)
+        } catch (ex: Exception) {
+            task.cancel(true)
+            throw ContractExecutionException(ex.message, ex)
         }
     }
 
-    private fun executeMethod(instance: SmartContract, method: ContractMethod): Any? {
-        val paramTypes = instance.javaClass.declaredMethods.firstOrNull { it.name == method.name }?.parameterTypes
-        return MethodUtils.invokeExactMethod(instance, method.name, method.params, paramTypes)
+    private fun executeMethod(instance: SmartContract, method: ContractMethod, identifier: String): Future<Any> {
+        return pool.submit (Callable {
+            Thread.currentThread().name = identifier
+            val paramTypes = instance.javaClass.declaredMethods.firstOrNull { it.name == method.name }?.parameterTypes
+            return@Callable MethodUtils.invokeExactMethod(instance, method.name, method.params, paramTypes)
+        })
     }
 
     private fun loadClassAndState(contract: ContractDto): Any {
@@ -87,7 +82,8 @@ class ContractExecutor(
     data class ExecutionResult(
         var identifier: String,
         var instance: SmartContract?,
-        var output: Any?
+        var output: Any?,
+        var surplus: Long = 0
     )
 
 }

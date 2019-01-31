@@ -13,6 +13,12 @@ class ContractProperties(
 
     /** Timeout for contract method execution */
     @field:NotNull
-    var executionTimeout: Long? = null
+    var executionTimeout: Long? = null,
+
+    @field:NotNull
+    var millisecondCost: Long? = null,
+
+    @field:NotNull
+    var maxExecutionTime: Long? = null
 
 )
