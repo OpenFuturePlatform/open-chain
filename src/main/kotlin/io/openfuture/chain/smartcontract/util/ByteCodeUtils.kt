@@ -1,12 +1,12 @@
 package io.openfuture.chain.smartcontract.util
 
-import io.openfuture.chain.smartcontract.exception.SmartContractValidationException
 import io.openfuture.chain.smartcontract.validation.SmartContractValidator
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.commons.ClassRemapper
 import org.objectweb.asm.commons.SimpleRemapper
 import org.slf4j.LoggerFactory
+import javax.validation.ValidationException
 
 object ByteCodeUtils {
 
@@ -31,7 +31,7 @@ object ByteCodeUtils {
         val result = validator.validationResult
         if (result.hasErrors()) {
             log.warn(result.getErrors().joinToString("\n\n"))
-            throw SmartContractValidationException("Contract class is invalid")
+            throw ValidationException("Contract class is invalid")
         }
     }
 
