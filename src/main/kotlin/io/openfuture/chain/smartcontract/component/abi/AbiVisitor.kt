@@ -10,14 +10,18 @@ class AbiVisitor : ClassVisitor(ASM6) {
 
     val abi = Abi()
 
+    companion object {
+        private const val INIT_METHOD = "<init>"
+    }
+
 
     override fun visitMethod(access: Int, name: String?, descriptor: String?, signature: String?,
                              exceptions: Array<out String>?): MethodVisitor {
-        if (Modifier.isPublic(access)) {
-            name?.let { abi.addMethodName(name) }
+        if (Modifier.isPublic(access) && name!! != INIT_METHOD) {
+            abi.addMethodName(name)
         }
 
-        return super.visitMethod(access, name, descriptor, signature, exceptions)
+        return object : MethodVisitor(ASM6) {}
     }
 
 }
