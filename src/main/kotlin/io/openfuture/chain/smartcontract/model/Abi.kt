@@ -1,16 +1,17 @@
 package io.openfuture.chain.smartcontract.model
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-
 class Abi {
 
-    private val methodNames: MutableSet<String> = mutableSetOf()
+    private val abi: MutableMap<String, List<String>> = mutableMapOf()
 
 
-    fun getAbi(): String = jacksonObjectMapper().writeValueAsString(methodNames)
+    fun getAbi(): String = "[${abi.map { mapMethod(it) }.joinToString(",")}]"
 
-    fun addMethodName(methodName: String) {
-        methodNames.add(methodName)
+    fun addMethod(methodName: String, argumentTypes: List<String>) {
+        abi[methodName] = argumentTypes
     }
+
+    private fun mapMethod(mapEntry: Map.Entry<String, List<String>>): String =
+        """{"name": "${mapEntry.key}","inputs": [${mapEntry.value.joinToString(",") { "\"$it\"" }}]}"""
 
 }

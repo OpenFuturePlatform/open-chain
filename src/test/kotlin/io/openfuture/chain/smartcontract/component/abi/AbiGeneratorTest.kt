@@ -7,11 +7,11 @@ class AbiGeneratorTest {
 
     @Test
     fun generateTest() {
-        val bytes = this::class.java.getResourceAsStream("/classes/KotlinContract.class").readBytes()
+        val bytes = this::class.java.getResourceAsStream("/classes/KotlinContractMethod.class").readBytes()
 
         val abi = AbiGenerator.generate(bytes)
 
-        assertThat(abi).isEqualTo("""["execute","another"]""")
+        assertThat(abi).isEqualTo("""[{"name": "execute","inputs": []},{"name": "another","inputs": ["java.lang.String","long"]}]""")
     }
 
 }
