@@ -7,6 +7,7 @@ import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.MainBlockService
+import io.openfuture.chain.core.service.block.DefaultMainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -54,7 +55,7 @@ class DefaultPendingBlockHandler(
             this.reset()
         }
 
-        if (!pendingBlocks.add(block)) {
+        if (!pendingBlocks.add(block) || blockAddedFlag) {
             return
         }
 
