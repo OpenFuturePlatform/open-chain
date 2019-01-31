@@ -62,7 +62,7 @@ class ChainSynchronizer(
 
     var syncSession: SyncSession? = null
     private var future: ScheduledFuture<*>? = null
-    private var becomeDelegateFlag = false
+    private var isBecomeDelegate = false
 
     @Volatile
     private var status: SyncStatus = SYNCHRONIZED
@@ -74,7 +74,7 @@ class ChainSynchronizer(
 
     fun prepareDB() {
         status = SyncStatus.PROCESSING
-        status = if (dbChecker.prepareDB(prepareDbAndGetSyncMode())) {
+        status = if (dbChecker.prepareDB(getSyncMode())) {
             SYNCHRONIZED
         } else {
             NOT_SYNCHRONIZED
@@ -92,7 +92,7 @@ class ChainSynchronizer(
                 return
             }
 
-            if (delegateStateService.existsByAddress(nodeKeyHolder.getPublicKeyAsHexString())
+            if (delegateStateService.isExistsByPublicKey(nodeKeyHolder.getPublicKeyAsHexString())
                 || (FULL == syncSession!!.syncMode
                     && !isValidTransactionMerkleRoot(message.mainBlocks)
                     && !isValidStateMerkleRoot(message.mainBlocks)
@@ -160,14 +160,10 @@ class ChainSynchronizer(
         }
     }
 
-    fun isDelegate(): Boolean = delegateStateService.existsByAddress(nodeKeyHolder.getPublicKeyAsHexString())
+    fun isDelegate(): Boolean = delegateStateService.isExistsByPublicKey(nodeKeyHolder.getPublicKeyAsHexString())
 
-    fun prepareDbAndGetSyncMode(): SyncMode {
-        if (isDelegate()) {
-            if (LIGHT == properties.syncMode && !becomeDelegateFlag) {
-                becomeDelegateFlag = true
-                prepareDB()
-            }
+    fun getSyncMode(): SyncMode {
+        if (LIGHT == properties.syncMode && !isBecomeDelegate && isDelegate()) {
             return FULL
         }
         return properties.syncMode!!
@@ -176,11 +172,16 @@ class ChainSynchronizer(
     private fun initSync(message: GenesisBlockMessage) {
         val delegates = genesisBlockService.getLast().payload.activeDelegates
         try {
+            if (!isBecomeDelegate) {
+                prepareDB()
+                isBecomeDelegate = true
+            }
+
             val currentGenesisBlock = GenesisBlock.of(message)
             val lastLocalGenesisBlock = genesisBlockService.getLast()
 
             if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
-                syncSession = SyncSession(prepareDbAndGetSyncMode(), lastLocalGenesisBlock, currentGenesisBlock)
+                syncSession = SyncSession(getSyncMode(), lastLocalGenesisBlock, currentGenesisBlock)
                 requestEpoch(delegates)
             } else {
                 checkBlock(lastLocalGenesisBlock)

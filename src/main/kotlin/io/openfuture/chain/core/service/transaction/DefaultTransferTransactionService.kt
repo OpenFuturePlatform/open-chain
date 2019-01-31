@@ -27,7 +27,7 @@ class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
     uRepository: UTransferTransactionRepository,
     transactionService: TransactionService
-) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(transactionService, repository, uRepository), TransferTransactionService {
+) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultTransferTransactionService::class.java)
