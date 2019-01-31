@@ -21,7 +21,7 @@ class SmartContractInjectorTest {
     }
 
     @Test(expected = SmartContractClassCastException::class)
-    fun initSmartContractWhenInstanceHasInvalidType() {
+    fun initSmartContractWhenInstanceHasInvalidTypeShouldThrowException() {
         val owner = "owner"
         val address = "address"
 
