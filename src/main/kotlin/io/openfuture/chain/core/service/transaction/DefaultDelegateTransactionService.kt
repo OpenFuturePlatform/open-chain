@@ -13,7 +13,6 @@ import io.openfuture.chain.core.repository.DelegateTransactionRepository
 import io.openfuture.chain.core.repository.UDelegateTransactionRepository
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.DelegateTransactionService
-import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -27,10 +26,9 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultDelegateTransactionService(
     repository: DelegateTransactionRepository,
     uRepository: UDelegateTransactionRepository,
-    transactionService: TransactionService,
     private val consensusProperties: ConsensusProperties,
     private val delegateStateService: DelegateStateService
-) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(transactionService, repository, uRepository), DelegateTransactionService {
+) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository), DelegateTransactionService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultDelegateTransactionService::class.java)

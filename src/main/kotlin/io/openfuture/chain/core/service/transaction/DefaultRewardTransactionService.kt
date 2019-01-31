@@ -32,7 +32,7 @@ class DefaultRewardTransactionService(
     private val delegateStateService: DelegateStateService,
     private val keyHolder: NodeKeyHolder,
     private val transactionService: TransactionService
-) : BaseTransactionService(transactionService), RewardTransactionService {
+) : BaseTransactionService(), RewardTransactionService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultRewardTransactionService::class.java)

@@ -15,10 +15,9 @@ import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.beans.factory.annotation.Autowired
 
 abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransaction>(
-    private val transactionService: TransactionService,
     protected val repository: TransactionRepository<T>,
     protected val unconfirmedRepository: UTransactionRepository<U>
-) : BaseTransactionService(transactionService) {
+) : BaseTransactionService() {
 
     @Autowired protected lateinit var walletStateService: WalletStateService
     @Autowired protected lateinit var baseService: TransactionService
