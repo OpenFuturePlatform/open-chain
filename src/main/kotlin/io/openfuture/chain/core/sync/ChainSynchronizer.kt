@@ -163,7 +163,7 @@ class ChainSynchronizer(
     fun isDelegate(): Boolean = delegateStateService.isExistsByPublicKey(nodeKeyHolder.getPublicKeyAsHexString())
 
     fun getSyncMode(): SyncMode {
-        if (LIGHT == properties.syncMode && !isBecomeDelegate && isDelegate()) {
+        if (isBecomeDelegate || (LIGHT == properties.syncMode && isDelegate())) {
             return FULL
         }
         return properties.syncMode!!
@@ -172,7 +172,7 @@ class ChainSynchronizer(
     private fun initSync(message: GenesisBlockMessage) {
         val delegates = genesisBlockService.getLast().payload.activeDelegates
         try {
-            if (!isBecomeDelegate) {
+            if (!isBecomeDelegate && LIGHT == properties.syncMode && isDelegate()) {
                 prepareDB()
                 isBecomeDelegate = true
             }
