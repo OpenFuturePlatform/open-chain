@@ -13,8 +13,4 @@ class ValidationResult {
 
     fun hasErrors(): Boolean = errors.isNotEmpty()
 
-    fun clear() {
-        errors.clear()
-    }
-
 }
