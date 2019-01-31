@@ -13,7 +13,7 @@ object ByteCodeUtils {
         val reader = ClassReader(bytes)
         val writer = ClassWriter(0)
 
-        val oldName = reader.className.replace('.', '/')
+        val oldName = reader.className.asResourcePath
 
         val adapter = RemappingClassAdapter(writer, SimpleRemapper(oldName, newName))
         reader.accept(adapter, ClassReader.EXPAND_FRAMES)
