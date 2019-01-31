@@ -26,7 +26,8 @@ class DefaultContractService(
 
     @Transactional(readOnly = true)
     override fun generateAddress(owner: String): String {
-        val hash = keccak256((fromHexString(owner) + getAllByOwner(owner).size.toByte()))
+        val nonce = getAllByOwner(owner).size
+        val hash = keccak256((fromHexString(owner) + nonce.toByte()))
         return AddressUtils.bytesToAddress(hash)
     }
 
