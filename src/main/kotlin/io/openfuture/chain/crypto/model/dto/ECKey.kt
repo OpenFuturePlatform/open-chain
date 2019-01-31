@@ -12,9 +12,7 @@ import org.bouncycastle.crypto.params.ECPrivateKeyParameters
 import org.bouncycastle.crypto.params.ECPublicKeyParameters
 import org.bouncycastle.crypto.signers.ECDSASigner
 import org.bouncycastle.crypto.signers.HMacDSAKCalculator
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.math.BigInteger
-import java.util.*
 
 class ECKey(
     val private: BigInteger?,
@@ -23,7 +21,6 @@ class ECKey(
 
     companion object {
         private const val PRIVATE_KEY_SIZE = 32
-        private const val ADDRESS_KEY_PART_SIZE = 20
 
         private val curve = SECNamedCurves.getByOID(SECObjectIdentifiers.secp256k1)
         private val params = ECDomainParameters(curve.curve, curve.g, curve.n, curve.h)
@@ -62,11 +59,7 @@ class ECKey(
 
     fun isPrivateEmpty() = null == private
 
-    fun getAddress(): String {
-        val pubKeyHash = HashUtils.keccak256(public)
-        val address = ByteUtils.toHexString(Arrays.copyOfRange(pubKeyHash, 0, ADDRESS_KEY_PART_SIZE))
-        return AddressUtils.addPrefix(AddressUtils.addChecksum(address))
-    }
+    fun getAddress(): String = AddressUtils.bytesToAddress(HashUtils.keccak256(public))
 
     fun sign(hashedMessage: ByteArray): ByteArray {
         if (isPrivateEmpty()) {
