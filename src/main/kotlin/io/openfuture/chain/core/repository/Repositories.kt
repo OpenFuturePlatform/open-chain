@@ -148,11 +148,11 @@ interface DelegateStateRepository : StateRepository<DelegateState> {
 interface AccountStateRepository : StateRepository<AccountState> {
 
     @Query("""
-        SELECT ws1 FROM AccountState ws1
-        WHERE ws1.voteFor=:delegateKey
-        AND ws1.block.height = (
-            SELECT MAX(ws2.block.height) FROM AccountState ws2
-            WHERE ws1.address=ws2.address
+        SELECT as1 FROM AccountState as1
+        WHERE as1.voteFor=:delegateKey
+        AND as1.block.height = (
+            SELECT MAX(as2.block.height) FROM AccountState as2
+            WHERE as1.address=as2.address
         )
         """)
     fun findVotesByDelegateKey(@Param("delegateKey") delegateKey: String): List<AccountState>
