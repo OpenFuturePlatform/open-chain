@@ -1,10 +1,10 @@
 package io.openfuture.chain.smartcontract.deploy.execution
 
-import io.openfuture.chain.smartcontract.core.model.SmartContract
 import io.openfuture.chain.smartcontract.deploy.domain.ContractDto
 import io.openfuture.chain.smartcontract.deploy.domain.ContractMethod
 import io.openfuture.chain.smartcontract.deploy.exception.ContractExecutionException
 import io.openfuture.chain.smartcontract.load.SmartContractLoader
+import io.openfuture.chain.smartcontract.model.SmartContract
 import io.openfuture.chain.smartcontract.property.ContractProperties
 import io.openfuture.chain.smartcontract.util.SerializationUtils
 import org.apache.commons.lang3.reflect.MethodUtils

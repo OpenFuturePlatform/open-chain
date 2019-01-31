@@ -2,7 +2,7 @@
 //
 //import io.openfuture.chain.ResourceUtils.getResourceBytes
 //import io.openfuture.chain.config.ContractTests
-//import io.openfuture.chain.smartcontract.core.model.SmartContract
+//import io.openfuture.chain.smartcontract.model.SmartContract
 //import io.openfuture.chain.smartcontract.deploy.domain.ContractDto
 //import io.openfuture.chain.smartcontract.deploy.domain.ContractMethod
 //import io.openfuture.chain.smartcontract.deploy.exception.ContractExecutionException

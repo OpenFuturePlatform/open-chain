@@ -1,7 +1,7 @@
 package io.openfuture.chain.smartcontract.util
 
-import io.openfuture.chain.smartcontract.core.model.SmartContract
 import io.openfuture.chain.smartcontract.exception.SmartContractClassCastException
+import io.openfuture.chain.smartcontract.model.SmartContract
 import org.springframework.util.ReflectionUtils
 
 object SmartContractUtils {

@@ -1,6 +1,6 @@
 package io.openfuture.chain.smartcontract.validation
 
-import io.openfuture.chain.smartcontract.core.model.SmartContract
+import io.openfuture.chain.smartcontract.model.SmartContract
 import io.openfuture.chain.smartcontract.util.asPackagePath
 import io.openfuture.chain.smartcontract.util.asResourcePath
 import io.openfuture.chain.smartcontract.validation.domain.ValidationResult
