@@ -15,6 +15,16 @@ object ByteCodeUtils {
     fun processByteArray(bytes: ByteArray, newName: String): ByteArray {
         val reader = ClassReader(bytes)
 
+        validate(reader)
+
+        val writer = ClassWriter(0)
+
+        renameClass(reader, writer, newName)
+
+        return writer.toByteArray()
+    }
+
+    private fun validate(reader: ClassReader) {
         val validator = SmartContractValidator()
         reader.accept(validator, ClassReader.SKIP_DEBUG)
 
@@ -23,14 +33,13 @@ object ByteCodeUtils {
             log.warn(result.getErrors().joinToString("\n\n"))
             throw SmartContractValidationException("Contract class is invalid")
         }
+    }
 
-        val writer = ClassWriter(0)
+    private fun renameClass(reader: ClassReader, writer: ClassWriter, newName: String) {
         val oldName = reader.className.asResourcePath
 
         val adapter = ClassRemapper(writer, SimpleRemapper(oldName, newName))
         reader.accept(adapter, ClassReader.EXPAND_FRAMES)
-
-        return writer.toByteArray()
     }
 
     private val log = LoggerFactory.getLogger(ByteCodeUtils::class.java)
