@@ -21,6 +21,7 @@ object SmartContractUtils {
     private fun injectField(instance: Any, fieldName: String, value: String) {
         val field = ReflectionUtils.findField(instance::class.java, fieldName)
             ?: throw SmartContractClassCastException("Instatnce has invalid type")
+        ReflectionUtils.makeAccessible(field)
         ReflectionUtils.setField(field, instance, value)
     }
 

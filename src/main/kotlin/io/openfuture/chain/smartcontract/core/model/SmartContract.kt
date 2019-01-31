@@ -5,8 +5,8 @@ import java.io.Serializable
 
 abstract class SmartContract : Serializable {
 
-    lateinit var owner: String
-    lateinit var address: String
+    val owner: String = ""
+    val address: String = ""
 
 
     protected fun required(value: Boolean, message: String? = null) {
