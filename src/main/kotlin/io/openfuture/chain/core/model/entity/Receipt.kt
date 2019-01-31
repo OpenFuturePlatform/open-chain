@@ -1,12 +1,12 @@
 package io.openfuture.chain.core.model.entity
 
+import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.core.model.entity.base.BaseModel
-import io.openfuture.chain.network.extension.readNullableString
-import io.openfuture.chain.network.extension.readString
-import io.openfuture.chain.network.extension.writeNullableString
-import io.openfuture.chain.network.extension.writeString
+import io.openfuture.chain.network.extension.*
+import io.openfuture.chain.network.serialization.Serializable
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Table
@@ -21,7 +21,17 @@ class Receipt(
     @Column(name = "result", nullable = false)
     var result: String
 
-) : BaseModel()
+) : BaseModel() {
+
+    fun getResults(): List<ReceiptResult> = Unpooled.buffer().writeBytes(ByteUtils.fromHexString(result)).readList()
+
+    fun setResults(results: List<ReceiptResult>) {
+        val buffer = Unpooled.buffer()
+        buffer.writeList(results)
+        result = ByteUtils.toHexString(buffer.array())
+    }
+
+}
 
 @NoArgConstructor
 class ReceiptResult(
@@ -30,25 +40,22 @@ class ReceiptResult(
     var amount: Long,
     var data: String,
     var error: String?
-) {
+) : Serializable {
 
-    fun toBytes(): ByteArray {
-        val buffer = Unpooled.buffer()
-        buffer.writeString(from)
-        buffer.writeString(to)
-        buffer.writeLong(amount)
-        buffer.writeString(data)
-        buffer.writeNullableString(error)
-        return buffer.array()
+    override fun read(buf: ByteBuf) {
+        from = buf.readString()
+        to = buf.readString()
+        amount = buf.readLong()
+        data = buf.readString()
+        error = buf.readNullableString()
     }
 
-    fun fromBytes(bytes: ByteArray) {
-        val buffer = Unpooled.buffer().writeBytes(bytes)
-        from = buffer.readString()
-        to = buffer.readString()
-        amount = buffer.readLong()
-        data = buffer.readString()
-        error = buffer.readNullableString()
+    override fun write(buf: ByteBuf) {
+        buf.writeString(from)
+        buf.writeString(to)
+        buf.writeLong(amount)
+        buf.writeString(data)
+        buf.writeNullableString(error)
     }
 
 }
