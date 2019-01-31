@@ -1,7 +1,7 @@
 package io.openfuture.chain.smartcontract.component.validation
 
-import io.openfuture.chain.smartcontract.component.validation.domain.ValidationResult
 import io.openfuture.chain.smartcontract.model.SmartContract
+import io.openfuture.chain.smartcontract.model.ValidationResult
 import io.openfuture.chain.smartcontract.util.asPackagePath
 import io.openfuture.chain.smartcontract.util.asResourcePath
 import org.objectweb.asm.*

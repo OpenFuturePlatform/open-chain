@@ -1,4 +1,4 @@
-package io.openfuture.chain.smartcontract.component.abi.domain
+package io.openfuture.chain.smartcontract.model
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 

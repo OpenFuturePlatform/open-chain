@@ -1,4 +1,4 @@
-package io.openfuture.chain.smartcontract.component.validation.domain
+package io.openfuture.chain.smartcontract.model
 
 class ValidationResult {
 

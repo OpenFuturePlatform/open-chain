@@ -1,6 +1,6 @@
 package io.openfuture.chain.smartcontract.component.abi
 
-import io.openfuture.chain.smartcontract.component.abi.domain.Abi
+import io.openfuture.chain.smartcontract.model.Abi
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.ASM6
