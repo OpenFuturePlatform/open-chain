@@ -2,6 +2,7 @@ package io.openfuture.chain.core.sync
 
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.StatePool
+import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -70,11 +71,7 @@ class ChainSynchronizer(
                 return
             }
 
-            if (syncSession!!.syncMode == FULL
-                && !isValidTransactionMerkleRoot(message.mainBlocks)
-                && !isValidStateMerkleRoot(message.mainBlocks)
-                && !isValidTransactions(message.mainBlocks)
-                && !isValidStates(message.mainBlocks)) {
+            if (syncSession!!.syncMode == FULL && !isValidEpoch(message.mainBlocks)) {
                 requestEpoch(delegates.filter { it != message.delegateKey })
                 return
             }
@@ -164,6 +161,7 @@ class ChainSynchronizer(
                 it.voteTransactions.forEach { vTx -> mainBlock.payload.voteTransactions.add(VoteTransaction.of(vTx, mainBlock)) }
                 it.delegateTransactions.forEach { dTx -> mainBlock.payload.delegateTransactions.add(DelegateTransaction.of(dTx, mainBlock)) }
                 it.transferTransactions.forEach { vTx -> mainBlock.payload.transferTransactions.add(TransferTransaction.of(vTx, mainBlock)) }
+                it.receipts.forEach { r -> mainBlock.payload.receipts.add(Receipt.of(r, mainBlock)) }
             }
             it.delegateStates.forEach { ds -> mainBlock.payload.delegateStates.add(DelegateState.of(ds, mainBlock)) }
             it.accountStates.forEach { ws -> mainBlock.payload.accountStates.add(AccountState.of(ws, mainBlock)) }
@@ -172,6 +170,14 @@ class ChainSynchronizer(
         listBlocks.addAll(mainBlocks)
         return listBlocks
     }
+
+    private fun isValidEpoch(mainBlocks: List<MainBlockMessage>): Boolean =
+        isValidTransactionMerkleRoot(mainBlocks)
+            && isValidStateMerkleRoot(mainBlocks)
+            && isValidReceiptMerkleRoot(mainBlocks)
+            && isValidTransactions(mainBlocks)
+            && isValidStates(mainBlocks)
+            && isValidReceipts(mainBlocks)
 
     private fun isValidRewardTransactions(message: RewardTransactionMessage): Boolean = rewardTransactionService.verify(message)
 
@@ -209,8 +215,8 @@ class ChainSynchronizer(
 
     private fun isValidStates(blocks: List<MainBlockMessage>): Boolean {
         try {
-            for (block in blocks) {
-                if (!isValidStates(block.getAllTransactions(), block.getAllStates())) {
+            blocks.forEach { block ->
+                if (!isValidBlockStates(block.getAllTransactions(), block.getAllStates())) {
                     throw ValidationException("Invalid states")
                 }
             }
@@ -221,14 +227,37 @@ class ChainSynchronizer(
         return true
     }
 
-    private fun isValidStates(txMessages: List<TransactionMessage>, blockStates: List<StateMessage>): Boolean {
+    private fun isValidBlockStates(txMessages: List<TransactionMessage>, blockStates: List<StateMessage>): Boolean {
         val states = getStates(txMessages)
-
         if (blockStates.size != states.size) {
             return false
         }
 
         return states.all { blockStates.contains(it) }
+    }
+
+    //todo refactor
+    private fun isValidReceipts(blocks: List<MainBlockMessage>): Boolean {
+        try {
+            blocks.forEach { block ->
+                if (!isValidBlockReceipts(block.getAllTransactions(), block.receipts)) {
+                    throw ValidationException("Invalid states")
+                }
+            }
+        } catch (e: ValidationException) {
+            log.debug("States are invalid, cause: ${e.message}")
+            return false
+        }
+        return true
+    }
+
+    private fun isValidBlockReceipts(txMessages: List<TransactionMessage>, blockReceipts: List<ReceiptMessage>): Boolean {
+        val receipts = getReceipts(txMessages)
+        if (blockReceipts.size != receipts.size) {
+            return false
+        }
+
+        return receipts.all { blockReceipts.contains(it) }
     }
 
     private fun getStates(txMessages: List<TransactionMessage>): List<StateMessage> {
@@ -246,10 +275,31 @@ class ChainSynchronizer(
         }
     }
 
+    private fun getReceipts(txMessages: List<TransactionMessage>): List<ReceiptMessage> = txMessages.map { tx ->
+        when (tx) {
+            is TransferTransactionMessage -> transferTransactionService.generateReceipt(tx)
+            is VoteTransactionMessage -> voteTransactionService.generateReceipt(tx)
+            is DelegateTransactionMessage -> delegateTransactionService.generateReceipt(tx)
+            is RewardTransactionMessage -> rewardTransactionService.generateReceipt(tx)
+            else -> throw IllegalStateException("Unsupported transaction type")
+        }.toMessage()
+    }
+
+
     private fun isValidStateMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
         mainBlocks.forEach { block ->
             if (!isValidRootHash(block.stateHash, block.getAllStates().map { it.getHash() })) {
                 log.warn("State merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun isValidReceiptMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
+        mainBlocks.forEach { block ->
+            if (!isValidRootHash(block.receiptHash, block.receipts.map { it.getHash() })) {
+                log.warn("Receipt merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
                 return false
             }
         }

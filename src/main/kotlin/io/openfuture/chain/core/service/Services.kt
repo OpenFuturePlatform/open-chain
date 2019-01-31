@@ -150,6 +150,8 @@ interface TransferTransactionService {
 
     fun updateState(message: TransferTransactionMessage)
 
+    fun generateReceipt(message: TransferTransactionMessage): Receipt
+
     fun verify(message: TransferTransactionMessage): Boolean
 
 }
@@ -165,6 +167,8 @@ interface RewardTransactionService {
     fun commit(transaction: RewardTransaction)
 
     fun updateState(message: RewardTransactionMessage)
+
+    fun generateReceipt(message: RewardTransactionMessage): Receipt
 
     fun verify(message: RewardTransactionMessage): Boolean
 
@@ -192,6 +196,8 @@ interface VoteTransactionService {
 
     fun updateState(message: VoteTransactionMessage)
 
+    fun generateReceipt(message: VoteTransactionMessage): Receipt
+
     fun verify(message: VoteTransactionMessage): Boolean
 
 }
@@ -213,6 +219,8 @@ interface DelegateTransactionService {
     fun commit(transaction: DelegateTransaction): DelegateTransaction
 
     fun updateState(message: DelegateTransactionMessage)
+
+    fun generateReceipt(message: DelegateTransactionMessage): Receipt
 
     fun verify(message: DelegateTransactionMessage): Boolean
 
@@ -281,6 +289,6 @@ interface ReceiptService {
 
     fun getByTransactionHash(hash: String): Receipt
 
-    fun save(receipt: Receipt): Receipt
+    fun commit(receipt: Receipt)
 
 }

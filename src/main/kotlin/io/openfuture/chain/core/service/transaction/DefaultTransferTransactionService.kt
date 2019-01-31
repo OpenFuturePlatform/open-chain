@@ -6,6 +6,8 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.INSUFFICIENT_ACTUAL_BALANCE
 import io.openfuture.chain.core.model.entity.Contract
+import io.openfuture.chain.core.model.entity.Receipt
+import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.model.entity.dictionary.TransferTransactionType.*
 import io.openfuture.chain.core.model.entity.dictionary.TransferTransactionType.Companion.getType
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -19,6 +21,7 @@ import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
+import org.apache.commons.lang3.StringUtils.EMPTY
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -108,14 +111,23 @@ class DefaultTransferTransactionService(
     override fun updateState(message: TransferTransactionMessage) {
         accountStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
 
-        if (FUND == getType(message)) {
+        val type = getType(message)
+        if (FUND == type) {
             accountStateService.updateBalanceByAddress(message.recipientAddress!!, message.amount)
         }
 
-        if (DEPLOY == getType(message)) {
+        if (DEPLOY == type) {
             accountStateService.updateStorage(contractService.generateAddress(message.senderAddress), message.data!!)
         }
     }
+
+    override fun generateReceipt(message: TransferTransactionMessage): Receipt =
+        getReceipt(message.hash, ReceiptResult(
+            message.senderAddress,
+            message.recipientAddress ?: EMPTY,
+            message.amount + message.fee,
+            getType(message).toString()
+        ))
 
     override fun verify(message: TransferTransactionMessage): Boolean {
         return try {

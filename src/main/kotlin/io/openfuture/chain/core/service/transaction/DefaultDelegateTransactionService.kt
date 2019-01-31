@@ -7,6 +7,8 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType
 import io.openfuture.chain.core.exception.model.ExceptionType.ALREADY_DELEGATE
+import io.openfuture.chain.core.model.entity.Receipt
+import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.repository.DelegateTransactionRepository
@@ -17,6 +19,7 @@ import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
+import org.apache.commons.lang3.StringUtils.EMPTY
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -98,6 +101,15 @@ class DefaultDelegateTransactionService(
         accountStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
         accountStateService.updateBalanceByAddress(consensusProperties.genesisAddress!!, message.amount)
         delegateStateService.addDelegate(message.delegateKey, message.senderAddress, message.timestamp)
+    }
+
+    override fun generateReceipt(message: DelegateTransactionMessage): Receipt {
+        return getReceipt(message.hash, ReceiptResult(
+            message.senderAddress,
+            EMPTY, //todo
+            message.amount + message.fee,
+            message.delegateKey
+        ))
     }
 
     override fun verify(message: DelegateTransactionMessage): Boolean {

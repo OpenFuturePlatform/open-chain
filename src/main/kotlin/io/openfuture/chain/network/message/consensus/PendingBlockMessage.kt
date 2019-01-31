@@ -13,14 +13,17 @@ class PendingBlockMessage(
     publicKey: String,
     merkleHash: String,
     stateHash: String,
+    receiptHash: String,
     rewardTransaction: RewardTransactionMessage,
     voteTransactions: List<VoteTransactionMessage>,
     delegateTransactions: List<DelegateTransactionMessage>,
     transferTransactions: List<TransferTransactionMessage>,
     delegateStates: List<DelegateStateMessage>,
-    accountStates: List<AccountStateMessage>
+    accountStates: List<AccountStateMessage>,
+    receipts: List<ReceiptMessage>
 ) : BaseMainBlockMessage(height, previousHash, timestamp, hash, signature, publicKey, merkleHash, stateHash,
-    rewardTransaction, voteTransactions, delegateTransactions, transferTransactions, delegateStates, accountStates) {
+    receiptHash, rewardTransaction, voteTransactions, delegateTransactions, transferTransactions, delegateStates,
+    accountStates, receipts) {
 
     fun getExternalTransactions(): List<TransactionMessage> =
         voteTransactions + delegateTransactions + transferTransactions

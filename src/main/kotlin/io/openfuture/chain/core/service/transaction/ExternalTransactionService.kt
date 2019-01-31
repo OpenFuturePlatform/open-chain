@@ -3,6 +3,8 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_ADDRESS
+import io.openfuture.chain.core.model.entity.Receipt
+import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
@@ -63,6 +65,12 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
     protected fun confirm(utx: U, tx: T): T {
         unconfirmedRepository.delete(utx)
         return save(tx)
+    }
+
+    protected fun getReceipt(hash: String, result: ReceiptResult): Receipt {
+        val receipt = Receipt(hash)
+        receipt.setResults(listOf(result))
+        return receipt
     }
 
     protected fun isValidActualBalance(address: String, amount: Long): Boolean =

@@ -6,6 +6,8 @@ import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.*
+import io.openfuture.chain.core.model.entity.Receipt
+import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.AGAINST
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.FOR
@@ -120,6 +122,14 @@ internal class DefaultVoteTransactionService(
         }
         accountStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
     }
+
+    override fun generateReceipt(message: VoteTransactionMessage): Receipt =
+        getReceipt(message.hash, ReceiptResult(
+            message.senderAddress,
+            message.delegateKey,
+            message.fee,
+            VoteType.getById(message.voteTypeId).toString()
+        ))
 
     override fun verify(message: VoteTransactionMessage): Boolean {
         return try {

@@ -7,6 +7,7 @@ import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.component.TransactionThroughput
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload.Companion.calculateMerkleRoot
@@ -53,7 +54,8 @@ class DefaultMainBlockService(
     private val voteTransactionService: VoteTransactionService,
     private val rewardTransactionService: RewardTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
-    private val transferTransactionService: TransferTransactionService
+    private val transferTransactionService: TransferTransactionService,
+    private val receiptService: ReceiptService
 ) : BaseBlockService<MainBlock>(repository, blockService, delegateStateService), MainBlockService {
 
     companion object {
@@ -115,6 +117,7 @@ class DefaultMainBlockService(
 
             val stateHashes = mutableListOf<String>()
             val states = getStates(txMessages)
+            val receipts = getReceipts(txMessages)
             val delegateStates = mutableListOf<DelegateStateMessage>()
             val accountStates = mutableListOf<AccountStateMessage>()
 
@@ -128,14 +131,15 @@ class DefaultMainBlockService(
 
             val merkleHash = calculateMerkleRoot(transactionHashes + rewardTransactionMessage.hash)
             val stateHash = calculateMerkleRoot(stateHashes)
-            val payload = MainBlockPayload(merkleHash, stateHash)
+            val receiptHash = calculateMerkleRoot(receipts.map { it.getHash() })
+            val payload = MainBlockPayload(merkleHash, stateHash, receiptHash)
             val hash = createHash(timestamp, height, previousHash, payload)
             val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
             val publicKey = keyHolder.getPublicKeyAsHexString()
 
             return PendingBlockMessage(height, previousHash, timestamp, toHexString(hash), signature, publicKey,
-                merkleHash, stateHash, rewardTransactionMessage, voteTransactions, delegateTransactions,
-                transferTransactions, delegateStates, accountStates)
+                merkleHash, stateHash, receiptHash, rewardTransactionMessage, voteTransactions, delegateTransactions,
+                transferTransactions, delegateStates, accountStates, receipts)
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -187,6 +191,8 @@ class DefaultMainBlockService(
                 }
             }
 
+            message.receipts.forEach { receiptService.commit(Receipt.of(it, block)) }
+
             throughput.updateThroughput(message.getAllTransactions().size, savedBlock.height)
         } finally {
             BlockchainLock.writeLock.unlock()
@@ -212,6 +218,10 @@ class DefaultMainBlockService(
             throw ValidationException("Invalid state merkle hash in block: height #${message.height}, hash ${message.hash}")
         }
 
+        if (!isValidRootHash(message.receiptHash, message.receipts.map { it.getHash() })) {
+            throw ValidationException("Invalid receipt merkle hash in block: height #${message.height}, hash ${message.hash}")
+        }
+
         if (!isValidBalances(message.getExternalTransactions())) {
             throw ValidationException("Invalid balances in block: height #${message.height}, hash ${message.hash}")
         }
@@ -234,6 +244,10 @@ class DefaultMainBlockService(
 
         if (!isValidStates(message.getAllTransactions(), message.getAllStates())) {
             throw ValidationException("Invalid states")
+        }
+
+        if (!isValidReceipts(message.getAllTransactions(), message.receipts)) {
+            throw ValidationException("Invalid receipts")
         }
 
     }
@@ -308,12 +322,20 @@ class DefaultMainBlockService(
 
     private fun isValidStates(txMessages: List<TransactionMessage>, blockStates: List<StateMessage>): Boolean {
         val states = getStates(txMessages)
-
         if (blockStates.size != states.size) {
             return false
         }
 
         return states.all { blockStates.contains(it) }
+    }
+
+    private fun isValidReceipts(txMessages: List<TransactionMessage>, blockReceipts: List<ReceiptMessage>): Boolean {
+        val receipts = getReceipts(txMessages)
+        if (blockReceipts.size != receipts.size) {
+            return false
+        }
+
+        return receipts.all { blockReceipts.contains(it) }
     }
 
 
@@ -330,6 +352,16 @@ class DefaultMainBlockService(
 
             statePool.getPool().values.toList()
         }
+    }
+
+    private fun getReceipts(txMessages: List<TransactionMessage>): List<ReceiptMessage> = txMessages.map { tx ->
+        when (tx) {
+            is TransferTransactionMessage -> transferTransactionService.generateReceipt(tx)
+            is VoteTransactionMessage -> voteTransactionService.generateReceipt(tx)
+            is DelegateTransactionMessage -> delegateTransactionService.generateReceipt(tx)
+            is RewardTransactionMessage -> rewardTransactionService.generateReceipt(tx)
+            else -> throw IllegalStateException("Unsupported transaction type")
+        }.toMessage()
     }
 
     private fun getTransactions(): List<UnconfirmedTransaction> {

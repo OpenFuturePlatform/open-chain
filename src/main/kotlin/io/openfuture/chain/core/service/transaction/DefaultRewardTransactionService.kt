@@ -4,6 +4,8 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.model.entity.Receipt
+import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
@@ -84,6 +86,16 @@ class DefaultRewardTransactionService(
         val reward = if (consensusProperties.rewardBlock!! > bank) bank else consensusProperties.rewardBlock!!
 
         accountStateService.updateBalanceByAddress(senderAddress, -reward)
+    }
+
+    override fun generateReceipt(message: RewardTransactionMessage): Receipt {
+        val receipt = Receipt(message.hash)
+        receipt.setResults(listOf(ReceiptResult(
+            message.senderAddress,
+            message.recipientAddress,
+            message.reward
+        )))
+        return receipt
     }
 
     @Transactional(readOnly = true)

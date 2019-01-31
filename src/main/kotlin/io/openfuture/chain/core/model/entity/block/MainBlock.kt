@@ -31,7 +31,7 @@ class MainBlock(
             message.hash,
             message.signature,
             message.publicKey,
-            MainBlockPayload(message.merkleHash, message.stateHash)
+            MainBlockPayload(message.merkleHash, message.stateHash, message.receiptHash)
         )
     }
 
@@ -50,12 +50,14 @@ class MainBlock(
         publicKey,
         payload.merkleHash,
         payload.stateHash,
+        payload.receiptHash,
         payload.rewardTransaction.first().toMessage(),
         payload.voteTransactions.map { it.toMessage() },
         payload.delegateTransactions.map { it.toMessage() },
         payload.transferTransactions.map { it.toMessage() },
         payload.delegateStates.map { it.toMessage() },
-        payload.accountStates.map { it.toMessage() }
+        payload.accountStates.map { it.toMessage() },
+        payload.receipts.map { it.toMessage() }
     )
 
 }

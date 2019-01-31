@@ -17,12 +17,14 @@ abstract class BaseMainBlockMessage(
     publicKey: String,
     var merkleHash: String,
     var stateHash: String,
+    var receiptHash: String,
     var rewardTransaction: RewardTransactionMessage,
     var voteTransactions: List<VoteTransactionMessage>,
     var delegateTransactions: List<DelegateTransactionMessage>,
     var transferTransactions: List<TransferTransactionMessage>,
     var delegateStates: List<DelegateStateMessage>,
-    var accountStates: List<AccountStateMessage>
+    var accountStates: List<AccountStateMessage>,
+    var receipts: List<ReceiptMessage>
 ) : BlockMessage(height, previousHash, timestamp, hash, signature, publicKey) {
 
     fun getAllTransactions(): List<TransactionMessage> =
@@ -35,6 +37,7 @@ abstract class BaseMainBlockMessage(
 
         merkleHash = buf.readString()
         stateHash = buf.readString()
+        receiptHash = buf.readString()
         rewardTransaction = RewardTransactionMessage::class.java.newInstance()
         rewardTransaction.read(buf)
         voteTransactions = buf.readList()
@@ -49,6 +52,7 @@ abstract class BaseMainBlockMessage(
 
         buf.writeString(merkleHash)
         buf.writeString(stateHash)
+        buf.writeString(receiptHash)
         rewardTransaction.write(buf)
         buf.writeList(voteTransactions)
         buf.writeList(delegateTransactions)
@@ -72,6 +76,7 @@ abstract class BaseMainBlockMessage(
         if (rewardTransaction != other.rewardTransaction) return false
         if (merkleHash != other.merkleHash) return false
         if (stateHash != other.stateHash) return false
+        if (receiptHash != other.receiptHash) return false
         if (voteTransactions != other.voteTransactions) return false
         if (delegateTransactions != other.delegateTransactions) return false
         if (transferTransactions != other.transferTransactions) return false
@@ -91,6 +96,7 @@ abstract class BaseMainBlockMessage(
         result = 31 * result + rewardTransaction.hashCode()
         result = 31 * result + merkleHash.hashCode()
         result = 31 * result + stateHash.hashCode()
+        result = 31 * result + receiptHash.hashCode()
         result = 31 * result + voteTransactions.hashCode()
         result = 31 * result + delegateTransactions.hashCode()
         result = 31 * result + transferTransactions.hashCode()
