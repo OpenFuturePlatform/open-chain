@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull
 class ContractProperties(
 
     /** Timeout for contract method execution */
-    @field:NotNull var executionTimeout: Long? = null
+    @field:NotNull
+    var executionTimeout: Long? = null
 
 )
