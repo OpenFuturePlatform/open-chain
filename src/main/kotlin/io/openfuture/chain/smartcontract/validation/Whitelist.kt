@@ -46,8 +46,12 @@ object Whitelist {
             "invoke.",
             "ref.",
             "reflect.",
+            "management.",
 
             ".Thread",
+            ".Process",
+            ".ProcessBuilder",
+            ".UNIXProcess",
             ".Shutdown",
             ".Math",
             ".ClassLoader"
@@ -58,6 +62,8 @@ object Whitelist {
             "logging.",
             "prefs.",
             "jar.",
+            "spi.",
+            "zip.",
 
             ".UUID",
             ".Random",
