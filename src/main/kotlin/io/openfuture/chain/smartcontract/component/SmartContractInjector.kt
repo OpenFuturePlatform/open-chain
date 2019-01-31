@@ -1,6 +1,5 @@
 package io.openfuture.chain.smartcontract.component
 
-import io.openfuture.chain.smartcontract.exception.SmartContractClassCastException
 import io.openfuture.chain.smartcontract.model.SmartContract
 import org.springframework.util.ReflectionUtils
 
@@ -10,10 +9,9 @@ object SmartContractInjector {
     private const val ADDRESS_FIELD = "address"
 
 
+    @Throws(ClassCastException::class)
     fun initSmartContract(clazz: Class<*>, owner: String, address: String): SmartContract {
-        val instance = clazz.newInstance()
-
-        instance as? SmartContract ?: throw SmartContractClassCastException("Instance has invalid type")
+        val instance = clazz.newInstance() as SmartContract
 
         injectField(instance, OWNER_FIELD, owner)
         injectField(instance, ADDRESS_FIELD, address)
