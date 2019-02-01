@@ -10,8 +10,6 @@ import io.openfuture.chain.smartcontract.deploy.exception.ContractLoadingExcepti
 import io.openfuture.chain.smartcontract.deploy.load.ContractInjector
 import io.openfuture.chain.smartcontract.deploy.load.SourceClassLoader
 import org.apache.commons.lang3.reflect.MethodUtils
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
