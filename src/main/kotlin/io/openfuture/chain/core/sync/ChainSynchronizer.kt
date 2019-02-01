@@ -89,12 +89,11 @@ class ChainSynchronizer(
                 return
             }
 
-            if (delegateStateService.isExistsByPublicKey(nodeKeyHolder.getPublicKeyAsHexString())
-                || (FULL == syncSession!!.syncMode
-                    && !isValidTransactionMerkleRoot(message.mainBlocks)
-                    && !isValidStateMerkleRoot(message.mainBlocks)
-                    && !isValidTransactions(message.mainBlocks)
-                    && !isValidStates(message.mainBlocks))) {
+            if ((isDelegate() || FULL == syncSession!!.syncMode)
+                    && (!isValidTransactionMerkleRoot(message.mainBlocks)
+                    || !isValidStateMerkleRoot(message.mainBlocks)
+                    || !isValidTransactions(message.mainBlocks)
+                    || !isValidStates(message.mainBlocks))) {
                 requestEpoch(delegates.filter { it != message.delegateKey })
                 return
             }
