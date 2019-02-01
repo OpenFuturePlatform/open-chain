@@ -70,7 +70,7 @@ class ChainSynchronizer(
     override fun onApplicationEvent(event: DataSourceSchemaCreatedEvent) {
         status = SyncStatus.PROCESSING
         val syncMode: SyncMode =
-            if (delegateStateService.existsByAddress(nodeKeyHolder.getPublicKeyAsHexString())
+            if (delegateStateService.isExistsByPublicKey(nodeKeyHolder.getPublicKeyAsHexString())
                 || FULL == properties.syncMode!!) {
                 FULL
             } else {
@@ -94,7 +94,7 @@ class ChainSynchronizer(
                 return
             }
 
-            if (delegateStateService.existsByAddress(nodeKeyHolder.getPublicKeyAsHexString())
+            if (delegateStateService.isExistsByPublicKey(nodeKeyHolder.getPublicKeyAsHexString())
                 || (FULL == syncSession!!.syncMode
                     && !isValidTransactionMerkleRoot(message.mainBlocks)
                     && !isValidStateMerkleRoot(message.mainBlocks)

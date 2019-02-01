@@ -28,7 +28,7 @@ class DefaultDelegateTransactionService(
     uRepository: UDelegateTransactionRepository,
     private val consensusProperties: ConsensusProperties,
     private val delegateStateService: DelegateStateService
-) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>( repository, uRepository), DelegateTransactionService {
+) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository), DelegateTransactionService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultDelegateTransactionService::class.java)
