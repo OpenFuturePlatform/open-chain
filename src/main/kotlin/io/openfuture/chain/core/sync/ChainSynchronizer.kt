@@ -72,13 +72,14 @@ class ChainSynchronizer(
         prepareDB()
     }
 
-    fun prepareDB() {
+    fun prepareDB(): Boolean {
         status = SyncStatus.PROCESSING
         status = if (dbChecker.prepareDB(getSyncMode())) {
             SYNCHRONIZED
         } else {
             NOT_SYNCHRONIZED
         }
+        return (SYNCHRONIZED == status)
     }
 
     fun getStatus(): SyncStatus = status
@@ -121,6 +122,11 @@ class ChainSynchronizer(
     }
 
     fun isInSync(block: Block): Boolean {
+        if (!isBecomeDelegate && LIGHT == properties.syncMode && isDelegate()) {
+            val isInSync = prepareDB()
+            isBecomeDelegate = true
+            return isInSync
+        }
         val lastBlock = blockService.getLast()
         if (lastBlock.hash == block.hash) {
             return true
@@ -172,11 +178,6 @@ class ChainSynchronizer(
     private fun initSync(message: GenesisBlockMessage) {
         val delegates = genesisBlockService.getLast().payload.activeDelegates
         try {
-            if (!isBecomeDelegate && LIGHT == properties.syncMode && isDelegate()) {
-                prepareDB()
-                isBecomeDelegate = true
-            }
-
             val currentGenesisBlock = GenesisBlock.of(message)
             val lastLocalGenesisBlock = genesisBlockService.getLast()
 
