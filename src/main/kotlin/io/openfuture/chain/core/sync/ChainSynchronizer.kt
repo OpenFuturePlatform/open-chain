@@ -123,9 +123,7 @@ class ChainSynchronizer(
 
     fun isInSync(block: Block): Boolean {
         if (!isBecomeDelegate && LIGHT == properties.syncMode && isDelegate()) {
-            val isInSync = prepareDB()
-            isBecomeDelegate = true
-            return isInSync
+            return prepareDB()
         }
         val lastBlock = blockService.getLast()
         if (lastBlock.hash == block.hash) {
@@ -170,6 +168,7 @@ class ChainSynchronizer(
 
     fun getSyncMode(): SyncMode {
         if (isBecomeDelegate || (LIGHT == properties.syncMode && isDelegate())) {
+            isBecomeDelegate = true
             return FULL
         }
         return properties.syncMode!!
