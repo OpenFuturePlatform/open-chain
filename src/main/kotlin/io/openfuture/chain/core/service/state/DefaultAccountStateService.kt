@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.state
 
 import io.openfuture.chain.core.component.StatePool
+import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -29,8 +30,10 @@ class DefaultAccountStateService(
 
     override fun getBalanceByAddress(address: String): Long {
         BlockchainLock.readLock.lock()
-        try {
-            return getLastByAddress(address)?.balance ?: DEFAULT_WALLET_BALANCE
+        return try {
+            getLastByAddress(address).balance
+        } catch (ex: NotFoundException) {
+            DEFAULT_WALLET_BALANCE
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -38,9 +41,11 @@ class DefaultAccountStateService(
 
     override fun getActualBalanceByAddress(address: String): Long {
         BlockchainLock.readLock.lock()
-        try {
-            val balance = getLastByAddress(address)?.balance ?: DEFAULT_WALLET_BALANCE
+        return try {
+            val balance = getLastByAddress(address).balance
             return balance - getUnconfirmedBalance(address)
+        } catch (ex: NotFoundException) {
+            DEFAULT_WALLET_BALANCE
         } finally {
             BlockchainLock.readLock.unlock()
         }

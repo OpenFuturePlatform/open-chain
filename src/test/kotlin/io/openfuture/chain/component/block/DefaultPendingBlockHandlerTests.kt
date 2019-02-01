@@ -52,18 +52,14 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
     @Test
     fun addBlockShouldAddMainBlockAndBroadcast() {
-        val payload = MainBlockPayload(
-            "merkleHash",
-            "stateHash"
-        )
-
+        val payload = MainBlockPayload("merkleHash", "stateHash", "receiptHash")
         val privateKey = "529719453390370201f3f0efeeffe4c3a288f39b2e140a3f6074c8d3fc0021e6"
         val rewardTransactionMessage = createRewardTransactionMessage(1L)
-        val pendingBlock = PendingBlockMessage(2L, "previousHash", 1L,
-            "hash", "signature", "publicKey", payload.merkleHash, payload.stateHash,
-            rewardTransactionMessage, listOf(), listOf(), listOf(), listOf(), listOf())
-        val delegate = DelegateState("publicKey", MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
-            MainBlockPayload("merkleHash", "stateHash")), 1, "address", 1)
+        val pendingBlock = PendingBlockMessage(2L, "previousHash", 1L, "hash",
+            "signature", "publicKey", payload.merkleHash, payload.stateHash, payload.receiptHash,
+            rewardTransactionMessage, listOf(), listOf(), listOf(), listOf(), listOf(), listOf())
+        val block = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey", payload)
+        val delegate = DelegateState("publicKey", block, 1, "address", 1)
 
         given(keyHolder.getPrivateKey()).willReturn(
             ByteUtils.fromHexString(privateKey))
@@ -84,14 +80,11 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         val privateKey = "237a1f68f5e6ee331c2d1fac4107807f7eaf7eed2265490d9a9a330c3549a43d"
         val publicKey = "020bf4f11983fca4a99b0d7b18fbffa02462c36126757e598e9beaa33a275f0948"
         val hash = "22c626c74fdc7aa6b2809d88a60068e6017a3d7015113ebd0af18cdf9f3809c6"
-        val payload = MainBlockPayload(
-            "merkleHash",
-            "stateHash"
-        )
+        val payload = MainBlockPayload("merkleHash", "stateHash", "receiptHash")
         val rewardTransactionMessage = createRewardTransactionMessage(1L)
-        val pendingBlock = PendingBlockMessage(2L, "previousHash", 1L,
-            hash, "signature", publicKey, payload.merkleHash, payload.stateHash, rewardTransactionMessage,
-            listOf(), listOf(), listOf(), listOf(), listOf())
+        val pendingBlock = PendingBlockMessage(2L, "previousHash", 1L, hash,
+            "signature", publicKey, payload.merkleHash, payload.stateHash, payload.receiptHash,
+            rewardTransactionMessage, listOf(), listOf(), listOf(), listOf(), listOf(), listOf())
 
         val message = BlockApprovalMessage(
             BlockApprovalStage.PREPARE.value,

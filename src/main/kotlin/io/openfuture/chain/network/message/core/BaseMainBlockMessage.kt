@@ -45,6 +45,7 @@ abstract class BaseMainBlockMessage(
         transferTransactions = buf.readList()
         delegateStates = buf.readList()
         accountStates = buf.readList()
+        receipts = buf.readList()
     }
 
     override fun write(buf: ByteBuf) {
@@ -59,6 +60,7 @@ abstract class BaseMainBlockMessage(
         buf.writeList(transferTransactions)
         buf.writeList(delegateStates)
         buf.writeList(accountStates)
+        buf.writeList(receipts)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -82,6 +84,7 @@ abstract class BaseMainBlockMessage(
         if (transferTransactions != other.transferTransactions) return false
         if (delegateStates != other.delegateStates) return false
         if (accountStates != other.accountStates) return false
+        if (receipts != other.receipts) return false
 
         return true
     }
@@ -102,6 +105,7 @@ abstract class BaseMainBlockMessage(
         result = 31 * result + transferTransactions.hashCode()
         result = 31 * result + delegateStates.hashCode()
         result = 31 * result + accountStates.hashCode()
+        result = 31 * result + receipts.hashCode()
         return result
     }
 

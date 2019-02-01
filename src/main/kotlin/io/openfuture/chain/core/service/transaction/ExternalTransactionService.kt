@@ -67,9 +67,9 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         return save(tx)
     }
 
-    protected fun getReceipt(hash: String, result: ReceiptResult): Receipt {
+    protected fun getReceipt(hash: String, results: List<ReceiptResult>): Receipt {
         val receipt = Receipt(hash)
-        receipt.setResults(listOf(result))
+        receipt.setResults(results)
         return receipt
     }
 

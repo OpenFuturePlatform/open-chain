@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.state
 
+import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.repository.StateRepository
@@ -12,10 +13,11 @@ abstract class BaseStateService<T : State>(
     private val repository: StateRepository<T>
 ) : StateService<T> {
 
-    override fun getLastByAddress(address: String): T? {
+    override fun getLastByAddress(address: String): T {
         BlockchainLock.readLock.lock()
         try {
             return repository.findFirstByAddressOrderByBlockIdDesc(address)
+                ?: throw NotFoundException("State with address $address not found")
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -30,10 +32,11 @@ abstract class BaseStateService<T : State>(
         }
     }
 
-    override fun getByAddressAndBlock(address: String, block: Block): T? {
+    override fun getByAddressAndBlock(address: String, block: Block): T {
         BlockchainLock.readLock.lock()
         try {
             return repository.findFirstByAddressAndBlockHeightLessThanEqualOrderByBlockHeightDesc(address, block.height)
+                ?: throw NotFoundException("State with address $address and block height ${block.height} not found")
         } finally {
             BlockchainLock.readLock.unlock()
         }

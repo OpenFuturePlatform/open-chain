@@ -2,7 +2,6 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.ReceiptResult
@@ -56,7 +55,6 @@ class DefaultRewardTransactionService(
         val fee = 0L
         val publicKey = keyHolder.getPublicKeyAsHexString()
         val delegate = delegateStateService.getLastByAddress(publicKey)
-            ?: throw NotFoundException("Delegate not found with key $publicKey")
         val hash = createHash(TransactionHeader(timestamp, fee, senderAddress), RewardTransactionPayload(reward, delegate.walletAddress))
         val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())
 

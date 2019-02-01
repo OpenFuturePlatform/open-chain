@@ -37,4 +37,20 @@ class ReceiptMessage(
         return ByteUtils.toHexString(sha256(bytes))
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ReceiptMessage) return false
+
+        if (transactionHash != other.transactionHash) return false
+        if (result != other.result) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result1 = transactionHash.hashCode()
+        result1 = 31 * result1 + result.hashCode()
+        return result1
+    }
+
 }

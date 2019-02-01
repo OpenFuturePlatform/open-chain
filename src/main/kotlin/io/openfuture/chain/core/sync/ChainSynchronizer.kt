@@ -46,6 +46,7 @@ class ChainSynchronizer(
     private val requestRetryScheduler: RequestRetryScheduler,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
+    private val delegateStateService: DelegateStateService,
     private val statePool: StatePool
 ) {
 
@@ -240,7 +241,8 @@ class ChainSynchronizer(
     private fun isValidReceipts(blocks: List<MainBlockMessage>): Boolean {
         try {
             blocks.forEach { block ->
-                if (!isValidBlockReceipts(block.getAllTransactions(), block.receipts)) {
+                val delegateWallet = delegateStateService.getLastByAddress(block.publicKey).walletAddress
+                if (!isValidBlockReceipts(block.getAllTransactions(), block.receipts, delegateWallet)) {
                     throw ValidationException("Invalid states")
                 }
             }
@@ -251,8 +253,8 @@ class ChainSynchronizer(
         return true
     }
 
-    private fun isValidBlockReceipts(txMessages: List<TransactionMessage>, blockReceipts: List<ReceiptMessage>): Boolean {
-        val receipts = getReceipts(txMessages)
+    private fun isValidBlockReceipts(txMessages: List<TransactionMessage>, blockReceipts: List<ReceiptMessage>, delegateWallet: String): Boolean {
+        val receipts = getReceipts(txMessages, delegateWallet)
         if (blockReceipts.size != receipts.size) {
             return false
         }
@@ -275,11 +277,11 @@ class ChainSynchronizer(
         }
     }
 
-    private fun getReceipts(txMessages: List<TransactionMessage>): List<ReceiptMessage> = txMessages.map { tx ->
+    private fun getReceipts(txMessages: List<TransactionMessage>, delegateWallet: String): List<ReceiptMessage> = txMessages.map { tx ->
         when (tx) {
-            is TransferTransactionMessage -> transferTransactionService.generateReceipt(tx)
-            is VoteTransactionMessage -> voteTransactionService.generateReceipt(tx)
-            is DelegateTransactionMessage -> delegateTransactionService.generateReceipt(tx)
+            is TransferTransactionMessage -> transferTransactionService.generateReceipt(tx, delegateWallet)
+            is VoteTransactionMessage -> voteTransactionService.generateReceipt(tx, delegateWallet)
+            is DelegateTransactionMessage -> delegateTransactionService.generateReceipt(tx, delegateWallet)
             is RewardTransactionMessage -> rewardTransactionService.generateReceipt(tx)
             else -> throw IllegalStateException("Unsupported transaction type")
         }.toMessage()

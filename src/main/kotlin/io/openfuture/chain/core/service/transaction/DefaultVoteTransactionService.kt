@@ -123,13 +123,22 @@ internal class DefaultVoteTransactionService(
         accountStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
     }
 
-    override fun generateReceipt(message: VoteTransactionMessage): Receipt =
-        getReceipt(message.hash, ReceiptResult(
-            message.senderAddress,
-            message.delegateKey,
-            message.fee,
-            VoteType.getById(message.voteTypeId).toString()
-        ))
+    override fun generateReceipt(message: VoteTransactionMessage, delegateWallet: String): Receipt {
+        val results = listOf(
+            ReceiptResult(
+                message.senderAddress,
+                consensusProperties.genesisAddress!!,
+                0,
+                "${VoteType.getById(message.voteTypeId)} ${message.delegateKey}"
+            ),
+            ReceiptResult(
+                message.senderAddress,
+                delegateWallet,
+                message.fee
+            )
+        )
+        return getReceipt(message.hash, results)
+    }
 
     override fun verify(message: VoteTransactionMessage): Boolean {
         return try {
@@ -182,8 +191,8 @@ internal class DefaultVoteTransactionService(
 
         val persistVote = accountStateService.getLastByAddress(senderAddress)
         return when (voteType) {
-            FOR -> null != persistVote?.voteFor
-            AGAINST -> null == persistVote?.voteFor || delegateKey != persistVote.voteFor
+            FOR -> null != persistVote.voteFor
+            AGAINST -> null == persistVote.voteFor || delegateKey != persistVote.voteFor
         }
     }
 

@@ -121,13 +121,22 @@ class DefaultTransferTransactionService(
         }
     }
 
-    override fun generateReceipt(message: TransferTransactionMessage): Receipt =
-        getReceipt(message.hash, ReceiptResult(
-            message.senderAddress,
-            message.recipientAddress ?: EMPTY,
-            message.amount + message.fee,
-            getType(message).toString()
-        ))
+    override fun generateReceipt(message: TransferTransactionMessage, delegateWallet: String): Receipt {
+        val results = listOf(
+            ReceiptResult(
+                message.senderAddress,
+                message.recipientAddress ?: EMPTY,
+                message.amount ,
+                getType(message).toString()
+            ), ReceiptResult(
+                message.senderAddress,
+                delegateWallet,
+                message.fee
+            )
+        )
+
+        return getReceipt(message.hash, results)
+    }
 
     override fun verify(message: TransferTransactionMessage): Boolean {
         return try {

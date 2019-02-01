@@ -19,7 +19,6 @@ import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
-import org.apache.commons.lang3.StringUtils.EMPTY
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -103,13 +102,22 @@ class DefaultDelegateTransactionService(
         delegateStateService.addDelegate(message.delegateKey, message.senderAddress, message.timestamp)
     }
 
-    override fun generateReceipt(message: DelegateTransactionMessage): Receipt {
-        return getReceipt(message.hash, ReceiptResult(
-            message.senderAddress,
-            EMPTY, //todo
-            message.amount + message.fee,
-            message.delegateKey
-        ))
+    override fun generateReceipt(message: DelegateTransactionMessage, delegateWallet: String): Receipt {
+        val results = listOf(
+            ReceiptResult(
+                message.senderAddress,
+                consensusProperties.genesisAddress!!,
+                message.amount,
+                message.delegateKey
+            ),
+            ReceiptResult(
+                message.senderAddress,
+                delegateWallet,
+                message.fee
+            )
+        )
+
+        return getReceipt(message.hash, results)
     }
 
     override fun verify(message: DelegateTransactionMessage): Boolean {

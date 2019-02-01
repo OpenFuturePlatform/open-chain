@@ -150,7 +150,7 @@ interface TransferTransactionService {
 
     fun updateState(message: TransferTransactionMessage)
 
-    fun generateReceipt(message: TransferTransactionMessage): Receipt
+    fun generateReceipt(message: TransferTransactionMessage, delegateWallet: String): Receipt
 
     fun verify(message: TransferTransactionMessage): Boolean
 
@@ -196,7 +196,7 @@ interface VoteTransactionService {
 
     fun updateState(message: VoteTransactionMessage)
 
-    fun generateReceipt(message: VoteTransactionMessage): Receipt
+    fun generateReceipt(message: VoteTransactionMessage, delegateWallet: String): Receipt
 
     fun verify(message: VoteTransactionMessage): Boolean
 
@@ -220,7 +220,7 @@ interface DelegateTransactionService {
 
     fun updateState(message: DelegateTransactionMessage)
 
-    fun generateReceipt(message: DelegateTransactionMessage): Receipt
+    fun generateReceipt(message: DelegateTransactionMessage, delegateWallet: String): Receipt
 
     fun verify(message: DelegateTransactionMessage): Boolean
 
@@ -228,11 +228,11 @@ interface DelegateTransactionService {
 
 interface StateService<T : State> {
 
-    fun getLastByAddress(address: String): T?
+    fun getLastByAddress(address: String): T
 
     fun getByAddress(address: String): List<T>
 
-    fun getByAddressAndBlock(address: String, block: Block): T?
+    fun getByAddressAndBlock(address: String, block: Block): T
 
     fun deleteBlockStates(blockHeights: List<Long>)
 

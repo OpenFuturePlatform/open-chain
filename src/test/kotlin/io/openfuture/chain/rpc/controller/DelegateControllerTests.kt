@@ -35,7 +35,7 @@ class DelegateControllerTests : ControllerTests() {
     @Test
     fun getAllShouldReturnDelegatesListTest() {
         val block = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
-            MainBlockPayload("merkleHash", "stateHash"))
+            MainBlockPayload("merkleHash", "stateHash", "receiptHash"))
         val delegate = DelegateState("publicKey", block, 1, "address", 1532345018021)
         val delegates = listOf(delegate)
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
@@ -59,7 +59,7 @@ class DelegateControllerTests : ControllerTests() {
         val genesisBlock = GenesisBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
             GenesisBlockPayload(1, mutableListOf(publicKey)))
         val delegate = DelegateState("publicKey", MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
-        MainBlockPayload("merkleHash", "stateHash")), 1, "address", 1532345018021)
+        MainBlockPayload("merkleHash", "stateHash", "receiptHash")), 1, "address", 1532345018021)
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
 
         given(genesisBlockService.getLast()).willReturn(genesisBlock)

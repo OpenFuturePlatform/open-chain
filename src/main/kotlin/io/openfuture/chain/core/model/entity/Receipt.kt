@@ -25,7 +25,7 @@ class Receipt(
 
     @ManyToOne
     @JoinColumn(name = "block_id", nullable = false)
-    var block: Block
+    var block: Block? = null
 
 ) : BaseModel() {
 
@@ -34,7 +34,7 @@ class Receipt(
             Receipt(message.transactionHash, message.result, block)
     }
 
-    fun getResults(): List<ReceiptResult> = Unpooled.buffer().writeBytes(ByteUtils.fromHexString(result)).readList()
+    fun getResults(): List<ReceiptResult> = Unpooled.copiedBuffer(ByteUtils.fromHexString(result)).readList()
 
     fun setResults(results: List<ReceiptResult>) {
         val buffer = Unpooled.buffer()

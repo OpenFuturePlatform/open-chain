@@ -32,7 +32,7 @@ class DefaultDelegateStateService(
         return getAllDelegates(PageRequest(0, consensusProperties.delegatesCount!!, sortBy, DESC))
     }
 
-    override fun isExistsByPublicKey(key: String): Boolean = null != getLastByAddress(key)
+    override fun isExistsByPublicKey(key: String): Boolean = null != repository.findFirstByAddressOrderByBlockIdDesc(key)
 
     override fun isExistsByPublicKeys(publicKeys: List<String>): Boolean = publicKeys.all { isExistsByPublicKey(it) }
 

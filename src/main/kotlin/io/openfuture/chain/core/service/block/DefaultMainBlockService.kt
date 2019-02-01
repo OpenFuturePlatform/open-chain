@@ -88,6 +88,8 @@ class DefaultMainBlockService(
             val lastBlock = blockService.getLast()
             val height = lastBlock.height + 1
             val previousHash = lastBlock.hash
+            val publicKey = keyHolder.getPublicKeyAsHexString()
+            val delegate = delegateStateService.getLastByAddress(publicKey)
 
             var fees = 0L
             val transactionHashes = mutableListOf<String>()
@@ -117,7 +119,7 @@ class DefaultMainBlockService(
 
             val stateHashes = mutableListOf<String>()
             val states = getStates(txMessages)
-            val receipts = getReceipts(txMessages)
+            val receipts = getReceipts(txMessages, delegate.walletAddress)
             val delegateStates = mutableListOf<DelegateStateMessage>()
             val accountStates = mutableListOf<AccountStateMessage>()
 
@@ -135,7 +137,6 @@ class DefaultMainBlockService(
             val payload = MainBlockPayload(merkleHash, stateHash, receiptHash)
             val hash = createHash(timestamp, height, previousHash, payload)
             val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
-            val publicKey = keyHolder.getPublicKeyAsHexString()
 
             return PendingBlockMessage(height, previousHash, timestamp, toHexString(hash), signature, publicKey,
                 merkleHash, stateHash, receiptHash, rewardTransactionMessage, voteTransactions, delegateTransactions,
@@ -170,7 +171,6 @@ class DefaultMainBlockService(
             }
 
             val block = MainBlock.of(message)
-
             val savedBlock = super.save(block)
 
             message.getAllTransactions().forEach {
@@ -179,7 +179,7 @@ class DefaultMainBlockService(
                     is TransferTransactionMessage -> transferTransactionService.commit(TransferTransaction.of(it, savedBlock))
                     is DelegateTransactionMessage -> delegateTransactionService.commit(DelegateTransaction.of(it, savedBlock))
                     is VoteTransactionMessage -> voteTransactionService.commit(VoteTransaction.of(it, savedBlock))
-                    else -> throw IllegalStateException("The type doesn`t handle")
+                    else -> throw IllegalStateException("Unsupported transaction type")
                 }
             }
 
@@ -187,7 +187,7 @@ class DefaultMainBlockService(
                 when (it) {
                     is DelegateStateMessage -> delegateStateService.commit(DelegateState.of(it, block))
                     is AccountStateMessage -> accountStateService.commit(AccountState.of(it, block))
-                    else -> throw IllegalStateException("The type doesn`t handle")
+                    else -> throw IllegalStateException("Unsupported state type")
                 }
             }
 
@@ -246,7 +246,8 @@ class DefaultMainBlockService(
             throw ValidationException("Invalid states")
         }
 
-        if (!isValidReceipts(message.getAllTransactions(), message.receipts)) {
+        val delegateWallet = delegateStateService.getLastByAddress(message.publicKey).walletAddress
+        if (!isValidReceipts(message.getAllTransactions(), message.receipts, delegateWallet)) {
             throw ValidationException("Invalid receipts")
         }
 
@@ -283,8 +284,8 @@ class DefaultMainBlockService(
             val persistVote = accountStateService.getLastByAddress(sender.key)
             val vote = sender.value.first()
             return when (VoteType.getById(vote.voteTypeId)) {
-                FOR -> null == persistVote?.voteFor
-                AGAINST -> null != persistVote?.voteFor && vote.delegateKey == persistVote.voteFor
+                FOR -> null == persistVote.voteFor
+                AGAINST -> null != persistVote.voteFor && vote.delegateKey == persistVote.voteFor
             }
         }
 
@@ -329,8 +330,8 @@ class DefaultMainBlockService(
         return states.all { blockStates.contains(it) }
     }
 
-    private fun isValidReceipts(txMessages: List<TransactionMessage>, blockReceipts: List<ReceiptMessage>): Boolean {
-        val receipts = getReceipts(txMessages)
+    private fun isValidReceipts(txMessages: List<TransactionMessage>, blockReceipts: List<ReceiptMessage>, activeDelegate: String): Boolean {
+        val receipts = getReceipts(txMessages, activeDelegate)
         if (blockReceipts.size != receipts.size) {
             return false
         }
@@ -354,11 +355,11 @@ class DefaultMainBlockService(
         }
     }
 
-    private fun getReceipts(txMessages: List<TransactionMessage>): List<ReceiptMessage> = txMessages.map { tx ->
+    private fun getReceipts(txMessages: List<TransactionMessage>, delegateWallet: String): List<ReceiptMessage> = txMessages.map { tx ->
         when (tx) {
-            is TransferTransactionMessage -> transferTransactionService.generateReceipt(tx)
-            is VoteTransactionMessage -> voteTransactionService.generateReceipt(tx)
-            is DelegateTransactionMessage -> delegateTransactionService.generateReceipt(tx)
+            is TransferTransactionMessage -> transferTransactionService.generateReceipt(tx, delegateWallet)
+            is VoteTransactionMessage -> voteTransactionService.generateReceipt(tx, delegateWallet)
+            is DelegateTransactionMessage -> delegateTransactionService.generateReceipt(tx, delegateWallet)
             is RewardTransactionMessage -> rewardTransactionService.generateReceipt(tx)
             else -> throw IllegalStateException("Unsupported transaction type")
         }.toMessage()
