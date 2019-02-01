@@ -72,14 +72,10 @@ class ChainSynchronizer(
         prepareDB()
     }
 
-    fun prepareDB(): Boolean {
+    fun prepareDB() {
         status = SyncStatus.PROCESSING
-        status = if (dbChecker.prepareDB(getSyncMode())) {
-            SYNCHRONIZED
-        } else {
-            NOT_SYNCHRONIZED
-        }
-        return (SYNCHRONIZED == status)
+        dbChecker.prepareDB(getSyncMode())
+        status = SYNCHRONIZED
     }
 
     fun getStatus(): SyncStatus = status
@@ -122,9 +118,6 @@ class ChainSynchronizer(
     }
 
     fun isInSync(block: Block): Boolean {
-        if (!isBecomeDelegate && LIGHT == properties.syncMode && isDelegate()) {
-            return prepareDB()
-        }
         val lastBlock = blockService.getLast()
         if (lastBlock.hash == block.hash) {
             return true

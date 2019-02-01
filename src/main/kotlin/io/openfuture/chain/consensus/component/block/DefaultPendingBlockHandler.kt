@@ -134,6 +134,11 @@ class DefaultPendingBlockHandler(
                         }
                         mainBlockService.add(it)
                         log.info("Saving main block: height #${it.height}, hash ${it.hash}")
+                        it.delegateTransactions.forEach {
+                            if (it.delegateKey == keyHolder.getPublicKeyAsHexString()) {
+                                chainSynchronizer.prepareDB()
+                            }
+                        }
                     }
                     blockAddedFlag = true
                 }
