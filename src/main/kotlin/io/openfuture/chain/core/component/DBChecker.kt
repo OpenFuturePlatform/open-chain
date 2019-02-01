@@ -38,15 +38,13 @@ class DBChecker(
 
     private fun lastValidBlockHeight(syncMode: SyncMode): Long {
         val epochHeight = consensusProperties.epochHeight!!
-        var indexFrom = genesisBlockService.getByEpochIndex(1L)!!.height
+        var indexFrom = 1L
         var indexTo = indexFrom + epochHeight
         var block: Block? = null
         do {
             val blocks = blockService.findAllByHeightBetween(indexFrom, indexTo)
-            indexFrom += epochHeight + 1
-            indexTo += epochHeight + 1
-
             val blocksIterator = blocks.iterator()
+
             if (null == block) {
                 block = blocksIterator.next()
             }
@@ -62,12 +60,19 @@ class DBChecker(
 
                 block = nextBlock
             }
+            indexFrom += epochHeight + 1
+            indexTo += epochHeight + 1
+
         } while (!blocks.isEmpty())
         if (!isValidBlock(block!!, syncMode)) {
             return block.height - 1
         }
         return block.height
     }
+
+    /* private fun isValidEpoch(epochBlocks: List<Block>, currentBlock: Block?, syncMode: SyncMode): Long {
+
+     }*/
 
     private fun isValidBlock(block: Block, syncMode: SyncMode): Boolean {
         if (!isValidBlockState(block)) {

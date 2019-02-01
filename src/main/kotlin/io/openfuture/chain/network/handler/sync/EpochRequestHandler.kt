@@ -23,7 +23,7 @@ class EpochRequestHandler(
     override fun channelRead0(ctx: ChannelHandlerContext, msg: EpochRequestMessage) {
         val delegateKey: String = keyHolder.getPublicKeyAsHexString()
         val epochIndex = msg.epochIndex
-        val genesisBlock = genesisBlockService.getByEpochIndex(epochIndex)
+        val genesisBlock = genesisBlockService.findByEpochIndex(epochIndex)
 
         if (null == genesisBlock) {
             ctx.writeAndFlush(EpochResponseMessage(delegateKey, false, null, emptyList()))

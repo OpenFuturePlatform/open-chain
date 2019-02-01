@@ -9,7 +9,6 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTrans
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.repository.TransferTransactionRepository
 import io.openfuture.chain.core.repository.UTransferTransactionRepository
-import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
@@ -25,9 +24,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
-    uRepository: UTransferTransactionRepository,
-    transactionService: TransactionService
-) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(transactionService, repository, uRepository), TransferTransactionService {
+    uRepository: UTransferTransactionRepository
+) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultTransferTransactionService::class.java)

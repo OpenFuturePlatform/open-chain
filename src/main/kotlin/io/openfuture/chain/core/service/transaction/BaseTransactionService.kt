@@ -10,11 +10,14 @@ import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayl
 import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.springframework.beans.factory.annotation.Autowired
 
 @OpenClass
-abstract class BaseTransactionService(
-    private val transactionService: TransactionService
-) {
+abstract class BaseTransactionService {
+
+    @Autowired
+    private lateinit var transactionService: TransactionService
+
 
     protected fun validateBase(header: TransactionHeader, payload: TransactionPayload, footer: TransactionFooter) {
         if (!isValidHash(header, payload, footer.hash)) {

@@ -65,7 +65,7 @@ class DefaultGenesisBlockService(
     override fun getLast(): GenesisBlock = genesisBlockRepository.findFirstByOrderByHeightDesc()!!
 
     @Transactional(readOnly = true)
-    override fun getByEpochIndex(epochIndex: Long): GenesisBlock? =
+    override fun findByEpochIndex(epochIndex: Long): GenesisBlock? =
         genesisBlockRepository.findOneByPayloadEpochIndex(epochIndex)
 
     @BlockchainSynchronized
