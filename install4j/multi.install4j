@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="7.0.5" transformSequenceNumber="7">
   <directoryPresets config="/" />
-  <application name="OPEN Chain" distributionSourceDir="" applicationId="2301-4490-4052-1739" mediaDir="/packages/artifacts" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.version}_${compiler:sys.platform}" compression="9" lzmaCompression="true" pack200Compression="true" excludeSignedFromPacking="true" commonExternalFiles="false" createMd5Sums="true" shrinkRuntime="true" shortName="open-chain" publisher="OPEN Platform" publisherWeb="https://openfuture.io" version="${VERSION}" allPathsRelative="false" backupOnSave="false" autoSave="true" convertDotsToUnderscores="true" macSignature="????" macVolumeId="fdf5c5b057ad2f78" javaMinVersion="1.8" javaMaxVersion="" allowBetaVM="false" jdkMode="runtimeJre" jdkName="">
+  <application name="OPEN Chain" distributionSourceDir="" applicationId="2301-4490-4052-1739" mediaDir="/packages/artifacts" mediaFilePattern="${compiler:sys.shortName}-${VERSION}-${compiler:sys.platform}" compression="9" lzmaCompression="true" pack200Compression="true" excludeSignedFromPacking="true" commonExternalFiles="false" createMd5Sums="true" shrinkRuntime="true" shortName="open-chain" publisher="OPEN Platform" publisherWeb="https://openfuture.io" version="${VERSION}" allPathsRelative="false" backupOnSave="false" autoSave="true" convertDotsToUnderscores="false" macSignature="????" macVolumeId="fdf5c5b057ad2f78" javaMinVersion="1.8" javaMaxVersion="" allowBetaVM="false" jdkMode="runtimeJre" jdkName="">
     <languages skipLanguageSelection="false" languageSelectionInPrincipalLanguage="false">
       <principalLanguage id="en" customLocalizationFile="" />
       <additionalLanguages />
@@ -34,7 +34,7 @@
       <splashScreen show="false" width="0" height="0" bitmapFile="" textOverlay="false">
         <text>
           <statusLine x="20" y="20" text="" fontSize="8" fontColor="0,0,0" bold="false" />
-          <versionLine x="20" y="40" text="version ${compiler:sys.version}" fontSize="8" fontColor="0,0,0" bold="false" />
+          <versionLine x="20" y="40" text="version ${VERSION}" fontSize="8" fontColor="0,0,0" bold="false" />
         </text>
       </splashScreen>
       <java mainClass="org.springframework.boot.loader.JarLauncher" mainMode="1" vmParameters="-Xmx512M" arguments="" allowVMPassthroughParameters="true" preferredVM="" bundleRuntime="true">
@@ -350,7 +350,7 @@ return console.askOkCancel(message, true);
                   <java class="java.beans.XMLDecoder">
                     <object class="com.install4j.runtime.beans.actions.desktop.RegisterAddRemoveAction">
                       <void property="itemName">
-                        <string>${compiler:sys.fullName} ${compiler:sys.version}</string>
+                        <string>${compiler:sys.fullName} ${VERSION}</string>
                       </void>
                     </object>
                   </java>
@@ -2087,7 +2087,7 @@ return true;</string>
     </styles>
   </installerGui>
   <mediaSets>
-    <unixInstaller name="Unix Installer" id="61" customizedId="" mediaFileName="" installDir="${compiler:sys.shortName}" overridePrincipalLanguage="false" jreBitType="all" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="/JRE/jre-linux.tar.gz" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" customInstallBaseDir="" contentFilesType="1">
+    <unixInstaller name="Unix Installer" id="61" customizedId="" mediaFileName="${compiler:sys.shortName}-${VERSION}_installer-${compiler:sys.platform}" installDir="${compiler:sys.shortName}" overridePrincipalLanguage="false" jreBitType="all" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="/JRE/jre-linux.tar.gz" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" customInstallBaseDir="" contentFilesType="1">
       <excludedComponents />
       <includedDownloadableComponents />
       <excludedLaunchers />
@@ -2103,7 +2103,7 @@ return true;</string>
         <content />
       </installerScript>
     </unixInstaller>
-    <unixArchive name="Unix Archive" id="62" customizedId="" mediaFileName="" installDir="${compiler:sys.shortName}" overridePrincipalLanguage="false" jreBitType="all" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="true" includedJRE="/JRE/jre-linux.tar.gz" manualJREEntry="false">
+    <unixArchive name="Unix Archive" id="62" customizedId="" mediaFileName="${compiler:sys.shortName}-${VERSION}_portable-${compiler:sys.platform}" installDir="${compiler:sys.shortName}" overridePrincipalLanguage="false" jreBitType="all" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="true" includedJRE="/JRE/jre-linux.tar.gz" manualJREEntry="false">
       <excludedComponents />
       <includedDownloadableComponents />
       <excludedLaunchers />
@@ -2116,7 +2116,7 @@ return true;</string>
         <customAttributes />
       </autoUpdate>
     </unixArchive>
-    <windows name="Windows" id="68" customizedId="" mediaFileName="" installDir="${compiler:sys.shortName}" overridePrincipalLanguage="false" jreBitType="64" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="/JRE/jre-windows.tar.gz" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" customInstallBaseDir="" contentFilesType="1" verifyIntegrity="true">
+    <windows name="Windows" id="68" customizedId="" mediaFileName="${compiler:sys.shortName}-${VERSION}_installer-${compiler:sys.platform}" installDir="${compiler:sys.shortName}" overridePrincipalLanguage="false" jreBitType="64" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="/JRE/jre-windows.tar.gz" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" customInstallBaseDir="" contentFilesType="1" verifyIntegrity="true">
       <excludedComponents />
       <includedDownloadableComponents />
       <excludedLaunchers />
@@ -2129,7 +2129,7 @@ return true;</string>
         <customAttributes />
       </autoUpdate>
     </windows>
-    <windowsArchive name="Windows Archive" id="69" customizedId="" mediaFileName="" installDir="${compiler:sys.shortName}" overridePrincipalLanguage="false" jreBitType="64" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="true" includedJRE="/JRE/jre-windows.tar.gz" manualJREEntry="false">
+    <windowsArchive name="Windows Archive" id="69" customizedId="" mediaFileName="${compiler:sys.shortName}-${VERSION}_portable-${compiler:sys.platform}" installDir="${compiler:sys.shortName}" overridePrincipalLanguage="false" jreBitType="64" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="true" includedJRE="/JRE/jre-windows.tar.gz" manualJREEntry="false">
       <excludedComponents />
       <includedDownloadableComponents />
       <excludedLaunchers />
@@ -2142,7 +2142,7 @@ return true;</string>
         <customAttributes />
       </autoUpdate>
     </windowsArchive>
-    <macosFolder name="macOS Folder" id="71" customizedId="" mediaFileName="" installDir="${compiler:sys.fullName}" overridePrincipalLanguage="false" jreBitType="all" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="/JRE/jre-osx.tar.gz" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" requiredVmIdPrefix="" customInstallBaseDir="" contentFilesType="1" installerName="${i18n:InstallerName(${compiler:sys.fullName})}" volumeName="${compiler:sys.shortName}" compressDmg="false" signLaunchers="false">
+    <macosFolder name="macOS Folder" id="71" customizedId="" mediaFileName="${compiler:sys.shortName}-${VERSION}_installer-${compiler:sys.platform}" installDir="${compiler:sys.fullName}" overridePrincipalLanguage="false" jreBitType="all" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" downloadURL="" includeAllDownloadableComponents="false" includedJRE="/JRE/jre-osx.tar.gz" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" requiredVmIdPrefix="" customInstallBaseDir="" contentFilesType="1" installerName="${i18n:InstallerName(${compiler:sys.fullName})}" volumeName="${compiler:sys.shortName}" compressDmg="false" signLaunchers="false">
       <excludedComponents />
       <includedDownloadableComponents />
       <excludedLaunchers />
