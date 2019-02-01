@@ -85,7 +85,7 @@ interface GenesisBlockService {
 
     fun getLast(): GenesisBlock
 
-    fun getByEpochIndex(epochIndex: Long): GenesisBlock?
+    fun findByEpochIndex(epochIndex: Long): GenesisBlock?
 
     fun create(): GenesisBlock
 
