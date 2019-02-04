@@ -140,7 +140,7 @@ class DefaultMainBlockService(
 
             return PendingBlockMessage(height, previousHash, timestamp, toHexString(hash), signature, publicKey,
                 merkleHash, stateHash, receiptHash, rewardTransactionMessage, voteTransactions, delegateTransactions,
-                transferTransactions, delegateStates, accountStates, receipts)
+                transferTransactions, delegateStates, accountStates, receipts.map { it.toMessage() })
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -218,7 +218,7 @@ class DefaultMainBlockService(
             throw ValidationException("Invalid state merkle hash in block: height #${message.height}, hash ${message.hash}")
         }
 
-        if (!isValidRootHash(message.receiptHash, message.receipts.map { it.getHash() })) {
+        if (!isValidRootHash(message.receiptHash, message.receipts.map { Receipt(it.transactionHash, it.result).getHash() })) {
             throw ValidationException("Invalid receipt merkle hash in block: height #${message.height}, hash ${message.hash}")
         }
 
@@ -331,7 +331,7 @@ class DefaultMainBlockService(
     }
 
     private fun isValidReceipts(txMessages: List<TransactionMessage>, blockReceipts: List<ReceiptMessage>, activeDelegate: String): Boolean {
-        val receipts = getReceipts(txMessages, activeDelegate)
+        val receipts = getReceipts(txMessages, activeDelegate).map { it.toMessage() }
         if (blockReceipts.size != receipts.size) {
             return false
         }
@@ -355,14 +355,14 @@ class DefaultMainBlockService(
         }
     }
 
-    private fun getReceipts(txMessages: List<TransactionMessage>, delegateWallet: String): List<ReceiptMessage> = txMessages.map { tx ->
+    private fun getReceipts(txMessages: List<TransactionMessage>, delegateWallet: String): List<Receipt> = txMessages.map { tx ->
         when (tx) {
             is TransferTransactionMessage -> transferTransactionService.generateReceipt(tx, delegateWallet)
             is VoteTransactionMessage -> voteTransactionService.generateReceipt(tx, delegateWallet)
             is DelegateTransactionMessage -> delegateTransactionService.generateReceipt(tx, delegateWallet)
             is RewardTransactionMessage -> rewardTransactionService.generateReceipt(tx)
             else -> throw IllegalStateException("Unsupported transaction type")
-        }.toMessage()
+        }
     }
 
     private fun getTransactions(): List<UnconfirmedTransaction> {

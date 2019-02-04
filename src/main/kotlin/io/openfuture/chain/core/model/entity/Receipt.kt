@@ -6,11 +6,13 @@ import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.core.model.entity.base.BaseModel
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.extension.*
 import io.openfuture.chain.network.message.core.ReceiptMessage
 import io.openfuture.chain.network.serialization.Serializable
 import org.apache.commons.lang3.StringUtils.EMPTY
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import java.nio.ByteBuffer
 import javax.persistence.*
 
 @Entity
@@ -32,6 +34,17 @@ class Receipt(
     companion object {
         fun of(message: ReceiptMessage, block: MainBlock): Receipt =
             Receipt(message.transactionHash, message.result, block)
+    }
+
+    fun getHash(): String {
+        val txHashBytes = transactionHash.toByteArray(Charsets.UTF_8)
+        val resultBytes = result.toByteArray(Charsets.UTF_8)
+        val bytes = ByteBuffer.allocate(txHashBytes.size + resultBytes.size)
+            .put(txHashBytes)
+            .put(resultBytes)
+            .array()
+
+        return ByteUtils.toHexString(HashUtils.sha256(bytes))
     }
 
     fun getResults(): List<ReceiptResult> = Unpooled.copiedBuffer(ByteUtils.fromHexString(result)).readList()

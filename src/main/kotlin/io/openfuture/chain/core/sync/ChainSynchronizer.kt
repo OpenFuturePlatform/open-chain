@@ -228,7 +228,7 @@ class ChainSynchronizer(
 
     private fun isValidReceiptMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
         mainBlocks.forEach { block ->
-            if (!isValidRootHash(block.receiptHash, block.receipts.map { it.getHash() })) {
+            if (!isValidRootHash(block.receiptHash, block.receipts.map { Receipt(it.transactionHash, it.result).getHash() })) {
                 log.warn("Receipt merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
                 return false
             }
