@@ -26,4 +26,14 @@ class DefaultReceiptService(
         }
     }
 
+    override fun deleteBlockReceipts(blockHeights: List<Long>) {
+        BlockchainLock.writeLock.lock()
+        try {
+            repository.deleteAllByBlockHeightIn(blockHeights)
+            repository.flush()
+        } finally {
+            BlockchainLock.writeLock.unlock()
+        }
+    }
+
 }

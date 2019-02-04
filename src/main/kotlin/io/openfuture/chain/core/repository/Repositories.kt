@@ -173,4 +173,6 @@ interface ReceiptRepository : BaseRepository<Receipt> {
 
     fun findOneByTransactionHash(hash: String): Receipt?
 
+    fun deleteAllByBlockHeightIn(heights: List<Long>)
+
 }

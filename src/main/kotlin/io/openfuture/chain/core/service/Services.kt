@@ -291,4 +291,6 @@ interface ReceiptService {
 
     fun commit(receipt: Receipt)
 
+    fun deleteBlockReceipts(blockHeights: List<Long>)
+
 }

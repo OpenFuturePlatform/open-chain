@@ -28,7 +28,8 @@ class DefaultBlockService(
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
     private val delegateStateService: DelegateStateService,
-    private val accountStateService: AccountStateService
+    private val accountStateService: AccountStateService,
+    private val receiptService: ReceiptService
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -67,6 +68,7 @@ class DefaultBlockService(
         transactionService.deleteBlockTransactions(heightRange)
         delegateStateService.deleteBlockStates(heightRange)
         accountStateService.deleteBlockStates(heightRange)
+        receiptService.deleteBlockReceipts(heightRange)
         repository.deleteAllByHeightIn(heightRange)
     }
 
@@ -108,6 +110,7 @@ class DefaultBlockService(
 
                 block.payload.delegateStates = mutableListOf()
                 block.payload.accountStates = mutableListOf()
+                block.payload.receipts = mutableListOf()
 
                 this.save(block)
                 rewardTransactionService.commit(rewardTransaction)
@@ -130,6 +133,10 @@ class DefaultBlockService(
                         is AccountState -> accountStateService.commit(it)
                         else -> throw IllegalStateException("The type doesn`t handle")
                     }
+                }
+                block.payload.receipts.forEach {
+                    it.block = block
+                    receiptService.commit(it)
                 }
             } else if (block is GenesisBlock) {
                 this.save(block)
