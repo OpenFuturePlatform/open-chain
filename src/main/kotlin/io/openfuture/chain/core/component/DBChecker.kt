@@ -42,6 +42,7 @@ class DBChecker(
         var indexTo = indexFrom + epochHeight
         var blocks = blockService.findAllByHeightBetween(indexFrom, indexTo).toMutableList()
         var result = blocks.first()
+        val lastChainBlock = blockService.getLast()
         while (!blocks.isEmpty()) {
             result = validateEpoch(blocks, syncMode) ?: result
             if (result != blocks.last()) {
@@ -52,7 +53,7 @@ class DBChecker(
             blocks = blockService.findAllByHeightBetween(indexFrom, indexTo).toMutableList()
         }
 
-        return if (!isValidBlock(blocks.last(), syncMode)) {
+        return if (!isValidBlock(lastChainBlock, syncMode)) {
             result.height - 1
         } else {
             result.height
