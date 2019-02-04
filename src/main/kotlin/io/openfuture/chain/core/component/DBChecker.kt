@@ -13,10 +13,10 @@ import java.util.*
 
 @Component
 class DBChecker(
-        private val blockService: BlockService,
-        private val consensusProperties: ConsensusProperties,
-        private val transactionService: TransactionService,
-        private val genesisBlockService: GenesisBlockService
+    private val blockService: BlockService,
+    private val consensusProperties: ConsensusProperties,
+    private val transactionService: TransactionService,
+    private val genesisBlockService: GenesisBlockService
 ) {
 
     fun prepareDB(syncMode: SyncMode): Boolean {
@@ -88,9 +88,9 @@ class DBChecker(
         }
         if (SyncMode.LIGHT == syncMode && block is MainBlock) {
             val transactions =
-                    block.payload.transferTransactions +
-                            block.payload.delegateTransactions +
-                            block.payload.voteTransactions
+                block.payload.transferTransactions +
+                    block.payload.delegateTransactions +
+                    block.payload.voteTransactions
             return transactions.isEmpty()
         }
         return true
@@ -118,7 +118,7 @@ class DBChecker(
         if (block is MainBlock) {
 
             val stateHashes = listOf(block.payload.delegateStates, block.payload.walletStates)
-                    .flatMap { states -> states.map { it.toMessage().getHash() } }
+                .flatMap { states -> states.map { it.toMessage().getHash() } }
 
 
             if (block.payload.stateHash != MainBlockPayload.calculateMerkleRoot(stateHashes)) {
