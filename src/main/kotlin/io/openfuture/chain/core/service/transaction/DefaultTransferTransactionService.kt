@@ -126,9 +126,10 @@ class DefaultTransferTransactionService(
             ReceiptResult(
                 message.senderAddress,
                 message.recipientAddress ?: EMPTY,
-                message.amount ,
+                message.amount,
                 getType(message).toString()
-            ), ReceiptResult(
+            ),
+            ReceiptResult(
                 message.senderAddress,
                 delegateWallet,
                 message.fee

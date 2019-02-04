@@ -4,7 +4,7 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.Contract
 import io.openfuture.chain.core.repository.ContractRepository
 import io.openfuture.chain.crypto.util.AddressUtils
-import io.openfuture.chain.smartcontract.core.utils.HashUtils.keccak256
+import io.openfuture.chain.crypto.util.HashUtils.keccak256
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.fromHexString
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
