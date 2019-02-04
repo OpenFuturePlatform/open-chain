@@ -111,7 +111,7 @@ class DefaultTransferTransactionService(
     override fun updateState(message: TransferTransactionMessage) {
         accountStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
 
-        val type = getType(message)
+        val type = getType(message.recipientAddress, message.data)
         if (FUND == type) {
             accountStateService.updateBalanceByAddress(message.recipientAddress!!, message.amount)
         }
@@ -127,7 +127,7 @@ class DefaultTransferTransactionService(
                 message.senderAddress,
                 message.recipientAddress ?: EMPTY,
                 message.amount,
-                getType(message).toString()
+                getType(message.recipientAddress, message.data).toString()
             ),
             ReceiptResult(
                 message.senderAddress,
@@ -151,7 +151,7 @@ class DefaultTransferTransactionService(
 
     @Transactional
     override fun save(tx: TransferTransaction): TransferTransaction {
-        if (DEPLOY == getType(tx.payload)) {
+        if (DEPLOY == getType(tx.payload.recipientAddress, tx.payload.data)) {
             val address = contractService.generateAddress(tx.header.senderAddress)
             contractService.save(Contract(address, tx.header.senderAddress, tx.payload.data!!))
         }
@@ -170,11 +170,11 @@ class DefaultTransferTransactionService(
             throw ValidationException("Amount should not be less than or equal to 0")
         }
 
-        if (DEPLOY == getType(utx.payload)) {
+        if (DEPLOY == getType(utx.payload.recipientAddress, utx.payload.data)) {
             //todo validate bytecode
         }
 
-        if (EXECUTE == getType(utx.payload)) {
+        if (EXECUTE == getType(utx.payload.recipientAddress, utx.payload.data)) {
             //todo validate method
         }
 
