@@ -15,7 +15,8 @@ import java.util.*
 class DBChecker(
     private val blockService: BlockService,
     private val consensusProperties: ConsensusProperties,
-    private val transactionService: TransactionService
+    private val transactionService: TransactionService,
+    private val genesisBlockService: GenesisBlockService
 ) {
 
     fun prepareDB(syncMode: SyncMode): Boolean {
@@ -38,7 +39,7 @@ class DBChecker(
     private fun lastValidBlockHeight(syncMode: SyncMode): Long {
         val epochHeight = consensusProperties.epochHeight!! + 1L
         var indexFrom = 1L
-        var indexTo = epochHeight
+        var indexTo = indexFrom + epochHeight
         var blocks = blockService.findAllByHeightBetween(indexFrom, indexTo).toMutableList()
         var result = blocks.first()
         while (!blocks.isEmpty()) {
@@ -46,10 +47,9 @@ class DBChecker(
             if (result != blocks.last()) {
                 break
             }
-            indexFrom += epochHeight
-            indexTo += epochHeight
+            indexFrom += indexTo
+            indexTo += indexFrom + epochHeight
             blocks = blockService.findAllByHeightBetween(indexFrom, indexTo).toMutableList()
-            blocks.add(0, result)
         }
         return result.height
     }
