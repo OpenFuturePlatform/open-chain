@@ -26,6 +26,6 @@ class OpcodeDictionary {
 
     fun get(opcode: Int) = opcodeDictionary.getOrDefault(opcode, 0L)
 
-    fun get(owner: String, name: String) = methodDictionary["$owner/$name"] ?: methodDictionary.getOrDefault(owner, 0L)
+    fun get(owner: String, name: String = "") = methodDictionary["$owner/$name"] ?: methodDictionary.getOrDefault(owner, 0L)
 
 }

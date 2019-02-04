@@ -2,6 +2,7 @@ package io.openfuture.chain.smartcontract.deploy.calculation
 
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.tree.ClassNode
+import org.objectweb.asm.tree.LdcInsnNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
 import org.springframework.stereotype.Component
@@ -32,10 +33,15 @@ class ContractCostCalculator {
         var instruction = instructions.first
         do {
             val opcode = instruction.opcode
-            result += if (instruction is MethodInsnNode) {
-                dictionary.get(instruction.owner, instruction.name)
-            } else {
-                dictionary.get(opcode)
+            result += when (instruction) {
+                is MethodInsnNode -> dictionary.get(instruction.owner, instruction.name)
+                is LdcInsnNode -> {
+                    when (instruction.cst) {
+                        is String -> (instruction.cst as String).length * dictionary.get(instruction.cst::class.java.name.replace('.', '/'))
+                        else -> dictionary.get(instruction.cst::class.java.name.replace('.', '/'))
+                    }
+                }
+                else -> dictionary.get(opcode)
             }
             instruction = instruction.next
         } while (null != instruction)
