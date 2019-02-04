@@ -5,11 +5,9 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.service.BlockService
-import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.sync.SyncMode
 import org.springframework.stereotype.Component
-import java.util.*
 
 @Component
 class DBChecker(
@@ -37,7 +35,8 @@ class DBChecker(
         val epochHeight = consensusProperties.epochHeight!! + 1L
         var indexFrom = 1L
         var indexTo = indexFrom + epochHeight
-        var blocks = blockService.findAllByHeightBetween(indexFrom, indexTo).toMutableList()
+        val heights = (indexFrom..indexTo).toList()
+        var blocks = blockService.findAllByHeightIn(heights).toMutableList()
         var result = blocks.first()
         val lastChainBlock = blockService.getLast()
         while (!blocks.isEmpty()) {
@@ -47,7 +46,7 @@ class DBChecker(
             }
             indexFrom += indexTo
             indexTo += epochHeight
-            blocks = blockService.findAllByHeightBetween(indexFrom, indexTo).toMutableList()
+            blocks = blockService.findAllByHeightIn(heights).toMutableList()
         }
 
         return if (!isValidBlock(lastChainBlock, syncMode)) {

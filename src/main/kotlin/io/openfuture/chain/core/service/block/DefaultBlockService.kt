@@ -87,8 +87,9 @@ class DefaultBlockService(
         repository.findOneByHashAndHeight(hash, height)?.let { true } ?: false
 
     @Transactional(readOnly = true)
-    override fun findAllByHeightBetween(beginHeight: Long, endHeight: Long): List<Block> =
-        repository.findAllByHeightBetween(beginHeight, endHeight)
+    override fun findAllByHeightIn(heights: List<Long>): List<Block> =
+        repository.findAllByHeightIn(heights)
+
 
     @Transactional
     override fun deleteByHeightIn(heights: List<Long>) {

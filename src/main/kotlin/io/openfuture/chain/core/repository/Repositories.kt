@@ -37,7 +37,7 @@ interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
 
     fun findAllByHeightGreaterThan(height: Long): List<Entity>
 
-    fun findAllByHeightBetween(beginHeight: Long, endHeight: Long): List<Entity>
+    fun findAllByHeightIn(heights: List<Long>): List<Entity>
 
     fun deleteAllByHeightIn(heights: List<Long>): List<Entity>
 
@@ -139,8 +139,6 @@ interface DelegateStateRepository : StateRepository<DelegateState> {
         )
         """)
     fun findLastAll(request: Pageable): List<DelegateState>
-
-    fun existsByAddress(nodeKey: String): Boolean
 
 }
 

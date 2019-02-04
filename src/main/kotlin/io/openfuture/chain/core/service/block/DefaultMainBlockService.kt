@@ -198,7 +198,8 @@ class DefaultMainBlockService(
         val genesisBlock = genesisBlockRepository.findOneByPayloadEpochIndex(epochIndex) ?: return emptyList()
         val beginHeight = genesisBlock.height + 1
         val endEpochHeight = beginHeight + consensusProperties.epochHeight!! - 1
-        return repository.findAllByHeightBetween(beginHeight, endEpochHeight)
+        val heights = (beginHeight..endEpochHeight).toList()
+        return repository.findAllByHeightIn(heights)
     }
 
     private fun validate(message: PendingBlockMessage) {
