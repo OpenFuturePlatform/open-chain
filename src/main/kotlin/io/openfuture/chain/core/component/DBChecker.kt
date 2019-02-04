@@ -36,13 +36,16 @@ class DBChecker(
     }
 
     private fun lastValidBlockHeight(syncMode: SyncMode): Long {
-        val epochHeight = consensusProperties.epochHeight!!
-        val indexFrom = 1L
-        val indexTo = indexFrom + epochHeight
-        val blocks = blockService.findAllByHeightBetween(indexFrom, indexTo)
+        val epochHeight = consensusProperties.epochHeight!! + 1L
+        var indexFrom = 1L
+        var indexTo = epochHeight
+        var blocks = blockService.findAllByHeightBetween(indexFrom, indexTo)
         var result = blocks.first()
         while (!blocks.isEmpty()) {
             result = validateEpoch(blocks, syncMode) ?: result
+            indexFrom += epochHeight
+            indexTo += epochHeight
+            blocks = blockService.findAllByHeightBetween(indexFrom, indexTo)
         }
         return result.height
     }
