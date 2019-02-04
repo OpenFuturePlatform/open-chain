@@ -39,13 +39,17 @@ class DBChecker(
         val epochHeight = consensusProperties.epochHeight!! + 1L
         var indexFrom = 1L
         var indexTo = epochHeight
-        var blocks = blockService.findAllByHeightBetween(indexFrom, indexTo)
+        var blocks = blockService.findAllByHeightBetween(indexFrom, indexTo).toMutableList()
         var result = blocks.first()
         while (!blocks.isEmpty()) {
             result = validateEpoch(blocks, syncMode) ?: result
+            if (result != blocks.last()) {
+                break
+            }
             indexFrom += epochHeight
             indexTo += epochHeight
-            blocks = blockService.findAllByHeightBetween(indexFrom, indexTo)
+            blocks = blockService.findAllByHeightBetween(indexFrom, indexTo).toMutableList()
+            blocks.add(0, result)
         }
         return result.height
     }
