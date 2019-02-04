@@ -15,8 +15,7 @@ import java.util.*
 class DBChecker(
     private val blockService: BlockService,
     private val consensusProperties: ConsensusProperties,
-    private val transactionService: TransactionService,
-    private val genesisBlockService: GenesisBlockService
+    private val transactionService: TransactionService
 ) {
 
     fun prepareDB(syncMode: SyncMode): Boolean {
@@ -30,10 +29,8 @@ class DBChecker(
     }
 
     private fun deleteInvalidChainPart(height: Long, heightTo: Long) {
-        val heightFrom = height + 1
-        val heightsToDelete = ArrayList<Long>()
-        heightsToDelete.addAll(heightFrom..heightTo)
-        blockService.deleteByHeightIn(heightsToDelete)
+        val heightsForDelete = (height + 1..heightTo).toList()
+        blockService.deleteByHeightIn(heightsForDelete)
     }
 
     private fun lastValidBlockHeight(syncMode: SyncMode): Long {
@@ -63,6 +60,11 @@ class DBChecker(
     private fun validateEpoch(blocks: List<Block>, syncMode: SyncMode): Block? {
         var result: Block? = null
         for (i in blocks.indices) {
+
+            if (i == blocks.lastIndex) {
+                continue
+            }
+
             val current = blocks[i]
             if (!isValidBlock(current, syncMode)) {
                 return result
@@ -70,6 +72,7 @@ class DBChecker(
 
             val next = blocks[i + 1]
             result = current
+
             if (!isValidBlocksHashes(current, next)) {
                 return result
             }
