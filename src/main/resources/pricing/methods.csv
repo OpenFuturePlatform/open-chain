@@ -1,3 +1,16 @@
 Method,Cost
 java/lang/StrictMath/pow,6
-java/lang/Math,4
+java/lang/StrictMath,4
+java/lang/Boolean,2
+java/lang/Byte,2
+java/lang/Character,2
+java/lang/Double,4
+java/lang/Float,2
+java/lang/Integer,2
+java/lang/Long,4
+java/lang/Boolean,2
+java/lang/Short,2
+java/lang/Boolean,2
+java/lang/String,4
+java/lang/Number,4
+java/lang/StringBuilder,4
