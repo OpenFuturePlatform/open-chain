@@ -170,11 +170,12 @@ class DefaultTransferTransactionService(
             throw ValidationException("Amount should not be less than or equal to 0")
         }
 
-        if (DEPLOY == getType(utx.payload.recipientAddress, utx.payload.data)) {
+        val type = getType(utx.payload.recipientAddress, utx.payload.data)
+        if (DEPLOY == type) {
             //todo validate bytecode
         }
 
-        if (EXECUTE == getType(utx.payload.recipientAddress, utx.payload.data)) {
+        if (EXECUTE == type) {
             //todo validate method
         }
 
