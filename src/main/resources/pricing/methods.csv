@@ -1,5 +1,8 @@
 Method,Cost
 java/lang/StrictMath/pow,6
+java/lang/StrictMath/cbrt,6
+java/lang/StrictMath/sqrt,6
+java/lang/StrictMath/exp,6
 java/lang/StrictMath/abs,2
 java/lang/StrictMath,4
 java/lang/Boolean,2
