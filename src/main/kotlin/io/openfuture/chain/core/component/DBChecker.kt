@@ -48,17 +48,22 @@ class DBChecker(
     }
 
     private fun validateEpoch(blocks: List<Block>, syncMode: SyncMode): Block? {
+        var result: Block? = null
         for (i in blocks.indices) {
             if (i == blocks.lastIndex) {
+                if (isValidBlock(blocks[i], syncMode)) {
+                    result = blocks[i]
+                }
                 continue
             }
             val current = blocks[i]
             val next = blocks[i + 1]
             if (!isValidBlock(current, syncMode) || !isValidBlocksHashes(current, next)) {
-                return null
+                return result
             }
+            result = current
         }
-        return blocks.last()
+        return result
     }
 
     private fun isValidBlock(block: Block, syncMode: SyncMode): Boolean {
