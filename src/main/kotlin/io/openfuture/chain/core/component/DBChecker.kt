@@ -14,7 +14,6 @@ import java.util.*
 @Component
 class DBChecker(
     private val blockService: BlockService,
-    private val genesisBlockService: GenesisBlockService,
     private val consensusProperties: ConsensusProperties,
     private val transactionService: TransactionService
 ) {
@@ -38,41 +37,29 @@ class DBChecker(
 
     private fun lastValidBlockHeight(syncMode: SyncMode): Long {
         val epochHeight = consensusProperties.epochHeight!!
-        var indexFrom = 1L
-        var indexTo = indexFrom + epochHeight
-        var block: Block? = null
-        do {
-            val blocks = blockService.findAllByHeightBetween(indexFrom, indexTo)
-            val blocksIterator = blocks.iterator()
-
-            if (null == block) {
-                block = blocksIterator.next()
-            }
-            while (blocksIterator.hasNext()) {
-                val nextBlock = blocksIterator.next()
-
-                if (!isValidBlock(block!!, syncMode)) {
-                    return block.height - 1
-                }
-                if (!isValidBlocksHashes(block, nextBlock)) {
-                    return block.height
-                }
-
-                block = nextBlock
-            }
-            indexFrom += epochHeight + 1
-            indexTo += epochHeight + 1
-
-        } while (!blocks.isEmpty())
-        if (!isValidBlock(block!!, syncMode)) {
-            return block.height - 1
+        val indexFrom = 1L
+        val indexTo = indexFrom + epochHeight
+        val blocks = blockService.findAllByHeightBetween(indexFrom, indexTo)
+        var result = blocks.first()
+        while (!blocks.isEmpty()) {
+            result = validateEpoch(blocks, syncMode) ?: result
         }
-        return block.height
+        return result.height
     }
 
-    /* private fun isValidEpoch(epochBlocks: List<Block>, currentBlock: Block?, syncMode: SyncMode): Long {
-
-     }*/
+    private fun validateEpoch(blocks: List<Block>, syncMode: SyncMode): Block? {
+        for (i in blocks.indices) {
+            if (i == blocks.lastIndex) {
+                continue
+            }
+            val current = blocks[i]
+            val next = blocks[i + 1]
+            if (!isValidBlock(current, syncMode) || !isValidBlocksHashes(current, next)) {
+                return null
+            }
+        }
+        return blocks.last()
+    }
 
     private fun isValidBlock(block: Block, syncMode: SyncMode): Boolean {
         if (!isValidBlockState(block)) {
@@ -115,10 +102,9 @@ class DBChecker(
     private fun isValidBlockState(block: Block): Boolean {
         if (block is MainBlock) {
 
-            val stateHashes = listOf(
-                *block.payload.delegateStates.toTypedArray(),
-                *block.payload.walletStates.toTypedArray()
-            ).map { it.toMessage().getHash() }
+            val stateHashes = listOf(block.payload.delegateStates, block.payload.walletStates)
+                .flatMap { states -> states.map { it.toMessage().getHash() } }
+
 
             if (block.payload.stateHash != MainBlockPayload.calculateMerkleRoot(stateHashes)) {
                 return false

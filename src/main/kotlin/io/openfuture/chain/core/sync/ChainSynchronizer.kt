@@ -60,7 +60,7 @@ class ChainSynchronizer(
         private val log: Logger = LoggerFactory.getLogger(ChainSynchronizer::class.java)
     }
 
-    var syncSession: SyncSession? = null
+    private var syncSession: SyncSession? = null
     private var future: ScheduledFuture<*>? = null
     private var isBecomeDelegate = false
 
