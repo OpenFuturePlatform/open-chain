@@ -122,7 +122,7 @@ class DefaultBlockService(
                             is TransferTransaction -> transferTransactionService.commit(it)
                             is DelegateTransaction -> delegateTransactionService.commit(it)
                             is VoteTransaction -> voteTransactionService.commit(it)
-                            else -> throw IllegalStateException("The type doesn`t handle")
+                            else -> throw IllegalStateException("Unsupported transaction type")
                         }
                     }
                 }
@@ -131,7 +131,7 @@ class DefaultBlockService(
                     when (it) {
                         is DelegateState -> delegateStateService.commit(it)
                         is AccountState -> accountStateService.commit(it)
-                        else -> throw IllegalStateException("The type doesn`t handle")
+                        else -> throw IllegalStateException("Unsupported state type")
                     }
                 }
                 block.payload.receipts.forEach {
