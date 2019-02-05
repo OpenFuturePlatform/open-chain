@@ -21,10 +21,15 @@ import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
+import io.openfuture.chain.smartcontract.component.SmartContractInjector
 import io.openfuture.chain.smartcontract.component.abi.AbiGenerator
+import io.openfuture.chain.smartcontract.component.load.SmartContractLoader
 import io.openfuture.chain.smartcontract.component.validation.SmartContractValidator
+import io.openfuture.chain.smartcontract.model.Abi
+import io.openfuture.chain.smartcontract.util.SerializationUtils.serialize
 import org.apache.commons.lang3.StringUtils.EMPTY
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.fromHexString
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.toHexString
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -114,13 +119,17 @@ class DefaultTransferTransactionService(
     override fun updateState(message: TransferTransactionMessage) {
         accountStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
 
-        val type = getType(message.recipientAddress, message.data)
-        if (FUND == type) {
-            accountStateService.updateBalanceByAddress(message.recipientAddress!!, message.amount)
-        }
-
-        if (DEPLOY == type) {
-            accountStateService.updateStorage(contractService.generateAddress(message.senderAddress), message.data!!)
+        when (getType(message.recipientAddress, message.data)) {
+            FUND -> {
+                accountStateService.updateBalanceByAddress(message.recipientAddress!!, message.amount)
+            }
+            DEPLOY -> {
+                val contractAddress = contractService.generateAddress(message.senderAddress)
+                val clazz = SmartContractLoader().loadClass(message.data)
+                val contract = SmartContractInjector.initSmartContract(clazz, message.senderAddress, contractAddress)
+                accountStateService.updateStorage(contractAddress, toHexString(serialize(contract)))
+            }
+            EXECUTE -> TODO()
         }
     }
 
@@ -174,16 +183,20 @@ class DefaultTransferTransactionService(
             throw ValidationException("Amount should not be less than or equal to 0")
         }
 
-        val type = getType(utx.payload.recipientAddress, utx.payload.data)
-        if (DEPLOY == type) {
-            if (!SmartContractValidator.validate(fromHexString(utx.payload.data!!))) {
-                throw ValidationException("Invalid smart contract code")
+        when (getType(utx.payload.recipientAddress, utx.payload.data)) {
+            DEPLOY -> {
+                if (!SmartContractValidator.validate(fromHexString(utx.payload.data!!))) {
+                    throw ValidationException("Invalid smart contract code")
+                }
             }
-        }
-
-        if (EXECUTE == type) {
-            val contract = contractService.getByAddress(utx.payload.recipientAddress!!)
-            //todo validate method
+            EXECUTE -> {
+                val contract = contractService.getByAddress(utx.payload.recipientAddress!!)
+                val methods = Abi.fromJson(contract.abi).abiMethods.map { it.name }
+                if (!methods.contains(utx.payload.data)) {
+                    throw ValidationException("Smart contract's method ${utx.payload.data} not exists")
+                }
+            }
+            FUND -> {}
         }
 
     }
