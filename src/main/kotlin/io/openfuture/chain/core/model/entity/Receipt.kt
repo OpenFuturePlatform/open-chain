@@ -36,6 +36,7 @@ class Receipt(
             Receipt(message.transactionHash, message.result, block)
     }
 
+
     fun getHash(): String {
         val txHashBytes = transactionHash.toByteArray(Charsets.UTF_8)
         val resultBytes = result.toByteArray(Charsets.UTF_8)
