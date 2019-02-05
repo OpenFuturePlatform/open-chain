@@ -27,7 +27,8 @@ class DBChecker(
     }
 
     private fun deleteInvalidChainPart(height: Long, heightTo: Long) {
-        val heightsForDelete = (height + 1..heightTo).toList()
+        val heightRange = LongRange(height + 1, heightTo)
+        val heightsForDelete = (heightRange).toList()
         blockService.deleteByHeightIn(heightsForDelete)
     }
 
@@ -119,10 +120,8 @@ class DBChecker(
 
     private fun isValidBlockState(block: Block): Boolean {
         if (block is MainBlock) {
-
             val stateHashes = listOf(block.payload.delegateStates, block.payload.walletStates)
                 .flatMap { states -> states.map { it.toMessage().getHash() } }
-
 
             if (block.payload.stateHash != MainBlockPayload.calculateMerkleRoot(stateHashes)) {
                 return false
