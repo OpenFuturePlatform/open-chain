@@ -1,6 +1,8 @@
 package io.openfuture.chain.core.sync
 
 import io.openfuture.chain.consensus.service.EpochService
+import io.openfuture.chain.core.component.DBChecker
+import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
@@ -14,6 +16,7 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTrans
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncMode.FULL
+import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.entity.NodeInfo
@@ -28,6 +31,8 @@ import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.NetworkApiService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.jdbc.DataSourceSchemaCreatedEvent
+import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Component
 import java.util.concurrent.ScheduledFuture
 import javax.xml.bind.ValidationException
@@ -45,19 +50,33 @@ class ChainSynchronizer(
     private val requestRetryScheduler: RequestRetryScheduler,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
-    private val statePool: StatePool
-) {
+    private val delegateStateService: DelegateStateService,
+    private val dbChecker: DBChecker,
+    private val statePool: StatePool,
+    private val nodeKeyHolder: NodeKeyHolder
+) : ApplicationListener<DataSourceSchemaCreatedEvent> {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(ChainSynchronizer::class.java)
     }
 
-    private var future: ScheduledFuture<*>? = null
     private var syncSession: SyncSession? = null
+    private var future: ScheduledFuture<*>? = null
+    private var isBecomeDelegate = false
 
     @Volatile
     private var status: SyncStatus = SYNCHRONIZED
 
+
+    override fun onApplicationEvent(event: DataSourceSchemaCreatedEvent) {
+        prepareDB()
+    }
+
+    fun prepareDB() {
+        status = SyncStatus.PROCESSING
+        dbChecker.prepareDB(getSyncMode())
+        status = SYNCHRONIZED
+    }
 
     fun getStatus(): SyncStatus = status
 
@@ -70,11 +89,11 @@ class ChainSynchronizer(
                 return
             }
 
-            if (syncSession!!.syncMode == FULL
-                && !isValidTransactionMerkleRoot(message.mainBlocks)
-                && !isValidStateMerkleRoot(message.mainBlocks)
-                && !isValidTransactions(message.mainBlocks)
-                && !isValidStates(message.mainBlocks)) {
+            if ((isDelegate() || FULL == syncSession!!.syncMode)
+                    && (!isValidTransactionMerkleRoot(message.mainBlocks)
+                    || !isValidStateMerkleRoot(message.mainBlocks)
+                    || !isValidTransactions(message.mainBlocks)
+                    || !isValidStates(message.mainBlocks))) {
                 requestEpoch(delegates.filter { it != message.delegateKey })
                 return
             }
@@ -137,6 +156,16 @@ class ChainSynchronizer(
         }
     }
 
+    fun isDelegate(): Boolean = delegateStateService.isExistsByPublicKey(nodeKeyHolder.getPublicKeyAsHexString())
+
+    fun getSyncMode(): SyncMode {
+        if (isBecomeDelegate || (LIGHT == properties.syncMode && isDelegate())) {
+            isBecomeDelegate = true
+            return FULL
+        }
+        return properties.syncMode!!
+    }
+
     private fun initSync(message: GenesisBlockMessage) {
         val delegates = genesisBlockService.getLast().payload.activeDelegates
         try {
@@ -144,7 +173,7 @@ class ChainSynchronizer(
             val lastLocalGenesisBlock = genesisBlockService.getLast()
 
             if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
-                syncSession = SyncSession(properties.syncMode!!, lastLocalGenesisBlock, currentGenesisBlock)
+                syncSession = SyncSession(getSyncMode(), lastLocalGenesisBlock, currentGenesisBlock)
                 requestEpoch(delegates)
             } else {
                 checkBlock(lastLocalGenesisBlock)

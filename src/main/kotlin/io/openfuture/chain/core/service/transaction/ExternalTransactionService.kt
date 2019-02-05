@@ -21,7 +21,6 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
 
     @Autowired protected lateinit var walletStateService: WalletStateService
     @Autowired protected lateinit var baseService: TransactionService
-    @Autowired protected lateinit var transactionService: TransactionService
     @Autowired private lateinit var cryptoService: CryptoService
     @Autowired private lateinit var networkService: NetworkApiService
 

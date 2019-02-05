@@ -11,6 +11,7 @@ import io.openfuture.chain.core.model.entity.transaction.payload.RewardTransacti
 import io.openfuture.chain.core.repository.RewardTransactionRepository
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.RewardTransactionService
+import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.service.WalletStateService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -29,7 +30,8 @@ class DefaultRewardTransactionService(
     private val walletStateService: WalletStateService,
     private val consensusProperties: ConsensusProperties,
     private val delegateStateService: DelegateStateService,
-    private val keyHolder: NodeKeyHolder
+    private val keyHolder: NodeKeyHolder,
+    private val transactionService: TransactionService
 ) : BaseTransactionService(), RewardTransactionService {
 
     companion object {
@@ -55,7 +57,7 @@ class DefaultRewardTransactionService(
         val publicKey = keyHolder.getPublicKeyAsHexString()
         val delegate = delegateStateService.getLastByAddress(publicKey)
             ?: throw NotFoundException("Delegate not found with key $publicKey")
-        val hash = createHash(TransactionHeader(timestamp, fee, senderAddress), RewardTransactionPayload(reward, delegate.walletAddress))
+        val hash = transactionService.createHash(TransactionHeader(timestamp, fee, senderAddress), RewardTransactionPayload(reward, delegate.walletAddress))
         val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())
 
         return RewardTransactionMessage(timestamp, fee, senderAddress, hash, signature, publicKey, reward, delegate.walletAddress)

@@ -65,7 +65,7 @@ class DefaultGenesisBlockService(
     override fun getLast(): GenesisBlock = genesisBlockRepository.findFirstByOrderByHeightDesc()!!
 
     @Transactional(readOnly = true)
-    override fun getByEpochIndex(epochIndex: Long): GenesisBlock? =
+    override fun findByEpochIndex(epochIndex: Long): GenesisBlock? =
         genesisBlockRepository.findOneByPayloadEpochIndex(epochIndex)
 
     @BlockchainSynchronized
@@ -76,7 +76,7 @@ class DefaultGenesisBlockService(
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
         val payload = createPayload()
-        val hash = createHash(timestamp, height, previousHash, payload)
+        val hash = blockService.createHash(timestamp, height, previousHash, payload)
         val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKeyAsHexString()
 
