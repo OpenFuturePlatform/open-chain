@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -94,6 +95,7 @@ class DefaultBlockService(
 
                 val transactions = mutableListOf<Transaction>()
                 val states = mutableListOf<State>()
+                val receipts = mutableSetOf<Receipt>()
 
                 if (syncMode == SyncMode.FULL) {
                     transactions.addAll(block.payload.transferTransactions)
@@ -103,6 +105,9 @@ class DefaultBlockService(
                     block.payload.transferTransactions = mutableListOf()
                     block.payload.voteTransactions = mutableListOf()
                     block.payload.delegateTransactions = mutableListOf()
+
+                    receipts.addAll(block.payload.receipts)
+                    block.payload.receipts = mutableListOf()
                 }
 
                 states.addAll(block.payload.delegateStates)
@@ -110,7 +115,6 @@ class DefaultBlockService(
 
                 block.payload.delegateStates = mutableListOf()
                 block.payload.accountStates = mutableListOf()
-                block.payload.receipts = mutableListOf()
 
                 this.save(block)
                 rewardTransactionService.commit(rewardTransaction)
@@ -125,7 +129,13 @@ class DefaultBlockService(
                             else -> throw IllegalStateException("Unsupported transaction type")
                         }
                     }
+
+                    receipts.forEach {
+                        it.block = block
+                        receiptService.commit(it)
+                    }
                 }
+
                 states.forEach {
                     it.block = block
                     when (it) {
@@ -133,10 +143,6 @@ class DefaultBlockService(
                         is AccountState -> accountStateService.commit(it)
                         else -> throw IllegalStateException("Unsupported state type")
                     }
-                }
-                block.payload.receipts.forEach {
-                    it.block = block
-                    receiptService.commit(it)
                 }
             } else if (block is GenesisBlock) {
                 this.save(block)
