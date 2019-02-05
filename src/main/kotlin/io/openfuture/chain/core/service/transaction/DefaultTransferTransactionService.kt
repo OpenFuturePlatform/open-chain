@@ -21,6 +21,7 @@ import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
+import io.openfuture.chain.smartcontract.component.ByteCodeProcessor
 import io.openfuture.chain.smartcontract.component.SmartContractInjector
 import io.openfuture.chain.smartcontract.component.abi.AbiGenerator
 import io.openfuture.chain.smartcontract.component.load.SmartContractLoader
@@ -125,7 +126,8 @@ class DefaultTransferTransactionService(
             }
             DEPLOY -> {
                 val contractAddress = contractService.generateAddress(message.senderAddress)
-                val clazz = SmartContractLoader().loadClass(message.data)
+                val newBytes = ByteCodeProcessor.renameClass(fromHexString(message.data), contractAddress)
+                val clazz = SmartContractLoader().loadClass(newBytes)
                 val contract = SmartContractInjector.initSmartContract(clazz, message.senderAddress, contractAddress)
                 accountStateService.updateStorage(contractAddress, toHexString(serialize(contract)))
             }
