@@ -37,7 +37,7 @@ class DBChecker(
         val epochHeight = consensusProperties.epochHeight!! + 1L
         var indexFrom = 1L
         var indexTo = indexFrom + epochHeight
-        val heights = (indexFrom..indexTo).toList()
+        var heights = (indexFrom..indexTo).toList()
         var blocks = blockService.getAllByHeightIn(heights).toMutableList()
         var result = blocks.first()
         val lastChainBlock = blockService.getLast()
@@ -48,6 +48,7 @@ class DBChecker(
             }
             indexFrom += indexTo
             indexTo += epochHeight
+            heights = (indexFrom..indexTo).toList()
             blocks = blockService.getAllByHeightIn(heights).toMutableList()
         }
 
