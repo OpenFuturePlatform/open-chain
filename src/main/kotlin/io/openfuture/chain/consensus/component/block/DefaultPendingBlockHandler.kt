@@ -46,10 +46,10 @@ class DefaultPendingBlockHandler(
     @BlockchainSynchronized
     @Synchronized
     override fun addBlock(block: PendingBlockMessage) {
-        val blockSlotNumber = epochService.getSlotNumber(block.timestamp)
+        val blockSlotNumber = epochService.getSlotNumber(System.currentTimeMillis())
         val slotOwner = epochService.getCurrentSlotOwner()
 
-        if (blockSlotNumber > timeSlotNumber || epochService.isInIntermission(block.timestamp)) {
+        if (blockSlotNumber != timeSlotNumber || epochService.isInIntermission(block.timestamp)) {
             this.timeSlotNumber = blockSlotNumber
             this.reset()
         }
