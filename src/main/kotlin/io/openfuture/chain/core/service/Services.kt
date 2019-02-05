@@ -3,13 +3,16 @@ package io.openfuture.chain.core.service
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.state.WalletState
+import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -65,6 +68,13 @@ interface BlockService {
 
     fun isExists(hash: String, height: Long): Boolean
 
+    fun getAllByHeightIn(heights: List<Long>): List<Block>
+
+    fun deleteByHeightIn(heights: List<Long>)
+
+    fun isValidHash(block: Block): Boolean
+
+    fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray
 }
 
 interface GenesisBlockService {
@@ -75,7 +85,7 @@ interface GenesisBlockService {
 
     fun getLast(): GenesisBlock
 
-    fun getByEpochIndex(epochIndex: Long): GenesisBlock?
+    fun findByEpochIndex(epochIndex: Long): GenesisBlock?
 
     fun create(): GenesisBlock
 
@@ -123,6 +133,8 @@ interface TransactionService {
     fun getProducingPerSecond(): Long
 
     fun deleteBlockTransactions(blockHeights: List<Long>)
+
+    fun createHash(header: TransactionHeader, payload: TransactionPayload): String
 
 }
 
