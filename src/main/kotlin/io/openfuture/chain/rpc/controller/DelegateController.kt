@@ -26,13 +26,13 @@ class DelegateController(
 ) {
 
     @GetMapping
-    fun getAll(request: PageRequest): PageResponse<DelegateResponse> {
+    fun getAll(@Valid request: PageRequest): PageResponse<DelegateResponse> {
         val delegates = delegateStateService.getAllDelegates(request).map { DelegateResponse(it) }
         return PageResponse(PageImpl(delegates, request, delegates.size.toLong()))
     }
 
     @GetMapping("/active")
-    fun getAllActive(request: PageRequest): PageResponse<DelegateResponse> {
+    fun getAllActive(@Valid request: PageRequest): PageResponse<DelegateResponse> {
         val activeDelegates = genesisBlockService.getLast().payload.activeDelegates.map {
             DelegateResponse(delegateStateService.getLastByAddress(it)!!)
         }
