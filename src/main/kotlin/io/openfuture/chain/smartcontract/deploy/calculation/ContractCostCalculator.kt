@@ -36,10 +36,9 @@ class ContractCostCalculator {
             result += when (instruction) {
                 is MethodInsnNode -> dictionary.get(instruction.owner, instruction.name)
                 is LdcInsnNode -> {
-                    when (instruction.cst) {
-                        is String -> (instruction.cst as String).length * dictionary.get(instruction.cst::class.java.name.replace('.', '/'))
-                        else -> dictionary.get(instruction.cst::class.java.name.replace('.', '/'))
-                    }
+                    val const = instruction.cst
+                    val cost = dictionary.get(instruction.cst::class.java.name.replace('.', '/'))
+                    cost * ((const as? String)?.length ?: 1)
                 }
                 else -> dictionary.get(opcode)
             }
