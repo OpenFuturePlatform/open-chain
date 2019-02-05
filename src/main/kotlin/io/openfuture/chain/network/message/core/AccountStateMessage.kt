@@ -7,7 +7,6 @@ import io.openfuture.chain.network.extension.readNullableString
 import io.openfuture.chain.network.extension.writeNullableString
 import org.apache.commons.lang3.StringUtils.EMPTY
 import java.nio.ByteBuffer
-import kotlin.text.Charsets.UTF_8
 
 @NoArgConstructor
 class AccountStateMessage(
@@ -18,8 +17,8 @@ class AccountStateMessage(
 ) : StateMessage(address) {
 
     override fun getBytes(): ByteArray {
-        val voteForBytes = (voteFor ?: EMPTY).toByteArray(UTF_8)
-        val storageBytes = (storage ?: EMPTY).toByteArray(UTF_8)
+        val voteForBytes = (voteFor ?: EMPTY).toByteArray()
+        val storageBytes = (storage ?: EMPTY).toByteArray()
         return ByteBuffer.allocate(LONG_BYTES + voteForBytes.size + storageBytes.size)
             .putLong(balance)
             .put(voteForBytes)
