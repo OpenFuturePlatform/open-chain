@@ -27,8 +27,7 @@ class DBChecker(
     }
 
     private fun deleteInvalidChainPart(height: Long, heightTo: Long) {
-        val heightRange = LongRange(height + 1, heightTo)
-        val heightsForDelete = (heightRange).toList()
+        val heightsForDelete = LongRange(height + 1, heightTo).toList()
         blockService.deleteByHeightIn(heightsForDelete)
     }
 
