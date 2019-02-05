@@ -21,7 +21,10 @@ import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
+import io.openfuture.chain.smartcontract.component.abi.AbiGenerator
+import io.openfuture.chain.smartcontract.component.validation.SmartContractValidator
 import org.apache.commons.lang3.StringUtils.EMPTY
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.fromHexString
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -153,7 +156,8 @@ class DefaultTransferTransactionService(
     override fun save(tx: TransferTransaction): TransferTransaction {
         if (DEPLOY == getType(tx.payload.recipientAddress, tx.payload.data)) {
             val address = contractService.generateAddress(tx.header.senderAddress)
-            contractService.save(Contract(address, tx.header.senderAddress, tx.payload.data!!))
+            val abi = AbiGenerator.generate(fromHexString(tx.payload.data!!))
+            contractService.save(Contract(address, tx.header.senderAddress, tx.payload.data!!, abi))
         }
 
         return super.save(tx)
@@ -172,10 +176,13 @@ class DefaultTransferTransactionService(
 
         val type = getType(utx.payload.recipientAddress, utx.payload.data)
         if (DEPLOY == type) {
-            //todo validate bytecode
+            if (!SmartContractValidator.validate(fromHexString(utx.payload.data!!))) {
+                throw ValidationException("Invalid smart contract code")
+            }
         }
 
         if (EXECUTE == type) {
+            val contract = contractService.getByAddress(utx.payload.recipientAddress!!)
             //todo validate method
         }
 

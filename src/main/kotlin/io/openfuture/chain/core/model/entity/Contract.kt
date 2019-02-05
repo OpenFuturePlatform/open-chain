@@ -16,6 +16,9 @@ class Contract(
     var owner: String,
 
     @Column(name = "bytecode", nullable = false)
-    var bytecode: String
+    var bytecode: String,
+
+    @Column(name = "abi", nullable = false)
+    var abi: String
 
 ) : BaseModel()
