@@ -121,7 +121,7 @@ class DBChecker(
 
     private fun isValidBlockState(block: Block): Boolean {
         if (block is MainBlock) {
-            val stateHashes = listOf(block.payload.delegateStates, block.payload.walletStates)
+            val stateHashes = listOf(block.payload.delegateStates, block.payload.accountStates)
                 .flatMap { states -> states.map { it.toMessage().getHash() } }
 
             if (block.payload.stateHash != MainBlockPayload.calculateMerkleRoot(stateHashes)) {

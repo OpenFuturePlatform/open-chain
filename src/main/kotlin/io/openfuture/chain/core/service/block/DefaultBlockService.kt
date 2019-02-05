@@ -6,8 +6,8 @@ import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
+import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -96,7 +96,7 @@ class DefaultBlockService(
 
     @Transactional
     override fun deleteByHeightIn(heights: List<Long>) {
-        walletStateService.deleteBlockStates(heights)
+        accountStateService.deleteBlockStates(heights)
         delegateStateService.deleteBlockStates(heights)
         transactionService.deleteBlockTransactions(heights)
         repository.deleteAllByHeightIn(heights)

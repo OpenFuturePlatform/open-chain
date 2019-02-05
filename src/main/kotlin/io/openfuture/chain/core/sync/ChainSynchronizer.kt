@@ -1,10 +1,9 @@
 package io.openfuture.chain.core.sync
 
 import io.openfuture.chain.consensus.service.EpochService
-import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.component.DBChecker
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.component.StatePool
+import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -57,7 +56,7 @@ class ChainSynchronizer(
     private val delegateStateService: DelegateStateService,
     private val dbChecker: DBChecker,
     private val nodeKeyHolder: NodeKeyHolder
-) {
+) : ApplicationListener<DataSourceSchemaCreatedEvent> {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(ChainSynchronizer::class.java)
