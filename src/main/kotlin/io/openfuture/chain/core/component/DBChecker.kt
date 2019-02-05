@@ -7,6 +7,8 @@ import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.sync.SyncMode
+import io.openfuture.chain.core.sync.SyncMode.FULL
+import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import org.springframework.stereotype.Component
 
 @Component
@@ -36,7 +38,7 @@ class DBChecker(
         var indexFrom = 1L
         var indexTo = indexFrom + epochHeight
         val heights = (indexFrom..indexTo).toList()
-        var blocks = blockService.findAllByHeightIn(heights).toMutableList()
+        var blocks = blockService.getAllByHeightIn(heights).toMutableList()
         var result = blocks.first()
         val lastChainBlock = blockService.getLast()
         while (!blocks.isEmpty()) {
@@ -46,7 +48,7 @@ class DBChecker(
             }
             indexFrom += indexTo
             indexTo += epochHeight
-            blocks = blockService.findAllByHeightIn(heights).toMutableList()
+            blocks = blockService.getAllByHeightIn(heights).toMutableList()
         }
 
         return if (!isValidBlock(lastChainBlock, syncMode)) {
@@ -86,10 +88,10 @@ class DBChecker(
         if (!blockService.isValidHash(block)) {
             return false
         }
-        if (SyncMode.FULL == syncMode) {
+        if (FULL == syncMode) {
             return isValidTransactions(block)
         }
-        if (SyncMode.LIGHT == syncMode && block is MainBlock) {
+        if (LIGHT == syncMode && block is MainBlock) {
             val transactions =
                 block.payload.transferTransactions +
                     block.payload.delegateTransactions +

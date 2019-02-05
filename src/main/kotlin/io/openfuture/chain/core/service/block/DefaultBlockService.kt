@@ -16,7 +16,8 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransacti
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncMode
-import io.openfuture.chain.core.util.ByteConstants
+import io.openfuture.chain.core.sync.SyncMode.FULL
+import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import io.openfuture.chain.crypto.util.HashUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
@@ -87,7 +88,7 @@ class DefaultBlockService(
         repository.findOneByHashAndHeight(hash, height)?.let { true } ?: false
 
     @Transactional(readOnly = true)
-    override fun findAllByHeightIn(heights: List<Long>): List<Block> =
+    override fun getAllByHeightIn(heights: List<Long>): List<Block> =
         repository.findAllByHeightIn(heights)
 
 
@@ -105,7 +106,7 @@ class DefaultBlockService(
     }
 
     override fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray {
-        val bytes = ByteBuffer.allocate(ByteConstants.LONG_BYTES + ByteConstants.LONG_BYTES + previousHash.toByteArray(StandardCharsets.UTF_8).size + payload.getBytes().size)
+        val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + previousHash.toByteArray().size + payload.getBytes().size)
             .putLong(timestamp)
             .putLong(height)
             .put(previousHash.toByteArray(StandardCharsets.UTF_8))
@@ -128,7 +129,7 @@ class DefaultBlockService(
                 val transactions = mutableListOf<Transaction>()
                 val states = mutableListOf<State>()
 
-                if (syncMode == SyncMode.FULL) {
+                if (syncMode == FULL) {
                     transactions.addAll(block.payload.transferTransactions)
                     transactions.addAll(block.payload.voteTransactions)
                     transactions.addAll(block.payload.delegateTransactions)
@@ -147,7 +148,7 @@ class DefaultBlockService(
                 this.save(block)
                 rewardTransactionService.commit(rewardTransaction)
 
-                if (syncMode == SyncMode.FULL) {
+                if (syncMode == FULL) {
                     transactions.forEach {
                         it.block = block
                         when (it) {

@@ -68,7 +68,7 @@ interface BlockService {
 
     fun isExists(hash: String, height: Long): Boolean
 
-    fun findAllByHeightIn(heights: List<Long>): List<Block>
+    fun getAllByHeightIn(heights: List<Long>): List<Block>
 
     fun deleteByHeightIn(heights: List<Long>)
 
