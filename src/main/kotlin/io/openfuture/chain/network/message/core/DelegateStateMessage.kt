@@ -6,7 +6,6 @@ import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 import java.nio.ByteBuffer
-import kotlin.text.Charsets.UTF_8
 
 @NoArgConstructor
 class DelegateStateMessage(
@@ -17,9 +16,9 @@ class DelegateStateMessage(
 ) : StateMessage(address) {
 
     override fun getBytes(): ByteArray =
-        ByteBuffer.allocate(LONG_BYTES + walletAddress.toByteArray(UTF_8).size + LONG_BYTES)
+        ByteBuffer.allocate(LONG_BYTES + walletAddress.toByteArray().size + LONG_BYTES)
             .putLong(rating)
-            .put(walletAddress.toByteArray(UTF_8))
+            .put(walletAddress.toByteArray())
             .putLong(createDate)
             .array()
 

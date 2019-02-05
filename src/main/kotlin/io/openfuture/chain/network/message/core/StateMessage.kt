@@ -17,8 +17,8 @@ abstract class StateMessage(
     protected abstract fun getBytes(): ByteArray
 
     fun getHash(): String {
-        val bytes = ByteBuffer.allocate(address.toByteArray(Charsets.UTF_8).size + getBytes().size)
-            .put(address.toByteArray(Charsets.UTF_8))
+        val bytes = ByteBuffer.allocate(address.toByteArray().size + getBytes().size)
+            .put(address.toByteArray())
             .put(getBytes())
             .array()
 

@@ -12,7 +12,6 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets.UTF_8
 
 @OpenClass
 abstract class BaseBlockService<T : Block>(
@@ -50,10 +49,10 @@ abstract class BaseBlockService<T : Block>(
     }
 
     protected fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray {
-        val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + previousHash.toByteArray(UTF_8).size + payload.getBytes().size)
+        val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + previousHash.toByteArray().size + payload.getBytes().size)
             .putLong(timestamp)
             .putLong(height)
-            .put(previousHash.toByteArray(UTF_8))
+            .put(previousHash.toByteArray())
             .put(payload.getBytes())
             .array()
 

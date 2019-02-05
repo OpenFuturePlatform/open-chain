@@ -4,7 +4,6 @@ import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.util.ByteConstants.INT_BYTES
 import io.openfuture.chain.core.util.DictionaryUtils
 import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets.UTF_8
 import javax.persistence.Column
 import javax.persistence.Embeddable
 
@@ -22,9 +21,9 @@ class VoteTransactionPayload(
     fun getVoteType(): VoteType = DictionaryUtils.valueOf(VoteType::class.java, voteTypeId)
 
     override fun getBytes(): ByteArray {
-        val buffer = ByteBuffer.allocate(INT_BYTES + delegateKey.toByteArray(UTF_8).size)
+        val buffer = ByteBuffer.allocate(INT_BYTES + delegateKey.toByteArray().size)
         buffer.putInt(voteTypeId)
-        buffer.put(delegateKey.toByteArray(UTF_8))
+        buffer.put(delegateKey.toByteArray())
         return buffer.array()
     }
 
