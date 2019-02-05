@@ -7,6 +7,7 @@ import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import io.openfuture.chain.rpc.domain.block.MainBlockResponse
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @CrossOrigin
 @RestController
@@ -28,7 +29,7 @@ class MainBlockController(
         getMainBlockResponse(blockService.getNextBlock(hash))
 
     @GetMapping
-    fun getAll(request: PageRequest): PageResponse<MainBlockResponse> =
+    fun getAll(@Valid request: PageRequest): PageResponse<MainBlockResponse> =
         PageResponse(blockService.getAll(request).map { getMainBlockResponse(it) })
 
     private fun getMainBlockResponse(block: MainBlock): MainBlockResponse = MainBlockResponse(block, epochService.getEpochByBlock(block))

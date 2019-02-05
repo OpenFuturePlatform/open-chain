@@ -5,6 +5,7 @@ import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import io.openfuture.chain.rpc.domain.block.GenesisBlockResponse
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @CrossOrigin
 @RestController
@@ -25,7 +26,7 @@ class GenesisBlockController(
         GenesisBlockResponse(blockService.getNextBlock(hash))
 
     @GetMapping
-    fun getAll(request: PageRequest): PageResponse<GenesisBlockResponse> =
+    fun getAll(@Valid request: PageRequest): PageResponse<GenesisBlockResponse> =
         PageResponse(blockService.getAll(request).map { GenesisBlockResponse(it) })
 
 }
