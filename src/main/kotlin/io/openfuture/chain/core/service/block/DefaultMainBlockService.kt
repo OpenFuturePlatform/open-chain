@@ -135,7 +135,7 @@ class DefaultMainBlockService(
             val stateHash = calculateMerkleRoot(stateHashes)
             val receiptHash = calculateMerkleRoot(receipts.map { it.getHash() })
             val payload = MainBlockPayload(merkleHash, stateHash, receiptHash)
-            val hash = createHash(timestamp, height, previousHash, payload)
+            val hash = blockService.createHash(timestamp, height, previousHash, payload)
             val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
 
             return PendingBlockMessage(height, previousHash, timestamp, toHexString(hash), signature, publicKey,
@@ -204,7 +204,8 @@ class DefaultMainBlockService(
         val genesisBlock = genesisBlockRepository.findOneByPayloadEpochIndex(epochIndex) ?: return emptyList()
         val beginHeight = genesisBlock.height + 1
         val endEpochHeight = beginHeight + consensusProperties.epochHeight!! - 1
-        return repository.findAllByHeightBetween(beginHeight, endEpochHeight)
+        val heights = (beginHeight..endEpochHeight).toList()
+        return repository.findAllByHeightIn(heights)
     }
 
     private fun validate(message: PendingBlockMessage) {

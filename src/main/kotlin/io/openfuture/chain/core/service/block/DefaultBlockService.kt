@@ -7,6 +7,7 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.state.AccountState
+import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -16,8 +17,13 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransacti
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncMode
+import io.openfuture.chain.core.sync.SyncMode.FULL
+import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
+import io.openfuture.chain.crypto.util.HashUtils
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.nio.ByteBuffer
 
 @Service
 class DefaultBlockService(
@@ -84,6 +90,35 @@ class DefaultBlockService(
         repository.findOneByHashAndHeight(hash, height)?.let { true } ?: false
 
     @Transactional(readOnly = true)
+    override fun getAllByHeightIn(heights: List<Long>): List<Block> =
+        repository.findAllByHeightIn(heights)
+
+
+    @Transactional
+    override fun deleteByHeightIn(heights: List<Long>) {
+        walletStateService.deleteBlockStates(heights)
+        delegateStateService.deleteBlockStates(heights)
+        transactionService.deleteBlockTransactions(heights)
+        repository.deleteAllByHeightIn(heights)
+    }
+
+    override fun isValidHash(block: Block): Boolean {
+        val hash = createHash(block.timestamp, block.height, block.previousHash, block.getPayload())
+        return ByteUtils.toHexString(hash) == block.hash
+    }
+
+    override fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray {
+        val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + previousHash.toByteArray().size + payload.getBytes().size)
+            .putLong(timestamp)
+            .putLong(height)
+            .put(previousHash.toByteArray())
+            .put(payload.getBytes())
+            .array()
+
+        return HashUtils.doubleSha256(bytes)
+    }
+
+    @Transactional(readOnly = true)
     override fun getCurrentHeight(): Long = repository.getCurrentHeight()
 
     @Transactional
@@ -97,7 +132,7 @@ class DefaultBlockService(
                 val states = mutableListOf<State>()
                 val receipts = mutableSetOf<Receipt>()
 
-                if (syncMode == SyncMode.FULL) {
+                if (syncMode == FULL) {
                     transactions.addAll(block.payload.transferTransactions)
                     transactions.addAll(block.payload.voteTransactions)
                     transactions.addAll(block.payload.delegateTransactions)
@@ -119,7 +154,7 @@ class DefaultBlockService(
                 this.save(block)
                 rewardTransactionService.commit(rewardTransaction)
 
-                if (syncMode == SyncMode.FULL) {
+                if (syncMode == FULL) {
                     transactions.forEach {
                         it.block = block
                         when (it) {
