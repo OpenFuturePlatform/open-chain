@@ -43,7 +43,7 @@ class DefaultAccountStateService(
         BlockchainLock.readLock.lock()
         return try {
             val balance = getLastByAddress(address).balance
-            return balance - getUnconfirmedBalance(address)
+            balance - getUnconfirmedBalance(address)
         } catch (ex: NotFoundException) {
             DEFAULT_WALLET_BALANCE
         } finally {
