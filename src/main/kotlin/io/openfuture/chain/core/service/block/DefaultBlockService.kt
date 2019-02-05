@@ -23,7 +23,6 @@ import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets
 
 @Service
 class DefaultBlockService(
@@ -109,7 +108,7 @@ class DefaultBlockService(
         val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + previousHash.toByteArray().size + payload.getBytes().size)
             .putLong(timestamp)
             .putLong(height)
-            .put(previousHash.toByteArray(StandardCharsets.UTF_8))
+            .put(previousHash.toByteArray())
             .put(payload.getBytes())
             .array()
 
