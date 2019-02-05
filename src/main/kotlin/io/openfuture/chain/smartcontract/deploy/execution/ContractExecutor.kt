@@ -11,6 +11,7 @@ import io.openfuture.chain.smartcontract.deploy.load.ContractInjector
 import io.openfuture.chain.smartcontract.deploy.load.SourceClassLoader
 import org.apache.commons.lang3.reflect.MethodUtils
 import org.springframework.stereotype.Component
+import java.lang.management.ManagementFactory
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
@@ -27,7 +28,11 @@ class ContractExecutor(
         private val uniqueIdentifier = AtomicInteger(0)
     }
 
-    private val pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1)
+    private var startTime: Long = 0
+    private var threadId: Long = 0
+    private val pool = Executors.newSingleThreadExecutor()
+    private val threadBean = ManagementFactory.getThreadMXBean()
+    private val millisecond = 1000000.0
     private val classLoader = SourceClassLoader()
 
 
@@ -40,11 +45,12 @@ class ContractExecutor(
 
         val task = executeMethod(instance, method, threadName)
         try {
-            val startTime = System.currentTimeMillis()
             result.output = task.get(executionTime, MILLISECONDS)
-            val endTime = System.currentTimeMillis()
+            val endTime = threadBean.getThreadCpuTime(threadId)
 
-            result.surplus = (availableTime - (endTime - startTime)) * properties.millisecondCost!!
+            val actualExecutionTime = Math.ceil((endTime - startTime) / millisecond).toInt()
+            result.surplus = (availableTime - actualExecutionTime) * properties.millisecondCost!!
+            startTime = endTime
             return result
         } catch (ex: Exception) {
             task.cancel(true)
@@ -53,7 +59,8 @@ class ContractExecutor(
     }
 
     private fun executeMethod(instance: SmartContract, method: ContractMethod, identifier: String): Future<Any> {
-        return pool.submit (Callable {
+        return pool.submit(Callable {
+            threadId = Thread.currentThread().id
             Thread.currentThread().name = identifier
             val paramTypes = instance.javaClass.declaredMethods.firstOrNull { it.name == method.name }?.parameterTypes
             return@Callable MethodUtils.invokeExactMethod(instance, method.name, method.params, paramTypes)
