@@ -3,16 +3,11 @@ package io.openfuture.chain.core.service.block
 import io.openfuture.chain.core.annotation.OpenClass
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.Block
-import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.DelegateStateService
-import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
-import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets.UTF_8
 
 @OpenClass
 abstract class BaseBlockService<T : Block>(
@@ -40,7 +35,7 @@ abstract class BaseBlockService<T : Block>(
             throw ValidationException("Invalid block timestamp: ${block.timestamp}")
         }
 
-        if (!isValidHash(block)) {
+        if (!blockService.isValidHash(block)) {
             throw ValidationException("Invalid block hash: ${block.hash}")
         }
 
@@ -49,27 +44,12 @@ abstract class BaseBlockService<T : Block>(
         }
     }
 
-    protected fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray {
-        val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + previousHash.toByteArray(UTF_8).size + payload.getBytes().size)
-            .putLong(timestamp)
-            .putLong(height)
-            .put(previousHash.toByteArray(UTF_8))
-            .put(payload.getBytes())
-            .array()
-
-        return HashUtils.doubleSha256(bytes)
-    }
 
     private fun isValidPreviousHash(block: Block, lastBlock: Block): Boolean = block.previousHash == lastBlock.hash
 
     private fun isValidTimeStamp(block: Block, lastBlock: Block): Boolean = block.timestamp > lastBlock.timestamp
 
     private fun isValidHeight(block: Block, lastBlock: Block): Boolean = block.height == lastBlock.height + 1
-
-    private fun isValidHash(block: Block): Boolean {
-        val hash = createHash(block.timestamp, block.height, block.previousHash, block.getPayload())
-        return ByteUtils.toHexString(hash) == block.hash
-    }
 
     private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean =
         SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
