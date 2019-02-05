@@ -112,7 +112,7 @@ class ChainSynchronizer(
             return
         }
         status = PROCESSING
-        val block = genesisBlockService.getLast()
+        val block = blockService.getLast()
         checkBlock(block)
         future = requestRetryScheduler.startRequestScheduler(future, Runnable { checkBlock(block) })
     }
