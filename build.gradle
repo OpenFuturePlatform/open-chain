@@ -15,7 +15,6 @@ group = 'io.openfuture.chain'
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 
