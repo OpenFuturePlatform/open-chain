@@ -12,6 +12,7 @@ class ContractCostCalculator {
 
     private val dictionary = OpcodeDictionary()
 
+
     fun calculateCost(bytes: ByteArray): Long {
         var result = 0L
         val classReader = ClassReader(bytes)
@@ -31,7 +32,7 @@ class ContractCostCalculator {
             return result
         }
         var instruction = instructions.first
-        do {
+        while (null != instruction) {
             val opcode = instruction.opcode
             result += when (instruction) {
                 is MethodInsnNode -> dictionary.get(instruction.owner, instruction.name)
@@ -43,7 +44,7 @@ class ContractCostCalculator {
                 else -> dictionary.get(opcode)
             }
             instruction = instruction.next
-        } while (null != instruction)
+        }
         return result
     }
 
