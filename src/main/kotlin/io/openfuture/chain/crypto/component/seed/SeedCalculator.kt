@@ -23,6 +23,6 @@ class SeedCalculator {
         return bytes
     }
 
-    private fun getUtf8Bytes(string: String): ByteArray = string.toByteArray(Charsets.UTF_8)
+    private fun getUtf8Bytes(string: String): ByteArray = string.toByteArray()
 
 }

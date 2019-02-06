@@ -7,6 +7,8 @@ import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType
 import io.openfuture.chain.core.exception.model.ExceptionType.ALREADY_DELEGATE
+import io.openfuture.chain.core.model.entity.Receipt
+import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.repository.DelegateTransactionRepository
@@ -95,9 +97,27 @@ class DefaultDelegateTransactionService(
     }
 
     override fun updateState(message: DelegateTransactionMessage) {
-        walletStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
-        walletStateService.updateBalanceByAddress(consensusProperties.genesisAddress!!, message.amount)
+        accountStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
+        accountStateService.updateBalanceByAddress(consensusProperties.genesisAddress!!, message.amount)
         delegateStateService.addDelegate(message.delegateKey, message.senderAddress, message.timestamp)
+    }
+
+    override fun generateReceipt(message: DelegateTransactionMessage, delegateWallet: String): Receipt {
+        val results = listOf(
+            ReceiptResult(
+                message.senderAddress,
+                consensusProperties.genesisAddress!!,
+                message.amount,
+                message.delegateKey
+            ),
+            ReceiptResult(
+                message.senderAddress,
+                delegateWallet,
+                message.fee
+            )
+        )
+
+        return getReceipt(message.hash, results)
     }
 
     override fun verify(message: DelegateTransactionMessage): Boolean {

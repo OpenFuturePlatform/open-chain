@@ -1,11 +1,13 @@
 package io.openfuture.chain.core.repository
 
+import io.openfuture.chain.core.model.entity.Contract
+import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
-import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -143,16 +145,34 @@ interface DelegateStateRepository : StateRepository<DelegateState> {
 }
 
 @Repository
-interface WalletStateRepository : StateRepository<WalletState> {
+interface AccountStateRepository : StateRepository<AccountState> {
 
     @Query("""
-        SELECT ws1 FROM WalletState ws1
-        WHERE ws1.voteFor=:delegateKey
-        AND ws1.block.height = (
-            SELECT MAX(ws2.block.height) FROM WalletState ws2
-            WHERE ws1.address=ws2.address
+        SELECT as1 FROM AccountState as1
+        WHERE as1.voteFor=:delegateKey
+        AND as1.block.height = (
+            SELECT MAX(as2.block.height) FROM AccountState as2
+            WHERE as1.address=as2.address
         )
         """)
-    fun findVotesByDelegateKey(@Param("delegateKey") delegateKey: String): List<WalletState>
+    fun findVotesByDelegateKey(@Param("delegateKey") delegateKey: String): List<AccountState>
+
+}
+
+@Repository
+interface ContractRepository : BaseRepository<Contract> {
+
+    fun findOneByAddress(address: String): Contract?
+
+    fun findAllByOwner(owner: String): List<Contract>
+
+}
+
+@Repository
+interface ReceiptRepository : BaseRepository<Receipt> {
+
+    fun findOneByTransactionHash(hash: String): Receipt?
+
+    fun deleteAllByBlockHeightIn(heights: List<Long>)
 
 }

@@ -6,7 +6,6 @@ import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
 import java.nio.ByteBuffer
-import kotlin.text.Charsets.UTF_8
 
 @NoArgConstructor
 class DelegateStateMessage(
@@ -17,9 +16,9 @@ class DelegateStateMessage(
 ) : StateMessage(address) {
 
     override fun getBytes(): ByteArray =
-        ByteBuffer.allocate(LONG_BYTES + walletAddress.toByteArray(UTF_8).size + LONG_BYTES)
+        ByteBuffer.allocate(LONG_BYTES + walletAddress.toByteArray().size + LONG_BYTES)
             .putLong(rating)
-            .put(walletAddress.toByteArray(UTF_8))
+            .put(walletAddress.toByteArray())
             .putLong(createDate)
             .array()
 
@@ -35,6 +34,26 @@ class DelegateStateMessage(
         buf.writeLong(rating)
         buf.writeString(walletAddress)
         buf.writeLong(createDate)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is DelegateStateMessage) return false
+        if (!super.equals(other)) return false
+
+        if (rating != other.rating) return false
+        if (walletAddress != other.walletAddress) return false
+        if (createDate != other.createDate) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + rating.hashCode()
+        result = 31 * result + walletAddress.hashCode()
+        result = 31 * result + createDate.hashCode()
+        return result
     }
 
 }

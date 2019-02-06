@@ -1,12 +1,14 @@
 package io.openfuture.chain.core.service
 
+import io.openfuture.chain.core.model.entity.Contract
+import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
-import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
@@ -160,6 +162,8 @@ interface TransferTransactionService {
 
     fun updateState(message: TransferTransactionMessage)
 
+    fun generateReceipt(message: TransferTransactionMessage, delegateWallet: String): Receipt
+
     fun verify(message: TransferTransactionMessage): Boolean
 
 }
@@ -175,6 +179,8 @@ interface RewardTransactionService {
     fun commit(transaction: RewardTransaction)
 
     fun updateState(message: RewardTransactionMessage)
+
+    fun generateReceipt(message: RewardTransactionMessage): Receipt
 
     fun verify(message: RewardTransactionMessage): Boolean
 
@@ -202,6 +208,8 @@ interface VoteTransactionService {
 
     fun updateState(message: VoteTransactionMessage)
 
+    fun generateReceipt(message: VoteTransactionMessage, delegateWallet: String): Receipt
+
     fun verify(message: VoteTransactionMessage): Boolean
 
 }
@@ -224,17 +232,19 @@ interface DelegateTransactionService {
 
     fun updateState(message: DelegateTransactionMessage)
 
+    fun generateReceipt(message: DelegateTransactionMessage, delegateWallet: String): Receipt
+
     fun verify(message: DelegateTransactionMessage): Boolean
 
 }
 
 interface StateService<T : State> {
 
-    fun getLastByAddress(address: String): T?
+    fun getLastByAddress(address: String): T
 
     fun getByAddress(address: String): List<T>
 
-    fun getByAddressAndBlock(address: String, block: Block): T?
+    fun getByAddressAndBlock(address: String, block: Block): T
 
     fun deleteBlockStates(blockHeights: List<Long>)
 
@@ -258,18 +268,41 @@ interface DelegateStateService : StateService<DelegateState> {
 
 }
 
-interface WalletStateService : StateService<WalletState> {
+interface AccountStateService : StateService<AccountState> {
 
     fun getBalanceByAddress(address: String): Long
 
     fun getActualBalanceByAddress(address: String): Long
 
-    fun getVotesForDelegate(delegateKey: String): List<WalletState>
+    fun getVotesForDelegate(delegateKey: String): List<AccountState>
 
-    fun updateBalanceByAddress(address: String, amount: Long): WalletStateMessage
+    fun updateBalanceByAddress(address: String, amount: Long): AccountStateMessage
 
-    fun updateVoteByAddress(address: String, delegateKey: String?): WalletStateMessage
+    fun updateVoteByAddress(address: String, delegateKey: String?): AccountStateMessage
 
-    fun commit(state: WalletState)
+    fun updateStorage(address: String, storage: String): AccountStateMessage
+
+    fun commit(state: AccountState)
+
+}
+
+interface ContractService {
+
+    fun getByAddress(address: String): Contract
+
+    fun getAllByOwner(owner: String): List<Contract>
+
+    fun save(contract: Contract): Contract
+
+    fun generateAddress(owner: String): String
+}
+
+interface ReceiptService {
+
+    fun getByTransactionHash(hash: String): Receipt
+
+    fun commit(receipt: Receipt)
+
+    fun deleteBlockReceipts(blockHeights: List<Long>)
 
 }
