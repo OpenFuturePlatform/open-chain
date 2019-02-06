@@ -61,6 +61,11 @@ dependencies {
     compile("org.ow2.asm:asm:7.0")
     compile("org.ow2.asm:asm-commons:7.0")
 
+    // SDK
+    compile("io.openfuture:chain-kotlin-sdk") {
+        exclude group: 'org.slf4j'
+    }
+
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('io.projectreactor:reactor-test')
