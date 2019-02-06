@@ -2,16 +2,17 @@ package io.openfuture.chain.core.component
 
 import io.openfuture.chain.network.message.core.StateMessage
 import org.springframework.stereotype.Component
-import java.io.Closeable
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
-class StatePool : Closeable {
+class StatePool {
 
     private val pool: MutableMap<String, StateMessage> = ConcurrentHashMap()
 
 
     fun getPool(): Map<String, StateMessage> = pool
+
+    fun getStates(): List<StateMessage> = pool.values.toList()
 
     fun get(address: String): StateMessage? = pool[address]
 
@@ -19,10 +20,6 @@ class StatePool : Closeable {
 
     fun clear() {
         pool.clear()
-    }
-
-    override fun close() {
-        clear()
     }
 
 }

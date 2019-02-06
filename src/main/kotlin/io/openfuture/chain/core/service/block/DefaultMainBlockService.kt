@@ -118,8 +118,8 @@ class DefaultMainBlockService(
             )
 
             val stateHashes = mutableListOf<String>()
-            val states = getStates(txMessages)
-            val receipts = getReceipts(txMessages, delegate.walletAddress)
+            val receipts = processTransactions(txMessages, delegate.walletAddress)
+            val states = statePool.getStates()
             val delegateStates = mutableListOf<DelegateStateMessage>()
             val accountStates = mutableListOf<AccountStateMessage>()
 
@@ -243,13 +243,8 @@ class DefaultMainBlockService(
             throw ValidationException("Invalid transfer transactions in block: height #${message.height}, hash ${message.hash}")
         }
 
-        if (!isValidStates(message.getAllTransactions(), message.getAllStates())) {
-            throw ValidationException("Invalid states")
-        }
-
-        val delegateWallet = delegateStateService.getLastByAddress(message.publicKey).walletAddress
-        if (!isValidReceipts(message.getAllTransactions(), message.receipts, delegateWallet)) {
-            throw ValidationException("Invalid receipts")
+        if (!isValidReceiptsAndStates(message)) {
+            throw ValidationException("Invalid block states and receipts")
         }
 
     }
@@ -322,48 +317,39 @@ class DefaultMainBlockService(
         return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)
     }
 
-    private fun isValidStates(txMessages: List<TransactionMessage>, blockStates: List<StateMessage>): Boolean {
-        val states = getStates(txMessages)
-        if (blockStates.size != states.size) {
+    private fun isValidReceiptsAndStates(block: PendingBlockMessage): Boolean {
+        val delegateWallet = delegateStateService.getLastByAddress(block.publicKey).walletAddress
+        val receipts = processTransactions(block.getAllTransactions(), delegateWallet).map { it.toMessage() }
+        val states = statePool.getStates()
+
+        if (block.receipts.size != receipts.size) {
             return false
         }
 
-        return states.all { blockStates.contains(it) }
-    }
-
-    private fun isValidReceipts(txMessages: List<TransactionMessage>, blockReceipts: List<ReceiptMessage>, activeDelegate: String): Boolean {
-        val receipts = getReceipts(txMessages, activeDelegate).map { it.toMessage() }
-        if (blockReceipts.size != receipts.size) {
+        if (block.getAllStates().size != states.size) {
             return false
         }
 
-        return receipts.all { blockReceipts.contains(it) }
+        return receipts.all { block.receipts.contains(it) } && states.all { block.getAllStates().contains(it) }
     }
 
+    private fun processTransactions(txMessages: List<TransactionMessage>, delegateWallet: String): List<Receipt> {
+        val receipts = mutableListOf<Receipt>()
 
-    private fun getStates(txMessages: List<TransactionMessage>): List<StateMessage> {
-        return statePool.use {
-            txMessages.forEach { tx ->
+        statePool.clear()
+
+        txMessages.forEach { tx ->
+            receipts.add(
                 when (tx) {
-                    is TransferTransactionMessage -> transferTransactionService.updateState(tx)
-                    is VoteTransactionMessage -> voteTransactionService.updateState(tx)
-                    is DelegateTransactionMessage -> delegateTransactionService.updateState(tx)
-                    is RewardTransactionMessage -> rewardTransactionService.updateState(tx)
-                }
-            }
-
-            statePool.getPool().values.toList()
+                    is TransferTransactionMessage -> transferTransactionService.process(tx, delegateWallet)
+                    is VoteTransactionMessage -> voteTransactionService.process(tx, delegateWallet)
+                    is DelegateTransactionMessage -> delegateTransactionService.process(tx, delegateWallet)
+                    is RewardTransactionMessage -> rewardTransactionService.process(tx)
+                    else -> throw IllegalStateException("Unsupported transaction type")
+                })
         }
-    }
 
-    private fun getReceipts(txMessages: List<TransactionMessage>, delegateWallet: String): List<Receipt> = txMessages.map { tx ->
-        when (tx) {
-            is TransferTransactionMessage -> transferTransactionService.generateReceipt(tx, delegateWallet)
-            is VoteTransactionMessage -> voteTransactionService.generateReceipt(tx, delegateWallet)
-            is DelegateTransactionMessage -> delegateTransactionService.generateReceipt(tx, delegateWallet)
-            is RewardTransactionMessage -> rewardTransactionService.generateReceipt(tx)
-            else -> throw IllegalStateException("Unsupported transaction type")
-        }
+        return receipts
     }
 
     private fun getTransactions(): List<UnconfirmedTransaction> {

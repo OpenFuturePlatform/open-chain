@@ -28,7 +28,6 @@ import io.openfuture.chain.smartcontract.component.load.SmartContractLoader
 import io.openfuture.chain.smartcontract.component.validation.SmartContractValidator
 import io.openfuture.chain.smartcontract.model.Abi
 import io.openfuture.chain.smartcontract.util.SerializationUtils.serialize
-import org.apache.commons.lang3.StringUtils.EMPTY
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.fromHexString
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.toHexString
 import org.slf4j.Logger
@@ -117,12 +116,16 @@ class DefaultTransferTransactionService(
         }
     }
 
-    override fun updateState(message: TransferTransactionMessage) {
-        accountStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
+
+    override fun process(message: TransferTransactionMessage, delegateWallet: String): Receipt {
+        val results = mutableListOf<ReceiptResult>()
 
         when (getType(message.recipientAddress, message.data)) {
             FUND -> {
+                accountStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
                 accountStateService.updateBalanceByAddress(message.recipientAddress!!, message.amount)
+                results.add(ReceiptResult(message.senderAddress, message.recipientAddress!!, message.amount))
+                results.add(ReceiptResult(message.senderAddress, delegateWallet, message.fee))
             }
             DEPLOY -> {
                 val contractAddress = contractService.generateAddress(message.senderAddress)
@@ -133,22 +136,6 @@ class DefaultTransferTransactionService(
             }
             EXECUTE -> TODO()
         }
-    }
-
-    override fun generateReceipt(message: TransferTransactionMessage, delegateWallet: String): Receipt {
-        val results = listOf(
-            ReceiptResult(
-                message.senderAddress,
-                message.recipientAddress ?: EMPTY,
-                message.amount,
-                getType(message.recipientAddress, message.data).toString()
-            ),
-            ReceiptResult(
-                message.senderAddress,
-                delegateWallet,
-                message.fee
-            )
-        )
 
         return getReceipt(message.hash, results)
     }
@@ -198,7 +185,8 @@ class DefaultTransferTransactionService(
                     throw ValidationException("Smart contract's method ${utx.payload.data} not exists")
                 }
             }
-            FUND -> {}
+            FUND -> {
+            }
         }
 
     }
