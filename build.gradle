@@ -63,7 +63,7 @@ dependencies {
     compile("org.ow2.asm:asm-commons:7.0")
 
     // SDK
-    implementation("io.openfuture.chain:chain-kotlin-sdk")
+    implementation("io.openfuture:chain-kotlin-sdk")
 
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
