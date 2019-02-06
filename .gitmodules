@@ -5,4 +5,6 @@
 	ignore = untracked
 [submodule "chain-kotlin-sdk"]
 	path = chain-kotlin-sdk
-	url = git@git.zensoft.io:open-platform/sdk/chain-kotlin-sdk.git
+	url = ../sdk/chain-kotlin-sdk.git
+	branch = master
+	ignore = untracked
