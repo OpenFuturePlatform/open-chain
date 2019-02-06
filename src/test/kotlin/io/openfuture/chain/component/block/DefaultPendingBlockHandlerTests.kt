@@ -68,7 +68,6 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
         given(keyHolder.getPrivateKey()).willReturn(
             ByteUtils.fromHexString(privateKey))
         given(keyHolder.getPublicKeyAsHexString()).willReturn("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4")
-        given(epochService.getSlotNumber(pendingBlock.timestamp)).willReturn(2L)
         given(epochService.getCurrentSlotOwner()).willReturn(delegate.address)
         given(epochService.getDelegatesPublicKeys()).willReturn(listOf("037aa4d9495e30b6b30b94a30f5a573a0f2b365c25eda2d425093b6cf7b826fbd4"))
         given(mainBlockService.verify(pendingBlock)).willReturn(true)
@@ -104,7 +103,6 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
 
         given(keyHolder.getPrivateKey()).willReturn(ByteUtils.fromHexString(privateKey))
         given(keyHolder.getPublicKeyAsHexString()).willReturn(publicKey)
-        given(epochService.getSlotNumber(pendingBlock.timestamp)).willReturn(2L)
         given(epochService.getCurrentSlotOwner()).willReturn(publicKey)
         given(mainBlockService.verify(pendingBlock)).willReturn(true)
         given(epochService.getDelegatesPublicKeys()).willReturn(
