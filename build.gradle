@@ -64,7 +64,7 @@ dependencies {
 
     // SDK
     compile("io.openfuture:chain-kotlin-sdk") {
-        exclude group: 'org.slf4j', module: 'slf4j-api'
+        exclude group: 'org.slf4j'
     }
 
     // Tests
