@@ -41,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
     uRepository: UTransferTransactionRepository,
-    private val contractService: ContractService
+    private val contractService: ContractService,
 ) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
 
     companion object {
@@ -131,7 +131,10 @@ class DefaultTransferTransactionService(
                 val contract = SmartContractInjector.initSmartContract(clazz, message.senderAddress, contractAddress)
                 accountStateService.updateStorage(contractAddress, toHexString(serialize(contract)))
             }
-            EXECUTE -> TODO()
+            EXECUTE -> {
+                val contractState = accountStateService.getLastByAddress(message.recipientAddress!!)
+
+            }
         }
     }
 
