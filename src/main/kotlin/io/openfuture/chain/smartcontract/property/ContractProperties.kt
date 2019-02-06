@@ -1,10 +1,9 @@
-package io.openfuture.chain.smartcontract.deploy
+package io.openfuture.chain.smartcontract.property
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
 import javax.validation.constraints.NotNull
-
 
 @Component
 @Validated

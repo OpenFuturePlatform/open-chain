@@ -6,7 +6,7 @@ import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.MainBlockService
-import io.openfuture.chain.core.sync.SyncMode
+import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.network.message.sync.EpochRequestMessage
 import io.openfuture.chain.network.message.sync.EpochResponseMessage
 import org.springframework.stereotype.Component
@@ -23,7 +23,7 @@ class EpochRequestHandler(
     override fun channelRead0(ctx: ChannelHandlerContext, msg: EpochRequestMessage) {
         val delegateKey: String = keyHolder.getPublicKeyAsHexString()
         val epochIndex = msg.epochIndex
-        val genesisBlock = genesisBlockService.getByEpochIndex(epochIndex)
+        val genesisBlock = genesisBlockService.findByEpochIndex(epochIndex)
 
         if (null == genesisBlock) {
             ctx.writeAndFlush(EpochResponseMessage(delegateKey, false, null, emptyList()))
@@ -32,7 +32,7 @@ class EpochRequestHandler(
 
         val mainBlocks = mainBlockService.getBlocksByEpochIndex(epochIndex)
 
-        if (msg.syncMode != SyncMode.FULL) {
+        if (msg.syncMode != FULL) {
             mainBlocks.forEach {
                 it.payload.transferTransactions = mutableListOf()
                 it.payload.delegateTransactions = mutableListOf()

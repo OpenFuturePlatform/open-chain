@@ -1,14 +1,13 @@
 package io.openfuture.chain.smartcontract.deploy.execution
 
-import io.openfuture.chain.smartcontract.core.model.SmartContract
-import io.openfuture.chain.smartcontract.deploy.ContractProperties
-import io.openfuture.chain.smartcontract.deploy.domain.ClassSource
+import io.openfuture.chain.smartcontract.component.SmartContractInjector
+import io.openfuture.chain.smartcontract.component.load.SmartContractLoader
 import io.openfuture.chain.smartcontract.deploy.domain.ContractDto
 import io.openfuture.chain.smartcontract.deploy.domain.ContractMethod
 import io.openfuture.chain.smartcontract.deploy.exception.ContractExecutionException
 import io.openfuture.chain.smartcontract.deploy.exception.ContractLoadingException
-import io.openfuture.chain.smartcontract.deploy.load.ContractInjector
-import io.openfuture.chain.smartcontract.deploy.load.SourceClassLoader
+import io.openfuture.chain.smartcontract.model.SmartContract
+import io.openfuture.chain.smartcontract.property.ContractProperties
 import org.apache.commons.lang3.reflect.MethodUtils
 import org.springframework.stereotype.Component
 import java.lang.management.ManagementFactory
@@ -33,7 +32,7 @@ class ContractExecutor(
     private val pool = Executors.newSingleThreadExecutor()
     private val threadBean = ManagementFactory.getThreadMXBean()
     private val millisecond = 1000000.0
-    private val classLoader = SourceClassLoader()
+    private val classLoader = SmartContractLoader()
 
 
     fun run(contract: ContractDto, method: ContractMethod, executionFee: Long): ExecutionResult {
@@ -69,16 +68,10 @@ class ContractExecutor(
 
     private fun loadClassAndState(contract: ContractDto): Any {
         try {
-            var instance = classLoader.getLoadedClass(contract.clazz)?.newInstance()
+            val clazz = classLoader.loadClass(contract.bytes)
 
-            if (null == instance) {
-                instance = classLoader.loadBytes(ClassSource(contract.bytes)).clazz.newInstance()
-            }
-
-            val injector = ContractInjector(instance as SmartContract, classLoader)
-            injector.injectState(contract.state)
-            injector.injectFields(contract.address, contract.owner)
-            return instance
+            val inst = SmartContractInjector.initSmartContract(clazz, contract.owner, contract.address)
+            return inst
         } catch (ex: Throwable) {
             throw ContractLoadingException("Error while loading contract and state: ${ex.message}", ex)
         }
