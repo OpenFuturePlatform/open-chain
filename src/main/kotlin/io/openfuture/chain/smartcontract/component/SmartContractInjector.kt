@@ -9,7 +9,6 @@ object SmartContractInjector {
     private const val ADDRESS_FIELD = "address"
 
 
-    @Throws(ClassCastException::class)
     fun initSmartContract(clazz: Class<*>, owner: String, address: String): SmartContract {
         val instance = clazz.newInstance() as SmartContract
 
