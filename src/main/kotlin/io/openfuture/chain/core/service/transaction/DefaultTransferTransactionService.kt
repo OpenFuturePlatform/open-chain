@@ -130,7 +130,7 @@ class DefaultTransferTransactionService(
             DEPLOY -> {
                 val contractAddress = contractService.generateAddress(message.senderAddress)
                 val newBytes = ByteCodeProcessor.renameClass(fromHexString(message.data), contractAddress)
-                val clazz = SmartContractLoader().loadClass(newBytes)
+                val clazz = SmartContractLoader(this::class.java.classLoader).loadClass(newBytes)
                 val contract = SmartContractInjector.initSmartContract(clazz, message.senderAddress, contractAddress)
                 accountStateService.updateStorage(contractAddress, toHexString(serialize(contract)))
             }
