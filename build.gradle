@@ -15,14 +15,10 @@ group = 'io.openfuture.chain'
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 
 dependencies {
-    // Smartcontract sdk
-    implementation('io.openfuture.chain:smartcontract-sdk:0.1.0-SNAPSHOT')
-    
     // Kotlin
     compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     compile("org.jetbrains.kotlin:kotlin-reflect")
@@ -63,7 +59,7 @@ dependencies {
 
     // SDK
     compile("io.openfuture:chain-kotlin-sdk") {
-        exclude group: 'org.slf4j', module: 'slf4j-api'
+        exclude group: 'org.slf4j'
     }
 
     // Tests
