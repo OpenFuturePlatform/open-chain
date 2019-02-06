@@ -17,14 +17,14 @@ import javax.persistence.*
 @Embeddable
 class MainBlockPayload(
 
-    @Column(name = "merkle_hash", nullable = false)
-    var merkleHash: String,
+    @Column(name = "transaction_merkle_hash", nullable = false)
+    var transactionMerkleHash: String,
 
-    @Column(name = "state_hash", nullable = false)
-    var stateHash: String,
+    @Column(name = "state_merkle_hash", nullable = false)
+    var stateMerkleHash: String,
 
-    @Column(name = "receipt_hash", nullable = false)
-    var receiptHash: String,
+    @Column(name = "receipt_merkle_hash", nullable = false)
+    var receiptMerkleHash: String,
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.EAGER)
@@ -99,7 +99,7 @@ class MainBlockPayload(
 ) : BlockPayload {
 
     override fun getBytes(): ByteArray =
-        merkleHash.toByteArray() + stateHash.toByteArray() + receiptHash.toByteArray()
+        transactionMerkleHash.toByteArray() + stateMerkleHash.toByteArray() + receiptMerkleHash.toByteArray()
 
     companion object {
 

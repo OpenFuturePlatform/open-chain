@@ -131,16 +131,16 @@ class DefaultMainBlockService(
                 }
             }
 
-            val merkleHash = calculateMerkleRoot(transactionHashes + rewardTransactionMessage.hash)
-            val stateHash = calculateMerkleRoot(stateHashes)
-            val receiptHash = calculateMerkleRoot(receipts.map { it.getHash() })
-            val payload = MainBlockPayload(merkleHash, stateHash, receiptHash)
+            val transactionMerkleHash = calculateMerkleRoot(transactionHashes + rewardTransactionMessage.hash)
+            val stateMerkleHash = calculateMerkleRoot(stateHashes)
+            val receiptMerkleHash = calculateMerkleRoot(receipts.map { it.getHash() })
+            val payload = MainBlockPayload(transactionMerkleHash, stateMerkleHash, receiptMerkleHash)
             val hash = blockService.createHash(timestamp, height, previousHash, payload)
             val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
 
             return PendingBlockMessage(height, previousHash, timestamp, toHexString(hash), signature, publicKey,
-                merkleHash, stateHash, receiptHash, rewardTransactionMessage, voteTransactions, delegateTransactions,
-                transferTransactions, delegateStates, accountStates, receipts.map { it.toMessage() })
+                transactionMerkleHash, stateMerkleHash, receiptMerkleHash, rewardTransactionMessage, voteTransactions,
+                delegateTransactions, transferTransactions, delegateStates, accountStates, receipts.map { it.toMessage() })
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -211,15 +211,15 @@ class DefaultMainBlockService(
     private fun validate(message: PendingBlockMessage) {
         super.validateBase(MainBlock.of(message))
 
-        if (!isValidRootHash(message.merkleHash, message.getAllTransactions().map { it.hash })) {
+        if (!isValidRootHash(message.transactionMerkleHash, message.getAllTransactions().map { it.hash })) {
             throw ValidationException("Invalid transaction merkle hash in block: height #${message.height}, hash ${message.hash}")
         }
 
-        if (!isValidRootHash(message.stateHash, message.getAllStates().map { it.getHash() })) {
+        if (!isValidRootHash(message.stateMerkleHash, message.getAllStates().map { it.getHash() })) {
             throw ValidationException("Invalid state merkle hash in block: height #${message.height}, hash ${message.hash}")
         }
 
-        if (!isValidRootHash(message.receiptHash, message.receipts.map { Receipt(it.transactionHash, it.result).getHash() })) {
+        if (!isValidRootHash(message.receiptMerkleHash, message.receipts.map { Receipt(it.transactionHash, it.result).getHash() })) {
             throw ValidationException("Invalid receipt merkle hash in block: height #${message.height}, hash ${message.hash}")
         }
 

@@ -11,9 +11,9 @@ class MainBlockMessage(
     hash: String,
     signature: String,
     publicKey: String,
-    merkleHash: String,
-    stateHash: String,
-    receiptHash: String,
+    transactionMerkleHash: String,
+    stateMerkleHash: String,
+    receiptMerkleHash: String,
     rewardTransaction: RewardTransactionMessage,
     voteTransactions: List<VoteTransactionMessage>,
     delegateTransactions: List<DelegateTransactionMessage>,
@@ -21,9 +21,9 @@ class MainBlockMessage(
     delegateStates: List<DelegateStateMessage>,
     accountStates: List<AccountStateMessage>,
     receipts: List<ReceiptMessage>
-) : BaseMainBlockMessage(height, previousHash, timestamp, hash, signature, publicKey, merkleHash, stateHash,
-    receiptHash, rewardTransaction, voteTransactions, delegateTransactions, transferTransactions, delegateStates,
-    accountStates, receipts) {
+) : BaseMainBlockMessage(height, previousHash, timestamp, hash, signature, publicKey, transactionMerkleHash,
+    stateMerkleHash, receiptMerkleHash, rewardTransaction, voteTransactions, delegateTransactions, transferTransactions,
+    delegateStates, accountStates, receipts) {
 
     override fun toString() = "MainBlockMessage(hash=$hash)"
 

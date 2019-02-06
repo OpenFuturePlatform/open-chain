@@ -245,7 +245,7 @@ class ChainSynchronizer(
 
     private fun isValidStateMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
         mainBlocks.forEach { block ->
-            if (!isValidRootHash(block.stateHash, block.getAllStates().map { it.getHash() })) {
+            if (!isValidRootHash(block.stateMerkleHash, block.getAllStates().map { it.getHash() })) {
                 log.warn("State merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
                 return false
             }
@@ -256,7 +256,7 @@ class ChainSynchronizer(
 
     private fun isValidReceiptMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
         mainBlocks.forEach { block ->
-            if (!isValidRootHash(block.receiptHash, block.receipts.map { Receipt(it.transactionHash, it.result).getHash() })) {
+            if (!isValidRootHash(block.receiptMerkleHash, block.receipts.map { Receipt(it.transactionHash, it.result).getHash() })) {
                 log.warn("Receipt merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
                 return false
             }
@@ -267,7 +267,7 @@ class ChainSynchronizer(
 
     private fun isValidTransactionMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
         mainBlocks.forEach { block ->
-            if (!isValidRootHash(block.merkleHash, block.getAllTransactions().map { it.hash })) {
+            if (!isValidRootHash(block.transactionMerkleHash, block.getAllTransactions().map { it.hash })) {
                 log.warn("Transaction merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
                 return false
             }
