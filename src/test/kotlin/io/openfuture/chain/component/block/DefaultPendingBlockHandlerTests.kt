@@ -25,7 +25,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
-
 class DefaultPendingBlockHandlerTests : ServiceTests() {
 
     @Mock private lateinit var epochService: EpochService
@@ -59,7 +58,7 @@ class DefaultPendingBlockHandlerTests : ServiceTests() {
             "signature", "publicKey", payload.transactionMerkleHash, payload.stateMerkleHash, payload.receiptMerkleHash,
             rewardTransactionMessage, listOf(), listOf(), listOf(), listOf(), listOf(), listOf())
         val block = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey", payload)
-        val delegate = DelegateState("publicKey", block, 1, "address", 1)
+        val delegate = DelegateState("publicKey", 1, "address", 1, "hash", block)
 
         given(keyHolder.getPrivateKey()).willReturn(
             ByteUtils.fromHexString(privateKey))

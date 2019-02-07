@@ -252,9 +252,9 @@ interface DelegateStateService : StateService<DelegateState> {
 
     fun isExistsByPublicKeys(publicKeys: List<String>): Boolean
 
-    fun addDelegate(delegateKey: String, walletAddress: String, createDate: Long): DelegateStateMessage
+    fun addDelegate(delegateKey: String, walletAddress: String, createDate: Long): DelegateState
 
-    fun updateRating(delegateKey: String, amount: Long): DelegateStateMessage
+    fun updateRating(delegateKey: String, amount: Long): DelegateState
 
     fun commit(state: DelegateState)
 
@@ -268,11 +268,11 @@ interface AccountStateService : StateService<AccountState> {
 
     fun getVotesForDelegate(delegateKey: String): List<AccountState>
 
-    fun updateBalanceByAddress(address: String, amount: Long): AccountStateMessage
+    fun updateBalanceByAddress(address: String, amount: Long): AccountState
 
-    fun updateVoteByAddress(address: String, delegateKey: String?): AccountStateMessage
+    fun updateVoteByAddress(address: String, delegateKey: String?): AccountState
 
-    fun updateStorage(address: String, storage: String): AccountStateMessage
+    fun updateStorage(address: String, storage: String): AccountState
 
     fun commit(state: AccountState)
 

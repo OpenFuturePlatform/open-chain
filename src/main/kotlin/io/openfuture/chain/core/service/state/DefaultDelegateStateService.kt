@@ -6,7 +6,6 @@ import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.repository.DelegateStateRepository
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.sync.BlockchainLock
-import io.openfuture.chain.network.message.core.DelegateStateMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.stereotype.Service
@@ -36,15 +35,15 @@ class DefaultDelegateStateService(
 
     override fun isExistsByPublicKeys(publicKeys: List<String>): Boolean = publicKeys.all { isExistsByPublicKey(it) }
 
-    override fun updateRating(delegateKey: String, amount: Long): DelegateStateMessage {
+    override fun updateRating(delegateKey: String, amount: Long): DelegateState {
         val state = getCurrentState(delegateKey)
-        val newState = DelegateStateMessage(state.address, state.rating + amount, state.walletAddress, state.createDate)
+        val newState = DelegateState(state.address, state.rating + amount, state.walletAddress, state.createDate)
         statePool.update(newState)
         return newState
     }
 
-    override fun addDelegate(delegateKey: String, walletAddress: String, createDate: Long): DelegateStateMessage {
-        val newState = DelegateStateMessage(delegateKey, DEFAULT_DELEGATE_RATING, walletAddress, createDate)
+    override fun addDelegate(delegateKey: String, walletAddress: String, createDate: Long): DelegateState {
+        val newState = DelegateState(delegateKey, DEFAULT_DELEGATE_RATING, walletAddress, createDate)
         statePool.update(newState)
         return newState
     }
@@ -59,11 +58,11 @@ class DefaultDelegateStateService(
         }
     }
 
-    private fun getCurrentState(address: String): DelegateStateMessage {
+    private fun getCurrentState(address: String): DelegateState {
         BlockchainLock.readLock.lock()
         try {
-            return statePool.get(address) as? DelegateStateMessage
-                ?: repository.findFirstByAddressOrderByBlockIdDesc(address)!!.toMessage()
+            return statePool.get(address) as? DelegateState
+                ?: repository.findFirstByAddressOrderByBlockIdDesc(address)!!
         } finally {
             BlockchainLock.readLock.unlock()
         }

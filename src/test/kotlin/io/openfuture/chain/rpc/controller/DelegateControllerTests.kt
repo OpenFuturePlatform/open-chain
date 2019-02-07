@@ -18,7 +18,6 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.data.domain.PageImpl
 
-
 @WebFluxTest(DelegateController::class)
 class DelegateControllerTests : ControllerTests() {
 
@@ -34,9 +33,11 @@ class DelegateControllerTests : ControllerTests() {
 
     @Test
     fun getAllShouldReturnDelegatesListTest() {
-        val block = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
+        val block = MainBlock(1, 1, "previousHash", "hash", "signature",
+            "publicKey",
             MainBlockPayload("merkleHash", "stateHash", "receiptHash"))
-        val delegate = DelegateState("publicKey", block, 1, "address", 1532345018021)
+        val delegate = DelegateState("publicKey", 1, "address", 1532345018021,
+            "hash", block)
         val delegates = listOf(delegate)
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
 
@@ -56,10 +57,11 @@ class DelegateControllerTests : ControllerTests() {
     @Test
     fun getAllActiveShouldReturnActiveDelegatesListTest() {
         val publicKey = "publicKey"
-        val genesisBlock = GenesisBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
-            GenesisBlockPayload(1, mutableListOf(publicKey)))
-        val delegate = DelegateState("publicKey", MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
-        MainBlockPayload("merkleHash", "stateHash", "receiptHash")), 1, "address", 1532345018021)
+        val genesisBlock = GenesisBlock(1, 1, "previousHash", "hash",
+            "signature", "publicKey", GenesisBlockPayload(1, mutableListOf(publicKey)))
+        val delegate = DelegateState("publicKey", 1, "address", 1532345018021,
+            "hash", MainBlock(1, 1, "previousHash", "hash", "signature",
+            "publicKey", MainBlockPayload("merkleHash", "stateHash", "receiptHash")))
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
 
         given(genesisBlockService.getLast()).willReturn(genesisBlock)

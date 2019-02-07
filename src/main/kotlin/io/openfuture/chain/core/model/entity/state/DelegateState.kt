@@ -1,16 +1,20 @@
 package io.openfuture.chain.core.model.entity.state
 
+import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.message.core.DelegateStateMessage
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import java.nio.ByteBuffer
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Table
+import kotlin.Long.Companion.SIZE_BYTES
 
 @Entity
 @Table(name = "delegate_states")
 class DelegateState(
     address: String,
-    block: MainBlock,
 
     @Column(name = "rating", nullable = false)
     val rating: Long,
@@ -19,16 +23,44 @@ class DelegateState(
     var walletAddress: String,
 
     @Column(name = "create_date", nullable = false)
-    var createDate: Long
+    var createDate: Long,
 
-) : State(address, block) {
+    hash: String,
+    block: Block? = null
+) : State(address, hash, block) {
+
+    constructor(address: String, rating: Long, walletAddress: String, createDate: Long) : this(
+        address,
+        rating,
+        walletAddress,
+        createDate,
+        lazy {
+            val bytes = ByteBuffer.allocate(address.toByteArray().size + SIZE_BYTES +
+                walletAddress.toByteArray().size + SIZE_BYTES)
+                .put(address.toByteArray())
+                .putLong(rating)
+                .put(walletAddress.toByteArray())
+                .putLong(createDate)
+                .array()
+
+            ByteUtils.toHexString(HashUtils.sha256(bytes))
+        }.value
+    )
 
     companion object {
-        fun of(message: DelegateStateMessage, block: MainBlock): DelegateState =
-            DelegateState(message.address, block, message.rating, message.walletAddress, message.createDate)
+        fun of(message: DelegateStateMessage, block: MainBlock? = null): DelegateState =
+            DelegateState(message.address, message.rating, message.walletAddress, message.createDate, message.hash, block)
     }
 
 
-    override fun toMessage(): DelegateStateMessage = DelegateStateMessage(address, rating, walletAddress, createDate)
+    override fun getBytes(): ByteArray = ByteBuffer.allocate(address.toByteArray().size + SIZE_BYTES +
+        walletAddress.toByteArray().size + SIZE_BYTES)
+        .put(address.toByteArray())
+        .putLong(rating)
+        .put(walletAddress.toByteArray())
+        .putLong(createDate)
+        .array()
+
+    override fun toMessage(): DelegateStateMessage = DelegateStateMessage(address, hash, rating, walletAddress, createDate)
 
 }

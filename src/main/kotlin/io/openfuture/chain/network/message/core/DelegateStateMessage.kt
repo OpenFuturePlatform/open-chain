@@ -2,25 +2,17 @@ package io.openfuture.chain.network.message.core
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
-import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
-import java.nio.ByteBuffer
 
 @NoArgConstructor
 class DelegateStateMessage(
     address: String,
+    hash: String,
     var rating: Long,
     var walletAddress: String,
     var createDate: Long
-) : StateMessage(address) {
-
-    override fun getBytes(): ByteArray =
-        ByteBuffer.allocate(LONG_BYTES + walletAddress.toByteArray().size + LONG_BYTES)
-            .putLong(rating)
-            .put(walletAddress.toByteArray())
-            .putLong(createDate)
-            .array()
+) : StateMessage(address, hash) {
 
     override fun read(buf: ByteBuf) {
         super.read(buf)

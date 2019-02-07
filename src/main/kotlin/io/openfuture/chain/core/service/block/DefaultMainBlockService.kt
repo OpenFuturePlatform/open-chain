@@ -124,10 +124,10 @@ class DefaultMainBlockService(
             val accountStates = mutableListOf<AccountStateMessage>()
 
             states.asSequence().forEach {
-                stateHashes.add(it.getHash())
+                stateHashes.add(it.hash)
                 when (it) {
-                    is DelegateStateMessage -> delegateStates.add(it)
-                    is AccountStateMessage -> accountStates.add(it)
+                    is DelegateState -> delegateStates.add(it.toMessage())
+                    is AccountState -> accountStates.add(it.toMessage())
                 }
             }
 
@@ -215,7 +215,7 @@ class DefaultMainBlockService(
             throw ValidationException("Invalid transaction merkle hash in block: height #${message.height}, hash ${message.hash}")
         }
 
-        if (!isValidRootHash(message.stateMerkleHash, message.getAllStates().map { it.getHash() })) {
+        if (!isValidRootHash(message.stateMerkleHash, message.getAllStates().map { it.hash })) {
             throw ValidationException("Invalid state merkle hash in block: height #${message.height}, hash ${message.hash}")
         }
 
@@ -330,7 +330,7 @@ class DefaultMainBlockService(
             return false
         }
 
-        return receipts.all { block.receipts.contains(it) } && states.all { block.getAllStates().contains(it) }
+        return receipts.all { block.receipts.contains(it) } && states.all { block.getAllStates().contains(it.toMessage()) }
     }
 
     private fun processTransactions(txMessages: List<TransactionMessage>, delegateWallet: String): List<Receipt> {

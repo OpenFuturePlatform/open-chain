@@ -10,7 +10,6 @@ import io.openfuture.chain.core.repository.AccountStateRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.AccountStateService
 import io.openfuture.chain.core.sync.BlockchainLock
-import io.openfuture.chain.network.message.core.AccountStateMessage
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -53,28 +52,28 @@ class DefaultAccountStateService(
 
     override fun getVotesForDelegate(delegateKey: String): List<AccountState> = repository.findVotesByDelegateKey(delegateKey)
 
-    override fun updateBalanceByAddress(address: String, amount: Long): AccountStateMessage {
+    override fun updateBalanceByAddress(address: String, amount: Long): AccountState {
         val state = getCurrentState(address)
 
         if (null != state.voteFor) {
             delegateStateService.updateRating(state.voteFor!!, amount)
         }
 
-        val newState = AccountStateMessage(address, state.balance + amount, state.voteFor, state.storage)
+        val newState = AccountState(address, state.balance + amount, state.voteFor, state.storage)
         statePool.update(newState)
         return newState
     }
 
-    override fun updateVoteByAddress(address: String, delegateKey: String?): AccountStateMessage {
-        val state = AccountStateMessage(address, getCurrentState(address).balance, delegateKey)
+    override fun updateVoteByAddress(address: String, delegateKey: String?): AccountState {
+        val state = AccountState(address, getCurrentState(address).balance, delegateKey)
         statePool.update(state)
         return state
     }
 
-    override fun updateStorage(address: String, storage: String): AccountStateMessage {
+    override fun updateStorage(address: String, storage: String): AccountState {
         val state = getCurrentState(address)
 
-        val newState = AccountStateMessage(address, state.balance, state.voteFor, storage)
+        val newState = AccountState(address, state.balance, state.voteFor, storage)
         statePool.update(newState)
         return newState
     }
@@ -88,12 +87,12 @@ class DefaultAccountStateService(
             }
         }.sum()
 
-    private fun getCurrentState(address: String): AccountStateMessage {
+    private fun getCurrentState(address: String): AccountState {
         BlockchainLock.readLock.lock()
         try {
-            return statePool.get(address) as? AccountStateMessage
-                ?: repository.findFirstByAddressOrderByBlockIdDesc(address)?.toMessage()
-                ?: AccountStateMessage(address, DEFAULT_WALLET_BALANCE)
+            return statePool.get(address) as? AccountState
+                ?: repository.findFirstByAddressOrderByBlockIdDesc(address)
+                ?: AccountState(address)
         } finally {
             BlockchainLock.readLock.unlock()
         }

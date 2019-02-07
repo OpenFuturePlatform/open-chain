@@ -8,8 +8,8 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.extension.*
+import io.openfuture.chain.network.message.base.Message
 import io.openfuture.chain.network.message.core.ReceiptMessage
-import io.openfuture.chain.network.serialization.Serializable
 import org.apache.commons.lang3.StringUtils.EMPTY
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.nio.ByteBuffer
@@ -38,8 +38,8 @@ class Receipt(
 
 
     fun getHash(): String {
-        val txHashBytes = transactionHash.toByteArray(Charsets.UTF_8)
-        val resultBytes = result.toByteArray(Charsets.UTF_8)
+        val txHashBytes = transactionHash.toByteArray()
+        val resultBytes = result.toByteArray()
         val bytes = ByteBuffer.allocate(txHashBytes.size + resultBytes.size)
             .put(txHashBytes)
             .put(resultBytes)
@@ -67,7 +67,7 @@ class ReceiptResult(
     var amount: Long,
     var data: String? = null,
     var error: String? = null
-) : Serializable {
+) : Message {
 
     override fun read(buf: ByteBuf) {
         from = buf.readString()

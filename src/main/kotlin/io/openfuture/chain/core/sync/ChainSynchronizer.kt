@@ -245,7 +245,7 @@ class ChainSynchronizer(
 
     private fun isValidStateMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
         mainBlocks.forEach { block ->
-            if (!isValidRootHash(block.stateMerkleHash, block.getAllStates().map { it.getHash() })) {
+            if (!isValidRootHash(block.stateMerkleHash, block.getAllStates().map { it.hash })) {
                 log.warn("State merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
                 return false
             }
