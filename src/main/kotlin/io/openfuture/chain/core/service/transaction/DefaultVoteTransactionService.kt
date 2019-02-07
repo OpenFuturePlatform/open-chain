@@ -109,8 +109,9 @@ internal class DefaultVoteTransactionService(
         }
     }
 
-    override fun updateState(message: VoteTransactionMessage) {
-        when (VoteType.getById(message.voteTypeId)) {
+    override fun process(message: VoteTransactionMessage, delegateWallet: String): Receipt {
+        val type = VoteType.getById(message.voteTypeId)
+        when (type) {
             FOR -> {
                 val accountState = accountStateService.updateVoteByAddress(message.senderAddress, message.delegateKey)
                 delegateStateService.updateRating(message.delegateKey, accountState.balance)
@@ -121,23 +122,8 @@ internal class DefaultVoteTransactionService(
             }
         }
         accountStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
-    }
 
-    override fun generateReceipt(message: VoteTransactionMessage, delegateWallet: String): Receipt {
-        val results = listOf(
-            ReceiptResult(
-                message.senderAddress,
-                consensusProperties.genesisAddress!!,
-                0,
-                "${VoteType.getById(message.voteTypeId)} ${message.delegateKey}"
-            ),
-            ReceiptResult(
-                message.senderAddress,
-                delegateWallet,
-                message.fee
-            )
-        )
-        return getReceipt(message.hash, results)
+        return generateReceipt(type, message, delegateWallet)
     }
 
     override fun verify(message: VoteTransactionMessage): Boolean {
@@ -203,5 +189,13 @@ internal class DefaultVoteTransactionService(
     }
 
     private fun isExistsVoteType(typeId: Int): Boolean = VoteType.values().any { it.getId() == typeId }
+
+    private fun generateReceipt(type: VoteType, message: VoteTransactionMessage, delegateWallet: String): Receipt {
+        val results = listOf(
+            ReceiptResult(message.senderAddress, consensusProperties.genesisAddress!!, 0, "$type ${message.delegateKey}"),
+            ReceiptResult(message.senderAddress, delegateWallet, message.fee)
+        )
+        return getReceipt(message.hash, results)
+    }
 
 }

@@ -3,7 +3,7 @@ package io.openfuture.chain.smartcontract.component.load
 import io.openfuture.chain.smartcontract.component.ByteCodeProcessor
 import io.openfuture.chain.smartcontract.util.asPackagePath
 
-class SmartContractLoader : ClassLoader() {
+class SmartContractLoader(parent: ClassLoader) : ClassLoader(parent) {
 
     fun loadClass(bytes: ByteArray): Class<*> {
         val className = ByteCodeProcessor.getClassName(bytes).asPackagePath

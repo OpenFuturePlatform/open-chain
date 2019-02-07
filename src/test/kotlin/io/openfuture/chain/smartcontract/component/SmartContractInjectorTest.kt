@@ -11,7 +11,7 @@ class SmartContractInjectorTest {
         val owner = "owner"
         val address = "address"
         val bytes = this::class.java.getResourceAsStream("/classes/JavaContract.class").readBytes()
-        val clazz = SmartContractLoader().loadClass(bytes)
+        val clazz = SmartContractLoader(this::class.java.classLoader).loadClass(bytes)
 
         val smartContract = SmartContractInjector.initSmartContract(clazz, owner, address)
 

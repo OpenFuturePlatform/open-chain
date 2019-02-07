@@ -5,8 +5,8 @@ import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
+import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
@@ -160,9 +160,7 @@ interface TransferTransactionService {
 
     fun commit(transaction: TransferTransaction): TransferTransaction
 
-    fun updateState(message: TransferTransactionMessage)
-
-    fun generateReceipt(message: TransferTransactionMessage, delegateWallet: String): Receipt
+    fun process(message: TransferTransactionMessage, delegateWallet: String): Receipt
 
     fun verify(message: TransferTransactionMessage): Boolean
 
@@ -178,9 +176,7 @@ interface RewardTransactionService {
 
     fun commit(transaction: RewardTransaction)
 
-    fun updateState(message: RewardTransactionMessage)
-
-    fun generateReceipt(message: RewardTransactionMessage): Receipt
+    fun process(message: RewardTransactionMessage): Receipt
 
     fun verify(message: RewardTransactionMessage): Boolean
 
@@ -206,9 +202,7 @@ interface VoteTransactionService {
 
     fun commit(transaction: VoteTransaction): VoteTransaction
 
-    fun updateState(message: VoteTransactionMessage)
-
-    fun generateReceipt(message: VoteTransactionMessage, delegateWallet: String): Receipt
+    fun process(message: VoteTransactionMessage, delegateWallet: String): Receipt
 
     fun verify(message: VoteTransactionMessage): Boolean
 
@@ -230,9 +224,7 @@ interface DelegateTransactionService {
 
     fun commit(transaction: DelegateTransaction): DelegateTransaction
 
-    fun updateState(message: DelegateTransactionMessage)
-
-    fun generateReceipt(message: DelegateTransactionMessage, delegateWallet: String): Receipt
+    fun process(message: DelegateTransactionMessage, delegateWallet: String): Receipt
 
     fun verify(message: DelegateTransactionMessage): Boolean
 

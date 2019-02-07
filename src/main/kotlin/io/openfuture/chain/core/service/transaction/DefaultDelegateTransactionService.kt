@@ -96,28 +96,12 @@ class DefaultDelegateTransactionService(
         }
     }
 
-    override fun updateState(message: DelegateTransactionMessage) {
+    override fun process(message: DelegateTransactionMessage, delegateWallet: String): Receipt {
         accountStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
         accountStateService.updateBalanceByAddress(consensusProperties.genesisAddress!!, message.amount)
         delegateStateService.addDelegate(message.delegateKey, message.senderAddress, message.timestamp)
-    }
 
-    override fun generateReceipt(message: DelegateTransactionMessage, delegateWallet: String): Receipt {
-        val results = listOf(
-            ReceiptResult(
-                message.senderAddress,
-                consensusProperties.genesisAddress!!,
-                message.amount,
-                message.delegateKey
-            ),
-            ReceiptResult(
-                message.senderAddress,
-                delegateWallet,
-                message.fee
-            )
-        )
-
-        return getReceipt(message.hash, results)
+        return generateReceipt(message, delegateWallet)
     }
 
     override fun verify(message: DelegateTransactionMessage): Boolean {
@@ -164,5 +148,13 @@ class DefaultDelegateTransactionService(
 
     private fun isAlreadySendRequest(delegateKey: String): Boolean =
         unconfirmedRepository.findAll().any { it.payload.delegateKey == delegateKey }
+
+    private fun generateReceipt(message: DelegateTransactionMessage, delegateWallet: String): Receipt {
+        val results = listOf(
+            ReceiptResult(message.senderAddress, consensusProperties.genesisAddress!!, message.amount, message.delegateKey),
+            ReceiptResult(message.senderAddress, delegateWallet, message.fee)
+        )
+        return getReceipt(message.hash, results)
+    }
 
 }
