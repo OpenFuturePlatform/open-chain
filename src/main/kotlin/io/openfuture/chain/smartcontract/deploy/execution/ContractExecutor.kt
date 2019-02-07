@@ -32,7 +32,7 @@ class ContractExecutor(
     private val pool = Executors.newSingleThreadExecutor()
     private val threadBean = ManagementFactory.getThreadMXBean()
     private val millisecond = 1000000.0
-    private val classLoader = SmartContractLoader()
+    private val classLoader = SmartContractLoader(this.javaClass.classLoader)
 
 
     fun run(contract: ContractDto, method: ContractMethod, executionFee: Long): ExecutionResult {

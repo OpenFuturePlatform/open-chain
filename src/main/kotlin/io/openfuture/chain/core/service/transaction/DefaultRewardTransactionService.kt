@@ -78,7 +78,7 @@ class DefaultRewardTransactionService(
         }
     }
 
-    override fun updateState(message: RewardTransactionMessage) {
+    override fun process(message: RewardTransactionMessage): Receipt {
         accountStateService.updateBalanceByAddress(message.recipientAddress, message.reward)
 
         val senderAddress = consensusProperties.genesisAddress!!
@@ -86,16 +86,8 @@ class DefaultRewardTransactionService(
         val reward = if (consensusProperties.rewardBlock!! > bank) bank else consensusProperties.rewardBlock!!
 
         accountStateService.updateBalanceByAddress(senderAddress, -reward)
-    }
 
-    override fun generateReceipt(message: RewardTransactionMessage): Receipt {
-        val receipt = Receipt(message.hash)
-        receipt.setResults(listOf(ReceiptResult(
-            message.senderAddress,
-            message.recipientAddress,
-            message.reward
-        )))
-        return receipt
+        return generateReceipt(message)
     }
 
     @Transactional(readOnly = true)
@@ -110,6 +102,12 @@ class DefaultRewardTransactionService(
             log.warn(e.message)
             false
         }
+    }
+
+    private fun generateReceipt(message: RewardTransactionMessage): Receipt {
+        val receipt = Receipt(message.hash)
+        receipt.setResults(listOf(ReceiptResult(message.senderAddress, message.recipientAddress, message.reward)))
+        return receipt
     }
 
 }
