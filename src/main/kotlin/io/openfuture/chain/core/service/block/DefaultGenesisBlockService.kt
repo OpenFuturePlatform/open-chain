@@ -8,8 +8,8 @@ import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.service.BlockService
-import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.handler.sync.EpochResponseHandler
@@ -25,11 +25,11 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultGenesisBlockService(
     blockService: BlockService,
-    delegateStateService: DelegateStateService,
+    stateManager: StateManager,
     private val keyHolder: NodeKeyHolder,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository
-) : BaseBlockService<GenesisBlock>(genesisBlockRepository, blockService, delegateStateService), GenesisBlockService {
+) : BaseBlockService<GenesisBlock>(genesisBlockRepository, blockService, stateManager), GenesisBlockService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(EpochResponseHandler::class.java)
@@ -121,7 +121,7 @@ class DefaultGenesisBlockService(
         val firstGenesisBlock = genesisBlockRepository.findOneByPayloadEpochIndex(1)!!
         val genesisDelegates = firstGenesisBlock.payload.activeDelegates
         val epochIndex = getLast().payload.epochIndex + 1
-        val delegates = delegateStateService.getActiveDelegates().map { it.address }.toMutableSet()
+        val delegates = stateManager.getActiveDelegates().map { it.address }.toMutableSet()
         delegates.addAll(genesisDelegates)
         return GenesisBlockPayload(epochIndex, delegates.toMutableList())
     }

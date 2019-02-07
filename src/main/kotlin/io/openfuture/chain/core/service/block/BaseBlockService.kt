@@ -5,7 +5,7 @@ import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.BlockService
-import io.openfuture.chain.core.service.DelegateStateService
+import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 
@@ -13,7 +13,7 @@ import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 abstract class BaseBlockService<T : Block>(
     protected val repository: BlockRepository<T>,
     protected val blockService: BlockService,
-    protected val delegateStateService: DelegateStateService
+    protected val stateManager: StateManager
 ) {
 
     protected fun save(block: T): T {

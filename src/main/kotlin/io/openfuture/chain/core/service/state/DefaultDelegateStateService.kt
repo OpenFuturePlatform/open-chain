@@ -17,12 +17,7 @@ class DefaultDelegateStateService(
     private val repository: DelegateStateRepository,
     private val consensusProperties: ConsensusProperties,
     private val statePool: StatePool
-) : BaseStateService<DelegateState>(repository), DelegateStateService {
-
-    companion object {
-        private const val DEFAULT_DELEGATE_RATING = 0L
-    }
-
+) : DelegateStateService {
 
     override fun getAllDelegates(request: PageRequest): List<DelegateState> = repository.findLastAll(request)
 
@@ -37,25 +32,16 @@ class DefaultDelegateStateService(
 
     override fun updateRating(delegateKey: String, amount: Long): DelegateState {
         val state = getCurrentState(delegateKey)
-        val newState = DelegateState(state.address, state.rating + amount, state.walletAddress, state.createDate)
+
+        val newState = DelegateState(state.address, state.walletAddress, state.createDate, state.rating + amount)
         statePool.update(newState)
         return newState
     }
 
     override fun addDelegate(delegateKey: String, walletAddress: String, createDate: Long): DelegateState {
-        val newState = DelegateState(delegateKey, DEFAULT_DELEGATE_RATING, walletAddress, createDate)
+        val newState = DelegateState(delegateKey, walletAddress, createDate)
         statePool.update(newState)
         return newState
-    }
-
-    @Transactional
-    override fun commit(state: DelegateState) {
-        BlockchainLock.writeLock.lock()
-        try {
-            repository.save(state)
-        } finally {
-            BlockchainLock.writeLock.unlock()
-        }
     }
 
     private fun getCurrentState(address: String): DelegateState {

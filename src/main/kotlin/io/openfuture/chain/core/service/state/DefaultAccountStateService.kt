@@ -18,9 +18,8 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultAccountStateService(
     private val repository: AccountStateRepository,
     private val statePool: StatePool,
-    private val delegateStateService: DefaultDelegateStateService,
     private val unconfirmedTransactionRepository: UTransactionRepository<UnconfirmedTransaction>
-) : BaseStateService<AccountState>(repository), AccountStateService {
+) : AccountStateService {
 
     companion object {
         private const val DEFAULT_WALLET_BALANCE = 0L
@@ -54,10 +53,6 @@ class DefaultAccountStateService(
 
     override fun updateBalanceByAddress(address: String, amount: Long): AccountState {
         val state = getCurrentState(address)
-
-        if (null != state.voteFor) {
-            delegateStateService.updateRating(state.voteFor!!, amount)
-        }
 
         val newState = AccountState(address, state.balance + amount, state.voteFor, state.storage)
         statePool.update(newState)
@@ -98,14 +93,8 @@ class DefaultAccountStateService(
         }
     }
 
-    @Transactional
-    override fun commit(state: AccountState) {
-        BlockchainLock.writeLock.lock()
-        try {
-            repository.save(state)
-        } finally {
-            BlockchainLock.writeLock.unlock()
-        }
-    }
+    private fun getLastByAddress(address: String): AccountState =
+        repository.findFirstByAddressOrderByBlockIdDesc(address)
+            ?: throw NotFoundException("Account state with address $address not found")
 
 }

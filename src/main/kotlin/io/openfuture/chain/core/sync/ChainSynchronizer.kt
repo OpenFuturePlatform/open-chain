@@ -53,7 +53,7 @@ class ChainSynchronizer(
     private val requestRetryScheduler: RequestRetryScheduler,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
-    private val delegateStateService: DelegateStateService,
+    private val stateManager: StateManager,
     private val dbChecker: DBChecker,
     private val nodeKeyHolder: NodeKeyHolder
 ) : ApplicationListener<DataSourceSchemaCreatedEvent> {
@@ -154,7 +154,7 @@ class ChainSynchronizer(
         }
     }
 
-    fun isDelegate(): Boolean = delegateStateService.isExistsByPublicKey(nodeKeyHolder.getPublicKeyAsHexString())
+    fun isDelegate(): Boolean = stateManager.isExistsDelegateByPublicKey(nodeKeyHolder.getPublicKeyAsHexString())
 
     fun getSyncMode(): SyncMode {
         if (isBecomeDelegate || (LIGHT == properties.syncMode && isDelegate())) {

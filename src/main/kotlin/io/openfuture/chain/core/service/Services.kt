@@ -6,6 +6,7 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
+import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
@@ -230,19 +231,41 @@ interface DelegateTransactionService {
 
 }
 
-interface StateService<T : State> {
+interface StateManager {
 
-    fun getLastByAddress(address: String): T
+    fun <T : State> getLastByAddress(address: String): T
 
-    fun getByAddress(address: String): List<T>
+    fun getWalletBalanceByAddress(address: String): Long
 
-    fun getByAddressAndBlock(address: String, block: Block): T
+    fun getActualWalletBalanceByAddress(address: String): Long
 
-    fun deleteBlockStates(blockHeights: List<Long>)
+    fun getVotesForDelegate(delegateKey: String): List<AccountState>
+
+    fun updateWalletBalanceByAddress(address: String, amount: Long)
+
+    fun updateVoteByAddress(address: String, delegateKey: String, voteType: VoteType)
+
+    fun updateSmartContractStorage(address: String, storage: String)
+
+    fun getAllDelegates(request: PageRequest): List<DelegateState>
+
+    fun getActiveDelegates(): List<DelegateState>
+
+    fun isExistsDelegateByPublicKey(key: String): Boolean
+
+    fun isExistsDelegatesByPublicKeys(publicKeys: List<String>): Boolean
+
+    fun addDelegate(delegateKey: String, walletAddress: String, createDate: Long)
+
+    fun updateDelegateRating(delegateKey: String, amount: Long)
+
+    fun commit(state: State)
+
+    fun removeAllByBlockHeights(blockHeights: List<Long>)
 
 }
 
-interface DelegateStateService : StateService<DelegateState> {
+interface DelegateStateService {
 
     fun getAllDelegates(request: PageRequest): List<DelegateState>
 
@@ -256,11 +279,9 @@ interface DelegateStateService : StateService<DelegateState> {
 
     fun updateRating(delegateKey: String, amount: Long): DelegateState
 
-    fun commit(state: DelegateState)
-
 }
 
-interface AccountStateService : StateService<AccountState> {
+interface AccountStateService {
 
     fun getBalanceByAddress(address: String): Long
 
@@ -273,8 +294,6 @@ interface AccountStateService : StateService<AccountState> {
     fun updateVoteByAddress(address: String, delegateKey: String?): AccountState
 
     fun updateStorage(address: String, storage: String): AccountState
-
-    fun commit(state: AccountState)
 
 }
 

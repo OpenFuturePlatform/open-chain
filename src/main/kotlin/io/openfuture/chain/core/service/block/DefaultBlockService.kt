@@ -7,8 +7,6 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
-import io.openfuture.chain.core.model.entity.state.AccountState
-import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
@@ -34,8 +32,7 @@ class DefaultBlockService(
     private val rewardTransactionService: RewardTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
-    private val delegateStateService: DelegateStateService,
-    private val accountStateService: AccountStateService,
+    private val stateManager: StateManager,
     private val receiptService: ReceiptService
 ) : BlockService {
 
@@ -73,8 +70,7 @@ class DefaultBlockService(
         val toHeight = fromHeight + properties.epochHeight!!
         val heightRange = (fromHeight..toHeight).toList()
         transactionService.deleteBlockTransactions(heightRange)
-        delegateStateService.deleteBlockStates(heightRange)
-        accountStateService.deleteBlockStates(heightRange)
+        stateManager.removeAllByBlockHeights(heightRange)
         receiptService.deleteBlockReceipts(heightRange)
         repository.deleteAllByHeightIn(heightRange)
     }
@@ -96,8 +92,7 @@ class DefaultBlockService(
 
     @Transactional
     override fun deleteByHeightIn(heights: List<Long>) {
-        accountStateService.deleteBlockStates(heights)
-        delegateStateService.deleteBlockStates(heights)
+        stateManager.removeAllByBlockHeights(heights)
         transactionService.deleteBlockTransactions(heights)
         repository.deleteAllByHeightIn(heights)
     }
@@ -173,11 +168,7 @@ class DefaultBlockService(
 
                 states.forEach {
                     it.block = block
-                    when (it) {
-                        is DelegateState -> delegateStateService.commit(it)
-                        is AccountState -> accountStateService.commit(it)
-                        else -> throw IllegalStateException("Unsupported state type")
-                    }
+                    stateManager.commit(it)
                 }
             } else if (block is GenesisBlock) {
                 this.save(block)

@@ -11,11 +11,11 @@ import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.AGAINST
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.FOR
+import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.repository.UVoteTransactionRepository
 import io.openfuture.chain.core.repository.VoteTransactionRepository
-import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional
 internal class DefaultVoteTransactionService(
     repository: VoteTransactionRepository,
     uRepository: UVoteTransactionRepository,
-    private val delegateStateService: DelegateStateService,
     private val consensusProperties: ConsensusProperties
 ) : ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction>(repository, uRepository), VoteTransactionService {
 
@@ -111,17 +110,8 @@ internal class DefaultVoteTransactionService(
 
     override fun process(message: VoteTransactionMessage, delegateWallet: String): Receipt {
         val type = VoteType.getById(message.voteTypeId)
-        when (type) {
-            FOR -> {
-                val accountState = accountStateService.updateVoteByAddress(message.senderAddress, message.delegateKey)
-                delegateStateService.updateRating(message.delegateKey, accountState.balance)
-            }
-            AGAINST -> {
-                val accountState = accountStateService.updateVoteByAddress(message.senderAddress, null)
-                delegateStateService.updateRating(message.delegateKey, -accountState.balance)
-            }
-        }
-        accountStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
+        stateManager.updateVoteByAddress(message.senderAddress, message.delegateKey, type)
+        stateManager.updateWalletBalanceByAddress(message.senderAddress, -message.fee)
 
         return generateReceipt(type, message, delegateWallet)
     }
@@ -167,7 +157,7 @@ internal class DefaultVoteTransactionService(
         }
     }
 
-    private fun isExistsDelegate(delegateKey: String): Boolean = delegateStateService.isExistsByPublicKey(delegateKey)
+    private fun isExistsDelegate(delegateKey: String): Boolean = stateManager.isExistsDelegateByPublicKey(delegateKey)
 
     private fun isVoted(senderAddress: String, delegateKey: String, voteType: VoteType): Boolean {
         val unconfirmedVote = unconfirmedRepository.findAllByHeaderSenderAddress(senderAddress)
@@ -175,10 +165,10 @@ internal class DefaultVoteTransactionService(
             return true
         }
 
-        val persistVote = accountStateService.getLastByAddress(senderAddress)
+        val accountState = stateManager.getLastByAddress<AccountState>(senderAddress)
         return when (voteType) {
-            FOR -> null != persistVote.voteFor
-            AGAINST -> null == persistVote.voteFor || delegateKey != persistVote.voteFor
+            FOR -> null != accountState.voteFor
+            AGAINST -> null == accountState.voteFor || delegateKey != accountState.voteFor
         }
     }
 

@@ -122,8 +122,8 @@ class DefaultTransferTransactionService(
 
         when (getType(message.recipientAddress, message.data)) {
             FUND -> {
-                accountStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
-                accountStateService.updateBalanceByAddress(message.recipientAddress!!, message.amount)
+                stateManager.updateWalletBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
+                stateManager.updateWalletBalanceByAddress(message.recipientAddress!!, message.amount)
                 results.add(ReceiptResult(message.senderAddress, message.recipientAddress!!, message.amount))
                 results.add(ReceiptResult(message.senderAddress, delegateWallet, message.fee))
             }
@@ -132,7 +132,7 @@ class DefaultTransferTransactionService(
                 val newBytes = ByteCodeProcessor.renameClass(fromHexString(message.data), contractAddress)
                 val clazz = SmartContractLoader(this::class.java.classLoader).loadClass(newBytes)
                 val contract = SmartContractInjector.initSmartContract(clazz, message.senderAddress, contractAddress)
-                accountStateService.updateStorage(contractAddress, toHexString(serialize(contract)))
+                stateManager.updateSmartContractStorage(contractAddress, toHexString(serialize(contract)))
             }
             EXECUTE -> TODO()
         }

@@ -13,7 +13,6 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTrans
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.repository.DelegateTransactionRepository
 import io.openfuture.chain.core.repository.UDelegateTransactionRepository
-import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
@@ -28,8 +27,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultDelegateTransactionService(
     repository: DelegateTransactionRepository,
     uRepository: UDelegateTransactionRepository,
-    private val consensusProperties: ConsensusProperties,
-    private val delegateStateService: DelegateStateService
+    private val consensusProperties: ConsensusProperties
 ) : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>(repository, uRepository), DelegateTransactionService {
 
     companion object {
@@ -97,9 +95,9 @@ class DefaultDelegateTransactionService(
     }
 
     override fun process(message: DelegateTransactionMessage, delegateWallet: String): Receipt {
-        accountStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
-        accountStateService.updateBalanceByAddress(consensusProperties.genesisAddress!!, message.amount)
-        delegateStateService.addDelegate(message.delegateKey, message.senderAddress, message.timestamp)
+        stateManager.updateWalletBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
+        stateManager.updateWalletBalanceByAddress(consensusProperties.genesisAddress!!, message.amount)
+        stateManager.addDelegate(message.delegateKey, message.senderAddress, message.timestamp)
 
         return generateReceipt(message, delegateWallet)
     }
@@ -144,7 +142,7 @@ class DefaultDelegateTransactionService(
         }
     }
 
-    private fun isAlreadyDelegate(delegateKey: String): Boolean = delegateStateService.isExistsByPublicKey(delegateKey)
+    private fun isAlreadyDelegate(delegateKey: String): Boolean = stateManager.isExistsDelegateByPublicKey(delegateKey)
 
     private fun isAlreadySendRequest(delegateKey: String): Boolean =
         unconfirmedRepository.findAll().any { it.payload.delegateKey == delegateKey }

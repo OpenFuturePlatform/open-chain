@@ -29,7 +29,7 @@ class DelegateState(
     block: Block? = null
 ) : State(address, hash, block) {
 
-    constructor(address: String, rating: Long, walletAddress: String, createDate: Long) : this(
+    constructor(address: String, walletAddress: String, createDate: Long, rating: Long = 0) : this(
         address,
         rating,
         walletAddress,

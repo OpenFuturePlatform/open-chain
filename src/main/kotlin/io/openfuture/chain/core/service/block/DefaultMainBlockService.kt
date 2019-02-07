@@ -44,10 +44,9 @@ import kotlin.math.max
 class DefaultMainBlockService(
     blockService: BlockService,
     repository: MainBlockRepository,
-    delegateStateService: DelegateStateService,
+    stateManager: StateManager,
     private val keyHolder: NodeKeyHolder,
     private val throughput: TransactionThroughput,
-    private val accountStateService: AccountStateService,
     private val statePool: StatePool,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository,
@@ -56,7 +55,7 @@ class DefaultMainBlockService(
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
     private val receiptService: ReceiptService
-) : BaseBlockService<MainBlock>(repository, blockService, delegateStateService), MainBlockService {
+) : BaseBlockService<MainBlock>(repository, blockService, stateManager), MainBlockService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultMainBlockService::class.java)
@@ -89,7 +88,7 @@ class DefaultMainBlockService(
             val height = lastBlock.height + 1
             val previousHash = lastBlock.hash
             val publicKey = keyHolder.getPublicKeyAsHexString()
-            val delegate = delegateStateService.getLastByAddress(publicKey)
+            val delegate = stateManager.getLastByAddress<DelegateState>(publicKey)
 
             var fees = 0L
             val transactionHashes = mutableListOf<String>()
@@ -184,11 +183,12 @@ class DefaultMainBlockService(
             }
 
             message.getAllStates().forEach {
-                when (it) {
-                    is DelegateStateMessage -> delegateStateService.commit(DelegateState.of(it, block))
-                    is AccountStateMessage -> accountStateService.commit(AccountState.of(it, block))
+                val state = when (it) {
+                    is DelegateStateMessage -> DelegateState.of(it, block)
+                    is AccountStateMessage -> AccountState.of(it, block)
                     else -> throw IllegalStateException("Unsupported state type")
                 }
+                stateManager.commit(state)
             }
 
             message.receipts.forEach { receiptService.commit(Receipt.of(it, block)) }
@@ -260,7 +260,7 @@ class DefaultMainBlockService(
                         else -> 0
                     }
                 }
-                .sum() <= accountStateService.getBalanceByAddress(sender.key)
+                .sum() <= stateManager.getWalletBalanceByAddress(sender.key)
         }
 
     private fun isValidRewardTransaction(message: PendingBlockMessage): Boolean =
@@ -277,11 +277,11 @@ class DefaultMainBlockService(
                 return false
             }
 
-            val persistVote = accountStateService.getLastByAddress(sender.key)
+            val accountState = stateManager.getLastByAddress<AccountState>(sender.key)
             val vote = sender.value.first()
             return when (VoteType.getById(vote.voteTypeId)) {
-                FOR -> null == persistVote.voteFor
-                AGAINST -> null != persistVote.voteFor && vote.delegateKey == persistVote.voteFor
+                FOR -> null == accountState.voteFor
+                AGAINST -> null != accountState.voteFor && vote.delegateKey == accountState.voteFor
             }
         }
 
@@ -294,7 +294,7 @@ class DefaultMainBlockService(
         }
 
         return transactions.all { delegateTransactionService.verify(it) } &&
-            !delegateStateService.isExistsByPublicKeys(transactions.map { it.delegateKey }) &&
+            !stateManager.isExistsDelegatesByPublicKeys(transactions.map { it.delegateKey }) &&
             transactions.distinctBy { it.delegateKey }.size == transactions.size
     }
 
@@ -311,14 +311,14 @@ class DefaultMainBlockService(
 
     private fun isValidReward(fees: Long, reward: Long): Boolean {
         val senderAddress = consensusProperties.genesisAddress!!
-        val bank = accountStateService.getActualBalanceByAddress(senderAddress)
+        val bank = stateManager.getActualWalletBalanceByAddress(senderAddress)
         val rewardBlock = consensusProperties.rewardBlock!!
 
         return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)
     }
 
     private fun isValidReceiptsAndStates(block: PendingBlockMessage): Boolean {
-        val delegateWallet = delegateStateService.getLastByAddress(block.publicKey).walletAddress
+        val delegateWallet = stateManager.getLastByAddress<DelegateState>(block.publicKey).walletAddress
         val receipts = processTransactions(block.getAllTransactions(), delegateWallet).map { it.toMessage() }
         val states = statePool.getStates()
 
@@ -390,7 +390,7 @@ class DefaultMainBlockService(
         val transactionsBySender = transactions.groupBy { it.header.senderAddress }
 
         transactionsBySender.forEach {
-            var balance = accountStateService.getBalanceByAddress(it.key)
+            var balance = stateManager.getWalletBalanceByAddress(it.key)
             val list = it.value.filter { tx ->
                 balance -= when (tx) {
                     is UnconfirmedTransferTransaction -> tx.header.fee + tx.payload.amount

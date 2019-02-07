@@ -6,9 +6,8 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.state.DelegateState
-import io.openfuture.chain.core.service.AccountStateService
-import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -22,10 +21,7 @@ import org.springframework.data.domain.PageImpl
 class DelegateControllerTests : ControllerTests() {
 
     @MockBean
-    private lateinit var delegateStateService: DelegateStateService
-
-    @MockBean
-    private lateinit var accountStateService: AccountStateService
+    private lateinit var stateManager: StateManager
 
     @MockBean
     private lateinit var genesisBlockService: GenesisBlockService
@@ -41,7 +37,7 @@ class DelegateControllerTests : ControllerTests() {
         val delegates = listOf(delegate)
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
 
-        given(delegateStateService.getAllDelegates(PageRequest())).willReturn(delegates)
+        given(stateManager.getAllDelegates(PageRequest())).willReturn(delegates)
 
         val actualPageResponse = webClient.get().uri("/rpc/delegates")
             .exchange()
@@ -65,7 +61,7 @@ class DelegateControllerTests : ControllerTests() {
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
 
         given(genesisBlockService.getLast()).willReturn(genesisBlock)
-        given(delegateStateService.getLastByAddress(publicKey)).willReturn(delegate)
+        given(stateManager.getLastByAddress<DelegateState>(publicKey)).willReturn(delegate)
 
         val actualPageResponse = webClient.get().uri("/rpc/delegates/active")
             .exchange()

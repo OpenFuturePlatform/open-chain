@@ -9,7 +9,7 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
-import io.openfuture.chain.core.service.AccountStateService
+import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.network.service.NetworkApiService
@@ -21,7 +21,7 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
     protected val unconfirmedRepository: UTransactionRepository<U>
 ) : BaseTransactionService() {
 
-    @Autowired protected lateinit var accountStateService: AccountStateService
+    @Autowired protected lateinit var stateManager: StateManager
     @Autowired protected lateinit var baseService: TransactionService
     @Autowired private lateinit var cryptoService: CryptoService
     @Autowired private lateinit var networkService: NetworkApiService
@@ -73,7 +73,7 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
     }
 
     protected fun isValidActualBalance(address: String, amount: Long): Boolean =
-        accountStateService.getActualBalanceByAddress(address) >= amount
+        stateManager.getActualWalletBalanceByAddress(address) >= amount
 
     private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean =
         cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))

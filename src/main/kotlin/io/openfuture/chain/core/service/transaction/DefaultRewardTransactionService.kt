@@ -5,14 +5,14 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.ReceiptResult
+import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
 import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.RewardTransactionPayload
 import io.openfuture.chain.core.repository.RewardTransactionRepository
-import io.openfuture.chain.core.service.AccountStateService
-import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.RewardTransactionService
+import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -28,9 +28,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultRewardTransactionService(
     private val repository: RewardTransactionRepository,
-    private val accountStateService: AccountStateService,
     private val consensusProperties: ConsensusProperties,
-    private val delegateStateService: DelegateStateService,
+    private val stateManager: StateManager,
     private val keyHolder: NodeKeyHolder,
     private val transactionService: TransactionService
 ) : BaseTransactionService(), RewardTransactionService {
@@ -52,11 +51,11 @@ class DefaultRewardTransactionService(
     override fun create(timestamp: Long, fees: Long): RewardTransactionMessage {
         val senderAddress = consensusProperties.genesisAddress!!
         val rewardBlock = consensusProperties.rewardBlock!!
-        val bank = accountStateService.getActualBalanceByAddress(senderAddress)
+        val bank = stateManager.getActualWalletBalanceByAddress(senderAddress)
         val reward = fees + if (rewardBlock > bank) bank else rewardBlock
         val fee = 0L
         val publicKey = keyHolder.getPublicKeyAsHexString()
-        val delegate = delegateStateService.getLastByAddress(publicKey)
+        val delegate = stateManager.getLastByAddress<DelegateState>(publicKey)
         val hash = transactionService.createHash(TransactionHeader(timestamp, fee, senderAddress), RewardTransactionPayload(reward, delegate.walletAddress))
         val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())
 
@@ -79,13 +78,13 @@ class DefaultRewardTransactionService(
     }
 
     override fun process(message: RewardTransactionMessage): Receipt {
-        accountStateService.updateBalanceByAddress(message.recipientAddress, message.reward)
+        stateManager.updateWalletBalanceByAddress(message.recipientAddress, message.reward)
 
         val senderAddress = consensusProperties.genesisAddress!!
-        val bank = accountStateService.getActualBalanceByAddress(senderAddress)
+        val bank = stateManager.getActualWalletBalanceByAddress(senderAddress)
         val reward = if (consensusProperties.rewardBlock!! > bank) bank else consensusProperties.rewardBlock!!
 
-        accountStateService.updateBalanceByAddress(senderAddress, -reward)
+        stateManager.updateWalletBalanceByAddress(senderAddress, -reward)
 
         return generateReceipt(message)
     }
