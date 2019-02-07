@@ -26,6 +26,7 @@ import io.openfuture.chain.smartcontract.component.SmartContractInjector
 import io.openfuture.chain.smartcontract.component.abi.AbiGenerator
 import io.openfuture.chain.smartcontract.component.load.SmartContractLoader
 import io.openfuture.chain.smartcontract.component.validation.SmartContractValidator
+import io.openfuture.chain.smartcontract.deploy.calculation.ContractCostCalculator
 import io.openfuture.chain.smartcontract.model.Abi
 import io.openfuture.chain.smartcontract.util.SerializationUtils.serialize
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.fromHexString
@@ -41,6 +42,7 @@ class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
     uRepository: UTransferTransactionRepository,
     private val contractService: ContractService,
+    private val contractCostCalculator: ContractCostCalculator
 ) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
 
     companion object {
@@ -128,11 +130,30 @@ class DefaultTransferTransactionService(
                 results.add(ReceiptResult(message.senderAddress, delegateWallet, message.fee))
             }
             DEPLOY -> {
-                val contractAddress = contractService.generateAddress(message.senderAddress)
-                val newBytes = ByteCodeProcessor.renameClass(fromHexString(message.data), contractAddress)
-                val clazz = SmartContractLoader(this::class.java.classLoader).loadClass(newBytes)
-                val contract = SmartContractInjector.initSmartContract(clazz, message.senderAddress, contractAddress)
-                accountStateService.updateStorage(contractAddress, toHexString(serialize(contract)))
+                val bytecode = fromHexString(message.data)
+                val contractCost = contractCostCalculator.calculateCost(bytecode)
+
+                if (message.fee >= contractCost) {
+                    val contractAddress = contractService.generateAddress(message.senderAddress)
+                    val newBytes = ByteCodeProcessor.renameClass(bytecode, contractAddress)
+                    val clazz = SmartContractLoader(this::class.java.classLoader).loadClass(newBytes)
+                    val contract = SmartContractInjector.initSmartContract(clazz, message.senderAddress, contractAddress)
+                    accountStateService.updateStorage(contractAddress, toHexString(serialize(contract)))
+                    accountStateService.updateBalanceByAddress(message.senderAddress, -contractCost)
+                    accountStateService.updateBalanceByAddress(delegateWallet, contractCost)
+                    results.add(ReceiptResult(message.senderAddress, delegateWallet, message.fee))
+
+                    val delivery = message.fee - contractCost
+                    if (0 < delivery) {
+                        results.add(ReceiptResult(delegateWallet, message.senderAddress, delivery))
+                    }
+                } else {
+                    accountStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
+                    accountStateService.updateBalanceByAddress(delegateWallet, message.fee)
+                    results.add(ReceiptResult(message.senderAddress, delegateWallet, message.fee,
+                        "The fee was charged, but this is not enough.", "Contract is not deployed.")
+                    )
+                }
             }
             EXECUTE -> {
                 val contractState = accountStateService.getLastByAddress(message.recipientAddress!!)
