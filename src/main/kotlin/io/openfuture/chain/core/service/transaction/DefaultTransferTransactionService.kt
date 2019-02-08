@@ -27,6 +27,7 @@ import io.openfuture.chain.smartcontract.component.abi.AbiGenerator
 import io.openfuture.chain.smartcontract.component.load.SmartContractLoader
 import io.openfuture.chain.smartcontract.component.validation.SmartContractValidator
 import io.openfuture.chain.smartcontract.deploy.calculation.ContractCostCalculator
+import io.openfuture.chain.smartcontract.execution.ContractExecutor
 import io.openfuture.chain.smartcontract.model.Abi
 import io.openfuture.chain.smartcontract.util.SerializationUtils.serialize
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.fromHexString
@@ -42,7 +43,8 @@ class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
     uRepository: UTransferTransactionRepository,
     private val contractService: ContractService,
-    private val contractCostCalculator: ContractCostCalculator
+    private val contractCostCalculator: ContractCostCalculator,
+    private val contractExecutor: ContractExecutor
 ) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
 
     companion object {
@@ -157,7 +159,15 @@ class DefaultTransferTransactionService(
             }
             EXECUTE -> {
                 val contractState = accountStateService.getLastByAddress(message.recipientAddress!!)
-
+                val result = contractExecutor.run(contractState.storage!!, message, delegateWallet)
+                result.receipt.forEach {
+                    accountStateService.updateBalanceByAddress(it.from, -it.amount)
+                    accountStateService.updateBalanceByAddress(it.to, it.amount)
+                }
+                results.addAll(result.receipt)
+                result.state?.let {
+                    accountStateService.updateStorage(message.recipientAddress!!, it)
+                }
             }
         }
 
@@ -177,9 +187,11 @@ class DefaultTransferTransactionService(
     @Transactional
     override fun save(tx: TransferTransaction): TransferTransaction {
         if (DEPLOY == getType(tx.payload.recipientAddress, tx.payload.data)) {
+            val bytecode = fromHexString(tx.payload.data!!)
             val address = contractService.generateAddress(tx.header.senderAddress)
-            val abi = AbiGenerator.generate(fromHexString(tx.payload.data!!))
-            contractService.save(Contract(address, tx.header.senderAddress, tx.payload.data!!, abi))
+            val abi = AbiGenerator.generate(bytecode)
+            val cost = contractCostCalculator.calculateCost(bytecode)
+            contractService.save(Contract(address, tx.header.senderAddress, tx.payload.data!!, abi, cost))
         }
 
         return super.save(tx)
@@ -210,6 +222,9 @@ class DefaultTransferTransactionService(
             EXECUTE -> {
                 val contract = contractService.getByAddress(utx.payload.recipientAddress!!)
                 val methods = Abi.fromJson(contract.abi).abiMethods.map { it.name }
+                if (contract.cost != utx.header.fee) {
+                    throw ValidationException("Insufficient funds for smart contract execution")
+                }
                 if (!methods.contains(utx.payload.data)) {
                     throw ValidationException("Smart contract's method ${utx.payload.data} not exists")
                 }
