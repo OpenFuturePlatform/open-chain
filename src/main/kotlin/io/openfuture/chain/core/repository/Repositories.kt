@@ -122,6 +122,8 @@ interface StateRepository<T : State> : BaseRepository<T> {
 
     fun findFirstByAddressOrderByBlockIdDesc(address: String): T?
 
+    fun findAllByBlock(block: Block): List<T>
+
     fun deleteAllByBlockHeightIn(heights: List<Long>)
 
 }

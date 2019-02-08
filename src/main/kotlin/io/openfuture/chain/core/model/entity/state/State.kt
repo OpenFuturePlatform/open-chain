@@ -2,7 +2,7 @@ package io.openfuture.chain.core.model.entity.state
 
 import io.openfuture.chain.core.model.entity.base.BaseModel
 import io.openfuture.chain.core.model.entity.block.Block
-import io.openfuture.chain.network.message.base.Message
+import io.openfuture.chain.network.message.core.StateMessage
 import javax.persistence.*
 
 @Entity
@@ -24,6 +24,6 @@ abstract class State(
 
     abstract fun getBytes(): ByteArray
 
-    abstract fun toMessage(): Message
+    abstract fun toMessage(): StateMessage
 
 }

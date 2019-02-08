@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.state
 
 import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.AGAINST
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.FOR
@@ -34,6 +35,8 @@ class DefaultStateManager(
             BlockchainLock.readLock.unlock()
         }
     }
+
+    override fun getAllByBlock(block: Block): List<State> = repository.findAllByBlock(block)
 
     override fun getWalletBalanceByAddress(address: String): Long = accountStateService.getBalanceByAddress(address)
 

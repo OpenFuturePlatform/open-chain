@@ -235,6 +235,8 @@ interface StateManager {
 
     fun <T : State> getLastByAddress(address: String): T
 
+    fun getAllByBlock(block: Block): List<State>
+
     fun getWalletBalanceByAddress(address: String): Long
 
     fun getActualWalletBalanceByAddress(address: String): Long
