@@ -26,8 +26,11 @@ import io.openfuture.chain.smartcontract.component.SmartContractInjector
 import io.openfuture.chain.smartcontract.component.abi.AbiGenerator
 import io.openfuture.chain.smartcontract.component.load.SmartContractLoader
 import io.openfuture.chain.smartcontract.component.validation.SmartContractValidator
+import io.openfuture.chain.smartcontract.deploy.calculation.ContractCostCalculator
+import io.openfuture.chain.smartcontract.execution.ContractExecutor
 import io.openfuture.chain.smartcontract.model.Abi
 import io.openfuture.chain.smartcontract.util.SerializationUtils.serialize
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.fromHexString
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.toHexString
 import org.slf4j.Logger
@@ -40,7 +43,9 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
     uRepository: UTransferTransactionRepository,
-    private val contractService: ContractService
+    private val contractService: ContractService,
+    private val contractCostCalculator: ContractCostCalculator,
+    private val contractExecutor: ContractExecutor
 ) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
 
     companion object {
@@ -97,12 +102,21 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun commit(transaction: TransferTransaction): TransferTransaction {
+    override fun commit(transaction: TransferTransaction, receipt: Receipt): TransferTransaction {
         BlockchainLock.writeLock.lock()
         try {
             val tx = repository.findOneByFooterHash(transaction.footer.hash)
             if (null != tx) {
                 return tx
+            }
+
+            if (DEPLOY == getType(transaction.payload.recipientAddress, transaction.payload.data) && receipt.getResults().all { it.error == null }) {
+                val bytecode = fromHexString(transaction.payload.data!!)
+                val address = contractService.generateAddress(transaction.header.senderAddress)
+                val abi = AbiGenerator.generate(bytecode)
+                val cost = contractCostCalculator.calculateCost(bytecode)
+                val newBytes = ByteUtils.toHexString(ByteCodeProcessor.renameClass(bytecode, address))
+                contractService.save(Contract(address, transaction.header.senderAddress, newBytes, abi, cost))
             }
 
             val utx = unconfirmedRepository.findOneByFooterHash(transaction.footer.hash)
@@ -128,13 +142,43 @@ class DefaultTransferTransactionService(
                 results.add(ReceiptResult(message.senderAddress, delegateWallet, message.fee))
             }
             DEPLOY -> {
-                val contractAddress = contractService.generateAddress(message.senderAddress)
-                val newBytes = ByteCodeProcessor.renameClass(fromHexString(message.data), contractAddress)
-                val clazz = SmartContractLoader(this::class.java.classLoader).loadClass(newBytes)
-                val contract = SmartContractInjector.initSmartContract(clazz, message.senderAddress, contractAddress)
-                accountStateService.updateStorage(contractAddress, toHexString(serialize(contract)))
+                val bytecode = fromHexString(message.data)
+                val contractCost = contractCostCalculator.calculateCost(bytecode)
+
+                if (message.fee >= contractCost) {
+                    val contractAddress = contractService.generateAddress(message.senderAddress)
+                    val newBytes = ByteCodeProcessor.renameClass(bytecode, contractAddress)
+                    val clazz = SmartContractLoader(this::class.java.classLoader).loadClass(newBytes)
+                    val contract = SmartContractInjector.initSmartContract(clazz, message.senderAddress, contractAddress)
+                    accountStateService.updateStorage(contractAddress, toHexString(serialize(contract)))
+                    accountStateService.updateBalanceByAddress(message.senderAddress, -contractCost)
+                    accountStateService.updateBalanceByAddress(delegateWallet, contractCost)
+                    results.add(ReceiptResult(message.senderAddress, delegateWallet, message.fee))
+
+                    val delivery = message.fee - contractCost
+                    if (0 < delivery) {
+                        results.add(ReceiptResult(delegateWallet, message.senderAddress, delivery))
+                    }
+                } else {
+                    accountStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
+                    accountStateService.updateBalanceByAddress(delegateWallet, message.fee)
+                    results.add(ReceiptResult(message.senderAddress, delegateWallet, message.fee,
+                        "The fee was charged, but this is not enough.", "Contract is not deployed.")
+                    )
+                }
             }
-            EXECUTE -> TODO()
+            EXECUTE -> {
+                val contractState = accountStateService.getLastByAddress(message.recipientAddress!!)
+                val result = contractExecutor.run(contractState.storage!!, message, delegateWallet)
+                result.receipt.forEach {
+                    accountStateService.updateBalanceByAddress(it.from, -it.amount)
+                    accountStateService.updateBalanceByAddress(it.to, it.amount)
+                }
+                results.addAll(result.receipt)
+                result.state?.let {
+                    accountStateService.updateStorage(message.recipientAddress!!, it)
+                }
+            }
         }
 
         return getReceipt(message.hash, results)
@@ -151,15 +195,7 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun save(tx: TransferTransaction): TransferTransaction {
-        if (DEPLOY == getType(tx.payload.recipientAddress, tx.payload.data)) {
-            val address = contractService.generateAddress(tx.header.senderAddress)
-            val abi = AbiGenerator.generate(fromHexString(tx.payload.data!!))
-            contractService.save(Contract(address, tx.header.senderAddress, tx.payload.data!!, abi))
-        }
-
-        return super.save(tx)
-    }
+    override fun save(tx: TransferTransaction): TransferTransaction = super.save(tx)
 
     override fun validate(utx: UnconfirmedTransferTransaction) {
         super.validate(utx)
@@ -167,26 +203,39 @@ class DefaultTransferTransactionService(
         if (utx.header.fee < 0) {
             throw ValidationException("Fee should not be less than 0")
         }
-
-        if (utx.payload.amount <= 0) {
-            throw ValidationException("Amount should not be less than or equal to 0")
+        if (utx.payload.amount < 0) {
+            throw ValidationException("Amount should not be less than 0")
         }
 
         when (getType(utx.payload.recipientAddress, utx.payload.data)) {
             DEPLOY -> {
+
+                if (utx.header.fee == 0L) {
+                    throw ValidationException("Fee should not be equal to 0")
+                }
                 if (!SmartContractValidator.validate(fromHexString(utx.payload.data!!))) {
                     throw ValidationException("Invalid smart contract code", INVALID_CONTRACT)
                 }
             }
             EXECUTE -> {
+                if (utx.header.fee == 0L) {
+                    throw ValidationException("Fee should not be equal to 0")
+                }
+
                 val contract = contractService.getByAddress(utx.payload.recipientAddress!!)
                 val methods = Abi.fromJson(contract.abi).abiMethods.map { it.name }
+                if (contract.cost > utx.header.fee) {
+                    throw ValidationException("Insufficient funds for smart contract execution")
+                }
                 if (!methods.contains(utx.payload.data)) {
                     throw ValidationException("Smart contract's method ${utx.payload.data} not exists",
                         CONTRACT_METHOD_NOT_EXISTS)
                 }
             }
             FUND -> {
+                if (utx.payload.amount == 0L) {
+                    throw ValidationException("Amount should not be equal to 0")
+                }
             }
         }
 
