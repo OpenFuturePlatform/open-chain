@@ -6,9 +6,9 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.state.DelegateState
+import io.openfuture.chain.core.service.AccountStateService
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.GenesisBlockService
-import io.openfuture.chain.core.service.WalletStateService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -26,7 +26,7 @@ class DelegateControllerTests : ControllerTests() {
     private lateinit var delegateStateService: DelegateStateService
 
     @MockBean
-    private lateinit var walletStateService: WalletStateService
+    private lateinit var accountStateService: AccountStateService
 
     @MockBean
     private lateinit var genesisBlockService: GenesisBlockService
@@ -35,7 +35,7 @@ class DelegateControllerTests : ControllerTests() {
     @Test
     fun getAllShouldReturnDelegatesListTest() {
         val block = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
-            MainBlockPayload("merkleHash", "stateHash"))
+            MainBlockPayload("merkleHash", "stateHash", "receiptHash"))
         val delegate = DelegateState("publicKey", block, 1, "address", 1532345018021)
         val delegates = listOf(delegate)
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
@@ -59,7 +59,7 @@ class DelegateControllerTests : ControllerTests() {
         val genesisBlock = GenesisBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
             GenesisBlockPayload(1, mutableListOf(publicKey)))
         val delegate = DelegateState("publicKey", MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
-        MainBlockPayload("merkleHash", "stateHash")), 1, "address", 1532345018021)
+        MainBlockPayload("merkleHash", "stateHash", "receiptHash")), 1, "address", 1532345018021)
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
 
         given(genesisBlockService.getLast()).willReturn(genesisBlock)

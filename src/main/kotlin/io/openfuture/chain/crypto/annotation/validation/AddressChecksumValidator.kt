@@ -15,7 +15,11 @@ class AddressChecksumValidator : ConstraintValidator<AddressChecksum, String> {
     }
 
 
-    override fun isValid(value: String, context: ConstraintValidatorContext?): Boolean {
+    override fun isValid(value: String?, context: ConstraintValidatorContext?): Boolean {
+        if (null == value) {
+            return true
+        }
+
         if (!ADDRESS_PATTERN.toRegex().matches(value)) {
             return false
         }

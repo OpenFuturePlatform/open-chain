@@ -11,7 +11,8 @@ class TransferTransactionResponse(
     senderPublicKey: String,
     hash: String,
     val amount: Long,
-    val recipientAddress: String,
+    val recipientAddress: String? = null,
+    val data: String? = null,
     blockHash: String? = null
 ) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey, hash, blockHash) {
 
@@ -23,7 +24,8 @@ class TransferTransactionResponse(
         tx.footer.senderPublicKey,
         tx.footer.hash,
         tx.payload.amount,
-        tx.payload.recipientAddress
+        tx.payload.recipientAddress,
+        tx.payload.data
     )
 
     constructor(tx: TransferTransaction) : this(
@@ -35,6 +37,7 @@ class TransferTransactionResponse(
         tx.footer.hash,
         tx.payload.amount,
         tx.payload.recipientAddress,
+        tx.payload.data,
         tx.block.hash
     )
 

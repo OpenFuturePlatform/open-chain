@@ -21,7 +21,7 @@ class MainBlockResponse(
         block.hash,
         block.signature,
         block.publicKey,
-        block.payload.merkleHash,
+        block.payload.transactionMerkleHash,
         block.getTransactionsCount(),
         epochIndex
     )

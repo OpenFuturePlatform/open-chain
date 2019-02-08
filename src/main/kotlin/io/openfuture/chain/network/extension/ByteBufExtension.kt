@@ -2,6 +2,7 @@ package io.openfuture.chain.network.extension
 
 import io.netty.buffer.ByteBuf
 import io.openfuture.chain.network.serialization.Serializable
+import org.apache.commons.lang3.StringUtils.EMPTY
 import java.nio.charset.StandardCharsets.UTF_8
 
 fun ByteBuf.writeString(string: String) {
@@ -9,7 +10,16 @@ fun ByteBuf.writeString(string: String) {
     this.writeCharSequence(string, UTF_8)
 }
 
+fun ByteBuf.writeNullableString(string: String?) {
+    this.writeString(string ?: EMPTY)
+}
+
 fun ByteBuf.readString(): String = this.readCharSequence(this.readInt(), UTF_8).toString()
+
+fun ByteBuf.readNullableString(): String? {
+    val temp = this.readString()
+    return if (temp.isNotEmpty()) temp else null
+}
 
 fun ByteBuf.readStringList(): List<String> {
     val size = this.readInt()

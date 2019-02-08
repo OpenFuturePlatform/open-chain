@@ -57,8 +57,8 @@ VALUES (1, '0x0000000000000000000000000000000000000000', 1),
        (21, '0225aebdbb8ea2d8c401a638c87da670d5e2f0e4fdb9197f09ae75b2c805046724', 1),
        (22, '02e20add31fbf82b1369e8f2f537df9225a05d6fd497e2f9c65ee9b2df176c01c8', 1);
 
-INSERT INTO wallet_states (id, balance, vote_for)
-VALUES (1, 10000000000000000, NULL);
+INSERT INTO account_states (id, balance, vote_for, storage)
+VALUES (1, 10000000000000000, NULL, NULL);
 
 INSERT INTO delegate_states (id, rating, wallet_address, create_date)
 VALUES (2, 0, '0x51c5311F25206De4A9C6ecAa1Bc2Be257B0bA1fb', 1532345018021),

@@ -6,6 +6,8 @@ import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.*
+import io.openfuture.chain.core.model.entity.Receipt
+import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.AGAINST
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.FOR
@@ -107,18 +109,21 @@ internal class DefaultVoteTransactionService(
         }
     }
 
-    override fun updateState(message: VoteTransactionMessage) {
-        when (VoteType.getById(message.voteTypeId)) {
+    override fun process(message: VoteTransactionMessage, delegateWallet: String): Receipt {
+        val type = VoteType.getById(message.voteTypeId)
+        when (type) {
             FOR -> {
-                val walletState = walletStateService.updateVoteByAddress(message.senderAddress, message.delegateKey)
-                delegateStateService.updateRating(message.delegateKey, walletState.balance)
+                val accountState = accountStateService.updateVoteByAddress(message.senderAddress, message.delegateKey)
+                delegateStateService.updateRating(message.delegateKey, accountState.balance)
             }
             AGAINST -> {
-                val walletState = walletStateService.updateVoteByAddress(message.senderAddress, null)
-                delegateStateService.updateRating(message.delegateKey, -walletState.balance)
+                val accountState = accountStateService.updateVoteByAddress(message.senderAddress, null)
+                delegateStateService.updateRating(message.delegateKey, -accountState.balance)
             }
         }
-        walletStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
+        accountStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
+
+        return generateReceipt(type, message, delegateWallet)
     }
 
     override fun verify(message: VoteTransactionMessage): Boolean {
@@ -170,10 +175,10 @@ internal class DefaultVoteTransactionService(
             return true
         }
 
-        val persistVote = walletStateService.getLastByAddress(senderAddress)
+        val persistVote = accountStateService.getLastByAddress(senderAddress)
         return when (voteType) {
-            FOR -> null != persistVote?.voteFor
-            AGAINST -> null == persistVote?.voteFor || delegateKey != persistVote.voteFor
+            FOR -> null != persistVote.voteFor
+            AGAINST -> null == persistVote.voteFor || delegateKey != persistVote.voteFor
         }
     }
 
@@ -184,5 +189,13 @@ internal class DefaultVoteTransactionService(
     }
 
     private fun isExistsVoteType(typeId: Int): Boolean = VoteType.values().any { it.getId() == typeId }
+
+    private fun generateReceipt(type: VoteType, message: VoteTransactionMessage, delegateWallet: String): Receipt {
+        val results = listOf(
+            ReceiptResult(message.senderAddress, consensusProperties.genesisAddress!!, 0, "$type ${message.delegateKey}"),
+            ReceiptResult(message.senderAddress, delegateWallet, message.fee)
+        )
+        return getReceipt(message.hash, results)
+    }
 
 }

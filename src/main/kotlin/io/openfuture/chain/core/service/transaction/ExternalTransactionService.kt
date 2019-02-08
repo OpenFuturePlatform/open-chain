@@ -3,12 +3,14 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_ADDRESS
+import io.openfuture.chain.core.model.entity.Receipt
+import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
+import io.openfuture.chain.core.service.AccountStateService
 import io.openfuture.chain.core.service.TransactionService
-import io.openfuture.chain.core.service.WalletStateService
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.network.service.NetworkApiService
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -19,7 +21,7 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
     protected val unconfirmedRepository: UTransactionRepository<U>
 ) : BaseTransactionService() {
 
-    @Autowired protected lateinit var walletStateService: WalletStateService
+    @Autowired protected lateinit var accountStateService: AccountStateService
     @Autowired protected lateinit var baseService: TransactionService
     @Autowired private lateinit var cryptoService: CryptoService
     @Autowired private lateinit var networkService: NetworkApiService
@@ -64,8 +66,14 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         return save(tx)
     }
 
+    protected fun getReceipt(hash: String, results: List<ReceiptResult>): Receipt {
+        val receipt = Receipt(hash)
+        receipt.setResults(results)
+        return receipt
+    }
+
     protected fun isValidActualBalance(address: String, amount: Long): Boolean =
-        walletStateService.getActualBalanceByAddress(address) >= amount
+        accountStateService.getActualBalanceByAddress(address) >= amount
 
     private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean =
         cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))

@@ -36,7 +36,7 @@ class TransferTransactionControllerTests : ControllerTests() {
     @Test
     fun addTransactionShouldReturnAddedTransaction() {
         val transactionRequest = TransferTransactionRequest(1L, 1L, "hash", WALLET_ADDRESS,
-            1, WALLET_ADDRESS, "senderSignature", "recipientAddress")
+            "senderSignature","senderPublicKey", 1, WALLET_ADDRESS,  "recipientAddress")
         val header = TransactionHeader(1L, 1L, WALLET_ADDRESS)
         val footer = TransactionFooter("hash", "senderSignature", "senderPublicKey")
         val payload = TransferTransactionPayload(1L, WALLET_ADDRESS)
@@ -111,7 +111,7 @@ class TransferTransactionControllerTests : ControllerTests() {
 
     private fun createTransferTransaction(): TransferTransaction {
         val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature",
-            "publicKey", MainBlockPayload("merkleHash", "stateHash")).apply { id = 1 }
+            "publicKey", MainBlockPayload("merkleHash", "stateHash", "receiptHash")).apply { id = 1 }
         val header = TransactionHeader(1, 1, WALLET_ADDRESS)
         val footer = TransactionFooter("hash", "senderSignature", "senderPublicKey")
         val payload = TransferTransactionPayload(1, WALLET_ADDRESS)

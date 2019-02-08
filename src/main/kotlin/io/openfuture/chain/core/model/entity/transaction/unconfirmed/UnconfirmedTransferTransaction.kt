@@ -24,13 +24,13 @@ class UnconfirmedTransferTransaction(
         fun of(message: TransferTransactionMessage): UnconfirmedTransferTransaction = UnconfirmedTransferTransaction(
             TransactionHeader(message.timestamp, message.fee, message.senderAddress),
             TransactionFooter(message.hash, message.senderSignature, message.senderPublicKey),
-            TransferTransactionPayload(message.amount, message.recipientAddress)
+            TransferTransactionPayload(message.amount, message.recipientAddress, message.data)
         )
 
         fun of(request: TransferTransactionRequest): UnconfirmedTransferTransaction = UnconfirmedTransferTransaction(
             TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
             TransactionFooter(request.hash!!, request.senderSignature!!, request.senderPublicKey!!),
-            TransferTransactionPayload(request.amount!!, request.recipientAddress!!)
+            TransferTransactionPayload(request.amount!!, request.recipientAddress, request.data)
         )
     }
 
@@ -42,7 +42,8 @@ class UnconfirmedTransferTransaction(
         footer.senderSignature,
         footer.senderPublicKey,
         payload.amount,
-        payload.recipientAddress
+        payload.recipientAddress,
+        payload.data
     )
 
 }
