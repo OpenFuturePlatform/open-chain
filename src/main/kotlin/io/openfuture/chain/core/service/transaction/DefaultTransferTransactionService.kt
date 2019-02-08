@@ -30,6 +30,7 @@ import io.openfuture.chain.smartcontract.deploy.calculation.ContractCostCalculat
 import io.openfuture.chain.smartcontract.execution.ContractExecutor
 import io.openfuture.chain.smartcontract.model.Abi
 import io.openfuture.chain.smartcontract.util.SerializationUtils.serialize
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.fromHexString
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.toHexString
 import org.slf4j.Logger
@@ -109,16 +110,18 @@ class DefaultTransferTransactionService(
                 return tx
             }
 
+            if (DEPLOY == getType(transaction.payload.recipientAddress, transaction.payload.data) && receipt.getResults().all { it.error == null }) {
+                val bytecode = fromHexString(transaction.payload.data!!)
+                val address = contractService.generateAddress(transaction.header.senderAddress)
+                val abi = AbiGenerator.generate(bytecode)
+                val cost = contractCostCalculator.calculateCost(bytecode)
+                val newBytes = ByteUtils.toHexString(ByteCodeProcessor.renameClass(bytecode, address))
+                contractService.save(Contract(address, transaction.header.senderAddress, newBytes, abi, cost))
+            }
+
             val utx = unconfirmedRepository.findOneByFooterHash(transaction.footer.hash)
             if (null != utx) {
                 return confirm(utx, transaction)
-            }
-
-            if (DEPLOY == getType(transaction.payload.recipientAddress, transaction.payload.data) && receipt.getResults().all { it.error == null }) {
-                val address = contractService.generateAddress(transaction.header.senderAddress)
-                val abi = AbiGenerator.generate(fromHexString(transaction.payload.data!!))
-                val cost = contractCostCalculator.calculateCost(fromHexString(transaction.payload.data))
-                contractService.save(Contract(address, transaction.header.senderAddress, transaction.payload.data!!, abi, cost))
             }
 
             return save(transaction)
@@ -215,13 +218,13 @@ class DefaultTransferTransactionService(
                 }
             }
             EXECUTE -> {
-                if (utx.header.fee != 0L) {
+                if (utx.header.fee == 0L) {
                     throw ValidationException("Fee should not be equal to 0")
                 }
 
                 val contract = contractService.getByAddress(utx.payload.recipientAddress!!)
                 val methods = Abi.fromJson(contract.abi).abiMethods.map { it.name }
-                if (contract.cost != utx.header.fee) {
+                if (contract.cost > utx.header.fee) {
                     throw ValidationException("Insufficient funds for smart contract execution")
                 }
                 if (!methods.contains(utx.payload.data)) {
@@ -229,7 +232,7 @@ class DefaultTransferTransactionService(
                 }
             }
             FUND -> {
-                if (utx.payload.amount != 0L) {
+                if (utx.payload.amount == 0L) {
                     throw ValidationException("Amount should not be equal to 0")
                 }
             }

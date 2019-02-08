@@ -7,6 +7,7 @@ import io.openfuture.chain.core.service.ContractService
 import io.openfuture.chain.network.message.core.AccountStateMessage
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.smartcontract.deploy.calculation.ContractCostCalculator
+import io.openfuture.chain.smartcontract.execution.ContractExecutor
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -35,6 +36,9 @@ class DefaultTransactionServiceTest {
     @Mock
     private lateinit var accountStateService: AccountStateService
 
+    @Mock
+    private lateinit var contractExecutor: ContractExecutor
+
     @SpyBean
     private lateinit var contractCostCalculator: ContractCostCalculator
 
@@ -51,7 +55,7 @@ class DefaultTransactionServiceTest {
 
     @Before
     fun setUp() {
-        transactionService = DefaultTransferTransactionService(repository, uRepository, contractSevice, contractCostCalculator)
+        transactionService = DefaultTransferTransactionService(repository, uRepository, contractSevice, contractCostCalculator, contractExecutor)
         ReflectionTestUtils.setField(transactionService, "accountStateService", accountStateService, AccountStateService::class.java)
         val code = this::class.java.getResourceAsStream("/classes/JavaContract.class").readBytes()
         val bytecode = ByteUtils.toHexString(code)
