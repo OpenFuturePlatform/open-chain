@@ -4,7 +4,7 @@ import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.exception.model.ExceptionType.INSUFFICIENT_ACTUAL_BALANCE
+import io.openfuture.chain.core.exception.model.ExceptionType.*
 import io.openfuture.chain.core.model.entity.Contract
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.ReceiptResult
@@ -175,14 +175,15 @@ class DefaultTransferTransactionService(
         when (getType(utx.payload.recipientAddress, utx.payload.data)) {
             DEPLOY -> {
                 if (!SmartContractValidator.validate(fromHexString(utx.payload.data!!))) {
-                    throw ValidationException("Invalid smart contract code")
+                    throw ValidationException("Invalid smart contract code", INVALID_CONTRACT)
                 }
             }
             EXECUTE -> {
                 val contract = contractService.getByAddress(utx.payload.recipientAddress!!)
                 val methods = Abi.fromJson(contract.abi).abiMethods.map { it.name }
                 if (!methods.contains(utx.payload.data)) {
-                    throw ValidationException("Smart contract's method ${utx.payload.data} not exists")
+                    throw ValidationException("Smart contract's method ${utx.payload.data} not exists",
+                        CONTRACT_METHOD_NOT_EXISTS)
                 }
             }
             FUND -> {
