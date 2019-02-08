@@ -2,9 +2,9 @@ package io.openfuture.chain.smartcontract.deploy.calculation
 
 class OpcodeDictionary {
 
-    private val opcodeDictionary: MutableMap<Int, Long> = HashMap()
+    private val opcodeDictionary: MutableMap<Int, Long> = hashMapOf()
 
-    private val methodDictionary: MutableMap<String, Long> = HashMap()
+    private val methodDictionary: MutableMap<String, Long> = hashMapOf()
 
     init {
         val opcodes = this::class.java.classLoader.getResourceAsStream("pricing/opcodes.csv")
@@ -23,6 +23,7 @@ class OpcodeDictionary {
             methodDictionary[opcode] = cost
         }
     }
+
 
     fun get(opcode: Int) = opcodeDictionary.getOrDefault(opcode, 0L)
 

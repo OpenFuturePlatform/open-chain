@@ -27,6 +27,7 @@ import io.openfuture.chain.smartcontract.component.abi.AbiGenerator
 import io.openfuture.chain.smartcontract.component.load.SmartContractLoader
 import io.openfuture.chain.smartcontract.component.validation.SmartContractValidator
 import io.openfuture.chain.smartcontract.deploy.calculation.ContractCostCalculator
+import io.openfuture.chain.smartcontract.execution.ContractExecutor
 import io.openfuture.chain.smartcontract.model.Abi
 import io.openfuture.chain.smartcontract.util.SerializationUtils.serialize
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.fromHexString
@@ -42,7 +43,8 @@ class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
     uRepository: UTransferTransactionRepository,
     private val contractService: ContractService,
-    private val contractCostCalculator: ContractCostCalculator
+    private val contractCostCalculator: ContractCostCalculator,
+    private val contractExecutor: ContractExecutor
 ) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
 
     companion object {
@@ -163,7 +165,15 @@ class DefaultTransferTransactionService(
             }
             EXECUTE -> {
                 val contractState = accountStateService.getLastByAddress(message.recipientAddress!!)
-
+                val result = contractExecutor.run(contractState.storage!!, message, delegateWallet)
+                result.receipt.forEach {
+                    accountStateService.updateBalanceByAddress(it.from, -it.amount)
+                    accountStateService.updateBalanceByAddress(it.to, it.amount)
+                }
+                results.addAll(result.receipt)
+                result.state?.let {
+                    accountStateService.updateStorage(message.recipientAddress!!, it)
+                }
             }
         }
 
@@ -208,6 +218,9 @@ class DefaultTransferTransactionService(
             EXECUTE -> {
                 val contract = contractService.getByAddress(utx.payload.recipientAddress!!)
                 val methods = Abi.fromJson(contract.abi).abiMethods.map { it.name }
+                if (contract.cost != utx.header.fee) {
+                    throw ValidationException("Insufficient funds for smart contract execution")
+                }
                 if (!methods.contains(utx.payload.data)) {
                     throw ValidationException("Smart contract's method ${utx.payload.data} not exists")
                 }
