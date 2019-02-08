@@ -4,7 +4,7 @@ CREATE TABLE transactions (
   fee              BIGINT  NOT NULL,
   sender_address   VARCHAR NOT NULL,
   hash             VARCHAR NOT NULL,
-  sender_signature VARCHAR NOT NULL,
+  signature        VARCHAR NOT NULL,
   sender_key       VARCHAR NOT NULL,
   block_id         BIGINT  NOT NULL REFERENCES main_blocks
 );
@@ -70,7 +70,7 @@ CREATE MEMORY TABLE u_transactions (
   fee              BIGINT  NOT NULL,
   sender_address   VARCHAR NOT NULL,
   hash             VARCHAR NOT NULL,
-  sender_signature VARCHAR NOT NULL,
+  signature        VARCHAR NOT NULL,
   sender_key       VARCHAR NOT NULL
 );
 --

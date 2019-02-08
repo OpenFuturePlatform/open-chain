@@ -22,7 +22,7 @@ abstract class BaseTransaction(
     @Column(name = "hash", nullable = false, unique = true)
     var hash: String,
 
-    @Column(name = "sender_signature", nullable = false)
+    @Column(name = "signature", nullable = false)
     var signature: String,
 
     @Column(name = "sender_key", nullable = false)
