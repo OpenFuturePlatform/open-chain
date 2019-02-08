@@ -3,12 +3,12 @@ package io.openfuture.chain.core.component
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload.Companion.calculateMerkleRoot
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncMode.LIGHT
+import io.openfuture.chain.crypto.util.HashUtils
 import org.springframework.stereotype.Component
 
 @Component
@@ -113,7 +113,7 @@ class DBChecker(
             val rewardTransaction = block.payload.rewardTransaction[0]
             hashes.add(transactionService.createHash(rewardTransaction.header, rewardTransaction.payload))
 
-            if (block.payload.transactionMerkleHash != calculateMerkleRoot(hashes)) {
+            if (block.payload.transactionMerkleHash != HashUtils.calculateMerkleRoot(hashes)) {
                 return false
             }
         }
@@ -125,7 +125,7 @@ class DBChecker(
             val stateHashes = listOf(block.payload.delegateStates, block.payload.accountStates)
                 .flatMap { states -> states.map { it.hash } }
 
-            if (block.payload.transactionMerkleHash != calculateMerkleRoot(stateHashes)) {
+            if (block.payload.transactionMerkleHash != HashUtils.calculateMerkleRoot(stateHashes)) {
                 return false
             }
         }

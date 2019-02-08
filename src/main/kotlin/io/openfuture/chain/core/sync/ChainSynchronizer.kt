@@ -7,7 +7,6 @@ import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -18,6 +17,7 @@ import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import io.openfuture.chain.core.sync.SyncStatus.*
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.consensus.BlockAvailabilityRequest
@@ -281,7 +281,7 @@ class ChainSynchronizer(
             return false
         }
 
-        return rootHash == MainBlockPayload.calculateMerkleRoot(hashes)
+        return rootHash == HashUtils.calculateMerkleRoot(hashes)
     }
 
     private fun isValidPreviousHash(block: Block, lastBlock: Block): Boolean = block.previousHash == lastBlock.hash
