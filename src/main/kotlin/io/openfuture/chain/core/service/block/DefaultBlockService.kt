@@ -150,19 +150,22 @@ class DefaultBlockService(
                 rewardTransactionService.commit(rewardTransaction)
 
                 if (syncMode == FULL) {
+                    receipts.forEach {
+                        it.block = block
+                        receiptService.commit(it)
+                    }
+
                     transactions.forEach {
                         it.block = block
                         when (it) {
-                            is TransferTransaction -> transferTransactionService.commit(it)
+                            is TransferTransaction -> {
+                                val receipt = receipts.find { receipt -> receipt.transactionHash == it.footer.hash }!!
+                                transferTransactionService.commit(it, receipt)
+                            }
                             is DelegateTransaction -> delegateTransactionService.commit(it)
                             is VoteTransaction -> voteTransactionService.commit(it)
                             else -> throw IllegalStateException("Unsupported transaction type")
                         }
-                    }
-
-                    receipts.forEach {
-                        it.block = block
-                        receiptService.commit(it)
                     }
                 }
 
