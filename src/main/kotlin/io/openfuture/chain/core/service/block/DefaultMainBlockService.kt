@@ -10,7 +10,6 @@ import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
-import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload.Companion.calculateMerkleRoot
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.AGAINST
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.FOR
@@ -28,6 +27,7 @@ import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.repository.MainBlockRepository
 import io.openfuture.chain.core.service.*
 import io.openfuture.chain.core.sync.BlockchainLock
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.*
@@ -130,9 +130,9 @@ class DefaultMainBlockService(
                 }
             }
 
-            val transactionMerkleHash = calculateMerkleRoot(transactionHashes + rewardTransactionMessage.hash)
-            val stateMerkleHash = calculateMerkleRoot(stateHashes)
-            val receiptMerkleHash = calculateMerkleRoot(receipts.map { it.getHash() })
+            val transactionMerkleHash = HashUtils.calculateMerkleRoot(transactionHashes + rewardTransactionMessage.hash)
+            val stateMerkleHash = HashUtils.calculateMerkleRoot(stateHashes)
+            val receiptMerkleHash = HashUtils.calculateMerkleRoot(receipts.map { it.getHash() })
             val payload = MainBlockPayload(transactionMerkleHash, stateMerkleHash, receiptMerkleHash)
             val hash = blockService.createHash(timestamp, height, previousHash, payload)
             val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
@@ -306,7 +306,7 @@ class DefaultMainBlockService(
             return false
         }
 
-        return rootHash == calculateMerkleRoot(hashes)
+        return rootHash == HashUtils.calculateMerkleRoot(hashes)
     }
 
     private fun isValidReward(fees: Long, reward: Long): Boolean {
