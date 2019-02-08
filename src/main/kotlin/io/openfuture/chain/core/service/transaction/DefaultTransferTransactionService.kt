@@ -203,23 +203,24 @@ class DefaultTransferTransactionService(
         if (utx.header.fee < 0) {
             throw ValidationException("Fee should not be less than 0")
         }
-
-        if (utx.payload.amount <= 0) {
-            throw ValidationException("Amount should not be less than or equal to 0")
+        if (utx.payload.amount < 0) {
+            throw ValidationException("Amount should not be less than 0")
         }
 
         when (getType(utx.payload.recipientAddress, utx.payload.data)) {
             DEPLOY -> {
-
                 if (utx.header.fee != 0L) {
                     throw ValidationException("Fee should not be equal to 0")
                 }
-
                 if (!SmartContractValidator.validate(fromHexString(utx.payload.data!!))) {
                     throw ValidationException("Invalid smart contract code")
                 }
             }
             EXECUTE -> {
+                if (utx.header.fee != 0L) {
+                    throw ValidationException("Fee should not be equal to 0")
+                }
+
                 val contract = contractService.getByAddress(utx.payload.recipientAddress!!)
                 val methods = Abi.fromJson(contract.abi).abiMethods.map { it.name }
                 if (contract.cost != utx.header.fee) {
@@ -230,6 +231,9 @@ class DefaultTransferTransactionService(
                 }
             }
             FUND -> {
+                if (utx.payload.amount != 0L) {
+                    throw ValidationException("Amount should not be equal to 0")
+                }
             }
         }
 
