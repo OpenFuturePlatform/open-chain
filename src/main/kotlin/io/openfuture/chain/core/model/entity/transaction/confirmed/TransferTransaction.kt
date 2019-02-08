@@ -27,7 +27,7 @@ class TransferTransaction(
             TransactionHeader(message.timestamp, message.fee, message.senderAddress),
             TransactionFooter(message.hash, message.senderSignature, message.senderPublicKey),
             block,
-            TransferTransactionPayload(message.amount, message.recipientAddress)
+            TransferTransactionPayload(message.amount, message.recipientAddress, message.data)
         )
 
         fun of(utx: UnconfirmedTransferTransaction, block: MainBlock): TransferTransaction = TransferTransaction(
@@ -47,7 +47,8 @@ class TransferTransaction(
         footer.senderSignature,
         footer.senderPublicKey,
         payload.amount,
-        payload.recipientAddress
+        payload.recipientAddress,
+        payload.data
     )
 
 }

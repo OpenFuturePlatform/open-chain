@@ -106,6 +106,7 @@ class MainBlockControllerTests : ControllerTests() {
 
     private fun createMainBlock(): MainBlock =
         MainBlock(1, 1, "previousHash", "hash", "signature",
-            "publicKey", MainBlockPayload("merkleHash", "stateHash")).apply { id = 1 }
+            "publicKey", MainBlockPayload("merkleHash", "stateHash", "receiptHash"))
+            .apply { id = 1 }
 
 }

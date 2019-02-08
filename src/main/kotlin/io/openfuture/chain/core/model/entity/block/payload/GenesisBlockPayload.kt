@@ -2,7 +2,6 @@ package io.openfuture.chain.core.model.entity.block.payload
 
 import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets.UTF_8
 import javax.persistence.*
 
 @Embeddable
@@ -19,10 +18,10 @@ class GenesisBlockPayload(
 ) : BlockPayload {
 
     override fun getBytes(): ByteArray {
-        val length = activeDelegates.asSequence().map { it.toByteArray(UTF_8).size }.sum()
+        val length = activeDelegates.asSequence().map { it.toByteArray().size }.sum()
         val buffer = ByteBuffer.allocate(LONG_BYTES + length)
         buffer.putLong(epochIndex)
-        activeDelegates.forEach { buffer.put(it.toByteArray(UTF_8)) }
+        activeDelegates.forEach { buffer.put(it.toByteArray()) }
         return buffer.array()
     }
 

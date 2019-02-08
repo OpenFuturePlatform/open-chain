@@ -2,13 +2,14 @@ package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
+import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
-import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -34,7 +35,8 @@ class DefaultBlockService(
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
     private val delegateStateService: DelegateStateService,
-    private val walletStateService: WalletStateService
+    private val accountStateService: AccountStateService,
+    private val receiptService: ReceiptService
 ) : BlockService {
 
     @Transactional(readOnly = true)
@@ -72,7 +74,8 @@ class DefaultBlockService(
         val heightRange = (fromHeight..toHeight).toList()
         transactionService.deleteBlockTransactions(heightRange)
         delegateStateService.deleteBlockStates(heightRange)
-        walletStateService.deleteBlockStates(heightRange)
+        accountStateService.deleteBlockStates(heightRange)
+        receiptService.deleteBlockReceipts(heightRange)
         repository.deleteAllByHeightIn(heightRange)
     }
 
@@ -93,7 +96,7 @@ class DefaultBlockService(
 
     @Transactional
     override fun deleteByHeightIn(heights: List<Long>) {
-        walletStateService.deleteBlockStates(heights)
+        accountStateService.deleteBlockStates(heights)
         delegateStateService.deleteBlockStates(heights)
         transactionService.deleteBlockTransactions(heights)
         repository.deleteAllByHeightIn(heights)
@@ -127,6 +130,7 @@ class DefaultBlockService(
 
                 val transactions = mutableListOf<Transaction>()
                 val states = mutableListOf<State>()
+                val receipts = mutableSetOf<Receipt>()
 
                 if (syncMode == FULL) {
                     transactions.addAll(block.payload.transferTransactions)
@@ -136,13 +140,16 @@ class DefaultBlockService(
                     block.payload.transferTransactions = mutableListOf()
                     block.payload.voteTransactions = mutableListOf()
                     block.payload.delegateTransactions = mutableListOf()
+
+                    receipts.addAll(block.payload.receipts)
+                    block.payload.receipts = mutableListOf()
                 }
 
                 states.addAll(block.payload.delegateStates)
-                states.addAll(block.payload.walletStates)
+                states.addAll(block.payload.accountStates)
 
                 block.payload.delegateStates = mutableListOf()
-                block.payload.walletStates = mutableListOf()
+                block.payload.accountStates = mutableListOf()
 
                 this.save(block)
                 rewardTransactionService.commit(rewardTransaction)
@@ -154,16 +161,22 @@ class DefaultBlockService(
                             is TransferTransaction -> transferTransactionService.commit(it)
                             is DelegateTransaction -> delegateTransactionService.commit(it)
                             is VoteTransaction -> voteTransactionService.commit(it)
-                            else -> throw IllegalStateException("The type doesn`t handle")
+                            else -> throw IllegalStateException("Unsupported transaction type")
                         }
                     }
+
+                    receipts.forEach {
+                        it.block = block
+                        receiptService.commit(it)
+                    }
                 }
+
                 states.forEach {
                     it.block = block
                     when (it) {
                         is DelegateState -> delegateStateService.commit(it)
-                        is WalletState -> walletStateService.commit(it)
-                        else -> throw IllegalStateException("The type doesn`t handle")
+                        is AccountState -> accountStateService.commit(it)
+                        else -> throw IllegalStateException("Unsupported state type")
                     }
                 }
             } else if (block is GenesisBlock) {

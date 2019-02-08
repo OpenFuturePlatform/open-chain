@@ -4,17 +4,32 @@ import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.exception.model.ExceptionType.INSUFFICIENT_ACTUAL_BALANCE
+import io.openfuture.chain.core.exception.model.ExceptionType.*
+import io.openfuture.chain.core.model.entity.Contract
+import io.openfuture.chain.core.model.entity.Receipt
+import io.openfuture.chain.core.model.entity.ReceiptResult
+import io.openfuture.chain.core.model.entity.dictionary.TransferTransactionType.*
+import io.openfuture.chain.core.model.entity.dictionary.TransferTransactionType.Companion.getType
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.repository.TransferTransactionRepository
 import io.openfuture.chain.core.repository.UTransferTransactionRepository
+import io.openfuture.chain.core.service.ContractService
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
+import io.openfuture.chain.smartcontract.component.ByteCodeProcessor
+import io.openfuture.chain.smartcontract.component.SmartContractInjector
+import io.openfuture.chain.smartcontract.component.abi.AbiGenerator
+import io.openfuture.chain.smartcontract.component.load.SmartContractLoader
+import io.openfuture.chain.smartcontract.component.validation.SmartContractValidator
+import io.openfuture.chain.smartcontract.model.Abi
+import io.openfuture.chain.smartcontract.util.SerializationUtils.serialize
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.fromHexString
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.toHexString
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -24,7 +39,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DefaultTransferTransactionService(
     repository: TransferTransactionRepository,
-    uRepository: UTransferTransactionRepository
+    uRepository: UTransferTransactionRepository,
+    private val contractService: ContractService
 ) : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction>(repository, uRepository), TransferTransactionService {
 
     companion object {
@@ -100,9 +116,28 @@ class DefaultTransferTransactionService(
         }
     }
 
-    override fun updateState(message: TransferTransactionMessage) {
-        walletStateService.updateBalanceByAddress(message.recipientAddress, message.amount)
-        walletStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
+
+    override fun process(message: TransferTransactionMessage, delegateWallet: String): Receipt {
+        val results = mutableListOf<ReceiptResult>()
+
+        when (getType(message.recipientAddress, message.data)) {
+            FUND -> {
+                accountStateService.updateBalanceByAddress(message.senderAddress, -(message.amount + message.fee))
+                accountStateService.updateBalanceByAddress(message.recipientAddress!!, message.amount)
+                results.add(ReceiptResult(message.senderAddress, message.recipientAddress!!, message.amount))
+                results.add(ReceiptResult(message.senderAddress, delegateWallet, message.fee))
+            }
+            DEPLOY -> {
+                val contractAddress = contractService.generateAddress(message.senderAddress)
+                val newBytes = ByteCodeProcessor.renameClass(fromHexString(message.data), contractAddress)
+                val clazz = SmartContractLoader(this::class.java.classLoader).loadClass(newBytes)
+                val contract = SmartContractInjector.initSmartContract(clazz, message.senderAddress, contractAddress)
+                accountStateService.updateStorage(contractAddress, toHexString(serialize(contract)))
+            }
+            EXECUTE -> TODO()
+        }
+
+        return getReceipt(message.hash, results)
     }
 
     override fun verify(message: TransferTransactionMessage): Boolean {
@@ -116,7 +151,15 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun save(tx: TransferTransaction): TransferTransaction = super.save(tx)
+    override fun save(tx: TransferTransaction): TransferTransaction {
+        if (DEPLOY == getType(tx.payload.recipientAddress, tx.payload.data)) {
+            val address = contractService.generateAddress(tx.header.senderAddress)
+            val abi = AbiGenerator.generate(fromHexString(tx.payload.data!!))
+            contractService.save(Contract(address, tx.header.senderAddress, tx.payload.data!!, abi))
+        }
+
+        return super.save(tx)
+    }
 
     override fun validate(utx: UnconfirmedTransferTransaction) {
         super.validate(utx)
@@ -127,6 +170,24 @@ class DefaultTransferTransactionService(
 
         if (utx.payload.amount <= 0) {
             throw ValidationException("Amount should not be less than or equal to 0")
+        }
+
+        when (getType(utx.payload.recipientAddress, utx.payload.data)) {
+            DEPLOY -> {
+                if (!SmartContractValidator.validate(fromHexString(utx.payload.data!!))) {
+                    throw ValidationException("Invalid smart contract code", INVALID_CONTRACT)
+                }
+            }
+            EXECUTE -> {
+                val contract = contractService.getByAddress(utx.payload.recipientAddress!!)
+                val methods = Abi.fromJson(contract.abi).abiMethods.map { it.name }
+                if (!methods.contains(utx.payload.data)) {
+                    throw ValidationException("Smart contract's method ${utx.payload.data} not exists",
+                        CONTRACT_METHOD_NOT_EXISTS)
+                }
+            }
+            FUND -> {
+            }
         }
 
     }

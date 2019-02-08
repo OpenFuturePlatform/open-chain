@@ -3,13 +3,13 @@ package io.openfuture.chain.core.sync
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.DBChecker
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.component.StatePool
+import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
+import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
-import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -22,7 +22,10 @@ import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.consensus.BlockAvailabilityRequest
 import io.openfuture.chain.network.message.consensus.BlockAvailabilityResponse
-import io.openfuture.chain.network.message.core.*
+import io.openfuture.chain.network.message.core.DelegateTransactionMessage
+import io.openfuture.chain.network.message.core.RewardTransactionMessage
+import io.openfuture.chain.network.message.core.TransferTransactionMessage
+import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.network.message.sync.EpochRequestMessage
 import io.openfuture.chain.network.message.sync.EpochResponseMessage
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
@@ -52,7 +55,6 @@ class ChainSynchronizer(
     private val transferTransactionService: TransferTransactionService,
     private val delegateStateService: DelegateStateService,
     private val dbChecker: DBChecker,
-    private val statePool: StatePool,
     private val nodeKeyHolder: NodeKeyHolder
 ) : ApplicationListener<DataSourceSchemaCreatedEvent> {
 
@@ -89,11 +91,7 @@ class ChainSynchronizer(
                 return
             }
 
-            if ((isDelegate() || FULL == syncSession!!.syncMode)
-                    && (!isValidTransactionMerkleRoot(message.mainBlocks)
-                    || !isValidStateMerkleRoot(message.mainBlocks)
-                    || !isValidTransactions(message.mainBlocks)
-                    || !isValidStates(message.mainBlocks))) {
+            if ((isDelegate() || syncSession!!.syncMode == FULL) && !isValidEpoch(message.mainBlocks)) {
                 requestEpoch(delegates.filter { it != message.delegateKey })
                 return
             }
@@ -193,29 +191,37 @@ class ChainSynchronizer(
                 it.voteTransactions.forEach { vTx -> mainBlock.payload.voteTransactions.add(VoteTransaction.of(vTx, mainBlock)) }
                 it.delegateTransactions.forEach { dTx -> mainBlock.payload.delegateTransactions.add(DelegateTransaction.of(dTx, mainBlock)) }
                 it.transferTransactions.forEach { vTx -> mainBlock.payload.transferTransactions.add(TransferTransaction.of(vTx, mainBlock)) }
+                it.receipts.forEach { r -> mainBlock.payload.receipts.add(Receipt.of(r, mainBlock)) }
             }
             it.delegateStates.forEach { ds -> mainBlock.payload.delegateStates.add(DelegateState.of(ds, mainBlock)) }
-            it.walletStates.forEach { ws -> mainBlock.payload.walletStates.add(WalletState.of(ws, mainBlock)) }
+            it.accountStates.forEach { ws -> mainBlock.payload.accountStates.add(AccountState.of(ws, mainBlock)) }
             mainBlock
         }
         listBlocks.addAll(mainBlocks)
         return listBlocks
     }
 
-    private fun isValidRewardTransactions(message: RewardTransactionMessage): Boolean = rewardTransactionService.verify(message)
+    private fun isValidEpoch(mainBlocks: List<MainBlockMessage>): Boolean =
+        isValidTransactionMerkleRoot(mainBlocks)
+            && isValidStateMerkleRoot(mainBlocks)
+            && isValidReceiptMerkleRoot(mainBlocks)
+            && isValidTransactions(mainBlocks)
 
-    private fun isValidVoteTransactions(list: List<VoteTransactionMessage>): Boolean = !list
-        .any { !voteTransactionService.verify(it) }
+    private fun isValidRewardTransactions(message: RewardTransactionMessage): Boolean =
+        rewardTransactionService.verify(message)
 
-    private fun isValidDelegateTransactions(list: List<DelegateTransactionMessage>): Boolean = !list
-        .any { !delegateTransactionService.verify(it) }
+    private fun isValidVoteTransactions(list: List<VoteTransactionMessage>): Boolean =
+        list.all { voteTransactionService.verify(it) }
 
-    private fun isValidTransferTransactions(list: List<TransferTransactionMessage>): Boolean = !list
-        .any { !transferTransactionService.verify(it) }
+    private fun isValidDelegateTransactions(list: List<DelegateTransactionMessage>): Boolean =
+        list.all { delegateTransactionService.verify(it) }
+
+    private fun isValidTransferTransactions(list: List<TransferTransactionMessage>): Boolean =
+        list.all { transferTransactionService.verify(it) }
 
     private fun isValidTransactions(blocks: List<MainBlockMessage>): Boolean {
         try {
-            for (block in blocks) {
+            blocks.forEach { block ->
                 if (!isValidRewardTransactions(block.rewardTransaction)) {
                     throw ValidationException("Invalid reward transaction in block: height #${block.height}, hash ${block.hash} ")
                 }
@@ -233,65 +239,40 @@ class ChainSynchronizer(
             log.warn("Transactions are invalid: ${e.message}")
             return false
         }
+
         return true
-    }
-
-    private fun isValidStates(blocks: List<MainBlockMessage>): Boolean {
-        try {
-            for (block in blocks) {
-                if (!isValidStates(block.getAllTransactions(), block.getAllStates())) {
-                    throw ValidationException("Invalid states")
-                }
-            }
-        } catch (e: ValidationException) {
-            log.debug("States are invalid, cause: ${e.message}")
-            return false
-        }
-        return true
-    }
-
-    private fun isValidStates(txMessages: List<TransactionMessage>, blockStates: List<StateMessage>): Boolean {
-        val states = getStates(txMessages)
-
-        if (blockStates.size != states.size) {
-            return false
-        }
-
-        return states.all { blockStates.contains(it) }
-    }
-
-    private fun getStates(txMessages: List<TransactionMessage>): List<StateMessage> {
-        return statePool.use {
-            txMessages.forEach { tx ->
-                when (tx) {
-                    is TransferTransactionMessage -> transferTransactionService.updateState(tx)
-                    is VoteTransactionMessage -> voteTransactionService.updateState(tx)
-                    is DelegateTransactionMessage -> delegateTransactionService.updateState(tx)
-                    is RewardTransactionMessage -> rewardTransactionService.updateState(tx)
-                }
-            }
-
-            statePool.getPool().values.toList()
-        }
     }
 
     private fun isValidStateMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
         mainBlocks.forEach { block ->
-            if (!isValidRootHash(block.stateHash, block.getAllStates().map { it.getHash() })) {
+            if (!isValidRootHash(block.stateMerkleHash, block.getAllStates().map { it.getHash() })) {
                 log.warn("State merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
                 return false
             }
         }
+
+        return true
+    }
+
+    private fun isValidReceiptMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
+        mainBlocks.forEach { block ->
+            if (!isValidRootHash(block.receiptMerkleHash, block.receipts.map { Receipt(it.transactionHash, it.result).getHash() })) {
+                log.warn("Receipt merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
+                return false
+            }
+        }
+
         return true
     }
 
     private fun isValidTransactionMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
         mainBlocks.forEach { block ->
-            if (!isValidRootHash(block.merkleHash, block.getAllTransactions().map { it.hash })) {
+            if (!isValidRootHash(block.transactionMerkleHash, block.getAllTransactions().map { it.hash })) {
                 log.warn("Transaction merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
                 return false
             }
         }
+
         return true
     }
 

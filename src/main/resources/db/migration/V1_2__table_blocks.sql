@@ -16,9 +16,10 @@ CREATE UNIQUE HASH INDEX blocks_height
 --
 
 CREATE TABLE main_blocks (
-  id          BIGINT PRIMARY KEY REFERENCES blocks,
-  merkle_hash VARCHAR NOT NULL,
-  state_hash  VARCHAR NOT NULL
+  id                       BIGINT  PRIMARY KEY REFERENCES blocks,
+  transaction_merkle_hash  VARCHAR NOT NULL,
+  state_merkle_hash        VARCHAR NOT NULL,
+  receipt_merkle_hash      VARCHAR NOT NULL
 );
 --
 CREATE TABLE genesis_blocks (

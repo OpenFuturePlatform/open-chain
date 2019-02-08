@@ -15,46 +15,52 @@ abstract class BaseMainBlockMessage(
     hash: String,
     signature: String,
     publicKey: String,
-    var merkleHash: String,
-    var stateHash: String,
+    var transactionMerkleHash: String,
+    var stateMerkleHash: String,
+    var receiptMerkleHash: String,
     var rewardTransaction: RewardTransactionMessage,
     var voteTransactions: List<VoteTransactionMessage>,
     var delegateTransactions: List<DelegateTransactionMessage>,
     var transferTransactions: List<TransferTransactionMessage>,
     var delegateStates: List<DelegateStateMessage>,
-    var walletStates: List<WalletStateMessage>
+    var accountStates: List<AccountStateMessage>,
+    var receipts: List<ReceiptMessage>
 ) : BlockMessage(height, previousHash, timestamp, hash, signature, publicKey) {
 
     fun getAllTransactions(): List<TransactionMessage> =
         voteTransactions + delegateTransactions + transferTransactions + rewardTransaction
 
-    fun getAllStates(): List<StateMessage> = delegateStates + walletStates
+    fun getAllStates(): List<StateMessage> = delegateStates + accountStates
 
     override fun read(buf: ByteBuf) {
         super.read(buf)
 
-        merkleHash = buf.readString()
-        stateHash = buf.readString()
+        transactionMerkleHash = buf.readString()
+        stateMerkleHash = buf.readString()
+        receiptMerkleHash = buf.readString()
         rewardTransaction = RewardTransactionMessage::class.java.newInstance()
         rewardTransaction.read(buf)
         voteTransactions = buf.readList()
         delegateTransactions = buf.readList()
         transferTransactions = buf.readList()
         delegateStates = buf.readList()
-        walletStates = buf.readList()
+        accountStates = buf.readList()
+        receipts = buf.readList()
     }
 
     override fun write(buf: ByteBuf) {
         super.write(buf)
 
-        buf.writeString(merkleHash)
-        buf.writeString(stateHash)
+        buf.writeString(transactionMerkleHash)
+        buf.writeString(stateMerkleHash)
+        buf.writeString(receiptMerkleHash)
         rewardTransaction.write(buf)
         buf.writeList(voteTransactions)
         buf.writeList(delegateTransactions)
         buf.writeList(transferTransactions)
         buf.writeList(delegateStates)
-        buf.writeList(walletStates)
+        buf.writeList(accountStates)
+        buf.writeList(receipts)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -70,13 +76,15 @@ abstract class BaseMainBlockMessage(
         if (height != other.height) return false
         if (previousHash != other.previousHash) return false
         if (rewardTransaction != other.rewardTransaction) return false
-        if (merkleHash != other.merkleHash) return false
-        if (stateHash != other.stateHash) return false
+        if (transactionMerkleHash != other.transactionMerkleHash) return false
+        if (stateMerkleHash != other.stateMerkleHash) return false
+        if (receiptMerkleHash != other.receiptMerkleHash) return false
         if (voteTransactions != other.voteTransactions) return false
         if (delegateTransactions != other.delegateTransactions) return false
         if (transferTransactions != other.transferTransactions) return false
         if (delegateStates != other.delegateStates) return false
-        if (walletStates != other.walletStates) return false
+        if (accountStates != other.accountStates) return false
+        if (receipts != other.receipts) return false
 
         return true
     }
@@ -89,13 +97,15 @@ abstract class BaseMainBlockMessage(
         result = 31 * result + height.hashCode()
         result = 31 * result + previousHash.hashCode()
         result = 31 * result + rewardTransaction.hashCode()
-        result = 31 * result + merkleHash.hashCode()
-        result = 31 * result + stateHash.hashCode()
+        result = 31 * result + transactionMerkleHash.hashCode()
+        result = 31 * result + stateMerkleHash.hashCode()
+        result = 31 * result + receiptMerkleHash.hashCode()
         result = 31 * result + voteTransactions.hashCode()
         result = 31 * result + delegateTransactions.hashCode()
         result = 31 * result + transferTransactions.hashCode()
         result = 31 * result + delegateStates.hashCode()
-        result = 31 * result + walletStates.hashCode()
+        result = 31 * result + accountStates.hashCode()
+        result = 31 * result + receipts.hashCode()
         return result
     }
 

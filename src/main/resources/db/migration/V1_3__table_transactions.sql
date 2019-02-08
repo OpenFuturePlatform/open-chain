@@ -18,7 +18,8 @@ CREATE HASH INDEX transaction_sender_address
 CREATE TABLE transfer_transactions (
   id                BIGINT PRIMARY KEY REFERENCES transactions,
   amount            BIGINT  NOT NULL,
-  recipient_address VARCHAR NOT NULL
+  recipient_address VARCHAR,
+  data              VARCHAR
 );
 --
 CREATE HASH INDEX transfer_transaction_recipient_address
@@ -61,6 +62,7 @@ CREATE HASH INDEX vote_transactions_delegate_key
   ON vote_transactions (delegate_key);
 --
 
+
 -- UNCONFIRMED TABLES
 CREATE MEMORY TABLE u_transactions (
   id               BIGINT AUTO_INCREMENT PRIMARY KEY HASH,
@@ -84,7 +86,8 @@ CREATE INDEX u_transactions_fee
 CREATE MEMORY TABLE u_transfer_transactions (
   id                BIGINT PRIMARY KEY REFERENCES u_transactions,
   amount            BIGINT  NOT NULL,
-  recipient_address VARCHAR NOT NULL
+  recipient_address VARCHAR,
+  data              VARCHAR,
 );
 --
 CREATE MEMORY TABLE u_delegate_transactions (
@@ -99,8 +102,9 @@ CREATE UNIQUE HASH INDEX u_delegate_transactions_delegate_key
 CREATE MEMORY TABLE u_vote_transactions (
   id           BIGINT PRIMARY KEY REFERENCES u_transactions,
   vote_type_id INTEGER NOT NULL REFERENCES vote_types,
-  delegate_key      VARCHAR NOT NULL
+  delegate_key VARCHAR NOT NULL
 );
 --
 CREATE INDEX u_vote_transactions_delegate_key
-  ON u_vote_transactions (delegate_key)
+  ON u_vote_transactions (delegate_key);
+--

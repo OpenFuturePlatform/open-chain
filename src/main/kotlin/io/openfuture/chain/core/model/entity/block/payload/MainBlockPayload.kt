@@ -1,8 +1,9 @@
 package io.openfuture.chain.core.model.entity.block.payload
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import io.openfuture.chain.core.model.entity.Receipt
+import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
-import io.openfuture.chain.core.model.entity.state.WalletState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -11,17 +12,19 @@ import io.openfuture.chain.crypto.util.HashUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
-import java.nio.charset.StandardCharsets.UTF_8
 import javax.persistence.*
 
 @Embeddable
 class MainBlockPayload(
 
-    @Column(name = "merkle_hash", nullable = false)
-    var merkleHash: String,
+    @Column(name = "transaction_merkle_hash", nullable = false)
+    var transactionMerkleHash: String,
 
-    @Column(name = "state_hash", nullable = false)
-    var stateHash: String,
+    @Column(name = "state_merkle_hash", nullable = false)
+    var stateMerkleHash: String,
+
+    @Column(name = "receipt_merkle_hash", nullable = false)
+    var receiptMerkleHash: String,
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.EAGER)
@@ -81,11 +84,22 @@ class MainBlockPayload(
         inverseJoinColumns = [JoinColumn(name = "id")]
     )
     @Fetch(value = FetchMode.SUBSELECT)
-    var walletStates: MutableList<WalletState> = mutableListOf()
+    var accountStates: MutableList<AccountState> = mutableListOf(),
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "receipts",
+        joinColumns = [JoinColumn(name = "block_id")],
+        inverseJoinColumns = [JoinColumn(name = "id")]
+    )
+    @Fetch(value = FetchMode.SUBSELECT)
+    var receipts: MutableList<Receipt> = mutableListOf()
 
 ) : BlockPayload {
 
-    override fun getBytes(): ByteArray = merkleHash.toByteArray(UTF_8) + stateHash.toByteArray(UTF_8)
+    override fun getBytes(): ByteArray =
+        transactionMerkleHash.toByteArray() + stateMerkleHash.toByteArray() + receiptMerkleHash.toByteArray()
 
     companion object {
 
