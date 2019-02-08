@@ -117,7 +117,8 @@ class DefaultTransferTransactionService(
             if (DEPLOY == getType(transaction.payload.recipientAddress, transaction.payload.data) && receipt.getResults().all { it.error == null }) {
                 val address = contractService.generateAddress(transaction.header.senderAddress)
                 val abi = AbiGenerator.generate(fromHexString(transaction.payload.data!!))
-                contractService.save(Contract(address, transaction.header.senderAddress, transaction.payload.data!!, abi))
+                val cost = contractCostCalculator.calculateCost(fromHexString(transaction.payload.data))
+                contractService.save(Contract(address, transaction.header.senderAddress, transaction.payload.data!!, abi, cost))
             }
 
             return save(transaction)
