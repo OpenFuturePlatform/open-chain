@@ -61,7 +61,7 @@ interface GenesisBlockRepository : BlockRepository<GenesisBlock> {
 @Repository
 interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 
-    fun findOneByFooterHash(hash: String): Entity?
+    fun findOneByHash(hash: String): Entity?
 
     fun deleteAllByBlockHeightIn(heights: List<Long>)
 
@@ -70,7 +70,7 @@ interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
 @Repository
 interface VoteTransactionRepository : TransactionRepository<VoteTransaction> {
 
-    fun findFirstByHeaderSenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeIdOrderByHeaderTimestampDesc(senderAddress: String, delegateKey: String, typeId: Int): VoteTransaction?
+    fun findFirstBySenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeIdOrderByTimestampDesc(senderAddress: String, delegateKey: String, typeId: Int): VoteTransaction?
 
 }
 
@@ -80,14 +80,14 @@ interface DelegateTransactionRepository : TransactionRepository<DelegateTransact
 @Repository
 interface TransferTransactionRepository : TransactionRepository<TransferTransaction> {
 
-    fun findAllByHeaderSenderAddressOrPayloadRecipientAddress(senderAddress: String, recipientAddress: String, request: Pageable): Page<TransferTransaction>
+    fun findAllBySenderAddressOrPayloadRecipientAddress(senderAddress: String, recipientAddress: String, request: Pageable): Page<TransferTransaction>
 
 }
 
 @Repository
 interface RewardTransactionRepository : BaseRepository<RewardTransaction> {
 
-    fun findOneByFooterHash(hash: String): RewardTransaction?
+    fun findOneByHash(hash: String): RewardTransaction?
 
     fun findAllByPayloadRecipientAddress(payloadRecipientAddress: String): List<RewardTransaction>
 
@@ -96,18 +96,18 @@ interface RewardTransactionRepository : BaseRepository<RewardTransaction> {
 @Repository
 interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseRepository<UEntity> {
 
-    fun findOneByFooterHash(hash: String): UEntity?
+    fun findOneByHash(hash: String): UEntity?
 
-    fun findAllByOrderByHeaderFeeDesc(request: Pageable): MutableList<UEntity>
+    fun findAllByOrderByFeeDesc(request: Pageable): MutableList<UEntity>
 
-    fun findAllByHeaderSenderAddress(address: String): List<UEntity>
+    fun findAllBySenderAddress(address: String): List<UEntity>
 
 }
 
 @Repository
 interface UVoteTransactionRepository : UTransactionRepository<UnconfirmedVoteTransaction> {
 
-    fun findOneByHeaderSenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeId(senderAddress: String, delegateKey: String, typeId: Int): UnconfirmedVoteTransaction?
+    fun findOneBySenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeId(senderAddress: String, delegateKey: String, typeId: Int): UnconfirmedVoteTransaction?
 
 }
 

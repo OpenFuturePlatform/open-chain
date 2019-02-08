@@ -1,7 +1,5 @@
 package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 
-import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
@@ -12,38 +10,37 @@ import javax.persistence.Table
 @Entity
 @Table(name = "u_transfer_transactions")
 class UnconfirmedTransferTransaction(
-    header: TransactionHeader,
-    footer: TransactionFooter,
+    timestamp: Long,
+    fee: Long,
+    senderAddress: String,
+    hash: String,
+    signature: String,
+    publicKey: String,
 
     @Embedded
-    var payload: TransferTransactionPayload
+    private var payload: TransferTransactionPayload
 
-) : UnconfirmedTransaction(header, footer, payload) {
+) : UnconfirmedTransaction(timestamp, fee, senderAddress, hash, signature, publicKey) {
 
     companion object {
         fun of(message: TransferTransactionMessage): UnconfirmedTransferTransaction = UnconfirmedTransferTransaction(
-            TransactionHeader(message.timestamp, message.fee, message.senderAddress),
-            TransactionFooter(message.hash, message.senderSignature, message.senderPublicKey),
+            message.timestamp, message.fee, message.senderAddress, message.hash, message.signature, message.publicKey,
             TransferTransactionPayload(message.amount, message.recipientAddress, message.data)
         )
 
         fun of(request: TransferTransactionRequest): UnconfirmedTransferTransaction = UnconfirmedTransferTransaction(
-            TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
-            TransactionFooter(request.hash!!, request.senderSignature!!, request.senderPublicKey!!),
-            TransferTransactionPayload(request.amount!!, request.recipientAddress, request.data)
+            request.timestamp!!, request.fee!!, request.senderAddress!!, request.hash!!, request.senderSignature!!,
+            request.senderPublicKey!!, TransferTransactionPayload(request.amount!!, request.recipientAddress,
+            request.data)
         )
     }
 
+
     override fun toMessage(): TransferTransactionMessage = TransferTransactionMessage(
-        header.timestamp,
-        header.fee,
-        header.senderAddress,
-        footer.hash,
-        footer.senderSignature,
-        footer.senderPublicKey,
-        payload.amount,
-        payload.recipientAddress,
+        timestamp, fee, senderAddress, hash, signature, publicKey, payload.amount, payload.recipientAddress,
         payload.data
     )
+
+    override fun getPayload(): TransferTransactionPayload = payload
 
 }

@@ -4,18 +4,17 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.BlockService
-import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import io.openfuture.chain.crypto.util.HashUtils
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Component
 
 @Component
 class DBChecker(
     private val blockService: BlockService,
-    private val consensusProperties: ConsensusProperties,
-    private val transactionService: TransactionService
+    private val consensusProperties: ConsensusProperties
 ) {
 
     fun prepareDB(syncMode: SyncMode): Boolean {
@@ -107,11 +106,11 @@ class DBChecker(
     private fun isValidTransactions(block: Block): Boolean {
         if (block is MainBlock) {
             val hashes = mutableListOf<String>()
-            hashes.addAll(block.payload.transferTransactions.map { transactionService.createHash(it.header, it.payload) })
-            hashes.addAll(block.payload.voteTransactions.map { transactionService.createHash(it.header, it.payload) })
-            hashes.addAll(block.payload.delegateTransactions.map { transactionService.createHash(it.header, it.payload) })
-            val rewardTransaction = block.payload.rewardTransaction[0]
-            hashes.add(transactionService.createHash(rewardTransaction.header, rewardTransaction.payload))
+            hashes.addAll(block.payload.transferTransactions.map { ByteUtils.toHexString(HashUtils.sha256(it.getBytes())) })
+            hashes.addAll(block.payload.voteTransactions.map { ByteUtils.toHexString(HashUtils.sha256(it.getBytes())) })
+            hashes.addAll(block.payload.delegateTransactions.map { ByteUtils.toHexString(HashUtils.sha256(it.getBytes())) })
+            val rewardTransactionHash = ByteUtils.toHexString(HashUtils.sha256(block.payload.rewardTransaction[0].getBytes()))
+            hashes.add(rewardTransactionHash)
 
             if (block.payload.transactionMerkleHash != HashUtils.calculateMerkleRoot(hashes)) {
                 return false

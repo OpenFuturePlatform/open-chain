@@ -52,7 +52,7 @@ class AccountController(
                 delegate.address,
                 delegate.rating,
                 stateManager.getVotesForDelegate(delegate.address).size,
-                voteTransactionService.getLastVoteForDelegate(address, delegate.address).header.timestamp,
+                voteTransactionService.getLastVoteForDelegate(address, delegate.address).timestamp,
                 voteTransactionService.getUnconfirmedBySenderAgainstDelegate(address, delegate.address) != null
             )
         }

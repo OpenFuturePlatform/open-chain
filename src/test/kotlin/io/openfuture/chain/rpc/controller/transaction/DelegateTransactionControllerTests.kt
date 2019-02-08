@@ -3,8 +3,6 @@ package io.openfuture.chain.rpc.controller.transaction
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
-import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
@@ -33,18 +31,15 @@ class DelegateTransactionControllerTests : ControllerTests() {
 
     @Test
     fun addTransactionShouldReturnAddedTransaction() {
-        val transactionRequest = DelegateTransactionRequest(1L, 1L, WALLET_ADDRESS, 1L,
+        val request = DelegateTransactionRequest(1L, 1L, WALLET_ADDRESS, 1L,
             "delegateKey", "hash", "senderSignature", "senderPublicKey")
-        val header = TransactionHeader(1L, 1L, WALLET_ADDRESS)
-        val footer = TransactionFooter("senderPublicKey", "senderSignature", "hash")
-        val payload = DelegateTransactionPayload("delegateKey", 1)
-        val unconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(header, footer, payload)
+        val unconfirmedDelegateTransaction = UnconfirmedDelegateTransaction.of(request)
         val expectedResponse = DelegateTransactionResponse(unconfirmedDelegateTransaction)
 
-        given(service.add(transactionRequest)).willReturn(unconfirmedDelegateTransaction)
+        given(service.add(request)).willReturn(unconfirmedDelegateTransaction)
 
         val actualResponse = webClient.post().uri(DELEGATE_TRANSACTION_URL)
-            .body(Mono.just(transactionRequest), DelegateTransactionRequest::class.java)
+            .body(Mono.just(request), DelegateTransactionRequest::class.java)
             .exchange()
             .expectStatus().isOk
             .expectBody(DelegateTransactionResponse::class.java)
@@ -58,10 +53,9 @@ class DelegateTransactionControllerTests : ControllerTests() {
         val hash = "hash"
         val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
             MainBlockPayload("merkleHash", "stateHash", "receiptHash")).apply { id = 1 }
-        val header = TransactionHeader(1L, 1L, WALLET_ADDRESS)
-        val footer = TransactionFooter("senderPublicKey", "senderSignature", "hash")
         val payload = DelegateTransactionPayload("delegateKey", 1)
-        val delegateTransaction = DelegateTransaction(header, footer, mainBlock, payload).apply { id = 1 }
+        val delegateTransaction = DelegateTransaction(1L, 1L, WALLET_ADDRESS, "hash", "senderSignature",
+            "senderPublicKey", payload, mainBlock).apply { id = 1 }
         val expectedResponse = DelegateTransactionResponse(delegateTransaction)
 
         given(service.getByHash(hash)).willReturn(delegateTransaction)

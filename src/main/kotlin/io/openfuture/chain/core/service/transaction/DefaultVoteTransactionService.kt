@@ -42,26 +42,26 @@ internal class DefaultVoteTransactionService(
     override fun getUnconfirmedCount(): Long = unconfirmedRepository.count()
 
     @Transactional(readOnly = true)
-    override fun getByHash(hash: String): VoteTransaction = repository.findOneByFooterHash(hash)
+    override fun getByHash(hash: String): VoteTransaction = repository.findOneByHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedVoteTransaction> =
-        unconfirmedRepository.findAllByOrderByHeaderFeeDesc(request)
+        unconfirmedRepository.findAllByOrderByFeeDesc(request)
 
     @Transactional(readOnly = true)
-    override fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction = unconfirmedRepository.findOneByFooterHash(hash)
-        ?: throw NotFoundException("Transaction with hash $hash not found")
+    override fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction =
+        unconfirmedRepository.findOneByHash(hash) ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional(readOnly = true)
     override fun getUnconfirmedBySenderAgainstDelegate(senderAddress: String, delegateKey: String): UnconfirmedVoteTransaction? =
         (unconfirmedRepository as UVoteTransactionRepository)
-            .findOneByHeaderSenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeId(senderAddress, delegateKey, AGAINST.getId())
+            .findOneBySenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeId(senderAddress, delegateKey, AGAINST.getId())
 
     @Transactional(readOnly = true)
     override fun getLastVoteForDelegate(senderAddress: String, delegateKey: String): VoteTransaction =
         (repository as VoteTransactionRepository)
-            .findFirstByHeaderSenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeIdOrderByHeaderTimestampDesc(senderAddress, delegateKey, FOR.getId())
+            .findFirstBySenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeIdOrderByTimestampDesc(senderAddress, delegateKey, FOR.getId())
             ?: throw NotFoundException("Last vote for delegate transaction not found")
 
     @BlockchainSynchronized
@@ -92,12 +92,12 @@ internal class DefaultVoteTransactionService(
     override fun commit(transaction: VoteTransaction): VoteTransaction {
         BlockchainLock.writeLock.lock()
         try {
-            val tx = repository.findOneByFooterHash(transaction.footer.hash)
+            val tx = repository.findOneByHash(transaction.hash)
             if (null != tx) {
                 return tx
             }
 
-            val utx = unconfirmedRepository.findOneByFooterHash(transaction.footer.hash)
+            val utx = unconfirmedRepository.findOneByHash(transaction.hash)
             if (null != utx) {
                 return confirm(utx, transaction)
             }
@@ -132,27 +132,27 @@ internal class DefaultVoteTransactionService(
     override fun validate(utx: UnconfirmedVoteTransaction) {
         super.validate(utx)
 
-        if (!isExistsVoteType(utx.payload.voteTypeId)) {
-            throw ValidationException("Vote type with id: ${utx.payload.voteTypeId} is not exists")
+        if (!isExistsVoteType(utx.getPayload().voteTypeId)) {
+            throw ValidationException("Vote type with id: ${utx.getPayload().voteTypeId} is not exists")
         }
 
-        if (!isValidFee(utx.payload.voteTypeId, utx.header.fee)) {
+        if (!isValidFee(utx.getPayload().voteTypeId, utx.fee)) {
             throw ValidationException("Incorrect fee")
         }
 
-        if (!isExistsDelegate(utx.payload.delegateKey)) {
+        if (!isExistsDelegate(utx.getPayload().delegateKey)) {
             throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
     }
 
     @Transactional(readOnly = true)
     override fun validateNew(utx: UnconfirmedVoteTransaction) {
-        if (!isValidActualBalance(utx.header.senderAddress, utx.header.fee)) {
+        if (!isValidActualBalance(utx.senderAddress, utx.fee)) {
             throw ValidationException("Insufficient actual balance", INSUFFICIENT_ACTUAL_BALANCE)
         }
 
-        if (isVoted(utx.header.senderAddress, utx.payload.delegateKey, utx.payload.getVoteType())) {
-            throw ValidationException("Address ${utx.header.senderAddress} has voted invalid",
+        if (isVoted(utx.senderAddress, utx.getPayload().delegateKey, utx.getPayload().getVoteType())) {
+            throw ValidationException("Address ${utx.senderAddress} has voted invalid",
                 ALREADY_VOTED_FOR_DELEGATE)
         }
     }
@@ -160,7 +160,7 @@ internal class DefaultVoteTransactionService(
     private fun isExistsDelegate(delegateKey: String): Boolean = stateManager.isExistsDelegateByPublicKey(delegateKey)
 
     private fun isVoted(senderAddress: String, delegateKey: String, voteType: VoteType): Boolean {
-        val unconfirmedVote = unconfirmedRepository.findAllByHeaderSenderAddress(senderAddress)
+        val unconfirmedVote = unconfirmedRepository.findAllBySenderAddress(senderAddress)
         if (unconfirmedVote.isNotEmpty()) {
             return true
         }

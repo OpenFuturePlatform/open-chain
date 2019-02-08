@@ -99,8 +99,8 @@ class DefaultMainBlockService(
             val transferTransactions = mutableListOf<TransferTransactionMessage>()
 
             transactionsForBlock.asSequence().forEach {
-                fees += it.header.fee
-                transactionHashes.add(it.footer.hash)
+                fees += it.fee
+                transactionHashes.add(it.hash)
                 when (it) {
                     is UnconfirmedVoteTransaction -> voteTransactions.add(it.toMessage())
                     is UnconfirmedDelegateTransaction -> delegateTransactions.add(it.toMessage())
@@ -108,7 +108,7 @@ class DefaultMainBlockService(
                 }
             }
 
-            val rewardTransactionMessage = rewardTransactionService.create(timestamp, fees)
+            val rewardTransactionMessage = rewardTransactionService.create(timestamp, fees).toMessage()
             val txMessages = listOf(
                 *voteTransactions.toTypedArray(),
                 *delegateTransactions.toTypedArray(),
@@ -390,15 +390,15 @@ class DefaultMainBlockService(
 
     private fun filterTransactions(transactions: List<UnconfirmedTransaction>): MutableList<UnconfirmedTransaction> {
         val result = mutableListOf<UnconfirmedTransaction>()
-        val transactionsBySender = transactions.groupBy { it.header.senderAddress }
+        val transactionsBySender = transactions.groupBy { it.senderAddress }
 
         transactionsBySender.forEach {
             var balance = stateManager.getWalletBalanceByAddress(it.key)
             val list = it.value.filter { tx ->
                 balance -= when (tx) {
-                    is UnconfirmedTransferTransaction -> tx.header.fee + tx.payload.amount
-                    is UnconfirmedDelegateTransaction -> tx.header.fee + tx.payload.amount
-                    is UnconfirmedVoteTransaction -> tx.header.fee
+                    is UnconfirmedTransferTransaction -> tx.fee + tx.getPayload().amount
+                    is UnconfirmedDelegateTransaction -> tx.fee + tx.getPayload().amount
+                    is UnconfirmedVoteTransaction -> tx.fee
                     else -> 0
                 }
                 0 <= balance

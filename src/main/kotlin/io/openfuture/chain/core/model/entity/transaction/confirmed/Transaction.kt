@@ -2,26 +2,21 @@ package io.openfuture.chain.core.model.entity.transaction.confirmed
 
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
-import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
-import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
-import io.openfuture.chain.network.message.core.TransactionMessage
 import javax.persistence.*
 
 @Entity
 @Table(name = "transactions")
 @Inheritance(strategy = InheritanceType.JOINED)
 abstract class Transaction(
-    header: TransactionHeader,
-    footer: TransactionFooter,
-    payload: TransactionPayload,
+    timestamp: Long,
+    fee: Long,
+    senderAddress: String,
+    hash: String,
+    signature: String,
+    publicKey: String,
 
     @ManyToOne
     @JoinColumn(name = "block_id", nullable = false)
-    var block: MainBlock
+    var block: MainBlock? = null
 
-) : BaseTransaction(header, footer, payload) {
-
-    abstract fun toMessage(): TransactionMessage
-
-}
+) : BaseTransaction(timestamp, fee, senderAddress, hash, signature, publicKey)

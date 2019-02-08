@@ -159,7 +159,7 @@ class DefaultBlockService(
                         it.block = block
                         when (it) {
                             is TransferTransaction -> {
-                                val receipt = receipts.find { receipt -> receipt.transactionHash == it.footer.hash }!!
+                                val receipt = receipts.find { receipt -> receipt.transactionHash == it.hash }!!
                                 transferTransactionService.commit(it, receipt)
                             }
                             is DelegateTransaction -> delegateTransactionService.commit(it)

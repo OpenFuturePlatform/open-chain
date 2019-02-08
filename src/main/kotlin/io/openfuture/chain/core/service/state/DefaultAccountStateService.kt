@@ -74,10 +74,10 @@ class DefaultAccountStateService(
     }
 
     private fun getUnconfirmedBalance(address: String): Long =
-        unconfirmedTransactionRepository.findAllByHeaderSenderAddress(address).asSequence().map {
-            it.header.fee + when (it) {
-                is UnconfirmedTransferTransaction -> it.payload.amount
-                is UnconfirmedDelegateTransaction -> it.payload.amount
+        unconfirmedTransactionRepository.findAllBySenderAddress(address).asSequence().map {
+            it.fee + when (it) {
+                is UnconfirmedTransferTransaction -> it.getPayload().amount
+                is UnconfirmedDelegateTransaction -> it.getPayload().amount
                 else -> 0
             }
         }.sum()

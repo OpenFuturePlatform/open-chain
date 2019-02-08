@@ -60,7 +60,7 @@ class DefaultTransferTransactionService(
     override fun getUnconfirmedCount(): Long = unconfirmedRepository.count()
 
     @Transactional(readOnly = true)
-    override fun getByHash(hash: String): TransferTransaction = repository.findOneByFooterHash(hash)
+    override fun getByHash(hash: String): TransferTransaction = repository.findOneByHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional(readOnly = true)
@@ -69,16 +69,16 @@ class DefaultTransferTransactionService(
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedTransferTransaction> =
-        unconfirmedRepository.findAllByOrderByHeaderFeeDesc(request)
+        unconfirmedRepository.findAllByOrderByFeeDesc(request)
 
     @Transactional(readOnly = true)
     override fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction =
-        unconfirmedRepository.findOneByFooterHash(hash)
+        unconfirmedRepository.findOneByHash(hash)
             ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional(readOnly = true)
     override fun getByAddress(address: String, request: TransactionPageRequest): Page<TransferTransaction> =
-        (repository as TransferTransactionRepository).findAllByHeaderSenderAddressOrPayloadRecipientAddress(address, address, request.toEntityRequest())
+        (repository as TransferTransactionRepository).findAllBySenderAddressOrPayloadRecipientAddress(address, address, request.toEntityRequest())
 
     @BlockchainSynchronized
     @Transactional
@@ -108,21 +108,22 @@ class DefaultTransferTransactionService(
     override fun commit(transaction: TransferTransaction, receipt: Receipt): TransferTransaction {
         BlockchainLock.writeLock.lock()
         try {
-            val tx = repository.findOneByFooterHash(transaction.footer.hash)
+            val tx = repository.findOneByHash(transaction.hash)
             if (null != tx) {
                 return tx
             }
 
-            if (DEPLOY == getType(transaction.payload.recipientAddress, transaction.payload.data) && receipt.getResults().all { it.error == null }) {
-                val bytecode = fromHexString(transaction.payload.data!!)
-                val address = contractService.generateAddress(transaction.header.senderAddress)
+            if (DEPLOY == getType(transaction.getPayload().recipientAddress, transaction.getPayload().data)
+                && receipt.getResults().all { it.error == null }) {
+                val bytecode = fromHexString(transaction.getPayload().data!!)
+                val address = contractService.generateAddress(transaction.senderAddress)
                 val abi = AbiGenerator.generate(bytecode)
                 val cost = contractCostCalculator.calculateCost(bytecode)
                 val newBytes = ByteUtils.toHexString(ByteCodeProcessor.renameClass(bytecode, address))
-                contractService.save(Contract(address, transaction.header.senderAddress, newBytes, abi, cost))
+                contractService.save(Contract(address, transaction.senderAddress, newBytes, abi, cost))
             }
 
-            val utx = unconfirmedRepository.findOneByFooterHash(transaction.footer.hash)
+            val utx = unconfirmedRepository.findOneByHash(transaction.hash)
             if (null != utx) {
                 return confirm(utx, transaction)
             }
@@ -203,40 +204,40 @@ class DefaultTransferTransactionService(
     override fun validate(utx: UnconfirmedTransferTransaction) {
         super.validate(utx)
 
-        if (utx.header.fee < 0) {
+        if (utx.fee < 0) {
             throw ValidationException("Fee should not be less than 0")
         }
-        if (utx.payload.amount < 0) {
+        if (utx.getPayload().amount < 0) {
             throw ValidationException("Amount should not be less than 0")
         }
 
-        when (getType(utx.payload.recipientAddress, utx.payload.data)) {
+        when (getType(utx.getPayload().recipientAddress, utx.getPayload().data)) {
             DEPLOY -> {
 
-                if (utx.header.fee == 0L) {
+                if (utx.fee == 0L) {
                     throw ValidationException("Fee should not be equal to 0")
                 }
-                if (!SmartContractValidator.validate(fromHexString(utx.payload.data!!))) {
+                if (!SmartContractValidator.validate(fromHexString(utx.getPayload().data!!))) {
                     throw ValidationException("Invalid smart contract code", INVALID_CONTRACT)
                 }
             }
             EXECUTE -> {
-                if (utx.header.fee == 0L) {
+                if (utx.fee == 0L) {
                     throw ValidationException("Fee should not be equal to 0")
                 }
 
-                val contract = contractService.getByAddress(utx.payload.recipientAddress!!)
+                val contract = contractService.getByAddress(utx.getPayload().recipientAddress!!)
                 val methods = Abi.fromJson(contract.abi).abiMethods.map { it.name }
-                if (contract.cost > utx.header.fee) {
+                if (contract.cost > utx.fee) {
                     throw ValidationException("Insufficient funds for smart contract execution")
                 }
-                if (!methods.contains(utx.payload.data)) {
-                    throw ValidationException("Smart contract's method ${utx.payload.data} not exists",
+                if (!methods.contains(utx.getPayload().data)) {
+                    throw ValidationException("Smart contract's method ${utx.getPayload().data} not exists",
                         ExceptionType.CONTRACT_METHOD_NOT_EXISTS)
                 }
             }
             FUND -> {
-                if (utx.payload.amount == 0L) {
+                if (utx.getPayload().amount == 0L) {
                     throw ValidationException("Amount should not be equal to 0")
                 }
             }
@@ -246,7 +247,7 @@ class DefaultTransferTransactionService(
 
     @Transactional(readOnly = true)
     override fun validateNew(utx: UnconfirmedTransferTransaction) {
-        if (!isValidActualBalance(utx.header.senderAddress, utx.payload.amount + utx.header.fee)) {
+        if (!isValidActualBalance(utx.senderAddress, utx.getPayload().amount + utx.fee)) {
             throw ValidationException("Insufficient actual balance", INSUFFICIENT_ACTUAL_BALANCE)
         }
     }

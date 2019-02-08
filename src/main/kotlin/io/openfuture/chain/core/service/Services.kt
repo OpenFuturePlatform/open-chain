@@ -10,12 +10,10 @@ import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -137,8 +135,6 @@ interface TransactionService {
 
     fun deleteBlockTransactions(blockHeights: List<Long>)
 
-    fun createHash(header: TransactionHeader, payload: TransactionPayload): String
-
 }
 
 interface TransferTransactionService {
@@ -173,7 +169,7 @@ interface RewardTransactionService {
 
     fun getByRecipientAddress(address: String): List<RewardTransaction>
 
-    fun create(timestamp: Long, fees: Long): RewardTransactionMessage
+    fun create(timestamp: Long, fees: Long): RewardTransaction
 
     fun commit(transaction: RewardTransaction)
 

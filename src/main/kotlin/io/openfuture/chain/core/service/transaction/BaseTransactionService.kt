@@ -4,35 +4,29 @@ import io.openfuture.chain.core.annotation.OpenClass
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_HASH
 import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_SIGNATURE
-import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
-import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
-import io.openfuture.chain.core.service.TransactionService
+import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import org.springframework.beans.factory.annotation.Autowired
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.fromHexString
 
 @OpenClass
 abstract class BaseTransactionService {
 
-    @Autowired
-    private lateinit var transactionService: TransactionService
-
-
-    protected fun validateBase(header: TransactionHeader, payload: TransactionPayload, footer: TransactionFooter) {
-        if (!isValidHash(header, payload, footer.hash)) {
+    protected fun validateBase(transaction: BaseTransaction) {
+        if (!isValidHash(transaction)) {
             throw ValidationException("Incorrect hash", INCORRECT_HASH)
         }
 
-        if (!isValidSignature(footer.hash, footer.senderSignature, footer.senderPublicKey)) {
+        if (!isValidSignature(transaction)) {
             throw ValidationException("Incorrect signature", INCORRECT_SIGNATURE)
         }
     }
 
-    private fun isValidHash(header: TransactionHeader, payload: TransactionPayload, hash: String): Boolean =
-        transactionService.createHash(header, payload) == hash
+    private fun isValidHash(transaction: BaseTransaction): Boolean =
+        ByteUtils.toHexString(HashUtils.sha256(transaction.getBytes())) == transaction.hash
 
-    private fun isValidSignature(hash: String, signature: String, publicKey: String): Boolean =
-        SignatureUtils.verify(ByteUtils.fromHexString(hash), signature, ByteUtils.fromHexString(publicKey))
+    private fun isValidSignature(transaction: BaseTransaction): Boolean =
+        SignatureUtils.verify(fromHexString(transaction.hash), transaction.signature, fromHexString(transaction.publicKey))
 
 }

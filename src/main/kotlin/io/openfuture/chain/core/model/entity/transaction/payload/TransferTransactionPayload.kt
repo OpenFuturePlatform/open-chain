@@ -1,10 +1,10 @@
 package io.openfuture.chain.core.model.entity.transaction.payload
 
-import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import org.apache.commons.lang3.StringUtils.EMPTY
 import java.nio.ByteBuffer
 import javax.persistence.Column
 import javax.persistence.Embeddable
+import kotlin.Long.Companion.SIZE_BYTES
 
 @Embeddable
 class TransferTransactionPayload(
@@ -24,7 +24,7 @@ class TransferTransactionPayload(
         val recipientAddressBytes = (recipientAddress ?: EMPTY).toByteArray()
         val dataBytes = (data ?: EMPTY).toByteArray()
 
-        val buffer = ByteBuffer.allocate(LONG_BYTES + recipientAddressBytes.size + dataBytes.size)
+        val buffer = ByteBuffer.allocate(SIZE_BYTES + recipientAddressBytes.size + dataBytes.size)
         buffer.putLong(amount)
         buffer.put(recipientAddressBytes)
         buffer.put(dataBytes)

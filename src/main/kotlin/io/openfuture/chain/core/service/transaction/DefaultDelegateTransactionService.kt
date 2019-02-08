@@ -39,16 +39,16 @@ class DefaultDelegateTransactionService(
     override fun getUnconfirmedCount(): Long = unconfirmedRepository.count()
 
     @Transactional(readOnly = true)
-    override fun getByHash(hash: String): DelegateTransaction = repository.findOneByFooterHash(hash)
+    override fun getByHash(hash: String): DelegateTransaction = repository.findOneByHash(hash)
         ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @Transactional(readOnly = true)
     override fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedDelegateTransaction> =
-        unconfirmedRepository.findAllByOrderByHeaderFeeDesc(request)
+        unconfirmedRepository.findAllByOrderByFeeDesc(request)
 
     @Transactional(readOnly = true)
-    override fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction = unconfirmedRepository.findOneByFooterHash(hash)
-        ?: throw NotFoundException("Transaction with hash $hash not found")
+    override fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction =
+        unconfirmedRepository.findOneByHash(hash) ?: throw NotFoundException("Transaction with hash $hash not found")
 
     @BlockchainSynchronized
     @Transactional
@@ -78,12 +78,12 @@ class DefaultDelegateTransactionService(
     override fun commit(transaction: DelegateTransaction): DelegateTransaction {
         BlockchainLock.writeLock.lock()
         try {
-            val tx = repository.findOneByFooterHash(transaction.footer.hash)
+            val tx = repository.findOneByHash(transaction.hash)
             if (null != tx) {
                 return tx
             }
 
-            val utx = unconfirmedRepository.findOneByFooterHash(transaction.footer.hash)
+            val utx = unconfirmedRepository.findOneByHash(transaction.hash)
             if (null != utx) {
                 return confirm(utx, transaction)
             }
@@ -118,34 +118,34 @@ class DefaultDelegateTransactionService(
     override fun validate(utx: UnconfirmedDelegateTransaction) {
         super.validate(utx)
 
-        if (utx.header.fee != consensusProperties.feeDelegateTx!!) {
+        if (utx.fee != consensusProperties.feeDelegateTx!!) {
             throw ValidationException("Fee should be ${consensusProperties.feeDelegateTx!!}")
         }
 
-        if (utx.payload.amount != consensusProperties.amountDelegateTx!!) {
+        if (utx.getPayload().amount != consensusProperties.amountDelegateTx!!) {
             throw ValidationException("Amount should be ${consensusProperties.amountDelegateTx!!}")
         }
     }
 
     @Transactional(readOnly = true)
     override fun validateNew(utx: UnconfirmedDelegateTransaction) {
-        if (!isValidActualBalance(utx.header.senderAddress, utx.payload.amount + utx.header.fee)) {
+        if (!isValidActualBalance(utx.senderAddress, utx.getPayload().amount + utx.fee)) {
             throw ValidationException("Insufficient actual balance", ExceptionType.INSUFFICIENT_ACTUAL_BALANCE)
         }
 
-        if (isAlreadyDelegate(utx.payload.delegateKey)) {
-            throw ValidationException("Node ${utx.payload.delegateKey} already registered as delegate", ALREADY_DELEGATE)
+        if (isAlreadyDelegate(utx.getPayload().delegateKey)) {
+            throw ValidationException("Node ${utx.getPayload().delegateKey} already registered as delegate", ALREADY_DELEGATE)
         }
 
-        if (isAlreadySendRequest(utx.payload.delegateKey)) {
-            throw ValidationException("Node ${utx.payload.delegateKey} already send request to become delegate", ALREADY_DELEGATE)
+        if (isAlreadySendRequest(utx.getPayload().delegateKey)) {
+            throw ValidationException("Node ${utx.getPayload().delegateKey} already send request to become delegate", ALREADY_DELEGATE)
         }
     }
 
     private fun isAlreadyDelegate(delegateKey: String): Boolean = stateManager.isExistsDelegateByPublicKey(delegateKey)
 
     private fun isAlreadySendRequest(delegateKey: String): Boolean =
-        unconfirmedRepository.findAll().any { it.payload.delegateKey == delegateKey }
+        unconfirmedRepository.findAll().any { it.getPayload().delegateKey == delegateKey }
 
     private fun generateReceipt(message: DelegateTransactionMessage, delegateWallet: String): Receipt {
         val results = listOf(

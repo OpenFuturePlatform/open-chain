@@ -6,14 +6,11 @@ import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.model.entity.state.DelegateState
-import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.RewardTransactionPayload
 import io.openfuture.chain.core.repository.RewardTransactionRepository
 import io.openfuture.chain.core.service.RewardTransactionService
 import io.openfuture.chain.core.service.StateManager
-import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.core.RewardTransactionMessage
@@ -30,8 +27,7 @@ class DefaultRewardTransactionService(
     private val repository: RewardTransactionRepository,
     private val consensusProperties: ConsensusProperties,
     private val stateManager: StateManager,
-    private val keyHolder: NodeKeyHolder,
-    private val transactionService: TransactionService
+    private val keyHolder: NodeKeyHolder
 ) : BaseTransactionService(), RewardTransactionService {
 
     companion object {
@@ -48,7 +44,7 @@ class DefaultRewardTransactionService(
         repository.findAllByPayloadRecipientAddress(address)
 
     @Transactional(readOnly = true)
-    override fun create(timestamp: Long, fees: Long): RewardTransactionMessage {
+    override fun create(timestamp: Long, fees: Long): RewardTransaction {
         val senderAddress = consensusProperties.genesisAddress!!
         val rewardBlock = consensusProperties.rewardBlock!!
         val bank = stateManager.getActualWalletBalanceByAddress(senderAddress)
@@ -56,17 +52,18 @@ class DefaultRewardTransactionService(
         val fee = 0L
         val publicKey = keyHolder.getPublicKeyAsHexString()
         val delegate = stateManager.getLastByAddress<DelegateState>(publicKey)
-        val hash = transactionService.createHash(TransactionHeader(timestamp, fee, senderAddress), RewardTransactionPayload(reward, delegate.walletAddress))
+        val hash = RewardTransaction.generateHash(timestamp, fee, senderAddress, reward, delegate.walletAddress)
         val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())
 
-        return RewardTransactionMessage(timestamp, fee, senderAddress, hash, signature, publicKey, reward, delegate.walletAddress)
+        return RewardTransaction(timestamp, fee, senderAddress, hash, signature, publicKey,
+            RewardTransactionPayload(reward, delegate.walletAddress))
     }
 
     @Transactional
     override fun commit(transaction: RewardTransaction) {
         BlockchainLock.writeLock.lock()
         try {
-            val persistedTransaction = repository.findOneByFooterHash(transaction.footer.hash)
+            val persistedTransaction = repository.findOneByHash(transaction.hash)
             if (null != persistedTransaction) {
                 return
             }
@@ -92,10 +89,7 @@ class DefaultRewardTransactionService(
     @Transactional(readOnly = true)
     override fun verify(message: RewardTransactionMessage): Boolean {
         return try {
-            val header = TransactionHeader(message.timestamp, message.fee, message.senderAddress)
-            val payload = RewardTransactionPayload(message.reward, message.recipientAddress)
-            val footer = TransactionFooter(message.hash, message.senderSignature, message.senderPublicKey)
-            super.validateBase(header, payload, footer)
+            super.validateBase(RewardTransaction.of(message))
             true
         } catch (e: ValidationException) {
             log.warn(e.message)

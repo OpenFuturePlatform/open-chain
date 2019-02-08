@@ -28,12 +28,12 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
 
 
     protected fun add(utx: U): U {
-        val persistTx = repository.findOneByFooterHash(utx.footer.hash)
+        val persistTx = repository.findOneByHash(utx.hash)
         if (null != persistTx) {
             throw CoreException("Transaction already handled")
         }
 
-        val persistUtx = unconfirmedRepository.findOneByFooterHash(utx.footer.hash)
+        val persistUtx = unconfirmedRepository.findOneByHash(utx.hash)
         if (null != persistUtx) {
             return persistUtx
         }
@@ -50,9 +50,9 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
 
     fun validate(utx: U) {
 
-        validateBase(utx.header, utx.externalPayload, utx.footer)
+        validateBase(utx)
 
-        if (!isValidAddress(utx.header.senderAddress, utx.footer.senderPublicKey)) {
+        if (!isValidAddress(utx.senderAddress, utx.publicKey)) {
             throw ValidationException("Incorrect sender address", INCORRECT_ADDRESS)
         }
     }
