@@ -5,6 +5,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Smart contracts: contract cost estimation
+- Smart contracts: contract execution
+- Smart contracts: rollback contract execution on failure
+- Smart contracts: added method to transfer tokens
+- Core: transaction receipts
+- Database: smart contract table
+
+### Changed
+- Core: transfer transaction structure, field for smart contract bytecode added
+- Core: transfer transaction extended for contract interactions
 
 ## [1.8.0] - 2019-01-25
 ### Added
@@ -13,7 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Core: delegate states
 - Core: light synchronization
 
-## Changed
+### Changed
 - Consensus: sequential ordering of active delegates
 - Consensus: in case active delegate does not produce block due to its possible unavailability, boot node will produce it
 - Consensus: invalid blocks are not broadcast across the network
