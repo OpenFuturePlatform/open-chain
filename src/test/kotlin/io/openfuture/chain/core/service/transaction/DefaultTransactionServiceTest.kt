@@ -1,11 +1,10 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.config.ServiceTests
-import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.repository.TransferTransactionRepository
 import io.openfuture.chain.core.repository.UTransferTransactionRepository
-import io.openfuture.chain.core.service.AccountStateService
 import io.openfuture.chain.core.service.ContractService
+import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.smartcontract.deploy.calculation.ContractCostCalculator
 import io.openfuture.chain.smartcontract.execution.ContractExecutor
@@ -23,7 +22,7 @@ class DefaultTransactionServiceTest : ServiceTests() {
     @Mock private lateinit var repository: TransferTransactionRepository
     @Mock private lateinit var uRepository: UTransferTransactionRepository
     @Mock private lateinit var contractService: ContractService
-    @Mock private lateinit var accountStateService: AccountStateService
+    @Mock private lateinit var stateManager: StateManager
     @Mock private lateinit var contractExecutor: ContractExecutor
     @Mock private lateinit var contractCostCalculator: ContractCostCalculator
 
@@ -39,8 +38,7 @@ class DefaultTransactionServiceTest : ServiceTests() {
     fun setUp() {
         transactionService = DefaultTransferTransactionService(repository, uRepository, contractService,
             contractCostCalculator, contractExecutor)
-        ReflectionTestUtils.setField(transactionService, "accountStateService", accountStateService,
-            AccountStateService::class.java)
+        ReflectionTestUtils.setField(transactionService, "stateManager", stateManager, StateManager::class.java)
         val code = this::class.java.getResourceAsStream("/classes/JavaContract.class").readBytes()
         val bytecode = ByteUtils.toHexString(code)
         transactionMessage = TransferTransactionMessage(121325454, 0, senderAddress, "", "", "", 0, null, bytecode)
@@ -55,15 +53,13 @@ class DefaultTransactionServiceTest : ServiceTests() {
         val expectedError = "Contract is not deployed."
         transactionMessage.fee = sendFee
 
-        given(accountStateService.updateBalanceByAddress(senderAddress, -sendFee))
-            .willReturn(AccountState(senderAddress, 0))
-        given(accountStateService.updateBalanceByAddress(delegateAddress, sendFee))
-            .willReturn(AccountState(delegateAddress, 0))
-
         val result = transactionService.process(transactionMessage, delegateAddress)
 
         assertEquals(expectedSize, result.getResults().size)
         assertEquals(expectedError, result.getResults().first().error)
+
+        verify(stateManager).updateWalletBalanceByAddress(senderAddress, -sendFee)
+        verify(stateManager).updateWalletBalanceByAddress(delegateAddress, sendFee)
     }
 
     @Test
@@ -91,9 +87,9 @@ class DefaultTransactionServiceTest : ServiceTests() {
         assertTrue(actualDelegateReceiptResult?.error.isNullOrBlank())
         assertTrue(actualDelegateReceiptResult?.data.isNullOrBlank())
 
-        verify(accountStateService).updateStorage(anyString(), anyString())
-        verify(accountStateService).updateBalanceByAddress(senderAddress, -contractCost)
-        verify(accountStateService).updateBalanceByAddress(delegateAddress, contractCost)
+        verify(stateManager).updateSmartContractStorage(anyString(), anyString())
+        verify(stateManager).updateWalletBalanceByAddress(senderAddress, -contractCost)
+        verify(stateManager).updateWalletBalanceByAddress(delegateAddress, contractCost)
     }
 
     @Test
@@ -114,9 +110,9 @@ class DefaultTransactionServiceTest : ServiceTests() {
         assertTrue(actualReceiptResult.error.isNullOrBlank())
         assertTrue(actualReceiptResult.data.isNullOrBlank())
 
-        verify(accountStateService).updateStorage(anyString(), anyString())
-        verify(accountStateService).updateBalanceByAddress(senderAddress, -contractCost)
-        verify(accountStateService).updateBalanceByAddress(delegateAddress, contractCost)
+        verify(stateManager).updateSmartContractStorage(anyString(), anyString())
+        verify(stateManager).updateWalletBalanceByAddress(senderAddress, -contractCost)
+        verify(stateManager).updateWalletBalanceByAddress(delegateAddress, contractCost)
     }
 
 }

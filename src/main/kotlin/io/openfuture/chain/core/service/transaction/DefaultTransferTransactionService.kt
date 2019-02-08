@@ -4,12 +4,15 @@ import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
+import io.openfuture.chain.core.exception.model.ExceptionType
 import io.openfuture.chain.core.exception.model.ExceptionType.INSUFFICIENT_ACTUAL_BALANCE
+import io.openfuture.chain.core.exception.model.ExceptionType.INVALID_CONTRACT
 import io.openfuture.chain.core.model.entity.Contract
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.model.entity.dictionary.TransferTransactionType.*
 import io.openfuture.chain.core.model.entity.dictionary.TransferTransactionType.Companion.getType
+import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.repository.TransferTransactionRepository
@@ -150,9 +153,9 @@ class DefaultTransferTransactionService(
                     val newBytes = ByteCodeProcessor.renameClass(bytecode, contractAddress)
                     val clazz = SmartContractLoader(this::class.java.classLoader).loadClass(newBytes)
                     val contract = SmartContractInjector.initSmartContract(clazz, message.senderAddress, contractAddress)
-                    accountStateService.updateStorage(contractAddress, toHexString(serialize(contract)))
-                    accountStateService.updateBalanceByAddress(message.senderAddress, -contractCost)
-                    accountStateService.updateBalanceByAddress(delegateWallet, contractCost)
+                    stateManager.updateSmartContractStorage(contractAddress, toHexString(serialize(contract)))
+                    stateManager.updateWalletBalanceByAddress(message.senderAddress, -contractCost)
+                    stateManager.updateWalletBalanceByAddress(delegateWallet, contractCost)
                     results.add(ReceiptResult(message.senderAddress, delegateWallet, message.fee))
 
                     val delivery = message.fee - contractCost
@@ -160,23 +163,23 @@ class DefaultTransferTransactionService(
                         results.add(ReceiptResult(delegateWallet, message.senderAddress, delivery))
                     }
                 } else {
-                    accountStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
-                    accountStateService.updateBalanceByAddress(delegateWallet, message.fee)
+                    stateManager.updateWalletBalanceByAddress(message.senderAddress, -message.fee)
+                    stateManager.updateWalletBalanceByAddress(delegateWallet, message.fee)
                     results.add(ReceiptResult(message.senderAddress, delegateWallet, message.fee,
                         "The fee was charged, but this is not enough.", "Contract is not deployed.")
                     )
                 }
             }
             EXECUTE -> {
-                val contractState = accountStateService.getLastByAddress(message.recipientAddress!!)
+                val contractState = stateManager.getLastByAddress<AccountState>(message.recipientAddress!!)
                 val result = contractExecutor.run(contractState.storage!!, message, delegateWallet)
                 result.receipt.forEach {
-                    accountStateService.updateBalanceByAddress(it.from, -it.amount)
-                    accountStateService.updateBalanceByAddress(it.to, it.amount)
+                    stateManager.updateWalletBalanceByAddress(it.from, -it.amount)
+                    stateManager.updateWalletBalanceByAddress(it.to, it.amount)
                 }
                 results.addAll(result.receipt)
                 result.state?.let {
-                    accountStateService.updateStorage(message.recipientAddress!!, it)
+                    stateManager.updateSmartContractStorage(message.recipientAddress!!, it)
                 }
             }
         }
@@ -229,7 +232,7 @@ class DefaultTransferTransactionService(
                 }
                 if (!methods.contains(utx.payload.data)) {
                     throw ValidationException("Smart contract's method ${utx.payload.data} not exists",
-                        CONTRACT_METHOD_NOT_EXISTS)
+                        ExceptionType.CONTRACT_METHOD_NOT_EXISTS)
                 }
             }
             FUND -> {
