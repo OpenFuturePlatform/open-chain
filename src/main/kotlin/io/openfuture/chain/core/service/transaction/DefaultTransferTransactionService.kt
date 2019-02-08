@@ -99,7 +99,7 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun commit(transaction: TransferTransaction): TransferTransaction {
+    override fun commit(transaction: TransferTransaction, receipt: Receipt): TransferTransaction {
         BlockchainLock.writeLock.lock()
         try {
             val tx = repository.findOneByFooterHash(transaction.footer.hash)
@@ -110,6 +110,12 @@ class DefaultTransferTransactionService(
             val utx = unconfirmedRepository.findOneByFooterHash(transaction.footer.hash)
             if (null != utx) {
                 return confirm(utx, transaction)
+            }
+
+            if (DEPLOY == getType(transaction.payload.recipientAddress, transaction.payload.data) && receipt.getResults().all { it.error == null }) {
+                val address = contractService.generateAddress(transaction.header.senderAddress)
+                val abi = AbiGenerator.generate(fromHexString(transaction.payload.data!!))
+                contractService.save(Contract(address, transaction.header.senderAddress, transaction.payload.data!!, abi))
             }
 
             return save(transaction)
@@ -175,15 +181,7 @@ class DefaultTransferTransactionService(
     }
 
     @Transactional
-    override fun save(tx: TransferTransaction): TransferTransaction {
-        if (DEPLOY == getType(tx.payload.recipientAddress, tx.payload.data)) {
-            val address = contractService.generateAddress(tx.header.senderAddress)
-            val abi = AbiGenerator.generate(fromHexString(tx.payload.data!!))
-            contractService.save(Contract(address, tx.header.senderAddress, tx.payload.data!!, abi))
-        }
-
-        return super.save(tx)
-    }
+    override fun save(tx: TransferTransaction): TransferTransaction = super.save(tx)
 
     override fun validate(utx: UnconfirmedTransferTransaction) {
         super.validate(utx)
@@ -199,7 +197,7 @@ class DefaultTransferTransactionService(
         when (getType(utx.payload.recipientAddress, utx.payload.data)) {
             DEPLOY -> {
 
-                if (utx.header.fee != 0L) {
+                if (utx.header.fee == 0L) {
                     throw ValidationException("Fee should not be equal to 0")
                 }
 

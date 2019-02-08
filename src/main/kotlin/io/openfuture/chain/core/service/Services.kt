@@ -158,7 +158,7 @@ interface TransferTransactionService {
 
     fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction
 
-    fun commit(transaction: TransferTransaction): TransferTransaction
+    fun commit(transaction: TransferTransaction, receipt: Receipt): TransferTransaction
 
     fun process(message: TransferTransactionMessage, delegateWallet: String): Receipt
 
