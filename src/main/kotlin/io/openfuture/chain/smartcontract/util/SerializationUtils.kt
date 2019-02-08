@@ -1,5 +1,6 @@
 package io.openfuture.chain.smartcontract.util
 
+import org.hibernate.internal.util.SerializationHelper
 import java.io.*
 
 object SerializationUtils {
@@ -11,7 +12,8 @@ object SerializationUtils {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T> deserialize(bytes: ByteArray): T = ObjectInputStream(ByteArrayInputStream(bytes)).readObject() as T
+    fun <T> deserialize(bytes: ByteArray, classLoader: ClassLoader): T =
+        SerializationHelper.deserialize(bytes, classLoader) as T
 
 }
 
