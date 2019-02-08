@@ -198,6 +198,11 @@ class DefaultTransferTransactionService(
 
         when (getType(utx.payload.recipientAddress, utx.payload.data)) {
             DEPLOY -> {
+
+                if (utx.header.fee != 0L) {
+                    throw ValidationException("Fee should not be equal to 0")
+                }
+
                 if (!SmartContractValidator.validate(fromHexString(utx.payload.data!!))) {
                     throw ValidationException("Invalid smart contract code")
                 }
