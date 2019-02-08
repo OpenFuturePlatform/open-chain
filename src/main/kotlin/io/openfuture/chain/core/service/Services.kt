@@ -131,6 +131,8 @@ interface TransactionService {
 
     fun getUnconfirmedTransactionByHash(hash: String): UnconfirmedTransaction
 
+    fun getUnconfirmedBalanceBySenderAddress(address: String): Long
+
     fun getProducingPerSecond(): Long
 
     fun deleteBlockTransactions(blockHeights: List<Long>)
@@ -235,8 +237,6 @@ interface StateManager {
 
     fun getWalletBalanceByAddress(address: String): Long
 
-    fun getActualWalletBalanceByAddress(address: String): Long
-
     fun getVotesForDelegate(delegateKey: String): List<AccountState>
 
     fun updateWalletBalanceByAddress(address: String, amount: Long)
@@ -282,8 +282,6 @@ interface DelegateStateService {
 interface AccountStateService {
 
     fun getBalanceByAddress(address: String): Long
-
-    fun getActualBalanceByAddress(address: String): Long
 
     fun getVotesForDelegate(delegateKey: String): List<AccountState>
 

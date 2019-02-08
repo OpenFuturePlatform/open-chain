@@ -3,11 +3,7 @@ package io.openfuture.chain.core.service.state
 import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.state.AccountState
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.repository.AccountStateRepository
-import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.AccountStateService
 import io.openfuture.chain.core.sync.BlockchainLock
 import org.springframework.stereotype.Service
@@ -17,8 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional(readOnly = true)
 class DefaultAccountStateService(
     private val repository: AccountStateRepository,
-    private val statePool: StatePool,
-    private val unconfirmedTransactionRepository: UTransactionRepository<UnconfirmedTransaction>
+    private val statePool: StatePool
 ) : AccountStateService {
 
     companion object {
@@ -30,18 +25,6 @@ class DefaultAccountStateService(
         BlockchainLock.readLock.lock()
         return try {
             getLastByAddress(address).balance
-        } catch (ex: NotFoundException) {
-            DEFAULT_WALLET_BALANCE
-        } finally {
-            BlockchainLock.readLock.unlock()
-        }
-    }
-
-    override fun getActualBalanceByAddress(address: String): Long {
-        BlockchainLock.readLock.lock()
-        return try {
-            val balance = getLastByAddress(address).balance
-            balance - getUnconfirmedBalance(address)
         } catch (ex: NotFoundException) {
             DEFAULT_WALLET_BALANCE
         } finally {
@@ -72,15 +55,6 @@ class DefaultAccountStateService(
         statePool.update(newState)
         return newState
     }
-
-    private fun getUnconfirmedBalance(address: String): Long =
-        unconfirmedTransactionRepository.findAllBySenderAddress(address).asSequence().map {
-            it.fee + when (it) {
-                is UnconfirmedTransferTransaction -> it.getPayload().amount
-                is UnconfirmedDelegateTransaction -> it.getPayload().amount
-                else -> 0
-            }
-        }.sum()
 
     private fun getCurrentState(address: String): AccountState {
         BlockchainLock.readLock.lock()

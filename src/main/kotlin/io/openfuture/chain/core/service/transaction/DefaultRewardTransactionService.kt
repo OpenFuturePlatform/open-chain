@@ -47,7 +47,7 @@ class DefaultRewardTransactionService(
     override fun create(timestamp: Long, fees: Long): RewardTransaction {
         val senderAddress = consensusProperties.genesisAddress!!
         val rewardBlock = consensusProperties.rewardBlock!!
-        val bank = stateManager.getActualWalletBalanceByAddress(senderAddress)
+        val bank = stateManager.getWalletBalanceByAddress(senderAddress)
         val reward = fees + if (rewardBlock > bank) bank else rewardBlock
         val fee = 0L
         val publicKey = keyHolder.getPublicKeyAsHexString()
@@ -78,7 +78,7 @@ class DefaultRewardTransactionService(
         stateManager.updateWalletBalanceByAddress(message.recipientAddress, message.reward)
 
         val senderAddress = consensusProperties.genesisAddress!!
-        val bank = stateManager.getActualWalletBalanceByAddress(senderAddress)
+        val bank = stateManager.getWalletBalanceByAddress(senderAddress)
         val reward = if (consensusProperties.rewardBlock!! > bank) bank else consensusProperties.rewardBlock!!
 
         stateManager.updateWalletBalanceByAddress(senderAddress, -reward)

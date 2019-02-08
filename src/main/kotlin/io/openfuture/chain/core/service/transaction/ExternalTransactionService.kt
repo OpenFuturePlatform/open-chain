@@ -21,10 +21,14 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
     protected val unconfirmedRepository: UTransactionRepository<U>
 ) : BaseTransactionService() {
 
-    @Autowired protected lateinit var stateManager: StateManager
-    @Autowired protected lateinit var baseService: TransactionService
-    @Autowired private lateinit var cryptoService: CryptoService
-    @Autowired private lateinit var networkService: NetworkApiService
+    @Autowired
+    protected lateinit var stateManager: StateManager
+    @Autowired
+    protected lateinit var baseService: TransactionService
+    @Autowired
+    private lateinit var cryptoService: CryptoService
+    @Autowired
+    private lateinit var networkService: NetworkApiService
 
 
     protected fun add(utx: U): U {
@@ -72,8 +76,12 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         return receipt
     }
 
-    protected fun isValidActualBalance(address: String, amount: Long): Boolean =
-        stateManager.getActualWalletBalanceByAddress(address) >= amount
+    protected fun isValidActualBalance(address: String, amount: Long): Boolean {
+        val balance = stateManager.getWalletBalanceByAddress(address)
+        val unconfirmedBalance = baseService.getUnconfirmedBalanceBySenderAddress(address)
+
+        return balance + unconfirmedBalance >= amount
+    }
 
     private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean =
         cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))

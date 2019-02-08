@@ -314,7 +314,7 @@ class DefaultMainBlockService(
 
     private fun isValidReward(fees: Long, reward: Long): Boolean {
         val senderAddress = consensusProperties.genesisAddress!!
-        val bank = stateManager.getActualWalletBalanceByAddress(senderAddress)
+        val bank = stateManager.getWalletBalanceByAddress(senderAddress)
         val rewardBlock = consensusProperties.rewardBlock!!
 
         return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)

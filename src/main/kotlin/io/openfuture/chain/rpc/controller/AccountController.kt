@@ -3,6 +3,7 @@ package io.openfuture.chain.rpc.controller
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.service.StateManager
+import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.crypto.annotation.AddressChecksum
 import io.openfuture.chain.crypto.service.CryptoService
@@ -24,7 +25,8 @@ import javax.validation.Valid
 class AccountController(
     private val cryptoService: CryptoService,
     private val stateManager: StateManager,
-    private val voteTransactionService: VoteTransactionService
+    private val voteTransactionService: VoteTransactionService,
+    private val transactionService: TransactionService
 ) {
 
     @GetMapping("/doGenerate")
@@ -37,8 +39,12 @@ class AccountController(
     }
 
     @GetMapping("/wallets/{address}/balance")
-    fun getBalance(@PathVariable @AddressChecksum address: String): Long =
-        stateManager.getActualWalletBalanceByAddress(address)
+    fun getBalance(@PathVariable @AddressChecksum address: String): Long {
+        val balance = stateManager.getWalletBalanceByAddress(address)
+        val unconfirmedBalance = transactionService.getUnconfirmedBalanceBySenderAddress(address)
+
+        return balance + unconfirmedBalance
+    }
 
     @GetMapping("/wallets/{address}/delegate")
     fun getDelegates(@PathVariable @AddressChecksum address: String): VoteResponse? {

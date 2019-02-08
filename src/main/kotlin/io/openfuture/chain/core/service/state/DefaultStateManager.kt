@@ -40,9 +40,6 @@ class DefaultStateManager(
 
     override fun getWalletBalanceByAddress(address: String): Long = accountStateService.getBalanceByAddress(address)
 
-    override fun getActualWalletBalanceByAddress(address: String): Long =
-        accountStateService.getActualBalanceByAddress(address)
-
     override fun getVotesForDelegate(delegateKey: String): List<AccountState> =
         accountStateService.getVotesForDelegate(delegateKey)
 

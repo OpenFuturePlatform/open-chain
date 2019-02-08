@@ -2,6 +2,7 @@ package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.service.StateManager
+import io.openfuture.chain.core.service.TransactionService
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
@@ -31,6 +32,9 @@ class AccountControllerTests : ControllerTests() {
 
     @MockBean
     private lateinit var voteTransactionService: VoteTransactionService
+
+    @MockBean
+    private lateinit var transactionService: TransactionService
 
     companion object {
         private const val ACCOUNT_URL = "/rpc/accounts"
@@ -105,9 +109,11 @@ class AccountControllerTests : ControllerTests() {
     @Test
     fun getBalanceShouldReturnWalletBalance() {
         val address = "0x51c5311F25206De4A9C6ecAa1Bc2Be257B0bA1fb"
-        val expectedBalance = 1L
+        val balance = 1L
+        val unconfirmedBalance = 1L
 
-        given(stateManager.getActualWalletBalanceByAddress(address)).willReturn(expectedBalance)
+        given(stateManager.getWalletBalanceByAddress(address)).willReturn(balance)
+        given(transactionService.getUnconfirmedBalanceBySenderAddress(address)).willReturn(unconfirmedBalance)
 
         val actualBalance = webClient.get().uri("$ACCOUNT_URL/wallets/$address/balance")
             .exchange()
@@ -115,7 +121,7 @@ class AccountControllerTests : ControllerTests() {
             .expectBody(Long::class.java)
             .returnResult().responseBody!!
 
-        assertThat(actualBalance).isEqualTo(expectedBalance)
+        assertThat(actualBalance).isEqualTo(balance + unconfirmedBalance)
     }
 
     @Test
