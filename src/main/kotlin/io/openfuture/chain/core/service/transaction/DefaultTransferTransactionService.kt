@@ -3,10 +3,6 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.NotFoundException
-import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.exception.model.ExceptionType
-import io.openfuture.chain.core.exception.model.ExceptionType.INSUFFICIENT_ACTUAL_BALANCE
-import io.openfuture.chain.core.exception.model.ExceptionType.INVALID_CONTRACT
 import io.openfuture.chain.core.model.entity.Contract
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.ReceiptResult
@@ -28,10 +24,8 @@ import io.openfuture.chain.smartcontract.component.ByteCodeProcessor
 import io.openfuture.chain.smartcontract.component.SmartContractInjector
 import io.openfuture.chain.smartcontract.component.abi.AbiGenerator
 import io.openfuture.chain.smartcontract.component.load.SmartContractLoader
-import io.openfuture.chain.smartcontract.component.validation.SmartContractValidator
 import io.openfuture.chain.smartcontract.deploy.calculation.ContractCostCalculator
 import io.openfuture.chain.smartcontract.execution.ContractExecutor
-import io.openfuture.chain.smartcontract.model.Abi
 import io.openfuture.chain.smartcontract.util.SerializationUtils.serialize
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.fromHexString
@@ -128,7 +122,7 @@ class DefaultTransferTransactionService(
                 return confirm(utx, transaction)
             }
 
-            return save(transaction)
+            return repository.save(transaction)
         } finally {
             BlockchainLock.writeLock.unlock()
         }
@@ -186,70 +180,6 @@ class DefaultTransferTransactionService(
         }
 
         return getReceipt(message.hash, results)
-    }
-
-    override fun verify(message: TransferTransactionMessage): Boolean {
-        return try {
-            validate(UnconfirmedTransferTransaction.of(message))
-            true
-        } catch (e: ValidationException) {
-            log.warn(e.message)
-            false
-        }
-    }
-
-    @Transactional
-    override fun save(tx: TransferTransaction): TransferTransaction = super.save(tx)
-
-    override fun validate(utx: UnconfirmedTransferTransaction) {
-        super.validate(utx)
-
-        if (utx.fee < 0) {
-            throw ValidationException("Fee should not be less than 0")
-        }
-        if (utx.getPayload().amount < 0) {
-            throw ValidationException("Amount should not be less than 0")
-        }
-
-        when (getType(utx.getPayload().recipientAddress, utx.getPayload().data)) {
-            DEPLOY -> {
-
-                if (utx.fee == 0L) {
-                    throw ValidationException("Fee should not be equal to 0")
-                }
-                if (!SmartContractValidator.validate(fromHexString(utx.getPayload().data!!))) {
-                    throw ValidationException("Invalid smart contract code", INVALID_CONTRACT)
-                }
-            }
-            EXECUTE -> {
-                if (utx.fee == 0L) {
-                    throw ValidationException("Fee should not be equal to 0")
-                }
-
-                val contract = contractService.getByAddress(utx.getPayload().recipientAddress!!)
-                val methods = Abi.fromJson(contract.abi).abiMethods.map { it.name }
-                if (contract.cost > utx.fee) {
-                    throw ValidationException("Insufficient funds for smart contract execution")
-                }
-                if (!methods.contains(utx.getPayload().data)) {
-                    throw ValidationException("Smart contract's method ${utx.getPayload().data} not exists",
-                        ExceptionType.CONTRACT_METHOD_NOT_EXISTS)
-                }
-            }
-            FUND -> {
-                if (utx.getPayload().amount == 0L) {
-                    throw ValidationException("Amount should not be equal to 0")
-                }
-            }
-        }
-
-    }
-
-    @Transactional(readOnly = true)
-    override fun validateNew(utx: UnconfirmedTransferTransaction) {
-        if (!isValidActualBalance(utx.senderAddress, utx.getPayload().amount + utx.fee)) {
-            throw ValidationException("Insufficient actual balance", INSUFFICIENT_ACTUAL_BALANCE)
-        }
     }
 
 }

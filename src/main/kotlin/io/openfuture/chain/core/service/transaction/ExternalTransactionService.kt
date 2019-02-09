@@ -1,8 +1,6 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.core.exception.CoreException
-import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_ADDRESS
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
@@ -11,24 +9,21 @@ import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.service.TransactionService
+import io.openfuture.chain.core.service.TransactionValidatorManager
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.network.service.NetworkApiService
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.beans.factory.annotation.Autowired
 
 abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransaction>(
     protected val repository: TransactionRepository<T>,
     protected val unconfirmedRepository: UTransactionRepository<U>
-) : BaseTransactionService() {
+) {
 
-    @Autowired
-    protected lateinit var stateManager: StateManager
-    @Autowired
-    protected lateinit var baseService: TransactionService
-    @Autowired
-    private lateinit var cryptoService: CryptoService
-    @Autowired
-    private lateinit var networkService: NetworkApiService
+    @Autowired protected lateinit var stateManager: StateManager
+    @Autowired protected lateinit var baseService: TransactionService
+    @Autowired private lateinit var cryptoService: CryptoService
+    @Autowired private lateinit var networkService: NetworkApiService
+    @Autowired private lateinit var transactionValidatorManager: TransactionValidatorManager
 
 
     protected fun add(utx: U): U {
@@ -42,32 +37,16 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
             return persistUtx
         }
 
-        validate(utx)
-        validateNew(utx)
+        transactionValidatorManager.validateNew(utx)
 
-        val savedUtx = save(utx)
+        val savedUtx = unconfirmedRepository.save(utx)
         networkService.broadcast(savedUtx.toMessage())
         return savedUtx
     }
 
-    abstract fun validateNew(utx: U)
-
-    fun validate(utx: U) {
-
-        validateBase(utx)
-
-        if (!isValidAddress(utx.senderAddress, utx.publicKey)) {
-            throw ValidationException("Incorrect sender address", INCORRECT_ADDRESS)
-        }
-    }
-
-    fun save(utx: U): U = unconfirmedRepository.save(utx)
-
-    fun save(tx: T): T = repository.save(tx)
-
     protected fun confirm(utx: U, tx: T): T {
         unconfirmedRepository.delete(utx)
-        return save(tx)
+        return repository.save(tx)
     }
 
     protected fun getReceipt(hash: String, results: List<ReceiptResult>): Receipt {
@@ -75,15 +54,5 @@ abstract class ExternalTransactionService<T : Transaction, U : UnconfirmedTransa
         receipt.setResults(results)
         return receipt
     }
-
-    protected fun isValidActualBalance(address: String, amount: Long): Boolean {
-        val balance = stateManager.getWalletBalanceByAddress(address)
-        val unconfirmedBalance = baseService.getUnconfirmedBalanceBySenderAddress(address)
-
-        return balance + unconfirmedBalance >= amount
-    }
-
-    private fun isValidAddress(senderAddress: String, senderPublicKey: String): Boolean =
-        cryptoService.isValidAddress(senderAddress, ByteUtils.fromHexString(senderPublicKey))
 
 }

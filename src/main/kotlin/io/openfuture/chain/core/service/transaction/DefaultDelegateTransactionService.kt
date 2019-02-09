@@ -4,9 +4,6 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.NotFoundException
-import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.exception.model.ExceptionType
-import io.openfuture.chain.core.exception.model.ExceptionType.ALREADY_DELEGATE
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -88,7 +85,7 @@ class DefaultDelegateTransactionService(
                 return confirm(utx, transaction)
             }
 
-            return this.save(transaction)
+            return repository.save(transaction)
         } finally {
             BlockchainLock.writeLock.unlock()
         }
@@ -101,51 +98,6 @@ class DefaultDelegateTransactionService(
 
         return generateReceipt(message, delegateWallet)
     }
-
-    override fun verify(message: DelegateTransactionMessage): Boolean {
-        return try {
-            validate(UnconfirmedDelegateTransaction.of(message))
-            true
-        } catch (e: ValidationException) {
-            log.error(e.message)
-            false
-        }
-    }
-
-    @Transactional
-    override fun save(tx: DelegateTransaction): DelegateTransaction = super.save(tx)
-
-    override fun validate(utx: UnconfirmedDelegateTransaction) {
-        super.validate(utx)
-
-        if (utx.fee != consensusProperties.feeDelegateTx!!) {
-            throw ValidationException("Fee should be ${consensusProperties.feeDelegateTx!!}")
-        }
-
-        if (utx.getPayload().amount != consensusProperties.amountDelegateTx!!) {
-            throw ValidationException("Amount should be ${consensusProperties.amountDelegateTx!!}")
-        }
-    }
-
-    @Transactional(readOnly = true)
-    override fun validateNew(utx: UnconfirmedDelegateTransaction) {
-        if (!isValidActualBalance(utx.senderAddress, utx.getPayload().amount + utx.fee)) {
-            throw ValidationException("Insufficient actual balance", ExceptionType.INSUFFICIENT_ACTUAL_BALANCE)
-        }
-
-        if (isAlreadyDelegate(utx.getPayload().delegateKey)) {
-            throw ValidationException("Node ${utx.getPayload().delegateKey} already registered as delegate", ALREADY_DELEGATE)
-        }
-
-        if (isAlreadySendRequest(utx.getPayload().delegateKey)) {
-            throw ValidationException("Node ${utx.getPayload().delegateKey} already send request to become delegate", ALREADY_DELEGATE)
-        }
-    }
-
-    private fun isAlreadyDelegate(delegateKey: String): Boolean = stateManager.isExistsDelegateByPublicKey(delegateKey)
-
-    private fun isAlreadySendRequest(delegateKey: String): Boolean =
-        unconfirmedRepository.findAll().any { it.getPayload().delegateKey == delegateKey }
 
     private fun generateReceipt(message: DelegateTransactionMessage, delegateWallet: String): Receipt {
         val results = listOf(

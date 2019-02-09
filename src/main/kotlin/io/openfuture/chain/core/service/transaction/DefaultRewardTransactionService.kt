@@ -2,7 +2,6 @@ package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.model.entity.state.DelegateState
@@ -16,8 +15,6 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.core.RewardTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,12 +25,7 @@ class DefaultRewardTransactionService(
     private val consensusProperties: ConsensusProperties,
     private val stateManager: StateManager,
     private val keyHolder: NodeKeyHolder
-) : BaseTransactionService(), RewardTransactionService {
-
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(DefaultRewardTransactionService::class.java)
-    }
-
+) : RewardTransactionService {
 
     @Transactional(readOnly = true)
     override fun getAll(request: TransactionPageRequest): Page<RewardTransaction> =
@@ -84,17 +76,6 @@ class DefaultRewardTransactionService(
         stateManager.updateWalletBalanceByAddress(senderAddress, -reward)
 
         return generateReceipt(message)
-    }
-
-    @Transactional(readOnly = true)
-    override fun verify(message: RewardTransactionMessage): Boolean {
-        return try {
-            super.validateBase(RewardTransaction.of(message))
-            true
-        } catch (e: ValidationException) {
-            log.warn(e.message)
-            false
-        }
     }
 
     private fun generateReceipt(message: RewardTransactionMessage): Receipt {

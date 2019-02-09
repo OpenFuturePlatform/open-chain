@@ -54,6 +54,7 @@ class DefaultMainBlockService(
     private val rewardTransactionService: RewardTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
+    private val transactionValidatorManager: TransactionValidatorManager,
     private val receiptService: ReceiptService
 ) : BaseBlockService<MainBlock>(repository, blockService, stateManager), MainBlockService {
 
@@ -268,7 +269,7 @@ class DefaultMainBlockService(
 
     private fun isValidRewardTransaction(message: PendingBlockMessage): Boolean =
         isValidReward(message.getExternalTransactions().asSequence().map { it.fee }.sum(), message.rewardTransaction.reward) &&
-            rewardTransactionService.verify(message.rewardTransaction)
+            transactionValidatorManager.verify(RewardTransaction.of(message.rewardTransaction))
 
     private fun isValidVoteTransactions(transactions: List<VoteTransactionMessage>): Boolean {
         if (transactions.isEmpty()) {
@@ -282,13 +283,17 @@ class DefaultMainBlockService(
 
             val accountState = stateManager.getLastByAddress<AccountState>(sender.key)
             val vote = sender.value.first()
-            return when (VoteType.getById(vote.voteTypeId)) {
+            if (VoteType.values().none { it.getId() == vote.voteTypeId }) {
+                throw ValidationException("Vote type with id: ${vote.voteTypeId} is not exists")
+            }
+
+            return when (VoteType.values().first { it.getId() == vote.voteTypeId }) {
                 FOR -> null == accountState.voteFor
                 AGAINST -> null != accountState.voteFor && vote.delegateKey == accountState.voteFor
             }
         }
 
-        return validVotes && transactions.all { voteTransactionService.verify(it) }
+        return validVotes && transactions.all { transactionValidatorManager.verify(VoteTransaction.of(it)) }
     }
 
     private fun isValidDelegateTransactions(transactions: List<DelegateTransactionMessage>): Boolean {
@@ -296,13 +301,13 @@ class DefaultMainBlockService(
             return true
         }
 
-        return transactions.all { delegateTransactionService.verify(it) } &&
+        return transactions.all { transactionValidatorManager.verify(DelegateTransaction.of(it)) } &&
             !stateManager.isExistsDelegatesByPublicKeys(transactions.map { it.delegateKey }) &&
             transactions.distinctBy { it.delegateKey }.size == transactions.size
     }
 
     private fun isValidTransferTransactions(transactions: List<TransferTransactionMessage>): Boolean =
-        transactions.all { transferTransactionService.verify(it) }
+        transactions.all { transactionValidatorManager.verify(TransferTransaction.of(it)) }
 
     private fun isValidRootHash(rootHash: String, hashes: List<String>): Boolean {
         if (hashes.isEmpty()) {

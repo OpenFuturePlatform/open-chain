@@ -10,6 +10,7 @@ import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
+import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -161,8 +162,6 @@ interface TransferTransactionService {
 
     fun process(message: TransferTransactionMessage, delegateWallet: String): Receipt
 
-    fun verify(message: TransferTransactionMessage): Boolean
-
 }
 
 interface RewardTransactionService {
@@ -176,8 +175,6 @@ interface RewardTransactionService {
     fun commit(transaction: RewardTransaction)
 
     fun process(message: RewardTransactionMessage): Receipt
-
-    fun verify(message: RewardTransactionMessage): Boolean
 
 }
 
@@ -203,8 +200,6 @@ interface VoteTransactionService {
 
     fun process(message: VoteTransactionMessage, delegateWallet: String): Receipt
 
-    fun verify(message: VoteTransactionMessage): Boolean
-
 }
 
 interface DelegateTransactionService {
@@ -225,9 +220,29 @@ interface DelegateTransactionService {
 
     fun process(message: DelegateTransactionMessage, delegateWallet: String): Receipt
 
-    fun verify(message: DelegateTransactionMessage): Boolean
+}
+
+interface TransactionValidatorManager {
+
+    fun validateNew(utx: UnconfirmedTransaction)
+
+    fun verify(tx: BaseTransaction): Boolean
 
 }
+
+interface TransactionValidator<T> {
+
+    fun validateNew(utx: T)
+
+    fun validate(utx: T)
+
+}
+
+interface DelegateTransactionValidator : TransactionValidator<UnconfirmedDelegateTransaction>
+
+interface TransferTransactionValidator : TransactionValidator<UnconfirmedTransferTransaction>
+
+interface VoteTransactionValidator : TransactionValidator<UnconfirmedVoteTransaction>
 
 interface StateManager {
 
