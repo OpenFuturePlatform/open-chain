@@ -24,7 +24,7 @@ abstract class BaseTransactionService {
     }
 
     private fun isValidHash(transaction: BaseTransaction): Boolean =
-        ByteUtils.toHexString(HashUtils.sha256(transaction.getBytes())) == transaction.hash
+        ByteUtils.toHexString(HashUtils.doubleSha256(transaction.getBytes())) == transaction.hash
 
     private fun isValidSignature(transaction: BaseTransaction): Boolean =
         SignatureUtils.verify(fromHexString(transaction.hash), transaction.signature, fromHexString(transaction.publicKey))

@@ -106,10 +106,10 @@ class DBChecker(
     private fun isValidTransactions(block: Block): Boolean {
         if (block is MainBlock) {
             val hashes = mutableListOf<String>()
-            hashes.addAll(block.payload.transferTransactions.map { ByteUtils.toHexString(HashUtils.sha256(it.getBytes())) })
-            hashes.addAll(block.payload.voteTransactions.map { ByteUtils.toHexString(HashUtils.sha256(it.getBytes())) })
-            hashes.addAll(block.payload.delegateTransactions.map { ByteUtils.toHexString(HashUtils.sha256(it.getBytes())) })
-            val rewardTransactionHash = ByteUtils.toHexString(HashUtils.sha256(block.payload.rewardTransaction[0].getBytes()))
+            hashes.addAll(block.payload.transferTransactions.map { ByteUtils.toHexString(HashUtils.doubleSha256(it.getBytes())) })
+            hashes.addAll(block.payload.voteTransactions.map { ByteUtils.toHexString(HashUtils.doubleSha256(it.getBytes())) })
+            hashes.addAll(block.payload.delegateTransactions.map { ByteUtils.toHexString(HashUtils.doubleSha256(it.getBytes())) })
+            val rewardTransactionHash = ByteUtils.toHexString(HashUtils.doubleSha256(block.payload.rewardTransaction[0].getBytes()))
             hashes.add(rewardTransactionHash)
 
             if (block.payload.transactionMerkleHash != HashUtils.calculateMerkleRoot(hashes)) {
