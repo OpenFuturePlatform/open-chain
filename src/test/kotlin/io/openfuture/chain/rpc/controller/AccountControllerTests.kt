@@ -121,7 +121,7 @@ class AccountControllerTests : ControllerTests() {
             .expectBody(Long::class.java)
             .returnResult().responseBody!!
 
-        assertThat(actualBalance).isEqualTo(balance + unconfirmedBalance)
+        assertThat(actualBalance).isEqualTo(balance - unconfirmedBalance)
     }
 
     @Test
