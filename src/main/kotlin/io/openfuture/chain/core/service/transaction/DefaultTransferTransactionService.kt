@@ -167,7 +167,7 @@ class DefaultTransferTransactionService(
             }
             EXECUTE -> {
                 val contractState = stateManager.getLastByAddress<AccountState>(message.recipientAddress!!)
-                val result = contractExecutor.run(contractState.storage!!, message, delegateWallet)
+                val result = contractExecutor.run(contractState.storage!!, UnconfirmedTransferTransaction.of(message), delegateWallet)
                 result.receipt.forEach {
                     stateManager.updateWalletBalanceByAddress(it.from, -it.amount)
                     stateManager.updateWalletBalanceByAddress(it.to, it.amount)
