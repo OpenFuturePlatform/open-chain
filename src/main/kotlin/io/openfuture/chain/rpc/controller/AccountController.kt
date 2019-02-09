@@ -43,7 +43,7 @@ class AccountController(
         val balance = stateManager.getWalletBalanceByAddress(address)
         val unconfirmedBalance = transactionService.getUnconfirmedBalanceBySenderAddress(address)
 
-        return balance + unconfirmedBalance
+        return balance - unconfirmedBalance
     }
 
     @GetMapping("/wallets/{address}/delegate")
