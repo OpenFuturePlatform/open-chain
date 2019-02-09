@@ -43,7 +43,7 @@ class DelegateState(
                 .putLong(createDate)
                 .array()
 
-            ByteUtils.toHexString(HashUtils.sha256(bytes))
+            ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
         }.value
     )
 

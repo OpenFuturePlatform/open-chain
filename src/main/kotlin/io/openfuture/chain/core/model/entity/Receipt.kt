@@ -45,7 +45,7 @@ class Receipt(
             .put(resultBytes)
             .array()
 
-        return ByteUtils.toHexString(HashUtils.sha256(bytes))
+        return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
     }
 
     fun getResults(): List<ReceiptResult> = Unpooled.copiedBuffer(ByteUtils.fromHexString(result)).readList()
