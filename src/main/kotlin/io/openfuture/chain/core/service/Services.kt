@@ -162,7 +162,7 @@ interface TransactionManager {
 
     fun processRewardTransaction(tx: RewardTransaction): Receipt
 
-    fun <T : Transaction> commit(tx: T, receipt: Receipt?): T
+    fun <T : Transaction> commit(tx: T, receipt: Receipt): T
 
     fun <uT : UnconfirmedTransaction> add(uTx: uT): uT
 
@@ -204,7 +204,7 @@ interface TransactionService<T : Transaction> {
 
     fun getAll(request: PageRequest): Page<T>
 
-    fun commit(tx: T, receipt: Receipt?): T
+    fun commit(tx: T, receipt: Receipt): T
 
 }
 

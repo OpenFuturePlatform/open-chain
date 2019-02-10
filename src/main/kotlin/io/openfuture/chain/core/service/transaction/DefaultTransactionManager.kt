@@ -110,7 +110,7 @@ class DefaultTransactionManager(
 
     @Suppress("UNCHECKED_CAST")
     @Transactional
-    override fun <T : Transaction> commit(tx: T, receipt: Receipt?): T = when (tx) {
+    override fun <T : Transaction> commit(tx: T, receipt: Receipt): T = when (tx) {
         is RewardTransaction -> rewardTransactionService.commit(tx, receipt)
         is DelegateTransaction -> delegateTransactionService.commit(tx, receipt)
         is TransferTransaction -> transferTransactionService.commit(tx, receipt)
