@@ -67,8 +67,6 @@ interface UTransactionRepository<uT : UnconfirmedTransaction> : BaseRepository<u
 
     fun findAllBySenderAddress(address: String): List<uT>
 
-    fun deleteAllByBlockHeightIn(heights: List<Long>)
-
 }
 
 @Repository
@@ -92,6 +90,8 @@ interface UVoteTransactionRepository : UTransactionRepository<UnconfirmedVoteTra
 interface TransactionRepository<T : Transaction> : BaseRepository<T> {
 
     fun findOneByHash(hash: String): T?
+
+    fun findAllByBlock(block: Block): List<T>
 
     fun deleteAllByBlockHeightIn(heights: List<Long>)
 

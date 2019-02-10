@@ -4,6 +4,7 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.ReceiptResult
+import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.RewardTransactionPayload
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional(readOnly = true)
 class DefaultRewardTransactionService(
     private val repository: RewardTransactionRepository,
     private val consensusProperties: ConsensusProperties,
@@ -24,11 +26,11 @@ class DefaultRewardTransactionService(
     private val keyHolder: NodeKeyHolder
 ) : DefaultTransactionService<RewardTransaction, RewardTransactionRepository>(repository), RewardTransactionService {
 
-    @Transactional(readOnly = true)
+    override fun getByBlock(block: Block): RewardTransaction = repository.findAllByBlock(block).first()
+
     override fun getByRecipientAddress(address: String): List<RewardTransaction> =
         repository.findAllByPayloadRecipientAddress(address)
 
-    @Transactional(readOnly = true)
     override fun create(timestamp: Long, fees: Long): RewardTransaction {
         val senderAddress = consensusProperties.genesisAddress!!
         val rewardBlock = consensusProperties.rewardBlock!!

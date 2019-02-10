@@ -4,6 +4,7 @@ import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.ReceiptResult
+import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
@@ -16,6 +17,7 @@ import io.openfuture.chain.network.service.NetworkApiService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
+@Transactional(readOnly = true)
 abstract class DefaultExternalTransactionService<T : Transaction, uT : UnconfirmedTransaction,
     R : TransactionRepository<T>, uS : UTransactionService<uT>>(
     private val repository: R,
@@ -26,6 +28,8 @@ abstract class DefaultExternalTransactionService<T : Transaction, uT : Unconfirm
     @Autowired private lateinit var networkService: NetworkApiService
     @Autowired protected lateinit var stateManager: StateManager
 
+
+    override fun getAllByBlock(block: Block): List<T> = repository.findAllByBlock(block)
 
     @BlockchainSynchronized
     @Transactional

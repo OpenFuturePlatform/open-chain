@@ -167,6 +167,8 @@ interface TransactionService<T : Transaction> {
 
 interface RewardTransactionService : TransactionService<RewardTransaction> {
 
+    fun getByBlock(block: Block): RewardTransaction
+
     fun getByRecipientAddress(address: String): List<RewardTransaction>
 
     fun create(timestamp: Long, fees: Long): RewardTransaction
@@ -178,6 +180,8 @@ interface RewardTransactionService : TransactionService<RewardTransaction> {
 }
 
 interface ExternalTransactionService<T : Transaction, uT : UnconfirmedTransaction> : TransactionService<T> {
+
+    fun getAllByBlock(block: Block): List<T>
 
     fun add(uTx: uT): uT
 

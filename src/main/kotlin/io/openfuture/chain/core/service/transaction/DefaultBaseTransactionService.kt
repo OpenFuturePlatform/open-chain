@@ -36,8 +36,6 @@ class DefaultBaseTransactionService(
     override fun deleteBlockTransactions(blockHeights: List<Long>) {
         repository.deleteAllByBlockHeightIn(blockHeights)
         repository.flush()
-        uRepository.deleteAllByBlockHeightIn(blockHeights)
-        uRepository.flush()
     }
 
 }
