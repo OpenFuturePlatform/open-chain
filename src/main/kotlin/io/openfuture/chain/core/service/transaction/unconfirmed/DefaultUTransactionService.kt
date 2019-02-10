@@ -1,9 +1,20 @@
 package io.openfuture.chain.core.service.transaction.unconfirmed
 
+import io.openfuture.chain.core.annotation.BlockchainSynchronized
+import io.openfuture.chain.core.exception.CoreException
+import io.openfuture.chain.core.model.entity.Receipt
+import io.openfuture.chain.core.model.entity.ReceiptResult
+import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
+import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
+import io.openfuture.chain.core.service.StateManager
+import io.openfuture.chain.core.service.TransactionValidatorManager
 import io.openfuture.chain.core.service.UTransactionService
+import io.openfuture.chain.core.sync.BlockchainLock
+import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.base.PageRequest
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional(readOnly = true)
@@ -11,18 +22,69 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction, uR : UTra
     private val uRepository: uR
 ) : UTransactionService<uT> {
 
-    override fun findByHash(hash: String): uT? = uRepository.findOneByHash(hash)
+    @Autowired private lateinit var transactionValidatorManager: TransactionValidatorManager
+    @Autowired private lateinit var networkService: NetworkApiService
+    @Autowired private lateinit var repository: TransactionRepository<Transaction>
+    @Autowired protected lateinit var stateManager: StateManager
 
-    override fun getAll(): List<uT> = uRepository.findAll()
 
-    override fun getAll(request: PageRequest): List<uT> = uRepository.findAllByOrderByFeeDesc(request)
+    override fun getAll(): List<uT> {
+        BlockchainLock.readLock.lock()
+        try {
+            return uRepository.findAll()
+        } finally {
+            BlockchainLock.readLock.unlock()
+        }
+    }
 
-    override fun getAllBySenderAddress(address: String): List<uT> = uRepository.findAllBySenderAddress(address)
+    override fun getAll(request: PageRequest): List<uT> {
+        BlockchainLock.readLock.lock()
+        try {
+            return uRepository.findAllByOrderByFeeDesc(request)
+        } finally {
+            BlockchainLock.readLock.unlock()
+        }
+    }
 
-    override fun save(uTx: uT): uT = uRepository.save(uTx)
+    override fun getAllBySenderAddress(address: String): List<uT> {
+        BlockchainLock.readLock.lock()
+        try {
+            return uRepository.findAllBySenderAddress(address)
+        } finally {
+            BlockchainLock.readLock.unlock()
+        }
+    }
 
-    override fun remove(uTx: uT) {
-        uRepository.delete(uTx)
+    @BlockchainSynchronized
+    @Transactional
+    override fun add(uTx: uT): uT {
+        BlockchainLock.writeLock.lock()
+        try {
+            val persistTx = repository.findOneByHash(uTx.hash)
+            if (null != persistTx) {
+                throw CoreException("Transaction already handled")
+            }
+
+            val persistUtx = uRepository.findOneByHash(uTx.hash)
+            if (null != persistUtx) {
+                return persistUtx
+            }
+
+            transactionValidatorManager.validateNew(uTx)
+
+            val savedUtx = uRepository.saveAndFlush(uTx)
+            networkService.broadcast(savedUtx.toMessage())
+            return savedUtx
+        } finally {
+            BlockchainLock.writeLock.unlock()
+        }
+    }
+
+    protected fun getReceipt(hash: String, results: List<ReceiptResult>): Receipt {
+        val receipt = Receipt(hash)
+        receipt.setResults(results)
+
+        return receipt
     }
 
 }

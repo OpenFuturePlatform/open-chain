@@ -1,8 +1,8 @@
 package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.consensus.service.EpochService
-import io.openfuture.chain.core.service.BaseTransactionService
 import io.openfuture.chain.core.service.BlockService
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.explorer.ExplorerResponse
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -17,15 +17,15 @@ class ExplorerController(
     private val blockService: BlockService,
     private val epochService: EpochService,
     private val networkApiService: NetworkApiService,
-    private val baseTransactionService: BaseTransactionService
+    private val transactionManager: TransactionManager
 ) {
 
     @GetMapping
     fun getExplorerInfo(): ExplorerResponse {
         val blocksCount = blockService.getCount()
         val blockProductionTime = blockService.getAvgProductionTime()
-        val transactionsCount = baseTransactionService.getCount()
-        val transactionsPerSecond = baseTransactionService.getProducingPerSecond()
+        val transactionsCount = transactionManager.getCount()
+        val transactionsPerSecond = transactionManager.getProducingPerSecond()
         val nodesCount = networkApiService.getNetworkSize()
         val epochNumber = epochService.getEpochIndex()
         val epochDate = epochService.getEpochStart()

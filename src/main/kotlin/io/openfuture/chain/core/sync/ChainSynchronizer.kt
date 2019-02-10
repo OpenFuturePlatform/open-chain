@@ -16,7 +16,7 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransacti
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.StateManager
-import io.openfuture.chain.core.service.TransactionValidatorManager
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import io.openfuture.chain.core.sync.SyncStatus.*
@@ -50,7 +50,7 @@ class ChainSynchronizer(
     private val blockService: BlockService,
     private val networkApiService: NetworkApiService,
     private val genesisBlockService: GenesisBlockService,
-    private val transactionValidatorManager: TransactionValidatorManager,
+    private val transactionManager: TransactionManager,
     private val epochService: EpochService,
     private val requestRetryScheduler: RequestRetryScheduler,
     private val stateManager: StateManager,
@@ -208,16 +208,16 @@ class ChainSynchronizer(
             && isValidTransactions(mainBlocks)
 
     private fun isValidRewardTransactions(message: RewardTransactionMessage): Boolean =
-        transactionValidatorManager.verify(RewardTransaction.of(message))
+        transactionManager.verify(RewardTransaction.of(message))
 
     private fun isValidVoteTransactions(list: List<VoteTransactionMessage>): Boolean =
-        list.all { transactionValidatorManager.verify(VoteTransaction.of(it)) }
+        list.all { transactionManager.verify(VoteTransaction.of(it)) }
 
     private fun isValidDelegateTransactions(list: List<DelegateTransactionMessage>): Boolean =
-        list.all { transactionValidatorManager.verify(DelegateTransaction.of(it)) }
+        list.all { transactionManager.verify(DelegateTransaction.of(it)) }
 
     private fun isValidTransferTransactions(list: List<TransferTransactionMessage>): Boolean =
-        list.all { transactionValidatorManager.verify(TransferTransaction.of(it)) }
+        list.all { transactionManager.verify(TransferTransaction.of(it)) }
 
     private fun isValidTransactions(blocks: List<MainBlockMessage>): Boolean {
         try {

@@ -14,6 +14,7 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -25,7 +26,7 @@ class DefaultTransactionValidatorManager(
     private val transferTransactionValidator: TransferTransactionValidator,
     private val voteTransactionValidator: VoteTransactionValidator,
     private val stateManager: StateManager,
-    private val baseTransactionService: BaseTransactionService
+    @Lazy private val transactionManager: TransactionManager
 ) : TransactionValidatorManager {
 
     companion object {
@@ -97,7 +98,7 @@ class DefaultTransactionValidatorManager(
 
     private fun checkActualBalance(address: String, amount: Long): Boolean {
         val balance = stateManager.getWalletBalanceByAddress(address)
-        val unconfirmedBalance = baseTransactionService.getUnconfirmedBalanceBySenderAddress(address)
+        val unconfirmedBalance = transactionManager.getUnconfirmedBalanceBySenderAddress(address)
 
         return balance + unconfirmedBalance >= amount
     }

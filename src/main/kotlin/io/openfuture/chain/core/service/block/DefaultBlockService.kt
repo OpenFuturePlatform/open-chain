@@ -13,7 +13,10 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.repository.BlockRepository
-import io.openfuture.chain.core.service.*
+import io.openfuture.chain.core.service.BlockService
+import io.openfuture.chain.core.service.ReceiptService
+import io.openfuture.chain.core.service.StateManager
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
@@ -27,11 +30,7 @@ import java.nio.ByteBuffer
 class DefaultBlockService(
     private val repository: BlockRepository<Block>,
     private val properties: ConsensusProperties,
-    private val baseTransactionService: BaseTransactionService,
-    private val voteTransactionService: VoteTransactionService,
-    private val rewardTransactionService: RewardTransactionService,
-    private val delegateTransactionService: DelegateTransactionService,
-    private val transferTransactionService: TransferTransactionService,
+    private val transactionManager: TransactionManager,
     private val stateManager: StateManager,
     private val receiptService: ReceiptService
 ) : BlockService {
@@ -69,7 +68,7 @@ class DefaultBlockService(
         }
         val toHeight = fromHeight + properties.epochHeight!!
         val heightRange = (fromHeight..toHeight).toList()
-        baseTransactionService.deleteBlockTransactions(heightRange)
+        transactionManager.deleteBlockTransactions(heightRange)
         stateManager.removeAllByBlockHeights(heightRange)
         receiptService.deleteBlockReceipts(heightRange)
         repository.deleteAllByHeightIn(heightRange)
@@ -93,7 +92,7 @@ class DefaultBlockService(
     @Transactional
     override fun deleteByHeightIn(heights: List<Long>) {
         stateManager.removeAllByBlockHeights(heights)
-        baseTransactionService.deleteBlockTransactions(heights)
+        transactionManager.deleteBlockTransactions(heights)
         repository.deleteAllByHeightIn(heights)
     }
 
@@ -147,7 +146,7 @@ class DefaultBlockService(
                 block.payload.accountStates = mutableListOf()
 
                 this.save(block)
-                rewardTransactionService.commit(rewardTransaction)
+                transactionManager.commit(rewardTransaction, null)
 
                 if (syncMode == FULL) {
                     receipts.forEach {
@@ -159,9 +158,9 @@ class DefaultBlockService(
                         it.block = block
                         val receipt = receipts.find { receipt -> receipt.transactionHash == it.hash }!!
                         when (it) {
-                            is TransferTransaction -> transferTransactionService.commit(it, receipt)
-                            is DelegateTransaction -> delegateTransactionService.commit(it, receipt)
-                            is VoteTransaction -> voteTransactionService.commit(it, receipt)
+                            is TransferTransaction -> transactionManager.commit(it, receipt)
+                            is DelegateTransaction -> transactionManager.commit(it, receipt)
+                            is VoteTransaction -> transactionManager.commit(it, receipt)
                             else -> throw IllegalStateException("Unsupported transaction type")
                         }
                     }

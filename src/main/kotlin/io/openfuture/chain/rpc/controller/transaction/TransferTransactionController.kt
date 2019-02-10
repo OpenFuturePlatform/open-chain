@@ -1,7 +1,7 @@
 package io.openfuture.chain.rpc.controller.transaction
 
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
-import io.openfuture.chain.core.service.TransferTransactionService
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.crypto.annotation.AddressChecksum
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
@@ -11,32 +11,32 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
-
 @RestController
 @Validated
 @RequestMapping("/rpc/transactions/transfer")
 class TransferTransactionController(
-    private val transactionService: TransferTransactionService
+    private val transactionManager: TransactionManager
 ) {
 
     @CrossOrigin
     @GetMapping("/address/{address}")
     fun getTransactions(@PathVariable @AddressChecksum address: String, @Valid request: TransactionPageRequest): PageResponse<TransferTransactionResponse> =
-        PageResponse(transactionService.getByAddress(address, request).map { TransferTransactionResponse(it) })
+        PageResponse(transactionManager.getAllTransferTransactionsByAddress(address, request)
+            .map { TransferTransactionResponse(it) })
 
     @CrossOrigin
     @GetMapping("/{hash}")
     fun get(@PathVariable hash: String): TransferTransactionResponse =
-        TransferTransactionResponse(transactionService.getByHash(hash))
+        TransferTransactionResponse(transactionManager.getTransferTransactionByHash(hash))
 
     @PostMapping
     fun add(@Valid @RequestBody request: TransferTransactionRequest): TransferTransactionResponse =
-        TransferTransactionResponse(transactionService.add(UnconfirmedTransferTransaction.of(request)))
+        TransferTransactionResponse(transactionManager.add(UnconfirmedTransferTransaction.of(request)))
 
     @CrossOrigin
     @GetMapping
     fun getAll(@Valid request: TransactionPageRequest): PageResponse<TransferTransactionResponse> =
-        PageResponse(transactionService.getAll(request).map { TransferTransactionResponse(it) })
+        PageResponse(transactionManager.getAllTransferTransactions(request).map { TransferTransactionResponse(it) })
 
 }
 

@@ -118,8 +118,7 @@ interface MainBlockService {
 
 }
 
-/** Base transaction service */
-interface BaseTransactionService {
+interface TransactionManager {
 
     fun getCount(): Long
 
@@ -127,13 +126,55 @@ interface BaseTransactionService {
 
     fun getProducingPerSecond(): Long
 
+    fun getAllUnconfirmedDelegateTransactions(request: PageRequest): List<UnconfirmedDelegateTransaction>
+
+    fun getAllUnconfirmedTransferTransactions(request: PageRequest): List<UnconfirmedTransferTransaction>
+
+    fun getAllUnconfirmedVoteTransactions(request: PageRequest): List<UnconfirmedVoteTransaction>
+
+    fun getAllTransferTransactions(request: PageRequest): Page<TransferTransaction>
+
+    fun getAllTransferTransactionsByAddress(address: String, request: PageRequest): Page<TransferTransaction>
+
+    fun getAllRewardTransactions(request: PageRequest): Page<RewardTransaction>
+
+    fun getAllDelegateTransactionsByBlock(block: Block): List<DelegateTransaction>
+
+    fun getAllTransferTransactionsByBlock(block: Block): List<TransferTransaction>
+
+    fun getAllVoteTransactionsByBlock(block: Block): List<VoteTransaction>
+
+    fun getDelegateTransactionByHash(hash: String): DelegateTransaction
+
+    fun getTransferTransactionByHash(hash: String): TransferTransaction
+
+    fun getVoteTransactionByHash(hash: String): VoteTransaction
+
+    fun getRewardTransactionByBlock(block: Block): RewardTransaction
+
+    fun getRewardTransactionByRecipientAddress(address: String): List<RewardTransaction>
+
+    fun getUnconfirmedVoteBySenderAgainstDelegate(senderAddress: String, delegateKey: String): UnconfirmedVoteTransaction?
+
+    fun getLastVoteForDelegate(senderAddress: String, delegateKey: String): VoteTransaction
+
+    fun createRewardTransaction(timestamp: Long, fees: Long): RewardTransaction
+
+    fun processRewardTransaction(tx: RewardTransaction): Receipt
+
+    fun <T : Transaction> commit(tx: T, receipt: Receipt?): T
+
+    fun <uT : UnconfirmedTransaction> add(uTx: uT): uT
+
+    fun <uT : UnconfirmedTransaction> processUnconfirmedTransaction(uTx: uT, delegateWallet: String): Receipt
+
+    fun verify(tx: BaseTransaction): Boolean
+
     fun deleteBlockTransactions(blockHeights: List<Long>)
 
 }
 
 interface UTransactionService<uT : UnconfirmedTransaction> {
-
-    fun findByHash(hash: String): uT?
 
     fun getAll(): List<uT>
 
@@ -141,9 +182,9 @@ interface UTransactionService<uT : UnconfirmedTransaction> {
 
     fun getAllBySenderAddress(address: String): List<uT>
 
-    fun save(uTx: uT): uT
+    fun add(uTx: uT): uT
 
-    fun remove(uTx: uT)
+    fun process(uTx: uT, delegateWallet: String): Receipt
 
 }
 
@@ -153,7 +194,7 @@ interface UTransferTransactionService : UTransactionService<UnconfirmedTransferT
 
 interface UVoteTransactionService : UTransactionService<UnconfirmedVoteTransaction> {
 
-    fun getUnconfirmedBySenderAgainstDelegate(senderAddress: String, delegateKey: String): UnconfirmedVoteTransaction?
+    fun getBySenderAgainstDelegate(senderAddress: String, delegateKey: String): UnconfirmedVoteTransaction?
 
 }
 
@@ -162,6 +203,8 @@ interface TransactionService<T : Transaction> {
     fun getByHash(hash: String): T
 
     fun getAll(request: PageRequest): Page<T>
+
+    fun commit(tx: T, receipt: Receipt?): T
 
 }
 
@@ -173,37 +216,29 @@ interface RewardTransactionService : TransactionService<RewardTransaction> {
 
     fun create(timestamp: Long, fees: Long): RewardTransaction
 
-    fun commit(tx: RewardTransaction): RewardTransaction
-
     fun process(tx: RewardTransaction): Receipt
 
 }
 
-interface ExternalTransactionService<T : Transaction, uT : UnconfirmedTransaction> : TransactionService<T> {
+interface ExternalTransactionService<T : Transaction> : TransactionService<T> {
 
     fun getAllByBlock(block: Block): List<T>
 
-    fun add(uTx: uT): uT
+}
 
-    fun commit(tx: T, receipt: Receipt): T
+interface TransferTransactionService : ExternalTransactionService<TransferTransaction> {
 
-    fun process(uTx: uT, delegateWallet: String): Receipt
+    fun getAllByAddress(address: String, request: PageRequest): Page<TransferTransaction>
 
 }
 
-interface TransferTransactionService : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction> {
-
-    fun getByAddress(address: String, request: PageRequest): Page<TransferTransaction>
-
-}
-
-interface VoteTransactionService : ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction> {
+interface VoteTransactionService : ExternalTransactionService<VoteTransaction> {
 
     fun getLastVoteForDelegate(senderAddress: String, delegateKey: String): VoteTransaction
 
 }
 
-interface DelegateTransactionService : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>
+interface DelegateTransactionService : ExternalTransactionService<DelegateTransaction>
 
 interface TransactionValidatorManager {
 

@@ -7,7 +7,7 @@ import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
-import io.openfuture.chain.core.service.TransferTransactionService
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
@@ -24,7 +24,7 @@ import reactor.core.publisher.Mono
 class TransferTransactionControllerTests : ControllerTests() {
 
     @MockBean
-    private lateinit var service: TransferTransactionService
+    private lateinit var transactionManager: TransactionManager
 
     companion object {
         private const val TRANSFER_TRANSACTION_URL = "/rpc/transactions/transfer"
@@ -39,7 +39,7 @@ class TransferTransactionControllerTests : ControllerTests() {
         val unconfirmedTransferTransaction = UnconfirmedTransferTransaction.of(request)
         val expectedResponse = TransferTransactionResponse(unconfirmedTransferTransaction)
 
-        given(service.add(any(UnconfirmedTransferTransaction::class.java))).willReturn(unconfirmedTransferTransaction)
+        given(transactionManager.add(any(UnconfirmedTransferTransaction::class.java))).willReturn(unconfirmedTransferTransaction)
 
         val actualResponse = webClient.post().uri(TRANSFER_TRANSACTION_URL)
             .body(Mono.just(request), TransferTransactionRequest::class.java)
@@ -56,7 +56,7 @@ class TransferTransactionControllerTests : ControllerTests() {
         val pageTransferTransactions = PageImpl(listOf(createTransferTransaction()))
         val expectedPageResponse = PageResponse(pageTransferTransactions)
 
-        given(service.getAll(TransactionPageRequest())).willReturn(pageTransferTransactions)
+        given(transactionManager.getAllTransferTransactions(TransactionPageRequest())).willReturn(pageTransferTransactions)
 
         val actualPageResponse = webClient.get().uri(TRANSFER_TRANSACTION_URL)
             .exchange()
@@ -65,8 +65,10 @@ class TransferTransactionControllerTests : ControllerTests() {
             .returnResult().responseBody!!
 
         assertThat(actualPageResponse.totalCount).isEqualTo(expectedPageResponse.totalCount)
-        assertThat(((actualPageResponse.list.first() as HashMap<*, *>)["senderAddress"])).isEqualTo(expectedPageResponse.list.first().senderAddress)
-        assertThat((actualPageResponse.list.first() as LinkedHashMap<*, *>)["senderPublicKey"]).isEqualTo(expectedPageResponse.list.first().publicKey)
+        assertThat(((actualPageResponse.list.first() as HashMap<*, *>)["senderAddress"]))
+            .isEqualTo(expectedPageResponse.list.first().senderAddress)
+        assertThat((actualPageResponse.list.first() as LinkedHashMap<*, *>)["senderPublicKey"])
+            .isEqualTo(expectedPageResponse.list.first().publicKey)
     }
 
     @Test
@@ -74,7 +76,8 @@ class TransferTransactionControllerTests : ControllerTests() {
         val pageTransferTransactions = PageImpl(listOf(createTransferTransaction()))
         val expectedPageResponse = PageResponse(pageTransferTransactions)
 
-        given(service.getByAddress(WALLET_ADDRESS, TransactionPageRequest())).willReturn(pageTransferTransactions)
+        given(transactionManager.getAllTransferTransactionsByAddress(WALLET_ADDRESS, TransactionPageRequest()))
+            .willReturn(pageTransferTransactions)
 
         val actualTransferTransactions = webClient.get().uri("$TRANSFER_TRANSACTION_URL/address/$WALLET_ADDRESS")
             .exchange()
@@ -94,7 +97,7 @@ class TransferTransactionControllerTests : ControllerTests() {
         val transferTransaction = createTransferTransaction()
         val expectedResponse = TransferTransactionResponse(transferTransaction)
 
-        given(service.getByHash(hash)).willReturn(transferTransaction)
+        given(transactionManager.getTransferTransactionByHash(hash)).willReturn(transferTransaction)
 
         val actualResponse = webClient.get().uri("$TRANSFER_TRANSACTION_URL/$hash")
             .exchange()

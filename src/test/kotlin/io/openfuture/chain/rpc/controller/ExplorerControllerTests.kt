@@ -2,8 +2,8 @@ package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.consensus.service.EpochService
-import io.openfuture.chain.core.service.BaseTransactionService
 import io.openfuture.chain.core.service.BlockService
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.explorer.ExplorerResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -25,7 +25,7 @@ class ExplorerControllerTests : ControllerTests() {
     private lateinit var networkApiService: NetworkApiService
 
     @MockBean
-    private lateinit var baseTransactionService: BaseTransactionService
+    private lateinit var transactionManager: TransactionManager
 
 
     @Test
@@ -45,9 +45,9 @@ class ExplorerControllerTests : ControllerTests() {
         given(epochService.getEpochStart()).willReturn(epochDate)
         given(epochService.getEpochIndex()).willReturn(epochNumber)
         given(networkApiService.getNetworkSize()).willReturn(nodesCount)
-        given(baseTransactionService.getCount()).willReturn(transactionsCount)
+        given(transactionManager.getCount()).willReturn(transactionsCount)
         given(blockService.getAvgProductionTime()).willReturn(blockProductionTime)
-        given(baseTransactionService.getProducingPerSecond()).willReturn(transactionsPerSecond)
+        given(transactionManager.getProducingPerSecond()).willReturn(transactionsPerSecond)
         given(epochService.getDelegatesPublicKeys()).willReturn(listOf("publicKey"))
 
         val actualResponse = webClient.get().uri("/rpc/explorer/info")
