@@ -1,6 +1,7 @@
 package io.openfuture.chain.rpc.controller.transaction
 
 import io.openfuture.chain.config.ControllerTests
+import io.openfuture.chain.config.any
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -15,7 +16,6 @@ import org.mockito.BDDMockito.given
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import reactor.core.publisher.Mono
-
 
 @WebFluxTest(DelegateTransactionController::class)
 class DelegateTransactionControllerTests : ControllerTests() {
@@ -36,7 +36,7 @@ class DelegateTransactionControllerTests : ControllerTests() {
         val unconfirmedDelegateTransaction = UnconfirmedDelegateTransaction.of(request)
         val expectedResponse = DelegateTransactionResponse(unconfirmedDelegateTransaction)
 
-        given(service.add(request)).willReturn(unconfirmedDelegateTransaction)
+        given(service.add(any(UnconfirmedDelegateTransaction::class.java))).willReturn(unconfirmedDelegateTransaction)
 
         val actualResponse = webClient.post().uri(DELEGATE_TRANSACTION_URL)
             .body(Mono.just(request), DelegateTransactionRequest::class.java)

@@ -4,9 +4,9 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.ALREADY_DELEGATE
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
-import io.openfuture.chain.core.repository.UDelegateTransactionRepository
 import io.openfuture.chain.core.service.DelegateTransactionValidator
 import io.openfuture.chain.core.service.StateManager
+import io.openfuture.chain.core.service.UDelegateTransactionService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultDelegateTransactionValidator(
     private val consensusProperties: ConsensusProperties,
     private val stateManager: StateManager,
-    private val uRepository: UDelegateTransactionRepository
+    private val uDelegateTransactionService: UDelegateTransactionService
 ) : DelegateTransactionValidator {
 
     override fun validateNew(utx: UnconfirmedDelegateTransaction) {
@@ -48,7 +48,7 @@ class DefaultDelegateTransactionValidator(
     }
 
     private fun checkSendRequest(utx: UnconfirmedDelegateTransaction) {
-        if (uRepository.findAll().any { it.getPayload().delegateKey == utx.getPayload().delegateKey }) {
+        if (uDelegateTransactionService.getAll().any { it.getPayload().delegateKey == utx.getPayload().delegateKey }) {
             throw ValidationException("Node ${utx.getPayload().delegateKey} already send request to become delegate",
                 ALREADY_DELEGATE)
         }

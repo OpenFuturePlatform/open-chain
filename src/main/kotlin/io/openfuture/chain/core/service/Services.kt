@@ -11,10 +11,7 @@ import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
@@ -22,13 +19,9 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.node.*
 import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.*
+import io.openfuture.chain.network.message.core.BaseMainBlockMessage
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
-import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
-import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
-import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
-import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import org.springframework.data.domain.Page
 
 interface HardwareInfoService {
@@ -125,12 +118,10 @@ interface MainBlockService {
 
 }
 
-/** Common base transaction service */
-interface TransactionService {
+/** Base transaction service */
+interface BaseTransactionService {
 
     fun getCount(): Long
-
-    fun getUnconfirmedTransactionByHash(hash: String): UnconfirmedTransaction
 
     fun getUnconfirmedBalanceBySenderAddress(address: String): Long
 
@@ -140,87 +131,75 @@ interface TransactionService {
 
 }
 
-interface TransferTransactionService {
+interface UTransactionService<uT : UnconfirmedTransaction> {
 
-    fun getUnconfirmedCount(): Long
+    fun findByHash(hash: String): uT?
 
-    fun getByHash(hash: String): TransferTransaction
+    fun getAll(): List<uT>
 
-    fun getAll(request: TransactionPageRequest): Page<TransferTransaction>
+    fun getAll(request: PageRequest): List<uT>
 
-    fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedTransferTransaction>
+    fun getAllBySenderAddress(address: String): List<uT>
 
-    fun getByAddress(address: String, request: TransactionPageRequest): Page<TransferTransaction>
+    fun save(uTx: uT): uT
 
-    fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction
-
-    fun add(message: TransferTransactionMessage)
-
-    fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction
-
-    fun commit(transaction: TransferTransaction, receipt: Receipt): TransferTransaction
-
-    fun process(message: TransferTransactionMessage, delegateWallet: String): Receipt
+    fun remove(uTx: uT)
 
 }
 
-interface RewardTransactionService {
+interface UDelegateTransactionService : UTransactionService<UnconfirmedDelegateTransaction>
 
-    fun getAll(request: TransactionPageRequest): Page<RewardTransaction>
+interface UTransferTransactionService : UTransactionService<UnconfirmedTransferTransaction>
+
+interface UVoteTransactionService : UTransactionService<UnconfirmedVoteTransaction> {
+
+    fun getUnconfirmedBySenderAgainstDelegate(senderAddress: String, delegateKey: String): UnconfirmedVoteTransaction?
+
+}
+
+interface TransactionService<T : Transaction> {
+
+    fun getByHash(hash: String): T
+
+    fun getAll(request: PageRequest): Page<T>
+
+}
+
+interface RewardTransactionService : TransactionService<RewardTransaction> {
 
     fun getByRecipientAddress(address: String): List<RewardTransaction>
 
     fun create(timestamp: Long, fees: Long): RewardTransaction
 
-    fun commit(transaction: RewardTransaction)
+    fun commit(tx: RewardTransaction): RewardTransaction
 
-    fun process(message: RewardTransactionMessage): Receipt
+    fun process(tx: RewardTransaction): Receipt
 
 }
 
-interface VoteTransactionService {
+interface ExternalTransactionService<T : Transaction, uT : UnconfirmedTransaction> : TransactionService<T> {
 
-    fun getUnconfirmedCount(): Long
+    fun add(uTx: uT): uT
 
-    fun getByHash(hash: String): VoteTransaction
+    fun commit(tx: T, receipt: Receipt): T
 
-    fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedVoteTransaction>
+    fun process(uTx: uT, delegateWallet: String): Receipt
 
-    fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction
+}
 
-    fun getUnconfirmedBySenderAgainstDelegate(senderAddress: String, delegateKey: String): UnconfirmedVoteTransaction?
+interface TransferTransactionService : ExternalTransactionService<TransferTransaction, UnconfirmedTransferTransaction> {
+
+    fun getByAddress(address: String, request: PageRequest): Page<TransferTransaction>
+
+}
+
+interface VoteTransactionService : ExternalTransactionService<VoteTransaction, UnconfirmedVoteTransaction> {
 
     fun getLastVoteForDelegate(senderAddress: String, delegateKey: String): VoteTransaction
 
-    fun add(message: VoteTransactionMessage)
-
-    fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction
-
-    fun commit(transaction: VoteTransaction): VoteTransaction
-
-    fun process(message: VoteTransactionMessage, delegateWallet: String): Receipt
-
 }
 
-interface DelegateTransactionService {
-
-    fun getUnconfirmedCount(): Long
-
-    fun getByHash(hash: String): DelegateTransaction
-
-    fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedDelegateTransaction>
-
-    fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction
-
-    fun add(message: DelegateTransactionMessage)
-
-    fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction
-
-    fun commit(transaction: DelegateTransaction): DelegateTransaction
-
-    fun process(message: DelegateTransactionMessage, delegateWallet: String): Receipt
-
-}
+interface DelegateTransactionService : ExternalTransactionService<DelegateTransaction, UnconfirmedDelegateTransaction>
 
 interface TransactionValidatorManager {
 

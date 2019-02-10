@@ -1,5 +1,6 @@
 package io.openfuture.chain.rpc.controller.transaction
 
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.crypto.annotation.AddressChecksum
 import io.openfuture.chain.rpc.domain.base.PageResponse
@@ -30,7 +31,7 @@ class TransferTransactionController(
 
     @PostMapping
     fun add(@Valid @RequestBody request: TransferTransactionRequest): TransferTransactionResponse =
-        TransferTransactionResponse(transactionService.add(request))
+        TransferTransactionResponse(transactionService.add(UnconfirmedTransferTransaction.of(request)))
 
     @CrossOrigin
     @GetMapping

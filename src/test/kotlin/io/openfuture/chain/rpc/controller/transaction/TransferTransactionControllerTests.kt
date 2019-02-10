@@ -1,6 +1,7 @@
 package io.openfuture.chain.rpc.controller.transaction
 
 import io.openfuture.chain.config.ControllerTests
+import io.openfuture.chain.config.any
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -38,7 +39,7 @@ class TransferTransactionControllerTests : ControllerTests() {
         val unconfirmedTransferTransaction = UnconfirmedTransferTransaction.of(request)
         val expectedResponse = TransferTransactionResponse(unconfirmedTransferTransaction)
 
-        given(service.add(request)).willReturn(unconfirmedTransferTransaction)
+        given(service.add(any(UnconfirmedTransferTransaction::class.java))).willReturn(unconfirmedTransferTransaction)
 
         val actualResponse = webClient.post().uri(TRANSFER_TRANSACTION_URL)
             .body(Mono.just(request), TransferTransactionRequest::class.java)

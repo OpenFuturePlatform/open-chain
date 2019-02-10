@@ -54,6 +54,9 @@ class DefaultMainBlockService(
     private val rewardTransactionService: RewardTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
     private val transferTransactionService: TransferTransactionService,
+    private val uTransferTransactionService: UTransferTransactionService,
+    private val uVoteTransactionService: UVoteTransactionService,
+    private val uDelegateTransactionService: UDelegateTransactionService,
     private val transactionValidatorManager: TransactionValidatorManager,
     private val receiptService: ReceiptService
 ) : BaseBlockService<MainBlock>(repository, blockService, stateManager), MainBlockService {
@@ -174,14 +177,15 @@ class DefaultMainBlockService(
             val savedBlock = super.save(block)
 
             message.getAllTransactions().forEach {
+                val receipt = message.receipts.find { receipt -> receipt.transactionHash == it.hash }!!
                 when (it) {
                     is RewardTransactionMessage -> rewardTransactionService.commit(RewardTransaction.of(it, savedBlock))
-                    is TransferTransactionMessage -> {
-                        val receipt = message.receipts.find { receipt -> receipt.transactionHash == it.hash }!!
+                    is TransferTransactionMessage ->
                         transferTransactionService.commit(TransferTransaction.of(it, savedBlock), Receipt.of(receipt, block))
-                    }
-                    is DelegateTransactionMessage -> delegateTransactionService.commit(DelegateTransaction.of(it, savedBlock))
-                    is VoteTransactionMessage -> voteTransactionService.commit(VoteTransaction.of(it, savedBlock))
+                    is DelegateTransactionMessage ->
+                        delegateTransactionService.commit(DelegateTransaction.of(it, savedBlock), Receipt.of(receipt, block))
+                    is VoteTransactionMessage ->
+                        voteTransactionService.commit(VoteTransaction.of(it, savedBlock), Receipt.of(receipt, block))
                     else -> throw IllegalStateException("Unsupported transaction type")
                 }
             }
@@ -349,10 +353,14 @@ class DefaultMainBlockService(
         txMessages.forEach { tx ->
             receipts.add(
                 when (tx) {
-                    is TransferTransactionMessage -> transferTransactionService.process(tx, delegateWallet)
-                    is VoteTransactionMessage -> voteTransactionService.process(tx, delegateWallet)
-                    is DelegateTransactionMessage -> delegateTransactionService.process(tx, delegateWallet)
-                    is RewardTransactionMessage -> rewardTransactionService.process(tx)
+                    is TransferTransactionMessage ->
+                        transferTransactionService.process(UnconfirmedTransferTransaction.of(tx), delegateWallet)
+                    is VoteTransactionMessage ->
+                        voteTransactionService.process(UnconfirmedVoteTransaction.of(tx), delegateWallet)
+                    is DelegateTransactionMessage ->
+                        delegateTransactionService.process(UnconfirmedDelegateTransaction.of(tx), delegateWallet)
+                    is RewardTransactionMessage ->
+                        rewardTransactionService.process(RewardTransaction.of(tx))
                     else -> throw IllegalStateException("Unsupported transaction type")
                 })
         }
@@ -370,17 +378,17 @@ class DefaultMainBlockService(
 
         do {
             counter = 0
-            val trTx = transferTransactionService.getAllUnconfirmed(PageRequest(trOffset, max(capacity / 2, 1)))
+            val trTx = uTransferTransactionService.getAll(PageRequest(trOffset, max(capacity / 2, 1)))
             counter += trTx.size
             trOffset += trTx.size
             result.addAll(trTx)
             capacity -= trTx.size
-            val delTx = delegateTransactionService.getAllUnconfirmed(PageRequest(delOffset, max(capacity / 2, 1)))
+            val delTx = uDelegateTransactionService.getAll(PageRequest(delOffset, max(capacity / 2, 1)))
             counter += delTx.size
             delOffset += delTx.size
             result.addAll(delTx)
             capacity -= delTx.size
-            val vTx = voteTransactionService.getAllUnconfirmed(PageRequest(vOffset, max(capacity / 2, 1)))
+            val vTx = uVoteTransactionService.getAll(PageRequest(vOffset, max(capacity / 2, 1)))
             counter += vTx.size
             vOffset += vTx.size
             result.addAll(vTx)

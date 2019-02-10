@@ -7,8 +7,8 @@ import io.openfuture.chain.core.exception.model.ExceptionType.ALREADY_VOTED_FOR_
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.*
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
-import io.openfuture.chain.core.repository.UVoteTransactionRepository
 import io.openfuture.chain.core.service.StateManager
+import io.openfuture.chain.core.service.UVoteTransactionService
 import io.openfuture.chain.core.service.VoteTransactionValidator
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultVoteTransactionValidator(
     private val consensusProperties: ConsensusProperties,
     private val stateManager: StateManager,
-    private val uRepository: UVoteTransactionRepository
+    private val uVoteTransactionService: UVoteTransactionService
 ) : VoteTransactionValidator {
 
     override fun validateNew(utx: UnconfirmedVoteTransaction) {
@@ -58,7 +58,7 @@ class DefaultVoteTransactionValidator(
     }
 
     private fun checkVote(utx: UnconfirmedVoteTransaction) {
-        val unconfirmedVote = uRepository.findAllBySenderAddress(utx.senderAddress)
+        val unconfirmedVote = uVoteTransactionService.getAllBySenderAddress(utx.senderAddress)
         if (unconfirmedVote.isNotEmpty()) {
             throw ValidationException("Address ${utx.senderAddress} has voted invalid", ALREADY_VOTED_FOR_DELEGATE)
         }

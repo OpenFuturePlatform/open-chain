@@ -1,6 +1,7 @@
 package io.openfuture.chain.rpc.controller.transaction
 
 import io.openfuture.chain.config.ControllerTests
+import io.openfuture.chain.config.any
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
@@ -35,7 +36,7 @@ class VoteTransactionControllerTests : ControllerTests() {
         val unconfirmedVoteTransaction = UnconfirmedVoteTransaction.of(request)
         val expectedResponse = VoteTransactionResponse(unconfirmedVoteTransaction)
 
-        given(service.add(request)).willReturn(unconfirmedVoteTransaction)
+        given(service.add(any(UnconfirmedVoteTransaction::class.java))).willReturn(unconfirmedVoteTransaction)
 
         val actualResponse = webClient.post().uri(VOTE_TRANSACTION_URL)
             .body(Mono.just(request), VoteTransactionRequest::class.java)

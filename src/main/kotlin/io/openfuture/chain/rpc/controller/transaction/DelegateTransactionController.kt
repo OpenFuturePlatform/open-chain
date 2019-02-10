@@ -1,5 +1,6 @@
 package io.openfuture.chain.rpc.controller.transaction
 
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.service.DelegateTransactionService
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.DelegateTransactionResponse
@@ -19,7 +20,7 @@ class DelegateTransactionController(
 
     @PostMapping
     fun add(@Valid @RequestBody request: DelegateTransactionRequest): DelegateTransactionResponse {
-        val tx = transactionService.add(request)
+        val tx = transactionService.add(UnconfirmedDelegateTransaction.of(request))
         return DelegateTransactionResponse(tx)
     }
 

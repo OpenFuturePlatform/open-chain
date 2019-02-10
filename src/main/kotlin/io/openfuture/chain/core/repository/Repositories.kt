@@ -59,18 +59,41 @@ interface GenesisBlockRepository : BlockRepository<GenesisBlock> {
 }
 
 @Repository
-interface TransactionRepository<Entity : Transaction> : BaseRepository<Entity> {
+interface UTransactionRepository<uT : UnconfirmedTransaction> : BaseRepository<uT> {
 
-    fun findOneByHash(hash: String): Entity?
+    fun findOneByHash(hash: String): uT?
+
+    fun findAllByOrderByFeeDesc(request: Pageable): MutableList<uT>
+
+    fun findAllBySenderAddress(address: String): List<uT>
 
     fun deleteAllByBlockHeightIn(heights: List<Long>)
 
 }
 
 @Repository
-interface VoteTransactionRepository : TransactionRepository<VoteTransaction> {
+interface UDelegateTransactionRepository : UTransactionRepository<UnconfirmedDelegateTransaction>
 
-    fun findFirstBySenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeIdOrderByTimestampDesc(senderAddress: String, delegateKey: String, typeId: Int): VoteTransaction?
+@Repository
+interface UTransferTransactionRepository : UTransactionRepository<UnconfirmedTransferTransaction>
+
+@Repository
+interface UVoteTransactionRepository : UTransactionRepository<UnconfirmedVoteTransaction> {
+
+    fun findOneBySenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeId(
+        senderAddress: String,
+        delegateKey: String,
+        typeId: Int
+    ): UnconfirmedVoteTransaction?
+
+}
+
+@Repository
+interface TransactionRepository<T : Transaction> : BaseRepository<T> {
+
+    fun findOneByHash(hash: String): T?
+
+    fun deleteAllByBlockHeightIn(heights: List<Long>)
 
 }
 
@@ -80,42 +103,31 @@ interface DelegateTransactionRepository : TransactionRepository<DelegateTransact
 @Repository
 interface TransferTransactionRepository : TransactionRepository<TransferTransaction> {
 
-    fun findAllBySenderAddressOrPayloadRecipientAddress(senderAddress: String, recipientAddress: String, request: Pageable): Page<TransferTransaction>
+    fun findAllBySenderAddressOrPayloadRecipientAddress(
+        senderAddress: String,
+        recipientAddress: String,
+        request: Pageable
+    ): Page<TransferTransaction>
 
 }
 
 @Repository
-interface RewardTransactionRepository : BaseRepository<RewardTransaction> {
+interface VoteTransactionRepository : TransactionRepository<VoteTransaction> {
 
-    fun findOneByHash(hash: String): RewardTransaction?
+    fun findFirstBySenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeIdOrderByTimestampDesc(
+        senderAddress: String,
+        delegateKey: String,
+        typeId: Int
+    ): VoteTransaction?
+
+}
+
+@Repository
+interface RewardTransactionRepository : TransactionRepository<RewardTransaction> {
 
     fun findAllByPayloadRecipientAddress(payloadRecipientAddress: String): List<RewardTransaction>
 
 }
-
-@Repository
-interface UTransactionRepository<UEntity : UnconfirmedTransaction> : BaseRepository<UEntity> {
-
-    fun findOneByHash(hash: String): UEntity?
-
-    fun findAllByOrderByFeeDesc(request: Pageable): MutableList<UEntity>
-
-    fun findAllBySenderAddress(address: String): List<UEntity>
-
-}
-
-@Repository
-interface UVoteTransactionRepository : UTransactionRepository<UnconfirmedVoteTransaction> {
-
-    fun findOneBySenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeId(senderAddress: String, delegateKey: String, typeId: Int): UnconfirmedVoteTransaction?
-
-}
-
-@Repository
-interface UDelegateTransactionRepository : UTransactionRepository<UnconfirmedDelegateTransaction>
-
-@Repository
-interface UTransferTransactionRepository : UTransactionRepository<UnconfirmedTransferTransaction>
 
 @Repository
 interface StateRepository<T : State> : BaseRepository<T> {

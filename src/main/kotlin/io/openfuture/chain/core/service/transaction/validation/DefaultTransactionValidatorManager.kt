@@ -25,7 +25,7 @@ class DefaultTransactionValidatorManager(
     private val transferTransactionValidator: TransferTransactionValidator,
     private val voteTransactionValidator: VoteTransactionValidator,
     private val stateManager: StateManager,
-    private val transactionService: TransactionService
+    private val baseTransactionService: BaseTransactionService
 ) : TransactionValidatorManager {
 
     companion object {
@@ -97,7 +97,7 @@ class DefaultTransactionValidatorManager(
 
     private fun checkActualBalance(address: String, amount: Long): Boolean {
         val balance = stateManager.getWalletBalanceByAddress(address)
-        val unconfirmedBalance = transactionService.getUnconfirmedBalanceBySenderAddress(address)
+        val unconfirmedBalance = baseTransactionService.getUnconfirmedBalanceBySenderAddress(address)
 
         return balance + unconfirmedBalance >= amount
     }

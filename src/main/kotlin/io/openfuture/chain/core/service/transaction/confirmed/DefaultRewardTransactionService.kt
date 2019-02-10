@@ -1,4 +1,4 @@
-package io.openfuture.chain.core.service.transaction
+package io.openfuture.chain.core.service.transaction.confirmed
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.component.NodeKeyHolder
@@ -12,10 +12,7 @@ import io.openfuture.chain.core.service.RewardTransactionService
 import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.message.core.RewardTransactionMessage
-import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -25,11 +22,7 @@ class DefaultRewardTransactionService(
     private val consensusProperties: ConsensusProperties,
     private val stateManager: StateManager,
     private val keyHolder: NodeKeyHolder
-) : RewardTransactionService {
-
-    @Transactional(readOnly = true)
-    override fun getAll(request: TransactionPageRequest): Page<RewardTransaction> =
-        repository.findAll(request.toEntityRequest())
+) : DefaultTransactionService<RewardTransaction, RewardTransactionRepository>(repository), RewardTransactionService {
 
     @Transactional(readOnly = true)
     override fun getByRecipientAddress(address: String): List<RewardTransaction> =
@@ -52,22 +45,22 @@ class DefaultRewardTransactionService(
     }
 
     @Transactional
-    override fun commit(transaction: RewardTransaction) {
+    override fun commit(tx: RewardTransaction): RewardTransaction {
         BlockchainLock.writeLock.lock()
         try {
-            val persistedTransaction = repository.findOneByHash(transaction.hash)
-            if (null != persistedTransaction) {
-                return
+            val persistedTx = repository.findOneByHash(tx.hash)
+            if (null != persistedTx) {
+                return persistedTx
             }
 
-            repository.save(transaction)
+            return repository.save(tx)
         } finally {
             BlockchainLock.writeLock.unlock()
         }
     }
 
-    override fun process(message: RewardTransactionMessage): Receipt {
-        stateManager.updateWalletBalanceByAddress(message.recipientAddress, message.reward)
+    override fun process(tx: RewardTransaction): Receipt {
+        stateManager.updateWalletBalanceByAddress(tx.getPayload().recipientAddress, tx.getPayload().reward)
 
         val senderAddress = consensusProperties.genesisAddress!!
         val bank = stateManager.getWalletBalanceByAddress(senderAddress)
@@ -75,12 +68,14 @@ class DefaultRewardTransactionService(
 
         stateManager.updateWalletBalanceByAddress(senderAddress, -reward)
 
-        return generateReceipt(message)
+        return generateReceipt(tx)
     }
 
-    private fun generateReceipt(message: RewardTransactionMessage): Receipt {
-        val receipt = Receipt(message.hash)
-        receipt.setResults(listOf(ReceiptResult(message.senderAddress, message.recipientAddress, message.reward)))
+    private fun generateReceipt(tx: RewardTransaction): Receipt {
+        val results = listOf(ReceiptResult(tx.senderAddress, tx.getPayload().recipientAddress, tx.getPayload().reward))
+        val receipt = Receipt(tx.hash)
+        receipt.setResults(results)
+
         return receipt
     }
 

@@ -1,5 +1,6 @@
 package io.openfuture.chain.rpc.controller.transaction
 
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.service.VoteTransactionService
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.VoteTransactionResponse
@@ -18,7 +19,7 @@ class VoteTransactionController(
 
     @PostMapping
     fun add(@Valid @RequestBody request: VoteTransactionRequest): VoteTransactionResponse {
-        val tx = transactionService.add(request)
+        val tx = transactionService.add(UnconfirmedVoteTransaction.of(request))
         return VoteTransactionResponse(tx)
     }
 

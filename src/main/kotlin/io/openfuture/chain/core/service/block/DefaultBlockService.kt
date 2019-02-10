@@ -27,7 +27,7 @@ import java.nio.ByteBuffer
 class DefaultBlockService(
     private val repository: BlockRepository<Block>,
     private val properties: ConsensusProperties,
-    private val transactionService: TransactionService,
+    private val baseTransactionService: BaseTransactionService,
     private val voteTransactionService: VoteTransactionService,
     private val rewardTransactionService: RewardTransactionService,
     private val delegateTransactionService: DelegateTransactionService,
@@ -69,7 +69,7 @@ class DefaultBlockService(
         }
         val toHeight = fromHeight + properties.epochHeight!!
         val heightRange = (fromHeight..toHeight).toList()
-        transactionService.deleteBlockTransactions(heightRange)
+        baseTransactionService.deleteBlockTransactions(heightRange)
         stateManager.removeAllByBlockHeights(heightRange)
         receiptService.deleteBlockReceipts(heightRange)
         repository.deleteAllByHeightIn(heightRange)
@@ -93,7 +93,7 @@ class DefaultBlockService(
     @Transactional
     override fun deleteByHeightIn(heights: List<Long>) {
         stateManager.removeAllByBlockHeights(heights)
-        transactionService.deleteBlockTransactions(heights)
+        baseTransactionService.deleteBlockTransactions(heights)
         repository.deleteAllByHeightIn(heights)
     }
 
@@ -157,13 +157,11 @@ class DefaultBlockService(
 
                     transactions.forEach {
                         it.block = block
+                        val receipt = receipts.find { receipt -> receipt.transactionHash == it.hash }!!
                         when (it) {
-                            is TransferTransaction -> {
-                                val receipt = receipts.find { receipt -> receipt.transactionHash == it.hash }!!
-                                transferTransactionService.commit(it, receipt)
-                            }
-                            is DelegateTransaction -> delegateTransactionService.commit(it)
-                            is VoteTransaction -> voteTransactionService.commit(it)
+                            is TransferTransaction -> transferTransactionService.commit(it, receipt)
+                            is DelegateTransaction -> delegateTransactionService.commit(it, receipt)
+                            is VoteTransaction -> voteTransactionService.commit(it, receipt)
                             else -> throw IllegalStateException("Unsupported transaction type")
                         }
                     }
