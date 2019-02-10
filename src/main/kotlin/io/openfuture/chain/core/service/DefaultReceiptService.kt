@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional(readOnly = true)
 class DefaultReceiptService(
     private val repository: ReceiptRepository
 ) : ReceiptService {
 
-    @Transactional(readOnly = true)
     override fun getByTransactionHash(hash: String): Receipt = repository.findOneByTransactionHash(hash)
         ?: throw NotFoundException("Receipt for transaction $hash not found")
 
@@ -26,6 +26,7 @@ class DefaultReceiptService(
         }
     }
 
+    @Transactional
     override fun deleteBlockReceipts(blockHeights: List<Long>) {
         BlockchainLock.writeLock.lock()
         try {

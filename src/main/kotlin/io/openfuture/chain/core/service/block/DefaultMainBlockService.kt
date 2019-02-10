@@ -136,7 +136,7 @@ class DefaultMainBlockService(
 
             val transactionMerkleHash = HashUtils.calculateMerkleRoot(transactionHashes + rewardTransactionMessage.hash)
             val stateMerkleHash = HashUtils.calculateMerkleRoot(stateHashes)
-            val receiptMerkleHash = HashUtils.calculateMerkleRoot(receipts.map { it.getHash() })
+            val receiptMerkleHash = HashUtils.calculateMerkleRoot(receipts.map { it.hash })
             val payload = MainBlockPayload(transactionMerkleHash, stateMerkleHash, receiptMerkleHash)
             val hash = blockService.createHash(timestamp, height, previousHash, payload)
             val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
@@ -227,7 +227,7 @@ class DefaultMainBlockService(
             throw ValidationException("Invalid state merkle hash in block: height #${message.height}, hash ${message.hash}")
         }
 
-        if (!isValidRootHash(message.receiptMerkleHash, message.receipts.map { Receipt(it.transactionHash, it.result).getHash() })) {
+        if (!isValidRootHash(message.receiptMerkleHash, message.receipts.map { it.hash })) {
             throw ValidationException("Invalid receipt merkle hash in block: height #${message.height}, hash ${message.hash}")
         }
 

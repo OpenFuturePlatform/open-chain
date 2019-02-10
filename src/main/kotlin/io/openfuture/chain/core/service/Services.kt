@@ -257,7 +257,7 @@ interface StateManager {
 
     fun commit(state: State)
 
-    fun removeAllByBlockHeights(blockHeights: List<Long>)
+    fun deleteBlockStates(blockHeights: List<Long>)
 
 }
 

@@ -70,7 +70,7 @@ class DefaultBlockService(
         val toHeight = fromHeight + properties.epochHeight!!
         val heightRange = (fromHeight..toHeight).toList()
         baseTransactionService.deleteBlockTransactions(heightRange)
-        stateManager.removeAllByBlockHeights(heightRange)
+        stateManager.deleteBlockStates(heightRange)
         receiptService.deleteBlockReceipts(heightRange)
         repository.deleteAllByHeightIn(heightRange)
     }
@@ -92,7 +92,7 @@ class DefaultBlockService(
 
     @Transactional
     override fun deleteByHeightIn(heights: List<Long>) {
-        stateManager.removeAllByBlockHeights(heights)
+        stateManager.deleteBlockStates(heights)
         baseTransactionService.deleteBlockTransactions(heights)
         repository.deleteAllByHeightIn(heights)
     }

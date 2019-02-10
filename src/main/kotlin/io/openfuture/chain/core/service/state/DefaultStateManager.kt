@@ -97,7 +97,7 @@ class DefaultStateManager(
     }
 
     @Transactional
-    override fun removeAllByBlockHeights(blockHeights: List<Long>) {
+    override fun deleteBlockStates(blockHeights: List<Long>) {
         BlockchainLock.writeLock.lock()
         try {
             repository.deleteAllByBlockHeightIn(blockHeights)

@@ -25,27 +25,33 @@ class Receipt(
     @Column(name = "result", nullable = false)
     var result: String = EMPTY,
 
+    @Column(name = "hash", nullable = false)
+    var hash: String,
+
     @ManyToOne
     @JoinColumn(name = "block_id", nullable = false)
     var block: Block? = null
 
 ) : BaseModel() {
 
+    constructor(transactionHash: String, result: String = EMPTY) : this(
+        transactionHash,
+        result,
+        lazy {
+            val txHashBytes = transactionHash.toByteArray()
+            val resultBytes = result.toByteArray()
+            val bytes = ByteBuffer.allocate(txHashBytes.size + resultBytes.size)
+                .put(txHashBytes)
+                .put(resultBytes)
+                .array()
+
+            ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
+        }.value
+    )
+
     companion object {
-        fun of(message: ReceiptMessage, block: MainBlock): Receipt =
-            Receipt(message.transactionHash, message.result, block)
-    }
-
-
-    fun getHash(): String {
-        val txHashBytes = transactionHash.toByteArray()
-        val resultBytes = result.toByteArray()
-        val bytes = ByteBuffer.allocate(txHashBytes.size + resultBytes.size)
-            .put(txHashBytes)
-            .put(resultBytes)
-            .array()
-
-        return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
+        fun of(message: ReceiptMessage, block: MainBlock? = null): Receipt =
+            Receipt(message.transactionHash, message.result, message.hash, block)
     }
 
     fun getResults(): List<ReceiptResult> = Unpooled.copiedBuffer(ByteUtils.fromHexString(result)).readList()
@@ -56,7 +62,17 @@ class Receipt(
         result = ByteUtils.toHexString(buffer.array())
     }
 
-    fun toMessage(): ReceiptMessage = ReceiptMessage(transactionHash, result)
+    fun getBytes(): ByteArray {
+        val txHashBytes = transactionHash.toByteArray()
+        val resultBytes = result.toByteArray()
+
+        return ByteBuffer.allocate(txHashBytes.size + resultBytes.size)
+            .put(txHashBytes)
+            .put(resultBytes)
+            .array()
+    }
+
+    fun toMessage(): ReceiptMessage = ReceiptMessage(transactionHash, result, hash)
 
 }
 
