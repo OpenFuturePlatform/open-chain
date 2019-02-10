@@ -50,14 +50,7 @@ class DefaultMainBlockService(
     private val statePool: StatePool,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository,
-    private val voteTransactionService: VoteTransactionService,
-    private val rewardTransactionService: RewardTransactionService,
-    private val delegateTransactionService: DelegateTransactionService,
-    private val transferTransactionService: TransferTransactionService,
-    private val uTransferTransactionService: UTransferTransactionService,
-    private val uVoteTransactionService: UVoteTransactionService,
-    private val uDelegateTransactionService: UDelegateTransactionService,
-    private val transactionValidatorManager: TransactionValidatorManager,
+    private val transactionManager: TransactionManager,
     private val receiptService: ReceiptService
 ) : BaseBlockService<MainBlock>(repository, blockService, stateManager), MainBlockService {
 
@@ -112,7 +105,7 @@ class DefaultMainBlockService(
                 }
             }
 
-            val rewardTransactionMessage = rewardTransactionService.create(timestamp, fees).toMessage()
+            val rewardTransactionMessage = transactionManager.createRewardTransaction(timestamp, fees).toMessage()
             val txMessages = listOf(
                 *voteTransactions.toTypedArray(),
                 *delegateTransactions.toTypedArray(),
@@ -179,13 +172,14 @@ class DefaultMainBlockService(
             message.getAllTransactions().forEach {
                 val receipt = message.receipts.find { receipt -> receipt.transactionHash == it.hash }!!
                 when (it) {
-                    is RewardTransactionMessage -> rewardTransactionService.commit(RewardTransaction.of(it, savedBlock))
+                    is RewardTransactionMessage ->
+                        transactionManager.commit(RewardTransaction.of(it, savedBlock), null)
                     is TransferTransactionMessage ->
-                        transferTransactionService.commit(TransferTransaction.of(it, savedBlock), Receipt.of(receipt, block))
+                        transactionManager.commit(TransferTransaction.of(it, savedBlock), Receipt.of(receipt, block))
                     is DelegateTransactionMessage ->
-                        delegateTransactionService.commit(DelegateTransaction.of(it, savedBlock), Receipt.of(receipt, block))
+                        transactionManager.commit(DelegateTransaction.of(it, savedBlock), Receipt.of(receipt, block))
                     is VoteTransactionMessage ->
-                        voteTransactionService.commit(VoteTransaction.of(it, savedBlock), Receipt.of(receipt, block))
+                        transactionManager.commit(VoteTransaction.of(it, savedBlock), Receipt.of(receipt, block))
                     else -> throw IllegalStateException("Unsupported transaction type")
                 }
             }
@@ -273,7 +267,7 @@ class DefaultMainBlockService(
 
     private fun isValidRewardTransaction(message: PendingBlockMessage): Boolean =
         isValidReward(message.getExternalTransactions().asSequence().map { it.fee }.sum(), message.rewardTransaction.reward) &&
-            transactionValidatorManager.verify(RewardTransaction.of(message.rewardTransaction))
+            transactionManager.verify(RewardTransaction.of(message.rewardTransaction))
 
     private fun isValidVoteTransactions(transactions: List<VoteTransactionMessage>): Boolean {
         if (transactions.isEmpty()) {
@@ -297,7 +291,7 @@ class DefaultMainBlockService(
             }
         }
 
-        return validVotes && transactions.all { transactionValidatorManager.verify(VoteTransaction.of(it)) }
+        return validVotes && transactions.all { transactionManager.verify(VoteTransaction.of(it)) }
     }
 
     private fun isValidDelegateTransactions(transactions: List<DelegateTransactionMessage>): Boolean {
@@ -305,13 +299,13 @@ class DefaultMainBlockService(
             return true
         }
 
-        return transactions.all { transactionValidatorManager.verify(DelegateTransaction.of(it)) } &&
+        return transactions.all { transactionManager.verify(DelegateTransaction.of(it)) } &&
             !stateManager.isExistsDelegatesByPublicKeys(transactions.map { it.delegateKey }) &&
             transactions.distinctBy { it.delegateKey }.size == transactions.size
     }
 
     private fun isValidTransferTransactions(transactions: List<TransferTransactionMessage>): Boolean =
-        transactions.all { transactionValidatorManager.verify(TransferTransaction.of(it)) }
+        transactions.all { transactionManager.verify(TransferTransaction.of(it)) }
 
     private fun isValidRootHash(rootHash: String, hashes: List<String>): Boolean {
         if (hashes.isEmpty()) {
@@ -354,13 +348,13 @@ class DefaultMainBlockService(
             receipts.add(
                 when (tx) {
                     is TransferTransactionMessage ->
-                        transferTransactionService.process(UnconfirmedTransferTransaction.of(tx), delegateWallet)
+                        transactionManager.processUnconfirmedTransaction(UnconfirmedTransferTransaction.of(tx), delegateWallet)
                     is VoteTransactionMessage ->
-                        voteTransactionService.process(UnconfirmedVoteTransaction.of(tx), delegateWallet)
+                        transactionManager.processUnconfirmedTransaction(UnconfirmedVoteTransaction.of(tx), delegateWallet)
                     is DelegateTransactionMessage ->
-                        delegateTransactionService.process(UnconfirmedDelegateTransaction.of(tx), delegateWallet)
+                        transactionManager.processUnconfirmedTransaction(UnconfirmedDelegateTransaction.of(tx), delegateWallet)
                     is RewardTransactionMessage ->
-                        rewardTransactionService.process(RewardTransaction.of(tx))
+                        transactionManager.processRewardTransaction(RewardTransaction.of(tx))
                     else -> throw IllegalStateException("Unsupported transaction type")
                 })
         }
@@ -378,17 +372,17 @@ class DefaultMainBlockService(
 
         do {
             counter = 0
-            val trTx = uTransferTransactionService.getAll(PageRequest(trOffset, max(capacity / 2, 1)))
+            val trTx = transactionManager.getAllUnconfirmedTransferTransactions(PageRequest(trOffset, max(capacity / 2, 1)))
             counter += trTx.size
             trOffset += trTx.size
             result.addAll(trTx)
             capacity -= trTx.size
-            val delTx = uDelegateTransactionService.getAll(PageRequest(delOffset, max(capacity / 2, 1)))
+            val delTx = transactionManager.getAllUnconfirmedDelegateTransactions(PageRequest(delOffset, max(capacity / 2, 1)))
             counter += delTx.size
             delOffset += delTx.size
             result.addAll(delTx)
             capacity -= delTx.size
-            val vTx = uVoteTransactionService.getAll(PageRequest(vOffset, max(capacity / 2, 1)))
+            val vTx = transactionManager.getAllUnconfirmedVoteTransactions(PageRequest(vOffset, max(capacity / 2, 1)))
             counter += vTx.size
             vOffset += vTx.size
             result.addAll(vTx)

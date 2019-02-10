@@ -7,7 +7,7 @@ import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
-import io.openfuture.chain.core.service.VoteTransactionService
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.VoteTransactionResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono
 class VoteTransactionControllerTests : ControllerTests() {
 
     @MockBean
-    private lateinit var service: VoteTransactionService
+    private lateinit var transactionManager: TransactionManager
 
     companion object {
         private const val VOTE_TRANSACTION_URL = "/rpc/transactions/vote"
@@ -36,7 +36,7 @@ class VoteTransactionControllerTests : ControllerTests() {
         val unconfirmedVoteTransaction = UnconfirmedVoteTransaction.of(request)
         val expectedResponse = VoteTransactionResponse(unconfirmedVoteTransaction)
 
-        given(service.add(any(UnconfirmedVoteTransaction::class.java))).willReturn(unconfirmedVoteTransaction)
+        given(transactionManager.add(any(UnconfirmedVoteTransaction::class.java))).willReturn(unconfirmedVoteTransaction)
 
         val actualResponse = webClient.post().uri(VOTE_TRANSACTION_URL)
             .body(Mono.just(request), VoteTransactionRequest::class.java)
@@ -58,7 +58,7 @@ class VoteTransactionControllerTests : ControllerTests() {
             payload, mainBlock).apply { id = 1 }
         val expectedResponse = VoteTransactionResponse(expectedTransaction)
 
-        given(service.getByHash(hash)).willReturn(expectedTransaction)
+        given(transactionManager.getVoteTransactionByHash(hash)).willReturn(expectedTransaction)
 
         val actualResponse = webClient.get().uri("$VOTE_TRANSACTION_URL/$hash")
             .exchange()

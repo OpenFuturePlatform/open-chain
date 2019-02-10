@@ -7,7 +7,7 @@ import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
-import io.openfuture.chain.core.service.DelegateTransactionService
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
 import io.openfuture.chain.rpc.domain.transaction.response.DelegateTransactionResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono
 class DelegateTransactionControllerTests : ControllerTests() {
 
     @MockBean
-    private lateinit var service: DelegateTransactionService
+    private lateinit var transactionManager: TransactionManager
 
     companion object {
         private const val DELEGATE_TRANSACTION_URL = "/rpc/transactions/delegate"
@@ -36,7 +36,7 @@ class DelegateTransactionControllerTests : ControllerTests() {
         val unconfirmedDelegateTransaction = UnconfirmedDelegateTransaction.of(request)
         val expectedResponse = DelegateTransactionResponse(unconfirmedDelegateTransaction)
 
-        given(service.add(any(UnconfirmedDelegateTransaction::class.java))).willReturn(unconfirmedDelegateTransaction)
+        given(transactionManager.add(any(UnconfirmedDelegateTransaction::class.java))).willReturn(unconfirmedDelegateTransaction)
 
         val actualResponse = webClient.post().uri(DELEGATE_TRANSACTION_URL)
             .body(Mono.just(request), DelegateTransactionRequest::class.java)
@@ -58,7 +58,7 @@ class DelegateTransactionControllerTests : ControllerTests() {
             "senderPublicKey", payload, mainBlock).apply { id = 1 }
         val expectedResponse = DelegateTransactionResponse(delegateTransaction)
 
-        given(service.getByHash(hash)).willReturn(delegateTransaction)
+        given(transactionManager.getDelegateTransactionByHash(hash)).willReturn(delegateTransaction)
 
         val actualResponse = webClient.get().uri("$DELEGATE_TRANSACTION_URL/$hash")
             .exchange()

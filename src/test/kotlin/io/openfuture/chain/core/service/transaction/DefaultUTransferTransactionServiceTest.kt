@@ -3,12 +3,11 @@ package io.openfuture.chain.core.service.transaction
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
-import io.openfuture.chain.core.repository.TransferTransactionRepository
+import io.openfuture.chain.core.repository.UTransferTransactionRepository
 import io.openfuture.chain.core.service.ContractService
 import io.openfuture.chain.core.service.StateManager
-import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.core.service.UTransferTransactionService
-import io.openfuture.chain.core.service.transaction.confirmed.DefaultTransferTransactionService
+import io.openfuture.chain.core.service.transaction.unconfirmed.DefaultUTransferTransactionService
 import io.openfuture.chain.smartcontract.deploy.calculation.ContractCostCalculator
 import io.openfuture.chain.smartcontract.execution.ContractExecutor
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -20,16 +19,15 @@ import org.mockito.BDDMockito.*
 import org.mockito.Mock
 import org.springframework.test.util.ReflectionTestUtils
 
-class DefaultBaseTransactionServiceTest : ServiceTests() {
+class DefaultUTransferTransactionServiceTest : ServiceTests() {
 
-    @Mock private lateinit var repository: TransferTransactionRepository
-    @Mock private lateinit var uTransferTransactionService: UTransferTransactionService
+    @Mock private lateinit var uRepository: UTransferTransactionRepository
     @Mock private lateinit var contractService: ContractService
     @Mock private lateinit var stateManager: StateManager
     @Mock private lateinit var contractExecutor: ContractExecutor
     @Mock private lateinit var contractCostCalculator: ContractCostCalculator
 
-    private lateinit var transactionService: TransferTransactionService
+    private lateinit var transactionService: UTransferTransactionService
     private lateinit var uTransferTransaction: UnconfirmedTransferTransaction
 
     private val delegateAddress = "delegateAddress"
@@ -39,8 +37,8 @@ class DefaultBaseTransactionServiceTest : ServiceTests() {
 
     @Before
     fun setUp() {
-        transactionService = DefaultTransferTransactionService(repository, uTransferTransactionService, contractService,
-            contractCostCalculator, contractExecutor)
+        transactionService = DefaultUTransferTransactionService(uRepository, contractService, contractCostCalculator,
+            contractExecutor)
         ReflectionTestUtils.setField(transactionService, "stateManager", stateManager, StateManager::class.java)
         val code = this::class.java.getResourceAsStream("/classes/JavaContract.class").readBytes()
         val bytecode = ByteUtils.toHexString(code)

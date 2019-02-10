@@ -1,7 +1,7 @@
 package io.openfuture.chain.rpc.controller.transaction
 
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
-import io.openfuture.chain.core.service.RewardTransactionService
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.crypto.annotation.AddressChecksum
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
@@ -16,14 +16,15 @@ import javax.validation.Valid
 @Validated
 @RequestMapping("/rpc/transactions/reward")
 class RewardTransactionController(
-    val service: RewardTransactionService
+    val transactionManager: TransactionManager
 ) {
 
     @GetMapping("/{address}")
     fun getAllByRecipientAddress(@PathVariable @AddressChecksum address: String): List<RewardTransaction> =
-        service.getByRecipientAddress(address)
+        transactionManager.getRewardTransactionByRecipientAddress(address)
 
     @GetMapping
-    fun getAll(@Valid request: TransactionPageRequest): PageResponse<RewardTransaction> = PageResponse(service.getAll(request))
+    fun getAll(@Valid request: TransactionPageRequest): PageResponse<RewardTransaction> =
+        PageResponse(transactionManager.getAllRewardTransactions(request))
 
 }

@@ -1,10 +1,8 @@
 package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
-import io.openfuture.chain.core.service.BaseTransactionService
 import io.openfuture.chain.core.service.StateManager
-import io.openfuture.chain.core.service.UVoteTransactionService
-import io.openfuture.chain.core.service.VoteTransactionService
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import io.openfuture.chain.crypto.service.CryptoService
@@ -32,13 +30,7 @@ class AccountControllerTests : ControllerTests() {
     private lateinit var stateManager: StateManager
 
     @MockBean
-    private lateinit var voteTransactionService: VoteTransactionService
-
-    @MockBean
-    private lateinit var uVoteTransactionService: UVoteTransactionService
-
-    @MockBean
-    private lateinit var baseTransactionService: BaseTransactionService
+    private lateinit var transactionManager: TransactionManager
 
     companion object {
         private const val ACCOUNT_URL = "/rpc/accounts"
@@ -117,7 +109,7 @@ class AccountControllerTests : ControllerTests() {
         val unconfirmedBalance = 1L
 
         given(stateManager.getWalletBalanceByAddress(address)).willReturn(balance)
-        given(baseTransactionService.getUnconfirmedBalanceBySenderAddress(address)).willReturn(unconfirmedBalance)
+        given(transactionManager.getUnconfirmedBalanceBySenderAddress(address)).willReturn(unconfirmedBalance)
 
         val actualBalance = webClient.get().uri("$ACCOUNT_URL/wallets/$address/balance")
             .exchange()
