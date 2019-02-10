@@ -30,7 +30,7 @@ class DefaultTransferTransactionService(
         repository.findAllBySenderAddressOrPayloadRecipientAddress(address, address, request.toEntityRequest())
 
     @Transactional
-    override fun commit(tx: TransferTransaction, receipt: Receipt?): TransferTransaction {
+    override fun commit(tx: TransferTransaction, receipt: Receipt): TransferTransaction {
         BlockchainLock.writeLock.lock()
         try {
             val persistTx = repository.findOneByHash(tx.hash)
@@ -39,7 +39,7 @@ class DefaultTransferTransactionService(
             }
 
             if (DEPLOY == TransferTransactionType.getType(tx.getPayload().recipientAddress, tx.getPayload().data)
-                && receipt!!.getResults().all { it.error == null }) {
+                && receipt.getResults().all { it.error == null }) {
                 val bytecode = ByteUtils.fromHexString(tx.getPayload().data!!)
                 val address = contractService.generateAddress(tx.senderAddress)
                 val abi = AbiGenerator.generate(bytecode)

@@ -8,10 +8,7 @@ import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.state.State
-import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.ReceiptService
@@ -146,7 +143,8 @@ class DefaultBlockService(
                 block.payload.accountStates = mutableListOf()
 
                 this.save(block)
-                transactionManager.commit(rewardTransaction, null)
+                var receipt = receipts.find { receipt -> receipt.transactionHash == rewardTransaction.hash }!!
+                transactionManager.commit(rewardTransaction, receipt)
 
                 if (syncMode == FULL) {
                     receipts.forEach {
@@ -156,13 +154,8 @@ class DefaultBlockService(
 
                     transactions.forEach {
                         it.block = block
-                        val receipt = receipts.find { receipt -> receipt.transactionHash == it.hash }!!
-                        when (it) {
-                            is TransferTransaction -> transactionManager.commit(it, receipt)
-                            is DelegateTransaction -> transactionManager.commit(it, receipt)
-                            is VoteTransaction -> transactionManager.commit(it, receipt)
-                            else -> throw IllegalStateException("Unsupported transaction type")
-                        }
+                        receipt = receipts.find { receipt -> receipt.transactionHash == it.hash }!!
+                        transactionManager.commit(it, receipt)
                     }
                 }
 

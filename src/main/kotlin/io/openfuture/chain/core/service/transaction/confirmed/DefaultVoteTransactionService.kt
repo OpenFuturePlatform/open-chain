@@ -22,7 +22,7 @@ class DefaultVoteTransactionService(
             ?: throw NotFoundException("Last vote for delegate transaction not found")
 
     @Transactional
-    override fun commit(tx: VoteTransaction, receipt: Receipt?): VoteTransaction {
+    override fun commit(tx: VoteTransaction, receipt: Receipt): VoteTransaction {
         BlockchainLock.writeLock.lock()
         try {
             val persistTx = repository.findOneByHash(tx.hash)

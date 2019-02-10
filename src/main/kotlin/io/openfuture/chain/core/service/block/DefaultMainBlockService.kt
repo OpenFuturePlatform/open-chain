@@ -171,17 +171,14 @@ class DefaultMainBlockService(
 
             message.getAllTransactions().forEach {
                 val receipt = message.receipts.find { receipt -> receipt.transactionHash == it.hash }!!
-                when (it) {
-                    is RewardTransactionMessage ->
-                        transactionManager.commit(RewardTransaction.of(it, savedBlock), null)
-                    is TransferTransactionMessage ->
-                        transactionManager.commit(TransferTransaction.of(it, savedBlock), Receipt.of(receipt, block))
-                    is DelegateTransactionMessage ->
-                        transactionManager.commit(DelegateTransaction.of(it, savedBlock), Receipt.of(receipt, block))
-                    is VoteTransactionMessage ->
-                        transactionManager.commit(VoteTransaction.of(it, savedBlock), Receipt.of(receipt, block))
+                val transaction = when (it) {
+                    is RewardTransactionMessage -> RewardTransaction.of(it, savedBlock)
+                    is TransferTransactionMessage -> TransferTransaction.of(it, savedBlock)
+                    is DelegateTransactionMessage -> DelegateTransaction.of(it, savedBlock)
+                    is VoteTransactionMessage -> VoteTransaction.of(it, savedBlock)
                     else -> throw IllegalStateException("Unsupported transaction type")
                 }
+                transactionManager.commit(transaction, Receipt.of(receipt, block))
             }
 
             message.getAllStates().forEach {

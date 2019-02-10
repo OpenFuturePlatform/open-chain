@@ -15,7 +15,7 @@ class DefaultDelegateTransactionService(
 ) : DefaultExternalTransactionService<DelegateTransaction, DelegateTransactionRepository>(repository), DelegateTransactionService {
 
     @Transactional
-    override fun commit(tx: DelegateTransaction, receipt: Receipt?): DelegateTransaction {
+    override fun commit(tx: DelegateTransaction, receipt: Receipt): DelegateTransaction {
         BlockchainLock.writeLock.lock()
         try {
             val persistTx = repository.findOneByHash(tx.hash)

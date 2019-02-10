@@ -47,7 +47,7 @@ class DefaultRewardTransactionService(
     }
 
     @Transactional
-    override fun commit(tx: RewardTransaction, receipt: Receipt?): RewardTransaction {
+    override fun commit(tx: RewardTransaction, receipt: Receipt): RewardTransaction {
         BlockchainLock.writeLock.lock()
         try {
             val persistedTx = repository.findOneByHash(tx.hash)
