@@ -12,6 +12,7 @@ import io.openfuture.chain.core.repository.StateRepository
 import io.openfuture.chain.core.service.AccountStateService
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.StateManager
+import io.openfuture.chain.core.service.StateValidatorManager
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.springframework.stereotype.Service
@@ -22,7 +23,8 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultStateManager(
     private val repository: StateRepository<State>,
     private val accountStateService: AccountStateService,
-    private val delegateStateService: DelegateStateService
+    private val delegateStateService: DelegateStateService,
+    private val stateValidatorManager: StateValidatorManager
 ) : StateManager {
 
     @Suppress("UNCHECKED_CAST")
@@ -79,9 +81,6 @@ class DefaultStateManager(
 
     override fun isExistsDelegateByPublicKey(key: String): Boolean = delegateStateService.isExistsByPublicKey(key)
 
-    override fun isExistsDelegatesByPublicKeys(publicKeys: List<String>): Boolean =
-        delegateStateService.isExistsByPublicKeys(publicKeys)
-
     override fun addDelegate(delegateKey: String, walletAddress: String, createDate: Long) {
         delegateStateService.addDelegate(delegateKey, walletAddress, createDate)
     }
@@ -99,6 +98,8 @@ class DefaultStateManager(
             BlockchainLock.writeLock.unlock()
         }
     }
+
+    override fun verify(state: State): Boolean = stateValidatorManager.verify(state)
 
     @Transactional
     override fun deleteBlockStates(blockHeights: List<Long>) {

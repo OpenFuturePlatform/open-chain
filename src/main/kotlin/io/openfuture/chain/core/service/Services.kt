@@ -9,7 +9,6 @@ import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
-import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -109,13 +108,13 @@ interface MainBlockService {
 
 interface BlockValidatorManager {
 
-    fun verify(block: Block): Boolean
+    fun verify(block: Block, lastBlock: Block, new: Boolean = true): Boolean
 
 }
 
 interface MainBlockValidator {
 
-    fun validate(block: MainBlock)
+    fun validate(block: MainBlock, new: Boolean)
 
 }
 
@@ -173,7 +172,7 @@ interface TransactionManager {
 
     fun processTransactions(transactions: List<Transaction>, delegateWallet: String): List<Receipt>
 
-    fun verify(tx: BaseTransaction): Boolean
+    fun verify(tx: Transaction, new: Boolean = false): Boolean
 
     fun deleteBlockTransactions(blockHeights: List<Long>)
 
@@ -247,25 +246,23 @@ interface DelegateTransactionService : ExternalTransactionService<DelegateTransa
 
 interface TransactionValidatorManager {
 
-    fun validateNew(utx: UnconfirmedTransaction)
+    fun validate(tx: Transaction, new: Boolean = true)
 
-    fun verify(tx: BaseTransaction): Boolean
+    fun verify(tx: Transaction, new: Boolean): Boolean
 
 }
 
 interface TransactionValidator<T> {
 
-    fun validateNew(utx: T)
-
-    fun validate(utx: T)
+    fun validate(tx: T, new: Boolean)
 
 }
 
-interface DelegateTransactionValidator : TransactionValidator<UnconfirmedDelegateTransaction>
+interface DelegateTransactionValidator : TransactionValidator<DelegateTransaction>
 
-interface TransferTransactionValidator : TransactionValidator<UnconfirmedTransferTransaction>
+interface TransferTransactionValidator : TransactionValidator<TransferTransaction>
 
-interface VoteTransactionValidator : TransactionValidator<UnconfirmedVoteTransaction>
+interface VoteTransactionValidator : TransactionValidator<VoteTransaction>
 
 interface StateManager {
 
@@ -291,13 +288,13 @@ interface StateManager {
 
     fun isExistsDelegateByPublicKey(key: String): Boolean
 
-    fun isExistsDelegatesByPublicKeys(publicKeys: List<String>): Boolean
-
     fun addDelegate(delegateKey: String, walletAddress: String, createDate: Long)
 
     fun updateDelegateRating(delegateKey: String, amount: Long)
 
     fun commit(state: State)
+
+    fun verify(state: State): Boolean
 
     fun deleteBlockStates(blockHeights: List<Long>)
 
@@ -317,8 +314,6 @@ interface DelegateStateService : StateService<DelegateState> {
 
     fun isExistsByPublicKey(key: String): Boolean
 
-    fun isExistsByPublicKeys(publicKeys: List<String>): Boolean
-
     fun addDelegate(delegateKey: String, walletAddress: String, createDate: Long): DelegateState
 
     fun updateRating(delegateKey: String, amount: Long): DelegateState
@@ -336,6 +331,12 @@ interface AccountStateService : StateService<AccountState> {
     fun updateVoteByAddress(address: String, delegateKey: String?): AccountState
 
     fun updateStorage(address: String, storage: String): AccountState
+
+}
+
+interface StateValidatorManager {
+
+    fun verify(state: State): Boolean
 
 }
 
@@ -358,6 +359,14 @@ interface ReceiptService {
 
     fun commit(receipt: Receipt)
 
+    fun verify(receipt: Receipt): Boolean
+
     fun deleteBlockReceipts(blockHeights: List<Long>)
+
+}
+
+interface ReceiptValidator {
+
+    fun verify(receipt: Receipt): Boolean
 
 }

@@ -4,7 +4,6 @@ import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.component.TransactionThroughput
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
-import io.openfuture.chain.core.model.entity.transaction.BaseTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -151,7 +150,7 @@ class DefaultTransactionManager(
         else -> throw IllegalStateException("Wrong type")
     }
 
-    override fun verify(tx: BaseTransaction): Boolean = transactionValidatorManager.verify(tx)
+    override fun verify(tx: Transaction, new: Boolean): Boolean = transactionValidatorManager.verify(tx, new)
 
     @Transactional
     override fun deleteBlockTransactions(blockHeights: List<Long>) {

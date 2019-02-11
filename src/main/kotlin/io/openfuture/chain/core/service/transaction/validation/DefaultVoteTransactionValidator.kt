@@ -2,11 +2,11 @@ package io.openfuture.chain.core.service.transaction.validation
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.ValidationException
-import io.openfuture.chain.core.exception.model.ExceptionType
 import io.openfuture.chain.core.exception.model.ExceptionType.ALREADY_VOTED_FOR_DELEGATE
+import io.openfuture.chain.core.exception.model.ExceptionType.INCORRECT_DELEGATE_KEY
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.*
 import io.openfuture.chain.core.model.entity.state.AccountState
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.repository.UVoteTransactionRepository
 import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.service.VoteTransactionValidator
@@ -22,28 +22,27 @@ class DefaultVoteTransactionValidator(
     private val uRepository: UVoteTransactionRepository
 ) : VoteTransactionValidator {
 
-    override fun validateNew(utx: UnconfirmedVoteTransaction) {
-        checkVote(utx)
-    }
-
-    override fun validate(utx: UnconfirmedVoteTransaction) {
-        checkVoteType(utx)
-        checkFee(utx)
-        checkDelegate(utx)
-    }
-
-    private fun checkVoteType(utx: UnconfirmedVoteTransaction) {
-        if (values().none { it.getId() == utx.getPayload().voteTypeId }) {
-            throw ValidationException("Vote type with id: ${utx.getPayload().voteTypeId} is not exists")
+    override fun validate(tx: VoteTransaction, new: Boolean) {
+        checkVoteType(tx)
+        checkFee(tx)
+        checkDelegate(tx)
+        if (new) {
+            checkVote(tx)
         }
     }
 
-    private fun checkFee(utx: UnconfirmedVoteTransaction) {
-        val typeId = utx.getPayload().voteTypeId
+    private fun checkVoteType(tx: VoteTransaction) {
+        if (values().none { it.getId() == tx.getPayload().voteTypeId }) {
+            throw ValidationException("Vote type with id: ${tx.getPayload().voteTypeId} is not exists")
+        }
+    }
+
+    private fun checkFee(tx: VoteTransaction) {
+        val typeId = tx.getPayload().voteTypeId
 
         val result = when {
-            typeId == FOR.getId() && utx.fee != consensusProperties.feeVoteTxFor!! -> false
-            typeId == AGAINST.getId() && utx.fee != consensusProperties.feeVoteTxAgainst!! -> false
+            typeId == FOR.getId() && tx.fee != consensusProperties.feeVoteTxFor!! -> false
+            typeId == AGAINST.getId() && tx.fee != consensusProperties.feeVoteTxAgainst!! -> false
             else -> true
         }
 
@@ -52,28 +51,28 @@ class DefaultVoteTransactionValidator(
         }
     }
 
-    private fun checkDelegate(utx: UnconfirmedVoteTransaction) {
-        if (!stateManager.isExistsDelegateByPublicKey(utx.getPayload().delegateKey)) {
-            throw ValidationException("Incorrect delegate key", ExceptionType.INCORRECT_DELEGATE_KEY)
+    private fun checkDelegate(tx: VoteTransaction) {
+        if (!stateManager.isExistsDelegateByPublicKey(tx.getPayload().delegateKey)) {
+            throw ValidationException("Incorrect delegate key", INCORRECT_DELEGATE_KEY)
         }
     }
 
-    private fun checkVote(utx: UnconfirmedVoteTransaction) {
+    private fun checkVote(tx: VoteTransaction) {
         BlockchainLock.readLock.lock()
         try {
-            val unconfirmedVote = uRepository.findAllBySenderAddress(utx.senderAddress)
+            val unconfirmedVote = uRepository.findAllBySenderAddress(tx.senderAddress)
             if (unconfirmedVote.isNotEmpty()) {
-                throw ValidationException("Address ${utx.senderAddress} has voted invalid", ALREADY_VOTED_FOR_DELEGATE)
+                throw ValidationException("Address ${tx.senderAddress} has voted invalid", ALREADY_VOTED_FOR_DELEGATE)
             }
 
-            val accountState = stateManager.getLastByAddress<AccountState>(utx.senderAddress)
-            val result = when (utx.getPayload().getVoteType()) {
+            val accountState = stateManager.getLastByAddress<AccountState>(tx.senderAddress)
+            val result = when (tx.getPayload().getVoteType()) {
                 FOR -> null != accountState.voteFor
-                AGAINST -> null == accountState.voteFor || utx.getPayload().delegateKey != accountState.voteFor
+                AGAINST -> null == accountState.voteFor || tx.getPayload().delegateKey != accountState.voteFor
             }
 
             if (result) {
-                throw ValidationException("Address ${utx.senderAddress} has voted invalid", ALREADY_VOTED_FOR_DELEGATE)
+                throw ValidationException("Address ${tx.senderAddress} has voted invalid", ALREADY_VOTED_FOR_DELEGATE)
             }
         } finally {
             BlockchainLock.readLock.unlock()

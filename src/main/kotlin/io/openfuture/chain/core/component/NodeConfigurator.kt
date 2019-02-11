@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.openfuture.chain.core.annotation.NoArgConstructor
+import io.openfuture.chain.core.sync.SyncMode
+import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import io.openfuture.chain.network.property.NodeProperties
 import org.springframework.stereotype.Component
 import java.io.File
@@ -51,6 +53,11 @@ class NodeConfigurator(
         updateFile()
     }
 
+    fun setMode(syncMode: SyncMode) {
+        config.mode = syncMode
+        updateFile()
+    }
+
     private fun updateFile() {
         file.writeText(mapper.writeValueAsString(config), UTF_8)
     }
@@ -59,7 +66,8 @@ class NodeConfigurator(
     data class NodeConfig(
         var externalPort: Int,
         var externalHost: String = "",
-        var secret: String = ""
+        var secret: String = "",
+        var mode: SyncMode = LIGHT
     )
 
 }

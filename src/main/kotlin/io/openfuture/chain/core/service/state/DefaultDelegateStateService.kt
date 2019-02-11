@@ -28,8 +28,6 @@ class DefaultDelegateStateService(
 
     override fun isExistsByPublicKey(key: String): Boolean = null != repository.findFirstByAddressOrderByBlockIdDesc(key)
 
-    override fun isExistsByPublicKeys(publicKeys: List<String>): Boolean = publicKeys.all { isExistsByPublicKey(it) }
-
     override fun updateRating(delegateKey: String, amount: Long): DelegateState {
         val state = getCurrentState(delegateKey)
 

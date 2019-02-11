@@ -2,8 +2,8 @@ package io.openfuture.chain.smartcontract.execution
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.core.model.entity.Contract
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.service.ContractService
 import io.openfuture.chain.smartcontract.component.SmartContractInjector
 import io.openfuture.chain.smartcontract.model.SmartContract
@@ -34,13 +34,13 @@ class ContractExecutorTests : ServiceTests() {
     fun executeShouldProduceReceiptWithFiveResults() {
         val compiledContract = this.javaClass.classLoader.getResourceAsStream("classes/FundSmartContract.class").readBytes()
         val persistedContract = createContract(compiledContract)
-        val uTx = createUTransferTransaction()
+        val tx = createTransferTransaction()
         val contract = SmartContractInjector.initSmartContract(FundSmartContract::class.java, "owner", "0xb0")
         val serializedContract = ByteUtils.toHexString(SerializationUtils.serialize(contract))
 
         given(contractService.getByAddress("contractAddress")).willReturn(persistedContract)
 
-        val result = executor.run(serializedContract, uTx, "delegateAddress")
+        val result = executor.run(serializedContract, tx, "delegateAddress")
 
         assertThat(result.receipt.size).isEqualTo(5)
         assertThat(result.receipt.last().amount).isEqualTo(45)
@@ -50,14 +50,14 @@ class ContractExecutorTests : ServiceTests() {
     fun executeShouldFailOnTimeout() {
         val compiledContract = this.javaClass.classLoader.getResourceAsStream("classes/TimeConsumingContract.class").readBytes()
         val persistedContract = createContract(compiledContract)
-        val uTx = createUTransferTransaction()
+        val tx = createTransferTransaction()
         val contract = SmartContractInjector.initSmartContract(TimeConsumingContract::class.java, "ownerAddress",
             "contractAddress")
         val serializedContract = ByteUtils.toHexString(SerializationUtils.serialize(contract))
 
         given(contractService.getByAddress("contractAddress")).willReturn(persistedContract)
 
-        val result = executor.run(serializedContract, uTx, "delegateAddress")
+        val result = executor.run(serializedContract, tx, "delegateAddress")
 
         assertThat(result.receipt.size).isEqualTo(2)
         assertThat(result.receipt.first().error).isNotNull()
@@ -68,21 +68,21 @@ class ContractExecutorTests : ServiceTests() {
     fun executeShouldFailOnContractExecution() {
         val compiledContract = this.javaClass.classLoader.getResourceAsStream("classes/FailingContract.class").readBytes()
         val persistedContract = createContract(compiledContract)
-        val uTx = createUTransferTransaction()
+        val tx = createTransferTransaction()
         val contract = SmartContractInjector.initSmartContract(FailingContract::class.java, "ownerAddress",
             "contractAddress")
         val serializedContract = ByteUtils.toHexString(SerializationUtils.serialize(contract))
 
         given(contractService.getByAddress("contractAddress")).willReturn(persistedContract)
 
-        val result = executor.run(serializedContract, uTx, "delegateAddress")
+        val result = executor.run(serializedContract, tx, "delegateAddress")
 
         assertThat(result.receipt.size).isEqualTo(2)
         assertThat(result.receipt.first().error).isNotNull()
         assertThat(result.receipt.last().amount).isEqualTo(45)
     }
 
-    private fun createUTransferTransaction(): UnconfirmedTransferTransaction = UnconfirmedTransferTransaction(
+    private fun createTransferTransaction(): TransferTransaction = TransferTransaction(
         System.currentTimeMillis(),
         100,
         "userAddress",

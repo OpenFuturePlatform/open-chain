@@ -63,7 +63,7 @@ class DefaultGenesisBlockService(
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<GenesisBlock> = repository.findAll(request)
 
-    override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()!!
+    override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()
 
     @Transactional(readOnly = true)
     override fun findByEpochIndex(epochIndex: Long): GenesisBlock? =

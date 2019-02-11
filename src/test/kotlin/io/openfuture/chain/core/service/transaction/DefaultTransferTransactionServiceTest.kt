@@ -1,13 +1,13 @@
 package io.openfuture.chain.core.service.transaction
 
 import io.openfuture.chain.config.ServiceTests
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
-import io.openfuture.chain.core.repository.UTransferTransactionRepository
+import io.openfuture.chain.core.repository.TransferTransactionRepository
 import io.openfuture.chain.core.service.ContractService
 import io.openfuture.chain.core.service.StateManager
-import io.openfuture.chain.core.service.UTransferTransactionService
-import io.openfuture.chain.core.service.transaction.unconfirmed.DefaultUTransferTransactionService
+import io.openfuture.chain.core.service.TransferTransactionService
+import io.openfuture.chain.core.service.transaction.confirmed.DefaultTransferTransactionService
 import io.openfuture.chain.smartcontract.deploy.calculation.ContractCostCalculator
 import io.openfuture.chain.smartcontract.execution.ContractExecutor
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -19,16 +19,16 @@ import org.mockito.BDDMockito.*
 import org.mockito.Mock
 import org.springframework.test.util.ReflectionTestUtils
 
-class DefaultUTransferTransactionServiceTest : ServiceTests() {
+class DefaultTransferTransactionServiceTest : ServiceTests() {
 
-    @Mock private lateinit var uRepository: UTransferTransactionRepository
+    @Mock private lateinit var repository: TransferTransactionRepository
     @Mock private lateinit var contractService: ContractService
-    @Mock private lateinit var stateManager: StateManager
     @Mock private lateinit var contractExecutor: ContractExecutor
     @Mock private lateinit var contractCostCalculator: ContractCostCalculator
+    @Mock private lateinit var stateManager: StateManager
 
-    private lateinit var transactionService: UTransferTransactionService
-    private lateinit var uTransferTransaction: UnconfirmedTransferTransaction
+    private lateinit var transactionService: TransferTransactionService
+    private lateinit var transferTransaction: TransferTransaction
 
     private val delegateAddress = "delegateAddress"
     private val senderAddress = "senderAddress"
@@ -37,12 +37,12 @@ class DefaultUTransferTransactionServiceTest : ServiceTests() {
 
     @Before
     fun setUp() {
-        transactionService = DefaultUTransferTransactionService(uRepository, contractService, contractCostCalculator,
+        transactionService = DefaultTransferTransactionService(repository, contractService, contractCostCalculator,
             contractExecutor)
         ReflectionTestUtils.setField(transactionService, "stateManager", stateManager, StateManager::class.java)
         val code = this::class.java.getResourceAsStream("/classes/JavaContract.class").readBytes()
         val bytecode = ByteUtils.toHexString(code)
-        uTransferTransaction = UnconfirmedTransferTransaction(121325454, 0, senderAddress, "", "", "",
+        transferTransaction = TransferTransaction(121325454, 0, senderAddress, "", "", "",
             TransferTransactionPayload(0, null, bytecode))
 
         given(contractCostCalculator.calculateCost(code)).willReturn(contractCost)
@@ -53,9 +53,9 @@ class DefaultUTransferTransactionServiceTest : ServiceTests() {
         val sendFee = 10L
         val expectedSize = 1
         val expectedError = "Contract is not deployed."
-        uTransferTransaction.fee = sendFee
+        transferTransaction.fee = sendFee
 
-        val result = transactionService.process(uTransferTransaction, delegateAddress)
+        val result = transactionService.process(transferTransaction, delegateAddress)
 
         assertEquals(expectedSize, result.getResults().size)
         assertEquals(expectedError, result.getResults().first().error)
@@ -69,11 +69,11 @@ class DefaultUTransferTransactionServiceTest : ServiceTests() {
         val sendFee = 40L
         val expectedSize = 2
         val expectedDelivery = sendFee - contractCost
-        uTransferTransaction.fee = sendFee
+        transferTransaction.fee = sendFee
 
         given(contractService.generateAddress(senderAddress)).willReturn(senderAddress)
 
-        val result = transactionService.process(uTransferTransaction, delegateAddress)
+        val result = transactionService.process(transferTransaction, delegateAddress)
         val actualSenderReceiptResult = result.getResults().find { it.from == senderAddress }
         val actualDelegateReceiptResult = result.getResults().find { it.from == delegateAddress }
 
@@ -98,11 +98,11 @@ class DefaultUTransferTransactionServiceTest : ServiceTests() {
     fun processWhenFeeIsEqualContractCostShouldReturnOneResultReceipt() {
         val sendFee = 30L
         val expectedSize = 1
-        uTransferTransaction.fee = sendFee
+        transferTransaction.fee = sendFee
 
         given(contractService.generateAddress(senderAddress)).willReturn(senderAddress)
 
-        val result = transactionService.process(uTransferTransaction, delegateAddress)
+        val result = transactionService.process(transferTransaction, delegateAddress)
         val actualReceiptResult = result.getResults().first()
 
         assertEquals(expectedSize, result.getResults().size)

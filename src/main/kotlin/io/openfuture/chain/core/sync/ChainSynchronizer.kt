@@ -2,7 +2,7 @@ package io.openfuture.chain.core.sync
 
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.DBChecker
-import io.openfuture.chain.core.component.NodeKeyHolder
+import io.openfuture.chain.core.component.NodeConfigurator
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
@@ -12,10 +12,8 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTrans
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
-import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.core.sync.SyncMode.FULL
-import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.component.AddressesHolder
@@ -50,9 +48,8 @@ class ChainSynchronizer(
     private val transactionManager: TransactionManager,
     private val epochService: EpochService,
     private val requestRetryScheduler: RequestRetryScheduler,
-    private val stateManager: StateManager,
     private val dbChecker: DBChecker,
-    private val nodeKeyHolder: NodeKeyHolder
+    private val nodeConfigurator: NodeConfigurator
 ) : ApplicationListener<DataSourceSchemaCreatedEvent> {
 
     companion object {
@@ -61,7 +58,6 @@ class ChainSynchronizer(
 
     private var syncSession: SyncSession? = null
     private var future: ScheduledFuture<*>? = null
-    private var isBecomeDelegate = false
 
     @Volatile
     private var status: SyncStatus = SYNCHRONIZED
@@ -73,7 +69,7 @@ class ChainSynchronizer(
 
     fun prepareDB() {
         status = SyncStatus.PROCESSING
-        dbChecker.prepareDB(getSyncMode())
+        dbChecker.prepareDB(nodeConfigurator.getConfig().mode)
         status = SYNCHRONIZED
     }
 
@@ -88,7 +84,7 @@ class ChainSynchronizer(
                 return
             }
 
-            if ((isDelegate() || syncSession!!.syncMode == FULL) && !isValidEpoch(message.mainBlocks)) {
+            if ((syncSession!!.syncMode == FULL) && !isValidEpoch(message.mainBlocks)) {
                 requestEpoch(delegates.filter { it != message.delegateKey })
                 return
             }
@@ -151,16 +147,6 @@ class ChainSynchronizer(
         }
     }
 
-    fun isDelegate(): Boolean = stateManager.isExistsDelegateByPublicKey(nodeKeyHolder.getPublicKeyAsHexString())
-
-    fun getSyncMode(): SyncMode {
-        if (isBecomeDelegate || (LIGHT == properties.syncMode && isDelegate())) {
-            isBecomeDelegate = true
-            return FULL
-        }
-        return properties.syncMode!!
-    }
-
     private fun initSync(message: GenesisBlockMessage) {
         val delegates = genesisBlockService.getLast().getPayload().activeDelegates
         try {
@@ -168,7 +154,7 @@ class ChainSynchronizer(
             val lastLocalGenesisBlock = genesisBlockService.getLast()
 
             if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
-                syncSession = SyncSession(getSyncMode(), lastLocalGenesisBlock, currentGenesisBlock)
+                syncSession = SyncSession(nodeConfigurator.getConfig().mode, lastLocalGenesisBlock, currentGenesisBlock)
                 requestEpoch(delegates)
             } else {
                 checkBlock(lastLocalGenesisBlock)

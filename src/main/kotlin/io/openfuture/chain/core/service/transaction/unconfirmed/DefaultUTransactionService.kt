@@ -2,8 +2,14 @@ package io.openfuture.chain.core.service.transaction.unconfirmed
 
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.CoreException
+import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.TransactionValidatorManager
@@ -66,7 +72,13 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction, uR : UTra
                 return persistUtx
             }
 
-            transactionValidatorManager.validateNew(uTx)
+            val tx = when (uTx) {
+                is UnconfirmedDelegateTransaction -> DelegateTransaction.of(uTx)
+                is UnconfirmedTransferTransaction -> TransferTransaction.of(uTx)
+                is UnconfirmedVoteTransaction -> VoteTransaction.of(uTx)
+                else -> throw IllegalStateException("Wrong type")
+            }
+            transactionValidatorManager.validate(tx)
 
             val savedUtx = uRepository.saveAndFlush(uTx)
             networkService.broadcast(savedUtx.toMessage())

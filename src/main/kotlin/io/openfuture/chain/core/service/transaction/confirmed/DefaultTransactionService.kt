@@ -25,11 +25,7 @@ abstract class DefaultTransactionService<T : Transaction, R : TransactionReposit
 
     override fun getAll(request: PageRequest): Page<T> = repository.findAll(request.toEntityRequest())
 
-    protected fun getReceipt(hash: String, results: List<ReceiptResult>): Receipt {
-        val receipt = Receipt(hash)
-        receipt.setResults(results)
-
-        return receipt
-    }
+    protected fun getReceipt(hash: String, results: List<ReceiptResult>): Receipt =
+        Receipt(hash, Receipt.generateResult(results))
 
 }

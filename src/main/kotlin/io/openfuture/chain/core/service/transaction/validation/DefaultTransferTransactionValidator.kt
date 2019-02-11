@@ -6,7 +6,7 @@ import io.openfuture.chain.core.exception.model.ExceptionType.INVALID_CONTRACT
 import io.openfuture.chain.core.model.entity.Contract
 import io.openfuture.chain.core.model.entity.dictionary.TransferTransactionType
 import io.openfuture.chain.core.model.entity.dictionary.TransferTransactionType.*
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.service.ContractService
 import io.openfuture.chain.core.service.TransferTransactionValidator
 import io.openfuture.chain.smartcontract.component.validation.SmartContractValidator
@@ -21,69 +21,67 @@ class DefaultTransferTransactionValidator(
     private val contractService: ContractService
 ) : TransferTransactionValidator {
 
-    override fun validateNew(utx: UnconfirmedTransferTransaction) {}
+    override fun validate(tx: TransferTransaction, new: Boolean) {
+        checkNegativeFee(tx)
+        checkNegativeAmount(tx)
 
-    override fun validate(utx: UnconfirmedTransferTransaction) {
-        checkNegativeFee(utx)
-        checkNegativeAmount(utx)
-
-        when (TransferTransactionType.getType(utx.getPayload().recipientAddress, utx.getPayload().data)) {
+        when (TransferTransactionType.getType(tx.getPayload().recipientAddress, tx.getPayload().data)) {
             DEPLOY -> {
-                checkEqualFee(utx)
-                checkByteCode(utx)
+                checkEqualFee(tx)
+                checkByteCode(tx)
             }
             EXECUTE -> {
-                checkEqualFee(utx)
-                val contract = contractService.getByAddress(utx.getPayload().recipientAddress!!)
-                checkContractCost(utx, contract)
-                checkContractMethods(utx, contract)
+                checkEqualFee(tx)
+                val contract = contractService.getByAddress(tx.getPayload().recipientAddress!!)
+                checkContractCost(tx, contract)
+                checkContractMethods(tx, contract)
             }
             FUND -> {
-                checkEqualAmount(utx)
+                checkEqualAmount(tx)
             }
         }
     }
 
-    private fun checkNegativeFee(utx: UnconfirmedTransferTransaction) {
-        if (utx.fee < 0) {
+    private fun checkNegativeFee(tx: TransferTransaction) {
+        if (tx.fee < 0) {
             throw ValidationException("Fee should not be less than 0")
         }
     }
 
-    private fun checkNegativeAmount(utx: UnconfirmedTransferTransaction) {
-        if (utx.getPayload().amount < 0) {
+    private fun checkNegativeAmount(tx: TransferTransaction) {
+        if (tx.getPayload().amount < 0) {
             throw ValidationException("Amount should not be less than 0")
         }
     }
 
-    private fun checkEqualFee(utx: UnconfirmedTransferTransaction) {
-        if (utx.fee == 0L) {
+    private fun checkEqualFee(tx: TransferTransaction) {
+        if (tx.fee == 0L) {
             throw ValidationException("Fee should not be equal to 0")
         }
     }
 
-    private fun checkEqualAmount(utx: UnconfirmedTransferTransaction) {
-        if (utx.getPayload().amount == 0L) {
+    private fun checkEqualAmount(tx: TransferTransaction) {
+        if (tx.getPayload().amount == 0L) {
             throw ValidationException("Amount should not be equal to 0")
         }
     }
 
-    private fun checkByteCode(utx: UnconfirmedTransferTransaction) {
-        if (!SmartContractValidator.validate(ByteUtils.fromHexString(utx.getPayload().data!!))) {
+    private fun checkByteCode(tx: TransferTransaction) {
+        if (!SmartContractValidator.validate(ByteUtils.fromHexString(tx.getPayload().data!!))) {
             throw ValidationException("Invalid smart contract code", INVALID_CONTRACT)
         }
     }
 
-    private fun checkContractCost(utx: UnconfirmedTransferTransaction, contract: Contract) {
-        if (contract.cost > utx.fee) {
+    private fun checkContractCost(tx: TransferTransaction, contract: Contract) {
+        if (contract.cost > tx.fee) {
             throw ValidationException("Insufficient funds for smart contract execution")
         }
     }
 
-    private fun checkContractMethods(utx: UnconfirmedTransferTransaction, contract: Contract) {
+    private fun checkContractMethods(tx: TransferTransaction, contract: Contract) {
         val methods = Abi.fromJson(contract.abi).abiMethods.map { it.name }
-        if (!methods.contains(utx.getPayload().data)) {
-            throw ValidationException("Smart contract's method ${utx.getPayload().data} not exists",
+        if (!methods.contains(tx.getPayload().data)) {
+            throw ValidationException("Smart contract's method ${tx.getPayload().data} not exists",
                 CONTRACT_METHOD_NOT_EXISTS)
         }
     }

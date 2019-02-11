@@ -10,7 +10,6 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.extension.*
 import io.openfuture.chain.network.message.base.Message
 import io.openfuture.chain.network.message.core.ReceiptMessage
-import org.apache.commons.lang3.StringUtils.EMPTY
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.nio.ByteBuffer
 import javax.persistence.*
@@ -23,7 +22,7 @@ class Receipt(
     var transactionHash: String,
 
     @Column(name = "result", nullable = false)
-    var result: String = EMPTY,
+    var result: String,
 
     @Column(name = "hash", nullable = false)
     var hash: String,
@@ -34,7 +33,7 @@ class Receipt(
 
 ) : BaseModel() {
 
-    constructor(transactionHash: String, result: String = EMPTY) : this(
+    constructor(transactionHash: String, result: String) : this(
         transactionHash,
         result,
         lazy {
@@ -52,15 +51,15 @@ class Receipt(
     companion object {
         fun of(message: ReceiptMessage, block: MainBlock? = null): Receipt =
             Receipt(message.transactionHash, message.result, message.hash, block)
+
+        fun generateResult(results: List<ReceiptResult>): String {
+            val buffer = Unpooled.buffer()
+            buffer.writeList(results)
+            return ByteUtils.toHexString(buffer.array())
+        }
     }
 
     fun getResults(): List<ReceiptResult> = Unpooled.copiedBuffer(ByteUtils.fromHexString(result)).readList()
-
-    fun setResults(results: List<ReceiptResult>) {
-        val buffer = Unpooled.buffer()
-        buffer.writeList(results)
-        result = ByteUtils.toHexString(buffer.array())
-    }
 
     fun getBytes(): ByteArray {
         val txHashBytes = transactionHash.toByteArray()

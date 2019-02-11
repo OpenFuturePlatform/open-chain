@@ -12,6 +12,7 @@ import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.HashUtils.doubleSha256
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.toHexString
 import org.springframework.stereotype.Component
 
@@ -92,7 +93,7 @@ class DBChecker(
         if (!isValidBlockState(block)) {
             return false
         }
-        if (!blockService.isValidHash(block)) {
+        if (block.hash != ByteUtils.toHexString(HashUtils.doubleSha256(block.getBytes()))) {
             return false
         }
         if (FULL == syncMode) {

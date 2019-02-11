@@ -4,10 +4,14 @@ import io.openfuture.chain.consensus.component.block.BlockApprovalStage.*
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
+import io.openfuture.chain.core.component.NodeConfigurator
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.service.BlockService
+import io.openfuture.chain.core.service.BlockValidatorManager
 import io.openfuture.chain.core.service.MainBlockService
 import io.openfuture.chain.core.sync.ChainSynchronizer
+import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
@@ -22,9 +26,12 @@ import org.springframework.stereotype.Component
 class DefaultPendingBlockHandler(
     private val epochService: EpochService,
     private val mainBlockService: MainBlockService,
+    private val blockService: BlockService,
+    private val blockValidatorManager: BlockValidatorManager,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService,
     private val chainSynchronizer: ChainSynchronizer,
+    private val nodeConfigurator: NodeConfigurator,
     private val properties: ConsensusProperties
 ) : PendingBlockHandler {
 
@@ -62,7 +69,7 @@ class DefaultPendingBlockHandler(
             return
         }
 
-        if (IDLE == stage && isActiveDelegate() && mainBlockService.verify(block)) {
+        if (IDLE == stage && isActiveDelegate() && blockValidatorManager.verify(MainBlock.of(block), blockService.getLast())) {
             this.observable = block
             this.stage = PREPARE
             val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKeyAsHexString())
@@ -136,6 +143,7 @@ class DefaultPendingBlockHandler(
                         log.info("Saving main block: height #${it.height}, hash ${it.hash}")
                         it.delegateTransactions.forEach {
                             if (it.delegateKey == keyHolder.getPublicKeyAsHexString()) {
+                                nodeConfigurator.setMode(FULL)
                                 chainSynchronizer.prepareDB()
                             }
                         }
