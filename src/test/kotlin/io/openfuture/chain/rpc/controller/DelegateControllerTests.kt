@@ -40,7 +40,7 @@ class DelegateControllerTests : ControllerTests() {
         val delegates = listOf(delegate)
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
 
-        given(delegateStateService.getAllDelegates(PageRequest())).willReturn(delegates)
+        given(delegateStateService.getAllDelegates(PageRequest())).willReturn(PageImpl(delegates))
 
         val actualPageResponse = webClient.get().uri("/rpc/delegates")
             .exchange()
