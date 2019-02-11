@@ -137,8 +137,13 @@ class DefaultTransactionManager(
 
     @Transactional
     override fun deleteBlockTransactions(blockHeights: List<Long>) {
-        repository.deleteAllByBlockHeightIn(blockHeights)
-        repository.flush()
+        BlockchainLock.writeLock.lock()
+        try {
+            repository.deleteAllByBlockHeightIn(blockHeights)
+            repository.flush()
+        } finally {
+            BlockchainLock.writeLock.unlock()
+        }
     }
 
 }
