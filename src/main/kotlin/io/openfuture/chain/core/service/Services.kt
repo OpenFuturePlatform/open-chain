@@ -52,21 +52,15 @@ interface BlockService {
 
     fun getAfterCurrentHash(hash: String): List<Block>
 
-    fun isExists(hash: String): Boolean
-
     fun findByHash(hash: String): Block?
 
     fun getAvgProductionTime(): Long
 
     fun getCurrentHeight(): Long
 
-    fun isExists(hash: String, height: Long): Boolean
-
     fun getAllByHeightIn(heights: List<Long>): List<Block>
 
     fun deleteByHeightIn(heights: List<Long>)
-
-    fun isValidHash(block: Block): Boolean
 }
 
 interface GenesisBlockService {
@@ -105,13 +99,23 @@ interface MainBlockService {
 
     fun add(message: BaseMainBlockMessage)
 
-    fun verify(message: PendingBlockMessage): Boolean
-
     fun getPreviousBlock(hash: String): MainBlock
 
     fun getNextBlock(hash: String): MainBlock
 
     fun getBlocksByEpochIndex(epochIndex: Long): List<MainBlock>
+
+}
+
+interface BlockValidatorManager {
+
+    fun verify(block: Block): Boolean
+
+}
+
+interface MainBlockValidator {
+
+    fun validate(block: MainBlock)
 
 }
 
@@ -163,13 +167,11 @@ interface TransactionManager {
 
     fun createRewardTransaction(timestamp: Long, fees: Long): RewardTransaction
 
-    fun processRewardTransaction(tx: RewardTransaction): Receipt
-
     fun <T : Transaction> commit(tx: T, receipt: Receipt): T
 
     fun <uT : UnconfirmedTransaction> add(uTx: uT): uT
 
-    fun <uT : UnconfirmedTransaction> processUnconfirmedTransaction(uTx: uT, delegateWallet: String): Receipt
+    fun processTransactions(transactions: List<Transaction>, delegateWallet: String): List<Receipt>
 
     fun verify(tx: BaseTransaction): Boolean
 
@@ -186,8 +188,6 @@ interface UTransactionService<uT : UnconfirmedTransaction> {
     fun getAllBySenderAddress(address: String): List<uT>
 
     fun add(uTx: uT): uT
-
-    fun process(uTx: uT, delegateWallet: String): Receipt
 
 }
 
@@ -209,6 +209,8 @@ interface TransactionService<T : Transaction> {
 
     fun commit(tx: T, receipt: Receipt): T
 
+    fun process(tx: T, delegateWallet: String): Receipt
+
 }
 
 interface RewardTransactionService : TransactionService<RewardTransaction> {
@@ -218,8 +220,6 @@ interface RewardTransactionService : TransactionService<RewardTransaction> {
     fun getByRecipientAddress(address: String): List<RewardTransaction>
 
     fun create(timestamp: Long, fees: Long): RewardTransaction
-
-    fun process(tx: RewardTransaction): Receipt
 
 }
 

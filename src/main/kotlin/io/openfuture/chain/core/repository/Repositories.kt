@@ -29,9 +29,7 @@ interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
 
     fun findOneByHash(hash: String): Entity?
 
-    fun findOneByHashAndHeight(hash: String, height: Long): Entity?
-
-    fun findFirstByOrderByHeightDesc(): Entity?
+    fun findFirstByOrderByHeightDesc(): Entity
 
     fun findFirstByHeightLessThanOrderByHeightDesc(height: Long): Entity?
 

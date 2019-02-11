@@ -2,13 +2,10 @@ package io.openfuture.chain.core.service.transaction.unconfirmed
 
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.CoreException
-import io.openfuture.chain.core.model.entity.Receipt
-import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
-import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.service.TransactionValidatorManager
 import io.openfuture.chain.core.service.UTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
@@ -25,7 +22,6 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction, uR : UTra
     @Autowired private lateinit var transactionValidatorManager: TransactionValidatorManager
     @Autowired private lateinit var networkService: NetworkApiService
     @Autowired private lateinit var repository: TransactionRepository<Transaction>
-    @Autowired protected lateinit var stateManager: StateManager
 
 
     override fun getAll(): List<uT> {
@@ -78,13 +74,6 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction, uR : UTra
         } finally {
             BlockchainLock.writeLock.unlock()
         }
-    }
-
-    protected fun getReceipt(hash: String, results: List<ReceiptResult>): Receipt {
-        val receipt = Receipt(hash)
-        receipt.setResults(results)
-
-        return receipt
     }
 
 }

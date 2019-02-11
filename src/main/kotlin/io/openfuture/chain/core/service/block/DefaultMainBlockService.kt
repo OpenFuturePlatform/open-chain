@@ -6,14 +6,10 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.component.TransactionThroughput
 import io.openfuture.chain.core.exception.NotFoundException
-import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
-import io.openfuture.chain.core.model.entity.dictionary.VoteType
-import io.openfuture.chain.core.model.entity.dictionary.VoteType.AGAINST
-import io.openfuture.chain.core.model.entity.dictionary.VoteType.FOR
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
@@ -43,9 +39,9 @@ import kotlin.math.max
 
 @Service
 class DefaultMainBlockService(
-    blockService: BlockService,
-    repository: MainBlockRepository,
-    stateManager: StateManager,
+    private val blockService: BlockService,
+    private val repository: MainBlockRepository,
+    private val stateManager: StateManager,
     private val keyHolder: NodeKeyHolder,
     private val throughput: TransactionThroughput,
     private val statePool: StatePool,
@@ -53,7 +49,7 @@ class DefaultMainBlockService(
     private val genesisBlockRepository: GenesisBlockRepository,
     private val transactionManager: TransactionManager,
     private val receiptService: ReceiptService
-) : BaseBlockService<MainBlock>(repository, blockService, stateManager), MainBlockService {
+) : MainBlockService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(DefaultMainBlockService::class.java)
@@ -144,21 +140,6 @@ class DefaultMainBlockService(
         }
     }
 
-    @Transactional(readOnly = true)
-    override fun verify(message: PendingBlockMessage): Boolean {
-        BlockchainLock.readLock.lock()
-        try {
-            validate(message)
-            return true
-        } catch (ex: ValidationException) {
-            log.warn("Block is invalid cause: ${ex.message}")
-        } finally {
-            BlockchainLock.readLock.unlock()
-        }
-
-        return false
-    }
-
     @Transactional
     @Synchronized
     override fun add(message: BaseMainBlockMessage) {
@@ -170,7 +151,7 @@ class DefaultMainBlockService(
 
             val block = MainBlock.of(message)
             block.getPayload().setRewardTransaction()
-            val savedBlock = super.save(block)
+            val savedBlock = repository.save(block)
 
             message.getAllTransactions().forEach {
                 val receipt = message.receipts.find { receipt -> receipt.transactionHash == it.hash }!!
@@ -221,156 +202,18 @@ class DefaultMainBlockService(
         return blocks
     }
 
-    private fun validate(message: PendingBlockMessage) {
-        super.validateBase(MainBlock.of(message))
-
-        if (!isValidRootHash(message.transactionMerkleHash, message.getAllTransactions().map { it.hash })) {
-            throw ValidationException("Invalid transaction merkle hash in block: height #${message.height}, hash ${message.hash}")
-        }
-
-        if (!isValidRootHash(message.stateMerkleHash, message.getAllStates().map { it.hash })) {
-            throw ValidationException("Invalid state merkle hash in block: height #${message.height}, hash ${message.hash}")
-        }
-
-        if (!isValidRootHash(message.receiptMerkleHash, message.receipts.map { it.hash })) {
-            throw ValidationException("Invalid receipt merkle hash in block: height #${message.height}, hash ${message.hash}")
-        }
-
-        if (!isValidBalances(message.getExternalTransactions())) {
-            throw ValidationException("Invalid balances in block: height #${message.height}, hash ${message.hash}")
-        }
-
-        if (!isValidRewardTransaction(message)) {
-            throw ValidationException("Invalid reward transaction in block: height #${message.height}, hash ${message.hash}")
-        }
-
-        if (!isValidVoteTransactions(message.voteTransactions)) {
-            throw ValidationException("Invalid vote transactions in block: height #${message.height}, hash ${message.hash}")
-        }
-
-        if (!isValidDelegateTransactions(message.delegateTransactions)) {
-            throw ValidationException("Invalid delegate transactions in block: height #${message.height}, hash ${message.hash}")
-        }
-
-        if (!isValidTransferTransactions(message.transferTransactions)) {
-            throw ValidationException("Invalid transfer transactions in block: height #${message.height}, hash ${message.hash}")
-        }
-
-        if (!isValidReceiptsAndStates(message)) {
-            throw ValidationException("Invalid block states and receipts")
-        }
-
-    }
-
-    private fun isValidBalances(transactions: List<TransactionMessage>): Boolean =
-        transactions.groupBy { it.senderAddress }.entries.all { sender ->
-            sender.value.asSequence()
-                .map {
-                    when (it) {
-                        is TransferTransactionMessage -> it.amount + it.fee
-                        is DelegateTransactionMessage -> it.amount + it.fee
-                        is VoteTransactionMessage -> it.fee
-                        else -> 0
-                    }
-                }
-                .sum() <= stateManager.getWalletBalanceByAddress(sender.key)
-        }
-
-    private fun isValidRewardTransaction(message: PendingBlockMessage): Boolean =
-        isValidReward(message.getExternalTransactions().asSequence().map { it.fee }.sum(), message.rewardTransaction.reward) &&
-            transactionManager.verify(RewardTransaction.of(message.rewardTransaction))
-
-    private fun isValidVoteTransactions(transactions: List<VoteTransactionMessage>): Boolean {
-        if (transactions.isEmpty()) {
-            return true
-        }
-
-        val validVotes = transactions.groupBy { it.senderAddress }.entries.all { sender ->
-            if (sender.value.size != 1) {
-                return false
-            }
-
-            val accountState = stateManager.getLastByAddress<AccountState>(sender.key)
-            val vote = sender.value.first()
-            if (VoteType.values().none { it.getId() == vote.voteTypeId }) {
-                throw ValidationException("Vote type with id: ${vote.voteTypeId} is not exists")
-            }
-
-            return when (VoteType.values().first { it.getId() == vote.voteTypeId }) {
-                FOR -> null == accountState.voteFor
-                AGAINST -> null != accountState.voteFor && vote.delegateKey == accountState.voteFor
-            }
-        }
-
-        return validVotes && transactions.all { transactionManager.verify(VoteTransaction.of(it)) }
-    }
-
-    private fun isValidDelegateTransactions(transactions: List<DelegateTransactionMessage>): Boolean {
-        if (transactions.isEmpty()) {
-            return true
-        }
-
-        return transactions.all { transactionManager.verify(DelegateTransaction.of(it)) } &&
-            !stateManager.isExistsDelegatesByPublicKeys(transactions.map { it.delegateKey }) &&
-            transactions.distinctBy { it.delegateKey }.size == transactions.size
-    }
-
-    private fun isValidTransferTransactions(transactions: List<TransferTransactionMessage>): Boolean =
-        transactions.all { transactionManager.verify(TransferTransaction.of(it)) }
-
-    private fun isValidRootHash(rootHash: String, hashes: List<String>): Boolean {
-        if (hashes.isEmpty()) {
-            return false
-        }
-
-        return rootHash == HashUtils.calculateMerkleRoot(hashes)
-    }
-
-    private fun isValidReward(fees: Long, reward: Long): Boolean {
-        val senderAddress = consensusProperties.genesisAddress!!
-        val bank = stateManager.getWalletBalanceByAddress(senderAddress)
-        val rewardBlock = consensusProperties.rewardBlock!!
-
-        return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)
-    }
-
-    private fun isValidReceiptsAndStates(block: PendingBlockMessage): Boolean {
-        val delegateWallet = stateManager.getLastByAddress<DelegateState>(block.publicKey).walletAddress
-        val receipts = processTransactions(block.getAllTransactions(), delegateWallet).map { it.toMessage() }
-        val states = statePool.getStates()
-
-        if (block.receipts.size != receipts.size) {
-            return false
-        }
-
-        if (block.getAllStates().size != states.size) {
-            return false
-        }
-
-        return receipts.all { block.receipts.contains(it) } && states.all { block.getAllStates().contains(it.toMessage()) }
-    }
-
     private fun processTransactions(txMessages: List<TransactionMessage>, delegateWallet: String): List<Receipt> {
-        val receipts = mutableListOf<Receipt>()
-
-        statePool.clear()
-
-        txMessages.forEach { tx ->
-            receipts.add(
-                when (tx) {
-                    is TransferTransactionMessage ->
-                        transactionManager.processUnconfirmedTransaction(UnconfirmedTransferTransaction.of(tx), delegateWallet)
-                    is VoteTransactionMessage ->
-                        transactionManager.processUnconfirmedTransaction(UnconfirmedVoteTransaction.of(tx), delegateWallet)
-                    is DelegateTransactionMessage ->
-                        transactionManager.processUnconfirmedTransaction(UnconfirmedDelegateTransaction.of(tx), delegateWallet)
-                    is RewardTransactionMessage ->
-                        transactionManager.processRewardTransaction(RewardTransaction.of(tx))
-                    else -> throw IllegalStateException("Unsupported transaction type")
-                })
+        val transactions = txMessages.map {
+            when (it) {
+                is TransferTransactionMessage -> TransferTransaction.of(it)
+                is VoteTransactionMessage -> VoteTransaction.of(it)
+                is DelegateTransactionMessage -> DelegateTransaction.of(it)
+                is RewardTransactionMessage -> RewardTransaction.of(it)
+                else -> throw IllegalStateException("Unsupported transaction type")
+            }
         }
 
-        return receipts
+        return transactionManager.processTransactions(transactions, delegateWallet)
     }
 
     private fun getTransactions(): List<UnconfirmedTransaction> {

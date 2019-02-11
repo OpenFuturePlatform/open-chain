@@ -25,12 +25,12 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DefaultGenesisBlockService(
-    blockService: BlockService,
-    stateManager: StateManager,
+    private val blockService: BlockService,
+    private val stateManager: StateManager,
     private val keyHolder: NodeKeyHolder,
     private val consensusProperties: ConsensusProperties,
-    private val genesisBlockRepository: GenesisBlockRepository
-) : BaseBlockService<GenesisBlock>(genesisBlockRepository, blockService, stateManager), GenesisBlockService {
+    private val repository: GenesisBlockRepository
+) : GenesisBlockService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(EpochResponseHandler::class.java)
@@ -63,11 +63,11 @@ class DefaultGenesisBlockService(
     @Transactional(readOnly = true)
     override fun getAll(request: PageRequest): Page<GenesisBlock> = repository.findAll(request)
 
-    override fun getLast(): GenesisBlock = genesisBlockRepository.findFirstByOrderByHeightDesc()!!
+    override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()!!
 
     @Transactional(readOnly = true)
     override fun findByEpochIndex(epochIndex: Long): GenesisBlock? =
-        genesisBlockRepository.findOneByPayloadEpochIndex(epochIndex)
+        repository.findOneByPayloadEpochIndex(epochIndex)
 
     @BlockchainSynchronized
     @Transactional
@@ -87,9 +87,8 @@ class DefaultGenesisBlockService(
     @Transactional
     @Synchronized
     override fun add(block: GenesisBlock) {
-        super.save(block)
+        repository.save(block)
         log.debug("Saving genesis block: height #${block.height}, hash ${block.hash}")
-
     }
 
     @Transactional
@@ -119,7 +118,7 @@ class DefaultGenesisBlockService(
     }
 
     private fun createPayload(): GenesisBlockPayload {
-        val firstGenesisBlock = genesisBlockRepository.findOneByPayloadEpochIndex(1)!!
+        val firstGenesisBlock = repository.findOneByPayloadEpochIndex(1)!!
         val genesisDelegates = firstGenesisBlock.getPayload().activeDelegates
         val epochIndex = getLast().getPayload().epochIndex + 1
         val delegates = stateManager.getActiveDelegates().map { it.address }.toMutableSet()

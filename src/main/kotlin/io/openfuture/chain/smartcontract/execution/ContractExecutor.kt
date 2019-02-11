@@ -1,7 +1,7 @@
 package io.openfuture.chain.smartcontract.execution
 
 import io.openfuture.chain.core.model.entity.ReceiptResult
-import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.service.ContractService
 import io.openfuture.chain.smartcontract.component.load.SmartContractLoader
 import io.openfuture.chain.smartcontract.model.ExecutionContext
@@ -32,7 +32,7 @@ class ContractExecutor(
     private val pool = Executors.newSingleThreadExecutor()
 
 
-    fun run(contract: String, tx: UnconfirmedTransferTransaction, delegateAddress: String): ExecutionResult {
+    fun run(contract: String, tx: TransferTransaction, delegateAddress: String): ExecutionResult {
         val persistedContract = contractService.getByAddress(tx.getPayload().recipientAddress!!)
         val smartContractLoader = SmartContractLoader(this::class.java.classLoader)
         smartContractLoader.loadClass(ByteUtils.fromHexString(persistedContract.bytecode))
@@ -49,7 +49,7 @@ class ContractExecutor(
         }
     }
 
-    private fun executeMethod(instance: SmartContract, identifier: String, tx: UnconfirmedTransferTransaction,
+    private fun executeMethod(instance: SmartContract, identifier: String, tx: TransferTransaction,
                               delegateAddress: String, contractCost: Long): Future<ExecutionResult> {
         return pool.submit(Callable {
             Thread.currentThread().name = identifier
@@ -57,7 +57,7 @@ class ContractExecutor(
         })
     }
 
-    private fun proceedExecution(instance: SmartContract, tx: UnconfirmedTransferTransaction, delegateAddress: String,
+    private fun proceedExecution(instance: SmartContract, tx: TransferTransaction, delegateAddress: String,
                                  contractCost: Long): ExecutionResult {
         val context = ExecutionContext(tx.getPayload().amount, tx.senderAddress)
         val contextField = instance.javaClass.superclass.getDeclaredField("executionContext")
@@ -79,7 +79,7 @@ class ContractExecutor(
         }
     }
 
-    private fun assembleResults(context: ExecutionContext, instance: SmartContract, tx: UnconfirmedTransferTransaction,
+    private fun assembleResults(context: ExecutionContext, instance: SmartContract, tx: TransferTransaction,
                                 delegateAddress: String, contractCost: Long): List<ReceiptResult> {
         val receiptResults = mutableListOf<ReceiptResult>()
         context.getTransfers().forEach {
@@ -97,7 +97,7 @@ class ContractExecutor(
         return receiptResults
     }
 
-    private fun handleException(errorMessage: String, instance: SmartContract, tx: UnconfirmedTransferTransaction,
+    private fun handleException(errorMessage: String, instance: SmartContract, tx: TransferTransaction,
                                 delegateAddress: String, contractCost: Long): List<ReceiptResult> {
         val errorReceipt = ReceiptResult(tx.senderAddress, instance.address, 0, error = errorMessage)
         val processReceipt = ReceiptResult(tx.senderAddress, delegateAddress, tx.fee - contractCost)

@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.service.transaction
 
+import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.component.TransactionThroughput
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
@@ -31,7 +32,8 @@ class DefaultTransactionManager(
     private val transferTransactionService: TransferTransactionService,
     private val voteTransactionService: VoteTransactionService,
     private val rewardTransactionService: RewardTransactionService,
-    private val transactionValidatorManager: TransactionValidatorManager
+    private val transactionValidatorManager: TransactionValidatorManager,
+    private val statePool: StatePool
 ) : TransactionManager {
 
     override fun getCount(): Long = repository.count()
@@ -111,9 +113,6 @@ class DefaultTransactionManager(
     override fun createRewardTransaction(timestamp: Long, fees: Long): RewardTransaction =
         rewardTransactionService.create(timestamp, fees)
 
-    override fun processRewardTransaction(tx: RewardTransaction): Receipt =
-        rewardTransactionService.process(tx)
-
     @Suppress("UNCHECKED_CAST")
     @Transactional
     override fun <T : Transaction> commit(tx: T, receipt: Receipt): T = when (tx) {
@@ -132,10 +131,23 @@ class DefaultTransactionManager(
         else -> throw IllegalStateException("Wrong type")
     } as uT
 
-    override fun <uT : UnconfirmedTransaction> processUnconfirmedTransaction(uTx: uT, delegateWallet: String): Receipt = when (uTx) {
-        is UnconfirmedDelegateTransaction -> uDelegateTransactionService.process(uTx, delegateWallet)
-        is UnconfirmedTransferTransaction -> uTransferTransactionService.process(uTx, delegateWallet)
-        is UnconfirmedVoteTransaction -> uVoteTransactionService.process(uTx, delegateWallet)
+    override fun processTransactions(transactions: List<Transaction>, delegateWallet: String): List<Receipt> {
+        val receipts = mutableListOf<Receipt>()
+        statePool.clear()
+
+        transactions.forEach {
+            val receipt = processTransaction(it, delegateWallet)
+            receipts.add(receipt)
+        }
+
+        return receipts
+    }
+
+    private fun <T : Transaction> processTransaction(tx: T, delegateWallet: String): Receipt = when (tx) {
+        is RewardTransaction -> rewardTransactionService.process(tx, delegateWallet)
+        is DelegateTransaction -> delegateTransactionService.process(tx, delegateWallet)
+        is TransferTransaction -> transferTransactionService.process(tx, delegateWallet)
+        is VoteTransaction -> voteTransactionService.process(tx, delegateWallet)
         else -> throw IllegalStateException("Wrong type")
     }
 

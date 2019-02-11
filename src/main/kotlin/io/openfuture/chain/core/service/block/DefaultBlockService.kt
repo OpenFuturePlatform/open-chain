@@ -1,7 +1,6 @@
 package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
-import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
@@ -44,7 +43,7 @@ class DefaultBlockService(
 
     @Transactional(readOnly = true)
     override fun getLast(): Block =
-        repository.findFirstByOrderByHeightDesc() ?: throw NotFoundException("Last block not found!")
+        repository.findFirstByOrderByHeightDesc()
 
     @Transactional
     override fun save(block: Block) {
@@ -67,14 +66,7 @@ class DefaultBlockService(
     }
 
     @Transactional(readOnly = true)
-    override fun isExists(hash: String): Boolean = repository.findOneByHash(hash)?.let { true } ?: false
-
-    @Transactional(readOnly = true)
     override fun findByHash(hash: String): Block? = repository.findOneByHash(hash)
-
-    @Transactional(readOnly = true)
-    override fun isExists(hash: String, height: Long): Boolean =
-        repository.findOneByHashAndHeight(hash, height)?.let { true } ?: false
 
     @Transactional(readOnly = true)
     override fun getAllByHeightIn(heights: List<Long>): List<Block> =
@@ -87,11 +79,6 @@ class DefaultBlockService(
         transactionManager.deleteBlockTransactions(heights)
         receiptService.deleteBlockReceipts(heights)
         repository.deleteAllByHeightIn(heights)
-    }
-
-    override fun isValidHash(block: Block): Boolean {
-        val hash = Block.generateHash(block.timestamp, block.height, block.previousHash, block.getPayload())
-        return hash == block.hash
     }
 
     @Transactional(readOnly = true)

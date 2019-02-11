@@ -10,7 +10,6 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransac
 import io.openfuture.chain.core.model.entity.transaction.payload.RewardTransactionPayload
 import io.openfuture.chain.core.repository.RewardTransactionRepository
 import io.openfuture.chain.core.service.RewardTransactionService
-import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -22,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultRewardTransactionService(
     private val repository: RewardTransactionRepository,
     private val consensusProperties: ConsensusProperties,
-    private val stateManager: StateManager,
     private val keyHolder: NodeKeyHolder
 ) : DefaultTransactionService<RewardTransaction, RewardTransactionRepository>(repository), RewardTransactionService {
 
@@ -61,7 +59,7 @@ class DefaultRewardTransactionService(
         }
     }
 
-    override fun process(tx: RewardTransaction): Receipt {
+    override fun process(tx: RewardTransaction, delegateWallet: String): Receipt {
         stateManager.updateWalletBalanceByAddress(tx.getPayload().recipientAddress, tx.getPayload().reward)
 
         val senderAddress = consensusProperties.genesisAddress!!
@@ -75,10 +73,8 @@ class DefaultRewardTransactionService(
 
     private fun generateReceipt(tx: RewardTransaction): Receipt {
         val results = listOf(ReceiptResult(tx.senderAddress, tx.getPayload().recipientAddress, tx.getPayload().reward))
-        val receipt = Receipt(tx.hash)
-        receipt.setResults(results)
 
-        return receipt
+        return getReceipt(tx.hash, results)
     }
 
 }
