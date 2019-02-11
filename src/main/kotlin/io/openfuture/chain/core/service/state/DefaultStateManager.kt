@@ -36,7 +36,11 @@ class DefaultStateManager(
         }
     }
 
-    override fun getAllByBlock(block: Block): List<State> = repository.findAllByBlock(block)
+    override fun getAllDelegateStatesByBlock(block: Block): List<DelegateState> =
+        delegateStateService.getAllByBlock(block)
+
+    override fun getAllAccountStatesByBlock(block: Block): List<AccountState> =
+        accountStateService.getAllByBlock(block)
 
     override fun getWalletBalanceByAddress(address: String): Long = accountStateService.getBalanceByAddress(address)
 

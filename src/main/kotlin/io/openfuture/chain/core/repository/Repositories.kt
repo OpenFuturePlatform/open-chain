@@ -91,6 +91,8 @@ interface TransactionRepository<T : Transaction> : BaseRepository<T> {
 
     fun findOneByHash(hash: String): T?
 
+    fun countByBlock(block: Block): Long
+
     fun findAllByBlock(block: Block): List<T>
 
     fun deleteAllByBlockHeightIn(heights: List<Long>)
@@ -182,6 +184,8 @@ interface ContractRepository : BaseRepository<Contract> {
 interface ReceiptRepository : BaseRepository<Receipt> {
 
     fun findOneByTransactionHash(hash: String): Receipt?
+
+    fun findAllByBlock(block: Block): List<Receipt>
 
     fun deleteAllByBlockHeightIn(heights: List<Long>)
 

@@ -36,6 +36,12 @@ class DefaultTransactionManager(
 
     override fun getCount(): Long = repository.count()
 
+    override fun getCountDelegateTransactionsByBlock(block: Block): Long = delegateTransactionService.getCountByBlock(block)
+
+    override fun getCountTransferTransactionsByBlock(block: Block): Long = transferTransactionService.getCountByBlock(block)
+
+    override fun getCountVoteTransactionsByBlock(block: Block): Long = voteTransactionService.getCountByBlock(block)
+
     override fun getUnconfirmedBalanceBySenderAddress(address: String): Long {
         BlockchainLock.readLock.lock()
         try {

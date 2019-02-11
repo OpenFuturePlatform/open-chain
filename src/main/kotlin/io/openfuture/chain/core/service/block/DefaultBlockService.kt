@@ -6,7 +6,6 @@ import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.state.State
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.repository.BlockRepository
@@ -16,12 +15,8 @@ import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.core.sync.SyncMode.FULL
-import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
-import io.openfuture.chain.crypto.util.HashUtils
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.nio.ByteBuffer
 
 @Service
 class DefaultBlockService(
@@ -90,23 +85,13 @@ class DefaultBlockService(
     override fun deleteByHeightIn(heights: List<Long>) {
         stateManager.deleteBlockStates(heights)
         transactionManager.deleteBlockTransactions(heights)
+        receiptService.deleteBlockReceipts(heights)
         repository.deleteAllByHeightIn(heights)
     }
 
     override fun isValidHash(block: Block): Boolean {
-        val hash = createHash(block.timestamp, block.height, block.previousHash, block.getPayload())
-        return ByteUtils.toHexString(hash) == block.hash
-    }
-
-    override fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray {
-        val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + previousHash.toByteArray().size + payload.getBytes().size)
-            .putLong(timestamp)
-            .putLong(height)
-            .put(previousHash.toByteArray())
-            .put(payload.getBytes())
-            .array()
-
-        return HashUtils.doubleSha256(bytes)
+        val hash = Block.generateHash(block.timestamp, block.height, block.previousHash, block.getPayload())
+        return hash == block.hash
     }
 
     @Transactional(readOnly = true)
@@ -116,31 +101,24 @@ class DefaultBlockService(
     override fun saveChunk(blocksChunk: List<Block>, syncMode: SyncMode) {
         blocksChunk.forEach { block ->
             if (block is MainBlock) {
-                val rewardTransaction = block.payload.rewardTransaction.first()
-                block.payload.rewardTransaction = mutableListOf()
+                val rewardTransaction = block.getPayload().getRewardTransaction()
+                rewardTransaction.block = block
+                block.getPayload().setRewardTransaction()
 
                 val transactions = mutableListOf<Transaction>()
                 val states = mutableListOf<State>()
                 val receipts = mutableSetOf<Receipt>()
 
                 if (syncMode == FULL) {
-                    transactions.addAll(block.payload.transferTransactions)
-                    transactions.addAll(block.payload.voteTransactions)
-                    transactions.addAll(block.payload.delegateTransactions)
+                    transactions.addAll(block.getPayload().transferTransactions)
+                    transactions.addAll(block.getPayload().voteTransactions)
+                    transactions.addAll(block.getPayload().delegateTransactions)
 
-                    block.payload.transferTransactions = mutableListOf()
-                    block.payload.voteTransactions = mutableListOf()
-                    block.payload.delegateTransactions = mutableListOf()
-
-                    receipts.addAll(block.payload.receipts)
-                    block.payload.receipts = mutableListOf()
+                    receipts.addAll(block.getPayload().receipts)
                 }
 
-                states.addAll(block.payload.delegateStates)
-                states.addAll(block.payload.accountStates)
-
-                block.payload.delegateStates = mutableListOf()
-                block.payload.accountStates = mutableListOf()
+                states.addAll(block.getPayload().delegateStates)
+                states.addAll(block.getPayload().accountStates)
 
                 this.save(block)
                 var receipt = receipts.find { receipt -> receipt.transactionHash == rewardTransaction.hash }!!

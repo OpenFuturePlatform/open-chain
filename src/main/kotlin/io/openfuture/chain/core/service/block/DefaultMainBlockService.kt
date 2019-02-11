@@ -8,6 +8,7 @@ import io.openfuture.chain.core.component.TransactionThroughput
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.Receipt
+import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
@@ -32,7 +33,7 @@ import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.rpc.domain.base.PageRequest
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.toHexString
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -105,7 +106,8 @@ class DefaultMainBlockService(
                 }
             }
 
-            val rewardTransactionMessage = transactionManager.createRewardTransaction(timestamp, fees).toMessage()
+            val rewardTransaction = transactionManager.createRewardTransaction(timestamp, fees)
+            val rewardTransactionMessage = rewardTransaction.toMessage()
             val txMessages = listOf(
                 *voteTransactions.toTypedArray(),
                 *delegateTransactions.toTypedArray(),
@@ -127,14 +129,14 @@ class DefaultMainBlockService(
                 }
             }
 
-            val transactionMerkleHash = HashUtils.calculateMerkleRoot(transactionHashes + rewardTransactionMessage.hash)
+            val transactionMerkleHash = HashUtils.calculateMerkleRoot(transactionHashes + rewardTransaction.hash)
             val stateMerkleHash = HashUtils.calculateMerkleRoot(stateHashes)
             val receiptMerkleHash = HashUtils.calculateMerkleRoot(receipts.map { it.hash })
-            val payload = MainBlockPayload(transactionMerkleHash, stateMerkleHash, receiptMerkleHash)
-            val hash = blockService.createHash(timestamp, height, previousHash, payload)
-            val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
+            val payload = MainBlockPayload(transactionMerkleHash, stateMerkleHash, receiptMerkleHash, rewardTransaction)
+            val hash = Block.generateHash(timestamp, height, previousHash, payload)
+            val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())
 
-            return PendingBlockMessage(height, previousHash, timestamp, toHexString(hash), signature, publicKey,
+            return PendingBlockMessage(height, previousHash, timestamp, hash, signature, publicKey,
                 transactionMerkleHash, stateMerkleHash, receiptMerkleHash, rewardTransactionMessage, voteTransactions,
                 delegateTransactions, transferTransactions, delegateStates, accountStates, receipts.map { it.toMessage() })
         } finally {
@@ -167,6 +169,7 @@ class DefaultMainBlockService(
             }
 
             val block = MainBlock.of(message)
+            block.getPayload().setRewardTransaction()
             val savedBlock = super.save(block)
 
             message.getAllTransactions().forEach {
@@ -204,7 +207,18 @@ class DefaultMainBlockService(
         val beginHeight = genesisBlock.height + 1
         val endEpochHeight = beginHeight + consensusProperties.epochHeight!! - 1
         val heights = (beginHeight..endEpochHeight).toList()
-        return repository.findAllByHeightIn(heights)
+
+        val blocks = repository.findAllByHeightIn(heights)
+        blocks.forEach {
+            it.getPayload().delegateTransactions = transactionManager.getAllDelegateTransactionsByBlock(it)
+            it.getPayload().transferTransactions = transactionManager.getAllTransferTransactionsByBlock(it)
+            it.getPayload().voteTransactions = transactionManager.getAllVoteTransactionsByBlock(it)
+            it.getPayload().delegateStates = stateManager.getAllDelegateStatesByBlock(it)
+            it.getPayload().accountStates = stateManager.getAllAccountStatesByBlock(it)
+            it.getPayload().receipts = receiptService.getAllByBlock(it)
+        }
+
+        return blocks
     }
 
     private fun validate(message: PendingBlockMessage) {

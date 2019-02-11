@@ -14,23 +14,23 @@ class DefaultEpochService(
 
     override fun getEpochStart(): Long = genesisBlockService.getLast().timestamp
 
-    override fun getDelegatesPublicKeys(): List<String> = genesisBlockService.getLast().payload.activeDelegates
+    override fun getDelegatesPublicKeys(): List<String> = genesisBlockService.getLast().getPayload().activeDelegates
 
-    override fun getEpochIndex(): Long = genesisBlockService.getLast().payload.epochIndex
+    override fun getEpochIndex(): Long = genesisBlockService.getLast().getPayload().epochIndex
 
     override fun getGenesisBlockHeight(): Long = genesisBlockService.getLast().height
 
     @Transactional(readOnly = true)
     override fun getCurrentSlotOwner(): String {
         val genesisBlock = genesisBlockService.getLast()
-        val activeDelegates = genesisBlock.payload.activeDelegates
+        val activeDelegates = genesisBlock.getPayload().activeDelegates
         val slotNumber = getSlotNumber(System.currentTimeMillis())
         val mod = slotNumber % activeDelegates.size
         return if (mod != 0L) activeDelegates[mod.toInt() - 1] else activeDelegates.last()
     }
 
     override fun getEpochByBlock(block: MainBlock): Long =
-        genesisBlockService.getPreviousByHeight(block.height).payload.epochIndex
+        genesisBlockService.getPreviousByHeight(block.height).getPayload().epochIndex
 
     override fun isInIntermission(time: Long): Boolean = (getTimeSlotFromStart(time) >= properties.timeSlotDuration!!)
 

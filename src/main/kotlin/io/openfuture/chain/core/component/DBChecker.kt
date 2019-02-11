@@ -4,16 +4,23 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.BlockService
+import io.openfuture.chain.core.service.ReceiptService
+import io.openfuture.chain.core.service.StateManager
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import io.openfuture.chain.crypto.util.HashUtils
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import io.openfuture.chain.crypto.util.HashUtils.doubleSha256
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.toHexString
 import org.springframework.stereotype.Component
 
 @Component
 class DBChecker(
     private val blockService: BlockService,
+    private val transactionManager: TransactionManager,
+    private val stateManager: StateManager,
+    private val receiptService: ReceiptService,
     private val consensusProperties: ConsensusProperties
 ) {
 
@@ -89,14 +96,13 @@ class DBChecker(
             return false
         }
         if (FULL == syncMode) {
-            return isValidTransactions(block)
+            return isValidTransactions(block) && isValidBlockReceipts(block)
         }
         if (LIGHT == syncMode && block is MainBlock) {
-            val transactions =
-                block.payload.transferTransactions +
-                    block.payload.delegateTransactions +
-                    block.payload.voteTransactions
-            return transactions.isEmpty()
+            val delegateTxCount = transactionManager.getCountDelegateTransactionsByBlock(block)
+            val transferTxCount = transactionManager.getCountTransferTransactionsByBlock(block)
+            val voteTxCount = transactionManager.getCountVoteTransactionsByBlock(block)
+            return (delegateTxCount + transferTxCount + voteTxCount) == 0L
         }
         return true
     }
@@ -105,14 +111,17 @@ class DBChecker(
 
     private fun isValidTransactions(block: Block): Boolean {
         if (block is MainBlock) {
-            val hashes = mutableListOf<String>()
-            hashes.addAll(block.payload.transferTransactions.map { ByteUtils.toHexString(HashUtils.doubleSha256(it.getBytes())) })
-            hashes.addAll(block.payload.voteTransactions.map { ByteUtils.toHexString(HashUtils.doubleSha256(it.getBytes())) })
-            hashes.addAll(block.payload.delegateTransactions.map { ByteUtils.toHexString(HashUtils.doubleSha256(it.getBytes())) })
-            val rewardTransactionHash = ByteUtils.toHexString(HashUtils.doubleSha256(block.payload.rewardTransaction[0].getBytes()))
-            hashes.add(rewardTransactionHash)
+            val delegateTxHashes = transactionManager.getAllDelegateTransactionsByBlock(block)
+                .map { toHexString(doubleSha256(it.getBytes())) }
+            val transferTxHashes = transactionManager.getAllTransferTransactionsByBlock(block)
+                .map { toHexString(doubleSha256(it.getBytes())) }
+            val voteTxHashes = transactionManager.getAllVoteTransactionsByBlock(block)
+                .map { toHexString(doubleSha256(it.getBytes())) }
+            val rewardTxHash = toHexString(doubleSha256(transactionManager.getRewardTransactionByBlock(block).getBytes()))
 
-            if (block.payload.transactionMerkleHash != HashUtils.calculateMerkleRoot(hashes)) {
+            val hashes = delegateTxHashes + transferTxHashes + voteTxHashes + rewardTxHash
+
+            if (block.getPayload().transactionMerkleHash != HashUtils.calculateMerkleRoot(hashes)) {
                 return false
             }
         }
@@ -121,10 +130,26 @@ class DBChecker(
 
     private fun isValidBlockState(block: Block): Boolean {
         if (block is MainBlock) {
-            val stateHashes = listOf(block.payload.delegateStates, block.payload.accountStates)
-                .flatMap { states -> states.map { it.hash } }
+            val delegateStateHashes = stateManager.getAllDelegateStatesByBlock(block)
+                .map { toHexString(doubleSha256(it.getBytes())) }
+            val accountStateHashes = stateManager.getAllAccountStatesByBlock(block)
+                .map { toHexString(doubleSha256(it.getBytes())) }
 
-            if (block.payload.transactionMerkleHash != HashUtils.calculateMerkleRoot(stateHashes)) {
+            val hashes = delegateStateHashes + accountStateHashes
+
+            if (block.getPayload().transactionMerkleHash != HashUtils.calculateMerkleRoot(hashes)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun isValidBlockReceipts(block: Block): Boolean {
+        if (block is MainBlock) {
+            val receiptHashes = receiptService.getAllByBlock(block)
+                .map { toHexString(doubleSha256(it.getBytes())) }
+
+            if (block.getPayload().transactionMerkleHash != HashUtils.calculateMerkleRoot(receiptHashes)) {
                 return false
             }
         }

@@ -34,9 +34,10 @@ class EpochRequestHandler(
 
         if (msg.syncMode != FULL) {
             mainBlocks.forEach {
-                it.payload.transferTransactions = mutableListOf()
-                it.payload.delegateTransactions = mutableListOf()
-                it.payload.voteTransactions = mutableListOf()
+                it.getPayload().transferTransactions = mutableListOf()
+                it.getPayload().delegateTransactions = mutableListOf()
+                it.getPayload().voteTransactions = mutableListOf()
+                it.getPayload().receipts = mutableListOf()
             }
         }
         val mainBlockMessages = mainBlocks.map { it.toMessage() }

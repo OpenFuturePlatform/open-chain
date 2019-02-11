@@ -17,6 +17,8 @@ abstract class DefaultExternalTransactionService<T : Transaction, R : Transactio
     @Autowired protected lateinit var uRepository: UTransactionRepository<UnconfirmedTransaction>
 
 
+    override fun getCountByBlock(block: Block): Long = repository.countByBlock(block)
+
     override fun getAllByBlock(block: Block): List<T> = repository.findAllByBlock(block)
 
     protected fun confirm(uTx: UnconfirmedTransaction, tx: T): T {

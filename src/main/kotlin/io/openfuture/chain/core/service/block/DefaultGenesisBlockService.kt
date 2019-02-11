@@ -4,6 +4,7 @@ import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.exception.NotFoundException
+import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.repository.GenesisBlockRepository
@@ -76,11 +77,11 @@ class DefaultGenesisBlockService(
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
         val payload = createPayload()
-        val hash = blockService.createHash(timestamp, height, previousHash, payload)
-        val signature = SignatureUtils.sign(hash, keyHolder.getPrivateKey())
+        val hash = Block.generateHash(timestamp, height, previousHash, payload)
+        val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKeyAsHexString()
 
-        return GenesisBlock(timestamp, height, previousHash, ByteUtils.toHexString(hash), signature, publicKey, payload)
+        return GenesisBlock(timestamp, height, previousHash, hash, signature, publicKey, payload)
     }
 
     @Transactional
@@ -119,8 +120,8 @@ class DefaultGenesisBlockService(
 
     private fun createPayload(): GenesisBlockPayload {
         val firstGenesisBlock = genesisBlockRepository.findOneByPayloadEpochIndex(1)!!
-        val genesisDelegates = firstGenesisBlock.payload.activeDelegates
-        val epochIndex = getLast().payload.epochIndex + 1
+        val genesisDelegates = firstGenesisBlock.getPayload().activeDelegates
+        val epochIndex = getLast().getPayload().epochIndex + 1
         val delegates = stateManager.getActiveDelegates().map { it.address }.toMutableSet()
         delegates.addAll(genesisDelegates)
         return GenesisBlockPayload(epochIndex, delegates.toMutableList())

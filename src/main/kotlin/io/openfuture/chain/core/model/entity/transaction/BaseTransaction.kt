@@ -6,6 +6,7 @@ import io.openfuture.chain.network.message.core.TransactionMessage
 import java.nio.ByteBuffer
 import javax.persistence.Column
 import javax.persistence.MappedSuperclass
+import kotlin.Long.Companion.SIZE_BYTES
 
 @MappedSuperclass
 abstract class BaseTransaction(
@@ -34,7 +35,7 @@ abstract class BaseTransaction(
 
     abstract fun getPayload(): TransactionPayload
 
-    fun getBytes(): ByteArray = ByteBuffer.allocate(Long.SIZE_BYTES + Long.SIZE_BYTES +
+    fun getBytes(): ByteArray = ByteBuffer.allocate(SIZE_BYTES + SIZE_BYTES +
         senderAddress.toByteArray().size + getPayload().getBytes().size)
         .putLong(timestamp)
         .putLong(fee)

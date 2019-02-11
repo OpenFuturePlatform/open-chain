@@ -3,12 +3,9 @@ package io.openfuture.chain.core.sync
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.DBChecker
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.state.AccountState
-import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -84,7 +81,7 @@ class ChainSynchronizer(
 
     fun onEpochResponse(message: EpochResponseMessage) {
         future?.cancel(true)
-        val delegates = genesisBlockService.getLast().payload.activeDelegates
+        val delegates = genesisBlockService.getLast().getPayload().activeDelegates
         try {
             if (!message.isEpochExists) {
                 requestEpoch(delegates.filter { it != message.delegateKey })
@@ -138,7 +135,7 @@ class ChainSynchronizer(
         future?.cancel(true)
         if (-1L == response.height) {
             val invalidGenesisBlock = genesisBlockService.getLast()
-            log.info("Rolling back epoch #${invalidGenesisBlock.payload.epochIndex}")
+            log.info("Rolling back epoch #${invalidGenesisBlock.getPayload().epochIndex}")
             blockService.removeEpoch(invalidGenesisBlock)
             val lastGenesisBlock = genesisBlockService.getLast()
             val requestedBlock = if (1L == lastGenesisBlock.height) {
@@ -165,7 +162,7 @@ class ChainSynchronizer(
     }
 
     private fun initSync(message: GenesisBlockMessage) {
-        val delegates = genesisBlockService.getLast().payload.activeDelegates
+        val delegates = genesisBlockService.getLast().getPayload().activeDelegates
         try {
             val currentGenesisBlock = GenesisBlock.of(message)
             val lastLocalGenesisBlock = genesisBlockService.getLast()
@@ -184,19 +181,7 @@ class ChainSynchronizer(
 
     private fun convertToBlocks(message: EpochResponseMessage): List<Block> {
         val listBlocks: MutableList<Block> = mutableListOf(GenesisBlock.of(message.genesisBlock!!))
-        val mainBlocks = message.mainBlocks.map {
-            val mainBlock = MainBlock.of(it)
-            mainBlock.payload.rewardTransaction = mutableListOf(RewardTransaction.of(it.rewardTransaction, mainBlock))
-            if (syncSession!!.syncMode == FULL) {
-                it.voteTransactions.forEach { vTx -> mainBlock.payload.voteTransactions.add(VoteTransaction.of(vTx, mainBlock)) }
-                it.delegateTransactions.forEach { dTx -> mainBlock.payload.delegateTransactions.add(DelegateTransaction.of(dTx, mainBlock)) }
-                it.transferTransactions.forEach { vTx -> mainBlock.payload.transferTransactions.add(TransferTransaction.of(vTx, mainBlock)) }
-                it.receipts.forEach { r -> mainBlock.payload.receipts.add(Receipt.of(r, mainBlock)) }
-            }
-            it.delegateStates.forEach { ds -> mainBlock.payload.delegateStates.add(DelegateState.of(ds, mainBlock)) }
-            it.accountStates.forEach { ws -> mainBlock.payload.accountStates.add(AccountState.of(ws, mainBlock)) }
-            mainBlock
-        }
+        val mainBlocks = message.mainBlocks.map { MainBlock.of(it) }
         listBlocks.addAll(mainBlocks)
         return listBlocks
     }
@@ -290,9 +275,9 @@ class ChainSynchronizer(
 
     private fun requestEpoch(delegates: List<String>) {
         val targetEpoch = if (syncSession!!.isEpochSynced()) {
-            syncSession!!.getCurrentGenesisBlock().payload.epochIndex
+            syncSession!!.getCurrentGenesisBlock().getPayload().epochIndex
         } else {
-            (syncSession!!.getStorage().last() as GenesisBlock).payload.epochIndex - 1
+            (syncSession!!.getStorage().last() as GenesisBlock).getPayload().epochIndex - 1
         }
 
         val message = EpochRequestMessage(targetEpoch, syncSession!!.syncMode)
@@ -340,7 +325,7 @@ class ChainSynchronizer(
         if (null == syncSession) {
             checkBlock(lastGenesisBlock)
         } else {
-            requestEpoch(lastGenesisBlock.payload.activeDelegates)
+            requestEpoch(lastGenesisBlock.getPayload().activeDelegates)
         }
     }
 

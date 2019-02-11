@@ -30,7 +30,7 @@ class DelegateController(
 
     @GetMapping("/active")
     fun getAllActive(@Valid request: PageRequest): PageResponse<DelegateResponse> {
-        val activeDelegates = genesisBlockService.getLast().payload.activeDelegates.map {
+        val activeDelegates = genesisBlockService.getLast().getPayload().activeDelegates.map {
             DelegateResponse(stateManager.getLastByAddress(it))
         }
 

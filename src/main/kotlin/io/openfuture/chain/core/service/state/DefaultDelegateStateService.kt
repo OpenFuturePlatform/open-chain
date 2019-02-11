@@ -17,7 +17,7 @@ class DefaultDelegateStateService(
     private val repository: DelegateStateRepository,
     private val consensusProperties: ConsensusProperties,
     private val statePool: StatePool
-) : DelegateStateService {
+) : DefaultStateService<DelegateState, DelegateStateRepository>(repository), DelegateStateService {
 
     override fun getAllDelegates(request: PageRequest): List<DelegateState> = repository.findLastAll(request)
 

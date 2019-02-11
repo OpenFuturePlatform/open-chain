@@ -5,7 +5,6 @@ import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
@@ -68,8 +67,6 @@ interface BlockService {
     fun deleteByHeightIn(heights: List<Long>)
 
     fun isValidHash(block: Block): Boolean
-
-    fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray
 }
 
 interface GenesisBlockService {
@@ -121,6 +118,12 @@ interface MainBlockService {
 interface TransactionManager {
 
     fun getCount(): Long
+
+    fun getCountDelegateTransactionsByBlock(block: Block): Long
+
+    fun getCountTransferTransactionsByBlock(block: Block): Long
+
+    fun getCountVoteTransactionsByBlock(block: Block): Long
 
     fun getUnconfirmedBalanceBySenderAddress(address: String): Long
 
@@ -222,6 +225,8 @@ interface RewardTransactionService : TransactionService<RewardTransaction> {
 
 interface ExternalTransactionService<T : Transaction> : TransactionService<T> {
 
+    fun getCountByBlock(block: Block): Long
+
     fun getAllByBlock(block: Block): List<T>
 
 }
@@ -266,7 +271,9 @@ interface StateManager {
 
     fun <T : State> getLastByAddress(address: String): T
 
-    fun getAllByBlock(block: Block): List<State>
+    fun getAllDelegateStatesByBlock(block: Block): List<DelegateState>
+
+    fun getAllAccountStatesByBlock(block: Block): List<AccountState>
 
     fun getWalletBalanceByAddress(address: String): Long
 
@@ -296,7 +303,13 @@ interface StateManager {
 
 }
 
-interface DelegateStateService {
+interface StateService<T : State> {
+
+    fun getAllByBlock(block: Block): List<T>
+
+}
+
+interface DelegateStateService : StateService<DelegateState> {
 
     fun getAllDelegates(request: PageRequest): List<DelegateState>
 
@@ -312,7 +325,7 @@ interface DelegateStateService {
 
 }
 
-interface AccountStateService {
+interface AccountStateService : StateService<AccountState> {
 
     fun getBalanceByAddress(address: String): Long
 
@@ -340,6 +353,8 @@ interface ContractService {
 interface ReceiptService {
 
     fun getByTransactionHash(hash: String): Receipt
+
+    fun getAllByBlock(block: Block): List<Receipt>
 
     fun commit(receipt: Receipt)
 

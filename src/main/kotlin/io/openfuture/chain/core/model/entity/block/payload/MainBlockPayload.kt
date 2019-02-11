@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.model.entity.block.payload
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
@@ -8,8 +7,6 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTrans
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import org.hibernate.annotations.Fetch
-import org.hibernate.annotations.FetchMode
 import javax.persistence.*
 
 @Embeddable
@@ -24,77 +21,48 @@ class MainBlockPayload(
     @Column(name = "receipt_merkle_hash", nullable = false)
     var receiptMerkleHash: String,
 
-    @JsonIgnore
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, targetEntity = RewardTransaction::class)
     @JoinTable(
         name = "transactions",
         joinColumns = [JoinColumn(name = "block_id")],
         inverseJoinColumns = [JoinColumn(name = "id")]
     )
-    @Fetch(value = FetchMode.SUBSELECT)
-    var rewardTransaction: MutableList<RewardTransaction> = mutableListOf(),
+    private var rewardTransactions: List<RewardTransaction> = listOf(),
 
-    @JsonIgnore
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "transactions",
-        joinColumns = [JoinColumn(name = "block_id")],
-        inverseJoinColumns = [JoinColumn(name = "id")]
-    )
-    @Fetch(value = FetchMode.SUBSELECT)
-    var voteTransactions: MutableList<VoteTransaction> = mutableListOf(),
+    @Transient
+    var voteTransactions: List<VoteTransaction> = listOf(),
 
-    @JsonIgnore
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "transactions",
-        joinColumns = [JoinColumn(name = "block_id")],
-        inverseJoinColumns = [JoinColumn(name = "id")]
-    )
-    @Fetch(value = FetchMode.SUBSELECT)
-    var delegateTransactions: MutableList<DelegateTransaction> = mutableListOf(),
+    @Transient
+    var delegateTransactions: List<DelegateTransaction> = listOf(),
 
-    @JsonIgnore
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "transactions",
-        joinColumns = [JoinColumn(name = "block_id")],
-        inverseJoinColumns = [JoinColumn(name = "id")]
-    )
-    @Fetch(value = FetchMode.SUBSELECT)
-    var transferTransactions: MutableList<TransferTransaction> = mutableListOf(),
+    @Transient
+    var transferTransactions: List<TransferTransaction> = listOf(),
 
-    @JsonIgnore
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "states",
-        joinColumns = [JoinColumn(name = "block_id")],
-        inverseJoinColumns = [JoinColumn(name = "id")]
-    )
-    @Fetch(value = FetchMode.SUBSELECT)
-    var delegateStates: MutableList<DelegateState> = mutableListOf(),
+    @Transient
+    var delegateStates: List<DelegateState> = listOf(),
 
-    @JsonIgnore
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "states",
-        joinColumns = [JoinColumn(name = "block_id")],
-        inverseJoinColumns = [JoinColumn(name = "id")]
-    )
-    @Fetch(value = FetchMode.SUBSELECT)
-    var accountStates: MutableList<AccountState> = mutableListOf(),
+    @Transient
+    var accountStates: List<AccountState> = listOf(),
 
-    @JsonIgnore
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "receipts",
-        joinColumns = [JoinColumn(name = "block_id")],
-        inverseJoinColumns = [JoinColumn(name = "id")]
-    )
-    @Fetch(value = FetchMode.SUBSELECT)
-    var receipts: MutableList<Receipt> = mutableListOf()
+    @Transient
+    var receipts: List<Receipt> = listOf()
 
 ) : BlockPayload {
+
+    constructor(transactionMerkleHash: String, stateMerkleHash: String, receiptMerkleHash: String,
+                rewardTransaction: RewardTransaction) : this(
+        transactionMerkleHash, stateMerkleHash, receiptMerkleHash, listOf(rewardTransaction)
+    )
+
+    fun getRewardTransaction(): RewardTransaction = rewardTransactions.first()
+
+    fun setRewardTransaction(rewardTransaction: RewardTransaction? = null) {
+        rewardTransactions = if (null != rewardTransaction) {
+            listOf(rewardTransaction)
+        } else {
+            listOf()
+        }
+    }
 
     override fun getBytes(): ByteArray =
         transactionMerkleHash.toByteArray() + stateMerkleHash.toByteArray() + receiptMerkleHash.toByteArray()

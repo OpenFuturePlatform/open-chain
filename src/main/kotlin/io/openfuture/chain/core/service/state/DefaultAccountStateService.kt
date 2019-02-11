@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultAccountStateService(
     private val repository: AccountStateRepository,
     private val statePool: StatePool
-) : AccountStateService {
+) : DefaultStateService<AccountState, AccountStateRepository>(repository), AccountStateService {
 
     companion object {
         private const val DEFAULT_WALLET_BALANCE = 0L
