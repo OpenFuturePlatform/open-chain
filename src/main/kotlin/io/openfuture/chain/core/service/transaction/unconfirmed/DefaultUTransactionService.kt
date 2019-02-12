@@ -16,7 +16,6 @@ import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.TransactionValidatorManager
 import io.openfuture.chain.core.service.UTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
-import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.springframework.beans.factory.annotation.Autowired
@@ -75,20 +74,15 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction, uR : UTra
                 return persistUtx
             }
 
-            val savedUtx = if (nodeConfigurator.getConfig().mode == FULL) {
-                val tx = when (uTx) {
-                    is UnconfirmedDelegateTransaction -> DelegateTransaction.of(uTx)
-                    is UnconfirmedTransferTransaction -> TransferTransaction.of(uTx)
-                    is UnconfirmedVoteTransaction -> VoteTransaction.of(uTx)
-                    else -> throw IllegalStateException("Wrong type")
-                }
-                transactionValidatorManager.validate(tx)
-
-                uRepository.saveAndFlush(uTx)
-            } else {
-                uTx
+            val tx = when (uTx) {
+                is UnconfirmedDelegateTransaction -> DelegateTransaction.of(uTx)
+                is UnconfirmedTransferTransaction -> TransferTransaction.of(uTx)
+                is UnconfirmedVoteTransaction -> VoteTransaction.of(uTx)
+                else -> throw IllegalStateException("Wrong type")
             }
+            transactionValidatorManager.validate(tx)
 
+            val savedUtx = uRepository.saveAndFlush(uTx)
             networkService.broadcast(savedUtx.toMessage())
             return savedUtx
         } finally {

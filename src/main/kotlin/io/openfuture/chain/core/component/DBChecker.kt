@@ -11,6 +11,7 @@ import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 
 @Component
 class DBChecker(
@@ -21,6 +22,7 @@ class DBChecker(
     private val consensusProperties: ConsensusProperties
 ) {
 
+    @Transactional
     fun prepareDB(syncMode: SyncMode) {
         when (syncMode) {
             FULL -> {
@@ -37,7 +39,8 @@ class DBChecker(
                     blockManager.deleteByHeightIn(range.toList())
                 }
             }
-            LIGHT -> {}
+            LIGHT -> {
+            }
         }
     }
 
