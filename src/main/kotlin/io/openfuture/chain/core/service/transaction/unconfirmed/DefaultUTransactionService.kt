@@ -1,7 +1,6 @@
 package io.openfuture.chain.core.service.transaction.unconfirmed
 
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
-import io.openfuture.chain.core.component.NodeConfigurator
 import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
@@ -29,7 +28,6 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction, uR : UTra
     @Autowired private lateinit var transactionValidatorManager: TransactionValidatorManager
     @Autowired private lateinit var networkService: NetworkApiService
     @Autowired private lateinit var repository: TransactionRepository<Transaction>
-    @Autowired private lateinit var nodeConfigurator: NodeConfigurator
 
 
     override fun getAll(): List<uT> {
