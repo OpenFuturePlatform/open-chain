@@ -2,18 +2,16 @@ package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
+import io.openfuture.chain.core.component.NodeConfigurator
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.component.TransactionThroughput
-import io.openfuture.chain.core.exception.NotFoundException
-import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
@@ -22,119 +20,87 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.repository.GenesisBlockRepository
 import io.openfuture.chain.core.repository.MainBlockRepository
-import io.openfuture.chain.core.service.*
+import io.openfuture.chain.core.service.MainBlockService
+import io.openfuture.chain.core.service.ReceiptService
+import io.openfuture.chain.core.service.StateManager
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.core.sync.BlockchainLock
+import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
-import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.*
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.math.max
 
 @Service
+@Transactional(readOnly = true)
 class DefaultMainBlockService(
-    private val blockService: BlockService,
     private val repository: MainBlockRepository,
     private val stateManager: StateManager,
     private val keyHolder: NodeKeyHolder,
+    private val nodeConfigurator: NodeConfigurator,
     private val throughput: TransactionThroughput,
     private val statePool: StatePool,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository,
     private val transactionManager: TransactionManager,
     private val receiptService: ReceiptService
-) : MainBlockService {
-
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(DefaultMainBlockService::class.java)
-    }
-
-
-    @Transactional(readOnly = true)
-    override fun getByHash(hash: String): MainBlock = repository.findOneByHash(hash)
-        ?: throw NotFoundException("Block $hash not found")
-
-    @Transactional(readOnly = true)
-    override fun getNextBlock(hash: String): MainBlock = repository.findFirstByHeightGreaterThan(getByHash(hash).height)
-        ?: throw NotFoundException("Block after $hash not found")
-
-    @Transactional(readOnly = true)
-    override fun getPreviousBlock(hash: String): MainBlock =
-        repository.findFirstByHeightLessThanOrderByHeightDesc(getByHash(hash).height)
-            ?: throw NotFoundException("Block before $hash not found")
-
-    @Transactional(readOnly = true)
-    override fun getAll(request: PageRequest): Page<MainBlock> = repository.findAll(request)
+) : DefaultBlockService<MainBlock, MainBlockRepository>(repository), MainBlockService {
 
     @BlockchainSynchronized
-    @Transactional(readOnly = true)
-    override fun create(): PendingBlockMessage {
+    override fun create(): MainBlock {
         BlockchainLock.readLock.lock()
         try {
             val timestamp = System.currentTimeMillis()
-            val lastBlock = blockService.getLast()
+            val lastBlock = getLastBlock()
             val height = lastBlock.height + 1
             val previousHash = lastBlock.hash
             val publicKey = keyHolder.getPublicKeyAsHexString()
             val delegate = stateManager.getLastByAddress<DelegateState>(publicKey)
 
-            var fees = 0L
-            val transactionHashes = mutableListOf<String>()
-            val transactionsForBlock = getTransactions()
 
-            val voteTransactions = mutableListOf<VoteTransactionMessage>()
-            val delegateTransactions = mutableListOf<DelegateTransactionMessage>()
-            val transferTransactions = mutableListOf<TransferTransactionMessage>()
+            val unconfirmedTransactions = getTransactions()
+            val delegateTransactions = mutableListOf<DelegateTransaction>()
+            val transferTransactions = mutableListOf<TransferTransaction>()
+            val voteTransactions = mutableListOf<VoteTransaction>()
 
-            transactionsForBlock.asSequence().forEach {
-                fees += it.fee
-                transactionHashes.add(it.hash)
+            unconfirmedTransactions.asSequence().forEach {
                 when (it) {
-                    is UnconfirmedVoteTransaction -> voteTransactions.add(it.toMessage())
-                    is UnconfirmedDelegateTransaction -> delegateTransactions.add(it.toMessage())
-                    is UnconfirmedTransferTransaction -> transferTransactions.add(it.toMessage())
+                    is UnconfirmedDelegateTransaction -> delegateTransactions.add(DelegateTransaction.of(it))
+                    is UnconfirmedTransferTransaction -> transferTransactions.add(TransferTransaction.of(it))
+                    is UnconfirmedVoteTransaction -> voteTransactions.add(VoteTransaction.of(it))
                 }
             }
-
+            val fees = unconfirmedTransactions.map { it.fee }.sum()
             val rewardTransaction = transactionManager.createRewardTransaction(timestamp, fees)
-            val rewardTransactionMessage = rewardTransaction.toMessage()
-            val txMessages = listOf(
-                *voteTransactions.toTypedArray(),
-                *delegateTransactions.toTypedArray(),
-                *transferTransactions.toTypedArray(),
-                rewardTransactionMessage
-            )
 
-            val stateHashes = mutableListOf<String>()
-            val receipts = processTransactions(txMessages, delegate.walletAddress)
+            val transactions = delegateTransactions + transferTransactions + voteTransactions + rewardTransaction
+
+            val receipts = transactionManager.processTransactions(transactions, delegate.walletAddress)
             val states = statePool.getStates()
-            val delegateStates = mutableListOf<DelegateStateMessage>()
-            val accountStates = mutableListOf<AccountStateMessage>()
-
+            val delegateStates = mutableListOf<DelegateState>()
+            val accountStates = mutableListOf<AccountState>()
             states.asSequence().forEach {
-                stateHashes.add(it.hash)
                 when (it) {
-                    is DelegateState -> delegateStates.add(it.toMessage())
-                    is AccountState -> accountStates.add(it.toMessage())
+                    is DelegateState -> delegateStates.add(it)
+                    is AccountState -> accountStates.add(it)
                 }
             }
 
-            val transactionMerkleHash = HashUtils.calculateMerkleRoot(transactionHashes + rewardTransaction.hash)
-            val stateMerkleHash = HashUtils.calculateMerkleRoot(stateHashes)
+            val transactionMerkleHash = HashUtils.calculateMerkleRoot(transactions.map { it.hash })
+            val stateMerkleHash = HashUtils.calculateMerkleRoot(states.map { it.hash })
             val receiptMerkleHash = HashUtils.calculateMerkleRoot(receipts.map { it.hash })
-            val payload = MainBlockPayload(transactionMerkleHash, stateMerkleHash, receiptMerkleHash, rewardTransaction)
+
+            val payload = MainBlockPayload(transactionMerkleHash, stateMerkleHash, receiptMerkleHash,
+                listOf(rewardTransaction), voteTransactions, delegateTransactions, transferTransactions,
+                delegateStates, accountStates, receipts)
+
             val hash = Block.generateHash(timestamp, height, previousHash, payload)
             val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())
 
-            return PendingBlockMessage(height, previousHash, timestamp, hash, signature, publicKey,
-                transactionMerkleHash, stateMerkleHash, receiptMerkleHash, rewardTransactionMessage, voteTransactions,
-                delegateTransactions, transferTransactions, delegateStates, accountStates, receipts.map { it.toMessage() })
+            return MainBlock(timestamp, height, previousHash, hash, signature, publicKey, payload)
         } finally {
             BlockchainLock.readLock.unlock()
         }
@@ -142,47 +108,51 @@ class DefaultMainBlockService(
 
     @Transactional
     @Synchronized
-    override fun add(message: BaseMainBlockMessage) {
+    override fun add(block: MainBlock) {
         BlockchainLock.writeLock.lock()
         try {
-            if (null != repository.findOneByHash(message.hash)) {
+            if (null != repository.findOneByHash(block.hash)) {
                 return
             }
 
-            val block = MainBlock.of(message)
-            block.getPayload().setRewardTransaction()
-            val savedBlock = repository.save(block)
+            val rewardTransaction = block.getPayload().getRewardTransaction()
+            val externalTransactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
+                block.getPayload().voteTransactions
+            val states = block.getPayload().delegateStates + block.getPayload().accountStates
+            val receipts = block.getPayload().receipts
 
-            message.getAllTransactions().forEach {
-                val receipt = message.receipts.find { receipt -> receipt.transactionHash == it.hash }!!
-                val transaction = when (it) {
-                    is RewardTransactionMessage -> RewardTransaction.of(it, savedBlock)
-                    is TransferTransactionMessage -> TransferTransaction.of(it, savedBlock)
-                    is DelegateTransactionMessage -> DelegateTransaction.of(it, savedBlock)
-                    is VoteTransactionMessage -> VoteTransaction.of(it, savedBlock)
-                    else -> throw IllegalStateException("Unsupported transaction type")
-                }
-                transactionManager.commit(transaction, Receipt.of(receipt, block))
+            val savedBlock = save(block)
+
+            rewardTransaction.let {
+                it.block = savedBlock
+                val receipt = receipts.find { receipt -> receipt.transactionHash == it.hash }!!
+                transactionManager.commit(it, receipt)
             }
 
-            message.getAllStates().forEach {
-                val state = when (it) {
-                    is DelegateStateMessage -> DelegateState.of(it, block)
-                    is AccountStateMessage -> AccountState.of(it, block)
-                    else -> throw IllegalStateException("Unsupported state type")
-                }
-                stateManager.commit(state)
+            states.forEach {
+                it.block = savedBlock
+                stateManager.commit(it)
             }
 
-            message.receipts.forEach { receiptService.commit(Receipt.of(it, block)) }
+            if (nodeConfigurator.getConfig().mode == FULL) {
+                externalTransactions.forEach {
+                    it.block = savedBlock
+                    val receipt = receipts.find { receipt -> receipt.transactionHash == it.hash }!!
+                    transactionManager.commit(it, receipt)
+                }
+                receipts.forEach {
+                    it.block = savedBlock
+                    receiptService.commit(it)
+                }
+            }
 
-            throughput.updateThroughput(message.getAllTransactions().size, savedBlock.height)
+            val transactions = externalTransactions + rewardTransaction
+            throughput.updateThroughput(transactions.size, savedBlock.height)
         } finally {
             BlockchainLock.writeLock.unlock()
         }
     }
 
-    @Transactional(readOnly = true)
     override fun getBlocksByEpochIndex(epochIndex: Long): List<MainBlock> {
         val genesisBlock = genesisBlockRepository.findOneByPayloadEpochIndex(epochIndex) ?: return emptyList()
         val beginHeight = genesisBlock.height + 1
@@ -202,18 +172,9 @@ class DefaultMainBlockService(
         return blocks
     }
 
-    private fun processTransactions(txMessages: List<TransactionMessage>, delegateWallet: String): List<Receipt> {
-        val transactions = txMessages.map {
-            when (it) {
-                is TransferTransactionMessage -> TransferTransaction.of(it)
-                is VoteTransactionMessage -> VoteTransaction.of(it)
-                is DelegateTransactionMessage -> DelegateTransaction.of(it)
-                is RewardTransactionMessage -> RewardTransaction.of(it)
-                else -> throw IllegalStateException("Unsupported transaction type")
-            }
-        }
-
-        return transactionManager.processTransactions(transactions, delegateWallet)
+    private fun save(block: MainBlock): MainBlock {
+        block.getPayload().setRewardTransaction()
+        return repository.save(block)
     }
 
     private fun getTransactions(): List<UnconfirmedTransaction> {

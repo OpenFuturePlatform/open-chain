@@ -1,6 +1,6 @@
 package io.openfuture.chain.rpc.controller
 
-import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.BlockManager
 import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
@@ -19,7 +19,7 @@ import javax.validation.Valid
 @RequestMapping("/rpc/delegates")
 class DelegateController(
     private val stateManager: StateManager,
-    private val genesisBlockService: GenesisBlockService
+    private val blockManager: BlockManager
 ) {
 
     @GetMapping
@@ -30,7 +30,7 @@ class DelegateController(
 
     @GetMapping("/active")
     fun getAllActive(@Valid request: PageRequest): PageResponse<DelegateResponse> {
-        val activeDelegates = genesisBlockService.getLast().getPayload().activeDelegates.map {
+        val activeDelegates = blockManager.getLastGenesisBlock().getPayload().activeDelegates.map {
             DelegateResponse(stateManager.getLastByAddress(it))
         }
 

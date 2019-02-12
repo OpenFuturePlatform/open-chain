@@ -4,7 +4,7 @@ import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
-import io.openfuture.chain.core.service.MainBlockService
+import io.openfuture.chain.core.service.BlockManager
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import io.openfuture.chain.rpc.domain.block.MainBlockResponse
@@ -19,7 +19,7 @@ import org.springframework.data.domain.PageImpl
 class MainBlockControllerTests : ControllerTests() {
 
     @MockBean
-    private lateinit var service: MainBlockService
+    private lateinit var blockManager: BlockManager
 
     @MockBean
     private lateinit var epochService: EpochService
@@ -34,7 +34,7 @@ class MainBlockControllerTests : ControllerTests() {
         val pageMainBlocks = PageImpl(listOf(createMainBlock()))
         val expectedPageResponse = PageResponse(pageMainBlocks)
 
-        given(service.getAll(PageRequest())).willReturn(pageMainBlocks)
+        given(blockManager.getAllMainBlocks(PageRequest())).willReturn(pageMainBlocks)
 
         val actualPageResponse = webClient.get().uri(MAIN_BLOCK_URL)
             .exchange()
@@ -54,7 +54,7 @@ class MainBlockControllerTests : ControllerTests() {
         val mainBlock = createMainBlock()
         val expectedMainBlockResponse = MainBlockResponse(mainBlock, epochIndex)
 
-        given(service.getByHash(hash)).willReturn(mainBlock)
+        given(blockManager.getMainBlockByHash(hash)).willReturn(mainBlock)
         given(epochService.getEpochByBlock(mainBlock)).willReturn(epochIndex)
 
         val actualMainBlockResponse = webClient.get().uri("$MAIN_BLOCK_URL/$hash")
@@ -73,7 +73,7 @@ class MainBlockControllerTests : ControllerTests() {
         val mainBlock = createMainBlock()
         val expectedMainBlockResponse = MainBlockResponse(mainBlock, epochIndex)
 
-        given(service.getNextBlock(hash)).willReturn(mainBlock)
+        given(blockManager.getNextMainBlock(hash)).willReturn(mainBlock)
         given(epochService.getEpochByBlock(mainBlock)).willReturn(epochIndex)
 
         val actualMainBlockResponse = webClient.get().uri("$MAIN_BLOCK_URL/$hash/next")
@@ -92,7 +92,7 @@ class MainBlockControllerTests : ControllerTests() {
         val mainBlock = createMainBlock()
         val expectedMainBlockResponse = MainBlockResponse(mainBlock, epochIndex)
 
-        given(service.getPreviousBlock(hash)).willReturn(mainBlock)
+        given(blockManager.getPreviousMainBlock(hash)).willReturn(mainBlock)
         given(epochService.getEpochByBlock(mainBlock)).willReturn(epochIndex)
 
         val actualMainBlockResponse = webClient.get().uri("$MAIN_BLOCK_URL/$hash/previous")

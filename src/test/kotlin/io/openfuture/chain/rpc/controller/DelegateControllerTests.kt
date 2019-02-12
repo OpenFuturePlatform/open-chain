@@ -6,7 +6,7 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.state.DelegateState
-import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.BlockManager
 import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
@@ -24,7 +24,7 @@ class DelegateControllerTests : ControllerTests() {
     private lateinit var stateManager: StateManager
 
     @MockBean
-    private lateinit var genesisBlockService: GenesisBlockService
+    private lateinit var blockManager: BlockManager
 
 
     @Test
@@ -60,7 +60,7 @@ class DelegateControllerTests : ControllerTests() {
             "publicKey", MainBlockPayload("merkleHash", "stateHash", "receiptHash")))
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
 
-        given(genesisBlockService.getLast()).willReturn(genesisBlock)
+        given(blockManager.getLastGenesisBlock()).willReturn(genesisBlock)
         given(stateManager.getLastByAddress<DelegateState>(publicKey)).willReturn(delegate)
 
         val actualPageResponse = webClient.get().uri("/rpc/delegates/active")

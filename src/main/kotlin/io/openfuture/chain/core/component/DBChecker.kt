@@ -3,7 +3,7 @@ package io.openfuture.chain.core.component
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.service.BlockService
+import io.openfuture.chain.core.service.BlockManager
 import io.openfuture.chain.core.service.ReceiptService
 import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.service.TransactionManager
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class DBChecker(
-    private val blockService: BlockService,
+    private val blockManager: BlockManager,
     private val transactionManager: TransactionManager,
     private val stateManager: StateManager,
     private val receiptService: ReceiptService,
@@ -26,7 +26,7 @@ class DBChecker(
 ) {
 
     fun prepareDB(syncMode: SyncMode): Boolean {
-        val lastBlockHeight = blockService.getLast().height
+        val lastBlockHeight = blockManager.getLast().height
         val validBlockHeight = lastValidBlockHeight(syncMode)
         if (validBlockHeight < lastBlockHeight) {
             deleteInvalidChainPart(validBlockHeight, lastBlockHeight)
@@ -37,7 +37,7 @@ class DBChecker(
 
     private fun deleteInvalidChainPart(height: Long, heightTo: Long) {
         val heightsForDelete = LongRange(height + 1, heightTo).toList()
-        blockService.deleteByHeightIn(heightsForDelete)
+        blockManager.deleteByHeightIn(heightsForDelete)
     }
 
     private fun lastValidBlockHeight(syncMode: SyncMode): Long {
@@ -45,9 +45,9 @@ class DBChecker(
         var indexFrom = 1L
         var indexTo = indexFrom + epochHeight
         var heights = (indexFrom..indexTo).toList()
-        var blocks = blockService.getAllByHeightIn(heights).toMutableList()
+        var blocks = blockManager.getAllByHeightIn(heights).toMutableList()
         var result = blocks.first()
-        val lastChainBlock = blockService.getLast()
+        val lastChainBlock = blockManager.getLast()
         while (!blocks.isEmpty()) {
             result = validateEpoch(blocks, syncMode) ?: result
             if (result != blocks.last()) {
@@ -56,7 +56,7 @@ class DBChecker(
             indexFrom += indexTo
             indexTo += epochHeight
             heights = (indexFrom..indexTo).toList()
-            blocks = blockService.getAllByHeightIn(heights).toMutableList()
+            blocks = blockManager.getAllByHeightIn(heights).toMutableList()
         }
 
         return if (!isValidBlock(lastChainBlock, syncMode)) {

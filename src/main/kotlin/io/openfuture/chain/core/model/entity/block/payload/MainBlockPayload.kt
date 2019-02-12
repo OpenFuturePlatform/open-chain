@@ -49,11 +49,6 @@ class MainBlockPayload(
 
 ) : BlockPayload {
 
-    constructor(transactionMerkleHash: String, stateMerkleHash: String, receiptMerkleHash: String,
-                rewardTransaction: RewardTransaction) : this(
-        transactionMerkleHash, stateMerkleHash, receiptMerkleHash, listOf(rewardTransaction)
-    )
-
     fun getRewardTransaction(): RewardTransaction = rewardTransactions.first()
 
     fun setRewardTransaction(rewardTransaction: RewardTransaction? = null) {

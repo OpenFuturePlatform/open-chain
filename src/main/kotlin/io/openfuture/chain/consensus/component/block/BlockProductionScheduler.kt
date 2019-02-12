@@ -2,12 +2,12 @@ package io.openfuture.chain.consensus.component.block
 
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.service.GenesisBlockService
-import io.openfuture.chain.core.service.MainBlockService
+import io.openfuture.chain.core.service.BlockManager
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.sync.SyncStatus.SYNCHRONIZED
 import io.openfuture.chain.network.component.time.ClockChecker
 import io.openfuture.chain.network.component.time.ClockSyncStatus.NOT_SYNCHRONIZED
+import io.openfuture.chain.network.message.consensus.PendingBlockMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -20,8 +20,7 @@ import javax.annotation.PostConstruct
 class BlockProductionScheduler(
     private val keyHolder: NodeKeyHolder,
     private val epochService: EpochService,
-    private val mainBlockService: MainBlockService,
-    private val genesisBlockService: GenesisBlockService,
+    private val blockManager: BlockManager,
     private val pendingBlockHandler: PendingBlockHandler,
     private val chainSynchronizer: ChainSynchronizer,
     private val clockChecker: ClockChecker
@@ -54,14 +53,14 @@ class BlockProductionScheduler(
 
             val slotOwner = epochService.getCurrentSlotOwner()
             log.debug("CONSENSUS: Slot owner $slotOwner")
-            if (genesisBlockService.isGenesisBlockRequired()) {
-                val genesisBlock = genesisBlockService.create()
-                genesisBlockService.add(genesisBlock)
+            if (blockManager.isGenesisBlockRequired()) {
+                val genesisBlock = blockManager.createGenesisBlock()
+                blockManager.addGenesisBlock(genesisBlock)
                 log.debug("CONSENSUS: Saving genesis block with hash = ${genesisBlock.hash}")
                 pendingBlockHandler.resetSlotNumber()
             } else if (keyHolder.getPublicKeyAsHexString() == slotOwner) {
-                val block = mainBlockService.create()
-                pendingBlockHandler.addBlock(block)
+                val block = blockManager.createMainBlock()
+                pendingBlockHandler.addBlock(PendingBlockMessage(block.toMessage()))
             }
         } catch (ex: Exception) {
             log.error("Block creation failure inbound: ${ex.message}")

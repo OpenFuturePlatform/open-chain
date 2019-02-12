@@ -10,8 +10,7 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTrans
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import io.openfuture.chain.core.service.BlockService
-import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.BlockManager
 import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncStatus.*
@@ -42,9 +41,8 @@ import javax.xml.bind.ValidationException
 class ChainSynchronizer(
     private val properties: NodeProperties,
     private val addressesHolder: AddressesHolder,
-    private val blockService: BlockService,
+    private val blockManager: BlockManager,
     private val networkApiService: NetworkApiService,
-    private val genesisBlockService: GenesisBlockService,
     private val transactionManager: TransactionManager,
     private val epochService: EpochService,
     private val requestRetryScheduler: RequestRetryScheduler,
@@ -77,7 +75,7 @@ class ChainSynchronizer(
 
     fun onEpochResponse(message: EpochResponseMessage) {
         future?.cancel(true)
-        val delegates = genesisBlockService.getLast().getPayload().activeDelegates
+        val delegates = blockManager.getLastGenesisBlock().getPayload().activeDelegates
         try {
             if (!message.isEpochExists) {
                 requestEpoch(delegates.filter { it != message.delegateKey })
@@ -108,7 +106,7 @@ class ChainSynchronizer(
     }
 
     fun isInSync(block: Block): Boolean {
-        val lastBlock = blockService.getLast()
+        val lastBlock = blockManager.getLast()
         if (lastBlock.hash == block.hash) {
             return true
         }
@@ -122,7 +120,7 @@ class ChainSynchronizer(
             return
         }
         status = PROCESSING
-        val block = blockService.getLast()
+        val block = blockManager.getLast()
         checkBlock(block)
         future = requestRetryScheduler.startRequestScheduler(future, Runnable { checkBlock(block) })
     }
@@ -130,28 +128,28 @@ class ChainSynchronizer(
     fun onBlockAvailabilityResponse(response: BlockAvailabilityResponse) {
         future?.cancel(true)
         if (-1L == response.height) {
-            val invalidGenesisBlock = genesisBlockService.getLast()
+            val invalidGenesisBlock = blockManager.getLastGenesisBlock()
             log.info("Rolling back epoch #${invalidGenesisBlock.getPayload().epochIndex}")
-            blockService.removeEpoch(invalidGenesisBlock)
-            val lastGenesisBlock = genesisBlockService.getLast()
+            blockManager.removeEpoch(invalidGenesisBlock)
+            val lastGenesisBlock = blockManager.getLastGenesisBlock()
             val requestedBlock = if (1L == lastGenesisBlock.height) {
-                blockService.getLast()
+                blockManager.getLast()
             } else {
                 lastGenesisBlock
             }
             checkBlock(requestedBlock)
             future = requestRetryScheduler.startRequestScheduler(future, Runnable { checkBlock(lastGenesisBlock) })
         } else {
-            val lastGenesisBlock = response.genesisBlock ?: genesisBlockService.getLast().toMessage()
+            val lastGenesisBlock = response.genesisBlock ?: blockManager.getLastGenesisBlock().toMessage()
             initSync(lastGenesisBlock)
         }
     }
 
     private fun initSync(message: GenesisBlockMessage) {
-        val delegates = genesisBlockService.getLast().getPayload().activeDelegates
+        val delegates = blockManager.getLastGenesisBlock().getPayload().activeDelegates
         try {
             val currentGenesisBlock = GenesisBlock.of(message)
-            val lastLocalGenesisBlock = genesisBlockService.getLast()
+            val lastLocalGenesisBlock = blockManager.getLastGenesisBlock()
 
             if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
                 syncSession = SyncSession(nodeConfigurator.getConfig().mode, lastLocalGenesisBlock, currentGenesisBlock)
@@ -274,11 +272,11 @@ class ChainSynchronizer(
 
     private fun saveBlocks() {
         try {
-            val lastLocalBlock = blockService.getLast()
+            val lastLocalBlock = blockManager.getLast()
             val filteredStorage = syncSession!!.getStorage().filter { it.height > lastLocalBlock.height }
 
             filteredStorage.asReversed().chunked(properties.syncBatchSize!!).forEach {
-                blockService.saveChunk(it, syncSession!!.syncMode)
+                blockManager.saveChunk(it)
                 log.info("Blocks saved till ${it.last().height} from ${filteredStorage.first().height}")
             }
 
@@ -307,7 +305,7 @@ class ChainSynchronizer(
     }
 
     private fun expired() {
-        val lastGenesisBlock = genesisBlockService.getLast()
+        val lastGenesisBlock = blockManager.getLastGenesisBlock()
         if (null == syncSession) {
             checkBlock(lastGenesisBlock)
         } else {

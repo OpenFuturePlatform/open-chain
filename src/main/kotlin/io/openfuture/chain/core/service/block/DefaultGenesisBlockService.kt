@@ -8,75 +8,58 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.repository.GenesisBlockRepository
-import io.openfuture.chain.core.service.BlockService
 import io.openfuture.chain.core.service.GenesisBlockService
 import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.handler.sync.EpochResponseHandler
-import io.openfuture.chain.network.message.sync.GenesisBlockMessage
-import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional(readOnly = true)
 class DefaultGenesisBlockService(
-    private val blockService: BlockService,
+    private val repository: GenesisBlockRepository,
     private val stateManager: StateManager,
     private val keyHolder: NodeKeyHolder,
-    private val consensusProperties: ConsensusProperties,
-    private val repository: GenesisBlockRepository
-) : GenesisBlockService {
+    private val consensusProperties: ConsensusProperties
+) : DefaultBlockService<GenesisBlock, GenesisBlockRepository>(repository), GenesisBlockService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(EpochResponseHandler::class.java)
     }
 
 
-    @Transactional(readOnly = true)
     override fun getPreviousByHeight(height: Long): GenesisBlock = repository.findFirstByHeightLessThanOrderByHeightDesc(height)
         ?: throw NotFoundException("Previous block by height $height not found")
 
-    @Transactional(readOnly = true)
-    override fun getByHash(hash: String): GenesisBlock = repository.findOneByHash(hash)
-        ?: throw NotFoundException("Block $hash not found")
-
-    @Transactional(readOnly = true)
-    override fun getNextBlock(hash: String): GenesisBlock {
-        val block = getByHash(hash)
-
-        return repository.findFirstByHeightGreaterThan(block.height)
-            ?: throw NotFoundException("Next block by hash $hash not found")
-    }
-
-    @Transactional(readOnly = true)
-    override fun getPreviousBlock(hash: String): GenesisBlock {
-        val block = getByHash(hash)
-
-        return getPreviousByHeight(block.height)
-    }
-
-    @Transactional(readOnly = true)
-    override fun getAll(request: PageRequest): Page<GenesisBlock> = repository.findAll(request)
-
     override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()
 
-    @Transactional(readOnly = true)
     override fun findByEpochIndex(epochIndex: Long): GenesisBlock? =
         repository.findOneByPayloadEpochIndex(epochIndex)
+
+    override fun isGenesisBlockRequired(): Boolean {
+        BlockchainLock.readLock.lock()
+        try {
+            val blocksProduced = blockRepository.getCurrentHeight() - getLast().height
+            return (consensusProperties.epochHeight!!) <= blocksProduced
+        } finally {
+            BlockchainLock.readLock.unlock()
+        }
+    }
 
     @BlockchainSynchronized
     @Transactional
     override fun create(): GenesisBlock {
-        val lastBlock = blockService.getLast()
-        val timestamp = getTimestamp()
+        val last = getLast()
+        val lastBlock = getLastBlock()
+        val timestamp = getTimestamp(last, lastBlock)
         val height = lastBlock.height + 1
         val previousHash = lastBlock.hash
-        val payload = createPayload()
+        val payload = createPayload(last)
         val hash = Block.generateHash(timestamp, height, previousHash, payload)
         val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())
         val publicKey = keyHolder.getPublicKeyAsHexString()
@@ -87,43 +70,26 @@ class DefaultGenesisBlockService(
     @Transactional
     @Synchronized
     override fun add(block: GenesisBlock) {
+        if (null != repository.findOneByHash(block.hash)) {
+            return
+        }
+
         repository.save(block)
         log.debug("Saving genesis block: height #${block.height}, hash ${block.hash}")
     }
 
-    @Transactional
-    @Synchronized
-    override fun add(message: GenesisBlockMessage) {
-        if (null != repository.findOneByHash(message.hash)) {
-            return
-        }
-
-        add(GenesisBlock.of(message))
+    private fun getTimestamp(last: GenesisBlock, lastBlock: Block): Long {
+        val nextTimeSlot = ((lastBlock.timestamp - last.timestamp) / consensusProperties.getPeriod()) + 1
+        return last.timestamp + consensusProperties.getPeriod() * nextTimeSlot
     }
 
-    override fun isGenesisBlockRequired(): Boolean {
-        BlockchainLock.readLock.lock()
-        try {
-            val blocksProduced = blockService.getCurrentHeight() - getLast().height
-            return (consensusProperties.epochHeight!!) <= blocksProduced
-        } finally {
-            BlockchainLock.readLock.unlock()
-        }
-    }
-
-    private fun getTimestamp(): Long {
-        val lastBlock = blockService.getLast()
-        val nextTimeSlot = ((lastBlock.timestamp - getLast().timestamp) / consensusProperties.getPeriod()) + 1
-        return getLast().timestamp + consensusProperties.getPeriod() * nextTimeSlot
-    }
-
-    private fun createPayload(): GenesisBlockPayload {
+    private fun createPayload(last: GenesisBlock): GenesisBlockPayload {
         val firstGenesisBlock = repository.findOneByPayloadEpochIndex(1)!!
         val genesisDelegates = firstGenesisBlock.getPayload().activeDelegates
-        val epochIndex = getLast().getPayload().epochIndex + 1
+        val epochIndex = last.getPayload().epochIndex + 1
         val delegates = stateManager.getActiveDelegates().map { it.address }.toMutableSet()
         delegates.addAll(genesisDelegates)
-        return GenesisBlockPayload(epochIndex, delegates.toMutableList())
+        return GenesisBlockPayload(epochIndex, delegates.toList())
     }
 
 }

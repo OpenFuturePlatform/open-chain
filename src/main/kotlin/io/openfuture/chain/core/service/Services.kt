@@ -15,10 +15,6 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.node.*
-import io.openfuture.chain.core.sync.SyncMode
-import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.BaseMainBlockMessage
-import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.springframework.data.domain.Page
 
@@ -36,71 +32,90 @@ interface HardwareInfoService {
 
 }
 
-/** Common block info service */
-interface BlockService {
+interface BlockManager {
 
     fun getCount(): Long
 
     fun getLast(): Block
 
-    fun save(block: Block)
-
-    fun removeEpoch(genesisBlock: GenesisBlock)
-
-    fun saveChunk(blocksChunk: List<Block>, syncMode: SyncMode)
-
-    fun getAfterCurrentHash(hash: String): List<Block>
-
     fun findByHash(hash: String): Block?
 
     fun getAvgProductionTime(): Long
 
-    fun getCurrentHeight(): Long
-
     fun getAllByHeightIn(heights: List<Long>): List<Block>
 
+    fun getGenesisBlockByHash(hash: String): GenesisBlock
+
+    fun getMainBlockByHash(hash: String): MainBlock
+
+    fun getAllGenesisBlocks(request: PageRequest): Page<GenesisBlock>
+
+    fun getAllMainBlocks(request: PageRequest): Page<MainBlock>
+
+    fun getPreviousGenesisBlock(hash: String): GenesisBlock
+
+    fun getPreviousMainBlock(hash: String): MainBlock
+
+    fun getNextGenesisBlock(hash: String): GenesisBlock
+
+    fun getNextMainBlock(hash: String): MainBlock
+
+    fun getPreviousGenesisBlockByHeight(height: Long): GenesisBlock
+
+    fun getLastGenesisBlock(): GenesisBlock
+
+    fun findGenesisBlockByEpochIndex(epochIndex: Long): GenesisBlock?
+
+    fun isGenesisBlockRequired(): Boolean
+
+    fun getMainBlocksByEpochIndex(epochIndex: Long): List<MainBlock>
+
+    fun createGenesisBlock(): GenesisBlock
+
+    fun createMainBlock(): MainBlock
+
+    fun addGenesisBlock(block: GenesisBlock)
+
+    fun addMainBlock(block: MainBlock)
+
     fun deleteByHeightIn(heights: List<Long>)
+
+    fun saveChunk(blocksChunk: List<Block>)
+
+    fun removeEpoch(genesisBlock: GenesisBlock)
+
+    fun verify(block: Block, lastBlock: Block, new: Boolean = true): Boolean
 }
 
-interface GenesisBlockService {
+interface BlockService<T : Block> {
 
-    fun getByHash(hash: String): GenesisBlock
+    fun getByHash(hash: String): T
 
-    fun getAll(request: PageRequest): Page<GenesisBlock>
+    fun getAll(request: PageRequest): Page<T>
+
+    fun getPreviousBlock(hash: String): T
+
+    fun getNextBlock(hash: String): T
+
+    fun create(): T
+
+    fun add(block: T)
+
+}
+
+interface GenesisBlockService : BlockService<GenesisBlock> {
+
+    fun getPreviousByHeight(height: Long): GenesisBlock
 
     fun getLast(): GenesisBlock
 
     fun findByEpochIndex(epochIndex: Long): GenesisBlock?
 
-    fun create(): GenesisBlock
-
-    fun add(block: GenesisBlock)
-
-    fun getPreviousByHeight(height: Long): GenesisBlock
-
-    fun getNextBlock(hash: String): GenesisBlock
-
-    fun getPreviousBlock(hash: String): GenesisBlock
-
     fun isGenesisBlockRequired(): Boolean
-
-    fun add(message: GenesisBlockMessage)
 
 }
 
-interface MainBlockService {
-
-    fun getByHash(hash: String): MainBlock
-
-    fun getAll(request: PageRequest): Page<MainBlock>
-
-    fun create(): PendingBlockMessage
-
-    fun add(message: BaseMainBlockMessage)
-
-    fun getPreviousBlock(hash: String): MainBlock
-
-    fun getNextBlock(hash: String): MainBlock
+interface MainBlockService : BlockService<MainBlock> {
 
     fun getBlocksByEpochIndex(epochIndex: Long): List<MainBlock>
 
@@ -108,7 +123,7 @@ interface MainBlockService {
 
 interface BlockValidatorManager {
 
-    fun verify(block: Block, lastBlock: Block, new: Boolean = true): Boolean
+    fun verify(block: Block, lastBlock: Block, new: Boolean): Boolean
 
 }
 

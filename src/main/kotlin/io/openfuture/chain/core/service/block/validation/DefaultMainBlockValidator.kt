@@ -33,12 +33,12 @@ class DefaultMainBlockValidator(
         checkReceiptMerkleHash(block)
         if (new) {
             checkBalances(block)
-            checkReceiptsAndStates(block)
         }
         checkRewardTransaction(block)
         checkDelegateTransactions(block)
         checkTransferTransactions(block)
         checkVoteTransactions(block, new)
+        checkReceiptsAndStates(block, new)
     }
 
     private fun checkBalances(block: MainBlock) {
@@ -84,42 +84,47 @@ class DefaultMainBlockValidator(
         }
     }
 
-    private fun checkReceiptsAndStates(block: MainBlock) {
+    private fun checkReceiptsAndStates(block: MainBlock, new: Boolean) {
         val delegateWallet = stateManager.getLastByAddress<DelegateState>(block.publicKey).walletAddress
         val transactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
             block.getPayload().voteTransactions + block.getPayload().getRewardTransaction()
         val blockStates = block.getPayload().delegateStates + block.getPayload().accountStates
 
-        val receipts = transactionManager.processTransactions(transactions, delegateWallet)
-        val states = statePool.getStates()
+        if (new) {
+            val receipts = transactionManager.processTransactions(transactions, delegateWallet)
+            val states = statePool.getStates()
 
-        if (block.getPayload().receipts.size != receipts.size) {
-            throw ValidationException("Invalid count block receipts")
+            if (block.getPayload().receipts.size != receipts.size) {
+                throw ValidationException("Invalid count block receipts")
+            }
+
+            if (blockStates.size != states.size) {
+                throw ValidationException("Invalid count block states")
+            }
+
+            receipts.forEach { r ->
+                block.getPayload().receipts.firstOrNull { it.hash == r.hash }
+                    ?: throw ValidationException("Invalid block receipts")
+            }
+
+            states.forEach { s ->
+                blockStates.firstOrNull { it.hash == s.hash }
+                    ?: throw ValidationException("Invalid block states")
+            }
         }
 
-        if (blockStates.size != states.size) {
-            throw ValidationException("Invalid count block states")
-        }
-
-        receipts.forEach { r ->
-            val receipt = block.getPayload().receipts.firstOrNull { it.hash == r.hash }
-                ?: throw ValidationException("Invalid block receipts")
-
-            if (!receiptService.verify(receipt)) {
+        block.getPayload().receipts.forEach {
+            if (!receiptService.verify(it)) {
                 throw ValidationException("Invalid block receipts")
             }
         }
 
-        states.forEach { s ->
-            val state = blockStates.firstOrNull { it.hash == s.hash }
-                ?: throw ValidationException("Invalid block states")
-
-            if (!stateManager.verify(state)) {
+        blockStates.forEach {
+            if (!stateManager.verify(it)) {
                 throw ValidationException("Invalid block states")
             }
         }
     }
-
 
     private fun checkRewardTransaction(block: MainBlock) {
         val externalTransactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
