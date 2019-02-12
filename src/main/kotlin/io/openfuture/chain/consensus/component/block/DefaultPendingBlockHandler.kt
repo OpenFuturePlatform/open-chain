@@ -4,12 +4,10 @@ import io.openfuture.chain.consensus.component.block.BlockApprovalStage.*
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
-import io.openfuture.chain.core.component.NodeConfigurator
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.BlockManager
 import io.openfuture.chain.core.sync.ChainSynchronizer
-import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.network.message.consensus.BlockApprovalMessage
@@ -27,7 +25,6 @@ class DefaultPendingBlockHandler(
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService,
     private val chainSynchronizer: ChainSynchronizer,
-    private val nodeConfigurator: NodeConfigurator,
     private val properties: ConsensusProperties
 ) : PendingBlockHandler {
 
@@ -137,12 +134,6 @@ class DefaultPendingBlockHandler(
                         }
                         blockManager.addMainBlock(MainBlock.of(it))
                         log.info("Saving main block: height #${it.height}, hash ${it.hash}")
-                        it.delegateTransactions.forEach {
-                            if (it.delegateKey == keyHolder.getPublicKeyAsHexString()) {
-                                nodeConfigurator.setMode(FULL)
-                                chainSynchronizer.prepareDB()
-                            }
-                        }
                     }
                     blockAddedFlag = true
                 }

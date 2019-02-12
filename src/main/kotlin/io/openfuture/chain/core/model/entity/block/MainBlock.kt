@@ -41,7 +41,7 @@ class MainBlock(
                 message.transactionMerkleHash,
                 message.stateMerkleHash,
                 message.receiptMerkleHash,
-                listOf(RewardTransaction.of(message.rewardTransaction)),
+                message.rewardTransactions.map { RewardTransaction.of(it) },
                 message.voteTransactions.map { VoteTransaction.of(it) },
                 message.delegateTransactions.map { DelegateTransaction.of(it) },
                 message.transferTransactions.map { TransferTransaction.of(it) },
@@ -54,7 +54,7 @@ class MainBlock(
 
 
     fun getTransactionsCount(): Int = payload.transferTransactions.size + payload.voteTransactions.size +
-        payload.delegateTransactions.size + 1
+        payload.delegateTransactions.size + payload.rewardTransactions.size
 
     override fun toMessage(): MainBlockMessage = MainBlockMessage(
         height,
@@ -66,7 +66,7 @@ class MainBlock(
         payload.transactionMerkleHash,
         payload.stateMerkleHash,
         payload.receiptMerkleHash,
-        payload.getRewardTransaction().toMessage(),
+        payload.rewardTransactions.map { it.toMessage() },
         payload.voteTransactions.map { it.toMessage() },
         payload.delegateTransactions.map { it.toMessage() },
         payload.transferTransactions.map { it.toMessage() },

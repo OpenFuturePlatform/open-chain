@@ -33,6 +33,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.jdbc.DataSourceSchemaCreatedEvent
 import org.springframework.context.ApplicationListener
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.util.concurrent.ScheduledFuture
 import javax.xml.bind.ValidationException
@@ -62,12 +63,18 @@ class ChainSynchronizer(
 
 
     override fun onApplicationEvent(event: DataSourceSchemaCreatedEvent) {
-        prepareDB()
+        prepareDB(nodeConfigurator.getConfig().mode)
     }
 
-    fun prepareDB() {
+    @EventListener
+    fun eventSyncMode(syncMode: SyncMode) {
+        nodeConfigurator.setMode(syncMode)
+        prepareDB(syncMode)
+    }
+
+    fun prepareDB(syncMode: SyncMode) {
         status = SyncStatus.PROCESSING
-        dbChecker.prepareDB(nodeConfigurator.getConfig().mode)
+        dbChecker.prepareDB(syncMode)
         status = SYNCHRONIZED
     }
 
@@ -191,7 +198,7 @@ class ChainSynchronizer(
     private fun isValidTransactions(blocks: List<MainBlockMessage>): Boolean {
         try {
             blocks.forEach { block ->
-                if (!isValidRewardTransactions(block.rewardTransaction)) {
+                if (!isValidRewardTransactions(block.rewardTransactions.first())) {
                     throw ValidationException("Invalid reward transaction in block: height #${block.height}, hash ${block.hash} ")
                 }
                 if (!isValidDelegateTransactions(block.delegateTransactions)) {

@@ -71,7 +71,7 @@ class DefaultMainBlockValidator(
 
     private fun checkTransactionMerkleHash(block: MainBlock) {
         val transactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
-            block.getPayload().voteTransactions + block.getPayload().getRewardTransaction()
+            block.getPayload().voteTransactions + block.getPayload().rewardTransactions
 
         if (!verifyMerkleRootHash(block.getPayload().transactionMerkleHash, transactions.map { it.hash })) {
             throw ValidationException("Invalid transaction merkle hash in block: height #${block.height}, hash ${block.hash}")
@@ -85,12 +85,24 @@ class DefaultMainBlockValidator(
     }
 
     private fun checkReceiptsAndStates(block: MainBlock, new: Boolean) {
-        val delegateWallet = stateManager.getLastByAddress<DelegateState>(block.publicKey).walletAddress
-        val transactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
-            block.getPayload().voteTransactions + block.getPayload().getRewardTransaction()
         val blockStates = block.getPayload().delegateStates + block.getPayload().accountStates
 
+        blockStates.forEach {
+            if (!stateManager.verify(it)) {
+                throw ValidationException("Invalid block states in block: height #${block.height}, hash ${block.hash}")
+            }
+        }
+
+        block.getPayload().receipts.forEach {
+            if (!receiptService.verify(it)) {
+                throw ValidationException("Invalid block receipts in block: height #${block.height}, hash ${block.hash}")
+            }
+        }
+
         if (new) {
+            val delegateWallet = stateManager.getLastByAddress<DelegateState>(block.publicKey).walletAddress
+            val transactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
+                block.getPayload().voteTransactions + block.getPayload().rewardTransactions
             val receipts = transactionManager.processTransactions(transactions, delegateWallet)
             val states = statePool.getStates()
 
@@ -112,28 +124,17 @@ class DefaultMainBlockValidator(
                     ?: throw ValidationException("Invalid block states in block: height #${block.height}, hash ${block.hash}")
             }
         }
-
-        block.getPayload().receipts.forEach {
-            if (!receiptService.verify(it)) {
-                throw ValidationException("Invalid block receipts in block: height #${block.height}, hash ${block.hash}")
-            }
-        }
-
-        blockStates.forEach {
-            if (!stateManager.verify(it)) {
-                throw ValidationException("Invalid block states in block: height #${block.height}, hash ${block.hash}")
-            }
-        }
     }
 
     private fun checkRewardTransaction(block: MainBlock) {
         val externalTransactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
             block.getPayload().voteTransactions
+        val rewardTransaction = block.getPayload().rewardTransactions.firstOrNull()
+            ?: throw ValidationException("Missing reward transaction in block: height #${block.height}, hash ${block.hash}")
         val fees = externalTransactions.asSequence().map { it.fee }.sum()
-        val rewardTransaction = block.getPayload().getRewardTransaction()
 
         if (!verifyReward(fees, rewardTransaction.getPayload().reward)) {
-            throw ValidationException("Invalid reward transaction in block: height #${block.height}, hash ${block.hash}")
+            throw ValidationException("Invalid fee of reward transaction in block: height #${block.height}, hash ${block.hash}")
         }
 
         if (!transactionManager.verify(rewardTransaction)) {
