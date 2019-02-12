@@ -22,8 +22,8 @@ class DefaultDelegateTransactionValidator(
     override fun validate(tx: DelegateTransaction, new: Boolean) {
         checkFeeDelegateTx(tx)
         checkAmountDelegateTx(tx)
-        checkDelegate(tx)
         if (new) {
+            checkDelegate(tx)
             checkSendRequest(tx)
         }
     }

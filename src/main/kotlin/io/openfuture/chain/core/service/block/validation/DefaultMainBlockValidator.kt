@@ -95,33 +95,33 @@ class DefaultMainBlockValidator(
             val states = statePool.getStates()
 
             if (block.getPayload().receipts.size != receipts.size) {
-                throw ValidationException("Invalid count block receipts")
+                throw ValidationException("Invalid count block receiptsin block: height #${block.height}, hash ${block.hash}")
             }
 
             if (blockStates.size != states.size) {
-                throw ValidationException("Invalid count block states")
+                throw ValidationException("Invalid count block statesin block: height #${block.height}, hash ${block.hash}")
             }
 
             receipts.forEach { r ->
                 block.getPayload().receipts.firstOrNull { it.hash == r.hash }
-                    ?: throw ValidationException("Invalid block receipts")
+                    ?: throw ValidationException("Invalid block receipts in block: height #${block.height}, hash ${block.hash}")
             }
 
             states.forEach { s ->
                 blockStates.firstOrNull { it.hash == s.hash }
-                    ?: throw ValidationException("Invalid block states")
+                    ?: throw ValidationException("Invalid block states in block: height #${block.height}, hash ${block.hash}")
             }
         }
 
         block.getPayload().receipts.forEach {
             if (!receiptService.verify(it)) {
-                throw ValidationException("Invalid block receipts")
+                throw ValidationException("Invalid block receipts in block: height #${block.height}, hash ${block.hash}")
             }
         }
 
         blockStates.forEach {
             if (!stateManager.verify(it)) {
-                throw ValidationException("Invalid block states")
+                throw ValidationException("Invalid block states in block: height #${block.height}, hash ${block.hash}")
             }
         }
     }
