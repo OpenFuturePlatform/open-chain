@@ -2,6 +2,7 @@ package io.openfuture.chain.core.component
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.BlockManager
 import io.openfuture.chain.core.service.ReceiptService
@@ -25,14 +26,60 @@ class DBChecker(
     private val consensusProperties: ConsensusProperties
 ) {
 
-    fun prepareDB(syncMode: SyncMode): Boolean {
-        val lastBlockHeight = blockManager.getLast().height
-        val validBlockHeight = lastValidBlockHeight(syncMode)
-        if (validBlockHeight < lastBlockHeight) {
-            deleteInvalidChainPart(validBlockHeight, lastBlockHeight)
-            return false
+//    fun prepareDB(syncMode: SyncMode): Boolean {
+//        val lastBlockHeight = blockManager.getLast().height
+//        val validBlockHeight = lastValidBlockHeight(syncMode)
+//        if (validBlockHeight < lastBlockHeight) {
+//            deleteInvalidChainPart(validBlockHeight, lastBlockHeight)
+//            return false
+//        }
+//        return true
+//    }
+
+    fun prepareDB(syncMode: SyncMode) {
+        when (syncMode) {
+            FULL -> {
+                val lastBlock = blockManager.getLast()
+                val lastGenesisBlock = lastBlock as? GenesisBlock
+                    ?: blockManager.getPreviousGenesisBlockByHeight(lastBlock.height)
+                val lastEpochIndex = lastGenesisBlock.getPayload().epochIndex
+
+                val lastValidBlockHeight = lastValidBlockHeightByFullMode(lastEpochIndex)
+
+                val failBlockHeight = lastValidBlockHeight + 1L
+                if (failBlockHeight <= lastBlock.height) {
+                    val range = LongRange(failBlockHeight, lastBlock.height)
+                    blockManager.deleteByHeightIn(range.toList())
+                }
+            }
+            LIGHT -> TODO()
         }
-        return true
+    }
+
+    private fun lastValidBlockHeightByFullMode(lastEpochIndex: Long): Long {
+        val epochHeight = consensusProperties.epochHeight!!
+        var lastValidBlockHeight = 1L
+        loop@ for (epochIndex in 1L..lastEpochIndex) {
+            val genesisBlock = blockManager.findGenesisBlockByEpochIndex(epochIndex)!!
+
+            var previousBlock: Block = genesisBlock
+            val blocks = blockManager.getMainBlocksByEpochIndex(epochIndex)
+
+            if (blocks.isEmpty()) continue
+
+            for (index in 1..blocks.size) {
+                lastValidBlockHeight = ((epochIndex - 1L) * epochHeight) + index
+
+                val block = blocks[index - 1]
+                if (!blockManager.verify(block, previousBlock, false)) {
+                    break@loop
+                }
+
+                previousBlock = block
+            }
+        }
+
+        return lastValidBlockHeight
     }
 
     private fun deleteInvalidChainPart(height: Long, heightTo: Long) {
