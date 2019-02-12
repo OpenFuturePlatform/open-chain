@@ -5,6 +5,7 @@ import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.block.TemporaryBlock
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
@@ -46,6 +47,8 @@ interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
     @Query(value = "SELECT height FROM blocks ORDER BY height DESC LIMIT 1", nativeQuery = true)
     fun getCurrentHeight(): Long
 
+/*    @Query(value = "SELECT b FROM Block b LEFT JOIN ")
+    fun getAll(pageable: Pageable): List<Block>*/
 }
 
 @Repository
@@ -174,5 +177,12 @@ interface ReceiptRepository : BaseRepository<Receipt> {
     fun findOneByTransactionHash(hash: String): Receipt?
 
     fun deleteAllByBlockHeightIn(heights: List<Long>)
+
+}
+
+@Repository
+interface TemporaryBlockRepository : BaseRepository<TemporaryBlock> {
+
+    fun findByHeightIn(heights: List<Long>): List<TemporaryBlock>
 
 }

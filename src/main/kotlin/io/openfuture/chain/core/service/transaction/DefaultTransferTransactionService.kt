@@ -17,6 +17,7 @@ import io.openfuture.chain.core.repository.UTransferTransactionRepository
 import io.openfuture.chain.core.service.ContractService
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
+import io.openfuture.chain.core.util.SerializationUtils.serialize
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
@@ -29,7 +30,6 @@ import io.openfuture.chain.smartcontract.component.validation.SmartContractValid
 import io.openfuture.chain.smartcontract.deploy.calculation.ContractCostCalculator
 import io.openfuture.chain.smartcontract.execution.ContractExecutor
 import io.openfuture.chain.smartcontract.model.Abi
-import io.openfuture.chain.smartcontract.util.SerializationUtils.serialize
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.fromHexString
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.toHexString

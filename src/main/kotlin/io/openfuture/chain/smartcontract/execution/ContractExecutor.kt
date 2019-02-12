@@ -2,12 +2,12 @@ package io.openfuture.chain.smartcontract.execution
 
 import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.service.ContractService
+import io.openfuture.chain.core.util.SerializationUtils
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.smartcontract.component.load.SmartContractLoader
 import io.openfuture.chain.smartcontract.model.ExecutionContext
 import io.openfuture.chain.smartcontract.model.SmartContract
 import io.openfuture.chain.smartcontract.property.ContractProperties
-import io.openfuture.chain.smartcontract.util.SerializationUtils
 import org.apache.commons.lang3.reflect.MethodUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Component

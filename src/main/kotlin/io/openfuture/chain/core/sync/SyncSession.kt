@@ -2,56 +2,90 @@ package io.openfuture.chain.core.sync
 
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
+import io.openfuture.chain.core.model.entity.block.TemporaryBlock
+import io.openfuture.chain.core.service.DefaultTemporaryBlockService
+import io.openfuture.chain.core.util.SerializationUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.*
+import org.springframework.stereotype.Component
 
+@Component
 class SyncSession(
-    val syncMode: SyncMode,
-    private val lastLocalGenesisBlock: GenesisBlock,
-    private val currentGenesisBlock: GenesisBlock,
-    private val epochQuantity: Long = currentGenesisBlock.payload.epochIndex - lastLocalGenesisBlock.payload.epochIndex
+    private val temporaryBlockService: DefaultTemporaryBlockService
 ) {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(SyncSession::class.java)
     }
 
-    private val storage: SortedSet<Block> = TreeSet(kotlin.Comparator { o1, o2 -> (o2.height - o1.height).toInt() })
+    private lateinit var lastLocalGenesisBlock: GenesisBlock
+    private lateinit var currentGenesisBlock: GenesisBlock
+    private var epochQuantity: Long = 0L
+
+    //private val storage: SortedSet<Block> = TreeSet(kotlin.Comparator { o1, o2 -> (o2.height - o1.height).toInt() })
     private var completed: Boolean = false
     private var epochAdded: Long = 0
 
-    init {
-        storage.add(currentGenesisBlock)
-    }
+    lateinit var minBlock: Block
+    lateinit var syncMode: SyncMode
 
-
-    fun isEpochSynced(): Boolean = storage.last().hash == lastLocalGenesisBlock.hash
+    fun isEpochSynced(): Boolean = minBlock.hash == lastLocalGenesisBlock.hash
 
     fun isCompleted(): Boolean = completed
 
-    fun getStorage(): SortedSet<Block> = storage
+    fun getEpochAdded(): Long = epochAdded
+
+    @Synchronized
+    fun init(syncMode: SyncMode, lastLocalGenesisBlock: GenesisBlock, currentGenesisBlock: GenesisBlock) {
+        this.syncMode = syncMode
+        this.lastLocalGenesisBlock = lastLocalGenesisBlock
+        this.currentGenesisBlock = currentGenesisBlock
+        this.minBlock = currentGenesisBlock
+        epochQuantity = currentGenesisBlock.payload.epochIndex - lastLocalGenesisBlock.payload.epochIndex
+    }
 
     fun getCurrentGenesisBlock(): GenesisBlock = currentGenesisBlock
+
+    fun getTemporaryBlocks(heights: List<Long>): List<Block> = temporaryBlockService.getByHeightIn(heights).map {
+        SerializationUtils.deserialize(ByteUtils.fromHexString(it.block)) as Block
+    }
 
     @Synchronized
     fun add(epochBlocks: List<Block>): Boolean {
         if (isChainValid(epochBlocks)) {
-            storage.addAll(epochBlocks)
+            val temporaryBlocks = createTemporaryBlocks(epochBlocks)
+            temporaryBlockService.save(temporaryBlocks)
             completed = null != epochBlocks.firstOrNull { it.hash == currentGenesisBlock.hash }
             epochAdded++
             log.info("#$epochAdded epochs FROM ${epochQuantity + 1} is processed")
+
+            for (block in epochBlocks) {
+                if (minBlock.height > block.height) {
+                    minBlock = block
+                }
+            }
             return true
         }
 
         return false
     }
 
+    @Synchronized
+    fun clear() {
+        temporaryBlockService.deleteAll()
+        completed = false
+        minBlock = currentGenesisBlock
+        epochAdded = 0
+    }
+
+    private fun createTemporaryBlocks(blocks: List<Block>): List<TemporaryBlock> =
+        blocks.map { TemporaryBlock(it.height, ByteUtils.toHexString(SerializationUtils.serialize(it))) }
+
     private fun isChainValid(chain: List<Block>): Boolean {
         val list = if (chain.first().hash != currentGenesisBlock.hash) {
-            chain.sortedByDescending { it.height }.toMutableList().apply { add(0, storage.last()) }
+            chain.sortedByDescending { it.height }.toMutableList().apply { add(0, minBlock) }
         } else {
             chain.sortedByDescending { it.height }
         }
