@@ -80,8 +80,6 @@ interface BlockManager {
 
     fun deleteByHeightIn(heights: List<Long>)
 
-    fun saveChunk(blocksChunk: List<Block>)
-
     fun removeEpoch(genesisBlock: GenesisBlock)
 
     fun verify(block: Block, lastBlock: Block, new: Boolean = true): Boolean

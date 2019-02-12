@@ -276,7 +276,12 @@ class ChainSynchronizer(
             val filteredStorage = syncSession!!.getStorage().filter { it.height > lastLocalBlock.height }
 
             filteredStorage.asReversed().chunked(properties.syncBatchSize!!).forEach {
-                blockManager.saveChunk(it)
+                it.forEach { block ->
+                    when (block) {
+                        is MainBlock -> blockManager.addMainBlock(block)
+                        is GenesisBlock -> blockManager.addGenesisBlock(block)
+                    }
+                }
                 log.info("Blocks saved till ${it.last().height} from ${filteredStorage.first().height}")
             }
 

@@ -87,16 +87,6 @@ class DefaultBlockManager(
     }
 
     @Transactional
-    override fun saveChunk(blocksChunk: List<Block>) {
-        blocksChunk.forEach {
-            when (it) {
-                is MainBlock -> mainBlockService.add(it)
-                is GenesisBlock -> genesisBlockService.add(it)
-            }
-        }
-    }
-
-    @Transactional
     override fun removeEpoch(genesisBlock: GenesisBlock) {
         val fromHeight = if (1L == genesisBlock.height) {
             genesisBlock.height + 1
