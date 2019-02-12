@@ -2,7 +2,6 @@ package io.openfuture.chain.core.service.block
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
-import io.openfuture.chain.core.component.NodeConfigurator
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.component.TransactionThroughput
@@ -30,6 +29,7 @@ import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.math.max
@@ -40,13 +40,13 @@ class DefaultMainBlockService(
     private val repository: MainBlockRepository,
     private val stateManager: StateManager,
     private val keyHolder: NodeKeyHolder,
-    private val nodeConfigurator: NodeConfigurator,
     private val throughput: TransactionThroughput,
     private val statePool: StatePool,
     private val consensusProperties: ConsensusProperties,
     private val genesisBlockRepository: GenesisBlockRepository,
     private val transactionManager: TransactionManager,
-    private val receiptService: ReceiptService
+    private val receiptService: ReceiptService,
+    private val eventPublisher: ApplicationEventPublisher
 ) : DefaultBlockService<MainBlock, MainBlockRepository>(repository), MainBlockService {
 
     @BlockchainSynchronized
@@ -59,7 +59,6 @@ class DefaultMainBlockService(
             val previousHash = lastBlock.hash
             val publicKey = keyHolder.getPublicKeyAsHexString()
             val delegate = stateManager.getLastByAddress<DelegateState>(publicKey)
-
 
             val unconfirmedTransactions = getTransactions()
             val delegateTransactions = mutableListOf<DelegateTransaction>()
@@ -116,7 +115,7 @@ class DefaultMainBlockService(
             }
 
             val transactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
-                block.getPayload().voteTransactions + block.getPayload().getRewardTransaction()
+                block.getPayload().voteTransactions + block.getPayload().rewardTransactions
             val states = block.getPayload().delegateStates + block.getPayload().accountStates
             val receipts = block.getPayload().receipts
 
@@ -127,20 +126,24 @@ class DefaultMainBlockService(
                 stateManager.commit(it)
             }
 
-            if (nodeConfigurator.getConfig().mode == FULL) {
-                transactions.forEach {
-                    it.block = savedBlock
-                    val receipt = receipts.find { receipt -> receipt.transactionHash == it.hash }!!
-                    transactionManager.commit(it, receipt)
-                }
-                receipts.forEach {
-                    it.block = savedBlock
-                    receiptService.commit(it)
-                }
+            transactions.forEach {
+                it.block = savedBlock
+                val receipt = receipts.find { receipt -> receipt.transactionHash == it.hash }!!
+                transactionManager.commit(it, receipt)
+            }
+
+            receipts.forEach {
+                it.block = savedBlock
+                receiptService.commit(it)
             }
 
             throughput.updateThroughput(transactions.size, savedBlock.height)
         } finally {
+            block.getPayload().delegateTransactions.forEach {
+                if (it.getPayload().delegateKey == keyHolder.getPublicKeyAsHexString()) {
+                    eventPublisher.publishEvent(FULL)
+                }
+            }
             BlockchainLock.writeLock.unlock()
         }
     }
@@ -165,8 +168,8 @@ class DefaultMainBlockService(
     }
 
     private fun save(block: MainBlock): MainBlock {
-        block.getPayload().setRewardTransaction()
-        return repository.save(block)
+        block.getPayload().rewardTransactions = listOf()
+        return repository.saveAndFlush(block)
     }
 
     private fun getTransactions(): List<UnconfirmedTransaction> {

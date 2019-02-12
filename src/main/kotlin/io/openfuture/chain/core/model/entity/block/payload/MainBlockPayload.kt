@@ -27,7 +27,7 @@ class MainBlockPayload(
         joinColumns = [JoinColumn(name = "block_id")],
         inverseJoinColumns = [JoinColumn(name = "id")]
     )
-    private var rewardTransactions: List<RewardTransaction> = listOf(),
+    var rewardTransactions: List<RewardTransaction> = listOf(),
 
     @Transient
     var voteTransactions: List<VoteTransaction> = listOf(),
@@ -48,16 +48,6 @@ class MainBlockPayload(
     var receipts: List<Receipt> = listOf()
 
 ) : BlockPayload {
-
-    fun getRewardTransaction(): RewardTransaction = rewardTransactions.first()
-
-    fun setRewardTransaction(rewardTransaction: RewardTransaction? = null) {
-        rewardTransactions = if (null != rewardTransaction) {
-            listOf(rewardTransaction)
-        } else {
-            listOf()
-        }
-    }
 
     override fun getBytes(): ByteArray =
         transactionMerkleHash.toByteArray() + stateMerkleHash.toByteArray() + receiptMerkleHash.toByteArray()

@@ -32,6 +32,7 @@ class EpochRequestHandler(
 
         if (msg.syncMode != FULL) {
             mainBlocks.forEach {
+                it.getPayload().rewardTransactions = listOf()
                 it.getPayload().transferTransactions = listOf()
                 it.getPayload().delegateTransactions = listOf()
                 it.getPayload().voteTransactions = listOf()

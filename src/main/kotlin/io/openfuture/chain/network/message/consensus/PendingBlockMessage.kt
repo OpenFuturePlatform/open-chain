@@ -15,7 +15,7 @@ class PendingBlockMessage(
     transactionMerkleHash: String,
     stateMerkleHash: String,
     receiptMerkleHash: String,
-    rewardTransaction: RewardTransactionMessage,
+    rewardTransactions: List<RewardTransactionMessage>,
     voteTransactions: List<VoteTransactionMessage>,
     delegateTransactions: List<DelegateTransactionMessage>,
     transferTransactions: List<TransferTransactionMessage>,
@@ -23,7 +23,7 @@ class PendingBlockMessage(
     accountStates: List<AccountStateMessage>,
     receipts: List<ReceiptMessage>
 ) : BaseMainBlockMessage(height, previousHash, timestamp, hash, signature, publicKey, transactionMerkleHash,
-    stateMerkleHash, receiptMerkleHash, rewardTransaction, voteTransactions, delegateTransactions, transferTransactions,
+    stateMerkleHash, receiptMerkleHash, rewardTransactions, voteTransactions, delegateTransactions, transferTransactions,
     delegateStates, accountStates, receipts) {
 
     constructor(mainBlockMessage: MainBlockMessage) : this(
@@ -36,7 +36,7 @@ class PendingBlockMessage(
         mainBlockMessage.transactionMerkleHash,
         mainBlockMessage.stateMerkleHash,
         mainBlockMessage.receiptMerkleHash,
-        mainBlockMessage.rewardTransaction,
+        mainBlockMessage.rewardTransactions,
         mainBlockMessage.voteTransactions,
         mainBlockMessage.delegateTransactions,
         mainBlockMessage.transferTransactions,
