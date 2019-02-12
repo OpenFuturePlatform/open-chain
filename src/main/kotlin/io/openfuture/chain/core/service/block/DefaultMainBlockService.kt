@@ -89,9 +89,9 @@ class DefaultMainBlockService(
                 }
             }
 
-            val transactionMerkleHash = HashUtils.calculateMerkleRoot(transactions.map { it.hash })
-            val stateMerkleHash = HashUtils.calculateMerkleRoot(states.map { it.hash })
-            val receiptMerkleHash = HashUtils.calculateMerkleRoot(receipts.map { it.hash })
+            val transactionMerkleHash = HashUtils.merkleRoot(transactions.map { it.hash })
+            val stateMerkleHash = HashUtils.merkleRoot(states.map { it.hash })
+            val receiptMerkleHash = HashUtils.merkleRoot(receipts.map { it.hash })
 
             val payload = MainBlockPayload(transactionMerkleHash, stateMerkleHash, receiptMerkleHash,
                 listOf(rewardTransaction), voteTransactions, delegateTransactions, transferTransactions,
@@ -115,19 +115,12 @@ class DefaultMainBlockService(
                 return
             }
 
-            val rewardTransaction = block.getPayload().getRewardTransaction()
-            val externalTransactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
-                block.getPayload().voteTransactions
+            val transactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
+                block.getPayload().voteTransactions + block.getPayload().getRewardTransaction()
             val states = block.getPayload().delegateStates + block.getPayload().accountStates
             val receipts = block.getPayload().receipts
 
             val savedBlock = save(block)
-
-            rewardTransaction.let {
-                it.block = savedBlock
-                val receipt = receipts.find { receipt -> receipt.transactionHash == it.hash }!!
-                transactionManager.commit(it, receipt)
-            }
 
             states.forEach {
                 it.block = savedBlock
@@ -135,7 +128,7 @@ class DefaultMainBlockService(
             }
 
             if (nodeConfigurator.getConfig().mode == FULL) {
-                externalTransactions.forEach {
+                transactions.forEach {
                     it.block = savedBlock
                     val receipt = receipts.find { receipt -> receipt.transactionHash == it.hash }!!
                     transactionManager.commit(it, receipt)
@@ -146,7 +139,6 @@ class DefaultMainBlockService(
                 }
             }
 
-            val transactions = externalTransactions + rewardTransaction
             throughput.updateThroughput(transactions.size, savedBlock.height)
         } finally {
             BlockchainLock.writeLock.unlock()

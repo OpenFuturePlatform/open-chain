@@ -1,6 +1,7 @@
 package io.openfuture.chain.core.service.transaction.unconfirmed
 
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
+import io.openfuture.chain.core.component.NodeConfigurator
 import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
@@ -15,6 +16,7 @@ import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.TransactionValidatorManager
 import io.openfuture.chain.core.service.UTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
+import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,6 +30,7 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction, uR : UTra
     @Autowired private lateinit var transactionValidatorManager: TransactionValidatorManager
     @Autowired private lateinit var networkService: NetworkApiService
     @Autowired private lateinit var repository: TransactionRepository<Transaction>
+    @Autowired private lateinit var nodeConfigurator: NodeConfigurator
 
 
     override fun getAll(): List<uT> {
@@ -72,15 +75,20 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction, uR : UTra
                 return persistUtx
             }
 
-            val tx = when (uTx) {
-                is UnconfirmedDelegateTransaction -> DelegateTransaction.of(uTx)
-                is UnconfirmedTransferTransaction -> TransferTransaction.of(uTx)
-                is UnconfirmedVoteTransaction -> VoteTransaction.of(uTx)
-                else -> throw IllegalStateException("Wrong type")
-            }
-            transactionValidatorManager.validate(tx)
+            val savedUtx = if (nodeConfigurator.getConfig().mode == FULL) {
+                val tx = when (uTx) {
+                    is UnconfirmedDelegateTransaction -> DelegateTransaction.of(uTx)
+                    is UnconfirmedTransferTransaction -> TransferTransaction.of(uTx)
+                    is UnconfirmedVoteTransaction -> VoteTransaction.of(uTx)
+                    else -> throw IllegalStateException("Wrong type")
+                }
+                transactionValidatorManager.validate(tx)
 
-            val savedUtx = uRepository.saveAndFlush(uTx)
+                uRepository.saveAndFlush(uTx)
+            } else {
+                uTx
+            }
+
             networkService.broadcast(savedUtx.toMessage())
             return savedUtx
         } finally {

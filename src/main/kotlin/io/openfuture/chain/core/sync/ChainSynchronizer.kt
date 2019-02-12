@@ -250,7 +250,7 @@ class ChainSynchronizer(
             return false
         }
 
-        return rootHash == HashUtils.calculateMerkleRoot(hashes)
+        return rootHash == HashUtils.merkleRoot(hashes)
     }
 
     private fun isValidPreviousHash(block: Block, lastBlock: Block): Boolean = block.previousHash == lastBlock.hash

@@ -56,7 +56,7 @@ object HashUtils {
         return key.key
     }
 
-    fun calculateMerkleRoot(hashes: List<String>): String {
+    fun merkleRoot(hashes: List<String>): String {
         if (hashes.size == 1) {
             return hashes.single()
         }
