@@ -307,7 +307,7 @@ class ChainSynchronizer(
         try {
             val epochHeight = consensusProperties.epochHeight!!
             val lastLocalBlock = blockService.getLast()
-            var indexFrom = lastLocalBlock.height
+            var indexFrom = lastLocalBlock.height + 1
             var indexTo = indexFrom + epochHeight
             var heights = (indexFrom..indexTo).toList()
             var temporaryBlocks = syncSession.getTemporaryBlocks(heights)
@@ -316,7 +316,7 @@ class ChainSynchronizer(
                     blockService.saveChunk(it, syncSession.syncMode)
                     log.info("Blocks saved till ${it.last().height} from ${temporaryBlocks.first().height}")
                 }
-                indexFrom += indexTo
+                indexFrom += indexTo + 1
                 indexTo += epochHeight
                 heights = (indexFrom..indexTo).toList()
                 temporaryBlocks = syncSession.getTemporaryBlocks(heights)
