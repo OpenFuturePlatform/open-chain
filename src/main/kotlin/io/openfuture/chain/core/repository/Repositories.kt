@@ -47,8 +47,6 @@ interface BlockRepository<Entity : Block> : BaseRepository<Entity> {
     @Query(value = "SELECT height FROM blocks ORDER BY height DESC LIMIT 1", nativeQuery = true)
     fun getCurrentHeight(): Long
 
-/*    @Query(value = "SELECT b FROM Block b LEFT JOIN ")
-    fun getAll(pageable: Pageable): List<Block>*/
 }
 
 @Repository
