@@ -57,9 +57,9 @@ class SyncSession(
             return false
         }
 
-        if (!epochBlocks.any { it.height >= minBlock.height }) {
+        /*if (!epochBlocks.any { it.height >= minBlock.height }) {
             return true
-        }
+        }*/
 
         val temporaryBlocks = createTemporaryBlocks(epochBlocks)
 
