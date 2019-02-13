@@ -60,7 +60,7 @@ class BlockProductionScheduler(
                 pendingBlockHandler.resetSlotNumber()
             } else if (keyHolder.getPublicKeyAsHexString() == slotOwner) {
                 val block = blockManager.createMainBlock()
-                pendingBlockHandler.addBlock(PendingBlockMessage(block.toMessage()))
+                pendingBlockHandler.addBlock(PendingBlockMessage(block))
             }
         } catch (ex: Exception) {
             log.error("Block creation failure inbound: ${ex.message}")

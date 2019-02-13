@@ -26,7 +26,7 @@ class DefaultGenesisBlockService(
     private val stateManager: StateManager,
     private val keyHolder: NodeKeyHolder,
     private val consensusProperties: ConsensusProperties
-) : DefaultBlockService<GenesisBlock, GenesisBlockRepository>(repository), GenesisBlockService {
+) : DefaultBlockService<GenesisBlock>(repository), GenesisBlockService {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(EpochResponseHandler::class.java)

@@ -24,6 +24,7 @@ import io.openfuture.chain.core.service.ReceiptService
 import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.core.sync.BlockchainLock
+import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -47,7 +48,7 @@ class DefaultMainBlockService(
     private val transactionManager: TransactionManager,
     private val receiptService: ReceiptService,
     private val eventPublisher: ApplicationEventPublisher
-) : DefaultBlockService<MainBlock, MainBlockRepository>(repository), MainBlockService {
+) : DefaultBlockService<MainBlock>(repository), MainBlockService {
 
     @BlockchainSynchronized
     override fun create(): MainBlock {
@@ -148,7 +149,7 @@ class DefaultMainBlockService(
         }
     }
 
-    override fun getBlocksByEpochIndex(epochIndex: Long): List<MainBlock> {
+    override fun getBlocksByEpochIndex(epochIndex: Long, syncMode: SyncMode): List<MainBlock> {
         val genesisBlock = genesisBlockRepository.findOneByPayloadEpochIndex(epochIndex) ?: return emptyList()
         val beginHeight = genesisBlock.height + 1
         val endEpochHeight = beginHeight + consensusProperties.epochHeight!! - 1
@@ -156,14 +157,16 @@ class DefaultMainBlockService(
 
         val blocks = repository.findAllByHeightIn(heights)
         blocks.forEach {
-            val rewardTx = transactionManager.getRewardTransactionByBlock(it)
-            it.getPayload().rewardTransactions = if (null != rewardTx) listOf(rewardTx) else listOf()
-            it.getPayload().delegateTransactions = transactionManager.getAllDelegateTransactionsByBlock(it)
-            it.getPayload().transferTransactions = transactionManager.getAllTransferTransactionsByBlock(it)
-            it.getPayload().voteTransactions = transactionManager.getAllVoteTransactionsByBlock(it)
             it.getPayload().delegateStates = stateManager.getAllDelegateStatesByBlock(it)
             it.getPayload().accountStates = stateManager.getAllAccountStatesByBlock(it)
-            it.getPayload().receipts = receiptService.getAllByBlock(it)
+            if (syncMode == FULL) {
+                val rewardTx = transactionManager.getRewardTransactionByBlock(it)
+                it.getPayload().rewardTransactions = if (null != rewardTx) listOf(rewardTx) else listOf()
+                it.getPayload().delegateTransactions = transactionManager.getAllDelegateTransactionsByBlock(it)
+                it.getPayload().transferTransactions = transactionManager.getAllTransferTransactionsByBlock(it)
+                it.getPayload().voteTransactions = transactionManager.getAllVoteTransactionsByBlock(it)
+                it.getPayload().receipts = receiptService.getAllByBlock(it)
+            }
         }
 
         return blocks

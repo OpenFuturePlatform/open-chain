@@ -10,11 +10,11 @@ class MainBlockResponse(
     signature: String,
     publicKey: String,
     val merkleHash: String,
-    val transactionsCount: Int,
+    val transactionsCount: Long,
     val epochIndex: Long
 ) : BaseBlockResponse(timestamp, height, previousHash, hash, signature, publicKey) {
 
-    constructor(block: MainBlock, epochIndex: Long) : this(
+    constructor(block: MainBlock, transactionsCount: Long, epochIndex: Long) : this(
         block.timestamp,
         block.height,
         block.previousHash,
@@ -22,7 +22,7 @@ class MainBlockResponse(
         block.signature,
         block.publicKey,
         block.getPayload().transactionMerkleHash,
-        block.getTransactionsCount(),
+        transactionsCount,
         epochIndex
     )
 

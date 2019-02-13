@@ -5,7 +5,6 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.service.BlockManager
-import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.network.message.sync.EpochRequestMessage
 import io.openfuture.chain.network.message.sync.EpochResponseMessage
 import org.springframework.stereotype.Component
@@ -28,17 +27,7 @@ class EpochRequestHandler(
             return
         }
 
-        val mainBlocks = blockManager.getMainBlocksByEpochIndex(epochIndex)
-
-        if (msg.syncMode != FULL) {
-            mainBlocks.forEach {
-                it.getPayload().rewardTransactions = listOf()
-                it.getPayload().transferTransactions = listOf()
-                it.getPayload().delegateTransactions = listOf()
-                it.getPayload().voteTransactions = listOf()
-                it.getPayload().receipts = listOf()
-            }
-        }
+        val mainBlocks = blockManager.getMainBlocksByEpochIndex(epochIndex, msg.syncMode)
         val mainBlockMessages = mainBlocks.map { it.toMessage() }
 
         ctx.writeAndFlush(EpochResponseMessage(delegateKey, true, genesisBlock.toMessage(), mainBlockMessages))

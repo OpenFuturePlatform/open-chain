@@ -12,8 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional(readOnly = true)
 class DefaultUVoteTransactionService(
     private val uRepository: UVoteTransactionRepository
-) : DefaultUTransactionService<UnconfirmedVoteTransaction, UVoteTransactionRepository>(uRepository),
-    UVoteTransactionService {
+) : DefaultUTransactionService<UnconfirmedVoteTransaction>(uRepository), UVoteTransactionService {
 
     override fun getBySenderAgainstDelegate(senderAddress: String, delegateKey: String): UnconfirmedVoteTransaction? {
         BlockchainLock.readLock.lock()

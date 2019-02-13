@@ -22,7 +22,7 @@ class DefaultRewardTransactionService(
     private val repository: RewardTransactionRepository,
     private val consensusProperties: ConsensusProperties,
     private val keyHolder: NodeKeyHolder
-) : DefaultTransactionService<RewardTransaction, RewardTransactionRepository>(repository), RewardTransactionService {
+) : DefaultTransactionService<RewardTransaction>(repository), RewardTransactionService {
 
     override fun getByBlock(block: Block): RewardTransaction? = repository.findAllByBlock(block).firstOrNull()
 

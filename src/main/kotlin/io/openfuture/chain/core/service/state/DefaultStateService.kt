@@ -7,8 +7,8 @@ import io.openfuture.chain.core.service.StateService
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional(readOnly = true)
-abstract class DefaultStateService<T : State, R : StateRepository<T>>(
-    private val repository: R
+abstract class DefaultStateService<T : State>(
+    private val repository: StateRepository<T>
 ) : StateService<T> {
 
     override fun getAllByBlock(block: Block): List<T> = repository.findAllByBlock(block)

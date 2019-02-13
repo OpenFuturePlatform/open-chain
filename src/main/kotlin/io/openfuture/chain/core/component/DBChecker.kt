@@ -1,8 +1,6 @@
 package io.openfuture.chain.core.component
 
-import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.block.Block
-import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.service.BlockManager
 import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.core.sync.SyncMode.FULL
@@ -12,8 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Component
 class DBChecker(
-    private val blockManager: BlockManager,
-    private val consensusProperties: ConsensusProperties
+    private val blockManager: BlockManager
 ) {
 
     @Transactional
@@ -21,13 +18,9 @@ class DBChecker(
         when (syncMode) {
             FULL -> {
                 val lastBlock = blockManager.getLast()
-                val lastGenesisBlock = lastBlock as? GenesisBlock
-                    ?: blockManager.getPreviousGenesisBlockByHeight(lastBlock.height)
-                val lastEpochIndex = lastGenesisBlock.getPayload().epochIndex
-
-                val lastValidBlockHeight = lastValidBlockHeightByFullMode(lastEpochIndex)
-
+                val lastValidBlockHeight = lastValidBlockHeightByFullMode()
                 val failBlockHeight = lastValidBlockHeight + 1L
+
                 if (failBlockHeight <= lastBlock.height) {
                     val range = LongRange(failBlockHeight, lastBlock.height)
                     blockManager.deleteByHeightIn(range.toList())
@@ -39,25 +32,22 @@ class DBChecker(
         }
     }
 
-    private fun lastValidBlockHeightByFullMode(lastEpochIndex: Long): Long {
-        val epochHeight = consensusProperties.epochHeight!!
+    private fun lastValidBlockHeightByFullMode(): Long {
+        val lastEpochIndex = blockManager.getLastGenesisBlock().getPayload().epochIndex
         var lastValidBlockHeight = 1L
         loop@ for (epochIndex in 1L..lastEpochIndex) {
             val genesisBlock = blockManager.findGenesisBlockByEpochIndex(epochIndex)!!
 
             var previousBlock: Block = genesisBlock
-            val blocks = blockManager.getMainBlocksByEpochIndex(epochIndex)
+            val blocks = blockManager.getMainBlocksByEpochIndex(epochIndex, FULL)
 
-            if (blocks.isEmpty()) continue
-
-            for (index in 1..blocks.size) {
-                lastValidBlockHeight = ((epochIndex - 1L) * epochHeight) + index
-
-                val block = blocks[index - 1]
+            for (index in 0 until blocks.size) {
+                val block = blocks[index]
                 if (!blockManager.verify(block, previousBlock, false)) {
                     break@loop
                 }
 
+                lastValidBlockHeight = block.height
                 previousBlock = block
             }
         }

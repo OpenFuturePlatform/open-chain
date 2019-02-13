@@ -13,8 +13,8 @@ import org.springframework.data.domain.Page
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional(readOnly = true)
-abstract class DefaultTransactionService<T : Transaction, R : TransactionRepository<T>>(
-    private val repository: R
+abstract class DefaultTransactionService<T : Transaction>(
+    private val repository: TransactionRepository<T>
 ) : TransactionService<T> {
 
     @Autowired protected lateinit var stateManager: StateManager

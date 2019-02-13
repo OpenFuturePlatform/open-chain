@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultDelegateTransactionService(
     private val repository: DelegateTransactionRepository,
     private val consensusProperties: ConsensusProperties
-) : DefaultExternalTransactionService<DelegateTransaction, DelegateTransactionRepository>(repository), DelegateTransactionService {
+) : DefaultExternalTransactionService<DelegateTransaction>(repository), DelegateTransactionService {
 
     @Transactional
     override fun commit(tx: DelegateTransaction, receipt: Receipt): DelegateTransaction {

@@ -4,6 +4,7 @@ import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.component.TransactionThroughput
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -37,11 +38,7 @@ class DefaultTransactionManager(
 
     override fun getCount(): Long = repository.count()
 
-    override fun getCountDelegateTransactionsByBlock(block: Block): Long = delegateTransactionService.getCountByBlock(block)
-
-    override fun getCountTransferTransactionsByBlock(block: Block): Long = transferTransactionService.getCountByBlock(block)
-
-    override fun getCountVoteTransactionsByBlock(block: Block): Long = voteTransactionService.getCountByBlock(block)
+    override fun getCountByBlock(block: MainBlock): Long = repository.countByBlock(block)
 
     override fun getUnconfirmedBalanceBySenderAddress(address: String): Long {
         BlockchainLock.readLock.lock()

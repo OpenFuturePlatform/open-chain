@@ -10,14 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional(readOnly = true)
-abstract class DefaultExternalTransactionService<T : Transaction, R : TransactionRepository<T>>(
-    private val repository: R
-) : DefaultTransactionService<T, R>(repository), ExternalTransactionService<T> {
+abstract class DefaultExternalTransactionService<T : Transaction>(
+    private val repository: TransactionRepository<T>
+) : DefaultTransactionService<T>(repository), ExternalTransactionService<T> {
 
     @Autowired protected lateinit var uRepository: UTransactionRepository<UnconfirmedTransaction>
 
-
-    override fun getCountByBlock(block: Block): Long = repository.countByBlock(block)
 
     override fun getAllByBlock(block: Block): List<T> = repository.findAllByBlock(block)
 

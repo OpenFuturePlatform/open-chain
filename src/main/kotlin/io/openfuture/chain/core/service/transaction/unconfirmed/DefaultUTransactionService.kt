@@ -21,8 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional(readOnly = true)
-abstract class DefaultUTransactionService<uT : UnconfirmedTransaction, uR : UTransactionRepository<uT>>(
-    private val uRepository: uR
+abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
+    private val uRepository: UTransactionRepository<uT>
 ) : UTransactionService<uT> {
 
     @Autowired private lateinit var transactionValidatorManager: TransactionValidatorManager

@@ -31,7 +31,7 @@ class DefaultTransferTransactionService(
     private val contractService: ContractService,
     private val contractCostCalculator: ContractCostCalculator,
     private val contractExecutor: ContractExecutor
-) : DefaultExternalTransactionService<TransferTransaction, TransferTransactionRepository>(repository), TransferTransactionService {
+) : DefaultExternalTransactionService<TransferTransaction>(repository), TransferTransactionService {
 
     override fun getAllByAddress(address: String, request: PageRequest): Page<TransferTransaction> =
         repository.findAllBySenderAddressOrPayloadRecipientAddress(address, address, request.toEntityRequest())

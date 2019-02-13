@@ -3,6 +3,7 @@ package io.openfuture.chain.rpc.controller.block
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.BlockManager
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import io.openfuture.chain.rpc.domain.block.MainBlockResponse
@@ -14,7 +15,8 @@ import javax.validation.Valid
 @RequestMapping("/rpc/blocks/main")
 class MainBlockController(
     private val epochService: EpochService,
-    private val blockManager: BlockManager
+    private val blockManager: BlockManager,
+    private val transactionManager: TransactionManager
 ) {
 
     @GetMapping("/{hash}")
@@ -33,6 +35,6 @@ class MainBlockController(
         PageResponse(blockManager.getAllMainBlocks(request).map { getMainBlockResponse(it) })
 
     private fun getMainBlockResponse(block: MainBlock): MainBlockResponse =
-        MainBlockResponse(block, epochService.getEpochByBlock(block))
+        MainBlockResponse(block, transactionManager.getCountByBlock(block), epochService.getEpochByBlock(block))
 
 }

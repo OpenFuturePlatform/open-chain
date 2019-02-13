@@ -10,5 +10,4 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional(readOnly = true)
 class DefaultUDelegateTransactionService(
     uRepository: UDelegateTransactionRepository
-) : DefaultUTransactionService<UnconfirmedDelegateTransaction, UDelegateTransactionRepository>(uRepository),
-    UDelegateTransactionService
+) : DefaultUTransactionService<UnconfirmedDelegateTransaction>(uRepository), UDelegateTransactionService

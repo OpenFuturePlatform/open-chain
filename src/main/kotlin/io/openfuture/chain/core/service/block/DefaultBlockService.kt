@@ -10,8 +10,8 @@ import org.springframework.data.domain.Page
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional(readOnly = true)
-abstract class DefaultBlockService<T : Block, R : BlockRepository<T>>(
-    private val repository: R
+abstract class DefaultBlockService<T : Block>(
+    private val repository: BlockRepository<T>
 ) : BlockService<T> {
 
     @Autowired protected lateinit var blockRepository: BlockRepository<Block>

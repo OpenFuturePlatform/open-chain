@@ -6,6 +6,7 @@ import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.repository.BlockRepository
 import io.openfuture.chain.core.service.*
+import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
@@ -65,8 +66,8 @@ class DefaultBlockManager(
 
     override fun isGenesisBlockRequired(): Boolean = genesisBlockService.isGenesisBlockRequired()
 
-    override fun getMainBlocksByEpochIndex(epochIndex: Long): List<MainBlock> =
-        mainBlockService.getBlocksByEpochIndex(epochIndex)
+    override fun getMainBlocksByEpochIndex(epochIndex: Long, syncMode: SyncMode): List<MainBlock> =
+        mainBlockService.getBlocksByEpochIndex(epochIndex, syncMode)
 
     override fun createGenesisBlock(): GenesisBlock = genesisBlockService.create()
 

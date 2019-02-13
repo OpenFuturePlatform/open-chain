@@ -15,6 +15,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.node.*
+import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.springframework.data.domain.Page
 
@@ -68,7 +69,7 @@ interface BlockManager {
 
     fun isGenesisBlockRequired(): Boolean
 
-    fun getMainBlocksByEpochIndex(epochIndex: Long): List<MainBlock>
+    fun getMainBlocksByEpochIndex(epochIndex: Long, syncMode: SyncMode): List<MainBlock>
 
     fun createGenesisBlock(): GenesisBlock
 
@@ -113,7 +114,7 @@ interface GenesisBlockService : BlockService<GenesisBlock> {
 
 interface MainBlockService : BlockService<MainBlock> {
 
-    fun getBlocksByEpochIndex(epochIndex: Long): List<MainBlock>
+    fun getBlocksByEpochIndex(epochIndex: Long, syncMode: SyncMode): List<MainBlock>
 
 }
 
@@ -133,11 +134,7 @@ interface TransactionManager {
 
     fun getCount(): Long
 
-    fun getCountDelegateTransactionsByBlock(block: Block): Long
-
-    fun getCountTransferTransactionsByBlock(block: Block): Long
-
-    fun getCountVoteTransactionsByBlock(block: Block): Long
+    fun getCountByBlock(block: MainBlock): Long
 
     fun getUnconfirmedBalanceBySenderAddress(address: String): Long
 
@@ -234,8 +231,6 @@ interface RewardTransactionService : TransactionService<RewardTransaction> {
 }
 
 interface ExternalTransactionService<T : Transaction> : TransactionService<T> {
-
-    fun getCountByBlock(block: Block): Long
 
     fun getAllByBlock(block: Block): List<T>
 

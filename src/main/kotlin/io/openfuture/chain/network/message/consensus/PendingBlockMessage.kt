@@ -1,8 +1,8 @@
 package io.openfuture.chain.network.message.consensus
 
 import io.openfuture.chain.core.annotation.NoArgConstructor
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.network.message.core.*
-import io.openfuture.chain.network.message.sync.MainBlockMessage
 
 @NoArgConstructor
 class PendingBlockMessage(
@@ -26,23 +26,23 @@ class PendingBlockMessage(
     stateMerkleHash, receiptMerkleHash, rewardTransactions, voteTransactions, delegateTransactions, transferTransactions,
     delegateStates, accountStates, receipts) {
 
-    constructor(mainBlockMessage: MainBlockMessage) : this(
-        mainBlockMessage.height,
-        mainBlockMessage.previousHash,
-        mainBlockMessage.timestamp,
-        mainBlockMessage.hash,
-        mainBlockMessage.signature,
-        mainBlockMessage.publicKey,
-        mainBlockMessage.transactionMerkleHash,
-        mainBlockMessage.stateMerkleHash,
-        mainBlockMessage.receiptMerkleHash,
-        mainBlockMessage.rewardTransactions,
-        mainBlockMessage.voteTransactions,
-        mainBlockMessage.delegateTransactions,
-        mainBlockMessage.transferTransactions,
-        mainBlockMessage.delegateStates,
-        mainBlockMessage.accountStates,
-        mainBlockMessage.receipts
+    constructor(block: MainBlock) : this(
+        block.height,
+        block.previousHash,
+        block.timestamp,
+        block.hash,
+        block.signature,
+        block.publicKey,
+        block.getPayload().transactionMerkleHash,
+        block.getPayload().stateMerkleHash,
+        block.getPayload().receiptMerkleHash,
+        block.getPayload().rewardTransactions.map { it.toMessage() },
+        block.getPayload().voteTransactions.map { it.toMessage() },
+        block.getPayload().delegateTransactions.map { it.toMessage() },
+        block.getPayload().transferTransactions.map { it.toMessage() },
+        block.getPayload().delegateStates.map { it.toMessage() },
+        block.getPayload().accountStates.map { it.toMessage() },
+        block.getPayload().receipts.map { it.toMessage() }
     )
 
     override fun toString() = "PendingBlockMessage(hash=$hash)"

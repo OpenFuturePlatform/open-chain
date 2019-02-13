@@ -53,9 +53,6 @@ class MainBlock(
     }
 
 
-    fun getTransactionsCount(): Int = payload.transferTransactions.size + payload.voteTransactions.size +
-        payload.delegateTransactions.size + payload.rewardTransactions.size
-
     override fun toMessage(): MainBlockMessage = MainBlockMessage(
         height,
         previousHash,

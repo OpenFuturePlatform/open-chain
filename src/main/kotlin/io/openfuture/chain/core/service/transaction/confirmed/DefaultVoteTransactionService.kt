@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultVoteTransactionService(
     private val repository: VoteTransactionRepository,
     private val consensusProperties: ConsensusProperties
-) : DefaultExternalTransactionService<VoteTransaction, VoteTransactionRepository>(repository), VoteTransactionService {
+) : DefaultExternalTransactionService<VoteTransaction>(repository), VoteTransactionService {
 
     override fun getLastVoteForDelegate(senderAddress: String, delegateKey: String): VoteTransaction =
         repository.findFirstBySenderAddressAndPayloadDelegateKeyAndPayloadVoteTypeIdOrderByTimestampDesc(
