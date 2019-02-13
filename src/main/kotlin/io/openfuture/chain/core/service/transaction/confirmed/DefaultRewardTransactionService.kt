@@ -24,7 +24,7 @@ class DefaultRewardTransactionService(
     private val keyHolder: NodeKeyHolder
 ) : DefaultTransactionService<RewardTransaction, RewardTransactionRepository>(repository), RewardTransactionService {
 
-    override fun getByBlock(block: Block): RewardTransaction = repository.findAllByBlock(block).first()
+    override fun getByBlock(block: Block): RewardTransaction? = repository.findAllByBlock(block).firstOrNull()
 
     override fun getByRecipientAddress(address: String): List<RewardTransaction> =
         repository.findAllByPayloadRecipientAddress(address)

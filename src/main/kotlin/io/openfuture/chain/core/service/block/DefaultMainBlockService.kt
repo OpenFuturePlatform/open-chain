@@ -156,6 +156,8 @@ class DefaultMainBlockService(
 
         val blocks = repository.findAllByHeightIn(heights)
         blocks.forEach {
+            val rewardTx = transactionManager.getRewardTransactionByBlock(it)
+            it.getPayload().rewardTransactions = if (null != rewardTx) listOf(rewardTx) else listOf()
             it.getPayload().delegateTransactions = transactionManager.getAllDelegateTransactionsByBlock(it)
             it.getPayload().transferTransactions = transactionManager.getAllTransferTransactionsByBlock(it)
             it.getPayload().voteTransactions = transactionManager.getAllVoteTransactionsByBlock(it)

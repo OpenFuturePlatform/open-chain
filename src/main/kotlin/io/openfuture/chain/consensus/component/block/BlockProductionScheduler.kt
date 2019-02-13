@@ -55,7 +55,7 @@ class BlockProductionScheduler(
             log.debug("CONSENSUS: Slot owner $slotOwner")
             if (blockManager.isGenesisBlockRequired()) {
                 val genesisBlock = blockManager.createGenesisBlock()
-                blockManager.addGenesisBlock(genesisBlock)
+                blockManager.add(genesisBlock)
                 log.debug("CONSENSUS: Saving genesis block with hash = ${genesisBlock.hash}")
                 pendingBlockHandler.resetSlotNumber()
             } else if (keyHolder.getPublicKeyAsHexString() == slotOwner) {

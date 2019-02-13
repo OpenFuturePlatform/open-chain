@@ -73,10 +73,13 @@ class DefaultBlockManager(
     override fun createMainBlock(): MainBlock = mainBlockService.create()
 
     @Transactional
-    override fun addGenesisBlock(block: GenesisBlock) = genesisBlockService.add(block)
-
-    @Transactional
-    override fun addMainBlock(block: MainBlock) = mainBlockService.add(block)
+    override fun add(block: Block) {
+        when (block) {
+            is GenesisBlock -> genesisBlockService.add(block)
+            is MainBlock -> mainBlockService.add(block)
+            else -> throw IllegalStateException("Wrong type")
+        }
+    }
 
     @Transactional
     override fun deleteByHeightIn(heights: List<Long>) {

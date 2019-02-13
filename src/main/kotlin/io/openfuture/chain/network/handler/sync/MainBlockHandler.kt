@@ -15,7 +15,7 @@ class MainBlockHandler(
 ) : SimpleChannelInboundHandler<MainBlockMessage>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: MainBlockMessage) {
-        blockManager.addMainBlock(MainBlock.of(msg))
+        blockManager.add(MainBlock.of(msg))
     }
 
 }

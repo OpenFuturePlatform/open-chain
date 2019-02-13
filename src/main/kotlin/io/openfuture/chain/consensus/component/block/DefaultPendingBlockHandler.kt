@@ -132,7 +132,7 @@ class DefaultPendingBlockHandler(
                             reset()
                             return
                         }
-                        blockManager.addMainBlock(MainBlock.of(it))
+                        blockManager.add(MainBlock.of(it))
                         log.info("Saving main block: height #${it.height}, hash ${it.hash}")
                     }
                     blockAddedFlag = true

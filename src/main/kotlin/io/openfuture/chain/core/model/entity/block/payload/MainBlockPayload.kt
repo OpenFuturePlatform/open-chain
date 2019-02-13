@@ -7,7 +7,9 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTrans
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Embeddable
+import javax.persistence.Transient
 
 @Embeddable
 class MainBlockPayload(
@@ -21,12 +23,7 @@ class MainBlockPayload(
     @Column(name = "receipt_merkle_hash", nullable = false)
     var receiptMerkleHash: String,
 
-    @OneToMany(fetch = FetchType.EAGER, targetEntity = RewardTransaction::class)
-    @JoinTable(
-        name = "transactions",
-        joinColumns = [JoinColumn(name = "block_id")],
-        inverseJoinColumns = [JoinColumn(name = "id")]
-    )
+    @Transient
     var rewardTransactions: List<RewardTransaction> = listOf(),
 
     @Transient

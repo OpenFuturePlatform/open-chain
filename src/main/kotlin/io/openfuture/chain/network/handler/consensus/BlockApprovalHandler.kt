@@ -32,7 +32,7 @@ class BlockApprovalHandler(
             is SynchronizationException -> return
             is CoreException, is PessimisticLockingFailureException -> log.debug(cause.message)
             else -> {
-                log.error("Connection error ${ctx.channel().remoteAddress()} with cause: ${cause.message}")
+                log.error("Connection error ${ctx.channel().remoteAddress()} with cause: ${cause.message}", cause)
                 ctx.close()
             }
         }

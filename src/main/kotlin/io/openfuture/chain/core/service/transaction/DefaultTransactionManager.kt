@@ -97,7 +97,7 @@ class DefaultTransactionManager(
     override fun getVoteTransactionByHash(hash: String): VoteTransaction =
         voteTransactionService.getByHash(hash)
 
-    override fun getRewardTransactionByBlock(block: Block): RewardTransaction =
+    override fun getRewardTransactionByBlock(block: Block): RewardTransaction? =
         rewardTransactionService.getByBlock(block)
 
     override fun getRewardTransactionByRecipientAddress(address: String): List<RewardTransaction> =

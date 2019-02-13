@@ -15,7 +15,7 @@ class GenesisBlockHandler(
 ) : SimpleChannelInboundHandler<GenesisBlockMessage>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: GenesisBlockMessage) {
-        blockManager.addGenesisBlock(GenesisBlock.of(msg))
+        blockManager.add(GenesisBlock.of(msg))
     }
 
 }

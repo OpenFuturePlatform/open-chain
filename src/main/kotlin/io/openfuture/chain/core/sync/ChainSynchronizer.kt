@@ -183,8 +183,8 @@ class ChainSynchronizer(
             && isValidReceiptMerkleRoot(mainBlocks)
             && isValidTransactions(mainBlocks)
 
-    private fun isValidRewardTransactions(message: RewardTransactionMessage): Boolean =
-        transactionManager.verify(RewardTransaction.of(message))
+    private fun isValidRewardTransactions(list: List<RewardTransactionMessage>): Boolean =
+        list.all { transactionManager.verify(RewardTransaction.of(it)) }
 
     private fun isValidVoteTransactions(list: List<VoteTransactionMessage>): Boolean =
         list.all { transactionManager.verify(VoteTransaction.of(it)) }
@@ -198,7 +198,7 @@ class ChainSynchronizer(
     private fun isValidTransactions(blocks: List<MainBlockMessage>): Boolean {
         try {
             blocks.forEach { block ->
-                if (!isValidRewardTransactions(block.rewardTransactions.first())) {
+                if (!isValidRewardTransactions(block.rewardTransactions)) {
                     throw ValidationException("Invalid reward transaction in block: height #${block.height}, hash ${block.hash} ")
                 }
                 if (!isValidDelegateTransactions(block.delegateTransactions)) {
@@ -285,8 +285,8 @@ class ChainSynchronizer(
             filteredStorage.asReversed().chunked(properties.syncBatchSize!!).forEach {
                 it.forEach { block ->
                     when (block) {
-                        is MainBlock -> blockManager.addMainBlock(block)
-                        is GenesisBlock -> blockManager.addGenesisBlock(block)
+                        is MainBlock -> blockManager.add(block)
+                        is GenesisBlock -> blockManager.add(block)
                     }
                 }
                 log.info("Blocks saved till ${it.last().height} from ${filteredStorage.first().height}")

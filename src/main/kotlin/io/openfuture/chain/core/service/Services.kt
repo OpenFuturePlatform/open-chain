@@ -74,9 +74,7 @@ interface BlockManager {
 
     fun createMainBlock(): MainBlock
 
-    fun addGenesisBlock(block: GenesisBlock)
-
-    fun addMainBlock(block: MainBlock)
+    fun add(block: Block)
 
     fun deleteByHeightIn(heights: List<Long>)
 
@@ -169,7 +167,7 @@ interface TransactionManager {
 
     fun getVoteTransactionByHash(hash: String): VoteTransaction
 
-    fun getRewardTransactionByBlock(block: Block): RewardTransaction
+    fun getRewardTransactionByBlock(block: Block): RewardTransaction?
 
     fun getRewardTransactionByRecipientAddress(address: String): List<RewardTransaction>
 
@@ -227,7 +225,7 @@ interface TransactionService<T : Transaction> {
 
 interface RewardTransactionService : TransactionService<RewardTransaction> {
 
-    fun getByBlock(block: Block): RewardTransaction
+    fun getByBlock(block: Block): RewardTransaction?
 
     fun getByRecipientAddress(address: String): List<RewardTransaction>
 
