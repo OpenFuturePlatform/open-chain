@@ -34,7 +34,7 @@ class DefaultMainBlockValidator(
         if (new) {
             checkBalances(block)
         }
-        checkRewardTransaction(block)
+        checkRewardTransaction(block, new)
         checkDelegateTransactions(block)
         checkTransferTransactions(block)
         checkVoteTransactions(block, new)
@@ -126,15 +126,18 @@ class DefaultMainBlockValidator(
         }
     }
 
-    private fun checkRewardTransaction(block: MainBlock) {
-        val externalTransactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
-            block.getPayload().voteTransactions
+    private fun checkRewardTransaction(block: MainBlock, new: Boolean) {
         val rewardTransaction = block.getPayload().rewardTransactions.firstOrNull()
             ?: throw ValidationException("Missing reward transaction in block: height #${block.height}, hash ${block.hash}")
-        val fees = externalTransactions.asSequence().map { it.fee }.sum()
 
-        if (!verifyReward(fees, rewardTransaction.getPayload().reward)) {
-            throw ValidationException("Invalid fee of reward transaction in block: height #${block.height}, hash ${block.hash}")
+        if (new) {
+            val externalTransactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
+                block.getPayload().voteTransactions
+            val fees = externalTransactions.asSequence().map { it.fee }.sum()
+
+            if (!verifyReward(fees, rewardTransaction.getPayload().reward)) {
+                throw ValidationException("Invalid fee of reward transaction in block: height #${block.height}, hash ${block.hash}")
+            }
         }
 
         if (!transactionManager.verify(rewardTransaction)) {
