@@ -5,6 +5,7 @@ import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.service.BlockManager
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import io.openfuture.chain.rpc.domain.block.MainBlockResponse
@@ -20,6 +21,9 @@ class MainBlockControllerTests : ControllerTests() {
 
     @MockBean
     private lateinit var blockManager: BlockManager
+
+    @MockBean
+    private lateinit var transactionManager: TransactionManager
 
     @MockBean
     private lateinit var epochService: EpochService
@@ -50,11 +54,13 @@ class MainBlockControllerTests : ControllerTests() {
     @Test
     fun getMainBlockByHashShouldReturnMainBlockWithCurrentHash() {
         val hash = "hash"
+        val transactionCount = 5L
         val epochIndex = 1L
         val mainBlock = createMainBlock()
-        val expectedMainBlockResponse = MainBlockResponse(mainBlock, epochIndex)
+        val expectedMainBlockResponse = MainBlockResponse(mainBlock, transactionCount, epochIndex)
 
         given(blockManager.getMainBlockByHash(hash)).willReturn(mainBlock)
+        given(transactionManager.getCountByBlock(mainBlock)).willReturn(transactionCount)
         given(epochService.getEpochByBlock(mainBlock)).willReturn(epochIndex)
 
         val actualMainBlockResponse = webClient.get().uri("$MAIN_BLOCK_URL/$hash")
@@ -69,11 +75,13 @@ class MainBlockControllerTests : ControllerTests() {
     @Test
     fun getNextMainBlockByHashShouldReturnMainBlockWithNextHash() {
         val hash = "hash"
+        val transactionCount = 5L
         val epochIndex = 1L
         val mainBlock = createMainBlock()
-        val expectedMainBlockResponse = MainBlockResponse(mainBlock, epochIndex)
+        val expectedMainBlockResponse = MainBlockResponse(mainBlock, transactionCount, epochIndex)
 
         given(blockManager.getNextMainBlock(hash)).willReturn(mainBlock)
+        given(transactionManager.getCountByBlock(mainBlock)).willReturn(transactionCount)
         given(epochService.getEpochByBlock(mainBlock)).willReturn(epochIndex)
 
         val actualMainBlockResponse = webClient.get().uri("$MAIN_BLOCK_URL/$hash/next")
@@ -88,11 +96,13 @@ class MainBlockControllerTests : ControllerTests() {
     @Test
     fun getPreviousMainBlockByHashShouldReturnMainBlockWithPreviousHash() {
         val hash = "hash"
+        val transactionCount = 5L
         val epochIndex = 1L
         val mainBlock = createMainBlock()
-        val expectedMainBlockResponse = MainBlockResponse(mainBlock, epochIndex)
+        val expectedMainBlockResponse = MainBlockResponse(mainBlock, transactionCount, epochIndex)
 
         given(blockManager.getPreviousMainBlock(hash)).willReturn(mainBlock)
+        given(transactionManager.getCountByBlock(mainBlock)).willReturn(transactionCount)
         given(epochService.getEpochByBlock(mainBlock)).willReturn(epochIndex)
 
         val actualMainBlockResponse = webClient.get().uri("$MAIN_BLOCK_URL/$hash/previous")

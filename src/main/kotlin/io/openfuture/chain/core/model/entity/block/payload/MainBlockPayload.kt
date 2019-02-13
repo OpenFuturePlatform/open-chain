@@ -25,25 +25,25 @@ class MainBlockPayload(
     var receiptMerkleHash: String,
 
     @Transient
-    var rewardTransactions: List<RewardTransaction>,
+    var rewardTransactions: List<RewardTransaction> = listOf(),
 
     @Transient
-    var voteTransactions: List<VoteTransaction>,
+    var voteTransactions: List<VoteTransaction> = listOf(),
 
     @Transient
-    var delegateTransactions: List<DelegateTransaction>,
+    var delegateTransactions: List<DelegateTransaction> = listOf(),
 
     @Transient
-    var transferTransactions: List<TransferTransaction>,
+    var transferTransactions: List<TransferTransaction> = listOf(),
 
     @Transient
-    var delegateStates: List<DelegateState>,
+    var delegateStates: List<DelegateState> = listOf(),
 
     @Transient
-    var accountStates: List<AccountState>,
+    var accountStates: List<AccountState> = listOf(),
 
     @Transient
-    var receipts: List<Receipt>
+    var receipts: List<Receipt> = listOf()
 
 ) : BlockPayload {
 
