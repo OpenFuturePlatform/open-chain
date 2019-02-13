@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.model.entity.transaction
 
+import java.io.Serializable
 import javax.persistence.Column
 import javax.persistence.Embeddable
 
@@ -15,4 +16,4 @@ class TransactionFooter (
     @Column(name = "sender_key", nullable = false)
     var senderPublicKey: String
 
-)
+) : Serializable
