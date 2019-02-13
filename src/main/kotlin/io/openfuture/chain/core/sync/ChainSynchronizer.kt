@@ -58,8 +58,7 @@ class ChainSynchronizer(
     private val delegateStateService: DelegateStateService,
     private val dbChecker: DBChecker,
     private val nodeKeyHolder: NodeKeyHolder,
-    private val syncSession: SyncSession,
-    private val temporaryBlockService: DefaultTemporaryBlockService
+    private val syncSession: SyncSession
 ) : ApplicationListener<DataSourceSchemaCreatedEvent> {
 
     companion object {

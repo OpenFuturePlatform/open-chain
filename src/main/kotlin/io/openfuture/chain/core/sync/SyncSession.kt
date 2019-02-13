@@ -24,7 +24,6 @@ class SyncSession(
     private lateinit var currentGenesisBlock: GenesisBlock
     private var epochQuantity: Long = 0L
 
-    //private val storage: SortedSet<Block> = TreeSet(kotlin.Comparator { o1, o2 -> (o2.height - o1.height).toInt() })
     private var completed: Boolean = false
     private var epochAdded: Long = 0
 
