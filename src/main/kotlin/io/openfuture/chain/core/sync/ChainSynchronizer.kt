@@ -58,6 +58,7 @@ class ChainSynchronizer(
     private val delegateStateService: DelegateStateService,
     private val dbChecker: DBChecker,
     private val nodeKeyHolder: NodeKeyHolder,
+    private val syncSession: SyncSession,
     private val temporaryBlockService: DefaultTemporaryBlockService
 ) : ApplicationListener<DataSourceSchemaCreatedEvent> {
 
@@ -65,7 +66,6 @@ class ChainSynchronizer(
         private val log: Logger = LoggerFactory.getLogger(ChainSynchronizer::class.java)
     }
 
-    private lateinit var syncSession: SyncSession
     private var future: ScheduledFuture<*>? = null
     private var isBecomeDelegate = false
 

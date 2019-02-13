@@ -54,22 +54,23 @@ class SyncSession(
 
     @Synchronized
     fun add(epochBlocks: List<Block>): Boolean {
-        if (isChainValid(epochBlocks)) {
-            val temporaryBlocks = createTemporaryBlocks(epochBlocks)
-            temporaryBlockService.save(temporaryBlocks)
-            completed = null != epochBlocks.firstOrNull { it.hash == currentGenesisBlock.hash }
-            epochAdded++
-            log.info("#$epochAdded epochs FROM ${epochQuantity + 1} is processed")
-
-            for (block in epochBlocks) {
-                if (minBlock.height > block.height) {
-                    minBlock = block
-                }
-            }
-            return true
+        if (!isChainValid(epochBlocks)) {
+            return false
         }
 
-        return false
+        val temporaryBlocks = createTemporaryBlocks(epochBlocks)
+
+        temporaryBlockService.save(temporaryBlocks)
+        completed = null != epochBlocks.firstOrNull { it.hash == currentGenesisBlock.hash }
+        epochAdded++
+        log.info("#$epochAdded epochs FROM ${epochQuantity + 1} is processed")
+
+        for (block in epochBlocks) {
+            if (minBlock.height > block.height) {
+                minBlock = block
+            }
+        }
+        return true
     }
 
     @Synchronized
