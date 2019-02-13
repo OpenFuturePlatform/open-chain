@@ -312,10 +312,7 @@ class ChainSynchronizer(
             var heights = (indexFrom..indexTo).toList()
             var temporaryBlocks = syncSession.getTemporaryBlocks(heights)
             while (!temporaryBlocks.isEmpty()){
-                temporaryBlocks.asReversed().chunked(properties.syncBatchSize!!).forEach {
-                    blockService.saveChunk(it, syncSession.syncMode)
-                    log.info("Blocks saved till ${it.last().height} from ${temporaryBlocks.first().height}")
-                }
+                blockService.saveChunk(temporaryBlocks, syncSession.syncMode)
                 indexFrom = indexTo + 1
                 indexTo += epochHeight
                 heights = (indexFrom..indexTo).toList()
