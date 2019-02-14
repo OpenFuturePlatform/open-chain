@@ -1,7 +1,11 @@
 package io.openfuture.chain.core.model.entity.transaction.payload
 
-interface TransactionPayload {
+import com.fasterxml.jackson.annotation.JsonIgnore
+import java.io.Serializable
 
+interface TransactionPayload : Serializable {
+
+    @JsonIgnore
     fun getBytes(): ByteArray
 
 }

@@ -5,6 +5,7 @@ import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.block.TemporaryBlock
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
@@ -186,5 +187,12 @@ interface ReceiptRepository : BaseRepository<Receipt> {
     fun findAllByBlock(block: Block): List<Receipt>
 
     fun deleteAllByBlockHeightIn(heights: List<Long>)
+
+}
+
+@Repository
+interface TemporaryBlockRepository : BaseRepository<TemporaryBlock> {
+
+    fun findByHeightIn(heights: List<Long>): List<TemporaryBlock>
 
 }
