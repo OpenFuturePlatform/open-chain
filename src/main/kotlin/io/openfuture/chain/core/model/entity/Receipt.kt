@@ -71,6 +71,8 @@ class Receipt(
             .array()
     }
 
+    fun isSuccessful(): Boolean = getResults().all { null == it.error }
+
     fun toMessage(): ReceiptMessage = ReceiptMessage(transactionHash, result, hash)
 
 }

@@ -52,7 +52,7 @@ class DefaultTransferTransactionServiceTest : ServiceTests() {
     fun processWhenFeeIsNotEnoughShouldReturnErrorResultReceipt() {
         val sendFee = 10L
         val expectedSize = 1
-        val expectedError = "Contract is not deployed."
+        val expectedError = "Contract is not deployed. The fee was charged, but this is not enough for deploy."
         transferTransaction.fee = sendFee
 
         val result = transactionService.process(transferTransaction, delegateAddress)
@@ -82,7 +82,7 @@ class DefaultTransferTransactionServiceTest : ServiceTests() {
         assertEquals(delegateAddress, actualSenderReceiptResult?.to)
         assertEquals(sendFee, actualSenderReceiptResult?.amount)
         assertTrue(actualSenderReceiptResult?.error.isNullOrBlank())
-        assertTrue(actualSenderReceiptResult?.data.isNullOrBlank())
+        assertTrue(actualSenderReceiptResult?.data!!.isNotEmpty())
 
         assertEquals(senderAddress, actualDelegateReceiptResult?.to)
         assertEquals(expectedDelivery, actualDelegateReceiptResult?.amount)
@@ -110,7 +110,7 @@ class DefaultTransferTransactionServiceTest : ServiceTests() {
         assertEquals(delegateAddress, actualReceiptResult.to)
         assertEquals(sendFee, actualReceiptResult.amount)
         assertTrue(actualReceiptResult.error.isNullOrBlank())
-        assertTrue(actualReceiptResult.data.isNullOrBlank())
+        assertTrue(actualReceiptResult.data!!.isNotEmpty())
 
         verify(stateManager).updateSmartContractStorage(anyString(), anyString())
         verify(stateManager).updateWalletBalanceByAddress(senderAddress, -contractCost)

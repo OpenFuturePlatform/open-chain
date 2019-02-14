@@ -46,7 +46,7 @@ class DefaultTransferTransactionService(
             }
 
             if (DEPLOY == TransferTransactionType.getType(tx.getPayload().recipientAddress, tx.getPayload().data)
-                && receipt.getResults().all { it.error == null }) {
+                && receipt.isSuccessful()) {
                 val bytecode = ByteUtils.fromHexString(tx.getPayload().data!!)
                 val address = contractService.generateAddress(tx.senderAddress)
                 val abi = AbiGenerator.generate(bytecode)
@@ -89,7 +89,7 @@ class DefaultTransferTransactionService(
                         ByteUtils.toHexString(SerializationUtils.serialize(contract)))
                     stateManager.updateWalletBalanceByAddress(tx.senderAddress, -contractCost)
                     stateManager.updateWalletBalanceByAddress(delegateWallet, contractCost)
-                    results.add(ReceiptResult(tx.senderAddress, delegateWallet, tx.fee))
+                    results.add(ReceiptResult(tx.senderAddress, delegateWallet, tx.fee, contractAddress))
 
                     val delivery = tx.fee - contractCost
                     if (0 < delivery) {
@@ -99,7 +99,7 @@ class DefaultTransferTransactionService(
                     stateManager.updateWalletBalanceByAddress(tx.senderAddress, -tx.fee)
                     stateManager.updateWalletBalanceByAddress(delegateWallet, tx.fee)
                     results.add(ReceiptResult(tx.senderAddress, delegateWallet, tx.fee,
-                        "The fee was charged, but this is not enough.", "Contract is not deployed.")
+                        error = "Contract is not deployed. The fee was charged, but this is not enough for deploy.")
                     )
                 }
             }
