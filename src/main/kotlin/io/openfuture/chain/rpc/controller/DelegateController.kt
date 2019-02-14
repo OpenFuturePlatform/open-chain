@@ -42,7 +42,7 @@ class DelegateController(
     fun getAll(@Valid request: ViewDelegatePageRequest): PageResponse<ViewDelegateResponse> {
         val delegates = stateManager.getAllDelegates(request)
         val pageDelegates = delegates.map { delegate ->
-            ViewDelegateResponse(delegate, accountStateService.getVotesForDelegate(delegate.address).size)
+            ViewDelegateResponse(delegate, stateManager.getVotesForDelegate(delegate.address).size)
         }.sortedByDescending { it.rating }
 
         return PageResponse(PageImpl(pageDelegates, request, delegates.totalElements))

@@ -288,7 +288,7 @@ interface StateManager {
 
     fun updateSmartContractStorage(address: String, storage: String)
 
-    fun getAllDelegates(request: PageRequest): List<DelegateState>
+    fun getAllDelegates(request: PageRequest): Page<DelegateState>
 
     fun getActiveDelegates(): List<DelegateState>
 
