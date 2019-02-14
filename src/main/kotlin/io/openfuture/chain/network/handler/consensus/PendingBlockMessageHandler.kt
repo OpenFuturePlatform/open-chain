@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 
 @Component
 @Sharable
-class PendingBlockNetworkHandler(
+class PendingBlockMessageHandler(
     private val pendingBlockHandler: PendingBlockHandler
 ) : SimpleChannelInboundHandler<PendingBlockMessage>() {
 

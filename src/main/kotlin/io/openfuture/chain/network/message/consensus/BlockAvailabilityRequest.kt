@@ -4,12 +4,12 @@ import io.netty.buffer.ByteBuf
 import io.openfuture.chain.core.annotation.NoArgConstructor
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeString
-import io.openfuture.chain.network.serialization.Serializable
+import io.openfuture.chain.network.message.base.Message
 
 @NoArgConstructor
 class BlockAvailabilityRequest(
     var hash: String
-): Serializable {
+): Message {
 
     override fun read(buf: ByteBuf) {
         hash = buf.readString()

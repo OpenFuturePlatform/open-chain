@@ -20,8 +20,8 @@ class GenesisBlockResponse(
         block.hash,
         block.signature,
         block.publicKey,
-        block.payload.epochIndex,
-        block.payload.activeDelegates.size
+        block.getPayload().epochIndex,
+        block.getPayload().activeDelegates.size
     )
 
 }

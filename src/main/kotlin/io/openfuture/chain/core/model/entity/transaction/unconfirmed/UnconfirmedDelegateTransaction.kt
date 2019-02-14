@@ -1,7 +1,5 @@
 package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 
-import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.payload.DelegateTransactionPayload
 import io.openfuture.chain.network.message.core.DelegateTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
@@ -12,37 +10,35 @@ import javax.persistence.Table
 @Entity
 @Table(name = "u_delegate_transactions")
 class UnconfirmedDelegateTransaction(
-    header: TransactionHeader,
-    footer: TransactionFooter,
+    timestamp: Long,
+    fee: Long,
+    senderAddress: String,
+    hash: String,
+    signature: String,
+    publicKey: String,
 
     @Embedded
-    var payload: DelegateTransactionPayload
+    private var payload: DelegateTransactionPayload
 
-) : UnconfirmedTransaction(header, footer, payload) {
+) : UnconfirmedTransaction(timestamp, fee, senderAddress, hash, signature, publicKey) {
 
     companion object {
         fun of(message: DelegateTransactionMessage): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
-            TransactionHeader(message.timestamp, message.fee, message.senderAddress),
-            TransactionFooter(message.hash, message.senderSignature, message.senderPublicKey),
+            message.timestamp, message.fee, message.senderAddress, message.hash, message.signature, message.publicKey,
             DelegateTransactionPayload(message.delegateKey, message.amount)
         )
 
         fun of(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction = UnconfirmedDelegateTransaction(
-            TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
-            TransactionFooter(request.hash!!, request.senderSignature!!, request.senderPublicKey!!),
-            DelegateTransactionPayload(request.delegateKey!!, request.amount!!)
+            request.timestamp!!, request.fee!!, request.senderAddress!!, request.hash!!, request.senderSignature!!,
+            request.senderPublicKey!!, DelegateTransactionPayload(request.delegateKey!!, request.amount!!)
         )
     }
 
+
     override fun toMessage(): DelegateTransactionMessage = DelegateTransactionMessage(
-        header.timestamp,
-        header.fee,
-        header.senderAddress,
-        footer.hash,
-        footer.senderSignature,
-        footer.senderPublicKey,
-        payload.delegateKey,
-        payload.amount
+        timestamp, fee, senderAddress, hash, signature, publicKey, payload.delegateKey, payload.amount
     )
+
+    override fun getPayload(): DelegateTransactionPayload = payload
 
 }

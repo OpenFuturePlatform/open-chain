@@ -6,7 +6,7 @@ import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.service.MainBlockService
+import io.openfuture.chain.core.service.BlockManager
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component
 @Component
 class DefaultPendingBlockHandler(
     private val epochService: EpochService,
-    private val mainBlockService: MainBlockService,
+    private val blockManager: BlockManager,
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService,
     private val chainSynchronizer: ChainSynchronizer,
@@ -62,7 +62,7 @@ class DefaultPendingBlockHandler(
             return
         }
 
-        if (IDLE == stage && isActiveDelegate() && mainBlockService.verify(block)) {
+        if (IDLE == stage && isActiveDelegate() && blockManager.verify(MainBlock.of(block), blockManager.getLast())) {
             this.observable = block
             this.stage = PREPARE
             val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKeyAsHexString())
@@ -132,13 +132,8 @@ class DefaultPendingBlockHandler(
                             reset()
                             return
                         }
-                        mainBlockService.add(it)
+                        blockManager.add(MainBlock.of(it))
                         log.info("Saving main block: height #${it.height}, hash ${it.hash}")
-                        it.delegateTransactions.forEach {
-                            if (it.delegateKey == keyHolder.getPublicKeyAsHexString()) {
-                                chainSynchronizer.prepareDB()
-                            }
-                        }
                     }
                     blockAddedFlag = true
                 }

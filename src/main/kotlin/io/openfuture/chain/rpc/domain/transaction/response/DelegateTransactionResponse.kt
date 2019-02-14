@@ -16,26 +16,26 @@ class DelegateTransactionResponse(
 ) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey, hash, blockHash) {
 
     constructor(tx: UnconfirmedDelegateTransaction) : this(
-        tx.header.timestamp,
-        tx.header.fee,
-        tx.header.senderAddress,
-        tx.footer.senderSignature,
-        tx.footer.senderPublicKey,
-        tx.footer.hash,
-        tx.payload.delegateKey,
-        tx.payload.amount
+        tx.timestamp,
+        tx.fee,
+        tx.senderAddress,
+        tx.signature,
+        tx.publicKey,
+        tx.hash,
+        tx.getPayload().delegateKey,
+        tx.getPayload().amount
     )
 
     constructor(tx: DelegateTransaction) : this(
-        tx.header.timestamp,
-        tx.header.fee,
-        tx.header.senderAddress,
-        tx.footer.senderSignature,
-        tx.footer.senderPublicKey,
-        tx.footer.hash,
-        tx.payload.delegateKey,
-        tx.payload.amount,
-        tx.block.hash
+        tx.timestamp,
+        tx.fee,
+        tx.senderAddress,
+        tx.signature,
+        tx.publicKey,
+        tx.hash,
+        tx.getPayload().delegateKey,
+        tx.getPayload().amount,
+        tx.block?.hash
     )
 
 }

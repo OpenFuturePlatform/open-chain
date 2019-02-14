@@ -11,11 +11,11 @@ class DelegateTransactionMessage(
     fee: Long,
     senderAddress: String,
     hash: String,
-    senderSignature: String,
-    senderPublicKey: String,
+    signature: String,
+    publicKey: String,
     var delegateKey: String,
     var amount: Long
-) : TransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
+) : TransactionMessage(timestamp, fee, senderAddress, hash, signature, publicKey) {
 
     override fun read(buf: ByteBuf) {
         super.read(buf)

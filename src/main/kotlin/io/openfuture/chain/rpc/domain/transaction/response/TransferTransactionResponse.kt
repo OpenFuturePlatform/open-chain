@@ -17,28 +17,28 @@ class TransferTransactionResponse(
 ) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey, hash, blockHash) {
 
     constructor(tx: UnconfirmedTransferTransaction) : this(
-        tx.header.timestamp,
-        tx.header.fee,
-        tx.header.senderAddress,
-        tx.footer.senderSignature,
-        tx.footer.senderPublicKey,
-        tx.footer.hash,
-        tx.payload.amount,
-        tx.payload.recipientAddress,
-        tx.payload.data
+        tx.timestamp,
+        tx.fee,
+        tx.senderAddress,
+        tx.signature,
+        tx.publicKey,
+        tx.hash,
+        tx.getPayload().amount,
+        tx.getPayload().recipientAddress,
+        tx.getPayload().data
     )
 
     constructor(tx: TransferTransaction) : this(
-        tx.header.timestamp,
-        tx.header.fee,
-        tx.header.senderAddress,
-        tx.footer.senderSignature,
-        tx.footer.senderPublicKey,
-        tx.footer.hash,
-        tx.payload.amount,
-        tx.payload.recipientAddress,
-        tx.payload.data,
-        tx.block.hash
+        tx.timestamp,
+        tx.fee,
+        tx.senderAddress,
+        tx.signature,
+        tx.publicKey,
+        tx.hash,
+        tx.getPayload().amount,
+        tx.getPayload().recipientAddress,
+        tx.getPayload().data,
+        tx.block?.hash
     )
 
 }

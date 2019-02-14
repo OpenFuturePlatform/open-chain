@@ -1,9 +1,8 @@
 package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
-import io.openfuture.chain.core.service.AccountStateService
-import io.openfuture.chain.core.service.DelegateStateService
-import io.openfuture.chain.core.service.VoteTransactionService
+import io.openfuture.chain.core.service.StateManager
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.crypto.model.dto.ECKey
 import io.openfuture.chain.crypto.model.dto.ExtendedKey
 import io.openfuture.chain.crypto.service.CryptoService
@@ -28,13 +27,10 @@ class AccountControllerTests : ControllerTests() {
     private lateinit var cryptoService: CryptoService
 
     @MockBean
-    private lateinit var accountStateService: AccountStateService
+    private lateinit var stateManager: StateManager
 
     @MockBean
-    private lateinit var delegateStateService: DelegateStateService
-
-    @MockBean
-    private lateinit var voteTransactionService: VoteTransactionService
+    private lateinit var transactionManager: TransactionManager
 
     companion object {
         private const val ACCOUNT_URL = "/rpc/accounts"
@@ -109,9 +105,11 @@ class AccountControllerTests : ControllerTests() {
     @Test
     fun getBalanceShouldReturnWalletBalance() {
         val address = "0x51c5311F25206De4A9C6ecAa1Bc2Be257B0bA1fb"
-        val expectedBalance = 1L
+        val balance = 1L
+        val unconfirmedBalance = 1L
 
-        given(accountStateService.getActualBalanceByAddress(address)).willReturn(expectedBalance)
+        given(stateManager.getWalletBalanceByAddress(address)).willReturn(balance)
+        given(transactionManager.getUnconfirmedBalanceBySenderAddress(address)).willReturn(unconfirmedBalance)
 
         val actualBalance = webClient.get().uri("$ACCOUNT_URL/wallets/$address/balance")
             .exchange()
@@ -119,7 +117,7 @@ class AccountControllerTests : ControllerTests() {
             .expectBody(Long::class.java)
             .returnResult().responseBody!!
 
-        assertThat(actualBalance).isEqualTo(expectedBalance)
+        assertThat(actualBalance).isEqualTo(balance - unconfirmedBalance)
     }
 
     @Test

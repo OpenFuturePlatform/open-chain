@@ -1,45 +1,57 @@
 package io.openfuture.chain.core.model.entity.transaction.confirmed
 
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.payload.RewardTransactionPayload
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.message.core.RewardTransactionMessage
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
+import java.nio.ByteBuffer
 import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.Table
+import kotlin.Long.Companion.SIZE_BYTES
 
 @Entity
 @Table(name = "reward_transactions")
 class RewardTransaction(
-    header: TransactionHeader,
-    footer: TransactionFooter,
-    block: MainBlock,
+    timestamp: Long,
+    fee: Long,
+    senderAddress: String,
+    hash: String,
+    signature: String,
+    publicKey: String,
 
     @Embedded
-    val payload: RewardTransactionPayload
+    private val payload: RewardTransactionPayload,
 
-) : Transaction(header, footer, payload, block) {
+    block: MainBlock? = null
+) : Transaction(timestamp, fee, senderAddress, hash, signature, publicKey, block) {
 
     companion object {
-        fun of(message: RewardTransactionMessage, block: MainBlock): RewardTransaction = RewardTransaction(
-            TransactionHeader(message.timestamp, message.fee, message.senderAddress),
-            TransactionFooter(message.hash, message.senderSignature, message.senderPublicKey),
-            block,
-            RewardTransactionPayload(message.reward, message.recipientAddress)
+        fun of(message: RewardTransactionMessage, block: MainBlock? = null): RewardTransaction = RewardTransaction(
+            message.timestamp, message.fee, message.senderAddress, message.hash, message.signature, message.publicKey,
+            RewardTransactionPayload(message.reward, message.recipientAddress), block
         )
+
+        fun generateHash(timestamp: Long, fee: Long, senderAddress: String, reward: Long, recipientAddress: String): String {
+            val bytes = ByteBuffer.allocate(SIZE_BYTES + SIZE_BYTES + senderAddress.toByteArray().size +
+                SIZE_BYTES + recipientAddress.toByteArray().size)
+                .putLong(timestamp)
+                .putLong(fee)
+                .put(senderAddress.toByteArray())
+                .putLong(reward)
+                .put(recipientAddress.toByteArray())
+                .array()
+
+            return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
+        }
     }
 
 
     override fun toMessage(): RewardTransactionMessage = RewardTransactionMessage(
-        header.timestamp,
-        header.fee,
-        header.senderAddress,
-        footer.hash,
-        footer.senderSignature,
-        footer.senderPublicKey,
-        payload.reward,
-        payload.recipientAddress
+        timestamp, fee, senderAddress, hash, signature, publicKey, payload.reward, payload.recipientAddress
     )
+
+    override fun getPayload(): RewardTransactionPayload = payload
 
 }

@@ -2,35 +2,35 @@ package io.openfuture.chain.consensus.service
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.BlockManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional(readOnly = true)
 class DefaultEpochService(
-    private val genesisBlockService: GenesisBlockService,
+    private val blockManager: BlockManager,
     private val properties: ConsensusProperties
 ) : EpochService {
 
-    override fun getEpochStart(): Long = genesisBlockService.getLast().timestamp
+    override fun getEpochStart(): Long = blockManager.getLastGenesisBlock().timestamp
 
-    override fun getDelegatesPublicKeys(): List<String> = genesisBlockService.getLast().payload.activeDelegates
+    override fun getDelegatesPublicKeys(): List<String> = blockManager.getLastGenesisBlock().getPayload().activeDelegates
 
-    override fun getEpochIndex(): Long = genesisBlockService.getLast().payload.epochIndex
+    override fun getEpochIndex(): Long = blockManager.getLastGenesisBlock().getPayload().epochIndex
 
-    override fun getGenesisBlockHeight(): Long = genesisBlockService.getLast().height
+    override fun getGenesisBlockHeight(): Long = blockManager.getLastGenesisBlock().height
 
-    @Transactional(readOnly = true)
     override fun getCurrentSlotOwner(): String {
-        val genesisBlock = genesisBlockService.getLast()
-        val activeDelegates = genesisBlock.payload.activeDelegates
+        val genesisBlock = blockManager.getLastGenesisBlock()
+        val activeDelegates = genesisBlock.getPayload().activeDelegates
         val slotNumber = getSlotNumber(System.currentTimeMillis())
         val mod = slotNumber % activeDelegates.size
         return if (mod != 0L) activeDelegates[mod.toInt() - 1] else activeDelegates.last()
     }
 
     override fun getEpochByBlock(block: MainBlock): Long =
-        genesisBlockService.getPreviousByHeight(block.height).payload.epochIndex
+        blockManager.getPreviousGenesisBlockByHeight(block.height).getPayload().epochIndex
 
     override fun isInIntermission(time: Long): Boolean = (getTimeSlotFromStart(time) >= properties.timeSlotDuration!!)
 

@@ -7,7 +7,7 @@ import io.openfuture.chain.network.extension.readSet
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeSet
 import io.openfuture.chain.network.extension.writeString
-import io.openfuture.chain.network.serialization.Serializable
+import io.openfuture.chain.network.message.base.Message
 
 @NoArgConstructor
 data class GreetingResponseMessage(
@@ -16,7 +16,7 @@ data class GreetingResponseMessage(
     var nodesInfo: Set<NodeInfo>,
     var accepted: Boolean = true,
     var loop: Boolean = false
-) : Serializable {
+) : Message {
 
     override fun read(buf: ByteBuf) {
         uid = buf.readString()

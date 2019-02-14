@@ -6,7 +6,7 @@ import io.openfuture.chain.network.extension.readList
 import io.openfuture.chain.network.extension.readString
 import io.openfuture.chain.network.extension.writeList
 import io.openfuture.chain.network.extension.writeString
-import io.openfuture.chain.network.serialization.Serializable
+import io.openfuture.chain.network.message.base.Message
 
 @NoArgConstructor
 class EpochResponseMessage(
@@ -14,7 +14,7 @@ class EpochResponseMessage(
     var isEpochExists: Boolean,
     var genesisBlock: GenesisBlockMessage?,
     var mainBlocks: List<MainBlockMessage>
-) : Serializable {
+) : Message {
 
     override fun read(buf: ByteBuf) {
         delegateKey = buf.readString()

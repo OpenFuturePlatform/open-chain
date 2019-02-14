@@ -1,6 +1,7 @@
 CREATE TABLE states (
   id       BIGINT AUTO_INCREMENT PRIMARY KEY HASH,
   address  VARCHAR NOT NULL,
+  hash     VARCHAR NOT NULL,
   block_id BIGINT  NOT NULL REFERENCES blocks
 );
 --
@@ -16,7 +17,7 @@ CREATE TABLE account_states (
 --
 CREATE TABLE delegate_states (
   id             BIGINT PRIMARY KEY REFERENCES states,
-  rating         BIGINT NOT NULL,
+  rating         BIGINT  NOT NULL,
   wallet_address VARCHAR NOT NULL,
-  create_date    BIGINT NOT NULL
+  create_date    BIGINT  NOT NULL
 );

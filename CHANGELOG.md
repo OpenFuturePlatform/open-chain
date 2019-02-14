@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.9.0] - 2019-02-08
+### Added
+- Smart contracts: contract cost estimation
+- Smart contracts: contract execution
+- Smart contracts: rollback contract execution on failure
+- Smart contracts: added method to transfer tokens
+- Core: transaction receipts
+- Database: smart contract table
+
+### Changed
+- Core: transfer transaction structure, field for smart contract bytecode added
+- Core: transfer transaction extended for contract interactions
+
 ## [1.8.0] - 2019-01-25
 ### Added
 - Core: blocks rollback
@@ -13,7 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Core: delegate states
 - Core: light synchronization
 
-## Changed
+### Changed
 - Consensus: sequential ordering of active delegates
 - Consensus: in case active delegate does not produce block due to its possible unavailability, boot node will produce it
 - Consensus: invalid blocks are not broadcast across the network
@@ -310,6 +323,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[1.9.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.7.1...v1.8.0
 [1.7.1]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.6.0...v1.7.0

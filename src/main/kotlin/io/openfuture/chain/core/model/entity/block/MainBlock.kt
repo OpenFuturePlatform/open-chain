@@ -1,7 +1,13 @@
 package io.openfuture.chain.core.model.entity.block
 
-import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
+import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
+import io.openfuture.chain.core.model.entity.state.AccountState
+import io.openfuture.chain.core.model.entity.state.DelegateState
+import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.network.message.core.BaseMainBlockMessage
 import io.openfuture.chain.network.message.sync.MainBlockMessage
 import javax.persistence.Embedded
@@ -19,7 +25,7 @@ class MainBlock(
     publicKey: String,
 
     @Embedded
-    var payload: MainBlockPayload
+    private var payload: MainBlockPayload
 
 ) : Block(timestamp, height, previousHash, hash, signature, publicKey) {
 
@@ -31,15 +37,21 @@ class MainBlock(
             message.hash,
             message.signature,
             message.publicKey,
-            MainBlockPayload(message.transactionMerkleHash, message.stateMerkleHash, message.receiptMerkleHash)
+            MainBlockPayload(
+                message.transactionMerkleHash,
+                message.stateMerkleHash,
+                message.receiptMerkleHash,
+                message.rewardTransactions.map { RewardTransaction.of(it) },
+                message.voteTransactions.map { VoteTransaction.of(it) },
+                message.delegateTransactions.map { DelegateTransaction.of(it) },
+                message.transferTransactions.map { TransferTransaction.of(it) },
+                message.delegateStates.map { DelegateState.of(it) },
+                message.accountStates.map { AccountState.of(it) },
+                message.receipts.map { Receipt.of(it) }
+            )
         )
     }
 
-
-    fun getTransactionsCount(): Int = payload.transferTransactions.size + payload.voteTransactions.size +
-        payload.delegateTransactions.size + payload.rewardTransaction.size
-
-    override fun getPayload(): BlockPayload = payload
 
     override fun toMessage(): MainBlockMessage = MainBlockMessage(
         height,
@@ -51,7 +63,7 @@ class MainBlock(
         payload.transactionMerkleHash,
         payload.stateMerkleHash,
         payload.receiptMerkleHash,
-        payload.rewardTransaction.first().toMessage(),
+        payload.rewardTransactions.map { it.toMessage() },
         payload.voteTransactions.map { it.toMessage() },
         payload.delegateTransactions.map { it.toMessage() },
         payload.transferTransactions.map { it.toMessage() },
@@ -59,5 +71,7 @@ class MainBlock(
         payload.accountStates.map { it.toMessage() },
         payload.receipts.map { it.toMessage() }
     )
+
+    override fun getPayload(): MainBlockPayload = payload
 
 }
