@@ -153,7 +153,7 @@ class DefaultTransferTransactionService(
                     accountStateService.updateStorage(contractAddress, toHexString(serialize(contract)))
                     accountStateService.updateBalanceByAddress(message.senderAddress, -contractCost)
                     accountStateService.updateBalanceByAddress(delegateWallet, contractCost)
-                    results.add(ReceiptResult(message.senderAddress, delegateWallet, message.fee))
+                    results.add(ReceiptResult(message.senderAddress, delegateWallet, message.fee, contractAddress))
 
                     val delivery = message.fee - contractCost
                     if (0 < delivery) {
@@ -163,7 +163,7 @@ class DefaultTransferTransactionService(
                     accountStateService.updateBalanceByAddress(message.senderAddress, -message.fee)
                     accountStateService.updateBalanceByAddress(delegateWallet, message.fee)
                     results.add(ReceiptResult(message.senderAddress, delegateWallet, message.fee,
-                        "The fee was charged, but this is not enough.", "Contract is not deployed.")
+                        error = "Contract is not deployed. The fee was charged, but this is not enough for deploy.")
                     )
                 }
             }
