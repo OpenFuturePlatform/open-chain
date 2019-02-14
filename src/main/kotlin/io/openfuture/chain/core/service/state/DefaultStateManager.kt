@@ -12,9 +12,10 @@ import io.openfuture.chain.core.repository.StateRepository
 import io.openfuture.chain.core.service.AccountStateService
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.service.StateManager
-import io.openfuture.chain.core.service.StateValidatorManager
 import io.openfuture.chain.core.sync.BlockchainLock
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.rpc.domain.base.PageRequest
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -23,8 +24,7 @@ import org.springframework.transaction.annotation.Transactional
 class DefaultStateManager(
     private val repository: StateRepository<State>,
     private val accountStateService: AccountStateService,
-    private val delegateStateService: DelegateStateService,
-    private val stateValidatorManager: StateValidatorManager
+    private val delegateStateService: DelegateStateService
 ) : StateManager {
 
     @Suppress("UNCHECKED_CAST")
@@ -99,7 +99,8 @@ class DefaultStateManager(
         }
     }
 
-    override fun verify(state: State): Boolean = stateValidatorManager.verify(state)
+    override fun verify(state: State): Boolean =
+        state.hash != ByteUtils.toHexString(HashUtils.doubleSha256(state.getBytes()))
 
     @Transactional
     override fun deleteBlockStates(blockHeights: List<Long>) {

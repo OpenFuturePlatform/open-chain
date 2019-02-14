@@ -340,12 +340,6 @@ interface AccountStateService : StateService<AccountState> {
 
 }
 
-interface StateValidatorManager {
-
-    fun verify(state: State): Boolean
-
-}
-
 interface ContractService {
 
     fun getByAddress(address: String): Contract
@@ -368,11 +362,5 @@ interface ReceiptService {
     fun verify(receipt: Receipt): Boolean
 
     fun deleteBlockReceipts(blockHeights: List<Long>)
-
-}
-
-interface ReceiptValidator {
-
-    fun verify(receipt: Receipt): Boolean
 
 }
