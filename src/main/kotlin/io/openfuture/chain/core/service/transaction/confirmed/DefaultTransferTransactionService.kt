@@ -46,7 +46,7 @@ class DefaultTransferTransactionService(
             }
 
             if (DEPLOY == TransferTransactionType.getType(tx.getPayload().recipientAddress, tx.getPayload().data)
-                && receipt.getResults().all { it.error == null }) {
+                && receipt.isSuccessful()) {
                 val bytecode = ByteUtils.fromHexString(tx.getPayload().data!!)
                 val address = contractService.generateAddress(tx.senderAddress)
                 val abi = AbiGenerator.generate(bytecode)

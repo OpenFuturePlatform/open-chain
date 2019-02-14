@@ -1,6 +1,7 @@
 package io.openfuture.chain.rpc.controller.transaction
 
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
+import io.openfuture.chain.core.service.ReceiptService
 import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.crypto.annotation.AddressChecksum
 import io.openfuture.chain.rpc.domain.base.PageResponse
@@ -15,19 +16,24 @@ import javax.validation.Valid
 @Validated
 @RequestMapping("/rpc/transactions/transfer")
 class TransferTransactionController(
-    private val transactionManager: TransactionManager
+    private val transactionManager: TransactionManager,
+    private val receiptService: ReceiptService
 ) {
 
     @CrossOrigin
     @GetMapping("/address/{address}")
     fun getTransactions(@PathVariable @AddressChecksum address: String, @Valid request: TransactionPageRequest): PageResponse<TransferTransactionResponse> =
-        PageResponse(transactionManager.getAllTransferTransactionsByAddress(address, request)
-            .map { TransferTransactionResponse(it) })
+        PageResponse(transactionManager.getAllTransferTransactionsByAddress(address, request).map {
+            TransferTransactionResponse(it, receiptService.getByTransactionHash(it.hash))
+        })
 
     @CrossOrigin
     @GetMapping("/{hash}")
-    fun get(@PathVariable hash: String): TransferTransactionResponse =
-        TransferTransactionResponse(transactionManager.getTransferTransactionByHash(hash))
+    fun get(@PathVariable hash: String): TransferTransactionResponse {
+        val tx = transactionManager.getTransferTransactionByHash(hash)
+        val receipt = receiptService.getByTransactionHash(hash)
+        return TransferTransactionResponse(tx, receipt)
+    }
 
     @PostMapping
     fun add(@Valid @RequestBody request: TransferTransactionRequest): TransferTransactionResponse =
@@ -36,7 +42,9 @@ class TransferTransactionController(
     @CrossOrigin
     @GetMapping
     fun getAll(@Valid request: TransactionPageRequest): PageResponse<TransferTransactionResponse> =
-        PageResponse(transactionManager.getAllTransferTransactions(request).map { TransferTransactionResponse(it) })
+        PageResponse(transactionManager.getAllTransferTransactions(request).map {
+            TransferTransactionResponse(it, receiptService.getByTransactionHash(it.hash))
+        })
 
 }
 
