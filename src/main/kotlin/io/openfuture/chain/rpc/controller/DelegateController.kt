@@ -25,7 +25,7 @@ class DelegateController(
     @GetMapping
     fun getAll(@Valid request: PageRequest): PageResponse<DelegateResponse> {
         val delegates = stateManager.getAllDelegates(request).map { DelegateResponse(it) }
-        return PageResponse(PageImpl(delegates, request, delegates.size.toLong()))
+        return PageResponse(delegates)
     }
 
     @GetMapping("/active")
@@ -40,11 +40,12 @@ class DelegateController(
 
     @GetMapping("/view")
     fun getAll(@Valid request: ViewDelegatePageRequest): PageResponse<ViewDelegateResponse> {
-        val delegates = stateManager.getAllDelegates(request).map { delegate ->
+        val delegates = stateManager.getAllDelegates(request)
+        val pageDelegates = delegates.map { delegate ->
             ViewDelegateResponse(delegate, stateManager.getVotesForDelegate(delegate.address).size)
         }.sortedByDescending { it.rating }
 
-        return PageResponse(PageImpl(delegates, request, delegates.size.toLong()))
+        return PageResponse(PageImpl(pageDelegates, request, delegates.totalElements))
     }
 
 }

@@ -5,6 +5,7 @@ import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
+import io.openfuture.chain.core.model.entity.block.TemporaryBlock
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
@@ -253,7 +254,7 @@ interface StateManager {
 
     fun updateSmartContractStorage(address: String, storage: String)
 
-    fun getAllDelegates(request: PageRequest): List<DelegateState>
+    fun getAllDelegates(request: PageRequest): Page<DelegateState>
 
     fun getActiveDelegates(): List<DelegateState>
 
@@ -279,7 +280,7 @@ interface StateService<T : State> {
 
 interface DelegateStateService : StateService<DelegateState> {
 
-    fun getAllDelegates(request: PageRequest): List<DelegateState>
+    fun getAllDelegates(request: PageRequest): Page<DelegateState>
 
     fun getActiveDelegates(): List<DelegateState>
 
@@ -327,5 +328,15 @@ interface ReceiptService {
     fun verify(receipt: Receipt): Boolean
 
     fun deleteBlockReceipts(blockHeights: List<Long>)
+
+}
+
+interface TemporaryBlockService {
+
+    fun getByHeightIn(heights: List<Long>): List<TemporaryBlock>
+
+    fun save(blocks: List<TemporaryBlock>): List<TemporaryBlock>
+
+    fun deleteAll()
 
 }

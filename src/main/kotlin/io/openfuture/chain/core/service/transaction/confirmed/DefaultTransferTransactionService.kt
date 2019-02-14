@@ -10,6 +10,7 @@ import io.openfuture.chain.core.repository.TransferTransactionRepository
 import io.openfuture.chain.core.service.ContractService
 import io.openfuture.chain.core.service.TransferTransactionService
 import io.openfuture.chain.core.sync.BlockchainLock
+import io.openfuture.chain.core.util.SerializationUtils
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.smartcontract.component.ByteCodeProcessor
 import io.openfuture.chain.smartcontract.component.SmartContractInjector
@@ -17,7 +18,6 @@ import io.openfuture.chain.smartcontract.component.abi.AbiGenerator
 import io.openfuture.chain.smartcontract.component.load.SmartContractLoader
 import io.openfuture.chain.smartcontract.deploy.calculation.ContractCostCalculator
 import io.openfuture.chain.smartcontract.execution.ContractExecutor
-import io.openfuture.chain.smartcontract.util.SerializationUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
@@ -44,8 +44,7 @@ class DefaultTransferTransactionService(
                 return persistTx
             }
 
-            if (DEPLOY == tx.getType()
-                && receipt.getResults().all { it.error == null }) {
+            if (DEPLOY == tx.getType() && receipt.isSuccessful()) {
                 val bytecode = ByteUtils.fromHexString(tx.getPayload().data!!)
                 val address = contractService.generateAddress(tx.senderAddress)
                 val abi = AbiGenerator.generate(bytecode)
@@ -88,7 +87,7 @@ class DefaultTransferTransactionService(
                         ByteUtils.toHexString(SerializationUtils.serialize(contract)))
                     stateManager.updateWalletBalanceByAddress(tx.senderAddress, -contractCost)
                     stateManager.updateWalletBalanceByAddress(delegateWallet, contractCost)
-                    results.add(ReceiptResult(tx.senderAddress, delegateWallet, tx.fee))
+                    results.add(ReceiptResult(tx.senderAddress, delegateWallet, tx.fee, contractAddress))
 
                     val delivery = tx.fee - contractCost
                     if (0 < delivery) {
@@ -98,7 +97,7 @@ class DefaultTransferTransactionService(
                     stateManager.updateWalletBalanceByAddress(tx.senderAddress, -tx.fee)
                     stateManager.updateWalletBalanceByAddress(delegateWallet, tx.fee)
                     results.add(ReceiptResult(tx.senderAddress, delegateWallet, tx.fee,
-                        "The fee was charged, but this is not enough.", "Contract is not deployed.")
+                        error = "Contract is not deployed. The fee was charged, but this is not enough for deploy.")
                     )
                 }
             }
