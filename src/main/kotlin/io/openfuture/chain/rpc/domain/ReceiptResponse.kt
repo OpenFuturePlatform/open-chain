@@ -21,9 +21,9 @@ class ReceiptResultResponse(
     val amount: Long,
     val data: String? = null,
     val error: String? = null
-){
+) {
 
-    constructor(receiptResult: ReceiptResult):this(
+    constructor(receiptResult: ReceiptResult) : this(
         receiptResult.from,
         receiptResult.to,
         receiptResult.amount,
