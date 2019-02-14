@@ -15,7 +15,7 @@ class ReceiptResponse(
 
 }
 
-class ReceiptResultResponse(
+data class ReceiptResultResponse(
     val from: String,
     val to: String,
     val amount: Long,
