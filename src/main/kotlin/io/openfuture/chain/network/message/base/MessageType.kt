@@ -15,12 +15,11 @@ import io.openfuture.chain.network.message.sync.EpochRequestMessage
 import io.openfuture.chain.network.message.sync.EpochResponseMessage
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.network.message.sync.MainBlockMessage
-import io.openfuture.chain.network.serialization.Serializable
 import kotlin.reflect.KClass
 
 enum class MessageType(
     val id: Byte,
-    val clazz: KClass<out Serializable>
+    val clazz: KClass<out Message>
 ) {
 
     // network
@@ -48,7 +47,7 @@ enum class MessageType(
 
         fun get(id: Byte) = values().single { id == it.id }
 
-        fun get(message: Serializable) = values().single { message::class == it.clazz }
+        fun get(message: Message) = values().single { message::class == it.clazz }
 
     }
 

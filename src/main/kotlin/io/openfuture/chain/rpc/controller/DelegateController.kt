@@ -1,9 +1,7 @@
 package io.openfuture.chain.rpc.controller
 
-
-import io.openfuture.chain.core.service.AccountStateService
-import io.openfuture.chain.core.service.DelegateStateService
-import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.BlockManager
+import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import io.openfuture.chain.rpc.domain.delegate.DelegateResponse
@@ -20,21 +18,20 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/rpc/delegates")
 class DelegateController(
-    private val delegateStateService: DelegateStateService,
-    private val accountStateService: AccountStateService,
-    private val genesisBlockService: GenesisBlockService
+    private val stateManager: StateManager,
+    private val blockManager: BlockManager
 ) {
 
     @GetMapping
     fun getAll(@Valid request: PageRequest): PageResponse<DelegateResponse> {
-        val delegates = delegateStateService.getAllDelegates(request).map { DelegateResponse(it) }
+        val delegates = stateManager.getAllDelegates(request).map { DelegateResponse(it) }
         return PageResponse(delegates)
     }
 
     @GetMapping("/active")
     fun getAllActive(@Valid request: PageRequest): PageResponse<DelegateResponse> {
-        val activeDelegates = genesisBlockService.getLast().payload.activeDelegates.map {
-            DelegateResponse(delegateStateService.getLastByAddress(it))
+        val activeDelegates = blockManager.getLastGenesisBlock().getPayload().activeDelegates.map {
+            DelegateResponse(stateManager.getLastByAddress(it))
         }
 
         val pageActiveDelegate = activeDelegates.drop(request.offset.toInt()).take(request.getLimit())
@@ -43,7 +40,7 @@ class DelegateController(
 
     @GetMapping("/view")
     fun getAll(@Valid request: ViewDelegatePageRequest): PageResponse<ViewDelegateResponse> {
-        val delegates = delegateStateService.getAllDelegates(request)
+        val delegates = stateManager.getAllDelegates(request)
         val pageDelegates = delegates.map { delegate ->
             ViewDelegateResponse(delegate, accountStateService.getVotesForDelegate(delegate.address).size)
         }.sortedByDescending { it.rating }

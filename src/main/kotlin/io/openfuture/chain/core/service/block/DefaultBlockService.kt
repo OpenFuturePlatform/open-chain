@@ -1,191 +1,34 @@
 package io.openfuture.chain.core.service.block
 
-import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.NotFoundException
-import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
-import io.openfuture.chain.core.model.entity.block.GenesisBlock
-import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
-import io.openfuture.chain.core.model.entity.state.AccountState
-import io.openfuture.chain.core.model.entity.state.DelegateState
-import io.openfuture.chain.core.model.entity.state.State
-import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.repository.BlockRepository
-import io.openfuture.chain.core.service.*
-import io.openfuture.chain.core.sync.SyncMode
-import io.openfuture.chain.core.sync.SyncMode.FULL
-import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
-import io.openfuture.chain.crypto.util.HashUtils
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
-import org.springframework.stereotype.Service
+import io.openfuture.chain.core.service.BlockService
+import io.openfuture.chain.rpc.domain.base.PageRequest
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
 import org.springframework.transaction.annotation.Transactional
-import java.nio.ByteBuffer
 
-@Service
-class DefaultBlockService(
-    private val repository: BlockRepository<Block>,
-    private val properties: ConsensusProperties,
-    private val transactionService: TransactionService,
-    private val voteTransactionService: VoteTransactionService,
-    private val rewardTransactionService: RewardTransactionService,
-    private val delegateTransactionService: DelegateTransactionService,
-    private val transferTransactionService: TransferTransactionService,
-    private val delegateStateService: DelegateStateService,
-    private val accountStateService: AccountStateService,
-    private val receiptService: ReceiptService
-) : BlockService {
+@Transactional(readOnly = true)
+abstract class DefaultBlockService<T : Block>(
+    private val repository: BlockRepository<T>
+) : BlockService<T> {
 
-    @Transactional(readOnly = true)
-    override fun getAfterCurrentHash(hash: String): List<Block> {
-        val startBlock = repository.findOneByHash(hash) ?: return emptyList()
-        return repository.findAllByHeightGreaterThan(startBlock.height)
-    }
-
-    override fun getAvgProductionTime(): Long {
-        val lastBlock = getLast()
-        val firstMainBlock = repository.findFirstByHeightGreaterThan(1) ?: return 0
-        return (lastBlock.timestamp - firstMainBlock.timestamp) / lastBlock.height
-    }
-
-    @Transactional(readOnly = true)
-    override fun getCount(): Long = repository.count()
-
-    @Transactional(readOnly = true)
-    override fun getLast(): Block =
-        repository.findFirstByOrderByHeightDesc() ?: throw NotFoundException("Last block not found!")
-
-    @Transactional
-    override fun save(block: Block) {
-        repository.save(block)
-    }
-
-    @Transactional
-    override fun removeEpoch(genesisBlock: GenesisBlock) {
-        val fromHeight = if (1L == genesisBlock.height) {
-            genesisBlock.height + 1
-        } else {
-            genesisBlock.height
-        }
-        val toHeight = fromHeight + properties.epochHeight!!
-        val heightRange = (fromHeight..toHeight).toList()
-        transactionService.deleteBlockTransactions(heightRange)
-        delegateStateService.deleteBlockStates(heightRange)
-        accountStateService.deleteBlockStates(heightRange)
-        receiptService.deleteBlockReceipts(heightRange)
-        repository.deleteAllByHeightIn(heightRange)
-    }
-
-    @Transactional(readOnly = true)
-    override fun isExists(hash: String): Boolean = repository.findOneByHash(hash)?.let { true } ?: false
-
-    @Transactional(readOnly = true)
-    override fun findByHash(hash: String): Block? = repository.findOneByHash(hash)
-
-    @Transactional(readOnly = true)
-    override fun isExists(hash: String, height: Long): Boolean =
-        repository.findOneByHashAndHeight(hash, height)?.let { true } ?: false
-
-    @Transactional(readOnly = true)
-    override fun getAllByHeightIn(heights: List<Long>): List<Block> =
-        repository.findAllByHeightIn(heights)
+    @Autowired protected lateinit var blockRepository: BlockRepository<Block>
 
 
-    @Transactional
-    override fun deleteByHeightIn(heights: List<Long>) {
-        accountStateService.deleteBlockStates(heights)
-        delegateStateService.deleteBlockStates(heights)
-        transactionService.deleteBlockTransactions(heights)
-        repository.deleteAllByHeightIn(heights)
-    }
+    override fun getByHash(hash: String): T = repository.findOneByHash(hash)
+        ?: throw NotFoundException("Block $hash not found")
 
-    override fun isValidHash(block: Block): Boolean {
-        val hash = createHash(block.timestamp, block.height, block.previousHash, block.getPayload())
-        return ByteUtils.toHexString(hash) == block.hash
-    }
+    override fun getAll(request: PageRequest): Page<T> = repository.findAll(request)
 
-    override fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray {
-        val bytes = ByteBuffer.allocate(LONG_BYTES + LONG_BYTES + previousHash.toByteArray().size + payload.getBytes().size)
-            .putLong(timestamp)
-            .putLong(height)
-            .put(previousHash.toByteArray())
-            .put(payload.getBytes())
-            .array()
+    override fun getPreviousBlock(hash: String): T =
+        repository.findFirstByHeightLessThanOrderByHeightDesc(getByHash(hash).height)
+            ?: throw NotFoundException("Block before $hash not found")
 
-        return HashUtils.doubleSha256(bytes)
-    }
+    override fun getNextBlock(hash: String): T = repository.findFirstByHeightGreaterThan(getByHash(hash).height)
+        ?: throw NotFoundException("Block after $hash not found")
 
-    @Transactional(readOnly = true)
-    override fun getCurrentHeight(): Long = repository.getCurrentHeight()
-
-    @Transactional
-    override fun saveChunk(blocksChunk: List<Block>, syncMode: SyncMode) {
-        blocksChunk.forEach { block ->
-            if (block is MainBlock) {
-                val rewardTransaction = block.payload.rewardTransaction.first()
-                block.payload.rewardTransaction = mutableListOf()
-
-                val transactions = mutableListOf<Transaction>()
-                val states = mutableListOf<State>()
-                val receipts = mutableSetOf<Receipt>()
-
-                if (syncMode == FULL) {
-                    transactions.addAll(block.payload.transferTransactions)
-                    transactions.addAll(block.payload.voteTransactions)
-                    transactions.addAll(block.payload.delegateTransactions)
-
-                    block.payload.transferTransactions = mutableListOf()
-                    block.payload.voteTransactions = mutableListOf()
-                    block.payload.delegateTransactions = mutableListOf()
-
-                    receipts.addAll(block.payload.receipts)
-                    block.payload.receipts = mutableListOf()
-                }
-
-                states.addAll(block.payload.delegateStates)
-                states.addAll(block.payload.accountStates)
-
-                block.payload.delegateStates = mutableListOf()
-                block.payload.accountStates = mutableListOf()
-
-                this.save(block)
-                rewardTransactionService.commit(rewardTransaction)
-
-                if (syncMode == FULL) {
-                    receipts.forEach {
-                        it.block = block
-                        receiptService.commit(it)
-                    }
-
-                    transactions.forEach {
-                        it.block = block
-                        when (it) {
-                            is TransferTransaction -> {
-                                val receipt = receipts.find { receipt -> receipt.transactionHash == it.footer.hash }!!
-                                transferTransactionService.commit(it, receipt)
-                            }
-                            is DelegateTransaction -> delegateTransactionService.commit(it)
-                            is VoteTransaction -> voteTransactionService.commit(it)
-                            else -> throw IllegalStateException("Unsupported transaction type")
-                        }
-                    }
-                }
-
-                states.forEach {
-                    it.block = block
-                    when (it) {
-                        is DelegateState -> delegateStateService.commit(it)
-                        is AccountState -> accountStateService.commit(it)
-                        else -> throw IllegalStateException("Unsupported state type")
-                    }
-                }
-            } else if (block is GenesisBlock) {
-                this.save(block)
-            }
-        }
-    }
+    protected fun getLastBlock(): Block = blockRepository.findFirstByOrderByHeightDesc()
 
 }

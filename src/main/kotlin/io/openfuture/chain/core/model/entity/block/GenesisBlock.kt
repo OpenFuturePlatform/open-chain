@@ -1,6 +1,5 @@
 package io.openfuture.chain.core.model.entity.block
 
-import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import javax.persistence.Embedded
@@ -18,34 +17,22 @@ class GenesisBlock(
     publicKey: String,
 
     @Embedded
-    val payload: GenesisBlockPayload
+    private val payload: GenesisBlockPayload
 
 ) : Block(timestamp, height, previousHash, hash, signature, publicKey) {
 
     companion object {
         fun of(message: GenesisBlockMessage): GenesisBlock = GenesisBlock(
-            message.timestamp,
-            message.height,
-            message.previousHash,
-            message.hash,
-            message.signature,
-            message.publicKey,
-            GenesisBlockPayload(message.epochIndex, message.delegates.toMutableList())
+            message.timestamp, message.height, message.previousHash, message.hash, message.signature, message.publicKey,
+            GenesisBlockPayload(message.epochIndex, message.delegates)
         )
     }
 
 
-    override fun getPayload(): BlockPayload = payload
-
     override fun toMessage(): GenesisBlockMessage = GenesisBlockMessage(
-        height,
-        previousHash,
-        timestamp,
-        hash,
-        signature,
-        publicKey,
-        payload.epochIndex,
-        payload.activeDelegates
+        height, previousHash, timestamp, hash, signature, publicKey, payload.epochIndex, payload.activeDelegates
     )
+
+    override fun getPayload(): GenesisBlockPayload = payload
 
 }

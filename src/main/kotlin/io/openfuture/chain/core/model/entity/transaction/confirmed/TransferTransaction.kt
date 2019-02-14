@@ -1,8 +1,6 @@
 package io.openfuture.chain.core.model.entity.transaction.confirmed
 
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
@@ -13,42 +11,36 @@ import javax.persistence.Table
 @Entity
 @Table(name = "transfer_transactions")
 class TransferTransaction(
-    header: TransactionHeader,
-    footer: TransactionFooter,
-    block: MainBlock,
+    timestamp: Long,
+    fee: Long,
+    senderAddress: String,
+    hash: String,
+    signature: String,
+    publicKey: String,
 
     @Embedded
-    val payload: TransferTransactionPayload
+    private val payload: TransferTransactionPayload,
 
-) : Transaction(header, footer, payload, block) {
+    block: MainBlock? = null
+) : Transaction(timestamp, fee, senderAddress, hash, signature, publicKey, block) {
 
     companion object {
-        fun of(message: TransferTransactionMessage, block: MainBlock): TransferTransaction = TransferTransaction(
-            TransactionHeader(message.timestamp, message.fee, message.senderAddress),
-            TransactionFooter(message.hash, message.senderSignature, message.senderPublicKey),
-            block,
-            TransferTransactionPayload(message.amount, message.recipientAddress, message.data)
+        fun of(message: TransferTransactionMessage, block: MainBlock? = null): TransferTransaction = TransferTransaction(
+            message.timestamp, message.fee, message.senderAddress, message.hash, message.signature, message.publicKey,
+            TransferTransactionPayload(message.amount, message.recipientAddress, message.data), block
         )
 
-        fun of(utx: UnconfirmedTransferTransaction, block: MainBlock): TransferTransaction = TransferTransaction(
-            utx.header,
-            utx.footer,
-            block,
-            utx.payload
+        fun of(utx: UnconfirmedTransferTransaction, block: MainBlock? = null): TransferTransaction = TransferTransaction(
+            utx.timestamp, utx.fee, utx.senderAddress, utx.hash, utx.signature, utx.publicKey, utx.getPayload(), block
         )
     }
 
 
     override fun toMessage(): TransferTransactionMessage = TransferTransactionMessage(
-        header.timestamp,
-        header.fee,
-        header.senderAddress,
-        footer.hash,
-        footer.senderSignature,
-        footer.senderPublicKey,
-        payload.amount,
-        payload.recipientAddress,
+        timestamp, fee, senderAddress, hash, signature, publicKey, payload.amount, payload.recipientAddress,
         payload.data
     )
+
+    override fun getPayload(): TransferTransactionPayload = payload
 
 }

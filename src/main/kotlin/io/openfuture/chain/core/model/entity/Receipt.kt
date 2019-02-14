@@ -8,9 +8,8 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.extension.*
+import io.openfuture.chain.network.message.base.Message
 import io.openfuture.chain.network.message.core.ReceiptMessage
-import io.openfuture.chain.network.serialization.Serializable
-import org.apache.commons.lang3.StringUtils.EMPTY
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.nio.ByteBuffer
 import javax.persistence.*
@@ -23,7 +22,10 @@ class Receipt(
     var transactionHash: String,
 
     @Column(name = "result", nullable = false)
-    var result: String = EMPTY,
+    var result: String,
+
+    @Column(name = "hash", nullable = false)
+    var hash: String,
 
     @ManyToOne
     @JoinColumn(name = "block_id", nullable = false)
@@ -31,32 +33,45 @@ class Receipt(
 
 ) : BaseModel() {
 
+    constructor(transactionHash: String, result: String) : this(
+        transactionHash,
+        result,
+        lazy {
+            val txHashBytes = transactionHash.toByteArray()
+            val resultBytes = result.toByteArray()
+            val bytes = ByteBuffer.allocate(txHashBytes.size + resultBytes.size)
+                .put(txHashBytes)
+                .put(resultBytes)
+                .array()
+
+            ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
+        }.value
+    )
+
     companion object {
-        fun of(message: ReceiptMessage, block: MainBlock): Receipt =
-            Receipt(message.transactionHash, message.result, block)
-    }
+        fun of(message: ReceiptMessage, block: MainBlock? = null): Receipt =
+            Receipt(message.transactionHash, message.result, message.hash, block)
 
-
-    fun getHash(): String {
-        val txHashBytes = transactionHash.toByteArray(Charsets.UTF_8)
-        val resultBytes = result.toByteArray(Charsets.UTF_8)
-        val bytes = ByteBuffer.allocate(txHashBytes.size + resultBytes.size)
-            .put(txHashBytes)
-            .put(resultBytes)
-            .array()
-
-        return ByteUtils.toHexString(HashUtils.sha256(bytes))
+        fun generateResult(results: List<ReceiptResult>): String {
+            val buffer = Unpooled.buffer()
+            buffer.writeList(results)
+            return ByteUtils.toHexString(buffer.array())
+        }
     }
 
     fun getResults(): List<ReceiptResult> = Unpooled.copiedBuffer(ByteUtils.fromHexString(result)).readList()
 
-    fun setResults(results: List<ReceiptResult>) {
-        val buffer = Unpooled.buffer()
-        buffer.writeList(results)
-        result = ByteUtils.toHexString(buffer.array())
+    fun getBytes(): ByteArray {
+        val txHashBytes = transactionHash.toByteArray()
+        val resultBytes = result.toByteArray()
+
+        return ByteBuffer.allocate(txHashBytes.size + resultBytes.size)
+            .put(txHashBytes)
+            .put(resultBytes)
+            .array()
     }
 
-    fun toMessage(): ReceiptMessage = ReceiptMessage(transactionHash, result)
+    fun toMessage(): ReceiptMessage = ReceiptMessage(transactionHash, result, hash)
 
 }
 
@@ -67,7 +82,7 @@ class ReceiptResult(
     var amount: Long,
     var data: String? = null,
     var error: String? = null
-) : Serializable {
+) : Message {
 
     override fun read(buf: ByteBuf) {
         from = buf.readString()
