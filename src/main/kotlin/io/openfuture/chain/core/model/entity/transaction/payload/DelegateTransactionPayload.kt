@@ -1,9 +1,9 @@
 package io.openfuture.chain.core.model.entity.transaction.payload
 
-import io.openfuture.chain.core.util.ByteConstants.LONG_BYTES
 import java.nio.ByteBuffer
 import javax.persistence.Column
 import javax.persistence.Embeddable
+import kotlin.Long.Companion.SIZE_BYTES
 
 @Embeddable
 class DelegateTransactionPayload(
@@ -17,8 +17,7 @@ class DelegateTransactionPayload(
 ) : TransactionPayload {
 
     override fun getBytes(): ByteArray {
-        val buffer = ByteBuffer.allocate(delegateKey.toByteArray().size + LONG_BYTES)
-
+        val buffer = ByteBuffer.allocate(delegateKey.toByteArray().size + SIZE_BYTES)
         buffer.put(delegateKey.toByteArray())
         buffer.putLong(amount)
         return buffer.array()

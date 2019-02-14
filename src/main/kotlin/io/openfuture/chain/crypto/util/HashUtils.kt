@@ -6,6 +6,7 @@ import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
 import org.bouncycastle.crypto.params.KeyParameter
 import org.bouncycastle.jcajce.provider.digest.Keccak
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import java.security.MessageDigest
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -53,6 +54,29 @@ object HashUtils {
         generator.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(chars), salt, PBKDF2_ITERATION_COUNT)
         val key = generator.generateDerivedMacParameters(PBKDF2_KEY_SIZE) as KeyParameter
         return key.key
+    }
+
+    fun merkleRoot(hashes: List<String>): String {
+        if (hashes.size == 1) {
+            return hashes.single()
+        }
+
+        var previousTreeLayout = hashes.asSequence().sortedByDescending { it }.map { it.toByteArray() }.toList()
+        var treeLayout = mutableListOf<ByteArray>()
+        while (previousTreeLayout.size != 2) {
+            for (i in 0 until previousTreeLayout.size step 2) {
+                val leftHash = previousTreeLayout[i]
+                val rightHash = if (i + 1 == previousTreeLayout.size) {
+                    previousTreeLayout[i]
+                } else {
+                    previousTreeLayout[i + 1]
+                }
+                treeLayout.add(sha256(leftHash + rightHash))
+            }
+            previousTreeLayout = treeLayout
+            treeLayout = mutableListOf()
+        }
+        return ByteUtils.toHexString(doubleSha256(previousTreeLayout[0] + previousTreeLayout[1]))
     }
 
 }

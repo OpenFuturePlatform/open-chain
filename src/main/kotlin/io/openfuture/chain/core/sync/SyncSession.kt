@@ -12,7 +12,7 @@ class SyncSession(
     val syncMode: SyncMode,
     private val lastLocalGenesisBlock: GenesisBlock,
     private val currentGenesisBlock: GenesisBlock,
-    private val epochQuantity: Long = currentGenesisBlock.payload.epochIndex - lastLocalGenesisBlock.payload.epochIndex
+    private val epochQuantity: Long = currentGenesisBlock.getPayload().epochIndex - lastLocalGenesisBlock.getPayload().epochIndex
 ) {
 
     companion object {

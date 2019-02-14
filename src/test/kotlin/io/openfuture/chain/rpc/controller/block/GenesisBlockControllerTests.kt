@@ -3,7 +3,7 @@ package io.openfuture.chain.rpc.controller.block
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
-import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.BlockManager
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import io.openfuture.chain.rpc.domain.block.GenesisBlockResponse
@@ -20,7 +20,7 @@ import org.springframework.data.domain.PageImpl
 class GenesisBlockControllerTests : ControllerTests() {
 
     @MockBean
-    private lateinit var service: GenesisBlockService
+    private lateinit var blockManager: BlockManager
 
     companion object {
         private const val GENESIS_BLOCK_URL = "/rpc/blocks/genesis"
@@ -33,7 +33,7 @@ class GenesisBlockControllerTests : ControllerTests() {
             "hash", "signature", "publicKey", GenesisBlockPayload(1L, mutableListOf()))))
         val expectedPageResponse = PageResponse(pageGenesisBlocks)
 
-        given(service.getAll(PageRequest())).willReturn(pageGenesisBlocks)
+        given(blockManager.getAllGenesisBlocks(PageRequest())).willReturn(pageGenesisBlocks)
 
         val actualPageResponse = webClient.get().uri("/rpc/blocks/genesis")
             .exchange()
@@ -52,7 +52,7 @@ class GenesisBlockControllerTests : ControllerTests() {
         val genesisBlock = createGenesisBlock()
         val expectedGenesisBlockResponse = GenesisBlockResponse(genesisBlock)
 
-        given(service.getByHash(hash)).willReturn(genesisBlock)
+        given(blockManager.getGenesisBlockByHash(hash)).willReturn(genesisBlock)
 
         val actualGenesisBlockResponse = webClient.get().uri("$GENESIS_BLOCK_URL/$hash")
             .exchange()
@@ -69,7 +69,7 @@ class GenesisBlockControllerTests : ControllerTests() {
         val genesisBlock = createGenesisBlock()
         val expectedGenesisBlockResponse = GenesisBlockResponse(genesisBlock)
 
-        given(service.getNextBlock(hash)).willReturn(genesisBlock)
+        given(blockManager.getNextGenesisBlock(hash)).willReturn(genesisBlock)
 
         val actualGenesisBlockResponse = webClient.get().uri("$GENESIS_BLOCK_URL/$hash/next")
             .exchange()
@@ -86,7 +86,7 @@ class GenesisBlockControllerTests : ControllerTests() {
         val genesisBlock = createGenesisBlock()
         val expectedGenesisBlockResponse = GenesisBlockResponse(genesisBlock)
 
-        given(service.getPreviousBlock(hash)).willReturn(genesisBlock)
+        given(blockManager.getPreviousGenesisBlock(hash)).willReturn(genesisBlock)
 
         val actualGenesisBlockResponse = webClient.get().uri("$GENESIS_BLOCK_URL/$hash/previous")
             .exchange()

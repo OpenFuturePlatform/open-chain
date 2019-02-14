@@ -16,26 +16,26 @@ class VoteTransactionResponse(
 ) : BaseTransactionResponse(timestamp, fee, senderAddress, senderSignature, senderPublicKey, hash, blockHash) {
 
     constructor(tx: UnconfirmedVoteTransaction) : this(
-        tx.header.timestamp,
-        tx.header.fee,
-        tx.header.senderAddress,
-        tx.footer.senderSignature,
-        tx.footer.senderPublicKey,
-        tx.footer.hash,
-        tx.payload.voteTypeId,
-        tx.payload.delegateKey
+        tx.timestamp,
+        tx.fee,
+        tx.senderAddress,
+        tx.signature,
+        tx.publicKey,
+        tx.hash,
+        tx.getPayload().voteTypeId,
+        tx.getPayload().delegateKey
     )
 
     constructor(tx: VoteTransaction) : this(
-        tx.header.timestamp,
-        tx.header.fee,
-        tx.header.senderAddress,
-        tx.footer.senderSignature,
-        tx.footer.senderPublicKey,
-        tx.footer.hash,
-        tx.payload.voteTypeId,
-        tx.payload.delegateKey,
-        tx.block.hash
+        tx.timestamp,
+        tx.fee,
+        tx.senderAddress,
+        tx.signature,
+        tx.publicKey,
+        tx.hash,
+        tx.getPayload().voteTypeId,
+        tx.getPayload().delegateKey,
+        tx.block?.hash
     )
 
 }

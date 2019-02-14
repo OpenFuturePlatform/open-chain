@@ -1,8 +1,9 @@
 package io.openfuture.chain.rpc.controller
 
-import io.openfuture.chain.core.service.AccountStateService
-import io.openfuture.chain.core.service.DelegateStateService
-import io.openfuture.chain.core.service.VoteTransactionService
+import io.openfuture.chain.core.model.entity.state.AccountState
+import io.openfuture.chain.core.model.entity.state.DelegateState
+import io.openfuture.chain.core.service.StateManager
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.crypto.annotation.AddressChecksum
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.rpc.domain.crypto.AccountDto
@@ -22,9 +23,8 @@ import javax.validation.Valid
 @RequestMapping("/rpc/accounts")
 class AccountController(
     private val cryptoService: CryptoService,
-    private val accountStateService: AccountStateService,
-    private val delegateStateService: DelegateStateService,
-    private val voteTransactionService: VoteTransactionService
+    private val stateManager: StateManager,
+    private val transactionManager: TransactionManager
 ) {
 
     @GetMapping("/doGenerate")
@@ -37,23 +37,27 @@ class AccountController(
     }
 
     @GetMapping("/wallets/{address}/balance")
-    fun getBalance(@PathVariable @AddressChecksum address: String): Long =
-        accountStateService.getActualBalanceByAddress(address)
+    fun getBalance(@PathVariable @AddressChecksum address: String): Long {
+        val balance = stateManager.getWalletBalanceByAddress(address)
+        val unconfirmedBalance = transactionManager.getUnconfirmedBalanceBySenderAddress(address)
+
+        return balance - unconfirmedBalance
+    }
 
     @GetMapping("/wallets/{address}/delegate")
     fun getDelegates(@PathVariable @AddressChecksum address: String): VoteResponse? {
-        val accountState = accountStateService.getLastByAddress(address)
+        val accountState = stateManager.getLastByAddress<AccountState>(address)
 
         if (null != accountState.voteFor) {
-            val delegate = delegateStateService.getLastByAddress(accountState.voteFor!!)
+            val delegate = stateManager.getLastByAddress<DelegateState>(accountState.voteFor!!)
 
             return VoteResponse(
                 delegate.walletAddress,
                 delegate.address,
                 delegate.rating,
-                accountStateService.getVotesForDelegate(delegate.address).size,
-                voteTransactionService.getLastVoteForDelegate(address, delegate.address).header.timestamp,
-                voteTransactionService.getUnconfirmedBySenderAgainstDelegate(address, delegate.address) != null
+                stateManager.getVotesForDelegate(delegate.address).size,
+                transactionManager.getLastVoteForDelegate(address, delegate.address).timestamp,
+                transactionManager.getUnconfirmedVoteBySenderAgainstDelegate(address, delegate.address) != null
             )
         }
 

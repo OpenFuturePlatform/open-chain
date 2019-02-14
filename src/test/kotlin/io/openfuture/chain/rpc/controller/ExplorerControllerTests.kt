@@ -2,8 +2,8 @@ package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.consensus.service.EpochService
-import io.openfuture.chain.core.service.BlockService
-import io.openfuture.chain.core.service.TransactionService
+import io.openfuture.chain.core.service.BlockManager
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.explorer.ExplorerResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -16,7 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 class ExplorerControllerTests : ControllerTests() {
 
     @MockBean
-    private lateinit var blockService: BlockService
+    private lateinit var blockManager: BlockManager
 
     @MockBean
     private lateinit var epochService: EpochService
@@ -25,7 +25,7 @@ class ExplorerControllerTests : ControllerTests() {
     private lateinit var networkApiService: NetworkApiService
 
     @MockBean
-    private lateinit var transactionService: TransactionService
+    private lateinit var transactionManager: TransactionManager
 
 
     @Test
@@ -41,13 +41,13 @@ class ExplorerControllerTests : ControllerTests() {
         val expectedResponse = ExplorerResponse(nodesCount, blockCount, transactionsCount, blockProductionTime,
             transactionsPerSecond, epochNumber, epochDate, delegatesCount)
 
-        given(blockService.getCount()).willReturn(blockCount)
+        given(blockManager.getCount()).willReturn(blockCount)
         given(epochService.getEpochStart()).willReturn(epochDate)
         given(epochService.getEpochIndex()).willReturn(epochNumber)
         given(networkApiService.getNetworkSize()).willReturn(nodesCount)
-        given(transactionService.getCount()).willReturn(transactionsCount)
-        given(blockService.getAvgProductionTime()).willReturn(blockProductionTime)
-        given(transactionService.getProducingPerSecond()).willReturn(transactionsPerSecond)
+        given(transactionManager.getCount()).willReturn(transactionsCount)
+        given(blockManager.getAvgProductionTime()).willReturn(blockProductionTime)
+        given(transactionManager.getProducingPerSecond()).willReturn(transactionsPerSecond)
         given(epochService.getDelegatesPublicKeys()).willReturn(listOf("publicKey"))
 
         val actualResponse = webClient.get().uri("/rpc/explorer/info")

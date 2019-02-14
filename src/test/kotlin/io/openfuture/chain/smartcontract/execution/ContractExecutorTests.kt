@@ -2,8 +2,9 @@ package io.openfuture.chain.smartcontract.execution
 
 import io.openfuture.chain.config.ServiceTests
 import io.openfuture.chain.core.model.entity.Contract
+import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
+import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.service.ContractService
-import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.smartcontract.component.SmartContractInjector
 import io.openfuture.chain.smartcontract.model.SmartContract
 import io.openfuture.chain.smartcontract.property.ContractProperties
@@ -12,17 +13,17 @@ import org.assertj.core.api.Assertions.assertThat
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.junit.Before
 import org.junit.Test
-import org.mockito.BDDMockito.*
+import org.mockito.BDDMockito.given
 import org.mockito.Mock
 
-class ContractExecutorTests: ServiceTests() {
+class ContractExecutorTests : ServiceTests() {
 
-    @Mock
-    private lateinit var contractService: ContractService
+    @Mock private lateinit var contractService: ContractService
 
     private val contractProperties: ContractProperties = ContractProperties(10000, 3, 500)
 
     private lateinit var executor: ContractExecutor
+
 
     @Before
     fun setUp() {
@@ -33,13 +34,13 @@ class ContractExecutorTests: ServiceTests() {
     fun executeShouldProduceReceiptWithFiveResults() {
         val compiledContract = this.javaClass.classLoader.getResourceAsStream("classes/FundSmartContract.class").readBytes()
         val persistedContract = createContract(compiledContract)
-        val message = createMessage()
+        val tx = createTransferTransaction()
         val contract = SmartContractInjector.initSmartContract(FundSmartContract::class.java, "owner", "0xb0")
         val serializedContract = ByteUtils.toHexString(SerializationUtils.serialize(contract))
 
-        `when`(contractService.getByAddress("contractAddress")).thenReturn(persistedContract)
+        given(contractService.getByAddress("contractAddress")).willReturn(persistedContract)
 
-        val result = executor.run(serializedContract, message, "delegateAddress")
+        val result = executor.run(serializedContract, tx, "delegateAddress")
 
         assertThat(result.receipt.size).isEqualTo(5)
         assertThat(result.receipt.last().amount).isEqualTo(45)
@@ -49,13 +50,14 @@ class ContractExecutorTests: ServiceTests() {
     fun executeShouldFailOnTimeout() {
         val compiledContract = this.javaClass.classLoader.getResourceAsStream("classes/TimeConsumingContract.class").readBytes()
         val persistedContract = createContract(compiledContract)
-        val message = createMessage()
-        val contract = SmartContractInjector.initSmartContract(TimeConsumingContract::class.java, "ownerAddress", "contractAddress")
+        val tx = createTransferTransaction()
+        val contract = SmartContractInjector.initSmartContract(TimeConsumingContract::class.java, "ownerAddress",
+            "contractAddress")
         val serializedContract = ByteUtils.toHexString(SerializationUtils.serialize(contract))
 
-        `when`(contractService.getByAddress("contractAddress")).thenReturn(persistedContract)
+        given(contractService.getByAddress("contractAddress")).willReturn(persistedContract)
 
-        val result = executor.run(serializedContract, message, "delegateAddress")
+        val result = executor.run(serializedContract, tx, "delegateAddress")
 
         assertThat(result.receipt.size).isEqualTo(2)
         assertThat(result.receipt.first().error).isNotNull()
@@ -66,29 +68,32 @@ class ContractExecutorTests: ServiceTests() {
     fun executeShouldFailOnContractExecution() {
         val compiledContract = this.javaClass.classLoader.getResourceAsStream("classes/FailingContract.class").readBytes()
         val persistedContract = createContract(compiledContract)
-        val message = createMessage()
-        val contract = SmartContractInjector.initSmartContract(FailingContract::class.java, "ownerAddress", "contractAddress")
+        val tx = createTransferTransaction()
+        val contract = SmartContractInjector.initSmartContract(FailingContract::class.java, "ownerAddress",
+            "contractAddress")
         val serializedContract = ByteUtils.toHexString(SerializationUtils.serialize(contract))
 
-        `when`(contractService.getByAddress("contractAddress")).thenReturn(persistedContract)
+        given(contractService.getByAddress("contractAddress")).willReturn(persistedContract)
 
-        val result = executor.run(serializedContract, message, "delegateAddress")
+        val result = executor.run(serializedContract, tx, "delegateAddress")
 
         assertThat(result.receipt.size).isEqualTo(2)
         assertThat(result.receipt.first().error).isNotNull()
         assertThat(result.receipt.last().amount).isEqualTo(45)
     }
 
-    private fun createMessage(): TransferTransactionMessage = TransferTransactionMessage(
+    private fun createTransferTransaction(): TransferTransaction = TransferTransaction(
         System.currentTimeMillis(),
         100,
         "userAddress",
         "hash",
         "sign",
         "pubKey",
-        100,
-        "contractAddress",
-        "execute"
+        TransferTransactionPayload(
+            100,
+            "contractAddress",
+            "execute"
+        )
     )
 
     private fun createContract(compiledContract: ByteArray): Contract = Contract(
@@ -101,7 +106,7 @@ class ContractExecutorTests: ServiceTests() {
 
 }
 
-class FundSmartContract: SmartContract() {
+class FundSmartContract : SmartContract() {
 
     override fun execute() {
         super.transfer("0x175189F2C52E5648e7A524b7574F609D457175Cd", StrictMath.ceil(0.1 * super.getAmount()).toLong())
@@ -111,7 +116,7 @@ class FundSmartContract: SmartContract() {
 
 }
 
-class TimeConsumingContract: SmartContract() {
+class TimeConsumingContract : SmartContract() {
 
     override fun execute() {
         Thread.sleep(1000)
@@ -119,7 +124,7 @@ class TimeConsumingContract: SmartContract() {
 
 }
 
-class FailingContract: SmartContract() {
+class FailingContract : SmartContract() {
 
     override fun execute() {
         require(false)

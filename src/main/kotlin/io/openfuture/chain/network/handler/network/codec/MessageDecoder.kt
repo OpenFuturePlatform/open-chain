@@ -4,11 +4,11 @@ import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.ReplayingDecoder
 import io.openfuture.chain.network.extension.readString
+import io.openfuture.chain.network.message.base.Message
 import io.openfuture.chain.network.message.base.MessageType
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.network.message.sync.MainBlockMessage
 import io.openfuture.chain.network.property.NodeProperties
-import io.openfuture.chain.network.serialization.Serializable
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE
@@ -51,7 +51,7 @@ class MessageDecoder(
         return buf.readLong()
     }
 
-    private fun isExpired(message: Serializable, originTime: Long): Boolean {
+    private fun isExpired(message: Message, originTime: Long): Boolean {
         if (message is MainBlockMessage || message is GenesisBlockMessage) {
             return false
         }
