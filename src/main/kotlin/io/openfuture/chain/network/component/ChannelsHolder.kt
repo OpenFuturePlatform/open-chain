@@ -7,9 +7,9 @@ import io.netty.util.AttributeKey
 import io.netty.util.concurrent.GlobalEventExecutor
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.network.entity.NodeInfo
+import io.openfuture.chain.network.message.base.Message
 import io.openfuture.chain.network.message.network.GreetingMessage
 import io.openfuture.chain.network.property.NodeProperties
-import io.openfuture.chain.network.serialization.Serializable
 import io.openfuture.chain.network.server.ServerReadyEvent
 import io.openfuture.chain.network.service.ConnectionService
 import org.slf4j.Logger
@@ -58,11 +58,11 @@ class ChannelsHolder(
         findNewPeer()
     }
 
-    fun broadcast(message: Serializable) {
+    fun broadcast(message: Message) {
         channelGroup.writeAndFlush(message)
     }
 
-    fun send(message: Serializable, nodeInfo: NodeInfo): Boolean {
+    fun send(message: Message, nodeInfo: NodeInfo): Boolean {
         val channel = channelGroup.firstOrNull { nodeInfo == it.attr(NODE_INFO_KEY).get() } ?: return false
         channel.writeAndFlush(message)
         log.trace("Send ${message::class.java.simpleName} to ${nodeInfo.address.port}")

@@ -1,6 +1,5 @@
 package io.openfuture.chain.network.property
 
-import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.network.entity.NetworkAddress
 import io.openfuture.chain.network.entity.NodeInfo
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -78,9 +77,6 @@ class NodeProperties(
 
     @field:NotEmpty
     var ntpServers: List<String> = emptyList(),
-
-    @field:NotNull
-    var syncMode: SyncMode? = null,
 
     @field:NotNull
     var ntpOffsetThreshold: Long? = null

@@ -18,7 +18,7 @@ abstract class BaseMainBlockMessage(
     var transactionMerkleHash: String,
     var stateMerkleHash: String,
     var receiptMerkleHash: String,
-    var rewardTransaction: RewardTransactionMessage,
+    var rewardTransactions: List<RewardTransactionMessage>,
     var voteTransactions: List<VoteTransactionMessage>,
     var delegateTransactions: List<DelegateTransactionMessage>,
     var transferTransactions: List<TransferTransactionMessage>,
@@ -28,7 +28,7 @@ abstract class BaseMainBlockMessage(
 ) : BlockMessage(height, previousHash, timestamp, hash, signature, publicKey) {
 
     fun getAllTransactions(): List<TransactionMessage> =
-        voteTransactions + delegateTransactions + transferTransactions + rewardTransaction
+        voteTransactions + delegateTransactions + transferTransactions + rewardTransactions
 
     fun getAllStates(): List<StateMessage> = delegateStates + accountStates
 
@@ -38,8 +38,7 @@ abstract class BaseMainBlockMessage(
         transactionMerkleHash = buf.readString()
         stateMerkleHash = buf.readString()
         receiptMerkleHash = buf.readString()
-        rewardTransaction = RewardTransactionMessage::class.java.newInstance()
-        rewardTransaction.read(buf)
+        rewardTransactions = buf.readList()
         voteTransactions = buf.readList()
         delegateTransactions = buf.readList()
         transferTransactions = buf.readList()
@@ -54,7 +53,7 @@ abstract class BaseMainBlockMessage(
         buf.writeString(transactionMerkleHash)
         buf.writeString(stateMerkleHash)
         buf.writeString(receiptMerkleHash)
-        rewardTransaction.write(buf)
+        buf.writeList(rewardTransactions)
         buf.writeList(voteTransactions)
         buf.writeList(delegateTransactions)
         buf.writeList(transferTransactions)
@@ -75,7 +74,7 @@ abstract class BaseMainBlockMessage(
         if (publicKey != other.publicKey) return false
         if (height != other.height) return false
         if (previousHash != other.previousHash) return false
-        if (rewardTransaction != other.rewardTransaction) return false
+        if (rewardTransactions != other.rewardTransactions) return false
         if (transactionMerkleHash != other.transactionMerkleHash) return false
         if (stateMerkleHash != other.stateMerkleHash) return false
         if (receiptMerkleHash != other.receiptMerkleHash) return false
@@ -96,7 +95,7 @@ abstract class BaseMainBlockMessage(
         result = 31 * result + publicKey.hashCode()
         result = 31 * result + height.hashCode()
         result = 31 * result + previousHash.hashCode()
-        result = 31 * result + rewardTransaction.hashCode()
+        result = 31 * result + rewardTransactions.hashCode()
         result = 31 * result + transactionMerkleHash.hashCode()
         result = 31 * result + stateMerkleHash.hashCode()
         result = 31 * result + receiptMerkleHash.hashCode()

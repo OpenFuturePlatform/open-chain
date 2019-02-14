@@ -9,9 +9,8 @@ enum class SyncMode(private val value: Byte) {
         fun ofByte(value: Byte): SyncMode = values().find { it.value == value }
             ?: throw IllegalArgumentException("Sync mode by name: $value not found")
 
-        fun toByte(name: SyncMode): Byte = values().find { it == name }?.value
-            ?: throw IllegalArgumentException("Sync mode by name: $name not found")
-
+        fun toByte(name: SyncMode): Byte = values().find { it == name }!!.value
     }
+
 }
 

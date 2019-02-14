@@ -42,7 +42,7 @@ class SyncSession(
         this.lastLocalGenesisBlock = lastLocalGenesisBlock
         this.currentGenesisBlock = currentGenesisBlock
         this.minBlock = currentGenesisBlock
-        epochQuantity = currentGenesisBlock.payload.epochIndex - lastLocalGenesisBlock.payload.epochIndex
+        epochQuantity = currentGenesisBlock.getPayload().epochIndex - lastLocalGenesisBlock.getPayload().epochIndex
     }
 
     fun getCurrentGenesisBlock(): GenesisBlock = currentGenesisBlock

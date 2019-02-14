@@ -13,13 +13,17 @@ abstract class State(
     @Column(name = "address", nullable = false)
     var address: String,
 
+    @Column(name = "hash", nullable = false)
+    var hash: String,
+
     @ManyToOne
     @JoinColumn(name = "block_id", nullable = false)
-    var block: Block
+    var block: Block? = null
 
 ) : BaseModel() {
+
+    abstract fun getBytes(): ByteArray
 
     abstract fun toMessage(): StateMessage
 
 }
-

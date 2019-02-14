@@ -3,7 +3,7 @@ package io.openfuture.chain.network.service
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.component.ChannelsHolder
 import io.openfuture.chain.network.entity.NodeInfo
-import io.openfuture.chain.network.serialization.Serializable
+import io.openfuture.chain.network.message.base.Message
 import org.springframework.stereotype.Service
 import java.util.function.Consumer
 
@@ -14,7 +14,7 @@ class DefaultNetworkApiService(
     private val addressesHolder: AddressesHolder
 ) : NetworkApiService {
 
-    override fun broadcast(message: Serializable) {
+    override fun broadcast(message: Message) {
         channelsHolder.broadcast(message)
     }
 
@@ -22,7 +22,7 @@ class DefaultNetworkApiService(
 
     override fun getConnectionSize(): Int = channelsHolder.size()
 
-    override fun sendToAddress(message: Serializable, nodeInfo: NodeInfo) {
+    override fun sendToAddress(message: Message, nodeInfo: NodeInfo) {
         if (!channelsHolder.send(message, nodeInfo)) {
             connectionService.connect(nodeInfo.address, Consumer {
                 it.attr(ChannelsHolder.NODE_INFO_KEY).set(nodeInfo)
@@ -33,7 +33,7 @@ class DefaultNetworkApiService(
 
     override fun getNetworkSize(): Int = addressesHolder.getNodeInfos().size + 1
 
-    override fun poll(message: Serializable, pollSize: Int) {
+    override fun poll(message: Message, pollSize: Int) {
         addressesHolder.getRandomList(pollSize).forEach { sendToAddress(message, it) }
     }
 

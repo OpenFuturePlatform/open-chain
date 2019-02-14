@@ -6,9 +6,8 @@ import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.state.DelegateState
-import io.openfuture.chain.core.service.AccountStateService
-import io.openfuture.chain.core.service.DelegateStateService
-import io.openfuture.chain.core.service.GenesisBlockService
+import io.openfuture.chain.core.service.BlockManager
+import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -18,29 +17,27 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.data.domain.PageImpl
 
-
 @WebFluxTest(DelegateController::class)
 class DelegateControllerTests : ControllerTests() {
 
     @MockBean
-    private lateinit var delegateStateService: DelegateStateService
+    private lateinit var stateManager: StateManager
 
     @MockBean
-    private lateinit var accountStateService: AccountStateService
-
-    @MockBean
-    private lateinit var genesisBlockService: GenesisBlockService
+    private lateinit var blockManager: BlockManager
 
 
     @Test
     fun getAllShouldReturnDelegatesListTest() {
-        val block = MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
+        val block = MainBlock(1, 1, "previousHash", "hash", "signature",
+            "publicKey",
             MainBlockPayload("merkleHash", "stateHash", "receiptHash"))
-        val delegate = DelegateState("publicKey", block, 1, "address", 1532345018021)
+        val delegate = DelegateState("publicKey", 1, "address", 1532345018021,
+            "hash", block)
         val delegates = listOf(delegate)
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
 
-        given(delegateStateService.getAllDelegates(PageRequest())).willReturn(delegates)
+        given(stateManager.getAllDelegates(PageRequest())).willReturn(delegates)
 
         val actualPageResponse = webClient.get().uri("/rpc/delegates")
             .exchange()
@@ -56,14 +53,15 @@ class DelegateControllerTests : ControllerTests() {
     @Test
     fun getAllActiveShouldReturnActiveDelegatesListTest() {
         val publicKey = "publicKey"
-        val genesisBlock = GenesisBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
-            GenesisBlockPayload(1, mutableListOf(publicKey)))
-        val delegate = DelegateState("publicKey", MainBlock(1, 1, "previousHash", "hash", "signature", "publicKey",
-        MainBlockPayload("merkleHash", "stateHash", "receiptHash")), 1, "address", 1532345018021)
+        val genesisBlock = GenesisBlock(1, 1, "previousHash", "hash",
+            "signature", "publicKey", GenesisBlockPayload(1, mutableListOf(publicKey)))
+        val delegate = DelegateState("publicKey", 1, "address", 1532345018021,
+            "hash", MainBlock(1, 1, "previousHash", "hash", "signature",
+            "publicKey", MainBlockPayload("merkleHash", "stateHash", "receiptHash")))
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
 
-        given(genesisBlockService.getLast()).willReturn(genesisBlock)
-        given(delegateStateService.getLastByAddress(publicKey)).willReturn(delegate)
+        given(blockManager.getLastGenesisBlock()).willReturn(genesisBlock)
+        given(stateManager.getLastByAddress<DelegateState>(publicKey)).willReturn(delegate)
 
         val actualPageResponse = webClient.get().uri("/rpc/delegates/active")
             .exchange()

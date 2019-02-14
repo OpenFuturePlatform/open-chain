@@ -3,22 +3,19 @@ package io.openfuture.chain.core.sync
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.component.DBChecker
-import io.openfuture.chain.core.component.NodeKeyHolder
-import io.openfuture.chain.core.model.entity.Receipt
+import io.openfuture.chain.core.component.NodeConfigurator
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
-import io.openfuture.chain.core.model.entity.state.AccountState
-import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import io.openfuture.chain.core.service.*
+import io.openfuture.chain.core.service.BlockManager
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.core.sync.SyncMode.FULL
-import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import io.openfuture.chain.core.sync.SyncStatus.*
+import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.consensus.BlockAvailabilityRequest
@@ -37,6 +34,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.jdbc.DataSourceSchemaCreatedEvent
 import org.springframework.context.ApplicationListener
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.util.concurrent.ScheduledFuture
 import javax.xml.bind.ValidationException
@@ -46,18 +44,13 @@ class ChainSynchronizer(
     private val properties: NodeProperties,
     private val consensusProperties: ConsensusProperties,
     private val addressesHolder: AddressesHolder,
-    private val blockService: BlockService,
+    private val blockManager: BlockManager,
     private val networkApiService: NetworkApiService,
-    private val genesisBlockService: GenesisBlockService,
-    private val voteTransactionService: VoteTransactionService,
-    private val rewardTransactionService: RewardTransactionService,
+    private val transactionManager: TransactionManager,
     private val epochService: EpochService,
     private val requestRetryScheduler: RequestRetryScheduler,
-    private val delegateTransactionService: DelegateTransactionService,
-    private val transferTransactionService: TransferTransactionService,
-    private val delegateStateService: DelegateStateService,
     private val dbChecker: DBChecker,
-    private val nodeKeyHolder: NodeKeyHolder,
+    private val nodeConfigurator: NodeConfigurator,
     private val syncSession: SyncSession
 ) : ApplicationListener<DataSourceSchemaCreatedEvent> {
 
@@ -66,19 +59,24 @@ class ChainSynchronizer(
     }
 
     private var future: ScheduledFuture<*>? = null
-    private var isBecomeDelegate = false
 
     @Volatile
     private var status: SyncStatus = SYNCHRONIZED
 
 
     override fun onApplicationEvent(event: DataSourceSchemaCreatedEvent) {
-        // prepareDB()
+        prepareDB(nodeConfigurator.getConfig().mode)
     }
 
-    fun prepareDB() {
+    @EventListener
+    fun eventSyncMode(syncMode: SyncMode) {
+        nodeConfigurator.setMode(syncMode)
+        prepareDB(syncMode)
+    }
+
+    fun prepareDB(syncMode: SyncMode) {
         status = SyncStatus.PROCESSING
-        dbChecker.prepareDB(getSyncMode())
+        dbChecker.prepareDB(syncMode)
         status = SYNCHRONIZED
     }
 
@@ -86,14 +84,14 @@ class ChainSynchronizer(
 
     fun onEpochResponse(message: EpochResponseMessage) {
         future?.cancel(true)
-        val delegates = genesisBlockService.getLast().payload.activeDelegates
+        val delegates = blockManager.getLastGenesisBlock().getPayload().activeDelegates
         try {
             if (!message.isEpochExists) {
                 requestEpoch(delegates.filter { it != message.delegateKey })
                 return
             }
 
-            if ((isDelegate() || syncSession.syncMode == FULL) && !isValidEpoch(message.mainBlocks)) {
+            if ((syncSession.syncMode == FULL) && !isValidEpoch(message.mainBlocks)) {
                 requestEpoch(delegates.filter { it != message.delegateKey })
                 return
             }
@@ -117,7 +115,7 @@ class ChainSynchronizer(
     }
 
     fun isInSync(block: Block): Boolean {
-        val lastBlock = blockService.getLast()
+        val lastBlock = blockManager.getLast()
         if (lastBlock.hash == block.hash) {
             return true
         }
@@ -131,7 +129,7 @@ class ChainSynchronizer(
             return
         }
         status = PROCESSING
-        val block = blockService.getLast()
+        val block = blockManager.getLast()
         checkBlock(block)
         future = requestRetryScheduler.startRequestScheduler(future, Runnable { checkBlock(block) })
     }
@@ -139,41 +137,31 @@ class ChainSynchronizer(
     fun onBlockAvailabilityResponse(response: BlockAvailabilityResponse) {
         future?.cancel(true)
         if (-1L == response.height) {
-            val invalidGenesisBlock = genesisBlockService.getLast()
-            log.info("Rolling back epoch #${invalidGenesisBlock.payload.epochIndex}")
-            blockService.removeEpoch(invalidGenesisBlock)
-            val lastGenesisBlock = genesisBlockService.getLast()
+            val invalidGenesisBlock = blockManager.getLastGenesisBlock()
+            log.info("Rolling back epoch #${invalidGenesisBlock.getPayload().epochIndex}")
+            blockManager.removeEpoch(invalidGenesisBlock)
+            val lastGenesisBlock = blockManager.getLastGenesisBlock()
             val requestedBlock = if (1L == lastGenesisBlock.height) {
-                blockService.getLast()
+                blockManager.getLast()
             } else {
                 lastGenesisBlock
             }
             checkBlock(requestedBlock)
             future = requestRetryScheduler.startRequestScheduler(future, Runnable { checkBlock(lastGenesisBlock) })
         } else {
-            val lastGenesisBlock = response.genesisBlock ?: genesisBlockService.getLast().toMessage()
+            val lastGenesisBlock = response.genesisBlock ?: blockManager.getLastGenesisBlock().toMessage()
             initSync(lastGenesisBlock)
         }
     }
 
-    fun isDelegate(): Boolean = delegateStateService.isExistsByPublicKey(nodeKeyHolder.getPublicKeyAsHexString())
-
-    fun getSyncMode(): SyncMode {
-        if (isBecomeDelegate || (LIGHT == properties.syncMode && isDelegate())) {
-            isBecomeDelegate = true
-            return FULL
-        }
-        return properties.syncMode!!
-    }
-
     private fun initSync(message: GenesisBlockMessage) {
-        val delegates = genesisBlockService.getLast().payload.activeDelegates
+        val delegates = blockManager.getLastGenesisBlock().getPayload().activeDelegates
         try {
             val currentGenesisBlock = GenesisBlock.of(message)
-            val lastLocalGenesisBlock = genesisBlockService.getLast()
+            val lastLocalGenesisBlock = blockManager.getLastGenesisBlock()
 
             if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
-                syncSession.init(getSyncMode(), lastLocalGenesisBlock, currentGenesisBlock)
+                syncSession.init(nodeConfigurator.getConfig().mode, lastLocalGenesisBlock, currentGenesisBlock)
                 requestEpoch(delegates)
             } else {
                 checkBlock(lastLocalGenesisBlock)
@@ -186,19 +174,7 @@ class ChainSynchronizer(
 
     private fun convertToBlocks(message: EpochResponseMessage): List<Block> {
         val listBlocks: MutableList<Block> = mutableListOf(GenesisBlock.of(message.genesisBlock!!))
-        val mainBlocks = message.mainBlocks.map {
-            val mainBlock = MainBlock.of(it)
-            mainBlock.payload.rewardTransaction = mutableListOf(RewardTransaction.of(it.rewardTransaction, mainBlock))
-            if (syncSession.syncMode == FULL) {
-                it.voteTransactions.forEach { vTx -> mainBlock.payload.voteTransactions.add(VoteTransaction.of(vTx, mainBlock)) }
-                it.delegateTransactions.forEach { dTx -> mainBlock.payload.delegateTransactions.add(DelegateTransaction.of(dTx, mainBlock)) }
-                it.transferTransactions.forEach { vTx -> mainBlock.payload.transferTransactions.add(TransferTransaction.of(vTx, mainBlock)) }
-                it.receipts.forEach { r -> mainBlock.payload.receipts.add(Receipt.of(r, mainBlock)) }
-            }
-            it.delegateStates.forEach { ds -> mainBlock.payload.delegateStates.add(DelegateState.of(ds, mainBlock)) }
-            it.accountStates.forEach { ws -> mainBlock.payload.accountStates.add(AccountState.of(ws, mainBlock)) }
-            mainBlock
-        }
+        val mainBlocks = message.mainBlocks.map { MainBlock.of(it) }
         listBlocks.addAll(mainBlocks)
         return listBlocks
     }
@@ -209,22 +185,22 @@ class ChainSynchronizer(
             && isValidReceiptMerkleRoot(mainBlocks)
             && isValidTransactions(mainBlocks)
 
-    private fun isValidRewardTransactions(message: RewardTransactionMessage): Boolean =
-        rewardTransactionService.verify(message)
+    private fun isValidRewardTransactions(list: List<RewardTransactionMessage>): Boolean =
+        list.all { transactionManager.verify(RewardTransaction.of(it)) }
 
     private fun isValidVoteTransactions(list: List<VoteTransactionMessage>): Boolean =
-        list.all { voteTransactionService.verify(it) }
+        list.all { transactionManager.verify(VoteTransaction.of(it)) }
 
     private fun isValidDelegateTransactions(list: List<DelegateTransactionMessage>): Boolean =
-        list.all { delegateTransactionService.verify(it) }
+        list.all { transactionManager.verify(DelegateTransaction.of(it)) }
 
     private fun isValidTransferTransactions(list: List<TransferTransactionMessage>): Boolean =
-        list.all { transferTransactionService.verify(it) }
+        list.all { transactionManager.verify(TransferTransaction.of(it)) }
 
     private fun isValidTransactions(blocks: List<MainBlockMessage>): Boolean {
         try {
             blocks.forEach { block ->
-                if (!isValidRewardTransactions(block.rewardTransaction)) {
+                if (!isValidRewardTransactions(block.rewardTransactions)) {
                     throw ValidationException("Invalid reward transaction in block: height #${block.height}, hash ${block.hash} ")
                 }
                 if (!isValidDelegateTransactions(block.delegateTransactions)) {
@@ -247,7 +223,7 @@ class ChainSynchronizer(
 
     private fun isValidStateMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
         mainBlocks.forEach { block ->
-            if (!isValidRootHash(block.stateMerkleHash, block.getAllStates().map { it.getHash() })) {
+            if (!isValidRootHash(block.stateMerkleHash, block.getAllStates().map { it.hash })) {
                 log.warn("State merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
                 return false
             }
@@ -258,7 +234,7 @@ class ChainSynchronizer(
 
     private fun isValidReceiptMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
         mainBlocks.forEach { block ->
-            if (!isValidRootHash(block.receiptMerkleHash, block.receipts.map { Receipt(it.transactionHash, it.result).getHash() })) {
+            if (!isValidRootHash(block.receiptMerkleHash, block.receipts.map { it.hash })) {
                 log.warn("Receipt merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
                 return false
             }
@@ -283,7 +259,7 @@ class ChainSynchronizer(
             return false
         }
 
-        return rootHash == MainBlockPayload.calculateMerkleRoot(hashes)
+        return rootHash == HashUtils.merkleRoot(hashes)
     }
 
     private fun isValidPreviousHash(block: Block, lastBlock: Block): Boolean = block.previousHash == lastBlock.hash
@@ -292,9 +268,9 @@ class ChainSynchronizer(
 
     private fun requestEpoch(delegates: List<String>) {
         val targetEpoch = if (syncSession.isEpochSynced()) {
-            syncSession.getCurrentGenesisBlock().payload.epochIndex
+            syncSession.getCurrentGenesisBlock().getPayload().epochIndex
         } else {
-            (syncSession.minBlock as GenesisBlock).payload.epochIndex - 1
+            (syncSession.minBlock as GenesisBlock).getPayload().epochIndex - 1
         }
 
         val message = EpochRequestMessage(targetEpoch, syncSession.syncMode)
@@ -306,14 +282,19 @@ class ChainSynchronizer(
     private fun saveBlocks() {
         try {
             val epochHeight = consensusProperties.epochHeight!!
-            val lastLocalBlock = blockService.getLast()
+            val lastLocalBlock = blockManager.getLast()
             var indexFrom = lastLocalBlock.height + 1
             var indexTo = indexFrom + epochHeight
             var heights = (indexFrom..indexTo).toList()
             var temporaryBlocks = syncSession.getTemporaryBlocks(heights)
-            while (!temporaryBlocks.isEmpty()){
-                blockService.saveChunk(temporaryBlocks, syncSession.syncMode)
-                log.info("Blocks saved till ${temporaryBlocks.first().height} from ${temporaryBlocks.last().height}")
+            while (!temporaryBlocks.isEmpty()) {
+                temporaryBlocks.forEach { block ->
+                    when (block) {
+                        is MainBlock -> blockManager.add(block)
+                        is GenesisBlock -> blockManager.add(block)
+                    }
+                    log.info("Blocks saved till ${block.height} from ${temporaryBlocks.last().height}")
+                }
                 indexFrom = indexTo + 1
                 indexTo += epochHeight
                 heights = (indexFrom..indexTo).toList()
@@ -344,11 +325,11 @@ class ChainSynchronizer(
     }
 
     private fun expired() {
-        val lastGenesisBlock = genesisBlockService.getLast()
+        val lastGenesisBlock = blockManager.getLastGenesisBlock()
         if (syncSession.getEpochAdded() == 0L) {
             checkBlock(lastGenesisBlock)
         } else {
-            requestEpoch(lastGenesisBlock.payload.activeDelegates)
+            requestEpoch(lastGenesisBlock.getPayload().activeDelegates)
         }
     }
 

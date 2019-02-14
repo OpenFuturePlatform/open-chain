@@ -11,12 +11,12 @@ class TransferTransactionMessage(
     fee: Long,
     senderAddress: String,
     hash: String,
-    senderSignature: String,
-    senderPublicKey: String,
+    signature: String,
+    publicKey: String,
     var amount: Long,
     var recipientAddress: String?,
     var data: String?
-) : TransactionMessage(timestamp, fee, senderAddress, hash, senderSignature, senderPublicKey) {
+) : TransactionMessage(timestamp, fee, senderAddress, hash, signature, publicKey) {
 
     override fun read(buf: ByteBuf) {
         super.read(buf)

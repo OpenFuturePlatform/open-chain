@@ -2,7 +2,8 @@ package io.openfuture.chain.rpc.controller.block
 
 import io.openfuture.chain.consensus.service.EpochService
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.service.MainBlockService
+import io.openfuture.chain.core.service.BlockManager
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.rpc.domain.base.PageRequest
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import io.openfuture.chain.rpc.domain.block.MainBlockResponse
@@ -14,24 +15,26 @@ import javax.validation.Valid
 @RequestMapping("/rpc/blocks/main")
 class MainBlockController(
     private val epochService: EpochService,
-    private val blockService: MainBlockService
+    private val blockManager: BlockManager,
+    private val transactionManager: TransactionManager
 ) {
 
     @GetMapping("/{hash}")
-    fun get(@PathVariable hash: String): MainBlockResponse = getMainBlockResponse(blockService.getByHash(hash))
+    fun get(@PathVariable hash: String): MainBlockResponse = getMainBlockResponse(blockManager.getMainBlockByHash(hash))
 
     @GetMapping("/{hash}/previous")
     fun getPreviousBlock(@PathVariable hash: String): MainBlockResponse? =
-        getMainBlockResponse(blockService.getPreviousBlock(hash))
+        getMainBlockResponse(blockManager.getPreviousMainBlock(hash))
 
     @GetMapping("/{hash}/next")
     fun getNextBlock(@PathVariable hash: String): MainBlockResponse? =
-        getMainBlockResponse(blockService.getNextBlock(hash))
+        getMainBlockResponse(blockManager.getNextMainBlock(hash))
 
     @GetMapping
     fun getAll(@Valid request: PageRequest): PageResponse<MainBlockResponse> =
-        PageResponse(blockService.getAll(request).map { getMainBlockResponse(it) })
+        PageResponse(blockManager.getAllMainBlocks(request).map { getMainBlockResponse(it) })
 
-    private fun getMainBlockResponse(block: MainBlock): MainBlockResponse = MainBlockResponse(block, epochService.getEpochByBlock(block))
+    private fun getMainBlockResponse(block: MainBlock): MainBlockResponse =
+        MainBlockResponse(block, transactionManager.getCountByBlock(block), epochService.getEpochByBlock(block))
 
 }

@@ -1,135 +1,58 @@
 package io.openfuture.chain.core.component
 
-import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.model.entity.block.Block
-import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload.Companion.calculateMerkleRoot
-import io.openfuture.chain.core.service.BlockService
-import io.openfuture.chain.core.service.TransactionService
+import io.openfuture.chain.core.service.BlockManager
 import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 
 @Component
 class DBChecker(
-    private val blockService: BlockService,
-    private val consensusProperties: ConsensusProperties,
-    private val transactionService: TransactionService
+    private val blockManager: BlockManager
 ) {
 
-    fun prepareDB(syncMode: SyncMode): Boolean {
-        val lastBlockHeight = blockService.getLast().height
-        val validBlockHeight = lastValidBlockHeight(syncMode)
-        if (validBlockHeight < lastBlockHeight) {
-            deleteInvalidChainPart(validBlockHeight, lastBlockHeight)
-            return false
-        }
-        return true
-    }
+    @Transactional
+    fun prepareDB(syncMode: SyncMode) {
+        when (syncMode) {
+            FULL -> {
+                val lastBlock = blockManager.getLast()
+                val lastValidBlockHeight = lastValidBlockHeightByFullMode()
+                val failBlockHeight = lastValidBlockHeight + 1L
 
-    private fun deleteInvalidChainPart(height: Long, heightTo: Long) {
-        val heightsForDelete = LongRange(height + 1, heightTo).toList()
-        blockService.deleteByHeightIn(heightsForDelete)
-    }
-
-    private fun lastValidBlockHeight(syncMode: SyncMode): Long {
-        val epochHeight = consensusProperties.epochHeight!! + 1L
-        var indexFrom = 1L
-        var indexTo = indexFrom + epochHeight
-        var heights = (indexFrom..indexTo).toList()
-        var blocks = blockService.getAllByHeightIn(heights).toMutableList()
-        var result = blocks.first()
-        val lastChainBlock = blockService.getLast()
-        while (!blocks.isEmpty()) {
-            result = validateEpoch(blocks, syncMode) ?: result
-            if (result != blocks.last()) {
-                break
+                if (failBlockHeight <= lastBlock.height) {
+                    val range = LongRange(failBlockHeight, lastBlock.height)
+                    blockManager.deleteByHeightIn(range.toList())
+                }
             }
-            indexFrom += indexTo
-            indexTo += epochHeight
-            heights = (indexFrom..indexTo).toList()
-            blocks = blockService.getAllByHeightIn(heights).toMutableList()
-        }
-
-        return if (!isValidBlock(lastChainBlock, syncMode)) {
-            result.height - 1
-        } else {
-            result.height
+            LIGHT -> {
+                // todo("prepare db in LIGHT mode")
+            }
         }
     }
 
-    private fun validateEpoch(blocks: List<Block>, syncMode: SyncMode): Block? {
-        var result: Block? = null
-        for (i in blocks.indices) {
+    private fun lastValidBlockHeightByFullMode(): Long {
+        val lastEpochIndex = blockManager.getLastGenesisBlock().getPayload().epochIndex
+        var lastValidBlockHeight = 1L
+        loop@ for (epochIndex in 1L..lastEpochIndex) {
+            val genesisBlock = blockManager.findGenesisBlockByEpochIndex(epochIndex)!!
 
-            if (i == blocks.lastIndex) {
-                continue
-            }
+            var previousBlock: Block = genesisBlock
+            val blocks = blockManager.getMainBlocksByEpochIndex(epochIndex, FULL)
 
-            val current = blocks[i]
-            if (!isValidBlock(current, syncMode)) {
-                return result
-            }
+            for (index in 0 until blocks.size) {
+                val block = blocks[index]
+                if (!blockManager.verify(block, previousBlock, false)) {
+                    break@loop
+                }
 
-            val next = blocks[i + 1]
-            result = current
-
-            if (!isValidBlocksHashes(current, next)) {
-                return result
-            }
-        }
-        return result
-    }
-
-    private fun isValidBlock(block: Block, syncMode: SyncMode): Boolean {
-        if (!isValidBlockState(block)) {
-            return false
-        }
-        if (!blockService.isValidHash(block)) {
-            return false
-        }
-        if (FULL == syncMode) {
-            return isValidTransactions(block)
-        }
-        if (LIGHT == syncMode && block is MainBlock) {
-            val transactions =
-                block.payload.transferTransactions +
-                    block.payload.delegateTransactions +
-                    block.payload.voteTransactions
-            return transactions.isEmpty()
-        }
-        return true
-    }
-
-    private fun isValidBlocksHashes(block: Block, nextBlock: Block): Boolean = (block.hash == nextBlock.previousHash)
-
-    private fun isValidTransactions(block: Block): Boolean {
-        if (block is MainBlock) {
-            val hashes = mutableListOf<String>()
-            hashes.addAll(block.payload.transferTransactions.map { transactionService.createHash(it.header, it.payload) })
-            hashes.addAll(block.payload.voteTransactions.map { transactionService.createHash(it.header, it.payload) })
-            hashes.addAll(block.payload.delegateTransactions.map { transactionService.createHash(it.header, it.payload) })
-            val rewardTransaction = block.payload.rewardTransaction[0]
-            hashes.add(transactionService.createHash(rewardTransaction.header, rewardTransaction.payload))
-
-            if (block.payload.transactionMerkleHash != calculateMerkleRoot(hashes)) {
-                return false
+                lastValidBlockHeight = block.height
+                previousBlock = block
             }
         }
-        return true
-    }
 
-    private fun isValidBlockState(block: Block): Boolean {
-        if (block is MainBlock) {
-            val stateHashes = listOf(block.payload.delegateStates, block.payload.accountStates)
-                .flatMap { states -> states.map { it.toMessage().getHash() } }
-
-            if (block.payload.transactionMerkleHash != calculateMerkleRoot(stateHashes)) {
-                return false
-            }
-        }
-        return true
+        return lastValidBlockHeight
     }
 
 }

@@ -6,30 +6,18 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.TemporaryBlock
-import io.openfuture.chain.core.model.entity.block.payload.BlockPayload
+import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
-import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import io.openfuture.chain.core.model.entity.transaction.payload.TransactionPayload
+import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.model.node.*
 import io.openfuture.chain.core.sync.SyncMode
-import io.openfuture.chain.network.message.consensus.PendingBlockMessage
-import io.openfuture.chain.network.message.core.*
-import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.rpc.domain.base.PageRequest
-import io.openfuture.chain.rpc.domain.transaction.request.DelegateTransactionRequest
-import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
-import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
-import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
 import org.springframework.data.domain.Page
 
 interface HardwareInfoService {
@@ -46,200 +34,282 @@ interface HardwareInfoService {
 
 }
 
-/** Common block info service */
-interface BlockService {
+interface BlockManager {
 
     fun getCount(): Long
 
     fun getLast(): Block
 
-    fun save(block: Block)
-
-    fun removeEpoch(genesisBlock: GenesisBlock)
-
-    fun saveChunk(blocksChunk: List<Block>, syncMode: SyncMode)
-
-    fun getAfterCurrentHash(hash: String): List<Block>
-
-    fun isExists(hash: String): Boolean
-
     fun findByHash(hash: String): Block?
 
     fun getAvgProductionTime(): Long
 
-    fun getCurrentHeight(): Long
-
-    fun isExists(hash: String, height: Long): Boolean
-
     fun getAllByHeightIn(heights: List<Long>): List<Block>
+
+    fun getGenesisBlockByHash(hash: String): GenesisBlock
+
+    fun getMainBlockByHash(hash: String): MainBlock
+
+    fun getAllGenesisBlocks(request: PageRequest): Page<GenesisBlock>
+
+    fun getAllMainBlocks(request: PageRequest): Page<MainBlock>
+
+    fun getPreviousGenesisBlock(hash: String): GenesisBlock
+
+    fun getPreviousMainBlock(hash: String): MainBlock
+
+    fun getNextGenesisBlock(hash: String): GenesisBlock
+
+    fun getNextMainBlock(hash: String): MainBlock
+
+    fun getPreviousGenesisBlockByHeight(height: Long): GenesisBlock
+
+    fun getLastGenesisBlock(): GenesisBlock
+
+    fun findGenesisBlockByEpochIndex(epochIndex: Long): GenesisBlock?
+
+    fun isGenesisBlockRequired(): Boolean
+
+    fun getMainBlocksByEpochIndex(epochIndex: Long, syncMode: SyncMode): List<MainBlock>
+
+    fun createGenesisBlock(): GenesisBlock
+
+    fun createMainBlock(): MainBlock
+
+    fun add(block: Block)
 
     fun deleteByHeightIn(heights: List<Long>)
 
-    fun isValidHash(block: Block): Boolean
+    fun removeEpoch(genesisBlock: GenesisBlock)
 
-    fun createHash(timestamp: Long, height: Long, previousHash: String, payload: BlockPayload): ByteArray
+    fun verify(block: Block, lastBlock: Block, new: Boolean = true): Boolean
 }
 
-interface GenesisBlockService {
+interface BlockService<T : Block> {
 
-    fun getByHash(hash: String): GenesisBlock
+    fun getByHash(hash: String): T
 
-    fun getAll(request: PageRequest): Page<GenesisBlock>
+    fun getAll(request: PageRequest): Page<T>
+
+    fun getPreviousBlock(hash: String): T
+
+    fun getNextBlock(hash: String): T
+
+    fun create(): T
+
+    fun add(block: T)
+
+}
+
+interface GenesisBlockService : BlockService<GenesisBlock> {
+
+    fun getPreviousByHeight(height: Long): GenesisBlock
 
     fun getLast(): GenesisBlock
 
     fun findByEpochIndex(epochIndex: Long): GenesisBlock?
 
-    fun create(): GenesisBlock
-
-    fun add(block: GenesisBlock)
-
-    fun getPreviousByHeight(height: Long): GenesisBlock
-
-    fun getNextBlock(hash: String): GenesisBlock
-
-    fun getPreviousBlock(hash: String): GenesisBlock
-
     fun isGenesisBlockRequired(): Boolean
 
-    fun add(message: GenesisBlockMessage)
+}
+
+interface MainBlockService : BlockService<MainBlock> {
+
+    fun getBlocksByEpochIndex(epochIndex: Long, syncMode: SyncMode): List<MainBlock>
 
 }
 
-interface MainBlockService {
+interface BlockValidatorManager {
 
-    fun getByHash(hash: String): MainBlock
-
-    fun getAll(request: PageRequest): Page<MainBlock>
-
-    fun create(): PendingBlockMessage
-
-    fun add(message: BaseMainBlockMessage)
-
-    fun verify(message: PendingBlockMessage): Boolean
-
-    fun getPreviousBlock(hash: String): MainBlock
-
-    fun getNextBlock(hash: String): MainBlock
-
-    fun getBlocksByEpochIndex(epochIndex: Long): List<MainBlock>
+    fun verify(block: Block, lastBlock: Block, new: Boolean): Boolean
 
 }
 
-/** Common base transaction service */
-interface TransactionService {
+interface MainBlockValidator {
+
+    fun validate(block: MainBlock, new: Boolean)
+
+}
+
+interface TransactionManager {
 
     fun getCount(): Long
 
-    fun getUnconfirmedTransactionByHash(hash: String): UnconfirmedTransaction
+    fun getCountByBlock(block: MainBlock): Long
+
+    fun getUnconfirmedBalanceBySenderAddress(address: String): Long
 
     fun getProducingPerSecond(): Long
 
-    fun deleteBlockTransactions(blockHeights: List<Long>)
+    fun getAllUnconfirmedDelegateTransactions(request: PageRequest): List<UnconfirmedDelegateTransaction>
 
-    fun createHash(header: TransactionHeader, payload: TransactionPayload): String
+    fun getAllUnconfirmedTransferTransactions(request: PageRequest): List<UnconfirmedTransferTransaction>
 
-}
+    fun getAllUnconfirmedVoteTransactions(request: PageRequest): List<UnconfirmedVoteTransaction>
 
-interface TransferTransactionService {
+    fun getAllTransferTransactions(request: PageRequest): Page<TransferTransaction>
 
-    fun getUnconfirmedCount(): Long
+    fun getAllTransferTransactionsByAddress(address: String, request: PageRequest): Page<TransferTransaction>
 
-    fun getByHash(hash: String): TransferTransaction
+    fun getAllRewardTransactions(request: PageRequest): Page<RewardTransaction>
 
-    fun getAll(request: TransactionPageRequest): Page<TransferTransaction>
+    fun getAllDelegateTransactionsByBlock(block: Block): List<DelegateTransaction>
 
-    fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedTransferTransaction>
+    fun getAllTransferTransactionsByBlock(block: Block): List<TransferTransaction>
 
-    fun getByAddress(address: String, request: TransactionPageRequest): Page<TransferTransaction>
+    fun getAllVoteTransactionsByBlock(block: Block): List<VoteTransaction>
 
-    fun getUnconfirmedByHash(hash: String): UnconfirmedTransferTransaction
+    fun getDelegateTransactionByHash(hash: String): DelegateTransaction
 
-    fun add(message: TransferTransactionMessage)
+    fun getTransferTransactionByHash(hash: String): TransferTransaction
 
-    fun add(request: TransferTransactionRequest): UnconfirmedTransferTransaction
+    fun getVoteTransactionByHash(hash: String): VoteTransaction
 
-    fun commit(transaction: TransferTransaction, receipt: Receipt): TransferTransaction
+    fun getRewardTransactionByBlock(block: Block): RewardTransaction?
 
-    fun process(message: TransferTransactionMessage, delegateWallet: String): Receipt
+    fun getRewardTransactionByRecipientAddress(address: String): List<RewardTransaction>
 
-    fun verify(message: TransferTransactionMessage): Boolean
-
-}
-
-interface RewardTransactionService {
-
-    fun getAll(request: TransactionPageRequest): Page<RewardTransaction>
-
-    fun getByRecipientAddress(address: String): List<RewardTransaction>
-
-    fun create(timestamp: Long, fees: Long): RewardTransactionMessage
-
-    fun commit(transaction: RewardTransaction)
-
-    fun process(message: RewardTransactionMessage): Receipt
-
-    fun verify(message: RewardTransactionMessage): Boolean
-
-}
-
-interface VoteTransactionService {
-
-    fun getUnconfirmedCount(): Long
-
-    fun getByHash(hash: String): VoteTransaction
-
-    fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedVoteTransaction>
-
-    fun getUnconfirmedByHash(hash: String): UnconfirmedVoteTransaction
-
-    fun getUnconfirmedBySenderAgainstDelegate(senderAddress: String, delegateKey: String): UnconfirmedVoteTransaction?
+    fun getUnconfirmedVoteBySenderAgainstDelegate(senderAddress: String, delegateKey: String): UnconfirmedVoteTransaction?
 
     fun getLastVoteForDelegate(senderAddress: String, delegateKey: String): VoteTransaction
 
-    fun add(message: VoteTransactionMessage)
+    fun createRewardTransaction(timestamp: Long, fees: Long): RewardTransaction
 
-    fun add(request: VoteTransactionRequest): UnconfirmedVoteTransaction
+    fun <T : Transaction> commit(tx: T, receipt: Receipt): T
 
-    fun commit(transaction: VoteTransaction): VoteTransaction
+    fun <uT : UnconfirmedTransaction> add(uTx: uT): uT
 
-    fun process(message: VoteTransactionMessage, delegateWallet: String): Receipt
+    fun processTransactions(transactions: List<Transaction>, delegateWallet: String): List<Receipt>
 
-    fun verify(message: VoteTransactionMessage): Boolean
+    fun verify(tx: Transaction, new: Boolean = false): Boolean
+
+    fun deleteBlockTransactions(blockHeights: List<Long>)
 
 }
 
-interface DelegateTransactionService {
+interface UTransactionService<uT : UnconfirmedTransaction> {
 
-    fun getUnconfirmedCount(): Long
+    fun getAll(): List<uT>
 
-    fun getByHash(hash: String): DelegateTransaction
+    fun getAll(request: PageRequest): List<uT>
 
-    fun getAllUnconfirmed(request: PageRequest): MutableList<UnconfirmedDelegateTransaction>
+    fun getAllBySenderAddress(address: String): List<uT>
 
-    fun getUnconfirmedByHash(hash: String): UnconfirmedDelegateTransaction
+    fun add(uTx: uT): uT
 
-    fun add(message: DelegateTransactionMessage)
+}
 
-    fun add(request: DelegateTransactionRequest): UnconfirmedDelegateTransaction
+interface UDelegateTransactionService : UTransactionService<UnconfirmedDelegateTransaction>
 
-    fun commit(transaction: DelegateTransaction): DelegateTransaction
+interface UTransferTransactionService : UTransactionService<UnconfirmedTransferTransaction>
 
-    fun process(message: DelegateTransactionMessage, delegateWallet: String): Receipt
+interface UVoteTransactionService : UTransactionService<UnconfirmedVoteTransaction> {
 
-    fun verify(message: DelegateTransactionMessage): Boolean
+    fun getBySenderAgainstDelegate(senderAddress: String, delegateKey: String): UnconfirmedVoteTransaction?
+
+}
+
+interface TransactionService<T : Transaction> {
+
+    fun getByHash(hash: String): T
+
+    fun getAll(request: PageRequest): Page<T>
+
+    fun commit(tx: T, receipt: Receipt): T
+
+    fun process(tx: T, delegateWallet: String): Receipt
+
+}
+
+interface RewardTransactionService : TransactionService<RewardTransaction> {
+
+    fun getByBlock(block: Block): RewardTransaction?
+
+    fun getByRecipientAddress(address: String): List<RewardTransaction>
+
+    fun create(timestamp: Long, fees: Long): RewardTransaction
+
+}
+
+interface ExternalTransactionService<T : Transaction> : TransactionService<T> {
+
+    fun getAllByBlock(block: Block): List<T>
+
+}
+
+interface TransferTransactionService : ExternalTransactionService<TransferTransaction> {
+
+    fun getAllByAddress(address: String, request: PageRequest): Page<TransferTransaction>
+
+}
+
+interface VoteTransactionService : ExternalTransactionService<VoteTransaction> {
+
+    fun getLastVoteForDelegate(senderAddress: String, delegateKey: String): VoteTransaction
+
+}
+
+interface DelegateTransactionService : ExternalTransactionService<DelegateTransaction>
+
+interface TransactionValidatorManager {
+
+    fun validate(tx: Transaction, new: Boolean = true)
+
+    fun verify(tx: Transaction, new: Boolean): Boolean
+
+}
+
+interface TransactionValidator<T> {
+
+    fun validate(tx: T, new: Boolean)
+
+}
+
+interface DelegateTransactionValidator : TransactionValidator<DelegateTransaction>
+
+interface TransferTransactionValidator : TransactionValidator<TransferTransaction>
+
+interface VoteTransactionValidator : TransactionValidator<VoteTransaction>
+
+interface StateManager {
+
+    fun <T : State> getLastByAddress(address: String): T
+
+    fun getAllDelegateStatesByBlock(block: Block): List<DelegateState>
+
+    fun getAllAccountStatesByBlock(block: Block): List<AccountState>
+
+    fun getWalletBalanceByAddress(address: String): Long
+
+    fun getVotesForDelegate(delegateKey: String): List<AccountState>
+
+    fun updateWalletBalanceByAddress(address: String, amount: Long)
+
+    fun updateVoteByAddress(address: String, delegateKey: String, voteType: VoteType)
+
+    fun updateSmartContractStorage(address: String, storage: String)
+
+    fun getAllDelegates(request: PageRequest): List<DelegateState>
+
+    fun getActiveDelegates(): List<DelegateState>
+
+    fun isExistsDelegateByPublicKey(key: String): Boolean
+
+    fun addDelegate(delegateKey: String, walletAddress: String, createDate: Long)
+
+    fun updateDelegateRating(delegateKey: String, amount: Long)
+
+    fun commit(state: State)
+
+    fun verify(state: State): Boolean
+
+    fun deleteBlockStates(blockHeights: List<Long>)
 
 }
 
 interface StateService<T : State> {
 
-    fun getLastByAddress(address: String): T
-
-    fun getByAddress(address: String): List<T>
-
-    fun getByAddressAndBlock(address: String, block: Block): T
-
-    fun deleteBlockStates(blockHeights: List<Long>)
+    fun getAllByBlock(block: Block): List<T>
 
 }
 
@@ -251,13 +321,9 @@ interface DelegateStateService : StateService<DelegateState> {
 
     fun isExistsByPublicKey(key: String): Boolean
 
-    fun isExistsByPublicKeys(publicKeys: List<String>): Boolean
+    fun addDelegate(delegateKey: String, walletAddress: String, createDate: Long): DelegateState
 
-    fun addDelegate(delegateKey: String, walletAddress: String, createDate: Long): DelegateStateMessage
-
-    fun updateRating(delegateKey: String, amount: Long): DelegateStateMessage
-
-    fun commit(state: DelegateState)
+    fun updateRating(delegateKey: String, amount: Long): DelegateState
 
 }
 
@@ -265,17 +331,19 @@ interface AccountStateService : StateService<AccountState> {
 
     fun getBalanceByAddress(address: String): Long
 
-    fun getActualBalanceByAddress(address: String): Long
-
     fun getVotesForDelegate(delegateKey: String): List<AccountState>
 
-    fun updateBalanceByAddress(address: String, amount: Long): AccountStateMessage
+    fun updateBalanceByAddress(address: String, amount: Long): AccountState
 
-    fun updateVoteByAddress(address: String, delegateKey: String?): AccountStateMessage
+    fun updateVoteByAddress(address: String, delegateKey: String?): AccountState
 
-    fun updateStorage(address: String, storage: String): AccountStateMessage
+    fun updateStorage(address: String, storage: String): AccountState
 
-    fun commit(state: AccountState)
+}
+
+interface StateValidatorManager {
+
+    fun verify(state: State): Boolean
 
 }
 
@@ -294,7 +362,11 @@ interface ReceiptService {
 
     fun getByTransactionHash(hash: String): Receipt
 
+    fun getAllByBlock(block: Block): List<Receipt>
+
     fun commit(receipt: Receipt)
+
+    fun verify(receipt: Receipt): Boolean
 
     fun deleteBlockReceipts(blockHeights: List<Long>)
 
@@ -307,5 +379,11 @@ interface TemporaryBlockService {
     fun save(blocks: List<TemporaryBlock>): List<TemporaryBlock>
 
     fun deleteAll()
+
+}
+
+interface ReceiptValidator {
+
+    fun verify(receipt: Receipt): Boolean
 
 }

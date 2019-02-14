@@ -1,7 +1,5 @@
 package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 
-import io.openfuture.chain.core.model.entity.transaction.TransactionFooter
-import io.openfuture.chain.core.model.entity.transaction.TransactionHeader
 import io.openfuture.chain.core.model.entity.transaction.payload.VoteTransactionPayload
 import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.VoteTransactionRequest
@@ -12,37 +10,35 @@ import javax.persistence.Table
 @Entity
 @Table(name = "u_vote_transactions")
 class UnconfirmedVoteTransaction(
-    header: TransactionHeader,
-    footer: TransactionFooter,
+    timestamp: Long,
+    fee: Long,
+    senderAddress: String,
+    hash: String,
+    signature: String,
+    publicKey: String,
 
     @Embedded
-    val payload: VoteTransactionPayload
+    private val payload: VoteTransactionPayload
 
-) : UnconfirmedTransaction(header, footer, payload) {
+) : UnconfirmedTransaction(timestamp, fee, senderAddress, hash, signature, publicKey) {
 
     companion object {
         fun of(message: VoteTransactionMessage): UnconfirmedVoteTransaction = UnconfirmedVoteTransaction(
-            TransactionHeader(message.timestamp, message.fee, message.senderAddress),
-            TransactionFooter(message.hash, message.senderSignature, message.senderPublicKey),
+            message.timestamp, message.fee, message.senderAddress, message.hash, message.signature, message.publicKey,
             VoteTransactionPayload(message.voteTypeId, message.delegateKey)
         )
 
         fun of(request: VoteTransactionRequest): UnconfirmedVoteTransaction = UnconfirmedVoteTransaction(
-            TransactionHeader(request.timestamp!!, request.fee!!, request.senderAddress!!),
-            TransactionFooter(request.hash!!, request.senderSignature!!, request.senderPublicKey!!),
-            VoteTransactionPayload(request.voteTypeId!!, request.delegateKey!!)
+            request.timestamp!!, request.fee!!, request.senderAddress!!, request.hash!!, request.senderSignature!!,
+            request.senderPublicKey!!, VoteTransactionPayload(request.voteTypeId!!, request.delegateKey!!)
         )
     }
 
+
     override fun toMessage(): VoteTransactionMessage = VoteTransactionMessage(
-        header.timestamp,
-        header.fee,
-        header.senderAddress,
-        footer.hash,
-        footer.senderSignature,
-        footer.senderPublicKey,
-        payload.voteTypeId,
-        payload.delegateKey
+        timestamp, fee, senderAddress, hash, signature, publicKey, payload.voteTypeId, payload.delegateKey
     )
+
+    override fun getPayload(): VoteTransactionPayload = payload
 
 }

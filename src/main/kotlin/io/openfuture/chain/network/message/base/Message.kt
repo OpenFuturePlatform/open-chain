@@ -1,8 +1,8 @@
-package io.openfuture.chain.network.serialization
+package io.openfuture.chain.network.message.base
 
 import io.netty.buffer.ByteBuf
 
-interface Serializable {
+interface Message {
 
     fun read(buf: ByteBuf)
 

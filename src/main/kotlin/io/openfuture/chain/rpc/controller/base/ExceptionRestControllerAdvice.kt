@@ -1,11 +1,13 @@
 package io.openfuture.chain.rpc.controller.base
 
+import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.SynchronizationException
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.rpc.domain.ExceptionResponse
 import io.openfuture.chain.rpc.domain.ValidationErrorResponse
 import org.apache.commons.lang3.StringUtils.EMPTY
 import org.springframework.http.HttpStatus.BAD_REQUEST
+import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -27,6 +29,12 @@ class ExceptionRestControllerAdvice {
     @ExceptionHandler(ValidationException::class)
     fun handleValidationException(ex: ValidationException): ExceptionResponse {
         return ExceptionResponse(BAD_REQUEST.value(), ex.message, ex.type?.name)
+    }
+
+    @ResponseStatus(NOT_FOUND)
+    @ExceptionHandler(NotFoundException::class)
+    fun handleNotFoundException(ex: NotFoundException): ExceptionResponse {
+        return ExceptionResponse(NOT_FOUND.value(), ex.message)
     }
 
     @ResponseStatus(BAD_REQUEST)
