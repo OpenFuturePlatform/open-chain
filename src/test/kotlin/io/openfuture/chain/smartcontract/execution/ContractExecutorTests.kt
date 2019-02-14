@@ -5,10 +5,10 @@ import io.openfuture.chain.core.model.entity.Contract
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.service.ContractService
+import io.openfuture.chain.core.util.SerializationUtils
 import io.openfuture.chain.smartcontract.component.SmartContractInjector
 import io.openfuture.chain.smartcontract.model.SmartContract
 import io.openfuture.chain.smartcontract.property.ContractProperties
-import io.openfuture.chain.smartcontract.util.SerializationUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.junit.Before
