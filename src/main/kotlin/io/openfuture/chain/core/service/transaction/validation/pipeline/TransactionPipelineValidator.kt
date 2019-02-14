@@ -21,22 +21,20 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional(readOnly = true)
-abstract class TransactionPipelineValidator<T : TransactionPipelineValidator<T>> {
+abstract class TransactionPipelineValidator {
 
     @Lazy @Autowired private lateinit var transactionManager: TransactionManager
     @Autowired private lateinit var cryptoService: CryptoService
     @Autowired protected lateinit var stateManager: StateManager
-
-    protected val handlers = mutableListOf<TransactionValidateHandler>()
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(TransactionPipelineValidator::class.java)
     }
 
 
-    fun verify(tx: Transaction): Boolean {
+    fun verify(tx: Transaction, transactionValidationPipeline: TransactionValidationPipeline): Boolean {
         return try {
-            validate(tx)
+            validate(tx, transactionValidationPipeline)
             true
         } catch (e: ValidationException) {
             log.warn(e.message)
@@ -44,60 +42,46 @@ abstract class TransactionPipelineValidator<T : TransactionPipelineValidator<T>>
         }
     }
 
-    fun validate(tx: Transaction) {
-        handlers.forEach { it.invoke(tx) }
-        handlers.clear()
+    fun validate(tx: Transaction, transactionValidationPipeline: TransactionValidationPipeline) {
+        transactionValidationPipeline.invoke(tx)
     }
 
-    @Suppress("UNCHECKED_CAST")
-    fun checkHash(): T {
-        handlers.add {
-            if (toHexString(HashUtils.doubleSha256(it.getBytes())) != it.hash) {
-                throw ValidationException("Incorrect hash", INCORRECT_HASH)
-            }
+    fun checkHash(): TransactionValidateHandler = {
+        if (toHexString(HashUtils.doubleSha256(it.getBytes())) != it.hash) {
+            throw ValidationException("Incorrect hash", INCORRECT_HASH)
         }
-        return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
-    fun checkSignature(): T {
-        handlers.add {
-            if (!SignatureUtils.verify(fromHexString(it.hash), it.signature, fromHexString(it.publicKey))) {
-                throw ValidationException("Incorrect signature", INCORRECT_SIGNATURE)
-            }
+
+    fun checkSignature(): TransactionValidateHandler = {
+        if (!SignatureUtils.verify(fromHexString(it.hash), it.signature, fromHexString(it.publicKey))) {
+            throw ValidationException("Incorrect signature", INCORRECT_SIGNATURE)
         }
-        return this as T
     }
 
-    @Suppress("UNCHECKED_CAST")
-    fun checkActualBalance(): T {
-        handlers.add {
-            val balance = stateManager.getWalletBalanceByAddress(it.senderAddress)
-            val unconfirmedBalance = transactionManager.getUnconfirmedBalanceBySenderAddress(it.senderAddress)
-            val actualBalance = balance - unconfirmedBalance
 
-            val result = when (it) {
-                is DelegateTransaction -> actualBalance >= it.fee + it.getPayload().amount
-                is TransferTransaction -> actualBalance >= it.fee + it.getPayload().amount
-                is VoteTransaction -> actualBalance >= it.fee
-                else -> true
-            }
+    fun checkActualBalance(): TransactionValidateHandler = {
+        val balance = stateManager.getWalletBalanceByAddress(it.senderAddress)
+        val unconfirmedBalance = transactionManager.getUnconfirmedBalanceBySenderAddress(it.senderAddress)
+        val actualBalance = balance - unconfirmedBalance
 
-            if (!result) {
-                throw ValidationException("Incorrect balance", INSUFFICIENT_ACTUAL_BALANCE)
-            }
+        val result = when (it) {
+            is DelegateTransaction -> actualBalance >= it.fee + it.getPayload().amount
+            is TransferTransaction -> actualBalance >= it.fee + it.getPayload().amount
+            is VoteTransaction -> actualBalance >= it.fee
+            else -> true
         }
-        return this as T
+
+        if (!result) {
+            throw ValidationException("Incorrect balance", INSUFFICIENT_ACTUAL_BALANCE)
+        }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    fun checkSenderAddress(): T {
-        handlers.add {
-            if (!cryptoService.isValidAddress(it.senderAddress, fromHexString(it.publicKey))) {
-                throw ValidationException("Incorrect sender address", INCORRECT_ADDRESS)
-            }
+
+    fun checkSenderAddress(): TransactionValidateHandler = {
+        if (!cryptoService.isValidAddress(it.senderAddress, fromHexString(it.publicKey))) {
+            throw ValidationException("Incorrect sender address", INCORRECT_ADDRESS)
         }
-        return this as T
     }
 
 }

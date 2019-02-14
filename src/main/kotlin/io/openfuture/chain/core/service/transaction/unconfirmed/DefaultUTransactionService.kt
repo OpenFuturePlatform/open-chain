@@ -16,6 +16,7 @@ import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.TransactionValidatorManager
 import io.openfuture.chain.core.service.UTransactionService
 import io.openfuture.chain.core.service.transaction.validation.pipeline.DelegateTransactionPipelineValidator
+import io.openfuture.chain.core.service.transaction.validation.pipeline.TransactionValidationPipeline
 import io.openfuture.chain.core.service.transaction.validation.pipeline.TransferTransactionPipelineValidator
 import io.openfuture.chain.core.service.transaction.validation.pipeline.VoteTransactionPipelineValidator
 import io.openfuture.chain.core.sync.BlockchainLock
@@ -81,14 +82,17 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
 
             when (uTx) {
                 is UnconfirmedDelegateTransaction -> {
-                    delegateTransactionPipelineValidator.checkNew().validate(DelegateTransaction.of(uTx))
+                    val pipeline = TransactionValidationPipeline(delegateTransactionPipelineValidator.checkNew())
+                    delegateTransactionPipelineValidator.validate(DelegateTransaction.of(uTx), pipeline)
                 }
                 is UnconfirmedTransferTransaction -> {
                     val type = TransferTransactionType.getType(uTx.getPayload().recipientAddress, uTx.getPayload().data)
-                    transferTransactionPipelineValidator.checkNew(type).validate(TransferTransaction.of(uTx))
+                    val pipeline = TransactionValidationPipeline(transferTransactionPipelineValidator.checkNew(type))
+                    transferTransactionPipelineValidator.validate(TransferTransaction.of(uTx), pipeline)
                 }
                 is UnconfirmedVoteTransaction -> {
-                    voteTransactionPipelineValidator.checkNew().validate(VoteTransaction.of(uTx))
+                    val pipeline = TransactionValidationPipeline(voteTransactionPipelineValidator.checkNew())
+                    voteTransactionPipelineValidator.validate(VoteTransaction.of(uTx), pipeline)
                 }
                 else -> throw IllegalStateException("Wrong type")
             }

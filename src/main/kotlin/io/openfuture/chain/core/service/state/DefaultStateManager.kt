@@ -100,7 +100,7 @@ class DefaultStateManager(
     }
 
     override fun verify(state: State): Boolean =
-        state.hash != ByteUtils.toHexString(HashUtils.doubleSha256(state.getBytes()))
+        state.hash == ByteUtils.toHexString(HashUtils.doubleSha256(state.getBytes()))
 
     @Transactional
     override fun deleteBlockStates(blockHeights: List<Long>) {

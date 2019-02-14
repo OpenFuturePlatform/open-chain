@@ -33,7 +33,7 @@ class DefaultReceiptService(
     }
 
     override fun verify(receipt: Receipt): Boolean =
-        receipt.hash != ByteUtils.toHexString(HashUtils.doubleSha256(receipt.getBytes()))
+        receipt.hash == ByteUtils.toHexString(HashUtils.doubleSha256(receipt.getBytes()))
 
     @Transactional
     override fun deleteBlockReceipts(blockHeights: List<Long>) {

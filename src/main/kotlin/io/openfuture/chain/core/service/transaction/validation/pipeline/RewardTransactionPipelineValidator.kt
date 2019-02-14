@@ -1,19 +1,16 @@
 package io.openfuture.chain.core.service.transaction.validation.pipeline
 
-import org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE
-import org.springframework.context.annotation.Scope
+import io.openfuture.chain.core.util.TransactionValidateHandler
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Scope(SCOPE_PROTOTYPE)
 @Transactional(readOnly = true)
-class RewardTransactionPipelineValidator : TransactionPipelineValidator<RewardTransactionPipelineValidator>() {
+class RewardTransactionPipelineValidator : TransactionPipelineValidator() {
 
-    fun check(): RewardTransactionPipelineValidator {
-        checkHash()
+    fun check(): Array<TransactionValidateHandler> = arrayOf(
+        checkHash(),
         checkSignature()
-        return this
-    }
+    )
 
 }
