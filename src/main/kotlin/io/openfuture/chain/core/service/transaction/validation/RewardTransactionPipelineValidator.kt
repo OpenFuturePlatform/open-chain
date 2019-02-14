@@ -1,4 +1,4 @@
-package io.openfuture.chain.core.service.transaction.validation.pipeline
+package io.openfuture.chain.core.service.transaction.validation
 
 import io.openfuture.chain.core.util.TransactionValidateHandler
 import org.springframework.stereotype.Service

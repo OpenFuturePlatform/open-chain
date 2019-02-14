@@ -11,7 +11,11 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransac
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.service.BlockManager
-import io.openfuture.chain.core.service.TransactionManager
+import io.openfuture.chain.core.service.transaction.validation.DelegateTransactionPipelineValidator
+import io.openfuture.chain.core.service.transaction.validation.RewardTransactionPipelineValidator
+import io.openfuture.chain.core.service.transaction.validation.TransferTransactionPipelineValidator
+import io.openfuture.chain.core.service.transaction.validation.VoteTransactionPipelineValidator
+import io.openfuture.chain.core.service.transaction.validation.pipeline.TransactionValidationPipeline
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.crypto.util.HashUtils
@@ -44,7 +48,10 @@ class ChainSynchronizer(
     private val addressesHolder: AddressesHolder,
     private val blockManager: BlockManager,
     private val networkApiService: NetworkApiService,
-    private val transactionManager: TransactionManager,
+    private val rewardTransactionPipelineValidator: RewardTransactionPipelineValidator,
+    private val delegateTransactionPipelineValidator: DelegateTransactionPipelineValidator,
+    private val transferTransactionPipelineValidator: TransferTransactionPipelineValidator,
+    private val voteTransactionPipelineValidator: VoteTransactionPipelineValidator,
     private val epochService: EpochService,
     private val requestRetryScheduler: RequestRetryScheduler,
     private val dbChecker: DBChecker,
@@ -183,17 +190,25 @@ class ChainSynchronizer(
             && isValidReceiptMerkleRoot(mainBlocks)
             && isValidTransactions(mainBlocks)
 
-    private fun isValidRewardTransactions(list: List<RewardTransactionMessage>): Boolean =
-        list.all { transactionManager.verify(RewardTransaction.of(it)) }
+    private fun isValidRewardTransactions(list: List<RewardTransactionMessage>): Boolean {
+        val pipeline = TransactionValidationPipeline(rewardTransactionPipelineValidator.check())
+        return list.all { rewardTransactionPipelineValidator.verify(RewardTransaction.of(it), pipeline) }
+    }
 
-    private fun isValidVoteTransactions(list: List<VoteTransactionMessage>): Boolean =
-        list.all { transactionManager.verify(VoteTransaction.of(it)) }
+    private fun isValidVoteTransactions(list: List<VoteTransactionMessage>): Boolean {
+        val pipeline = TransactionValidationPipeline(voteTransactionPipelineValidator.check())
+        return list.all { voteTransactionPipelineValidator.verify(VoteTransaction.of(it), pipeline) }
+    }
 
-    private fun isValidDelegateTransactions(list: List<DelegateTransactionMessage>): Boolean =
-        list.all { transactionManager.verify(DelegateTransaction.of(it)) }
+    private fun isValidDelegateTransactions(list: List<DelegateTransactionMessage>): Boolean {
+        val pipeline = TransactionValidationPipeline(delegateTransactionPipelineValidator.check())
+        return list.all { delegateTransactionPipelineValidator.verify(DelegateTransaction.of(it), pipeline) }
+    }
 
-    private fun isValidTransferTransactions(list: List<TransferTransactionMessage>): Boolean =
-        list.all { transactionManager.verify(TransferTransaction.of(it)) }
+    private fun isValidTransferTransactions(list: List<TransferTransactionMessage>): Boolean {
+        val pipeline = TransactionValidationPipeline(transferTransactionPipelineValidator.check())
+        return list.all { transferTransactionPipelineValidator.verify(TransferTransaction.of(it), pipeline) }
+    }
 
     private fun isValidTransactions(blocks: List<MainBlockMessage>): Boolean {
         try {

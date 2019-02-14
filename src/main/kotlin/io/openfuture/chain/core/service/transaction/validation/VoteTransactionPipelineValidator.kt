@@ -1,4 +1,4 @@
-package io.openfuture.chain.core.service.transaction.validation.pipeline
+package io.openfuture.chain.core.service.transaction.validation
 
 import io.openfuture.chain.consensus.property.ConsensusProperties
 import io.openfuture.chain.core.exception.ValidationException

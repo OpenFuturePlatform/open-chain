@@ -7,6 +7,8 @@ import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.BlockManager
+import io.openfuture.chain.core.service.block.validation.MainBlockPipelineValidator
+import io.openfuture.chain.core.service.block.validation.pipeline.BlockValidationPipeline
 import io.openfuture.chain.core.sync.ChainSynchronizer
 import io.openfuture.chain.core.util.DictionaryUtils
 import io.openfuture.chain.crypto.util.SignatureUtils
@@ -25,7 +27,8 @@ class DefaultPendingBlockHandler(
     private val keyHolder: NodeKeyHolder,
     private val networkService: NetworkApiService,
     private val chainSynchronizer: ChainSynchronizer,
-    private val properties: ConsensusProperties
+    private val properties: ConsensusProperties,
+    private val mainBlockPipelineValidator: MainBlockPipelineValidator
 ) : PendingBlockHandler {
 
     companion object {
@@ -62,7 +65,10 @@ class DefaultPendingBlockHandler(
             return
         }
 
-        if (IDLE == stage && isActiveDelegate() && blockManager.verify(MainBlock.of(block), blockManager.getLast())) {
+        val lastBlock = blockManager.getLast()
+        val pipeline = BlockValidationPipeline(mainBlockPipelineValidator.checkFull())
+        if (IDLE == stage && isActiveDelegate()
+            && mainBlockPipelineValidator.verify(MainBlock.of(block), lastBlock, true, pipeline)) {
             this.observable = block
             this.stage = PREPARE
             val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKeyAsHexString())

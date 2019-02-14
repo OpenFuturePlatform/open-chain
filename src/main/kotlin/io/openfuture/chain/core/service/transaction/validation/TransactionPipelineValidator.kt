@@ -1,4 +1,4 @@
-package io.openfuture.chain.core.service.transaction.validation.pipeline
+package io.openfuture.chain.core.service.transaction.validation
 
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.*
@@ -8,6 +8,7 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTrans
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.service.TransactionManager
+import io.openfuture.chain.core.service.transaction.validation.pipeline.TransactionValidationPipeline
 import io.openfuture.chain.core.util.TransactionValidateHandler
 import io.openfuture.chain.crypto.service.CryptoService
 import io.openfuture.chain.crypto.util.HashUtils
@@ -58,7 +59,6 @@ abstract class TransactionPipelineValidator {
             throw ValidationException("Incorrect signature", INCORRECT_SIGNATURE)
         }
     }
-
 
     fun checkActualBalance(): TransactionValidateHandler = {
         val balance = stateManager.getWalletBalanceByAddress(it.senderAddress)

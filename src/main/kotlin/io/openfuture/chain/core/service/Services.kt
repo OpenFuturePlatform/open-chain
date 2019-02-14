@@ -81,7 +81,6 @@ interface BlockManager {
 
     fun removeEpoch(genesisBlock: GenesisBlock)
 
-    fun verify(block: Block, lastBlock: Block, new: Boolean = true): Boolean
 }
 
 interface BlockService<T : Block> {
@@ -115,18 +114,6 @@ interface GenesisBlockService : BlockService<GenesisBlock> {
 interface MainBlockService : BlockService<MainBlock> {
 
     fun getBlocksByEpochIndex(epochIndex: Long, syncMode: SyncMode): List<MainBlock>
-
-}
-
-interface BlockValidatorManager {
-
-    fun verify(block: Block, lastBlock: Block, new: Boolean): Boolean
-
-}
-
-interface MainBlockValidator {
-
-    fun validate(block: MainBlock, new: Boolean)
 
 }
 
@@ -179,8 +166,6 @@ interface TransactionManager {
     fun <uT : UnconfirmedTransaction> add(uTx: uT): uT
 
     fun processTransactions(transactions: List<Transaction>, delegateWallet: String): List<Receipt>
-
-    fun verify(tx: Transaction, new: Boolean = false): Boolean
 
     fun deleteBlockTransactions(blockHeights: List<Long>)
 
@@ -249,26 +234,6 @@ interface VoteTransactionService : ExternalTransactionService<VoteTransaction> {
 }
 
 interface DelegateTransactionService : ExternalTransactionService<DelegateTransaction>
-
-interface TransactionValidatorManager {
-
-    fun validate(tx: Transaction, new: Boolean = true)
-
-    fun verify(tx: Transaction, new: Boolean): Boolean
-
-}
-
-interface TransactionValidator<T> {
-
-    fun validate(tx: T, new: Boolean)
-
-}
-
-interface DelegateTransactionValidator : TransactionValidator<DelegateTransaction>
-
-interface TransferTransactionValidator : TransactionValidator<TransferTransaction>
-
-interface VoteTransactionValidator : TransactionValidator<VoteTransaction>
 
 interface StateManager {
 

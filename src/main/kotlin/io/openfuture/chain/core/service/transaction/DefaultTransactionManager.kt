@@ -32,7 +32,6 @@ class DefaultTransactionManager(
     private val transferTransactionService: TransferTransactionService,
     private val voteTransactionService: VoteTransactionService,
     private val rewardTransactionService: RewardTransactionService,
-    private val transactionValidatorManager: TransactionValidatorManager,
     private val statePool: StatePool
 ) : TransactionManager {
 
@@ -146,8 +145,6 @@ class DefaultTransactionManager(
         is VoteTransaction -> voteTransactionService.process(tx, delegateWallet)
         else -> throw IllegalStateException("Wrong type")
     }
-
-    override fun verify(tx: Transaction, new: Boolean): Boolean = transactionValidatorManager.verify(tx, new)
 
     @Transactional
     override fun deleteBlockTransactions(blockHeights: List<Long>) {

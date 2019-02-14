@@ -2,7 +2,6 @@ package io.openfuture.chain.core.service.transaction.unconfirmed
 
 import io.openfuture.chain.core.annotation.BlockchainSynchronized
 import io.openfuture.chain.core.exception.CoreException
-import io.openfuture.chain.core.model.entity.dictionary.TransferTransactionType
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -13,12 +12,11 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
-import io.openfuture.chain.core.service.TransactionValidatorManager
 import io.openfuture.chain.core.service.UTransactionService
-import io.openfuture.chain.core.service.transaction.validation.pipeline.DelegateTransactionPipelineValidator
+import io.openfuture.chain.core.service.transaction.validation.DelegateTransactionPipelineValidator
+import io.openfuture.chain.core.service.transaction.validation.TransferTransactionPipelineValidator
+import io.openfuture.chain.core.service.transaction.validation.VoteTransactionPipelineValidator
 import io.openfuture.chain.core.service.transaction.validation.pipeline.TransactionValidationPipeline
-import io.openfuture.chain.core.service.transaction.validation.pipeline.TransferTransactionPipelineValidator
-import io.openfuture.chain.core.service.transaction.validation.pipeline.VoteTransactionPipelineValidator
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -30,7 +28,6 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
     private val uRepository: UTransactionRepository<uT>
 ) : UTransactionService<uT> {
 
-    @Autowired private lateinit var transactionValidatorManager: TransactionValidatorManager
     @Autowired private lateinit var networkService: NetworkApiService
     @Autowired private lateinit var repository: TransactionRepository<Transaction>
     @Autowired private lateinit var delegateTransactionPipelineValidator: DelegateTransactionPipelineValidator
@@ -86,8 +83,7 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
                     delegateTransactionPipelineValidator.validate(DelegateTransaction.of(uTx), pipeline)
                 }
                 is UnconfirmedTransferTransaction -> {
-                    val type = TransferTransactionType.getType(uTx.getPayload().recipientAddress, uTx.getPayload().data)
-                    val pipeline = TransactionValidationPipeline(transferTransactionPipelineValidator.checkNew(type))
+                    val pipeline = TransactionValidationPipeline(transferTransactionPipelineValidator.checkNew())
                     transferTransactionPipelineValidator.validate(TransferTransaction.of(uTx), pipeline)
                 }
                 is UnconfirmedVoteTransaction -> {

@@ -5,4 +5,4 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 
 typealias TransactionValidateHandler = (tx: Transaction) -> Unit
 
-typealias BlockValidateHandler = (tx: Block, new: Boolean) -> Unit
+typealias BlockValidateHandler = (block: Block, lastBlock: Block, new: Boolean) -> Unit

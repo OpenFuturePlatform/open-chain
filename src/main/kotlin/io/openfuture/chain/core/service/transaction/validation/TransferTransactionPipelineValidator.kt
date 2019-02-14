@@ -4,11 +4,10 @@ import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.exception.model.ExceptionType.CONTRACT_METHOD_NOT_EXISTS
 import io.openfuture.chain.core.exception.model.ExceptionType.INVALID_CONTRACT
 import io.openfuture.chain.core.model.entity.Contract
-import io.openfuture.chain.core.model.entity.dictionary.TransferTransactionType
 import io.openfuture.chain.core.model.entity.dictionary.TransferTransactionType.*
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.service.ContractService
-import io.openfuture.chain.core.service.TransferTransactionValidator
+import io.openfuture.chain.core.util.TransactionValidateHandler
 import io.openfuture.chain.smartcontract.component.validation.SmartContractValidator
 import io.openfuture.chain.smartcontract.model.Abi
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -17,15 +16,41 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional(readOnly = true)
-class DefaultTransferTransactionValidator(
+class TransferTransactionPipelineValidator(
     private val contractService: ContractService
-) : TransferTransactionValidator {
+) : TransactionPipelineValidator() {
 
-    override fun validate(tx: TransferTransaction, new: Boolean) {
-        checkNegativeFee(tx)
-        checkNegativeAmount(tx)
+    fun check(): Array<TransactionValidateHandler> = arrayOf(
+        checkHash(),
+        checkSignature(),
+        checkSenderAddress(),
+        checkNegativeFee(),
+        checkNegativeAmount(),
+        checkByType()
+    )
 
-        when (TransferTransactionType.getType(tx.getPayload().recipientAddress, tx.getPayload().data)) {
+    fun checkNew(): Array<TransactionValidateHandler> = arrayOf(
+        *check(),
+        checkActualBalance()
+    )
+
+
+    fun checkNegativeFee(): TransactionValidateHandler = {
+        if (it.fee < 0) {
+            throw ValidationException("Fee should not be less than 0")
+        }
+    }
+
+    fun checkNegativeAmount(): TransactionValidateHandler = {
+        it as TransferTransaction
+        if (it.getPayload().amount < 0) {
+            throw ValidationException("Amount should not be less than 0")
+        }
+    }
+
+    fun checkByType(): TransactionValidateHandler = { tx ->
+        tx as TransferTransaction
+        when (tx.getType()) {
             DEPLOY -> {
                 checkEqualFee(tx)
                 checkByteCode(tx)
@@ -39,18 +64,6 @@ class DefaultTransferTransactionValidator(
             FUND -> {
                 checkEqualAmount(tx)
             }
-        }
-    }
-
-    private fun checkNegativeFee(tx: TransferTransaction) {
-        if (tx.fee < 0) {
-            throw ValidationException("Fee should not be less than 0")
-        }
-    }
-
-    private fun checkNegativeAmount(tx: TransferTransaction) {
-        if (tx.getPayload().amount < 0) {
-            throw ValidationException("Amount should not be less than 0")
         }
     }
 
