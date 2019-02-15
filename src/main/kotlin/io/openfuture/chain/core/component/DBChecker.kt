@@ -18,27 +18,23 @@ class DBChecker(
 
     @Transactional
     fun prepareDB(syncMode: SyncMode) {
-        when (syncMode) {
-            FULL -> {
-                val lastBlock = blockManager.getLast()
-                val lastValidBlockHeight = lastValidBlockHeightByFullMode()
-                val failBlockHeight = lastValidBlockHeight + 1L
+        val pipeline = when (syncMode) {
+            FULL -> BlockValidationPipeline(mainBlockValidator.checkFull())
+            LIGHT -> BlockValidationPipeline(mainBlockValidator.checkLight())
+        }
+        val lastBlock = blockManager.getLast()
+        val lastValidBlockHeight = lastValidBlockHeight(pipeline)
+        val failBlockHeight = lastValidBlockHeight + 1L
 
-                if (failBlockHeight <= lastBlock.height) {
-                    val range = LongRange(failBlockHeight, lastBlock.height)
-                    blockManager.deleteByHeightIn(range.toList())
-                }
-            }
-            LIGHT -> {
-                // todo("prepare db in LIGHT mode")
-            }
+        if (failBlockHeight <= lastBlock.height) {
+            val range = LongRange(failBlockHeight, lastBlock.height)
+            blockManager.deleteByHeightIn(range.toList())
         }
     }
 
-    private fun lastValidBlockHeightByFullMode(): Long {
+    private fun lastValidBlockHeight(pipeline: BlockValidationPipeline): Long {
         val lastEpochIndex = blockManager.getLastGenesisBlock().getPayload().epochIndex
         var lastValidBlockHeight = 1L
-        val pipeline = BlockValidationPipeline(mainBlockValidator.checkFull())
         loop@ for (epochIndex in 1L..lastEpochIndex) {
             val genesisBlock = blockManager.findGenesisBlockByEpochIndex(epochIndex)!!
 
