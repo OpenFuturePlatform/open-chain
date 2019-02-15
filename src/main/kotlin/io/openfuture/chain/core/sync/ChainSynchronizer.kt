@@ -28,7 +28,6 @@ import io.openfuture.chain.network.message.sync.EpochRequestMessage
 import io.openfuture.chain.network.message.sync.EpochResponseMessage
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.network.message.sync.MainBlockMessage
-import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.NetworkApiService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -41,7 +40,6 @@ import javax.xml.bind.ValidationException
 
 @Component
 class ChainSynchronizer(
-    private val properties: NodeProperties,
     private val consensusProperties: ConsensusProperties,
     private val addressesHolder: AddressesHolder,
     private val blockManager: BlockManager,
@@ -86,7 +84,10 @@ class ChainSynchronizer(
         future?.cancel(true)
         val delegates = blockManager.getLastGenesisBlock().getPayload().activeDelegates
         try {
-            if (!message.isEpochExists) {
+
+            if (!message.isEpochExists ||
+                (syncSession.getCurrentGenesisBlock().getPayload().epochIndex > message.genesisBlock!!.epochIndex
+                    && message.mainBlocks.isEmpty())) {
                 requestEpoch(delegates.filter { it != message.delegateKey })
                 return
             }
