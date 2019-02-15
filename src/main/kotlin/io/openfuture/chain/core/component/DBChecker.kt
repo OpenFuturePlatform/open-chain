@@ -2,7 +2,7 @@ package io.openfuture.chain.core.component
 
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.service.BlockManager
-import io.openfuture.chain.core.service.block.validation.MainBlockPipelineValidator
+import io.openfuture.chain.core.service.block.validation.MainBlockValidator
 import io.openfuture.chain.core.service.block.validation.pipeline.BlockValidationPipeline
 import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.core.sync.SyncMode.FULL
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 @Component
 class DBChecker(
     private val blockManager: BlockManager,
-    private val mainBlockPipelineValidator: MainBlockPipelineValidator
+    private val mainBlockValidator: MainBlockValidator
 ) {
 
     @Transactional
@@ -38,7 +38,7 @@ class DBChecker(
     private fun lastValidBlockHeightByFullMode(): Long {
         val lastEpochIndex = blockManager.getLastGenesisBlock().getPayload().epochIndex
         var lastValidBlockHeight = 1L
-        val pipeline = BlockValidationPipeline(mainBlockPipelineValidator.checkFull())
+        val pipeline = BlockValidationPipeline(mainBlockValidator.checkFull())
         loop@ for (epochIndex in 1L..lastEpochIndex) {
             val genesisBlock = blockManager.findGenesisBlockByEpochIndex(epochIndex)!!
 
@@ -47,7 +47,7 @@ class DBChecker(
 
             for (index in 0 until blocks.size) {
                 val block = blocks[index]
-                if (!mainBlockPipelineValidator.verify(block, previousBlock, false, pipeline)) {
+                if (!mainBlockValidator.verify(block, previousBlock, false, pipeline)) {
                     break@loop
                 }
 

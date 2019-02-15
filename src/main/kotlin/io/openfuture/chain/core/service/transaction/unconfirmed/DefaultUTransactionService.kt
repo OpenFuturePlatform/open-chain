@@ -13,9 +13,9 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
 import io.openfuture.chain.core.service.UTransactionService
-import io.openfuture.chain.core.service.transaction.validation.DelegateTransactionPipelineValidator
-import io.openfuture.chain.core.service.transaction.validation.TransferTransactionPipelineValidator
-import io.openfuture.chain.core.service.transaction.validation.VoteTransactionPipelineValidator
+import io.openfuture.chain.core.service.transaction.validation.DelegateTransactionValidator
+import io.openfuture.chain.core.service.transaction.validation.TransferTransactionValidator
+import io.openfuture.chain.core.service.transaction.validation.VoteTransactionValidator
 import io.openfuture.chain.core.service.transaction.validation.pipeline.TransactionValidationPipeline
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.service.NetworkApiService
@@ -30,9 +30,9 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
 
     @Autowired private lateinit var networkService: NetworkApiService
     @Autowired private lateinit var repository: TransactionRepository<Transaction>
-    @Autowired private lateinit var delegateTransactionPipelineValidator: DelegateTransactionPipelineValidator
-    @Autowired private lateinit var transferTransactionPipelineValidator: TransferTransactionPipelineValidator
-    @Autowired private lateinit var voteTransactionPipelineValidator: VoteTransactionPipelineValidator
+    @Autowired private lateinit var delegateTransactionValidator: DelegateTransactionValidator
+    @Autowired private lateinit var transferTransactionValidator: TransferTransactionValidator
+    @Autowired private lateinit var voteTransactionValidator: VoteTransactionValidator
 
 
     override fun getAll(): List<uT> {
@@ -79,16 +79,16 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
 
             when (uTx) {
                 is UnconfirmedDelegateTransaction -> {
-                    val pipeline = TransactionValidationPipeline(delegateTransactionPipelineValidator.checkNew())
-                    delegateTransactionPipelineValidator.validate(DelegateTransaction.of(uTx), pipeline)
+                    val pipeline = TransactionValidationPipeline(delegateTransactionValidator.checkNew())
+                    delegateTransactionValidator.validate(DelegateTransaction.of(uTx), pipeline)
                 }
                 is UnconfirmedTransferTransaction -> {
-                    val pipeline = TransactionValidationPipeline(transferTransactionPipelineValidator.checkNew())
-                    transferTransactionPipelineValidator.validate(TransferTransaction.of(uTx), pipeline)
+                    val pipeline = TransactionValidationPipeline(transferTransactionValidator.checkNew())
+                    transferTransactionValidator.validate(TransferTransaction.of(uTx), pipeline)
                 }
                 is UnconfirmedVoteTransaction -> {
-                    val pipeline = TransactionValidationPipeline(voteTransactionPipelineValidator.checkNew())
-                    voteTransactionPipelineValidator.validate(VoteTransaction.of(uTx), pipeline)
+                    val pipeline = TransactionValidationPipeline(voteTransactionValidator.checkNew())
+                    voteTransactionValidator.validate(VoteTransaction.of(uTx), pipeline)
                 }
                 else -> throw IllegalStateException("Wrong type")
             }

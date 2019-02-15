@@ -14,10 +14,10 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransacti
 import io.openfuture.chain.core.service.ReceiptService
 import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.service.TransactionManager
-import io.openfuture.chain.core.service.transaction.validation.DelegateTransactionPipelineValidator
-import io.openfuture.chain.core.service.transaction.validation.RewardTransactionPipelineValidator
-import io.openfuture.chain.core.service.transaction.validation.TransferTransactionPipelineValidator
-import io.openfuture.chain.core.service.transaction.validation.VoteTransactionPipelineValidator
+import io.openfuture.chain.core.service.transaction.validation.DelegateTransactionValidator
+import io.openfuture.chain.core.service.transaction.validation.RewardTransactionValidator
+import io.openfuture.chain.core.service.transaction.validation.TransferTransactionValidator
+import io.openfuture.chain.core.service.transaction.validation.VoteTransactionValidator
 import io.openfuture.chain.core.service.transaction.validation.pipeline.TransactionValidationPipeline
 import io.openfuture.chain.core.util.BlockValidateHandler
 import io.openfuture.chain.crypto.util.HashUtils
@@ -26,17 +26,17 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional(readOnly = true)
-class MainBlockPipelineValidator(
+class MainBlockValidator(
     private val consensusProperties: ConsensusProperties,
     private val stateManager: StateManager,
     private val transactionManager: TransactionManager,
-    private val rewardTransactionValidationPipeline: RewardTransactionPipelineValidator,
-    private val delegateTransactionValidationPipeline: DelegateTransactionPipelineValidator,
-    private val transferTransactionValidationPipeline: TransferTransactionPipelineValidator,
-    private val voteTransactionPipelineValidator: VoteTransactionPipelineValidator,
+    private val rewardTransactionPipeline: RewardTransactionValidator,
+    private val delegateTransactionPipeline: DelegateTransactionValidator,
+    private val transferTransactionPipeline: TransferTransactionValidator,
+    private val voteTransactionValidator: VoteTransactionValidator,
     private val receiptService: ReceiptService,
     private val statePool: StatePool
-) : BlockPipelineValidator() {
+) : BlockValidator() {
 
     fun checkLight(): Array<BlockValidateHandler> = arrayOf(
         checkSignature(),
@@ -166,8 +166,8 @@ class MainBlockPipelineValidator(
             }
         }
 
-        val pipeline = TransactionValidationPipeline(rewardTransactionValidationPipeline.check())
-        if (!rewardTransactionValidationPipeline.verify(rewardTransaction, pipeline)) {
+        val pipeline = TransactionValidationPipeline(rewardTransactionPipeline.check())
+        if (!rewardTransactionPipeline.verify(rewardTransaction, pipeline)) {
             throw ValidationException("Invalid reward transaction in block: height #${block.height}, hash ${block.hash}")
         }
     }
@@ -180,9 +180,9 @@ class MainBlockPipelineValidator(
             throw ValidationException("Invalid delegate transactions in block: height #${block.height}, hash ${block.hash}")
         }
 
-        val pipeline = TransactionValidationPipeline(delegateTransactionValidationPipeline.check())
+        val pipeline = TransactionValidationPipeline(delegateTransactionPipeline.check())
         transactions.forEach {
-            if (!delegateTransactionValidationPipeline.verify(it, pipeline)) {
+            if (!delegateTransactionPipeline.verify(it, pipeline)) {
                 throw ValidationException("Invalid delegate transactions in block: height #${block.height}, hash ${block.hash}")
             }
         }
@@ -191,9 +191,9 @@ class MainBlockPipelineValidator(
     fun checkTransferTransactions(): BlockValidateHandler = { block, _, _ ->
         block as MainBlock
 
-        val pipeline = TransactionValidationPipeline(transferTransactionValidationPipeline.check())
+        val pipeline = TransactionValidationPipeline(transferTransactionPipeline.check())
         block.getPayload().transferTransactions.forEach {
-            if (!transferTransactionValidationPipeline.verify(it, pipeline)) {
+            if (!transferTransactionPipeline.verify(it, pipeline)) {
                 throw ValidationException("Invalid transfer transactions in block: height #${block.height}, hash ${block.hash}")
             }
         }
@@ -223,9 +223,9 @@ class MainBlockPipelineValidator(
             }
         }
 
-        val pipeline = TransactionValidationPipeline(voteTransactionPipelineValidator.check())
+        val pipeline = TransactionValidationPipeline(voteTransactionValidator.check())
         transactions.forEach {
-            if (!voteTransactionPipelineValidator.verify(it, pipeline)) {
+            if (!voteTransactionValidator.verify(it, pipeline)) {
                 throw ValidationException("Invalid vote transactions in block: height #${block.height}, hash ${block.hash}")
             }
         }

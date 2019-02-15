@@ -12,10 +12,10 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransac
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.service.BlockManager
-import io.openfuture.chain.core.service.transaction.validation.DelegateTransactionPipelineValidator
-import io.openfuture.chain.core.service.transaction.validation.RewardTransactionPipelineValidator
-import io.openfuture.chain.core.service.transaction.validation.TransferTransactionPipelineValidator
-import io.openfuture.chain.core.service.transaction.validation.VoteTransactionPipelineValidator
+import io.openfuture.chain.core.service.transaction.validation.DelegateTransactionValidator
+import io.openfuture.chain.core.service.transaction.validation.RewardTransactionValidator
+import io.openfuture.chain.core.service.transaction.validation.TransferTransactionValidator
+import io.openfuture.chain.core.service.transaction.validation.VoteTransactionValidator
 import io.openfuture.chain.core.service.transaction.validation.pipeline.TransactionValidationPipeline
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncStatus.*
@@ -32,7 +32,6 @@ import io.openfuture.chain.network.message.sync.EpochRequestMessage
 import io.openfuture.chain.network.message.sync.EpochResponseMessage
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.network.message.sync.MainBlockMessage
-import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.NetworkApiService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -45,15 +44,14 @@ import javax.xml.bind.ValidationException
 
 @Component
 class ChainSynchronizer(
-    private val properties: NodeProperties,
     private val consensusProperties: ConsensusProperties,
     private val addressesHolder: AddressesHolder,
     private val blockManager: BlockManager,
     private val networkApiService: NetworkApiService,
-    private val rewardTransactionPipelineValidator: RewardTransactionPipelineValidator,
-    private val delegateTransactionPipelineValidator: DelegateTransactionPipelineValidator,
-    private val transferTransactionPipelineValidator: TransferTransactionPipelineValidator,
-    private val voteTransactionPipelineValidator: VoteTransactionPipelineValidator,
+    private val rewardTransactionValidator: RewardTransactionValidator,
+    private val delegateTransactionValidator: DelegateTransactionValidator,
+    private val transferTransactionValidator: TransferTransactionValidator,
+    private val voteTransactionValidator: VoteTransactionValidator,
     private val epochService: EpochService,
     private val requestRetryScheduler: RequestRetryScheduler,
     private val dbChecker: DBChecker,
@@ -193,23 +191,23 @@ class ChainSynchronizer(
             && isValidTransactions(mainBlocks)
 
     private fun isValidRewardTransactions(list: List<RewardTransactionMessage>): Boolean {
-        val pipeline = TransactionValidationPipeline(rewardTransactionPipelineValidator.check())
-        return list.all { rewardTransactionPipelineValidator.verify(RewardTransaction.of(it), pipeline) }
+        val pipeline = TransactionValidationPipeline(rewardTransactionValidator.check())
+        return list.all { rewardTransactionValidator.verify(RewardTransaction.of(it), pipeline) }
     }
 
     private fun isValidVoteTransactions(list: List<VoteTransactionMessage>): Boolean {
-        val pipeline = TransactionValidationPipeline(voteTransactionPipelineValidator.check())
-        return list.all { voteTransactionPipelineValidator.verify(VoteTransaction.of(it), pipeline) }
+        val pipeline = TransactionValidationPipeline(voteTransactionValidator.check())
+        return list.all { voteTransactionValidator.verify(VoteTransaction.of(it), pipeline) }
     }
 
     private fun isValidDelegateTransactions(list: List<DelegateTransactionMessage>): Boolean {
-        val pipeline = TransactionValidationPipeline(delegateTransactionPipelineValidator.check())
-        return list.all { delegateTransactionPipelineValidator.verify(DelegateTransaction.of(it), pipeline) }
+        val pipeline = TransactionValidationPipeline(delegateTransactionValidator.check())
+        return list.all { delegateTransactionValidator.verify(DelegateTransaction.of(it), pipeline) }
     }
 
     private fun isValidTransferTransactions(list: List<TransferTransactionMessage>): Boolean {
-        val pipeline = TransactionValidationPipeline(transferTransactionPipelineValidator.check())
-        return list.all { transferTransactionPipelineValidator.verify(TransferTransaction.of(it), pipeline) }
+        val pipeline = TransactionValidationPipeline(transferTransactionValidator.check())
+        return list.all { transferTransactionValidator.verify(TransferTransaction.of(it), pipeline) }
     }
 
     private fun isValidTransactions(blocks: List<MainBlockMessage>): Boolean {

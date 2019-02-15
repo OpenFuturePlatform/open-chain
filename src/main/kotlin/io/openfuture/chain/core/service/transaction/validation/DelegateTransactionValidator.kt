@@ -12,10 +12,10 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional(readOnly = true)
-class DelegateTransactionPipelineValidator(
+class DelegateTransactionValidator(
     private val consensusProperties: ConsensusProperties,
     private val uRepository: UDelegateTransactionRepository
-) : TransactionPipelineValidator() {
+) : TransactionValidator() {
 
     fun check(): Array<TransactionValidateHandler> = arrayOf(
         checkHash(),

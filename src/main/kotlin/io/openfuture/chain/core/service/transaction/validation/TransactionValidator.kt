@@ -22,14 +22,14 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional(readOnly = true)
-abstract class TransactionPipelineValidator {
+abstract class TransactionValidator {
 
     @Lazy @Autowired private lateinit var transactionManager: TransactionManager
     @Autowired private lateinit var cryptoService: CryptoService
     @Autowired protected lateinit var stateManager: StateManager
 
     companion object {
-        private val log: Logger = LoggerFactory.getLogger(TransactionPipelineValidator::class.java)
+        private val log: Logger = LoggerFactory.getLogger(TransactionValidator::class.java)
     }
 
 

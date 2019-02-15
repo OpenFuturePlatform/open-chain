@@ -13,10 +13,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional(readOnly = true)
-abstract class BlockPipelineValidator {
+abstract class BlockValidator {
 
     companion object {
-        private val log: Logger = LoggerFactory.getLogger(BlockPipelineValidator::class.java)
+        private val log: Logger = LoggerFactory.getLogger(BlockValidator::class.java)
     }
 
 

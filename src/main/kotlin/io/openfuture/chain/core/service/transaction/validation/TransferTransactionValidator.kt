@@ -16,9 +16,9 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional(readOnly = true)
-class TransferTransactionPipelineValidator(
+class TransferTransactionValidator(
     private val contractService: ContractService
-) : TransactionPipelineValidator() {
+) : TransactionValidator() {
 
     fun check(): Array<TransactionValidateHandler> = arrayOf(
         checkHash(),

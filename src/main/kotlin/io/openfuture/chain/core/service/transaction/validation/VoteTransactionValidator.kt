@@ -15,10 +15,10 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional(readOnly = true)
-class VoteTransactionPipelineValidator(
+class VoteTransactionValidator(
     private val consensusProperties: ConsensusProperties,
     private val uRepository: UVoteTransactionRepository
-) : TransactionPipelineValidator() {
+) : TransactionValidator() {
 
     fun check(): Array<TransactionValidateHandler> = arrayOf(
         checkHash(),
