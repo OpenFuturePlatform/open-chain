@@ -15,6 +15,7 @@ import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.service.StateValidatorManager
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.rpc.domain.base.PageRequest
+import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -73,7 +74,7 @@ class DefaultStateManager(
         accountStateService.updateStorage(address, storage)
     }
 
-    override fun getAllDelegates(request: PageRequest): List<DelegateState> =
+    override fun getAllDelegates(request: PageRequest): Page<DelegateState> =
         delegateStateService.getAllDelegates(request)
 
     override fun getActiveDelegates(): List<DelegateState> =

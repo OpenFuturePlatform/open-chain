@@ -151,7 +151,7 @@ interface DelegateStateRepository : StateRepository<DelegateState> {
             WHERE ds1.address=ds2.address
         )
         """)
-    fun findLastAll(request: Pageable): List<DelegateState>
+    fun findLastAll(request: Pageable): Page<DelegateState>
 
 }
 

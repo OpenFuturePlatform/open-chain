@@ -2,11 +2,14 @@ package io.openfuture.chain.rpc.controller.transaction
 
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.config.any
+import io.openfuture.chain.core.model.entity.Receipt
+import io.openfuture.chain.core.model.entity.ReceiptResult
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
+import io.openfuture.chain.core.service.ReceiptService
 import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.rpc.domain.base.PageResponse
 import io.openfuture.chain.rpc.domain.transaction.request.TransactionPageRequest
@@ -23,8 +26,8 @@ import reactor.core.publisher.Mono
 @WebFluxTest(TransferTransactionController::class)
 class TransferTransactionControllerTests : ControllerTests() {
 
-    @MockBean
-    private lateinit var transactionManager: TransactionManager
+    @MockBean private lateinit var transactionManager: TransactionManager
+    @MockBean private lateinit var receiptService: ReceiptService
 
     companion object {
         private const val TRANSFER_TRANSACTION_URL = "/rpc/transactions/transfer"
@@ -57,6 +60,7 @@ class TransferTransactionControllerTests : ControllerTests() {
         val expectedPageResponse = PageResponse(pageTransferTransactions)
 
         given(transactionManager.getAllTransferTransactions(TransactionPageRequest())).willReturn(pageTransferTransactions)
+        given(receiptService.getByTransactionHash("hash")).willReturn(createReceipt())
 
         val actualPageResponse = webClient.get().uri(TRANSFER_TRANSACTION_URL)
             .exchange()
@@ -78,6 +82,7 @@ class TransferTransactionControllerTests : ControllerTests() {
 
         given(transactionManager.getAllTransferTransactionsByAddress(WALLET_ADDRESS, TransactionPageRequest()))
             .willReturn(pageTransferTransactions)
+        given(receiptService.getByTransactionHash("hash")).willReturn(createReceipt())
 
         val actualTransferTransactions = webClient.get().uri("$TRANSFER_TRANSACTION_URL/address/$WALLET_ADDRESS")
             .exchange()
@@ -95,9 +100,10 @@ class TransferTransactionControllerTests : ControllerTests() {
     fun getTransactionByHashShouldReturnTransactionWithCurrentHash() {
         val hash = "hash"
         val transferTransaction = createTransferTransaction()
-        val expectedResponse = TransferTransactionResponse(transferTransaction)
+        val expectedResponse = TransferTransactionResponse(transferTransaction, createReceipt())
 
         given(transactionManager.getTransferTransactionByHash(hash)).willReturn(transferTransaction)
+        given(receiptService.getByTransactionHash(hash)).willReturn(createReceipt())
 
         val actualResponse = webClient.get().uri("$TRANSFER_TRANSACTION_URL/$hash")
             .exchange()
@@ -107,6 +113,10 @@ class TransferTransactionControllerTests : ControllerTests() {
 
         assertThat(actualResponse).isEqualToComparingFieldByField(expectedResponse)
     }
+
+    private fun getReceiptResults(): List<ReceiptResult> = listOf(ReceiptResult("a", "b", 10))
+
+    private fun createReceipt(): Receipt = Receipt("hash", Receipt.generateResult(getReceiptResults()))
 
     private fun createTransferTransaction(): TransferTransaction {
         val mainBlock = MainBlock(1, 1, "previousHash", "hash", "signature",
