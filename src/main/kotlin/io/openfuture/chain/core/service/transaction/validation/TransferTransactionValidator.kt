@@ -29,9 +29,9 @@ class TransferTransactionValidator(
         checkByType()
     )
 
-    fun checkNew(): Array<TransactionValidateHandler> = arrayOf(
+    fun checkNew(unconfirmedBalance: Long): Array<TransactionValidateHandler> = arrayOf(
         *check(),
-        checkActualBalance()
+        checkActualBalance(unconfirmedBalance)
     )
 
 

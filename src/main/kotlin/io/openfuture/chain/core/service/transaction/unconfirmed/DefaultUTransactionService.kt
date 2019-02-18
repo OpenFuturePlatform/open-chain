@@ -64,7 +64,7 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
 
     @BlockchainSynchronized
     @Transactional
-    override fun add(uTx: uT): uT {
+    override fun add(uTx: uT, unconfirmedBalance: Long): uT {
         BlockchainLock.writeLock.lock()
         try {
             val persistTx = repository.findOneByHash(uTx.hash)
@@ -79,15 +79,15 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
 
             when (uTx) {
                 is UnconfirmedDelegateTransaction -> {
-                    val pipeline = TransactionValidationPipeline(delegateTransactionValidator.checkNew())
+                    val pipeline = TransactionValidationPipeline(delegateTransactionValidator.checkNew(unconfirmedBalance))
                     delegateTransactionValidator.validate(DelegateTransaction.of(uTx), pipeline)
                 }
                 is UnconfirmedTransferTransaction -> {
-                    val pipeline = TransactionValidationPipeline(transferTransactionValidator.checkNew())
+                    val pipeline = TransactionValidationPipeline(transferTransactionValidator.checkNew(unconfirmedBalance))
                     transferTransactionValidator.validate(TransferTransaction.of(uTx), pipeline)
                 }
                 is UnconfirmedVoteTransaction -> {
-                    val pipeline = TransactionValidationPipeline(voteTransactionValidator.checkNew())
+                    val pipeline = TransactionValidationPipeline(voteTransactionValidator.checkNew(unconfirmedBalance))
                     voteTransactionValidator.validate(VoteTransaction.of(uTx), pipeline)
                 }
                 else -> throw IllegalStateException("Wrong type")

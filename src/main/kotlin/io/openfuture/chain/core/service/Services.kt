@@ -180,7 +180,7 @@ interface UTransactionService<uT : UnconfirmedTransaction> {
 
     fun getAllBySenderAddress(address: String): List<uT>
 
-    fun add(uTx: uT): uT
+    fun add(uTx: uT, unconfirmedBalance: Long): uT
 
 }
 

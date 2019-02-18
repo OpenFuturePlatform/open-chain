@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional(readOnly = true)
 abstract class TransactionValidator {
 
-    @Lazy @Autowired private lateinit var transactionManager: TransactionManager
     @Autowired private lateinit var cryptoService: CryptoService
     @Autowired protected lateinit var stateManager: StateManager
 
@@ -60,9 +59,8 @@ abstract class TransactionValidator {
         }
     }
 
-    fun checkActualBalance(): TransactionValidateHandler = {
+    fun checkActualBalance(unconfirmedBalance: Long): TransactionValidateHandler = {
         val balance = stateManager.getWalletBalanceByAddress(it.senderAddress)
-        val unconfirmedBalance = transactionManager.getUnconfirmedBalanceBySenderAddress(it.senderAddress)
         val actualBalance = balance - unconfirmedBalance
 
         val result = when (it) {

@@ -119,12 +119,15 @@ class DefaultTransactionManager(
     } as T
 
     @Suppress("UNCHECKED_CAST")
-    override fun <uT : UnconfirmedTransaction> add(uTx: uT): uT = when (uTx) {
-        is UnconfirmedDelegateTransaction -> uDelegateTransactionService.add(uTx)
-        is UnconfirmedTransferTransaction -> uTransferTransactionService.add(uTx)
-        is UnconfirmedVoteTransaction -> uVoteTransactionService.add(uTx)
-        else -> throw IllegalStateException("Wrong type")
-    } as uT
+    override fun <uT : UnconfirmedTransaction> add(uTx: uT): uT {
+        val unconfirmedBalance = getUnconfirmedBalanceBySenderAddress(uTx.senderAddress)
+        return when (uTx) {
+            is UnconfirmedDelegateTransaction -> uDelegateTransactionService.add(uTx, unconfirmedBalance)
+            is UnconfirmedTransferTransaction -> uTransferTransactionService.add(uTx, unconfirmedBalance)
+            is UnconfirmedVoteTransaction -> uVoteTransactionService.add(uTx, unconfirmedBalance)
+            else -> throw IllegalStateException("Wrong type")
+        } as uT
+    }
 
     override fun processTransactions(transactions: List<Transaction>, delegateWallet: String): List<Receipt> {
         val receipts = mutableListOf<Receipt>()
