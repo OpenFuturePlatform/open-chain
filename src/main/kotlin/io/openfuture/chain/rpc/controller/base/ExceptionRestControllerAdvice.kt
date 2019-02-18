@@ -1,5 +1,6 @@
 package io.openfuture.chain.rpc.controller.base
 
+import io.openfuture.chain.core.exception.CoreException
 import io.openfuture.chain.core.exception.NotFoundException
 import io.openfuture.chain.core.exception.SynchronizationException
 import io.openfuture.chain.core.exception.ValidationException
@@ -35,6 +36,12 @@ class ExceptionRestControllerAdvice {
     @ExceptionHandler(NotFoundException::class)
     fun handleNotFoundException(ex: NotFoundException): ExceptionResponse {
         return ExceptionResponse(NOT_FOUND.value(), ex.message)
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(CoreException::class)
+    fun handleCoreException(ex: CoreException): ExceptionResponse {
+        return ExceptionResponse(BAD_REQUEST.value(), ex.message)
     }
 
     @ResponseStatus(BAD_REQUEST)

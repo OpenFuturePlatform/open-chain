@@ -71,6 +71,7 @@ class DefaultTransferTransactionService(
             FUND -> {
                 stateManager.updateWalletBalanceByAddress(tx.senderAddress, -(tx.getPayload().amount + tx.fee))
                 stateManager.updateWalletBalanceByAddress(tx.getPayload().recipientAddress!!, tx.getPayload().amount)
+                stateManager.updateWalletBalanceByAddress(delegateWallet, tx.fee)
                 results.add(ReceiptResult(tx.senderAddress, tx.getPayload().recipientAddress!!, tx.getPayload().amount))
                 results.add(ReceiptResult(tx.senderAddress, delegateWallet, tx.fee))
             }

@@ -160,7 +160,7 @@ interface TransactionManager {
 
     fun getLastVoteForDelegate(senderAddress: String, delegateKey: String): VoteTransaction
 
-    fun createRewardTransaction(timestamp: Long, fees: Long): RewardTransaction
+    fun createRewardTransaction(timestamp: Long): RewardTransaction
 
     fun <T : Transaction> commit(tx: T, receipt: Receipt): T
 
@@ -212,7 +212,7 @@ interface RewardTransactionService : TransactionService<RewardTransaction> {
 
     fun getByRecipientAddress(address: String): List<RewardTransaction>
 
-    fun create(timestamp: Long, fees: Long): RewardTransaction
+    fun create(timestamp: Long): RewardTransaction
 
 }
 

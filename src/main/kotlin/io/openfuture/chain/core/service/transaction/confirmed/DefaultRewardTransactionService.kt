@@ -29,11 +29,11 @@ class DefaultRewardTransactionService(
     override fun getByRecipientAddress(address: String): List<RewardTransaction> =
         repository.findAllByPayloadRecipientAddress(address)
 
-    override fun create(timestamp: Long, fees: Long): RewardTransaction {
+    override fun create(timestamp: Long): RewardTransaction {
         val senderAddress = consensusProperties.genesisAddress!!
         val rewardBlock = consensusProperties.rewardBlock!!
         val bank = stateManager.getWalletBalanceByAddress(senderAddress)
-        val reward = fees + if (rewardBlock > bank) bank else rewardBlock
+        val reward = if (rewardBlock > bank) bank else rewardBlock
         val fee = 0L
         val publicKey = keyHolder.getPublicKeyAsHexString()
         val delegate = stateManager.getLastByAddress<DelegateState>(publicKey)
