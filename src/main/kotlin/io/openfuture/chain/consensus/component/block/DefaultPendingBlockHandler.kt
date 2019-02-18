@@ -65,17 +65,14 @@ class DefaultPendingBlockHandler(
             return
         }
 
-        val lastBlock = blockManager.getLast()
-        val pipeline = BlockValidationPipeline(mainBlockValidator.checkFull())
-        if (IDLE == stage && isActiveDelegate()
-            && mainBlockValidator.verify(MainBlock.of(block), lastBlock, true, pipeline)) {
+        if (IDLE == stage && isActiveDelegate()) {
             this.observable = block
             this.stage = PREPARE
             val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKeyAsHexString())
             vote.signature = SignatureUtils.sign(vote.getBytes(), keyHolder.getPrivateKey())
-            networkService.broadcast(block)
             networkService.broadcast(vote)
         }
+        networkService.broadcast(block)
     }
 
     @BlockchainSynchronized
@@ -95,6 +92,7 @@ class DefaultPendingBlockHandler(
 
     private fun handlePrevote(message: BlockApprovalMessage) {
         if (!isActiveDelegate()) {
+            networkService.broadcast(message)
             return
         }
 
@@ -110,7 +108,9 @@ class DefaultPendingBlockHandler(
             networkService.broadcast(message)
             if (prepareVotes.size > (properties.delegatesCount!! - 1) / 3) {
                 pendingBlocks.find { it.hash == message.hash }?.let {
-                    if (it.hash == observable?.hash) {
+                    val lastBlock = blockManager.getLast()
+                    val pipeline = BlockValidationPipeline(mainBlockValidator.checkFull())
+                    if (it.hash == observable?.hash && mainBlockValidator.verify(MainBlock.of(observable!!), lastBlock, true, pipeline)) {
                         this.stage = COMMIT
                         val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKeyAsHexString())
                         commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())
