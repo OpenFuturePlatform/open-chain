@@ -4,40 +4,46 @@
   serial: "{{ count }}"
   gather_facts: False
   tasks:
-    - name: Remove openchain container
+    - name: Remove openchain containers
       docker_container:
-        name: openchain
+        name: "{{ item.name }}"
         state: absent
-    - name: Remove the embedded DB volume
+      with_items: 
+        - { name: openchain }
+        - { name: openchain-2 }
+    - name: Remove the embedded DB volumes
       docker_volume:
-        name: db_volume
+        name: "{{ item.name }}"
         state: absent
+      with_items:
+        - { name: db_volume }
+        - { name: db_volume-2 }
       when: del_volume
-    - name: Create a volume for embedded DB
+    - name: Create a volumes for embedded DB
       docker_volume:
-        name: db_volume
-    - name: Re-create openchain container
+        name: "{{ item.name }}"
+      with_items:
+        - { name: db_volume }
+        - { name: db_volume-2 }
+    - name: Re-create openchain containers
       docker_container:
-        name: openchain
+        name: "{{ item.name }}"
         image: openplatform/chain:{{ image_tag }}
         state: started
         pull: yes
         env:
           RPC_PORT: "{{ item.app_port }}"
           NODE_PORT: "{{ item.api_port }}"
-          KEY: '{ "externalPort" : {{ item.api_port }}, "externalHost" : "", "secret" : "{{ item.secret_key }}" }'
-          JMX_OPTS: "-Dcom.sun.management.jmxremote.rmi.port=7000 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=7000 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Djava.rmi.server.hostname={{ansible_host}}"
-          JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n"
+          KEY: '{ "externalPort" : {{ item.api_port }}, "externalHost" : "", "secret" : "{{ item.secret_key }}", "mode" : "FULL" }'
         published_ports:
-          - "{{ item.app_port }}:{{ item.app_port }}"
-          - "{{ item.api_port }}:{{ item.api_port }}"
-          - 7000:7000
-          - 8000:8000
+          - "{{ item.app_port }}:9090"
+          - "{{ item.api_port }}:9190"
         volumes:
-          - db_volume:/root/db
+          - "{{ item.db_volume }}:/root/db"
         restart_policy: always
       with_items:
-        - { app_port: 9090, api_port: 9190, secret_key: "{{ key }}" }
+        - { name: openchain, db_volume: db_volume, app_port: 9090, api_port: 9190, secret_key: "{{ key }}" }
+        - { name: openchain-2, db_volume: db_volume-2, app_port: 9092, api_port: 9192, secret_key: "{{ key2 }}" }
       no_log: True
     - name: Delete old images
       shell: docker image prune -a --force --filter "until=24h"
