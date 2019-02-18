@@ -1,5 +1,6 @@
 package io.openfuture.chain.core.model.entity.transaction.unconfirmed
 
+import io.openfuture.chain.core.model.entity.dictionary.TransferTransactionType
 import io.openfuture.chain.core.model.entity.transaction.payload.TransferTransactionPayload
 import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
@@ -35,6 +36,8 @@ class UnconfirmedTransferTransaction(
         )
     }
 
+
+    fun getType(): TransferTransactionType = TransferTransactionType.getType(payload.recipientAddress, payload.data)
 
     override fun toMessage(): TransferTransactionMessage = TransferTransactionMessage(
         timestamp, fee, senderAddress, hash, signature, publicKey, payload.amount, payload.recipientAddress,

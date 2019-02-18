@@ -11,57 +11,79 @@ import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
-import io.openfuture.chain.core.service.MainBlockValidator
 import io.openfuture.chain.core.service.ReceiptService
 import io.openfuture.chain.core.service.StateManager
 import io.openfuture.chain.core.service.TransactionManager
+import io.openfuture.chain.core.service.transaction.validation.DelegateTransactionValidator
+import io.openfuture.chain.core.service.transaction.validation.RewardTransactionValidator
+import io.openfuture.chain.core.service.transaction.validation.TransferTransactionValidator
+import io.openfuture.chain.core.service.transaction.validation.VoteTransactionValidator
+import io.openfuture.chain.core.service.transaction.validation.pipeline.TransactionValidationPipeline
+import io.openfuture.chain.core.util.BlockValidateHandler
 import io.openfuture.chain.crypto.util.HashUtils
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
-class DefaultMainBlockValidator(
+@Transactional(readOnly = true)
+class MainBlockValidator(
     private val consensusProperties: ConsensusProperties,
     private val stateManager: StateManager,
     private val transactionManager: TransactionManager,
+    private val rewardTransactionPipeline: RewardTransactionValidator,
+    private val delegateTransactionPipeline: DelegateTransactionValidator,
+    private val transferTransactionPipeline: TransferTransactionValidator,
+    private val voteTransactionValidator: VoteTransactionValidator,
     private val receiptService: ReceiptService,
     private val statePool: StatePool
-) : MainBlockValidator {
+) : BlockValidator() {
 
-    override fun validate(block: MainBlock, new: Boolean) {
-        checkStateMerkleHash(block)
-        checkTransactionMerkleHash(block)
-        checkReceiptMerkleHash(block)
+    fun checkLight(): Array<BlockValidateHandler> = arrayOf(
+        checkSignature(),
+        checkHash(),
+        checkTimeStamp(),
+        checkHeight(),
+        checkPreviousHash(),
+        checkStateMerkleHash()
+    )
+
+    fun checkFull(): Array<BlockValidateHandler> = arrayOf(
+        *checkLight(),
+        checkTransactionMerkleHash(),
+        checkReceiptMerkleHash(),
+        checkBalances(),
+        checkRewardTransaction(),
+        checkDelegateTransactions(),
+        checkTransferTransactions(),
+        checkVoteTransactions(),
+        checkReceiptsAndStates()
+    )
+
+    fun checkBalances(): BlockValidateHandler = { block, _, new ->
+        block as MainBlock
         if (new) {
-            checkBalances(block)
-        }
-        checkRewardTransaction(block, new)
-        checkDelegateTransactions(block)
-        checkTransferTransactions(block)
-        checkVoteTransactions(block, new)
-        checkReceiptsAndStates(block, new)
-    }
+            val transactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
+                block.getPayload().voteTransactions
 
-    private fun checkBalances(block: MainBlock) {
-        val transactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
-            block.getPayload().voteTransactions
+            val result = transactions.groupBy { it.senderAddress }.entries.all { sender ->
+                sender.value.asSequence().map {
+                    when (it) {
+                        is TransferTransaction -> it.getPayload().amount + it.fee
+                        is DelegateTransaction -> it.getPayload().amount + it.fee
+                        is VoteTransaction -> it.fee
+                        else -> 0
+                    }
+                }.sum() <= stateManager.getWalletBalanceByAddress(sender.key)
+            }
 
-        val result = transactions.groupBy { it.senderAddress }.entries.all { sender ->
-            sender.value.asSequence().map {
-                when (it) {
-                    is TransferTransaction -> it.getPayload().amount + it.fee
-                    is DelegateTransaction -> it.getPayload().amount + it.fee
-                    is VoteTransaction -> it.fee
-                    else -> 0
-                }
-            }.sum() <= stateManager.getWalletBalanceByAddress(sender.key)
-        }
-
-        if (!result) {
-            throw ValidationException("Invalid balances in block: height #${block.height}, hash ${block.hash}")
+            if (!result) {
+                throw ValidationException("Invalid balances in block: height #${block.height}, hash ${block.hash}")
+            }
         }
     }
 
-    private fun checkStateMerkleHash(block: MainBlock) {
+    fun checkStateMerkleHash(): BlockValidateHandler = { block, _, _ ->
+        block as MainBlock
         val states = block.getPayload().delegateStates + block.getPayload().accountStates
 
         if (!verifyMerkleRootHash(block.getPayload().stateMerkleHash, states.map { it.hash })) {
@@ -69,7 +91,8 @@ class DefaultMainBlockValidator(
         }
     }
 
-    private fun checkTransactionMerkleHash(block: MainBlock) {
+    fun checkTransactionMerkleHash(): BlockValidateHandler = { block, _, _ ->
+        block as MainBlock
         val transactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
             block.getPayload().voteTransactions + block.getPayload().rewardTransactions
 
@@ -78,13 +101,15 @@ class DefaultMainBlockValidator(
         }
     }
 
-    private fun checkReceiptMerkleHash(block: MainBlock) {
+    fun checkReceiptMerkleHash(): BlockValidateHandler = { block, _, _ ->
+        block as MainBlock
         if (!verifyMerkleRootHash(block.getPayload().receiptMerkleHash, block.getPayload().receipts.map { it.hash })) {
             throw ValidationException("Invalid receipt merkle hash in block: height #${block.height}, hash ${block.hash}")
         }
     }
 
-    private fun checkReceiptsAndStates(block: MainBlock, new: Boolean) {
+    fun checkReceiptsAndStates(): BlockValidateHandler = { block, _, new ->
+        block as MainBlock
         val blockStates = block.getPayload().delegateStates + block.getPayload().accountStates
 
         blockStates.forEach {
@@ -107,11 +132,11 @@ class DefaultMainBlockValidator(
             val states = statePool.getStates()
 
             if (block.getPayload().receipts.size != receipts.size) {
-                throw ValidationException("Invalid count block receiptsin block: height #${block.height}, hash ${block.hash}")
+                throw ValidationException("Invalid count block receipts in block: height #${block.height}, hash ${block.hash}")
             }
 
             if (blockStates.size != states.size) {
-                throw ValidationException("Invalid count block statesin block: height #${block.height}, hash ${block.hash}")
+                throw ValidationException("Invalid count block states in block: height #${block.height}, hash ${block.hash}")
             }
 
             receipts.forEach { r ->
@@ -126,7 +151,8 @@ class DefaultMainBlockValidator(
         }
     }
 
-    private fun checkRewardTransaction(block: MainBlock, new: Boolean) {
+    fun checkRewardTransaction(): BlockValidateHandler = { block, _, new ->
+        block as MainBlock
         val rewardTransaction = block.getPayload().rewardTransactions.firstOrNull()
             ?: throw ValidationException("Missing reward transaction in block: height #${block.height}, hash ${block.hash}")
 
@@ -140,34 +166,41 @@ class DefaultMainBlockValidator(
             }
         }
 
-        if (!transactionManager.verify(rewardTransaction)) {
+        val pipeline = TransactionValidationPipeline(rewardTransactionPipeline.check())
+        if (!rewardTransactionPipeline.verify(rewardTransaction, pipeline)) {
             throw ValidationException("Invalid reward transaction in block: height #${block.height}, hash ${block.hash}")
         }
     }
 
-    private fun checkDelegateTransactions(block: MainBlock) {
+    fun checkDelegateTransactions(): BlockValidateHandler = { block, _, _ ->
+        block as MainBlock
         val transactions = block.getPayload().delegateTransactions
 
         if (transactions.distinctBy { it.getPayload().delegateKey }.size != transactions.size) {
             throw ValidationException("Invalid delegate transactions in block: height #${block.height}, hash ${block.hash}")
         }
 
+        val pipeline = TransactionValidationPipeline(delegateTransactionPipeline.check())
         transactions.forEach {
-            if (!transactionManager.verify(it)) {
+            if (!delegateTransactionPipeline.verify(it, pipeline)) {
                 throw ValidationException("Invalid delegate transactions in block: height #${block.height}, hash ${block.hash}")
             }
         }
     }
 
-    private fun checkTransferTransactions(block: MainBlock) {
+    fun checkTransferTransactions(): BlockValidateHandler = { block, _, _ ->
+        block as MainBlock
+
+        val pipeline = TransactionValidationPipeline(transferTransactionPipeline.check())
         block.getPayload().transferTransactions.forEach {
-            if (!transactionManager.verify(it)) {
+            if (!transferTransactionPipeline.verify(it, pipeline)) {
                 throw ValidationException("Invalid transfer transactions in block: height #${block.height}, hash ${block.hash}")
             }
         }
     }
 
-    private fun checkVoteTransactions(block: MainBlock, new: Boolean) {
+    fun checkVoteTransactions(): BlockValidateHandler = { block, _, new ->
+        block as MainBlock
         val transactions = block.getPayload().voteTransactions
 
         transactions.groupBy { it.senderAddress }.entries.forEach {
@@ -190,8 +223,9 @@ class DefaultMainBlockValidator(
             }
         }
 
+        val pipeline = TransactionValidationPipeline(voteTransactionValidator.check())
         transactions.forEach {
-            if (!transactionManager.verify(it)) {
+            if (!voteTransactionValidator.verify(it, pipeline)) {
                 throw ValidationException("Invalid vote transactions in block: height #${block.height}, hash ${block.hash}")
             }
         }

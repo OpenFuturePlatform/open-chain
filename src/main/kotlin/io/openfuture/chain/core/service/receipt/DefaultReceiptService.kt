@@ -5,16 +5,16 @@ import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.repository.ReceiptRepository
 import io.openfuture.chain.core.service.ReceiptService
-import io.openfuture.chain.core.service.ReceiptValidator
 import io.openfuture.chain.core.sync.BlockchainLock
+import io.openfuture.chain.crypto.util.HashUtils
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional(readOnly = true)
 class DefaultReceiptService(
-    private val repository: ReceiptRepository,
-    private val receiptValidator: ReceiptValidator
+    private val repository: ReceiptRepository
 ) : ReceiptService {
 
     override fun getByTransactionHash(hash: String): Receipt = repository.findOneByTransactionHash(hash)
@@ -32,7 +32,8 @@ class DefaultReceiptService(
         }
     }
 
-    override fun verify(receipt: Receipt): Boolean = receiptValidator.verify(receipt)
+    override fun verify(receipt: Receipt): Boolean =
+        receipt.hash == ByteUtils.toHexString(HashUtils.doubleSha256(receipt.getBytes()))
 
     @Transactional
     override fun deleteBlockReceipts(blockHeights: List<Long>) {

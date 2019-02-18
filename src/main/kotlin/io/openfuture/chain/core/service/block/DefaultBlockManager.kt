@@ -21,8 +21,7 @@ class DefaultBlockManager(
     private val transactionManager: TransactionManager,
     private val stateManager: StateManager,
     private val receiptService: ReceiptService,
-    private val properties: ConsensusProperties,
-    private val blockValidatorManager: BlockValidatorManager
+    private val properties: ConsensusProperties
 ) : BlockManager {
 
 
@@ -102,8 +101,5 @@ class DefaultBlockManager(
 
         deleteByHeightIn(heightRange)
     }
-
-    override fun verify(block: Block, lastBlock: Block, new: Boolean): Boolean =
-        blockValidatorManager.verify(block, lastBlock, new)
 
 }

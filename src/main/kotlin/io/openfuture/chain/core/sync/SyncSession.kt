@@ -4,8 +4,11 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.TemporaryBlock
 import io.openfuture.chain.core.service.DefaultTemporaryBlockService
+import io.openfuture.chain.core.service.block.validation.MainBlockValidator
+import io.openfuture.chain.core.service.block.validation.pipeline.BlockValidationPipeline
+import io.openfuture.chain.core.sync.SyncMode.FULL
+import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import io.openfuture.chain.core.util.SerializationUtils
-import io.openfuture.chain.crypto.util.SignatureUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -13,7 +16,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class SyncSession(
-    private val temporaryBlockService: DefaultTemporaryBlockService
+    private val temporaryBlockService: DefaultTemporaryBlockService,
+    private val mainBlockValidator: MainBlockValidator
 ) {
 
     companion object {
@@ -29,6 +33,7 @@ class SyncSession(
 
     lateinit var minBlock: Block
     lateinit var syncMode: SyncMode
+
 
     fun isEpochSynced(): Boolean = minBlock.hash == lastLocalGenesisBlock.hash
 
@@ -53,6 +58,8 @@ class SyncSession(
 
     @Synchronized
     fun add(epochBlocks: List<Block>): Boolean {
+        epochBlocks.sortedBy { it.height }
+
         if (!isChainValid(epochBlocks)) {
             return false
         }
@@ -64,11 +71,10 @@ class SyncSession(
         epochAdded++
         log.info("#$epochAdded epochs FROM ${epochQuantity + 1} is processed")
 
-        for (block in epochBlocks) {
-            if (minBlock.height > block.height) {
-                minBlock = block
-            }
+        if (minBlock.height > epochBlocks.first().height) {
+            minBlock = epochBlocks.first()
         }
+
         return true
     }
 
@@ -84,40 +90,19 @@ class SyncSession(
         blocks.map { TemporaryBlock(it.height, ByteUtils.toHexString(SerializationUtils.serialize(it))) }
 
     private fun isChainValid(chain: List<Block>): Boolean {
-        val list = if (chain.first().hash != currentGenesisBlock.hash) {
-            chain.sortedByDescending { it.height }.toMutableList().apply { add(0, minBlock) }
-        } else {
-            chain.sortedByDescending { it.height }
+        if (chain.first().hash != currentGenesisBlock.hash) {
+            chain.toMutableList().add(minBlock)
         }
 
-        for (idx in 0 until list.size - 2) {
-            if (!isValid(list[idx], list[idx + 1])) {
+        val pipeline = when (syncMode) {
+            FULL -> BlockValidationPipeline(mainBlockValidator.checkFull())
+            LIGHT -> BlockValidationPipeline(mainBlockValidator.checkLight())
+        }
+
+        for (index in 1 until chain.size) {
+            if (!mainBlockValidator.verify(chain[index], chain[index - 1], false, pipeline)) {
                 return false
             }
-        }
-
-        return true
-    }
-
-    private fun isValid(last: Block, block: Block): Boolean {
-
-        if (last.previousHash != block.hash) {
-            return false
-        }
-
-        if (last.height != block.height + 1) {
-            return false
-        }
-
-        if (last.timestamp < block.timestamp) {
-            return false
-        }
-
-        val hash = ByteUtils.fromHexString(block.hash)
-        val publicKey = ByteUtils.fromHexString(block.publicKey)
-
-        if (block.height != 1L && !SignatureUtils.verify(hash, block.signature, publicKey)) {
-            return false
         }
 
         return true
