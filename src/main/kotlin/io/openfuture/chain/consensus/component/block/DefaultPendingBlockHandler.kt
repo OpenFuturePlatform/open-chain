@@ -36,7 +36,7 @@ class DefaultPendingBlockHandler(
     }
 
     private val pendingBlocks: MutableSet<PendingBlockMessage> = mutableSetOf()
-    private val prepareVotes: MutableList<String> = mutableListOf()
+    private val prepareVotes: MutableMap<String, MutableList<String>> = mutableMapOf()
     private val commits: MutableMap<String, MutableList<String>> = mutableMapOf()
 
     private var observable: PendingBlockMessage? = null
@@ -66,7 +66,6 @@ class DefaultPendingBlockHandler(
         }
 
         if (IDLE == stage && isActiveDelegate()) {
-            this.observable = block
             this.stage = PREPARE
             val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKeyAsHexString())
             vote.signature = SignatureUtils.sign(vote.getBytes(), keyHolder.getPrivateKey())
@@ -99,25 +98,29 @@ class DefaultPendingBlockHandler(
         val delegates = epochService.getDelegatesPublicKeys()
         val delegate = delegates.find { it == message.publicKey } ?: return
 
-        if (message.hash != observable?.hash || this.stage != PREPARE) {
-            return
-        }
-
-        if (!prepareVotes.contains(delegate) && isValidApprovalSignature(message)) {
-            prepareVotes.add(delegate)
-            networkService.broadcast(message)
-            if (prepareVotes.size > (properties.delegatesCount!! - 1) / 3) {
-                pendingBlocks.find { it.hash == message.hash }?.let {
-                    val lastBlock = blockManager.getLast()
-                    val pipeline = BlockValidationPipeline(mainBlockValidator.checkFull())
-                    if (it.hash == observable?.hash && mainBlockValidator.verify(MainBlock.of(observable!!), lastBlock, true, pipeline)) {
-                        this.stage = COMMIT
-                        val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKeyAsHexString())
-                        commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())
-                        networkService.broadcast(commit)
+        val votes = prepareVotes[message.hash]
+        if (null != votes) {
+            if (!votes.contains(delegate) && isValidApprovalSignature(message)) {
+                votes.add(delegate)
+                networkService.broadcast(message)
+                if (votes.size > (properties.delegatesCount!! - 1) / 3) {
+                    pendingBlocks.find { it.hash == message.hash }?.let {
+                        if (it.hash != this.observable?.hash) {
+                            val lastBlock = blockManager.getLast()
+                            val pipeline = BlockValidationPipeline(mainBlockValidator.checkFull())
+                            if (mainBlockValidator.verify(MainBlock.of(it), lastBlock, true, pipeline)) {
+                                this.observable = it
+                                this.stage = COMMIT
+                                val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKeyAsHexString())
+                                commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())
+                                networkService.broadcast(commit)
+                            }
+                        }
                     }
                 }
             }
+        } else {
+            prepareVotes[message.hash] = mutableListOf(delegate)
         }
     }
 
