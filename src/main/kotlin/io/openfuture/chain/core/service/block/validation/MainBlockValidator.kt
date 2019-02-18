@@ -157,11 +157,7 @@ class MainBlockValidator(
             ?: throw ValidationException("Missing reward transaction in block: height #${block.height}, hash ${block.hash}")
 
         if (new) {
-            val externalTransactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
-                block.getPayload().voteTransactions
-            val fees = externalTransactions.asSequence().map { it.fee }.sum()
-
-            if (!verifyReward(fees, rewardTransaction.getPayload().reward)) {
+            if (!verifyReward(rewardTransaction.getPayload().reward)) {
                 throw ValidationException("Invalid fee of reward transaction in block: height #${block.height}, hash ${block.hash}")
             }
         }
@@ -239,12 +235,12 @@ class MainBlockValidator(
         return rootHash == HashUtils.merkleRoot(hashes)
     }
 
-    private fun verifyReward(fees: Long, reward: Long): Boolean {
+    private fun verifyReward(reward: Long): Boolean {
         val senderAddress = consensusProperties.genesisAddress!!
         val bank = stateManager.getWalletBalanceByAddress(senderAddress)
         val rewardBlock = consensusProperties.rewardBlock!!
 
-        return reward == (fees + if (rewardBlock > bank) bank else rewardBlock)
+        return reward == if (rewardBlock > bank) bank else rewardBlock
     }
 
 }

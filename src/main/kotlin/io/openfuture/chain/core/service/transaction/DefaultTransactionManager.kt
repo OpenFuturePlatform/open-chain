@@ -105,8 +105,8 @@ class DefaultTransactionManager(
     override fun getLastVoteForDelegate(senderAddress: String, delegateKey: String): VoteTransaction =
         voteTransactionService.getLastVoteForDelegate(senderAddress, delegateKey)
 
-    override fun createRewardTransaction(timestamp: Long, fees: Long): RewardTransaction =
-        rewardTransactionService.create(timestamp, fees)
+    override fun createRewardTransaction(timestamp: Long): RewardTransaction =
+        rewardTransactionService.create(timestamp)
 
     @Suppress("UNCHECKED_CAST")
     @Transactional

@@ -73,8 +73,8 @@ class DefaultMainBlockService(
                     is UnconfirmedVoteTransaction -> voteTransactions.add(VoteTransaction.of(it))
                 }
             }
-            val fees = unconfirmedTransactions.map { it.fee }.sum()
-            val rewardTransaction = transactionManager.createRewardTransaction(timestamp, fees)
+
+            val rewardTransaction = transactionManager.createRewardTransaction(timestamp)
 
             val transactions = delegateTransactions + transferTransactions + voteTransactions + rewardTransaction
 

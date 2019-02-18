@@ -49,6 +49,7 @@ class DefaultVoteTransactionService(
         val type = VoteType.values().first { it.getId() == tx.getPayload().voteTypeId }
         stateManager.updateVoteByAddress(tx.senderAddress, tx.getPayload().delegateKey, type)
         stateManager.updateWalletBalanceByAddress(tx.senderAddress, -tx.fee)
+        stateManager.updateWalletBalanceByAddress(delegateWallet, tx.fee)
 
         return generateReceipt(type, tx, delegateWallet)
     }

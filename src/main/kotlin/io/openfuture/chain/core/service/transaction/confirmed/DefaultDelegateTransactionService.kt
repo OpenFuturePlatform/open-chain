@@ -41,6 +41,7 @@ class DefaultDelegateTransactionService(
         stateManager.updateWalletBalanceByAddress(tx.senderAddress, -(tx.getPayload().amount + tx.fee))
         stateManager.updateWalletBalanceByAddress(consensusProperties.genesisAddress!!, tx.getPayload().amount)
         stateManager.addDelegate(tx.getPayload().delegateKey, tx.senderAddress, tx.timestamp)
+        stateManager.updateWalletBalanceByAddress(delegateWallet, tx.fee)
 
         return generateReceipt(tx, delegateWallet)
     }
