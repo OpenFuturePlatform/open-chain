@@ -7,7 +7,6 @@ import io.openfuture.chain.core.model.entity.transaction.confirmed.Transaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.service.StateManager
-import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.core.service.transaction.validation.pipeline.TransactionValidationPipeline
 import io.openfuture.chain.core.util.TransactionValidateHandler
 import io.openfuture.chain.crypto.service.CryptoService
@@ -18,7 +17,6 @@ import org.bouncycastle.pqc.math.linearalgebra.ByteUtils.toHexString
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Lazy
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional(readOnly = true)

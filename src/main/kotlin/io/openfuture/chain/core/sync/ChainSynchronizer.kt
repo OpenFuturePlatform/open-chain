@@ -71,7 +71,10 @@ class ChainSynchronizer(
         future?.cancel(true)
         val delegates = blockManager.getLastGenesisBlock().getPayload().activeDelegates
         try {
-            if (!message.isEpochExists) {
+
+            if (!message.isEpochExists ||
+                (syncSession.getCurrentGenesisBlock().getPayload().epochIndex > message.genesisBlock!!.epochIndex
+                    && message.mainBlocks.isEmpty())) {
                 requestEpoch(delegates.filter { it != message.delegateKey })
                 return
             }
