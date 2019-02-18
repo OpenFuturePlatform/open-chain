@@ -12,8 +12,11 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
-import io.openfuture.chain.core.service.TransactionValidatorManager
 import io.openfuture.chain.core.service.UTransactionService
+import io.openfuture.chain.core.service.transaction.validation.DelegateTransactionValidator
+import io.openfuture.chain.core.service.transaction.validation.TransferTransactionValidator
+import io.openfuture.chain.core.service.transaction.validation.VoteTransactionValidator
+import io.openfuture.chain.core.service.transaction.validation.pipeline.TransactionValidationPipeline
 import io.openfuture.chain.core.sync.BlockchainLock
 import io.openfuture.chain.network.service.NetworkApiService
 import io.openfuture.chain.rpc.domain.base.PageRequest
@@ -25,9 +28,11 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
     private val uRepository: UTransactionRepository<uT>
 ) : UTransactionService<uT> {
 
-    @Autowired private lateinit var transactionValidatorManager: TransactionValidatorManager
     @Autowired private lateinit var networkService: NetworkApiService
     @Autowired private lateinit var repository: TransactionRepository<Transaction>
+    @Autowired private lateinit var delegateTransactionValidator: DelegateTransactionValidator
+    @Autowired private lateinit var transferTransactionValidator: TransferTransactionValidator
+    @Autowired private lateinit var voteTransactionValidator: VoteTransactionValidator
 
 
     override fun getAll(): List<uT> {
@@ -59,7 +64,7 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
 
     @BlockchainSynchronized
     @Transactional
-    override fun add(uTx: uT): uT {
+    override fun add(uTx: uT, unconfirmedBalance: Long): uT {
         BlockchainLock.writeLock.lock()
         try {
             val persistTx = repository.findOneByHash(uTx.hash)
@@ -72,13 +77,21 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
                 return persistUtx
             }
 
-            val tx = when (uTx) {
-                is UnconfirmedDelegateTransaction -> DelegateTransaction.of(uTx)
-                is UnconfirmedTransferTransaction -> TransferTransaction.of(uTx)
-                is UnconfirmedVoteTransaction -> VoteTransaction.of(uTx)
+            when (uTx) {
+                is UnconfirmedDelegateTransaction -> {
+                    val pipeline = TransactionValidationPipeline(delegateTransactionValidator.checkNew(unconfirmedBalance))
+                    delegateTransactionValidator.validate(DelegateTransaction.of(uTx), pipeline)
+                }
+                is UnconfirmedTransferTransaction -> {
+                    val pipeline = TransactionValidationPipeline(transferTransactionValidator.checkNew(unconfirmedBalance))
+                    transferTransactionValidator.validate(TransferTransaction.of(uTx), pipeline)
+                }
+                is UnconfirmedVoteTransaction -> {
+                    val pipeline = TransactionValidationPipeline(voteTransactionValidator.checkNew(unconfirmedBalance))
+                    voteTransactionValidator.validate(VoteTransaction.of(uTx), pipeline)
+                }
                 else -> throw IllegalStateException("Wrong type")
             }
-            transactionValidatorManager.validate(tx)
 
             val savedUtx = uRepository.saveAndFlush(uTx)
             networkService.broadcast(savedUtx.toMessage())

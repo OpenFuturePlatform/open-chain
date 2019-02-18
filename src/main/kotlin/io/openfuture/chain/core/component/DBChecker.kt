@@ -2,6 +2,8 @@ package io.openfuture.chain.core.component
 
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.service.BlockManager
+import io.openfuture.chain.core.service.block.validation.MainBlockValidator
+import io.openfuture.chain.core.service.block.validation.pipeline.BlockValidationPipeline
 import io.openfuture.chain.core.sync.SyncMode
 import io.openfuture.chain.core.sync.SyncMode.FULL
 import io.openfuture.chain.core.sync.SyncMode.LIGHT
@@ -10,29 +12,27 @@ import org.springframework.transaction.annotation.Transactional
 
 @Component
 class DBChecker(
-    private val blockManager: BlockManager
+    private val blockManager: BlockManager,
+    private val mainBlockValidator: MainBlockValidator
 ) {
 
     @Transactional
     fun prepareDB(syncMode: SyncMode) {
-        when (syncMode) {
-            FULL -> {
-                val lastBlock = blockManager.getLast()
-                val lastValidBlockHeight = lastValidBlockHeightByFullMode()
-                val failBlockHeight = lastValidBlockHeight + 1L
+        val pipeline = when (syncMode) {
+            FULL -> BlockValidationPipeline(mainBlockValidator.checkFull())
+            LIGHT -> BlockValidationPipeline(mainBlockValidator.checkLight())
+        }
+        val lastBlock = blockManager.getLast()
+        val lastValidBlockHeight = lastValidBlockHeight(pipeline)
+        val failBlockHeight = lastValidBlockHeight + 1L
 
-                if (failBlockHeight <= lastBlock.height) {
-                    val range = LongRange(failBlockHeight, lastBlock.height)
-                    blockManager.deleteByHeightIn(range.toList())
-                }
-            }
-            LIGHT -> {
-                // todo("prepare db in LIGHT mode")
-            }
+        if (failBlockHeight <= lastBlock.height) {
+            val range = LongRange(failBlockHeight, lastBlock.height)
+            blockManager.deleteByHeightIn(range.toList())
         }
     }
 
-    private fun lastValidBlockHeightByFullMode(): Long {
+    private fun lastValidBlockHeight(pipeline: BlockValidationPipeline): Long {
         val lastEpochIndex = blockManager.getLastGenesisBlock().getPayload().epochIndex
         var lastValidBlockHeight = 1L
         loop@ for (epochIndex in 1L..lastEpochIndex) {
@@ -43,7 +43,7 @@ class DBChecker(
 
             for (index in 0 until blocks.size) {
                 val block = blocks[index]
-                if (!blockManager.verify(block, previousBlock, false)) {
+                if (!mainBlockValidator.verify(block, previousBlock, false, pipeline)) {
                     break@loop
                 }
 

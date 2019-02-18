@@ -3,7 +3,6 @@ package io.openfuture.chain.core.service.transaction.confirmed
 import io.openfuture.chain.core.model.entity.Contract
 import io.openfuture.chain.core.model.entity.Receipt
 import io.openfuture.chain.core.model.entity.ReceiptResult
-import io.openfuture.chain.core.model.entity.dictionary.TransferTransactionType
 import io.openfuture.chain.core.model.entity.dictionary.TransferTransactionType.*
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
@@ -45,8 +44,7 @@ class DefaultTransferTransactionService(
                 return persistTx
             }
 
-            if (DEPLOY == TransferTransactionType.getType(tx.getPayload().recipientAddress, tx.getPayload().data)
-                && receipt.isSuccessful()) {
+            if (DEPLOY == tx.getType() && receipt.isSuccessful()) {
                 val bytecode = ByteUtils.fromHexString(tx.getPayload().data!!)
                 val address = contractService.generateAddress(tx.senderAddress)
                 val abi = AbiGenerator.generate(bytecode)
@@ -69,7 +67,7 @@ class DefaultTransferTransactionService(
     override fun process(tx: TransferTransaction, delegateWallet: String): Receipt {
         val results = mutableListOf<ReceiptResult>()
 
-        when (TransferTransactionType.getType(tx.getPayload().recipientAddress, tx.getPayload().data)) {
+        when (tx.getType()) {
             FUND -> {
                 stateManager.updateWalletBalanceByAddress(tx.senderAddress, -(tx.getPayload().amount + tx.fee))
                 stateManager.updateWalletBalanceByAddress(tx.getPayload().recipientAddress!!, tx.getPayload().amount)

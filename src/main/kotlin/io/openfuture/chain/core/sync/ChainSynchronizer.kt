@@ -7,28 +7,17 @@ import io.openfuture.chain.core.component.NodeConfigurator
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
-import io.openfuture.chain.core.model.entity.transaction.confirmed.DelegateTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.RewardTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.TransferTransaction
-import io.openfuture.chain.core.model.entity.transaction.confirmed.VoteTransaction
 import io.openfuture.chain.core.service.BlockManager
-import io.openfuture.chain.core.service.TransactionManager
-import io.openfuture.chain.core.sync.SyncMode.FULL
+import io.openfuture.chain.core.service.block.validation.MainBlockValidator
+import io.openfuture.chain.core.service.block.validation.pipeline.BlockValidationPipeline
 import io.openfuture.chain.core.sync.SyncStatus.*
-import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.entity.NodeInfo
 import io.openfuture.chain.network.message.consensus.BlockAvailabilityRequest
 import io.openfuture.chain.network.message.consensus.BlockAvailabilityResponse
-import io.openfuture.chain.network.message.core.DelegateTransactionMessage
-import io.openfuture.chain.network.message.core.RewardTransactionMessage
-import io.openfuture.chain.network.message.core.TransferTransactionMessage
-import io.openfuture.chain.network.message.core.VoteTransactionMessage
 import io.openfuture.chain.network.message.sync.EpochRequestMessage
 import io.openfuture.chain.network.message.sync.EpochResponseMessage
 import io.openfuture.chain.network.message.sync.GenesisBlockMessage
-import io.openfuture.chain.network.message.sync.MainBlockMessage
-import io.openfuture.chain.network.property.NodeProperties
 import io.openfuture.chain.network.service.NetworkApiService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -37,16 +26,14 @@ import org.springframework.context.ApplicationListener
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.util.concurrent.ScheduledFuture
-import javax.xml.bind.ValidationException
 
 @Component
 class ChainSynchronizer(
-    private val properties: NodeProperties,
     private val consensusProperties: ConsensusProperties,
     private val addressesHolder: AddressesHolder,
     private val blockManager: BlockManager,
     private val networkApiService: NetworkApiService,
-    private val transactionManager: TransactionManager,
+    private val mainBlockValidator: MainBlockValidator,
     private val epochService: EpochService,
     private val requestRetryScheduler: RequestRetryScheduler,
     private val dbChecker: DBChecker,
@@ -58,10 +45,8 @@ class ChainSynchronizer(
         private val log: Logger = LoggerFactory.getLogger(ChainSynchronizer::class.java)
     }
 
+    @Volatile private var status: SyncStatus = SYNCHRONIZED
     private var future: ScheduledFuture<*>? = null
-
-    @Volatile
-    private var status: SyncStatus = SYNCHRONIZED
 
 
     override fun onApplicationEvent(event: DataSourceSchemaCreatedEvent) {
@@ -91,11 +76,6 @@ class ChainSynchronizer(
                 return
             }
 
-            if ((syncSession.syncMode == FULL) && !isValidEpoch(message.mainBlocks)) {
-                requestEpoch(delegates.filter { it != message.delegateKey })
-                return
-            }
-
             if (!syncSession.add(convertToBlocks(message))) {
                 log.warn("Epoch #${message.genesisBlock!!.epochIndex} is invalid, requesting another node...")
                 requestEpoch(delegates.filter { it != message.delegateKey })
@@ -119,7 +99,9 @@ class ChainSynchronizer(
         if (lastBlock.hash == block.hash) {
             return true
         }
-        return isValidHeight(block, lastBlock) && isValidPreviousHash(block, lastBlock)
+        val handlers = arrayOf(mainBlockValidator.checkHeight(), mainBlockValidator.checkPreviousHash())
+        val pipeline = BlockValidationPipeline(handlers)
+        return mainBlockValidator.verify(block, lastBlock, false, pipeline)
     }
 
     @Synchronized
@@ -173,98 +155,11 @@ class ChainSynchronizer(
     }
 
     private fun convertToBlocks(message: EpochResponseMessage): List<Block> {
-        val listBlocks: MutableList<Block> = mutableListOf(GenesisBlock.of(message.genesisBlock!!))
+        val genesisBlock = GenesisBlock.of(message.genesisBlock!!)
         val mainBlocks = message.mainBlocks.map { MainBlock.of(it) }
-        listBlocks.addAll(mainBlocks)
-        return listBlocks
+
+        return listOf(genesisBlock) + mainBlocks
     }
-
-    private fun isValidEpoch(mainBlocks: List<MainBlockMessage>): Boolean =
-        isValidTransactionMerkleRoot(mainBlocks)
-            && isValidStateMerkleRoot(mainBlocks)
-            && isValidReceiptMerkleRoot(mainBlocks)
-            && isValidTransactions(mainBlocks)
-
-    private fun isValidRewardTransactions(list: List<RewardTransactionMessage>): Boolean =
-        list.all { transactionManager.verify(RewardTransaction.of(it)) }
-
-    private fun isValidVoteTransactions(list: List<VoteTransactionMessage>): Boolean =
-        list.all { transactionManager.verify(VoteTransaction.of(it)) }
-
-    private fun isValidDelegateTransactions(list: List<DelegateTransactionMessage>): Boolean =
-        list.all { transactionManager.verify(DelegateTransaction.of(it)) }
-
-    private fun isValidTransferTransactions(list: List<TransferTransactionMessage>): Boolean =
-        list.all { transactionManager.verify(TransferTransaction.of(it)) }
-
-    private fun isValidTransactions(blocks: List<MainBlockMessage>): Boolean {
-        try {
-            blocks.forEach { block ->
-                if (!isValidRewardTransactions(block.rewardTransactions)) {
-                    throw ValidationException("Invalid reward transaction in block: height #${block.height}, hash ${block.hash} ")
-                }
-                if (!isValidDelegateTransactions(block.delegateTransactions)) {
-                    throw ValidationException("Invalid delegate transactions in block: height #${block.height}, hash ${block.hash}")
-                }
-                if (!isValidTransferTransactions(block.transferTransactions)) {
-                    throw ValidationException("Invalid transfer transactions in block: height #${block.height}, hash ${block.hash}")
-                }
-                if (!isValidVoteTransactions(block.voteTransactions)) {
-                    throw ValidationException("Invalid vote transactions in block: height #${block.height}, hash ${block.hash}")
-                }
-            }
-        } catch (e: ValidationException) {
-            log.warn("Transactions are invalid: ${e.message}")
-            return false
-        }
-
-        return true
-    }
-
-    private fun isValidStateMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
-        mainBlocks.forEach { block ->
-            if (!isValidRootHash(block.stateMerkleHash, block.getAllStates().map { it.hash })) {
-                log.warn("State merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
-                return false
-            }
-        }
-
-        return true
-    }
-
-    private fun isValidReceiptMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
-        mainBlocks.forEach { block ->
-            if (!isValidRootHash(block.receiptMerkleHash, block.receipts.map { it.hash })) {
-                log.warn("Receipt merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
-                return false
-            }
-        }
-
-        return true
-    }
-
-    private fun isValidTransactionMerkleRoot(mainBlocks: List<MainBlockMessage>): Boolean {
-        mainBlocks.forEach { block ->
-            if (!isValidRootHash(block.transactionMerkleHash, block.getAllTransactions().map { it.hash })) {
-                log.warn("Transaction merkle root is invalid in block: height #${block.height}, hash ${block.hash}")
-                return false
-            }
-        }
-
-        return true
-    }
-
-    private fun isValidRootHash(rootHash: String, hashes: List<String>): Boolean {
-        if (hashes.isEmpty()) {
-            return false
-        }
-
-        return rootHash == HashUtils.merkleRoot(hashes)
-    }
-
-    private fun isValidPreviousHash(block: Block, lastBlock: Block): Boolean = block.previousHash == lastBlock.hash
-
-    private fun isValidHeight(block: Block, lastBlock: Block): Boolean = block.height == lastBlock.height + 1
 
     private fun requestEpoch(delegates: List<String>) {
         val targetEpoch = if (syncSession.isEpochSynced()) {
@@ -289,10 +184,7 @@ class ChainSynchronizer(
             var temporaryBlocks = syncSession.getTemporaryBlocks(heights)
             while (!temporaryBlocks.isEmpty()) {
                 temporaryBlocks.forEach { block ->
-                    when (block) {
-                        is MainBlock -> blockManager.add(block)
-                        is GenesisBlock -> blockManager.add(block)
-                    }
+                    blockManager.add(block)
                     log.info("Blocks saved till ${block.height} from ${temporaryBlocks.last().height}")
                 }
                 indexFrom = indexTo + 1
