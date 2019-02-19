@@ -36,8 +36,8 @@
           NODE_PORT: "{{ item.api_port }}"
           KEY: '{ "externalPort" : {{ item.api_port }}, "externalHost" : "", "secret" : "{{ item.secret_key }}", "mode" : "FULL" }'
         published_ports:
-          - "{{ item.app_port }}:9090"
-          - "{{ item.api_port }}:9190"
+          - "{{ item.app_port }}:{{ item.app_port }}"
+          - "{{ item.api_port }}:{{ item.api_port }}"
         volumes:
           - "{{ item.db_volume }}:/root/db"
         restart_policy: always
