@@ -77,10 +77,13 @@ class DefaultPendingBlockHandler(
     @BlockchainSynchronized
     @Synchronized
     override fun handleApproveMessage(message: BlockApprovalMessage) {
-        when (DictionaryUtils.valueOf(BlockApprovalStage::class.java, message.stageId)) {
-            PREPARE -> handlePrevote(message)
-            COMMIT -> handleCommit(message)
-            IDLE -> throw IllegalArgumentException("Unacceptable message type")
+        val block = pendingBlocks.firstOrNull { it.hash == message.hash }
+        if (null != block && !epochService.isInIntermission(block.timestamp)) {
+            when (DictionaryUtils.valueOf(BlockApprovalStage::class.java, message.stageId)) {
+                PREPARE -> handlePrevote(message)
+                COMMIT -> handleCommit(message)
+                IDLE -> throw IllegalArgumentException("Unacceptable message type")
+            }
         }
     }
 
