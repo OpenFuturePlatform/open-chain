@@ -95,7 +95,7 @@ class SyncSession(
         }
 
         val pipeline = when (syncMode) {
-            FULL -> BlockValidationPipeline(mainBlockValidator.checkFull())
+            FULL -> BlockValidationPipeline(mainBlockValidator.checkFullOnSync())
             LIGHT -> BlockValidationPipeline(mainBlockValidator.checkLight())
         }
 
