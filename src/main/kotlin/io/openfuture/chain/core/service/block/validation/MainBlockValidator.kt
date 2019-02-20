@@ -30,9 +30,9 @@ class MainBlockValidator(
     private val consensusProperties: ConsensusProperties,
     private val stateManager: StateManager,
     private val transactionManager: TransactionManager,
-    private val rewardTransactionPipeline: RewardTransactionValidator,
-    private val delegateTransactionPipeline: DelegateTransactionValidator,
-    private val transferTransactionPipeline: TransferTransactionValidator,
+    private val rewardTransactionValidator: RewardTransactionValidator,
+    private val delegateTransactionValidator: DelegateTransactionValidator,
+    private val transferTransactionValidator: TransferTransactionValidator,
     private val voteTransactionValidator: VoteTransactionValidator,
     private val receiptService: ReceiptService,
     private val statePool: StatePool
@@ -62,7 +62,8 @@ class MainBlockValidator(
     fun checkFullOnSync(): Array<BlockValidateHandler> = arrayOf(
         *checkLight(),
         checkTransactionMerkleHash(),
-        checkReceiptMerkleHash()
+        checkReceiptMerkleHash(),
+        checkTransactionsHashes()
     )
 
     fun checkBalances(): BlockValidateHandler = { block, _, new ->
@@ -157,6 +158,14 @@ class MainBlockValidator(
         }
     }
 
+    fun checkTransactionsHashes(): BlockValidateHandler = { block, _, _ ->
+        block as MainBlock
+        block.getPayload().delegateTransactions.forEach { delegateTransactionValidator.checkHash().invoke(it) }
+        block.getPayload().transferTransactions.forEach { transferTransactionValidator.checkHash().invoke(it) }
+        block.getPayload().voteTransactions.forEach { voteTransactionValidator.checkHash().invoke(it) }
+        block.getPayload().rewardTransactions.forEach { rewardTransactionValidator.checkHash().invoke(it) }
+    }
+
     fun checkRewardTransaction(): BlockValidateHandler = { block, _, new ->
         block as MainBlock
         val rewardTransaction = block.getPayload().rewardTransactions.firstOrNull()
@@ -168,8 +177,8 @@ class MainBlockValidator(
             }
         }
 
-        val pipeline = TransactionValidationPipeline(rewardTransactionPipeline.check())
-        if (!rewardTransactionPipeline.verify(rewardTransaction, pipeline)) {
+        val pipeline = TransactionValidationPipeline(rewardTransactionValidator.check())
+        if (!rewardTransactionValidator.verify(rewardTransaction, pipeline)) {
             throw ValidationException("Invalid reward transaction in block: height #${block.height}, hash ${block.hash}")
         }
     }
@@ -182,9 +191,9 @@ class MainBlockValidator(
             throw ValidationException("Invalid delegate transactions in block: height #${block.height}, hash ${block.hash}")
         }
 
-        val pipeline = TransactionValidationPipeline(delegateTransactionPipeline.check())
+        val pipeline = TransactionValidationPipeline(delegateTransactionValidator.check())
         transactions.forEach {
-            if (!delegateTransactionPipeline.verify(it, pipeline)) {
+            if (!delegateTransactionValidator.verify(it, pipeline)) {
                 throw ValidationException("Invalid delegate transactions in block: height #${block.height}, hash ${block.hash}")
             }
         }
@@ -193,9 +202,9 @@ class MainBlockValidator(
     fun checkTransferTransactions(): BlockValidateHandler = { block, _, _ ->
         block as MainBlock
 
-        val pipeline = TransactionValidationPipeline(transferTransactionPipeline.check())
+        val pipeline = TransactionValidationPipeline(transferTransactionValidator.check())
         block.getPayload().transferTransactions.forEach {
-            if (!transferTransactionPipeline.verify(it, pipeline)) {
+            if (!transferTransactionValidator.verify(it, pipeline)) {
                 throw ValidationException("Invalid transfer transactions in block: height #${block.height}, hash ${block.hash}")
             }
         }
