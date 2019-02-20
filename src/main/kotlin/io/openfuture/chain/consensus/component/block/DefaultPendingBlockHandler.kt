@@ -50,7 +50,6 @@ class DefaultPendingBlockHandler(
     @Synchronized
     override fun addBlock(block: PendingBlockMessage) {
         val blockSlotNumber = epochService.getSlotNumber(System.currentTimeMillis())
-        val slotOwner = epochService.getCurrentSlotOwner()
 
         if (blockSlotNumber != timeSlotNumber || epochService.isInIntermission(block.timestamp)) {
             this.timeSlotNumber = blockSlotNumber
@@ -58,10 +57,6 @@ class DefaultPendingBlockHandler(
         }
 
         if (!pendingBlocks.add(block) || blockAddedFlag) {
-            return
-        }
-
-        if (slotOwner != block.publicKey) {
             return
         }
 
@@ -98,6 +93,10 @@ class DefaultPendingBlockHandler(
             return
         }
 
+        if (COMMIT == this.stage) {
+            return
+        }
+
         val delegates = epochService.getDelegatesPublicKeys()
         val delegate = delegates.find { it == message.publicKey } ?: return
 
@@ -117,7 +116,7 @@ class DefaultPendingBlockHandler(
     private fun checkPrevote(size: Int, message: BlockApprovalMessage) {
         if (size > (properties.delegatesCount!! - 1) / 3) {
             val block = pendingBlocks.find { it.hash == message.hash }
-            if (null != block && block.hash != this.observable?.hash) {
+            if (null != block && epochService.getCurrentSlotOwner() == block.publicKey && block.hash != this.observable?.hash) {
                 val lastBlock = blockManager.getLast()
                 val pipeline = BlockValidationPipeline(mainBlockValidator.checkFull())
                 if (mainBlockValidator.verify(MainBlock.of(block), lastBlock, true, pipeline)) {
