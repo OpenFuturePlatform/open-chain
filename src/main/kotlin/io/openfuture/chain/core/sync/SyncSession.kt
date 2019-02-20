@@ -6,6 +6,8 @@ import io.openfuture.chain.core.model.entity.block.TemporaryBlock
 import io.openfuture.chain.core.service.DefaultTemporaryBlockService
 import io.openfuture.chain.core.service.block.validation.MainBlockValidator
 import io.openfuture.chain.core.service.block.validation.pipeline.BlockValidationPipeline
+import io.openfuture.chain.core.sync.SyncMode.FULL
+import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import io.openfuture.chain.core.util.SerializationUtils
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.slf4j.Logger
@@ -92,7 +94,10 @@ class SyncSession(
             chain.toMutableList().add(minBlock)
         }
 
-        val pipeline = BlockValidationPipeline(mainBlockValidator.checkSync())
+        val pipeline = when (syncMode) {
+            FULL -> BlockValidationPipeline(mainBlockValidator.checkFullOnSync())
+            LIGHT -> BlockValidationPipeline(mainBlockValidator.checkLight())
+        }
 
         for (index in 1 until chain.size) {
             if (!mainBlockValidator.verify(chain[index], chain[index - 1], false, pipeline)) {
