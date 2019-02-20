@@ -74,8 +74,8 @@ class DefaultPendingBlockHandler(
             val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKeyAsHexString())
             vote.signature = SignatureUtils.sign(vote.getBytes(), keyHolder.getPrivateKey())
             networkService.broadcast(vote)
+            networkService.broadcast(block)
         }
-        networkService.broadcast(block)
     }
 
     @BlockchainSynchronized
