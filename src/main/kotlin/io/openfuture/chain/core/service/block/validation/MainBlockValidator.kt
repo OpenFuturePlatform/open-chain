@@ -59,6 +59,12 @@ class MainBlockValidator(
         checkReceiptsAndStates()
     )
 
+    fun checkSync(): Array<BlockValidateHandler> = arrayOf(
+        *checkLight(),
+        checkTransactionMerkleHash(),
+        checkReceiptMerkleHash()
+    )
+
     fun checkBalances(): BlockValidateHandler = { block, _, new ->
         block as MainBlock
         if (new) {
