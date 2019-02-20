@@ -39,9 +39,16 @@ class DefaultPendingBlockHandler(
     private val prepareVotes: MutableMap<String, MutableList<String>> = mutableMapOf()
     private val commits: MutableMap<String, MutableList<String>> = mutableMapOf()
 
+    private val fullValidationPipe: BlockValidationPipeline = BlockValidationPipeline(mainBlockValidator.checkFull())
+    private val partialValidationPipe: BlockValidationPipeline = BlockValidationPipeline(arrayOf(
+        mainBlockValidator.checkHeight(),
+        mainBlockValidator.checkPreviousHash()
+    ))
+
     private var observable: PendingBlockMessage? = null
     private var timeSlotNumber: Long = 0
     private var stage: BlockApprovalStage = IDLE
+
     @Volatile
     private var blockAddedFlag = false
 
@@ -51,7 +58,7 @@ class DefaultPendingBlockHandler(
     override fun addBlock(block: PendingBlockMessage) {
         val blockSlotNumber = epochService.getSlotNumber(System.currentTimeMillis())
 
-        if (blockSlotNumber != timeSlotNumber || epochService.isInIntermission(block.timestamp)) {
+        if (blockSlotNumber != timeSlotNumber || epochService.isInIntermission(System.currentTimeMillis())) {
             this.timeSlotNumber = blockSlotNumber
             this.reset()
         }
@@ -60,7 +67,9 @@ class DefaultPendingBlockHandler(
             return
         }
 
-        if (IDLE == stage && isActiveDelegate()) {
+        val lastBlock = blockManager.getLast()
+        val blockValid = mainBlockValidator.verify(MainBlock.of(block), lastBlock, true, partialValidationPipe)
+        if (IDLE == stage && isActiveDelegate() && blockValid) {
             this.stage = PREPARE
             val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKeyAsHexString())
             vote.signature = SignatureUtils.sign(vote.getBytes(), keyHolder.getPrivateKey())
@@ -72,8 +81,7 @@ class DefaultPendingBlockHandler(
     @BlockchainSynchronized
     @Synchronized
     override fun handleApproveMessage(message: BlockApprovalMessage) {
-        val block = pendingBlocks.firstOrNull { it.hash == message.hash }
-        if (null != block && !epochService.isInIntermission(block.timestamp)) {
+        if (!epochService.isInIntermission(System.currentTimeMillis())) {
             when (DictionaryUtils.valueOf(BlockApprovalStage::class.java, message.stageId)) {
                 PREPARE -> handlePrevote(message)
                 COMMIT -> handleCommit(message)
@@ -100,13 +108,13 @@ class DefaultPendingBlockHandler(
         val delegates = epochService.getDelegatesPublicKeys()
         val delegate = delegates.find { it == message.publicKey } ?: return
 
-        val votes = prepareVotes[message.hash]
-        if (null == votes) {
-            prepareVotes[message.hash] = mutableListOf(delegate)
+        if (!isValidApprovalSignature(message)) {
             return
         }
 
-        if (!votes.contains(delegate) && isValidApprovalSignature(message)) {
+        val votes = prepareVotes.getOrPut(message.hash) { mutableListOf() }
+
+        if (!votes.contains(delegate)) {
             votes.add(delegate)
             networkService.broadcast(message)
             checkPrevote(votes.size, message)
@@ -116,10 +124,10 @@ class DefaultPendingBlockHandler(
     private fun checkPrevote(size: Int, message: BlockApprovalMessage) {
         if (size > (properties.delegatesCount!! - 1) / 3) {
             val block = pendingBlocks.find { it.hash == message.hash }
-            if (null != block && epochService.getCurrentSlotOwner() == block.publicKey && block.hash != this.observable?.hash) {
+            val slotOwner = epochService.getCurrentSlotOwner()
+            if (null != block && slotOwner == block.publicKey) {
                 val lastBlock = blockManager.getLast()
-                val pipeline = BlockValidationPipeline(mainBlockValidator.checkFull())
-                if (mainBlockValidator.verify(MainBlock.of(block), lastBlock, true, pipeline)) {
+                if (mainBlockValidator.verify(MainBlock.of(block), lastBlock, true, fullValidationPipe)) {
                     this.observable = block
                     this.stage = COMMIT
                     val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKeyAsHexString())
@@ -150,16 +158,17 @@ class DefaultPendingBlockHandler(
     private fun checkCommits(size: Int, message: BlockApprovalMessage) {
         if (size > (properties.delegatesCount!! / 3 * 2) && !blockAddedFlag) {
             pendingBlocks.find { it.hash == message.hash }?.let {
-                if (!chainSynchronizer.isInSync(MainBlock.of(it)) && it.hash != observable?.hash) {
+                val block = MainBlock.of(it)
+                if (!chainSynchronizer.isInSync(block) && it.hash != observable?.hash) {
                     chainSynchronizer.checkLastBlock()
                     timeSlotNumber = 0
                     reset()
                     return
                 }
-                blockManager.add(MainBlock.of(it))
+                blockManager.add(block)
                 log.info("Saving main block: height #${it.height}, hash ${it.hash}")
+                blockAddedFlag = true
             }
-            blockAddedFlag = true
         }
     }
 
