@@ -58,7 +58,7 @@ class DefaultPendingBlockHandler(
     override fun addBlock(block: PendingBlockMessage) {
         val blockSlotNumber = epochService.getSlotNumber(System.currentTimeMillis())
 
-        if (blockSlotNumber != timeSlotNumber || epochService.isInIntermission(System.currentTimeMillis())) {
+        if (blockSlotNumber != timeSlotNumber) {
             this.timeSlotNumber = blockSlotNumber
             this.reset()
         }
