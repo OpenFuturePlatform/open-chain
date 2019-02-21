@@ -92,8 +92,10 @@ class ContractExecutor(
             receiptResults.add(ReceiptResult(tx.senderAddress, instance.address, context.amount - spentFunds))
         }
 
-        val processReceipt = ReceiptResult(tx.senderAddress, delegateAddress, tx.fee - contractCost)
+        val processReceipt = ReceiptResult(tx.senderAddress, delegateAddress, tx.fee)
+        val changeReceipt = ReceiptResult(delegateAddress, tx.senderAddress, tx.fee - contractCost)
         receiptResults.add(processReceipt)
+        receiptResults.add(changeReceipt)
         return receiptResults
     }
 
