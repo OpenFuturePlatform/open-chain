@@ -42,7 +42,7 @@ class ContractExecutorTests : ServiceTests() {
 
         val result = executor.run(serializedContract, tx, "delegateAddress")
 
-        assertThat(result.receipt.size).isEqualTo(5)
+        assertThat(result.receipt.size).isEqualTo(6)
         assertThat(result.receipt.last().amount).isEqualTo(45)
     }
 
