@@ -36,7 +36,8 @@ class DefaultGenesisBlockService(
     override fun getPreviousByHeight(height: Long): GenesisBlock = repository.findFirstByHeightLessThanOrderByHeightDesc(height)
         ?: throw NotFoundException("Previous block by height $height not found")
 
-    override fun getLast(): GenesisBlock = repository.findFirstByOrderByHeightDesc()
+    override fun getLast(): GenesisBlock = repository.findFirstByHeightLessThanOrderByHeightDesc(Long.MAX_VALUE)
+        ?: throw NotFoundException("Last genesis block not found")
 
     override fun findByEpochIndex(epochIndex: Long): GenesisBlock? =
         repository.findOneByPayloadEpochIndex(epochIndex)
@@ -45,7 +46,7 @@ class DefaultGenesisBlockService(
         BlockchainLock.readLock.lock()
         try {
             val blocksProduced = blockRepository.getCurrentHeight() - getLast().height
-            return (consensusProperties.epochHeight!!) <= blocksProduced
+            return (consensusProperties.epochHeight!!) == blocksProduced.toInt()
         } finally {
             BlockchainLock.readLock.unlock()
         }

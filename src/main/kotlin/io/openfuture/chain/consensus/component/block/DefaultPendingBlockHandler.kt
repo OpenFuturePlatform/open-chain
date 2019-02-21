@@ -156,7 +156,7 @@ class DefaultPendingBlockHandler(
     }
 
     private fun checkCommits(size: Int, message: BlockApprovalMessage) {
-        if (size > (properties.delegatesCount!! / 3 * 2) && !blockAddedFlag) {
+        if (size > (properties.delegatesCount!! / 2) + 1 && !blockAddedFlag) {
             pendingBlocks.find { it.hash == message.hash }?.let {
                 val block = MainBlock.of(it)
                 if (!chainSynchronizer.isInSync(block) && it.hash != observable?.hash) {
