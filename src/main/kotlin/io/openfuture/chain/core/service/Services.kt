@@ -170,6 +170,8 @@ interface TransactionManager {
 
     fun deleteBlockTransactions(blockHeights: List<Long>)
 
+    fun deleteUnconfirmedTransactions()
+
 }
 
 interface UTransactionService<uT : UnconfirmedTransaction> {

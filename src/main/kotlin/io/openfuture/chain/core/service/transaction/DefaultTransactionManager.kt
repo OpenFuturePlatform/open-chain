@@ -160,4 +160,15 @@ class DefaultTransactionManager(
         }
     }
 
+    @Transactional
+    override fun deleteUnconfirmedTransactions() {
+        BlockchainLock.writeLock.lock()
+        try {
+            uRepository.deleteAll()
+            uRepository.flush()
+        } finally {
+            BlockchainLock.writeLock.unlock()
+        }
+    }
+
 }
