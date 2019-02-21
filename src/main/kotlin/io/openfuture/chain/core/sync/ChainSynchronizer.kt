@@ -8,8 +8,10 @@ import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.BlockManager
+import io.openfuture.chain.core.service.TransactionManager
 import io.openfuture.chain.core.service.block.validation.MainBlockValidator
 import io.openfuture.chain.core.service.block.validation.pipeline.BlockValidationPipeline
+import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import io.openfuture.chain.core.sync.SyncStatus.*
 import io.openfuture.chain.network.component.AddressesHolder
 import io.openfuture.chain.network.entity.NodeInfo
@@ -32,6 +34,7 @@ class ChainSynchronizer(
     private val consensusProperties: ConsensusProperties,
     private val addressesHolder: AddressesHolder,
     private val blockManager: BlockManager,
+    private val transactionManager: TransactionManager,
     private val networkApiService: NetworkApiService,
     private val mainBlockValidator: MainBlockValidator,
     private val epochService: EpochService,
@@ -91,6 +94,7 @@ class ChainSynchronizer(
             }
 
             saveBlocks()
+            clearUnconfirmedTransactions()
         } catch (e: Throwable) {
             log.error(e.message)
             syncFailed()
@@ -202,6 +206,12 @@ class ChainSynchronizer(
         } catch (e: Throwable) {
             log.error("Save block is failed: $e")
             syncFailed()
+        }
+    }
+
+    private fun clearUnconfirmedTransactions() {
+        if (LIGHT == nodeConfigurator.getConfig().mode) {
+            transactionManager.deleteUnconfirmedTransactions()
         }
     }
 
