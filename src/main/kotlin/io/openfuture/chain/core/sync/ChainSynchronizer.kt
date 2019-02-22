@@ -103,12 +103,13 @@ class ChainSynchronizer(
 
     fun isInSync(block: Block): Boolean {
         val lastBlock = blockManager.getLast()
+        val lastMainBlock = if (lastBlock !is MainBlock) blockManager.getLastMainBlock() else lastBlock
         if (lastBlock.hash == block.hash) {
             return true
         }
         val handlers = arrayOf(mainBlockValidator.checkHeight(), mainBlockValidator.checkPreviousHash())
         val pipeline = BlockValidationPipeline(handlers)
-        return mainBlockValidator.verify(block, lastBlock, false, pipeline)
+        return mainBlockValidator.verify(block, lastBlock, lastMainBlock, false, pipeline)
     }
 
     @Synchronized

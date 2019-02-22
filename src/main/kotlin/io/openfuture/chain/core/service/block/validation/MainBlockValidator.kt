@@ -48,8 +48,7 @@ class MainBlockValidator(
         checkHash(),
         checkTimeStamp(),
         checkHeight(),
-        checkPreviousHash(),
-        checkReceiptsAndStates()
+        checkPreviousHash()
     )
 
     fun checkFull(): Array<BlockValidateHandler> = arrayOf(
@@ -71,7 +70,7 @@ class MainBlockValidator(
         checkTransactionsHashes()
     )
 
-    fun checkBalances(): BlockValidateHandler = { block, _, new ->
+    fun checkBalances(): BlockValidateHandler = { block, _, _, new ->
         block as MainBlock
         if (new) {
             val transactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
@@ -94,16 +93,18 @@ class MainBlockValidator(
         }
     }
 
-    fun checkStateMerkleHash(): BlockValidateHandler = { block, _, _ ->
+    fun checkStateMerkleHash(): BlockValidateHandler = { block, _, lastMainBlock, _ ->
         block as MainBlock
         val states = block.getPayload().delegateStates + block.getPayload().accountStates
+        val stateHashes = (states.map { it.hash }) as MutableList
+        stateHashes.add(lastMainBlock.getPayload().stateMerkleHash)
 
-        if (!verifyMerkleRootHash(block.getPayload().stateMerkleHash, states.map { it.hash })) {
+        if (!verifyMerkleRootHash(block.getPayload().stateMerkleHash, stateHashes)) {
             throw ValidationException("Invalid state merkle hash in block: height #${block.height}, hash ${block.hash}")
         }
     }
 
-    fun checkTransactionMerkleHash(): BlockValidateHandler = { block, _, _ ->
+    fun checkTransactionMerkleHash(): BlockValidateHandler = { block, _, _, _ ->
         block as MainBlock
         val transactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
             block.getPayload().voteTransactions + block.getPayload().rewardTransactions
@@ -113,14 +114,14 @@ class MainBlockValidator(
         }
     }
 
-    fun checkReceiptMerkleHash(): BlockValidateHandler = { block, _, _ ->
+    fun checkReceiptMerkleHash(): BlockValidateHandler = { block, _, _, _ ->
         block as MainBlock
         if (!verifyMerkleRootHash(block.getPayload().receiptMerkleHash, block.getPayload().receipts.map { it.hash })) {
             throw ValidationException("Invalid receipt merkle hash in block: height #${block.height}, hash ${block.hash}")
         }
     }
 
-    fun checkReceiptsAndStates(): BlockValidateHandler = { block, _, new ->
+    fun checkReceiptsAndStates(): BlockValidateHandler = { block, _, _,  new ->
         block as MainBlock
         val blockStates = block.getPayload().delegateStates + block.getPayload().accountStates
 
@@ -163,7 +164,7 @@ class MainBlockValidator(
         }
     }
 
-    fun checkTransactionsHashes(): BlockValidateHandler = { block, _, _ ->
+    fun checkTransactionsHashes(): BlockValidateHandler = { block, _, _, _ ->
         block as MainBlock
         block.getPayload().delegateTransactions.forEach { delegateTransactionValidator.checkHash().invoke(it) }
         block.getPayload().transferTransactions.forEach { transferTransactionValidator.checkHash().invoke(it) }
@@ -171,7 +172,7 @@ class MainBlockValidator(
         block.getPayload().rewardTransactions.forEach { rewardTransactionValidator.checkHash().invoke(it) }
     }
 
-    fun checkRewardTransaction(): BlockValidateHandler = { block, _, new ->
+    fun checkRewardTransaction(): BlockValidateHandler = { block, _, _, new ->
         block as MainBlock
         val rewardTransaction = block.getPayload().rewardTransactions.firstOrNull()
             ?: throw ValidationException("Missing reward transaction in block: height #${block.height}, hash ${block.hash}")
@@ -188,7 +189,7 @@ class MainBlockValidator(
         }
     }
 
-    fun checkDelegateTransactions(): BlockValidateHandler = { block, _, _ ->
+    fun checkDelegateTransactions(): BlockValidateHandler = { block, _, _, _ ->
         block as MainBlock
         val transactions = block.getPayload().delegateTransactions
 
@@ -204,7 +205,7 @@ class MainBlockValidator(
         }
     }
 
-    fun checkTransferTransactions(): BlockValidateHandler = { block, _, _ ->
+    fun checkTransferTransactions(): BlockValidateHandler = { block, _, _, _ ->
         block as MainBlock
 
         val pipeline = TransactionValidationPipeline(transferTransactionValidator.check())
@@ -215,7 +216,7 @@ class MainBlockValidator(
         }
     }
 
-    fun checkVoteTransactions(): BlockValidateHandler = { block, _, new ->
+    fun checkVoteTransactions(): BlockValidateHandler = { block, _, _, new ->
         block as MainBlock
         val transactions = block.getPayload().voteTransactions
 

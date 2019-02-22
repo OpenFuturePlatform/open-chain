@@ -2,6 +2,7 @@ package io.openfuture.chain.core.sync
 
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.TemporaryBlock
 import io.openfuture.chain.core.service.DefaultTemporaryBlockService
 import io.openfuture.chain.core.service.block.validation.MainBlockValidator
@@ -100,7 +101,7 @@ class SyncSession(
         }
 
         for (index in 1 until chain.size) {
-            if (!mainBlockValidator.verify(chain[index], chain[index - 1], false, pipeline)) {
+            if (!mainBlockValidator.verify(chain[index], chain[index - 1], chain[index - 1] as MainBlock, false, pipeline)) {
                 return false
             }
         }

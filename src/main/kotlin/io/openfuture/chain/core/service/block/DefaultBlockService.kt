@@ -29,6 +29,9 @@ abstract class DefaultBlockService<T : Block>(
     override fun getNextBlock(hash: String): T = repository.findFirstByHeightGreaterThan(getByHash(hash).height)
         ?: throw NotFoundException("Block after $hash not found")
 
+    override fun getLast(): T = repository.findFirstByHeightLessThanOrderByHeightDesc(Long.MAX_VALUE)
+        ?: throw NotFoundException("Last block not found")
+
     protected fun getLastBlock(): Block = blockRepository.findFirstByOrderByHeightDesc()
 
 }
