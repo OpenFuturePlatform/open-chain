@@ -147,8 +147,8 @@ interface DelegateStateRepository : StateRepository<DelegateState> {
     @Query("""
         SELECT ds1 FROM DelegateState ds1
         WHERE ds1.block.height = (
-            SELECT MAX(ds2.block.height) FROM DelegateState ds2
-            WHERE ds1.address=ds2.address
+            SELECT ds2 FROM DelegateState ds2
+            WHERE ds1.address=ds2.address AND ds2.block.height < 99999999999 ORDER BY ds2.block.height DESC
         )
         """)
     fun findLastAll(request: Pageable): Page<DelegateState>
