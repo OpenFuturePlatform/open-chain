@@ -101,7 +101,7 @@ class SyncSession(
         }
 
         for (index in 1 until chain.size) {
-            if (!mainBlockValidator.verify(chain[index], chain[index - 1], chain[index - 1] as MainBlock, false, pipeline)) {
+            if (!mainBlockValidator.verify(chain[index], chain[index - 1], chain[index] as MainBlock, false, pipeline)) {
                 return false
             }
         }

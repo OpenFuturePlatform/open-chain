@@ -145,10 +145,10 @@ class ChainSynchronizer(
     }
 
     private fun initSync(message: GenesisBlockMessage) {
-        val delegates = blockManager.getLastGenesisBlock().getPayload().activeDelegates
+        val lastLocalGenesisBlock = blockManager.getLastGenesisBlock()
+        val delegates = lastLocalGenesisBlock.getPayload().activeDelegates
         try {
             val currentGenesisBlock = GenesisBlock.of(message)
-            val lastLocalGenesisBlock = blockManager.getLastGenesisBlock()
 
             if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
                 syncSession.init(nodeConfigurator.getConfig().mode, lastLocalGenesisBlock, currentGenesisBlock)
