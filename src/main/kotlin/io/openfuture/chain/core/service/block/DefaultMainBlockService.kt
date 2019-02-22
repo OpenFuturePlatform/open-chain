@@ -6,6 +6,7 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.component.TransactionThroughput
 import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.state.AccountState
@@ -88,9 +89,23 @@ class DefaultMainBlockService(
                     is AccountState -> accountStates.add(it)
                 }
             }
+            val stateHashes = states.map { it.hash } as MutableList
+            val stateMerkleHash = when (lastBlock) {
+                is MainBlock -> {
+                    stateHashes.add(lastBlock.getPayload().stateMerkleHash)
+                    HashUtils.merkleRoot(stateHashes)
+                }
+                is GenesisBlock -> {
+                    val block = repository.findFirstByHeightLessThanOrderByHeightDesc(lastBlock.height)
+                    block?.let {
+                        stateHashes.add(it.getPayload().stateMerkleHash)
+                        HashUtils.merkleRoot(stateHashes)
+                    } ?: HashUtils.merkleRoot(stateHashes)
+                }
+                else -> HashUtils.merkleRoot(stateHashes)
+            }
 
             val transactionMerkleHash = HashUtils.merkleRoot(transactions.map { it.hash })
-            val stateMerkleHash = HashUtils.merkleRoot(states.map { it.hash })
             val receiptMerkleHash = HashUtils.merkleRoot(receipts.map { it.hash })
 
             val payload = MainBlockPayload(transactionMerkleHash, stateMerkleHash, receiptMerkleHash,
