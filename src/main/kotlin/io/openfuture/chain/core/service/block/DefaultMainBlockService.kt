@@ -90,21 +90,15 @@ class DefaultMainBlockService(
                 }
             }
             val stateHashes = states.map { it.hash } as MutableList
-            val stateMerkleHash = when (lastBlock) {
-                is MainBlock -> {
-                    stateHashes.add(lastBlock.getPayload().stateMerkleHash)
-                    HashUtils.merkleRoot(stateHashes)
-                }
-                is GenesisBlock -> {
-                    val block = repository.findFirstByHeightLessThanOrderByHeightDesc(lastBlock.height)
-                    block?.let {
-                        stateHashes.add(it.getPayload().stateMerkleHash)
-                        HashUtils.merkleRoot(stateHashes)
-                    } ?: HashUtils.merkleRoot(stateHashes)
-                }
-                else -> HashUtils.merkleRoot(stateHashes)
+            when (lastBlock) {
+                is MainBlock -> lastBlock
+                is GenesisBlock -> repository.findFirstByHeightLessThanOrderByHeightDesc(lastBlock.height)
+                else -> throw IllegalStateException("Wrong type")
+            }?.let {
+                stateHashes.add(it.getPayload().stateMerkleHash)
             }
 
+            val stateMerkleHash = HashUtils.merkleRoot(stateHashes)
             val transactionMerkleHash = HashUtils.merkleRoot(transactions.map { it.hash })
             val receiptMerkleHash = HashUtils.merkleRoot(receipts.map { it.hash })
 
