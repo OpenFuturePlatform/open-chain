@@ -6,9 +6,7 @@ import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.repository.DelegateStateRepository
 import io.openfuture.chain.core.service.DelegateStateService
 import io.openfuture.chain.core.sync.BlockchainLock
-import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.rpc.domain.base.PageRequest
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.stereotype.Service
@@ -34,7 +32,6 @@ class DefaultDelegateStateService(
     override fun updateRating(delegateKey: String, amount: Long): DelegateState {
         val state = getCurrentState(delegateKey)
         state.rating += amount
-        state.hash = ByteUtils.toHexString(HashUtils.doubleSha256(state.getBytes()))
         statePool.update(state)
         return state
     }
