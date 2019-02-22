@@ -168,13 +168,13 @@ class DefaultMainBlockService(
 
         val nextGenesisHeight = endEpochHeight + 1
         if (null == repository.findFirstByHeightGreaterThan(nextGenesisHeight)) {
-            val lastBlock = blocks.last()
+            val lastBlock = blocks.lastOrNull()
             println()
-            println("last block height =${lastBlock.height}")
+            println("last block height =${lastBlock?.height}")
             println("last by height =${blocks.maxBy { it.height }?.height}")
             println()
-            lastBlock.getPayload().delegateStates = stateManager.getAllDelegateStates()
-            lastBlock.getPayload().accountStates = stateManager.getAllAccountStates()
+            lastBlock?.getPayload()?.delegateStates = stateManager.getAllDelegateStates()
+            lastBlock?.getPayload()?.accountStates = stateManager.getAllAccountStates()
         }
 
         return blocks
