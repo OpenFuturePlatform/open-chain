@@ -60,6 +60,8 @@ class DefaultBlockManager(
 
     override fun getLastGenesisBlock(): GenesisBlock = genesisBlockService.getLast()
 
+    override fun getLastMainBlock(): MainBlock = mainBlockService.getLast()
+
     override fun findGenesisBlockByEpochIndex(epochIndex: Long): GenesisBlock? =
         genesisBlockService.findByEpochIndex(epochIndex)
 
@@ -83,7 +85,7 @@ class DefaultBlockManager(
 
     @Transactional
     override fun deleteByHeightIn(heights: List<Long>) {
-//        stateManager.deleteAll()
+        stateManager.deleteAll()
         transactionManager.deleteBlockTransactions(heights)
         receiptService.deleteBlockReceipts(heights)
         repository.deleteAllByHeightIn(heights)

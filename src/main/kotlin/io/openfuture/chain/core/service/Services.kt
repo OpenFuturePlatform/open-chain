@@ -66,6 +66,8 @@ interface BlockManager {
 
     fun getLastGenesisBlock(): GenesisBlock
 
+    fun getLastMainBlock(): MainBlock
+
     fun findGenesisBlockByEpochIndex(epochIndex: Long): GenesisBlock?
 
     fun isGenesisBlockRequired(): Boolean
@@ -98,13 +100,13 @@ interface BlockService<T : Block> {
 
     fun add(block: T)
 
+    fun getLast(): T
+
 }
 
 interface GenesisBlockService : BlockService<GenesisBlock> {
 
     fun getPreviousByHeight(height: Long): GenesisBlock
-
-    fun getLast(): GenesisBlock
 
     fun findByEpochIndex(epochIndex: Long): GenesisBlock?
 
@@ -267,6 +269,8 @@ interface StateManager {
     fun updateDelegateRating(delegateKey: String, amount: Long)
 
     fun commit(state: State)
+
+    fun commit(states: List<State>)
 
     fun verify(state: State): Boolean
 

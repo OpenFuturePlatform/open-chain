@@ -134,6 +134,8 @@ interface StateRepository<T : State> : BaseRepository<T> {
 
     fun findOneByAddress(address: String): T?
 
+    fun deleteAllByAddressIn(addresses: List<String>)
+
 }
 
 @Repository

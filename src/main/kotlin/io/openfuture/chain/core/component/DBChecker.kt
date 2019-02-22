@@ -43,7 +43,7 @@ class DBChecker(
 
             for (index in 0 until blocks.size) {
                 val block = blocks[index]
-                if (!mainBlockValidator.verify(block, previousBlock, false, pipeline)) {
+                if (!mainBlockValidator.verify(block, previousBlock, blockManager.getLastMainBlock(), false, pipeline)) {
                     break@loop
                 }
 

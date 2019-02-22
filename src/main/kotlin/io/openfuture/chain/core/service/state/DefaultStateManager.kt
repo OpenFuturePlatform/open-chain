@@ -96,6 +96,17 @@ class DefaultStateManager(
         }
     }
 
+    override fun commit(states: List<State>) {
+        BlockchainLock.writeLock.lock()
+        try {
+            repository.deleteAllByAddressIn(states.map { it.address })
+            repository.flush()
+            repository.saveAll(states)
+        } finally {
+            BlockchainLock.writeLock.unlock()
+        }
+    }
+
     override fun verify(state: State): Boolean =
         state.hash == ByteUtils.toHexString(HashUtils.doubleSha256(state.getBytes()))
 

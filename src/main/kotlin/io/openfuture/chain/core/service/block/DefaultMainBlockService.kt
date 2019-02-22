@@ -131,9 +131,7 @@ class DefaultMainBlockService(
 
             val savedBlock = save(block)
 
-            states.forEach {
-                stateManager.commit(it)
-            }
+            stateManager.commit(states)
 
             transactions.forEach {
                 it.block = savedBlock

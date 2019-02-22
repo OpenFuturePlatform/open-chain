@@ -68,7 +68,8 @@ class DefaultPendingBlockHandler(
         }
 
         val lastBlock = blockManager.getLast()
-        val blockValid = mainBlockValidator.verify(MainBlock.of(block), lastBlock, true, partialValidationPipe)
+        val lastMainBlock = if (lastBlock !is MainBlock) blockManager.getLastMainBlock() else lastBlock
+        val blockValid = mainBlockValidator.verify(MainBlock.of(block), lastBlock, lastMainBlock, true, partialValidationPipe)
         if (IDLE == stage && isActiveDelegate() && blockValid) {
             this.stage = PREPARE
             val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKeyAsHexString())
@@ -127,7 +128,8 @@ class DefaultPendingBlockHandler(
             val slotOwner = epochService.getCurrentSlotOwner()
             if (null != block && slotOwner == block.publicKey) {
                 val lastBlock = blockManager.getLast()
-                if (mainBlockValidator.verify(MainBlock.of(block), lastBlock, true, fullValidationPipe)) {
+                val lastMainBlock = if (lastBlock !is MainBlock) blockManager.getLastMainBlock() else lastBlock
+                if (mainBlockValidator.verify(MainBlock.of(block), lastBlock, lastMainBlock,true, fullValidationPipe)) {
                     this.observable = block
                     this.stage = COMMIT
                     val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKeyAsHexString())
