@@ -155,10 +155,8 @@ class DefaultMainBlockService(
         val heights = (beginHeight..endEpochHeight).toList()
 
         val blocks = repository.findAllByHeightIn(heights)
-        blocks.forEach {
-            it.getPayload().delegateStates = stateManager.getAllDelegateStates() //todo move out of foreach
-            it.getPayload().accountStates = stateManager.getAllAccountStates() //todo move out of foreach
-            if (syncMode == FULL) {
+        if (syncMode == FULL) {
+            blocks.forEach {
                 val rewardTx = transactionManager.getRewardTransactionByBlock(it)
                 it.getPayload().rewardTransactions = if (null != rewardTx) listOf(rewardTx) else listOf()
                 it.getPayload().delegateTransactions = transactionManager.getAllDelegateTransactionsByBlock(it)
@@ -166,6 +164,17 @@ class DefaultMainBlockService(
                 it.getPayload().voteTransactions = transactionManager.getAllVoteTransactionsByBlock(it)
                 it.getPayload().receipts = receiptService.getAllByBlock(it)
             }
+        }
+
+        val nextGenesisHeight = endEpochHeight + 1
+        if (null == repository.findFirstByHeightGreaterThan(nextGenesisHeight)) {
+            val lastBlock = blocks.last()
+            println()
+            println("last block height =${lastBlock.height}")
+            println("last by height =${blocks.maxBy { it.height }?.height}")
+            println()
+            lastBlock.getPayload().delegateStates = stateManager.getAllDelegateStates()
+            lastBlock.getPayload().accountStates = stateManager.getAllAccountStates()
         }
 
         return blocks

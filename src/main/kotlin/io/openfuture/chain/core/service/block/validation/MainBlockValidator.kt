@@ -39,12 +39,17 @@ class MainBlockValidator(
 ) : BlockValidator() {
 
     fun checkLight(): Array<BlockValidateHandler> = arrayOf(
+        *checkLightOnSync(),
+        checkStateMerkleHash()
+    )
+
+    fun checkLightOnSync(): Array<BlockValidateHandler> = arrayOf(
         checkSignature(),
         checkHash(),
         checkTimeStamp(),
         checkHeight(),
         checkPreviousHash(),
-        checkStateMerkleHash()
+        checkReceiptsAndStates()
     )
 
     fun checkFull(): Array<BlockValidateHandler> = arrayOf(
@@ -60,7 +65,7 @@ class MainBlockValidator(
     )
 
     fun checkFullOnSync(): Array<BlockValidateHandler> = arrayOf(
-        *checkLight(),
+        *checkLightOnSync(),
         checkTransactionMerkleHash(),
         checkReceiptMerkleHash(),
         checkTransactionsHashes()
