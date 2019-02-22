@@ -6,6 +6,8 @@ import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.repository.AccountStateRepository
 import io.openfuture.chain.core.service.AccountStateService
 import io.openfuture.chain.core.sync.BlockchainLock
+import io.openfuture.chain.crypto.util.HashUtils
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -37,6 +39,7 @@ class DefaultAccountStateService(
     override fun updateBalanceByAddress(address: String, amount: Long): AccountState {
         val state = getCurrentState(address)
         state.balance += amount
+        state.hash = ByteUtils.toHexString(HashUtils.doubleSha256(state.getBytes()))
         statePool.update(state)
         return state
     }
@@ -44,6 +47,7 @@ class DefaultAccountStateService(
     override fun updateVoteByAddress(address: String, delegateKey: String?): AccountState {
         val state = getCurrentState(address)
         state.voteFor = delegateKey
+        state.hash = ByteUtils.toHexString(HashUtils.doubleSha256(state.getBytes()))
         statePool.update(state)
         return state
     }
@@ -51,6 +55,7 @@ class DefaultAccountStateService(
     override fun updateStorage(address: String, storage: String): AccountState {
         val state = getCurrentState(address)
         state.storage = storage
+        state.hash = ByteUtils.toHexString(HashUtils.doubleSha256(state.getBytes()))
         statePool.update(state)
         return state
     }
