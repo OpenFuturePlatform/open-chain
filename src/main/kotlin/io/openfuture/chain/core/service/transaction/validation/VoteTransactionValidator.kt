@@ -73,7 +73,7 @@ class VoteTransactionValidator(
                 throw ValidationException("Address ${it.senderAddress} has voted invalid", ALREADY_VOTED_FOR_DELEGATE)
             }
 
-            val accountState = stateManager.getLastByAddress<AccountState>(it.senderAddress)
+            val accountState = stateManager.getByAddress<AccountState>(it.senderAddress)
             val result = when (it.getPayload().getVoteType()) {
                 FOR -> null != accountState.voteFor
                 AGAINST -> null == accountState.voteFor || it.getPayload().delegateKey != accountState.voteFor

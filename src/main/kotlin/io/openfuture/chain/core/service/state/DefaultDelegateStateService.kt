@@ -20,21 +20,20 @@ class DefaultDelegateStateService(
     private val statePool: StatePool
 ) : DefaultStateService<DelegateState>(repository), DelegateStateService {
 
-    override fun getAllDelegates(request: PageRequest): Page<DelegateState> = repository.findLastAll(request)
+    override fun getAllDelegates(request: PageRequest): Page<DelegateState> = repository.findAll(request)
 
     override fun getActiveDelegates(): List<DelegateState> {
         val sortBy = setOf("rating", "id")
         return getAllDelegates(PageRequest(0, consensusProperties.delegatesCount!!, sortBy, DESC)).content
     }
 
-    override fun isExistsByPublicKey(key: String): Boolean = null != repository.findFirstByAddressOrderByBlockIdDesc(key)
+    override fun isExistsByPublicKey(key: String): Boolean = null != repository.findOneByAddress(key)
 
     override fun updateRating(delegateKey: String, amount: Long): DelegateState {
         val state = getCurrentState(delegateKey)
-
-        val newState = DelegateState(state.address, state.walletAddress, state.createDate, state.rating + amount)
-        statePool.update(newState)
-        return newState
+        state.rating += amount
+        statePool.update(state)
+        return state
     }
 
     override fun addDelegate(delegateKey: String, walletAddress: String, createDate: Long): DelegateState {
@@ -47,7 +46,7 @@ class DefaultDelegateStateService(
         BlockchainLock.readLock.lock()
         try {
             return statePool.get(address) as? DelegateState
-                ?: repository.findFirstByAddressOrderByBlockIdDesc(address)!!
+                ?: repository.findOneByAddress(address)!!
         } finally {
             BlockchainLock.readLock.unlock()
         }

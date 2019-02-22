@@ -19,7 +19,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.NoRepositoryBean
-import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @NoRepositoryBean
@@ -133,40 +132,17 @@ interface RewardTransactionRepository : TransactionRepository<RewardTransaction>
 @Repository
 interface StateRepository<T : State> : BaseRepository<T> {
 
-    fun findFirstByAddressOrderByBlockIdDesc(address: String): T?
-
-    fun findAllByBlock(block: Block): List<T>
-
-    fun deleteAllByBlockHeightIn(heights: List<Long>)
+    fun findOneByAddress(address: String): T?
 
 }
 
 @Repository
-interface DelegateStateRepository : StateRepository<DelegateState> {
-
-    @Query("""
-        SELECT ds1 FROM DelegateState ds1
-        WHERE ds1.block.height = (
-            SELECT MAX(ds2.block.height) FROM DelegateState ds2
-            WHERE ds1.address=ds2.address
-        )
-        """)
-    fun findLastAll(request: Pageable): Page<DelegateState>
-
-}
+interface DelegateStateRepository : StateRepository<DelegateState>
 
 @Repository
 interface AccountStateRepository : StateRepository<AccountState> {
 
-    @Query("""
-        SELECT as1 FROM AccountState as1
-        WHERE as1.voteFor=:delegateKey
-        AND as1.block.height = (
-            SELECT MAX(as2.block.height) FROM AccountState as2
-            WHERE as1.address=as2.address
-        )
-        """)
-    fun findVotesByDelegateKey(@Param("delegateKey") delegateKey: String): List<AccountState>
+    fun findAllByVoteFor(voteFor: String): List<AccountState>
 
 }
 

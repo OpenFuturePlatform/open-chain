@@ -59,7 +59,7 @@ class DefaultMainBlockService(
             val height = lastBlock.height + 1
             val previousHash = lastBlock.hash
             val publicKey = keyHolder.getPublicKeyAsHexString()
-            val delegate = stateManager.getLastByAddress<DelegateState>(publicKey)
+            val delegate = stateManager.getByAddress<DelegateState>(publicKey)
 
             val unconfirmedTransactions = getTransactions()
             val delegateTransactions = mutableListOf<DelegateTransaction>()
@@ -123,7 +123,6 @@ class DefaultMainBlockService(
             val savedBlock = save(block)
 
             states.forEach {
-                it.block = savedBlock
                 stateManager.commit(it)
             }
 
@@ -157,8 +156,8 @@ class DefaultMainBlockService(
 
         val blocks = repository.findAllByHeightIn(heights)
         blocks.forEach {
-            it.getPayload().delegateStates = stateManager.getAllDelegateStatesByBlock(it)
-            it.getPayload().accountStates = stateManager.getAllAccountStatesByBlock(it)
+            it.getPayload().delegateStates = stateManager.getAllDelegateStates() //todo move out of foreach
+            it.getPayload().accountStates = stateManager.getAllAccountStates() //todo move out of foreach
             if (syncMode == FULL) {
                 val rewardTx = transactionManager.getRewardTransactionByBlock(it)
                 it.getPayload().rewardTransactions = if (null != rewardTx) listOf(rewardTx) else listOf()

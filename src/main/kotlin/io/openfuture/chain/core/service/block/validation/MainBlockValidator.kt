@@ -132,7 +132,7 @@ class MainBlockValidator(
         }
 
         if (new) {
-            val delegateWallet = stateManager.getLastByAddress<DelegateState>(block.publicKey).walletAddress
+            val delegateWallet = stateManager.getByAddress<DelegateState>(block.publicKey).walletAddress
             val transactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
                 block.getPayload().voteTransactions + block.getPayload().rewardTransactions
             val receipts = transactionManager.processTransactions(transactions, delegateWallet)
@@ -220,7 +220,7 @@ class MainBlockValidator(
             }
 
             if (new) {
-                val accountState = stateManager.getLastByAddress<AccountState>(it.key)
+                val accountState = stateManager.getByAddress<AccountState>(it.key)
                 val vote = it.value.first()
 
                 val result = when (vote.getPayload().getVoteType()) {

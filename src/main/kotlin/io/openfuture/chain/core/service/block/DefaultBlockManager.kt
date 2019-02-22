@@ -83,7 +83,6 @@ class DefaultBlockManager(
 
     @Transactional
     override fun deleteByHeightIn(heights: List<Long>) {
-        stateManager.deleteBlockStates(heights)
         transactionManager.deleteBlockTransactions(heights)
         receiptService.deleteBlockReceipts(heights)
         repository.deleteAllByHeightIn(heights)

@@ -31,7 +31,7 @@ class DelegateController(
     @GetMapping("/active")
     fun getAllActive(@Valid request: PageRequest): PageResponse<DelegateResponse> {
         val activeDelegates = blockManager.getLastGenesisBlock().getPayload().activeDelegates.map {
-            DelegateResponse(stateManager.getLastByAddress(it))
+            DelegateResponse(stateManager.getByAddress(it))
         }
 
         val pageActiveDelegate = activeDelegates.drop(request.offset.toInt()).take(request.getLimit())

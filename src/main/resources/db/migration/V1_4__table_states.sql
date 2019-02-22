@@ -1,12 +1,11 @@
 CREATE TABLE states (
   id       BIGINT AUTO_INCREMENT PRIMARY KEY HASH,
   address  VARCHAR NOT NULL,
-  hash     VARCHAR NOT NULL,
-  block_id BIGINT  NOT NULL REFERENCES blocks
+  hash     VARCHAR NOT NULL
 );
 --
-CREATE UNIQUE HASH INDEX states_address_block_id
-  ON states (address, block_id);
+CREATE UNIQUE HASH INDEX states_address
+  ON states (address);
 --
 CREATE TABLE account_states (
   id       BIGINT PRIMARY KEY REFERENCES states,

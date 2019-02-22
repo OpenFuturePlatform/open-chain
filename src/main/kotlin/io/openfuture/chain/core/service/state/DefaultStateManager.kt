@@ -1,7 +1,6 @@
 package io.openfuture.chain.core.service.state
 
 import io.openfuture.chain.core.exception.NotFoundException
-import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.AGAINST
 import io.openfuture.chain.core.model.entity.dictionary.VoteType.FOR
@@ -29,21 +28,19 @@ class DefaultStateManager(
 ) : StateManager {
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : State> getLastByAddress(address: String): T {
+    override fun <T : State> getByAddress(address: String): T {
         BlockchainLock.readLock.lock()
         try {
-            return repository.findFirstByAddressOrderByBlockIdDesc(address) as? T
+            return repository.findOneByAddress(address) as? T
                 ?: throw NotFoundException("State with address $address not found")
         } finally {
             BlockchainLock.readLock.unlock()
         }
     }
 
-    override fun getAllDelegateStatesByBlock(block: Block): List<DelegateState> =
-        delegateStateService.getAllByBlock(block)
+    override fun getAllDelegateStates(): List<DelegateState> = delegateStateService.getAll()
 
-    override fun getAllAccountStatesByBlock(block: Block): List<AccountState> =
-        accountStateService.getAllByBlock(block)
+    override fun getAllAccountStates(): List<AccountState> = accountStateService.getAll()
 
     override fun getWalletBalanceByAddress(address: String): Long = accountStateService.getBalanceByAddress(address)
 
@@ -77,8 +74,7 @@ class DefaultStateManager(
     override fun getAllDelegates(request: PageRequest): Page<DelegateState> =
         delegateStateService.getAllDelegates(request)
 
-    override fun getActiveDelegates(): List<DelegateState> =
-        delegateStateService.getActiveDelegates()
+    override fun getActiveDelegates(): List<DelegateState> = delegateStateService.getActiveDelegates()
 
     override fun isExistsDelegateByPublicKey(key: String): Boolean = delegateStateService.isExistsByPublicKey(key)
 
@@ -104,10 +100,10 @@ class DefaultStateManager(
         state.hash == ByteUtils.toHexString(HashUtils.doubleSha256(state.getBytes()))
 
     @Transactional
-    override fun deleteBlockStates(blockHeights: List<Long>) {
+    override fun deleteAll() {
         BlockchainLock.writeLock.lock()
         try {
-            repository.deleteAllByBlockHeightIn(blockHeights)
+            repository.deleteAll()
             repository.flush()
         } finally {
             BlockchainLock.writeLock.unlock()

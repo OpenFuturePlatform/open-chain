@@ -240,11 +240,11 @@ interface DelegateTransactionService : ExternalTransactionService<DelegateTransa
 
 interface StateManager {
 
-    fun <T : State> getLastByAddress(address: String): T
+    fun <T : State> getByAddress(address: String): T
 
-    fun getAllDelegateStatesByBlock(block: Block): List<DelegateState>
+    fun getAllDelegateStates(): List<DelegateState>
 
-    fun getAllAccountStatesByBlock(block: Block): List<AccountState>
+    fun getAllAccountStates(): List<AccountState>
 
     fun getWalletBalanceByAddress(address: String): Long
 
@@ -270,13 +270,13 @@ interface StateManager {
 
     fun verify(state: State): Boolean
 
-    fun deleteBlockStates(blockHeights: List<Long>)
+    fun deleteAll()
 
 }
 
 interface StateService<T : State> {
 
-    fun getAllByBlock(block: Block): List<T>
+    fun getAll(): List<T>
 
 }
 
