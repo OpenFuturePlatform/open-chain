@@ -1,7 +1,5 @@
 package io.openfuture.chain.core.model.entity.state
 
-import io.openfuture.chain.core.model.entity.block.Block
-import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.message.core.DelegateStateMessage
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils
@@ -17,7 +15,7 @@ class DelegateState(
     address: String,
 
     @Column(name = "rating", nullable = false)
-    val rating: Long,
+    var rating: Long,
 
     @Column(name = "wallet_address", nullable = false)
     var walletAddress: String,
@@ -25,9 +23,8 @@ class DelegateState(
     @Column(name = "create_date", nullable = false)
     var createDate: Long,
 
-    hash: String,
-    block: Block? = null
-) : State(address, hash, block) {
+    hash: String
+) : State(address, hash) {
 
     constructor(address: String, walletAddress: String, createDate: Long, rating: Long = 0) : this(
         address,
@@ -48,8 +45,8 @@ class DelegateState(
     )
 
     companion object {
-        fun of(message: DelegateStateMessage, block: MainBlock? = null): DelegateState =
-            DelegateState(message.address, message.rating, message.walletAddress, message.createDate, message.hash, block)
+        fun of(message: DelegateStateMessage): DelegateState =
+            DelegateState(message.address, message.rating, message.walletAddress, message.createDate, message.hash)
     }
 
 

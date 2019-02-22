@@ -6,6 +6,7 @@ import io.openfuture.chain.core.component.NodeKeyHolder
 import io.openfuture.chain.core.component.StatePool
 import io.openfuture.chain.core.component.TransactionThroughput
 import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.core.model.entity.block.GenesisBlock
 import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.state.AccountState
@@ -59,7 +60,7 @@ class DefaultMainBlockService(
             val height = lastBlock.height + 1
             val previousHash = lastBlock.hash
             val publicKey = keyHolder.getPublicKeyAsHexString()
-            val delegate = stateManager.getLastByAddress<DelegateState>(publicKey)
+            val delegate = stateManager.getByAddress<DelegateState>(publicKey)
 
             val unconfirmedTransactions = getTransactions()
             val delegateTransactions = mutableListOf<DelegateTransaction>()
@@ -88,9 +89,17 @@ class DefaultMainBlockService(
                     is AccountState -> accountStates.add(it)
                 }
             }
+            val stateHashes = states.map { it.hash } as MutableList
+            when (lastBlock) {
+                is MainBlock -> lastBlock
+                is GenesisBlock -> repository.findFirstByHeightLessThanOrderByHeightDesc(lastBlock.height)
+                else -> throw IllegalStateException("Wrong type")
+            }?.let {
+                stateHashes.add(it.getPayload().stateMerkleHash)
+            }
 
+            val stateMerkleHash = HashUtils.merkleRoot(stateHashes)
             val transactionMerkleHash = HashUtils.merkleRoot(transactions.map { it.hash })
-            val stateMerkleHash = HashUtils.merkleRoot(states.map { it.hash })
             val receiptMerkleHash = HashUtils.merkleRoot(receipts.map { it.hash })
 
             val payload = MainBlockPayload(transactionMerkleHash, stateMerkleHash, receiptMerkleHash,
@@ -122,10 +131,7 @@ class DefaultMainBlockService(
 
             val savedBlock = save(block)
 
-            states.forEach {
-                it.block = savedBlock
-                stateManager.commit(it)
-            }
+            stateManager.commit(states)
 
             transactions.forEach {
                 it.block = savedBlock
@@ -156,10 +162,8 @@ class DefaultMainBlockService(
         val heights = (beginHeight..endEpochHeight).toList()
 
         val blocks = repository.findAllByHeightIn(heights)
-        blocks.forEach {
-            it.getPayload().delegateStates = stateManager.getAllDelegateStatesByBlock(it)
-            it.getPayload().accountStates = stateManager.getAllAccountStatesByBlock(it)
-            if (syncMode == FULL) {
+        if (syncMode == FULL) {
+            blocks.forEach {
                 val rewardTx = transactionManager.getRewardTransactionByBlock(it)
                 it.getPayload().rewardTransactions = if (null != rewardTx) listOf(rewardTx) else listOf()
                 it.getPayload().delegateTransactions = transactionManager.getAllDelegateTransactionsByBlock(it)
@@ -167,6 +171,13 @@ class DefaultMainBlockService(
                 it.getPayload().voteTransactions = transactionManager.getAllVoteTransactionsByBlock(it)
                 it.getPayload().receipts = receiptService.getAllByBlock(it)
             }
+        }
+
+        val nextGenesisHeight = endEpochHeight + 1
+        if (null == repository.findFirstByHeightGreaterThan(nextGenesisHeight)) {
+            val lastBlock = blocks.lastOrNull()
+            lastBlock?.getPayload()?.delegateStates = stateManager.getAllDelegateStates()
+            lastBlock?.getPayload()?.accountStates = stateManager.getAllAccountStates()
         }
 
         return blocks

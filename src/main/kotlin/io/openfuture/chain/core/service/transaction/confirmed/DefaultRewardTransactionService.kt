@@ -36,7 +36,7 @@ class DefaultRewardTransactionService(
         val reward = if (rewardBlock > bank) bank else rewardBlock
         val fee = 0L
         val publicKey = keyHolder.getPublicKeyAsHexString()
-        val delegate = stateManager.getLastByAddress<DelegateState>(publicKey)
+        val delegate = stateManager.getByAddress<DelegateState>(publicKey)
         val hash = RewardTransaction.generateHash(timestamp, fee, senderAddress, reward, delegate.walletAddress)
         val signature = SignatureUtils.sign(ByteUtils.fromHexString(hash), keyHolder.getPrivateKey())
 

@@ -1,7 +1,5 @@
 package io.openfuture.chain.core.model.entity.state
 
-import io.openfuture.chain.core.model.entity.block.Block
-import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.crypto.util.HashUtils
 import io.openfuture.chain.network.message.core.AccountStateMessage
 import org.apache.commons.lang3.StringUtils.EMPTY
@@ -18,17 +16,16 @@ class AccountState(
     address: String,
 
     @Column(name = "balance", nullable = false)
-    val balance: Long = 0,
+    var balance: Long = 0,
 
     @Column(name = "vote_for")
-    val voteFor: String? = null,
+    var voteFor: String? = null,
 
     @Column(name = "storage")
-    val storage: String? = null,
+    var storage: String? = null,
 
-    hash: String,
-    block: Block? = null
-) : State(address, hash, block) {
+    hash: String
+) : State(address, hash) {
 
     constructor(address: String, balance: Long = 0, voteFor: String? = null, storage: String? = null) : this(
         address,
@@ -52,8 +49,8 @@ class AccountState(
     )
 
     companion object {
-        fun of(message: AccountStateMessage, block: MainBlock? = null): AccountState =
-            AccountState(message.address, message.balance, message.voteFor, message.storage, message.hash, block)
+        fun of(message: AccountStateMessage): AccountState =
+            AccountState(message.address, message.balance, message.voteFor, message.storage, message.hash)
     }
 
 

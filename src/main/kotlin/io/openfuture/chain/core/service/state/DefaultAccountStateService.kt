@@ -32,35 +32,34 @@ class DefaultAccountStateService(
         }
     }
 
-    override fun getVotesForDelegate(delegateKey: String): List<AccountState> = repository.findVotesByDelegateKey(delegateKey)
+    override fun getVotesForDelegate(delegateKey: String): List<AccountState> = repository.findAllByVoteFor(delegateKey)
 
     override fun updateBalanceByAddress(address: String, amount: Long): AccountState {
         val state = getCurrentState(address)
-
-        val newState = AccountState(address, state.balance + amount, state.voteFor, state.storage)
-        statePool.update(newState)
-        return newState
+        state.balance += amount
+        statePool.update(state)
+        return state
     }
 
     override fun updateVoteByAddress(address: String, delegateKey: String?): AccountState {
-        val state = AccountState(address, getCurrentState(address).balance, delegateKey)
+        val state = getCurrentState(address)
+        state.voteFor = delegateKey
         statePool.update(state)
         return state
     }
 
     override fun updateStorage(address: String, storage: String): AccountState {
         val state = getCurrentState(address)
-
-        val newState = AccountState(address, state.balance, state.voteFor, storage)
-        statePool.update(newState)
-        return newState
+        state.storage = storage
+        statePool.update(state)
+        return state
     }
 
     private fun getCurrentState(address: String): AccountState {
         BlockchainLock.readLock.lock()
         try {
             return statePool.get(address) as? AccountState
-                ?: repository.findFirstByAddressOrderByBlockIdDesc(address)
+                ?: repository.findOneByAddress(address)
                 ?: AccountState(address)
         } finally {
             BlockchainLock.readLock.unlock()
@@ -68,7 +67,6 @@ class DefaultAccountStateService(
     }
 
     private fun getLastByAddress(address: String): AccountState =
-        repository.findFirstByAddressOrderByBlockIdDesc(address)
-            ?: throw NotFoundException("Account state with address $address not found")
+        repository.findOneByAddress(address) ?: throw NotFoundException("Account state with address $address not found")
 
 }

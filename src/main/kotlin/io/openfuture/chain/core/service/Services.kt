@@ -66,6 +66,8 @@ interface BlockManager {
 
     fun getLastGenesisBlock(): GenesisBlock
 
+    fun getLastMainBlock(): MainBlock
+
     fun findGenesisBlockByEpochIndex(epochIndex: Long): GenesisBlock?
 
     fun isGenesisBlockRequired(): Boolean
@@ -98,13 +100,13 @@ interface BlockService<T : Block> {
 
     fun add(block: T)
 
+    fun getLast(): T
+
 }
 
 interface GenesisBlockService : BlockService<GenesisBlock> {
 
     fun getPreviousByHeight(height: Long): GenesisBlock
-
-    fun getLast(): GenesisBlock
 
     fun findByEpochIndex(epochIndex: Long): GenesisBlock?
 
@@ -240,11 +242,11 @@ interface DelegateTransactionService : ExternalTransactionService<DelegateTransa
 
 interface StateManager {
 
-    fun <T : State> getLastByAddress(address: String): T
+    fun <T : State> getByAddress(address: String): T
 
-    fun getAllDelegateStatesByBlock(block: Block): List<DelegateState>
+    fun getAllDelegateStates(): List<DelegateState>
 
-    fun getAllAccountStatesByBlock(block: Block): List<AccountState>
+    fun getAllAccountStates(): List<AccountState>
 
     fun getWalletBalanceByAddress(address: String): Long
 
@@ -268,15 +270,17 @@ interface StateManager {
 
     fun commit(state: State)
 
+    fun commit(states: List<State>)
+
     fun verify(state: State): Boolean
 
-    fun deleteBlockStates(blockHeights: List<Long>)
+    fun deleteAll()
 
 }
 
 interface StateService<T : State> {
 
-    fun getAllByBlock(block: Block): List<T>
+    fun getAll(): List<T>
 
 }
 

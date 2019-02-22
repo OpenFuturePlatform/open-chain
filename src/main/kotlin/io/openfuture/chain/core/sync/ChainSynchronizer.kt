@@ -103,12 +103,13 @@ class ChainSynchronizer(
 
     fun isInSync(block: Block): Boolean {
         val lastBlock = blockManager.getLast()
+        val lastMainBlock = if (lastBlock !is MainBlock) blockManager.getLastMainBlock() else lastBlock
         if (lastBlock.hash == block.hash) {
             return true
         }
         val handlers = arrayOf(mainBlockValidator.checkHeight(), mainBlockValidator.checkPreviousHash())
         val pipeline = BlockValidationPipeline(handlers)
-        return mainBlockValidator.verify(block, lastBlock, false, pipeline)
+        return mainBlockValidator.verify(block, lastBlock, lastMainBlock, false, pipeline)
     }
 
     @Synchronized
@@ -144,10 +145,10 @@ class ChainSynchronizer(
     }
 
     private fun initSync(message: GenesisBlockMessage) {
-        val delegates = blockManager.getLastGenesisBlock().getPayload().activeDelegates
+        val lastLocalGenesisBlock = blockManager.getLastGenesisBlock()
+        val delegates = lastLocalGenesisBlock.getPayload().activeDelegates
         try {
             val currentGenesisBlock = GenesisBlock.of(message)
-            val lastLocalGenesisBlock = blockManager.getLastGenesisBlock()
 
             if (lastLocalGenesisBlock.height <= currentGenesisBlock.height) {
                 syncSession.init(nodeConfigurator.getConfig().mode, lastLocalGenesisBlock, currentGenesisBlock)

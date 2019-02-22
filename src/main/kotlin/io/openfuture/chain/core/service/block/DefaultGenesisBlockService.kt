@@ -36,9 +36,6 @@ class DefaultGenesisBlockService(
     override fun getPreviousByHeight(height: Long): GenesisBlock = repository.findFirstByHeightLessThanOrderByHeightDesc(height)
         ?: throw NotFoundException("Previous block by height $height not found")
 
-    override fun getLast(): GenesisBlock = repository.findFirstByHeightLessThanOrderByHeightDesc(Long.MAX_VALUE)
-        ?: throw NotFoundException("Last genesis block not found")
-
     override fun findByEpochIndex(epochIndex: Long): GenesisBlock? =
         repository.findOneByPayloadEpochIndex(epochIndex)
 

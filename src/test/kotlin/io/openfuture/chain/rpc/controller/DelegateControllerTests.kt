@@ -2,9 +2,7 @@ package io.openfuture.chain.rpc.controller
 
 import io.openfuture.chain.config.ControllerTests
 import io.openfuture.chain.core.model.entity.block.GenesisBlock
-import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.model.entity.block.payload.GenesisBlockPayload
-import io.openfuture.chain.core.model.entity.block.payload.MainBlockPayload
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.service.BlockManager
 import io.openfuture.chain.core.service.StateManager
@@ -29,11 +27,8 @@ class DelegateControllerTests : ControllerTests() {
 
     @Test
     fun getAllShouldReturnDelegatesListTest() {
-        val block = MainBlock(1, 1, "previousHash", "hash", "signature",
-            "publicKey",
-            MainBlockPayload("merkleHash", "stateHash", "receiptHash"))
         val delegate = DelegateState("publicKey", 1, "address", 1532345018021,
-            "hash", block)
+            "hash")
         val delegates = listOf(delegate)
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
 
@@ -55,13 +50,11 @@ class DelegateControllerTests : ControllerTests() {
         val publicKey = "publicKey"
         val genesisBlock = GenesisBlock(1, 1, "previousHash", "hash",
             "signature", "publicKey", GenesisBlockPayload(1, mutableListOf(publicKey)))
-        val delegate = DelegateState("publicKey", 1, "address", 1532345018021,
-            "hash", MainBlock(1, 1, "previousHash", "hash", "signature",
-            "publicKey", MainBlockPayload("merkleHash", "stateHash", "receiptHash")))
+        val delegate = DelegateState("publicKey", 1, "address", 1532345018021, "hash")
         val expectedPageResponse = PageResponse(PageImpl(listOf(delegate)))
 
         given(blockManager.getLastGenesisBlock()).willReturn(genesisBlock)
-        given(stateManager.getLastByAddress<DelegateState>(publicKey)).willReturn(delegate)
+        given(stateManager.getByAddress<DelegateState>(publicKey)).willReturn(delegate)
 
         val actualPageResponse = webClient.get().uri("/rpc/delegates/active")
             .exchange()

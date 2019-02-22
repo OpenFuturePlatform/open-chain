@@ -2,6 +2,7 @@ package io.openfuture.chain.core.service.block.validation
 
 import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.core.model.entity.block.Block
+import io.openfuture.chain.core.model.entity.block.MainBlock
 import io.openfuture.chain.core.service.block.validation.pipeline.BlockValidationPipeline
 import io.openfuture.chain.core.util.BlockValidateHandler
 import io.openfuture.chain.crypto.util.HashUtils
@@ -20,45 +21,44 @@ abstract class BlockValidator {
     }
 
 
-    fun verify(block: Block, lastBlock: Block, new: Boolean, blockValidationPipeline: BlockValidationPipeline): Boolean {
-        return try {
-            validate(block, lastBlock, new, blockValidationPipeline)
+    fun verify(block: Block, lastBlock: Block, lastMainBlock: MainBlock, new: Boolean, blockValidationPipeline: BlockValidationPipeline): Boolean =
+        try {
+            validate(block, lastBlock, lastMainBlock, new, blockValidationPipeline)
             true
         } catch (e: ValidationException) {
             log.warn(e.message)
             false
         }
+
+    fun validate(block: Block, lastBlock: Block, lastMainBlock: MainBlock, new: Boolean, blockValidationPipeline: BlockValidationPipeline) {
+        blockValidationPipeline.invoke(block, lastBlock, lastMainBlock, new)
     }
 
-    fun validate(block: Block, lastBlock: Block, new: Boolean, blockValidationPipeline: BlockValidationPipeline) {
-        blockValidationPipeline.invoke(block, lastBlock, new)
-    }
-
-    fun checkSignature(): BlockValidateHandler = { block, _, _ ->
+    fun checkSignature(): BlockValidateHandler = { block, _, _, _ ->
         if (!SignatureUtils.verify(fromHexString(block.hash), block.signature, fromHexString(block.publicKey))) {
             throw ValidationException("Incorrect signature in block: height #${block.height}, hash ${block.hash}")
         }
     }
 
-    fun checkHash(): BlockValidateHandler = { block, _, _ ->
+    fun checkHash(): BlockValidateHandler = { block, _, _, _ ->
         if (block.hash != toHexString(HashUtils.doubleSha256(block.getBytes()))) {
             throw ValidationException("Incorrect hash in block: height #${block.height}, hash ${block.hash}")
         }
     }
 
-    fun checkTimeStamp(): BlockValidateHandler = { block, lastBlock, _ ->
+    fun checkTimeStamp(): BlockValidateHandler = { block, lastBlock, _, _ ->
         if (block.timestamp <= lastBlock.timestamp) {
             throw ValidationException("Incorrect timestamp in block: height #${block.height}, hash ${block.hash}")
         }
     }
 
-    fun checkHeight(): BlockValidateHandler = { block, lastBlock, _ ->
+    fun checkHeight(): BlockValidateHandler = { block, lastBlock, _, _ ->
         if (block.height != lastBlock.height + 1) {
             throw ValidationException("Incorrect height in block: height #${block.height}, hash ${block.hash}")
         }
     }
 
-    fun checkPreviousHash(): BlockValidateHandler = { block, lastBlock, _ ->
+    fun checkPreviousHash(): BlockValidateHandler = { block, lastBlock, _, _ ->
         if (block.previousHash != lastBlock.hash) {
             throw ValidationException("Incorrect previous hash in block: height #${block.height}, hash ${block.hash}")
         }

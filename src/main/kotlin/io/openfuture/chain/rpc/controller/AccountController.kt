@@ -46,10 +46,10 @@ class AccountController(
 
     @GetMapping("/wallets/{address}/delegate")
     fun getDelegates(@PathVariable @AddressChecksum address: String): VoteResponse? {
-        val accountState = stateManager.getLastByAddress<AccountState>(address)
+        val accountState = stateManager.getByAddress<AccountState>(address)
 
         if (null != accountState.voteFor) {
-            val delegate = stateManager.getLastByAddress<DelegateState>(accountState.voteFor!!)
+            val delegate = stateManager.getByAddress<DelegateState>(accountState.voteFor!!)
 
             return VoteResponse(
                 delegate.walletAddress,

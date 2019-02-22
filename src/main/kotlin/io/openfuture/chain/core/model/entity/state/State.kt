@@ -1,7 +1,6 @@
 package io.openfuture.chain.core.model.entity.state
 
 import io.openfuture.chain.core.model.entity.base.BaseModel
-import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.network.message.core.StateMessage
 import javax.persistence.*
 
@@ -14,11 +13,7 @@ abstract class State(
     var address: String,
 
     @Column(name = "hash", nullable = false)
-    var hash: String,
-
-    @ManyToOne
-    @JoinColumn(name = "block_id", nullable = false)
-    var block: Block? = null
+    var hash: String
 
 ) : BaseModel() {
 
