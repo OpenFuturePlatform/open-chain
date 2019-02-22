@@ -49,9 +49,6 @@ class DefaultPendingBlockHandler(
     private var timeSlotNumber: Long = 0
     private var stage: BlockApprovalStage = IDLE
 
-    @Volatile
-    private var blockAddedFlag = false
-
 
     @BlockchainSynchronized
     @Synchronized
@@ -63,7 +60,7 @@ class DefaultPendingBlockHandler(
             this.reset()
         }
 
-        if (!pendingBlocks.add(block) || blockAddedFlag) {
+        if (!pendingBlocks.add(block)) {
             return
         }
 
@@ -71,8 +68,11 @@ class DefaultPendingBlockHandler(
         val blockValid = mainBlockValidator.verify(MainBlock.of(block), lastBlock, true, partialValidationPipe)
         if (IDLE == stage && isActiveDelegate() && blockValid) {
             this.stage = PREPARE
-            val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, keyHolder.getPublicKeyAsHexString())
+            val publicKey = keyHolder.getPublicKeyAsHexString()
+            val vote = BlockApprovalMessage(PREPARE.getId(), block.hash, publicKey)
             vote.signature = SignatureUtils.sign(vote.getBytes(), keyHolder.getPrivateKey())
+            val votes = prepareVotes.getOrPut(block.hash) { mutableListOf() }
+            votes.add(publicKey)
             networkService.broadcast(vote)
             networkService.broadcast(block)
         }
@@ -122,7 +122,7 @@ class DefaultPendingBlockHandler(
     }
 
     private fun checkPrevote(size: Int, message: BlockApprovalMessage) {
-        if (size > (properties.delegatesCount!! - 1) / 3) {
+        if (size > (properties.delegatesCount!!) / 3) {
             val block = pendingBlocks.find { it.hash == message.hash }
             val slotOwner = epochService.getCurrentSlotOwner()
             if (null != block && slotOwner == block.publicKey) {
@@ -130,8 +130,11 @@ class DefaultPendingBlockHandler(
                 if (mainBlockValidator.verify(MainBlock.of(block), lastBlock, true, fullValidationPipe)) {
                     this.observable = block
                     this.stage = COMMIT
-                    val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, keyHolder.getPublicKeyAsHexString())
+                    val publicKey = keyHolder.getPublicKeyAsHexString()
+                    val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, publicKey)
                     commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())
+                    val blockCommits = commits.getOrPut(message.hash) {mutableListOf()}
+                    blockCommits.add(publicKey)
                     networkService.broadcast(commit)
                 }
             }
@@ -142,21 +145,17 @@ class DefaultPendingBlockHandler(
         val delegates = epochService.getDelegatesPublicKeys()
         val delegate = delegates.find { it == message.publicKey } ?: return
 
-        val blockCommits = commits[message.hash]
-        if (null == blockCommits) {
-            commits[message.hash] = mutableListOf(delegate)
-            return
-        }
+        val blockCommits = commits.getOrPut(message.hash) { mutableListOf() }
 
         if (!blockCommits.contains(delegate) && isValidApprovalSignature(message)) {
-            blockCommits.add(delegate)
             networkService.broadcast(message)
+            blockCommits.add(delegate)
             checkCommits(blockCommits.size, message)
         }
     }
 
     private fun checkCommits(size: Int, message: BlockApprovalMessage) {
-        if (size > (properties.delegatesCount!! / 2) + 1 && !blockAddedFlag) {
+        if (size > (properties.delegatesCount!! / 2)) {
             pendingBlocks.find { it.hash == message.hash }?.let {
                 val block = MainBlock.of(it)
                 if (!chainSynchronizer.isInSync(block) && it.hash != observable?.hash) {
@@ -166,9 +165,8 @@ class DefaultPendingBlockHandler(
                     return
                 }
                 blockManager.add(block)
-                log.info("Saving main block: height #${it.height}, hash ${it.hash}")
-                blockAddedFlag = true
-            }
+                log.info("Saving main block: height #${it.height}, hash ${it.hash}.. ${size}")
+            } ?: log.info("not found block with hash ${message.hash}")
         }
     }
 
@@ -177,7 +175,6 @@ class DefaultPendingBlockHandler(
         prepareVotes.clear()
         commits.clear()
         pendingBlocks.clear()
-        blockAddedFlag = false
     }
 
     private fun isValidApprovalSignature(message: BlockApprovalMessage): Boolean =
