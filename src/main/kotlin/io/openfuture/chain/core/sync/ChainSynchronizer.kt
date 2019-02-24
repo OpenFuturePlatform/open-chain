@@ -53,7 +53,7 @@ class ChainSynchronizer(
 
 
     override fun onApplicationEvent(event: DataSourceSchemaCreatedEvent) {
-        prepareDB(nodeConfigurator.getConfig().mode)
+//        prepareDB(nodeConfigurator.getConfig().mode)
     }
 
     @EventListener
