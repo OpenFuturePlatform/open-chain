@@ -96,11 +96,13 @@ class MainBlockValidator(
     fun checkStateMerkleHash(): BlockValidateHandler = { block, _, lastMainBlock, _ ->
         block as MainBlock
         val states = block.getPayload().delegateStates + block.getPayload().accountStates
-        val stateHashes = (states.map { it.hash }) as MutableList
-        stateHashes.add(lastMainBlock.getPayload().stateMerkleHash)
+        if (!states.isEmpty()) {
+            val stateHashes = (states.map { it.hash }) as MutableList
+            stateHashes.add(lastMainBlock.getPayload().stateMerkleHash)
 
-        if (!verifyMerkleRootHash(block.getPayload().stateMerkleHash, stateHashes)) {
-            throw ValidationException("Invalid state merkle hash in block: height #${block.height}, hash ${block.hash}")
+            if (!verifyMerkleRootHash(block.getPayload().stateMerkleHash, stateHashes)) {
+                throw ValidationException("Invalid state merkle hash in block: height #${block.height}, hash ${block.hash}")
+            }
         }
     }
 

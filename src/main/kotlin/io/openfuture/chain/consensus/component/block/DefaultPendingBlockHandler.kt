@@ -48,6 +48,7 @@ class DefaultPendingBlockHandler(
     private var observable: PendingBlockMessage? = null
     private var timeSlotNumber: Long = 0
     private var stage: BlockApprovalStage = IDLE
+    private var blockAddedFlag = false
 
 
     @BlockchainSynchronized
@@ -60,7 +61,7 @@ class DefaultPendingBlockHandler(
             this.reset()
         }
 
-        if (!pendingBlocks.add(block)) {
+        if (!pendingBlocks.add(block) || blockAddedFlag) {
             return
         }
 
@@ -157,7 +158,7 @@ class DefaultPendingBlockHandler(
     }
 
     private fun checkCommits(size: Int, message: BlockApprovalMessage) {
-        if (size > (properties.delegatesCount!! / 2)) {
+        if (size > (properties.delegatesCount!! / 2) && !blockAddedFlag) {
             pendingBlocks.find { it.hash == message.hash }?.let {
                 val block = MainBlock.of(it)
                 if (!chainSynchronizer.isInSync(block) && it.hash != observable?.hash) {
@@ -168,7 +169,8 @@ class DefaultPendingBlockHandler(
                 }
                 blockManager.add(block)
                 log.info("Saving main block: height #${it.height}, hash ${it.hash}.. ${size}")
-            } ?: log.info("not found block with hash ${message.hash}")
+                blockAddedFlag = true
+            }
         }
     }
 
@@ -177,6 +179,7 @@ class DefaultPendingBlockHandler(
         prepareVotes.clear()
         commits.clear()
         pendingBlocks.clear()
+        blockAddedFlag = false
     }
 
     private fun isValidApprovalSignature(message: BlockApprovalMessage): Boolean =
