@@ -163,7 +163,7 @@ class DefaultPendingBlockHandler(
         if (size > (properties.delegatesCount!! / 2) && !blockAddedFlag) {
             pendingBlocks.find { it.hash == message.hash }?.let {
                 val block = MainBlock.of(it)
-                if (!chainSynchronizer.isInSync(block) && it.hash != observable?.hash) {
+                if (!chainSynchronizer.isInSync(block) || it.hash != observable?.hash) {
                     chainSynchronizer.checkLastBlock()
                     timeSlotNumber = 0
                     reset()
