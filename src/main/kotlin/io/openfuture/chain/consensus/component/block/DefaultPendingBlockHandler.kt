@@ -57,6 +57,7 @@ class DefaultPendingBlockHandler(
         val blockSlotNumber = epochService.getSlotNumber(System.currentTimeMillis())
 
         if (blockSlotNumber != timeSlotNumber) {
+            log.info("Timeslot reset")
             this.timeSlotNumber = blockSlotNumber
             this.reset()
         }
@@ -133,6 +134,7 @@ class DefaultPendingBlockHandler(
                 if (mainBlockValidator.verify(MainBlock.of(block), lastBlock, lastMainBlock,true, fullValidationPipe)) {
                     this.observable = block
                     this.stage = COMMIT
+                    log.info("Commited block with hash ${message.hash}")
                     val publicKey = keyHolder.getPublicKeyAsHexString()
                     val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, publicKey)
                     commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())
