@@ -35,6 +35,7 @@ class MainBlockController(
         PageResponse(blockManager.getAllMainBlocks(request).map { getMainBlockResponse(it) })
 
     private fun getMainBlockResponse(block: MainBlock): MainBlockResponse =
-        MainBlockResponse(block, transactionManager.getCountByBlock(block), epochService.getEpochByBlock(block))
+        MainBlockResponse(block, transactionManager.getCountByBlock(block),
+            if (block.height == 0L) 0 else epochService.getEpochByBlock(block))
 
 }
