@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.0.0] - 2019-02-25
+### Changed
+- Consensus: block production time is increased
+- Core: states reflect only latest blockchain status
+- RPC: transaction's receipts are displayed on Wallet UI
+- RPC: contract estimation button is added to Wallet UI
+
 ## [1.9.0] - 2019-02-08
 ### Added
 - Smart contracts: contract cost estimation
@@ -323,6 +330,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - RPC requests: getTimestamp
 
 [Unreleased]: https://github.com/OpenFuturePlatform/open-chain/compare/master...sprint
+[2.0.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.9.0...v2.0.0
 [1.9.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.7.1...v1.8.0
 [1.7.1]: https://github.com/OpenFuturePlatform/open-chain/compare/v1.7.0...v1.7.1
