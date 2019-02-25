@@ -57,7 +57,6 @@ class DefaultPendingBlockHandler(
         val blockSlotNumber = epochService.getSlotNumber(System.currentTimeMillis())
 
         if (blockSlotNumber != timeSlotNumber) {
-            log.info("Timeslot reset")
             this.timeSlotNumber = blockSlotNumber
             this.reset()
         }
@@ -134,7 +133,6 @@ class DefaultPendingBlockHandler(
                 if (mainBlockValidator.verify(MainBlock.of(block), lastBlock, lastMainBlock,true, fullValidationPipe)) {
                     this.observable = block
                     this.stage = COMMIT
-                    log.info("Commited block with hash ${message.hash}")
                     val publicKey = keyHolder.getPublicKeyAsHexString()
                     val commit = BlockApprovalMessage(COMMIT.getId(), message.hash, publicKey)
                     commit.signature = SignatureUtils.sign(commit.getBytes(), keyHolder.getPrivateKey())
@@ -163,14 +161,14 @@ class DefaultPendingBlockHandler(
         if (size > (properties.delegatesCount!! / 2) && !blockAddedFlag) {
             pendingBlocks.find { it.hash == message.hash }?.let {
                 val block = MainBlock.of(it)
-                if (!chainSynchronizer.isInSync(block) || it.hash != observable?.hash) {
+                if (!chainSynchronizer.isInSync(block) || (it.hash != observable?.hash && isActiveDelegate())) {
                     chainSynchronizer.checkLastBlock()
                     timeSlotNumber = 0
                     reset()
                     return
                 }
                 blockManager.add(block)
-                log.info("Saving main block: height #${it.height}, hash ${it.hash}.. ${size}")
+                log.info("Saving main block: height #${it.height}, hash ${it.hash}")
                 blockAddedFlag = true
             }
         }
