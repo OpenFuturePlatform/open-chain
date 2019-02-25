@@ -123,7 +123,7 @@ class MainBlockValidator(
         }
     }
 
-    fun checkReceiptsAndStates(): BlockValidateHandler = { block, _, _,  new ->
+    fun checkReceiptsAndStates(): BlockValidateHandler = { block, _, _, new ->
         block as MainBlock
         val blockStates = block.getPayload().delegateStates + block.getPayload().accountStates
 
