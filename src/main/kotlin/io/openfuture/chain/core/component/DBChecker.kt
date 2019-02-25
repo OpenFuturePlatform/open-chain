@@ -10,7 +10,6 @@ import io.openfuture.chain.core.sync.SyncMode.LIGHT
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 
 @Component
 class DBChecker(
@@ -24,8 +23,8 @@ class DBChecker(
 
     fun prepareDB(syncMode: SyncMode) {
         val pipeline = when (syncMode) {
-            FULL -> BlockValidationPipeline(mainBlockValidator.checkFull())
-            LIGHT -> BlockValidationPipeline(mainBlockValidator.checkLight())
+            FULL -> BlockValidationPipeline(mainBlockValidator.checkFullOnSync())
+            LIGHT -> BlockValidationPipeline(mainBlockValidator.checkLightOnSync())
         }
         val lastBlock = blockManager.getLast()
         val lastValidBlockHeight = lastValidBlockHeight(pipeline)
