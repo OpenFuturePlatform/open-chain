@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/github/license/OpenFuturePlatform/open-chain.svg?style=flat-square)](./LICENSE.txt)
 
 
-## OPEN Platform: A distributed network for the Smart Contracts
+## OPEN Platform: A distributed network for Smart Contracts
 
 OPEN Platform uses blockchain technology to leverage **smart contracts** in order to autonomously manage digital assets and to create a **smart economy** within a decentralized network.
 
