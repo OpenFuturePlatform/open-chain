@@ -1,4 +1,4 @@
-# OPEN Chain [![Twitter Follow](https://img.shields.io/twitter/follow/openplatformico.svg?style=social&label=Follow)](https://twitter.com/openplatformico)
+# OPEN Chain [![Twitter Follow](https://img.shields.io/twitter/follow/openplatform.svg?style=social&label=Follow)](https://twitter.com/openplatform)
 
 
 [![Explorer](https://img.shields.io/badge/open%20chain-explorer-007EC6.svg?style=flat-square)](http://explorer.openfuture.io)
