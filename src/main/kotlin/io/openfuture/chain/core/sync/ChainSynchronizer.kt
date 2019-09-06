@@ -151,6 +151,8 @@ class ChainSynchronizer(
     }
 
     private fun initSync(message: GenesisBlockMessage) {
+        syncSession.clearTemporaryBlocks()
+
         val lastLocalGenesisBlock = blockManager.getLastGenesisBlock()
         val delegates = lastLocalGenesisBlock.getPayload().activeDelegates
         try {

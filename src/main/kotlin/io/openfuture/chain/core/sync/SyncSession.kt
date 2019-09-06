@@ -66,11 +66,11 @@ class SyncSession(
         }
 
         val temporaryBlocks = createTemporaryBlocks(epochBlocks)
-        val lastTemporaryBlock = temporaryBlocks.last()
 
-        val lastSavedTemporaryBlock = temporaryBlockService.getByHeightIn(listOf(lastTemporaryBlock.height))
-        if (null == lastSavedTemporaryBlock.firstOrNull { it.block == lastTemporaryBlock.block }) {
+        try {
             temporaryBlockService.save(temporaryBlocks)
+        } catch (e: Exception) {
+            log.warn("Blocks till height ${epochBlocks.last().height} already saved, skiping...")
         }
 
         completed = null != epochBlocks.firstOrNull { it.hash == currentGenesisBlock.hash }
@@ -92,6 +92,10 @@ class SyncSession(
         epochAdded = 0
     }
 
+    fun clearTemporaryBlocks(){
+        temporaryBlockService.deleteAll()
+    }
+
     private fun createTemporaryBlocks(blocks: List<Block>): List<TemporaryBlock> =
         blocks.map { TemporaryBlock(it.height, ByteUtils.toHexString(SerializationUtils.serialize(it))) }
 
@@ -106,14 +110,7 @@ class SyncSession(
         }
 
         for (index in 1 until chain.size) {
-            if (!mainBlockValidator.verify(
-                    chain[index],
-                    chain[index - 1],
-                    chain[index] as MainBlock,
-                    false,
-                    pipeline
-                )
-            ) {
+            if (!mainBlockValidator.verify(chain[index], chain[index - 1], chain[index] as MainBlock, false, pipeline)) {
                 return false
             }
         }
