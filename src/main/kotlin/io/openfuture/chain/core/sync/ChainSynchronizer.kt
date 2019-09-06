@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationListener
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.util.concurrent.ScheduledFuture
+import javax.annotation.PostConstruct
 
 @Component
 class ChainSynchronizer(
@@ -52,6 +53,11 @@ class ChainSynchronizer(
     private var future: ScheduledFuture<*>? = null
 
 
+    @PostConstruct
+    fun forceSynchronizationCheck() {
+        checkLastBlock()
+    }
+
     override fun onApplicationEvent(event: DataSourceSchemaCreatedEvent) {
         prepareDB(nodeConfigurator.getConfig().mode)
     }
@@ -63,7 +69,7 @@ class ChainSynchronizer(
     }
 
     fun prepareDB(syncMode: SyncMode) {
-        status = SyncStatus.PROCESSING
+        status = PROCESSING
         dbChecker.prepareDB(syncMode)
         status = SYNCHRONIZED
     }

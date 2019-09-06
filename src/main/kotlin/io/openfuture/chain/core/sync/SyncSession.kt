@@ -66,8 +66,13 @@ class SyncSession(
         }
 
         val temporaryBlocks = createTemporaryBlocks(epochBlocks)
+        val lastTemporaryBlock = temporaryBlocks.last()
 
-        temporaryBlockService.save(temporaryBlocks)
+        val lastSavedTemporaryBlock = temporaryBlockService.getByHeightIn(listOf(lastTemporaryBlock.height))
+        if (null == lastSavedTemporaryBlock.firstOrNull { it.block == lastTemporaryBlock.block }) {
+            temporaryBlockService.save(temporaryBlocks)
+        }
+
         completed = null != epochBlocks.firstOrNull { it.hash == currentGenesisBlock.hash }
         epochAdded++
         log.info("#$epochAdded epochs FROM ${epochQuantity + 1} is processed")
@@ -101,7 +106,14 @@ class SyncSession(
         }
 
         for (index in 1 until chain.size) {
-            if (!mainBlockValidator.verify(chain[index], chain[index - 1], chain[index] as MainBlock, false, pipeline)) {
+            if (!mainBlockValidator.verify(
+                    chain[index],
+                    chain[index - 1],
+                    chain[index] as MainBlock,
+                    false,
+                    pipeline
+                )
+            ) {
                 return false
             }
         }
