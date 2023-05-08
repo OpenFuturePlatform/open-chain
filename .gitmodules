@@ -5,6 +5,6 @@
 	ignore = untracked
 [submodule "chain-kotlin-sdk"]
 	path = chain-kotlin-sdk
-	url = ../sdk/chain-kotlin-sdk.git
+	url = ../chain-kotlin-sdk.git
 	branch = master
 	ignore = untracked

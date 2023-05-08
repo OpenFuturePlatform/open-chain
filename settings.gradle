@@ -1,4 +1,4 @@
 rootProject.name = 'open-chain'
 
-include('frontend')
+//include('frontend')
 includeBuild('./chain-kotlin-sdk')

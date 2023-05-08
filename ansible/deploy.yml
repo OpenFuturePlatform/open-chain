@@ -18,19 +18,20 @@
       with_items:
         - { name: db_volume }
         - { name: db_volume-2 }
-      when: del_volume
+#      when: del_volume
     - name: Create a volumes for embedded DB
       docker_volume:
         name: "{{ item.name }}"
       with_items:
         - { name: db_volume }
         - { name: db_volume-2 }
+    - name: Delete all images
+      shell: docker image prune -a --force
     - name: Re-create openchain containers
       docker_container:
         name: "{{ item.name }}"
-        image: openplatform/chain:{{ image_tag }}
+        image: openplatform/chain-v2:v0.0.1
         state: started
-        pull: yes
         env:
           RPC_PORT: "{{ item.app_port }}"
           NODE_PORT: "{{ item.api_port }}"
@@ -44,6 +45,5 @@
       with_items:
         - { name: openchain, db_volume: db_volume, app_port: 9090, api_port: 9190, secret_key: "{{ key }}" }
         - { name: openchain-2, db_volume: db_volume-2, app_port: 9092, api_port: 9192, secret_key: "{{ key2 }}" }
-      no_log: True
     - name: Delete old images
       shell: docker image prune -a --force --filter "until=24h"

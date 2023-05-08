@@ -65,7 +65,6 @@ class ChannelsHolder(
     fun send(message: Message, nodeInfo: NodeInfo): Boolean {
         val channel = channelGroup.firstOrNull { nodeInfo == it.attr(NODE_INFO_KEY).get() } ?: return false
         channel.writeAndFlush(message)
-        log.trace("Send ${message::class.java.simpleName} to ${nodeInfo.address.port}")
         return true
     }
 

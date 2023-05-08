@@ -61,4 +61,10 @@ class MainBlockPayload(
     override fun getBytes(): ByteArray =
         transactionMerkleHash.toByteArray() + stateMerkleHash.toByteArray() + receiptMerkleHash.toByteArray()
 
+    fun hasRewardTransactions(): Boolean = rewardTransactions.isNotEmpty()
+
+    fun hasTransferTransactions(): Boolean = transferTransactions.isNotEmpty()
+
+    fun hasVoteTransactions(): Boolean = voteTransactions.isNotEmpty()
+
 }

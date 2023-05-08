@@ -1,6 +1,7 @@
 package io.openfuture.chain.smartcontract.deploy.calculation
 
 import org.assertj.core.api.Assertions
+import org.bouncycastle.util.encoders.Hex.toHexString
 import org.junit.Test
 
 class ContractCostCalculatorTests {

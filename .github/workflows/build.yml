@@ -1,0 +1,176 @@
+name: Build
+on:
+  push:
+    branches:
+      - sprint
+jobs:
+  unitTests:
+    if: ${{ false }}
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: sprint
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: 8
+      - name: Set Gradle User Home
+        run: export GRADLE_USER_HOME=$(pwd)/.gradle
+      - name: Cache Gradle Dependencies
+        uses: actions/cache@v2
+        with:
+          path: .gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+      - name: Cache Gradle Wrapper
+        uses: actions/cache@v2
+        with:
+          path: .gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle
+  buildJar:
+#    if: ${{ false }}
+    name: Build JAR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Pull & update submodules recursively
+        run: |
+          git submodule update --init --recursive
+          git submodule update --recursive --remote
+      - name: Commit
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions - update submodules"
+          git add --all
+          git commit -m "Update submodules" || echo "No changes to commit"
+          git push
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: 8
+          distribution: temurin
+      - name: Set Gradle User Home
+        run: export GRADLE_USER_HOME=$(pwd)/.gradle
+      - name: Assemble JAR
+        run: ./gradlew assemble
+      - name: Cache Gradle Dependencies
+        uses: actions/cache@v2
+        with:
+          path: .gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+      - name: Cache Gradle Wrapper
+        uses: actions/cache@v2
+        with:
+          path: .gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle
+      - name: Upload JAR
+        uses: actions/upload-artifact@v2
+        with:
+          name: open-chain.jar
+          path: build/libs/*.jar
+  packageNative:
+    name: Package Native
+    runs-on: ubuntu-latest
+    needs:
+      - buildJar
+    env:
+      INSTALL4J_KEY: ${{ secrets.INSTALL4J_KEY }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: 8
+          distribution: temurin
+      - name: Install Gettext
+        run: sudo apt-get -y install gettext
+      - name: Set Version
+        run: |
+          export VERSION=$(echo ${{ github.ref }} | sed -e 's/v//')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: Substitute Version in File
+        run: |
+          envsubst '${VERSION}' < install4j/multi.install4j > install4j/multi.install4j.new
+          mv install4j/multi.install4j.new install4j/multi.install4j
+      - name: Download JAR
+        uses: actions/download-artifact@master
+        with:
+          name: open-chain.jar
+          path: build/libs/
+      - name: Run install4j
+        run: >
+          docker run --rm -v "$(pwd):/packages" openplatform/install4j:full \
+            /JRE/install4j7.0.6/bin/install4jc --license=${INSTALL4J_KEY} /packages/install4j/multi.install4j
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: artifacts/
+  deploy:
+    name: Deploy with Volume Deletion
+    runs-on: ubuntu-latest
+    needs:
+      - buildJar
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: sprint
+      - name: Download JAR
+        uses: actions/download-artifact@master
+        with:
+          name: open-chain.jar
+          path: build/libs/
+
+      - name: Build and push
+        run: |
+          docker login -u ${{ secrets.DOCKER_LOGIN }} -p ${{ secrets.DOCKER_PASS }}
+          docker build -t openplatform/chain-v2:v0.0.1 .
+          docker push openplatform/chain-v2:v0.0.1
+
+      - name: Setup SSH connection
+        run: |
+          eval $(ssh-agent -s)
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan 35.194.84.89 >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+          echo "${{ secrets.OPENCHAIN_DEPLOY_KEY }}" | tr -d '\r' > ansible/key.pem
+          chmod 600 ansible/key.pem
+      - name: Deploy
+        uses: docker://openplatform/ansible
+        with:
+          entrypoint: bash
+          args: ansible/deploy.sh
+        env:
+          SERVER1: ${{ secrets.SERVER1 }}
+          SERVER2: ${{ secrets.SERVER2 }}
+          SERVER3: ${{ secrets.SERVER3 }}
+          SERVER4: ${{ secrets.SERVER4 }}
+          SERVER5: ${{ secrets.SERVER5 }}
+          SERVER6: ${{ secrets.SERVER6 }}
+          SERVER7: ${{ secrets.SERVER7 }}
+          SERVER8: ${{ secrets.SERVER8 }}
+          SERVER9: ${{ secrets.SERVER9 }}
+          SERVER10: ${{ secrets.SERVER10 }}
+          SERVER11: ${{ secrets.SERVER11 }}
+          SERVER12: ${{ secrets.SERVER12 }}
+          SERVER13: ${{ secrets.SERVER13 }}
+          SERVER14: ${{ secrets.SERVER14 }}
+          SERVER15: ${{ secrets.SERVER15 }}
+          SERVER16: ${{ secrets.SERVER16 }}
+          SERVER17: ${{ secrets.SERVER17 }}
+          SERVER18: ${{ secrets.SERVER18 }}
+          SERVER19: ${{ secrets.SERVER19 }}
+          SERVER20: ${{ secrets.SERVER20 }}
+          SERVER21: ${{ secrets.SERVER21 }}
