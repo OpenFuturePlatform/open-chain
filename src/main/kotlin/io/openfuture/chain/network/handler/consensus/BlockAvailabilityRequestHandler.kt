@@ -18,7 +18,6 @@ class BlockAvailabilityRequestHandler(
 ) : SimpleChannelInboundHandler<BlockAvailabilityRequest>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: BlockAvailabilityRequest) {
-        println("Received message for BlockAvailabilityRequestHandler: ${msg.hash}")
         log.info("Received message for BlockAvailabilityRequestHandler: ${msg.hash}")
         val block = blockManager.findByHash(msg.hash)
         val height = block?.height ?: -1

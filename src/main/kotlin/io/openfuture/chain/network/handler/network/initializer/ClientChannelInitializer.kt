@@ -65,6 +65,7 @@ class ClientChannelInitializer(
             epochResponseHandler,
             mainBlockHandler,
             genesisBlockHandler,
+
             blockAvailabilityRequestHandler,
             blockAvailabilityResponseHandler,
             syncStatusHandler,
