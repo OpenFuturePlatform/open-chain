@@ -124,8 +124,10 @@ class ChainSynchronizer(
         if (PROCESSING == status) {
             return
         }
+        log.info("Setting to processing")
         status = PROCESSING
         val block = blockManager.getLast()
+        log.info("Last block ${block.hash}")
         checkBlock(block)
         future = requestRetryScheduler.startRequestScheduler(future, Runnable { checkBlock(block) })
     }
@@ -234,6 +236,7 @@ class ChainSynchronizer(
         val delegate = epochService.getDelegatesPublicKeys().random()
         val nodeInfo = addressesHolder.getNodeInfoByUid(delegate)
         if (null != nodeInfo) {
+            log.info("Sending message to node ${nodeInfo.address}, ${block.hash}, $delegate")
             networkApiService.sendToAddress(BlockAvailabilityRequest(block.hash), nodeInfo)
         }
     }

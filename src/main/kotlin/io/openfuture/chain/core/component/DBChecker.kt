@@ -12,7 +12,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class DBChecker(
+class
+DBChecker(
     private val blockManager: BlockManager,
     private val mainBlockValidator: MainBlockValidator
 ) {
@@ -22,11 +23,13 @@ class DBChecker(
     }
 
     fun prepareDB(syncMode: SyncMode) {
+        log.info("Starting to prepareDb")
         val pipeline = when (syncMode) {
             FULL -> BlockValidationPipeline(mainBlockValidator.checkFullOnSync())
             LIGHT -> BlockValidationPipeline(mainBlockValidator.checkLightOnSync())
         }
         val lastBlock = blockManager.getLast()
+        log.info("Last valid block $lastBlock")
         val lastValidBlockHeight = lastValidBlockHeight(pipeline)
         val failBlockHeight = lastValidBlockHeight + 1L
 
@@ -34,6 +37,7 @@ class DBChecker(
             val range = LongRange(failBlockHeight, lastBlock.height)
             blockManager.deleteByHeightIn(range.toList())
         }
+        log.info("Finished to prepareDb")
     }
 
     private fun lastValidBlockHeight(pipeline: BlockValidationPipeline): Long {

@@ -37,6 +37,8 @@ dependencies {
     // DB
     compile('org.flywaydb:flyway-core')
     compile('com.h2database:h2')
+    implementation("mysql:mysql-connector-java")
+    implementation 'org.postgresql:postgresql:42.3.1'
 
     // Utils
     compile('commons-net:commons-net:3.6')

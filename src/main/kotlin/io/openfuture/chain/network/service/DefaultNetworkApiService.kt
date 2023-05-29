@@ -27,6 +27,7 @@ class DefaultNetworkApiService(
             connectionService.connect(nodeInfo.address, Consumer {
                 it.attr(ChannelsHolder.NODE_INFO_KEY).set(nodeInfo)
                 it.writeAndFlush(message)
+                println("Send message to ${nodeInfo.address} $message")
             })
         }
     }

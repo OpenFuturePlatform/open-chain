@@ -14,6 +14,7 @@ class BlockAvailabilityResponseHandler(
 ) : SimpleChannelInboundHandler<BlockAvailabilityResponse>() {
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: BlockAvailabilityResponse) {
+        println("Received message BlockAvailabilityResponse: ${msg.genesisBlock}, ${msg.hash}, ${msg.height}")
         chainSynchronizer.onBlockAvailabilityResponse(msg)
     }
 
