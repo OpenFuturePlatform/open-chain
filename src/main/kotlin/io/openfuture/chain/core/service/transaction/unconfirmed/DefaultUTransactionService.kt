@@ -23,7 +23,7 @@ import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
-@Transactional(readOnly = true)
+@Transactional
 abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
     private val uRepository: UTransactionRepository<uT>
 ) : UTransactionService<uT> {
