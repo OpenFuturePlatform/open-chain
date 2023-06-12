@@ -236,7 +236,6 @@ class ChainSynchronizer(
         val delegate = epochService.getDelegatesPublicKeys().random()
         val nodeInfo = addressesHolder.getNodeInfoByUid(delegate)
         if (null != nodeInfo) {
-            log.info("Sending message to node ${nodeInfo.address}, ${block.hash}, $delegate")
             networkApiService.sendToAddress(BlockAvailabilityRequest(block.hash), nodeInfo)
         }
     }

@@ -39,9 +39,6 @@ class BlockProductionScheduler(
     }
 
     private fun proceedProductionLoop() {
-        log.info("proceedProductionLoop started")
-        log.info("Status clock: ${clockChecker.getStatus()}")
-        log.info("chainSyncronizer: ${chainSynchronizer.getStatus()}")
         try {
             if (NOT_SYNCHRONIZED == clockChecker.getStatus()) {
                 log.error("Please set up Time synchronization by the ntp servers")
@@ -55,7 +52,8 @@ class BlockProductionScheduler(
             }
 
             val slotOwner = epochService.getCurrentSlotOwner()
-            log.debug("CONSENSUS: Slot owner $slotOwner")
+            log.info("Attempt to produce block...")
+            log.info("CONSENSUS: Slot owner $slotOwner")
             if (blockManager.isGenesisBlockRequired()) {
                 val genesisBlock = blockManager.createGenesisBlock()
                 blockManager.add(genesisBlock)

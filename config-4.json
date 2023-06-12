@@ -1,6 +1,6 @@
 {
   "externalPort" : 9194,
   "externalHost" : "127.0.0.1",
-  "secret" : "60751945a528466644813f7eab5c3d809129dfd54a62e38232f661c526de5378",
-  "mode" : "LIGHT"
+  "secret" : "afc442a5eb0253dce40e3a25596ab8ba5ec8b043dd99826b28b271594e4367c6",
+  "mode" : "FULL"
 }

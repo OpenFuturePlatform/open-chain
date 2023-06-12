@@ -150,13 +150,13 @@ class MainBlockValidator(
                 throw ValidationException("Invalid count block receipts in block: height #${block.height}, hash ${block.hash}")
             }
 
-            if (block.getPayload().transferTransactions.isEmpty() && block.getPayload().voteTransactions.isEmpty() && block.getPayload().receipts.isEmpty()) {
+/*            if (block.getPayload().transferTransactions.isEmpty() && block.getPayload().voteTransactions.isEmpty() && block.getPayload().receipts.isEmpty()) {
                 throw ValidationException("Block won't be created bc: has transfer transactions: " +
                         "${!block.getPayload().transferTransactions.isEmpty()}" +
                         "has vote transactions: ${!block.getPayload().voteTransactions.isEmpty()}" +
                         "has receipts: ${!block.getPayload().receipts.isEmpty()}" +
                         "")
-            }
+            }*/
 
             if (blockStates.size != states.size) {
                 throw ValidationException("Invalid count block states in block: height #${block.height}, hash ${block.hash}")
@@ -224,6 +224,9 @@ class MainBlockValidator(
                 throw ValidationException("Invalid transfer transactions in block: height #${block.height}, hash ${block.hash}")
             }
         }
+//        if (block.getPayload().transferTransactions.isEmpty()) {
+//            throw ValidationException("No transactions, main block won't be created")
+//        }
     }
 
     fun checkVoteTransactions(): BlockValidateHandler = { block, _, _, new ->
