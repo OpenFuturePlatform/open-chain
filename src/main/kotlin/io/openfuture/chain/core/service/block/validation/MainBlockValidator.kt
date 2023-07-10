@@ -125,7 +125,8 @@ class MainBlockValidator(
 
     fun checkReceiptsAndStates(): BlockValidateHandler = { block, _, _, new ->
         block as MainBlock
-        val blockStates = block.getPayload().delegateStates + block.getPayload().accountStates
+        val payload = block.getPayload()
+        val blockStates = payload.delegateStates + payload.accountStates
 
         blockStates.forEach {
             if (!stateManager.verify(it)) {
@@ -133,7 +134,7 @@ class MainBlockValidator(
             }
         }
 
-        block.getPayload().receipts.forEach {
+        payload.receipts.forEach {
             if (!receiptService.verify(it)) {
                 throw ValidationException("Invalid block receipts in block: height #${block.height}, hash ${block.hash}")
             }
@@ -141,13 +142,18 @@ class MainBlockValidator(
 
         if (new) {
             val delegateWallet = stateManager.getByAddress<DelegateState>(block.publicKey).walletAddress
-            val transactions = block.getPayload().delegateTransactions + block.getPayload().transferTransactions +
-                block.getPayload().voteTransactions + block.getPayload().rewardTransactions
+            val transactions = payload.delegateTransactions + payload.transferTransactions +
+                payload.voteTransactions + payload.rewardTransactions
             val receipts = transactionManager.processTransactions(transactions, delegateWallet)
             val states = statePool.getStates()
 
-            if (block.getPayload().receipts.size != receipts.size) {
+            if (payload.receipts.size != receipts.size) {
                 throw ValidationException("Invalid count block receipts in block: height #${block.height}, hash ${block.hash}")
+            }
+
+            if (!payload.hasTransferTransactions() && !payload.hasVoteTransactions()) {
+                throw ValidationException("Block won't be created due to: has transfer transactions: " +
+                        "${payload.hasTransferTransactions()}  has vote transactions: ${payload.hasVoteTransactions()}")
             }
 
             if (blockStates.size != states.size) {
@@ -155,7 +161,7 @@ class MainBlockValidator(
             }
 
             receipts.forEach { r ->
-                block.getPayload().receipts.firstOrNull { it.hash == r.hash }
+                payload.receipts.firstOrNull { it.hash == r.hash }
                     ?: throw ValidationException("Invalid block receipts in block: height #${block.height}, hash ${block.hash}")
             }
 

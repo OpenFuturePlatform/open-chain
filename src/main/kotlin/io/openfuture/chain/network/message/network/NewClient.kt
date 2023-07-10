@@ -11,7 +11,7 @@ data class NewClient(
 ) : Message {
 
     override fun read(buf: ByteBuf) {
-        nodeInfo = NodeInfo::class.java.newInstance()
+        nodeInfo = NodeInfo::class.java.getDeclaredConstructor().newInstance()
         nodeInfo.read(buf)
     }
 
