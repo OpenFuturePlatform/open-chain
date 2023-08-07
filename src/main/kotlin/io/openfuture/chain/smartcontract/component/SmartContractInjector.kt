@@ -10,7 +10,7 @@ object SmartContractInjector {
 
 
     fun initSmartContract(clazz: Class<*>, owner: String, address: String): SmartContract {
-        val instance = clazz.newInstance() as SmartContract
+        val instance = clazz.getDeclaredConstructor().newInstance() as SmartContract
 
         injectField(instance, OWNER_FIELD, owner)
         injectField(instance, ADDRESS_FIELD, address)

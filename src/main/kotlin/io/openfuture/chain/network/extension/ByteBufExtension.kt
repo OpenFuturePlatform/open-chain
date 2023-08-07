@@ -39,7 +39,7 @@ inline fun <reified T : Message> ByteBuf.readList(): MutableList<T> {
     val size = this.readInt()
     val list = mutableListOf<T>()
     for (index in 1..size) {
-        val instance = T::class.java.newInstance()
+        val instance = T::class.java.getDeclaredConstructor().newInstance()
         instance.read(this)
         list.add(instance)
     }
@@ -55,7 +55,7 @@ inline fun <reified T : Message> ByteBuf.readSet(): MutableSet<T> {
     val size = this.readInt()
     val set = mutableSetOf<T>()
     for (index in 1..size) {
-        val instance = T::class.java.newInstance()
+        val instance = T::class.java.getDeclaredConstructor().newInstance()
         instance.read(this)
         set.add(instance)
     }

@@ -65,9 +65,9 @@ class ServerChannelInitializer(
             epochResponseHandler,
             mainBlockHandler,
             genesisBlockHandler,
+            blockAvailabilityRequestHandler,
             blockAvailabilityResponseHandler,
             syncStatusHandler,
-            blockAvailabilityRequestHandler,
             //        core
             transferTransactionHandler,
             delegateTransactionHandler,
