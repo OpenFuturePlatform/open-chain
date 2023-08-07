@@ -1,6 +1,7 @@
 package io.openfuture.chain.smartcontract.deploy.calculation
 
 import org.assertj.core.api.Assertions
+import org.bouncycastle.util.encoders.Hex.toHexString
 import org.junit.Test
 
 class ContractCostCalculatorTests {
@@ -10,7 +11,7 @@ class ContractCostCalculatorTests {
     @Test
     fun testCalculation() {
         val bytes = this::class.java.getResourceAsStream("/classes/SampleClass.class").readBytes()
-
+        println("vv ${toHexString(bytes)}")
         val result = costCalculator.calculateCost(bytes)
 
         Assertions.assertThat(result).isEqualTo(56L)
