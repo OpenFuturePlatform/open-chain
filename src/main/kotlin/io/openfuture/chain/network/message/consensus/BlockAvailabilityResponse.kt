@@ -18,7 +18,7 @@ class BlockAvailabilityResponse(
         hash = buf.readString()
         height = buf.readLong()
         if (-1L != height) {
-            val block = GenesisBlockMessage::class.java.newInstance()
+            val block = GenesisBlockMessage::class.java.getDeclaredConstructor().newInstance()
             block.read(buf)
             genesisBlock = block
         }

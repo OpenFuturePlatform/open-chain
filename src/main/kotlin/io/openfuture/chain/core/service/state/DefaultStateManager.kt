@@ -99,6 +99,7 @@ class DefaultStateManager(
     override fun commit(states: List<State>) {
         BlockchainLock.writeLock.lock()
         try {
+            states.forEach { println(it.address) }
             repository.deleteAllByAddressIn(states.map { it.address })
             repository.flush()
             repository.saveAll(states)

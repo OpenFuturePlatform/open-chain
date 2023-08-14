@@ -14,7 +14,7 @@ data class NodeInfo(
 
     override fun read(buf: ByteBuf) {
         uid = buf.readString()
-        address = NetworkAddress::class.java.newInstance()
+        address = NetworkAddress::class.java.getDeclaredConstructor().newInstance()
         address.read(buf)
     }
 
