@@ -2,7 +2,7 @@ name: Build
 on:
   push:
     branches:
-      - sprint
+      - master
 jobs:
   unitTests:
     if: ${{ false }}
