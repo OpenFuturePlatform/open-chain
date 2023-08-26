@@ -46,6 +46,22 @@ abstract class Block(
 
             return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
         }
+
+        fun generateHashForTransaction(timestamp: Long,
+                                       fee: Long, amount: Long,
+                                       senderAddress: String,
+                                       recipientAddress: String): String {
+            val bytes = ByteBuffer.allocate(SIZE_BYTES + SIZE_BYTES + SIZE_BYTES +
+                senderAddress.toByteArray().size + recipientAddress.toByteArray().size)
+                .putLong(timestamp)
+                .putLong(fee)
+                .put(senderAddress.toByteArray())
+                .putLong(amount)
+                .put(recipientAddress.toByteArray())
+                .array()
+
+            return ByteUtils.toHexString(HashUtils.doubleSha256(bytes))
+        }
     }
 
 

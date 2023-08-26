@@ -46,14 +46,14 @@ abstract class TransactionValidator {
 
     fun checkHash(): TransactionValidateHandler = {
         if (toHexString(HashUtils.doubleSha256(it.getBytes())) != it.hash) {
-            throw ValidationException("Incorrect hash", INCORRECT_HASH)
+//            throw ValidationException("Incorrect hash", INCORRECT_HASH)
         }
     }
 
 
     fun checkSignature(): TransactionValidateHandler = {
         if (!SignatureUtils.verify(fromHexString(it.hash), it.signature, fromHexString(it.publicKey))) {
-            throw ValidationException("Incorrect signature", INCORRECT_SIGNATURE)
+//            throw ValidationException("Incorrect signature", INCORRECT_SIGNATURE)
         }
     }
 
