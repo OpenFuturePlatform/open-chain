@@ -1,4 +1,4 @@
-package io.openfuture.chain
+package io.openfuture.chain.stress_test
 
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransferTransaction
 import io.openfuture.chain.core.service.TransactionManager
