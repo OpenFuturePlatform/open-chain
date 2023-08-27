@@ -1,7 +1,7 @@
 package io.openfuture.chain.stress_test.controller
 
-import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.rpc.domain.RestResponse
@@ -49,13 +49,17 @@ class BatchController {
             .retrieve()
             .bodyToMono(RestResponse::class.java)
             .block()
-
-        /*if (getListResponse != null) {
-            val javaType = mapper.typeFactory.constructParametricType(PageResponse::class.java, TransferTransactionResponse::class.java)
-            val pageResponseList: PageResponse<TransferTransactionResponse> = mapper.readValue(getListResponse.payload.toString(), javaType)
+        var initialTransactionCount = 0
+        var finalTransactionCount = 0
+        val javaType = mapper.typeFactory.constructParametricType(PageResponse::class.java, TransferTransactionResponse::class.java)
+        if (getListResponse != null) {
+            val respData: String = mapper.writeValueAsString(getListResponse.payload)
+            val pageResponseList: PageResponse<TransferTransactionResponse> = mapper.readValue(respData, javaType)
             println("Total count : ${pageResponseList.totalCount}")
-        }*/
-
+            initialTransactionCount = pageResponseList.totalCount.toInt()
+            finalTransactionCount = initialTransactionCount
+        }
+        val startTime = System.currentTimeMillis()
         for (i in 1..concurrentRequests) {
             coroutineScope.launch {
                 val request = createRandomTransferRequest()
@@ -73,6 +77,23 @@ class BatchController {
         }
         latch.await()
         //TODO - GET TIME TO UPDATE $concurrentRequests number of transactions to be updated
+        /*while (initialTransactionCount + concurrentRequests > finalTransactionCount){
+
+            val getListResponseFinal = webClient.get()
+                .uri(TRANSFER_TRANSACTION_GET_URL)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(RestResponse::class.java)
+                .block()
+
+            if (getListResponseFinal != null) {
+                val respData = mapper.writeValueAsString(getListResponseFinal.payload)
+                val pageResponseList = mapper.readValue(respData, javaType)
+                finalTransactionCount = pageResponseList.totalCount.toInt()
+            }
+        }*/
+        val endTime = System.currentTimeMillis()
+        println("Time spent for confirmation: ${endTime-startTime}/1000")
         return latch.count
     }
 
