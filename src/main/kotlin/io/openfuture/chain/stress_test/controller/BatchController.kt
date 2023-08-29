@@ -1,7 +1,6 @@
 package io.openfuture.chain.stress_test.controller
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.openfuture.chain.core.model.entity.block.Block
 import io.openfuture.chain.crypto.util.SignatureUtils
 import io.openfuture.chain.rpc.domain.RestResponse
@@ -16,6 +15,7 @@ import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
@@ -26,9 +26,9 @@ import java.util.concurrent.CountDownLatch
 @Validated
 @RequestMapping("/rpc/test/transfer")
 class BatchController {
-    private val concurrentRequests = 1
+   // private val concurrentRequests = 1
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
-    private val latch = CountDownLatch(concurrentRequests)
+    //private val latch = CountDownLatch(concurrentRequests)
 
     companion object {
         private const val TRANSFER_TRANSACTION_URL = "/rpc/transactions/transfer"
@@ -36,9 +36,8 @@ class BatchController {
     }
 
     @GetMapping
-    fun test() : Long {
-        //val coroutineScope = CoroutineScope(Dispatchers.Default)
-        //val latch = CountDownLatch(concurrentRequests)
+    fun test(@RequestParam(required = false) count: Int) : Long {
+        val latch = CountDownLatch(count)
         val mapper = jacksonObjectMapper()
         //TODO - GET CURRENT NUMBER OF TRANSACTIONS COUNT
         val webClient = WebClient.builder().baseUrl("http://gunter.chain.openfuture.io:9090").build()
@@ -60,7 +59,7 @@ class BatchController {
             finalTransactionCount = initialTransactionCount
         }
         val startTime = System.currentTimeMillis()
-        for (i in 1..concurrentRequests) {
+        for (i in 1..count) {
             coroutineScope.launch {
                 val request = createRandomTransferRequest()
                 println("Request $i request: $request")
@@ -77,7 +76,8 @@ class BatchController {
         }
         latch.await()
         //TODO - GET TIME TO UPDATE $concurrentRequests number of transactions to be updated
-        /*while (initialTransactionCount + concurrentRequests > finalTransactionCount){
+        println("NUMBER OF TRANSACTIONS --- $count")
+        while (initialTransactionCount + count - 1 > finalTransactionCount){
 
             val getListResponseFinal = webClient.get()
                 .uri(TRANSFER_TRANSACTION_GET_URL)
@@ -87,14 +87,23 @@ class BatchController {
                 .block()
 
             if (getListResponseFinal != null) {
-                val respData = mapper.writeValueAsString(getListResponseFinal.payload)
-                val pageResponseList = mapper.readValue(respData, javaType)
+                val respData: String = mapper.writeValueAsString(getListResponseFinal.payload)
+                val pageResponseList: PageResponse<TransferTransactionResponse>  = mapper.readValue(respData, javaType)
                 finalTransactionCount = pageResponseList.totalCount.toInt()
+                println("Current Transaction count : $finalTransactionCount")
+                val trxExecuted = (System.currentTimeMillis() - startTime)/1000
+                val diff = finalTransactionCount - initialTransactionCount
+                println("Current processed transactions : $diff in - $trxExecuted")
+                if (diff > 1)
+                    break
             }
-        }*/
+
+            Thread.sleep(10000)
+        }
         val endTime = System.currentTimeMillis()
-        println("Time spent for confirmation: ${endTime-startTime}/1000")
-        return latch.count
+        val executionTime = (endTime-startTime)/1000
+        println("Time spent for confirmation : $executionTime seconds")
+        return executionTime
     }
 
     private fun createRandomTransferRequest(): TransferTransactionRequest {
