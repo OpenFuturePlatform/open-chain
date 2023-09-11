@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
 import java.util.concurrent.CountDownLatch
 
 
@@ -39,8 +41,8 @@ class BatchController {
     fun test(@RequestParam(required = false) count: Int) : Long {
         val latch = CountDownLatch(count)
         val mapper = jacksonObjectMapper()
-        //TODO - GET CURRENT NUMBER OF TRANSACTIONS COUNT
-        val webClient = WebClient.builder().baseUrl("http://gunter.chain.openfuture.io:9090").build()
+
+        /*val webClient = WebClient.builder().baseUrl("http://gunter.chain.openfuture.io:9090").build()
 
         val getListResponse = webClient.get()
             .uri(TRANSFER_TRANSACTION_GET_URL)
@@ -58,26 +60,42 @@ class BatchController {
             initialTransactionCount = pageResponseList.totalCount.toInt()
             finalTransactionCount = initialTransactionCount
         }
+        */
         val startTime = System.currentTimeMillis()
+        println("STARTED POST REQUEST")
+
+       /* Flux.range(1, count)
+            .parallel()
+            .runOn(Schedulers.parallel())
+            .flatMap { this.sendWebRequest(webClient) }
+            .doOnError{
+                err -> println("WebClient err $err")
+            }
+            .subscribe()*/
+
         for (i in 1..count) {
             coroutineScope.launch {
                 val request = createRandomTransferRequest()
-                println("Request $i request: $request")
-
+                //println("Request $i request: $request in thread ${Thread.currentThread().name}")
+                val url = urlEndpoints.random()
+                println("THREAD ${Thread.currentThread().name} and url $url")
+                val webClient = WebClient.builder().baseUrl(url).build()
                 webClient.post()
                     .uri(TRANSFER_TRANSACTION_URL)
                     .body(Mono.just(request), TransferTransactionRequest::class.java)
                     .retrieve()
                     .bodyToMono(RestResponse::class.java)
-                    .block()
+                    .doOnError{err -> println("REQUEST ERROR ${err.localizedMessage} in $url") }
+                    .subscribe()
 
                 latch.countDown()
             }
         }
         latch.await()
+        println("ENDED POST REQUEST ${(System.currentTimeMillis()-startTime)/1000}")
         //TODO - GET TIME TO UPDATE $concurrentRequests number of transactions to be updated
         println("NUMBER OF TRANSACTIONS --- $count")
-        while (initialTransactionCount + count - 1 > finalTransactionCount){
+        /*while (initialTransactionCount + count - 1 > finalTransactionCount){
 
             val getListResponseFinal = webClient.get()
                 .uri(TRANSFER_TRANSACTION_GET_URL)
@@ -103,7 +121,18 @@ class BatchController {
         val endTime = System.currentTimeMillis()
         val executionTime = (endTime-startTime)/1000
         println("Time spent for confirmation : $executionTime seconds")
-        return executionTime
+        return executionTime*/
+        return count.toLong()
+    }
+
+    private fun sendWebRequest(webClient: WebClient): Mono<RestResponse<*>>{
+        val request = createRandomTransferRequest()
+        println("THREAD ${Thread.currentThread().name}")
+        return webClient.post()
+                .uri(TRANSFER_TRANSACTION_URL)
+                .body(Mono.just(request), TransferTransactionRequest::class.java)
+                .retrieve()
+                .bodyToMono(RestResponse::class.java)
     }
 
     private fun createRandomTransferRequest(): TransferTransactionRequest {
@@ -156,4 +185,20 @@ class BatchController {
         "0x175D5f7aC09D6f9c4B70C11b1cd84671bc3E9F0F",
         "0xCd91F1eBb8E096dAAb1d5c2c97f5E340c6b2E155"
     )
+
+    private val urlEndpoints = listOf(
+        //"http://gunter.chain.openfuture.io:9090",
+        "http://margo.chain.openfuture.io:9090",
+        "http://wolf.chain.openfuture.io:9090",
+        "http://charlie.chain.openfuture.io:9090",
+        "http://gonzalez.chain.openfuture.io:9090",
+        "http://george.chain.openfuture.io:9090",
+        "http://pablo.chain.openfuture.io:9090",
+        "http://anna.chain.openfuture.io:9090",
+        "http://niko.chain.openfuture.io:9090",
+        "http://bruce.chain.openfuture.io:9090",
+        "http://chuck.chain.openfuture.io:9090")
+
+    /*private val urlEndpoints = listOf(
+        "http://gunter.chain.openfuture.io:9090")*/
 }
