@@ -30,6 +30,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-freemarker")
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
     compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-actuator')
 
     // Cache
     compile('com.github.ben-manes.caffeine:caffeine')
@@ -67,6 +68,8 @@ dependencies {
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('io.projectreactor:reactor-test')
+
+    implementation('io.micrometer:micrometer-registry-prometheus')
 }
 
 sourceSets {
