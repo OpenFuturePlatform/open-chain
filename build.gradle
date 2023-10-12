@@ -5,7 +5,7 @@ plugins {
     id 'org.jetbrains.kotlin.kapt' version '1.3.20'
     id 'org.jetbrains.kotlin.plugin.spring' version '1.3.20'
     id 'org.jetbrains.kotlin.plugin.jpa' version '1.3.20'
-    id 'org.springframework.boot' version '2.1.2.RELEASE'
+    id 'org.springframework.boot' version '2.7.16'
 }
 
 apply plugin: "io.spring.dependency-management"
@@ -38,8 +38,7 @@ dependencies {
     // DB
     compile('org.flywaydb:flyway-core')
     compile('com.h2database:h2')
-    implementation("mysql:mysql-connector-java")
-    implementation 'org.postgresql:postgresql:42.3.1'
+
 
     // Utils
     compile('commons-net:commons-net:3.6')
@@ -68,7 +67,7 @@ dependencies {
     // Tests
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('io.projectreactor:reactor-test')
-
+    // Monitoring
     implementation('io.micrometer:micrometer-registry-prometheus')
 }
 
