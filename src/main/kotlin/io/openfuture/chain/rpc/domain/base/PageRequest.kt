@@ -29,6 +29,7 @@ open class PageRequest(
     override fun getSort(): Sort = if (sortBy.isEmpty()) Sort.unsorted() else Sort.by(sortDirection, *sortBy.toTypedArray())
 
     override fun first(): Pageable = PageRequest(0, limit, sortBy, sortDirection, maySortBy)
+    override fun withPage(pageNumber: Int) = PageRequest(pageNumber.toLong(), limit, sortBy, sortDirection, maySortBy)
 
     override fun getOffset(): Long = offset
 

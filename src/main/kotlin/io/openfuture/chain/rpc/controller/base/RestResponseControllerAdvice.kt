@@ -24,7 +24,9 @@ class RestResponseControllerAdvice(
 
     override fun beforeBodyWrite(body: Any?, returnType: MethodParameter, selectedContentType: MediaType,
                                  selectedConverterType: Class<out HttpMessageConverter<*>>, request: ServerHttpRequest,
-                                 response: ServerHttpResponse): RestResponse<Any?> {
+                                 response: ServerHttpResponse): Any? {
+        if (request.uri.path.contains("actuator"))
+            return body
         return RestResponse(System.currentTimeMillis(), nodeProperties.protocolVersion!!, body)
     }
 

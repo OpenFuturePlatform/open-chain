@@ -56,9 +56,9 @@ class ClockChecker(
                 return
             }
 
-            if (absOffsets.min()!! >= properties.ntpOffsetThreshold!!) {
+            if (absOffsets.minOf { it } >= properties.ntpOffsetThreshold!!) {
                 status = NOT_SYNCHRONIZED
-                log.info("Clock is not synchronised: offset ${absOffsets.min()} is critical")
+                log.info("Clock is not synchronised: offset ${absOffsets.minOf { it }} is critical")
                 return
             }
 
