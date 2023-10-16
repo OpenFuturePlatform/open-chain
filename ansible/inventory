@@ -1,12 +1,13 @@
-server1  ansible_host=35.194.75.244
-server2  ansible_host=35.186.190.72
-server3  ansible_host=35.188.230.154
-server4  ansible_host=35.199.58.74
-server5  ansible_host=35.230.166.77
-server6  ansible_host=35.230.168.111
-server7  ansible_host=35.194.88.166
-server8  ansible_host=35.221.53.164
-server9  ansible_host=35.236.216.126
-server10  ansible_host=35.199.11.229
-server11  ansible_host=35.194.84.89
+#server1  ansible_host=35.194.75.244
+#server2  ansible_host=35.186.190.72
+#server3  ansible_host=35.188.230.154
+#server4  ansible_host=35.199.58.74
+#server5  ansible_host=35.230.166.77
+#server6  ansible_host=35.230.168.111
+#server7  ansible_host=35.194.88.166
+#server8  ansible_host=35.221.53.164
+#server9  ansible_host=35.236.216.126
+#server10  ansible_host=35.199.11.229
+#server11  ansible_host=35.194.84.89
+server  ansible_host=34.145.185.53
 # server11 ansible_host=35.194.84.89 ansible_user=ubuntu ansible_ssh_private_key_file=ansible/openchain-11
