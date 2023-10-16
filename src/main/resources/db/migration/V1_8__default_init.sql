@@ -1,4 +1,4 @@
-INSERT INTO blocks (id, TIMESTAMP, height, previous_hash, hash, signature, public_key)
+INSERT INTO blocks (id, timestamp, height, previous_hash, hash, signature, public_key)
 VALUES (1,
         1532345018021,
         0,

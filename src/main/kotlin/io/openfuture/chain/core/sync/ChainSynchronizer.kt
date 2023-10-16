@@ -43,7 +43,8 @@ class ChainSynchronizer(
     private val dbChecker: DBChecker,
     private val nodeConfigurator: NodeConfigurator,
     private val syncSession: SyncSession
-)  {
+) {
+    //: ApplicationListener<DataSourceSchemaCreatedEvent>  {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(ChainSynchronizer::class.java)
@@ -57,6 +58,9 @@ class ChainSynchronizer(
     fun forceSynchronizationCheck() {
         checkLastBlock()
     }
+//    override fun onApplicationEvent(event: DataSourceSchemaCreatedEvent) {
+//        prepareDB(nodeConfigurator.getConfig().mode)
+//    }
 
     @EventListener
     fun eventSyncMode(syncMode: SyncMode) {

@@ -87,7 +87,7 @@ CREATE MEMORY TABLE u_transfer_transactions (
   id                BIGINT PRIMARY KEY REFERENCES u_transactions,
   amount            BIGINT  NOT NULL,
   recipient_address VARCHAR,
-  data              VARCHAR,
+  data              VARCHAR
 );
 --
 CREATE MEMORY TABLE u_delegate_transactions (
