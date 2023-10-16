@@ -7,6 +7,7 @@ import io.openfuture.chain.core.exception.ValidationException
 import io.openfuture.chain.rpc.domain.ExceptionResponse
 import io.openfuture.chain.rpc.domain.ValidationErrorResponse
 import org.apache.commons.lang3.StringUtils.EMPTY
+import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -62,6 +63,12 @@ class ExceptionRestControllerAdvice {
         return ex.bindingResult.fieldErrors.map {
             ValidationErrorResponse(it.field, it.defaultMessage ?: EMPTY)
         }
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(JdbcSQLIntegrityConstraintViolationException::class)
+    fun handleJdbcSQLIntegrityConstraintViolationException(ex: JdbcSQLIntegrityConstraintViolationException): ExceptionResponse  {
+        return ExceptionResponse(BAD_REQUEST.value(), ex.message)
     }
 
 }
