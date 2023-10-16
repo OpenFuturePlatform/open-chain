@@ -107,8 +107,8 @@ class ChannelsHolder(
             val connectedNodesInfo = getNodesInfo()
             val regularAddresses = addressesHolder.getRandomList(exclude = connectedNodesInfo).map { it.address }
             val bootAddresses = nodeProperties.getRootAddresses().asSequence()
-                .minus(connectedNodesInfo.map { it.address })
-                .minus(regularAddresses)
+                .minus(connectedNodesInfo.map { it.address }.toSet())
+                .minus(regularAddresses.toSet())
             val addresses = regularAddresses.plus(bootAddresses).shuffled()
             for (address in addresses) {
                 val connected = connectionService.connect(address, Consumer {
