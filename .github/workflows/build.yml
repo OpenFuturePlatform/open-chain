@@ -2,7 +2,7 @@ name: Build
 on:
   push:
     branches:
-      - sprint
+      - sqlite
 jobs:
   unitTests:
     if: ${{ false }}
@@ -135,8 +135,8 @@ jobs:
       - name: Build and push
         run: |
           docker login -u ${{ secrets.DOCKER_LOGIN }} -p ${{ secrets.DOCKER_PASS }}
-          docker build -t openplatform/chain-v2:v0.0.1 .
-          docker push openplatform/chain-v2:v0.0.1
+          docker build -t openplatform/chain-v3:v0.0.1 .
+          docker push openplatform/chain-v3:v0.0.1
 
       - name: Setup SSH connection
         run: |
