@@ -1,5 +1,5 @@
 CREATE TABLE blocks (
-  id            BIGINT AUTO_INCREMENT PRIMARY KEY HASH,
+  id            BIGINT AUTO_INCREMENT PRIMARY KEY,
   timestamp     BIGINT  NOT NULL,
   height        BIGINT  NOT NULL,
   previous_hash VARCHAR NOT NULL,
@@ -8,10 +8,10 @@ CREATE TABLE blocks (
   public_key    VARCHAR NOT NULL
 );
 --
-CREATE UNIQUE HASH INDEX blocks_hash
+CREATE UNIQUE INDEX blocks_hash
   ON blocks (hash);
 --
-CREATE UNIQUE HASH INDEX blocks_height
+CREATE UNIQUE INDEX blocks_height
   ON blocks (height);
 --
 
@@ -27,7 +27,7 @@ CREATE TABLE genesis_blocks (
   epoch_index BIGINT NOT NULL
 );
 --
-CREATE HASH INDEX genesis_blocks_epoch_index
+CREATE INDEX genesis_blocks_epoch_index
   ON genesis_blocks (epoch_index);
 --
 CREATE TABLE delegate2genesis (

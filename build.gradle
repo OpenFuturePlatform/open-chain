@@ -38,7 +38,9 @@ dependencies {
 
     // DB
     implementation('org.flywaydb:flyway-core')
-    implementation('com.h2database:h2')
+    //implementation('com.h2database:h2')
+    implementation('org.xerial:sqlite-jdbc')
+    implementation('com.github.gwenn:sqlite-dialect:0.1.0')
 
 
     // Utils

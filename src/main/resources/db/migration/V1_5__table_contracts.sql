@@ -1,5 +1,5 @@
 CREATE TABLE contracts (
-  id       BIGINT AUTO_INCREMENT PRIMARY KEY HASH,
+  id       BIGINT AUTO_INCREMENT PRIMARY KEY,
   address  VARCHAR NOT NULL,
   owner    VARCHAR NOT NULL,
   bytecode VARCHAR NOT NULL,
@@ -7,6 +7,6 @@ CREATE TABLE contracts (
   cost BIGINT NOT NULL
 );
 --
-CREATE UNIQUE HASH INDEX contracts_address
+CREATE UNIQUE INDEX contracts_address
   ON contracts (address);
 --

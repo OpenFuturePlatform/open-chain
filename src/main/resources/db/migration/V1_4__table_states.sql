@@ -1,10 +1,10 @@
 CREATE TABLE states (
-  id       BIGINT AUTO_INCREMENT PRIMARY KEY HASH,
+  id       BIGINT AUTO_INCREMENT PRIMARY KEY,
   address  VARCHAR NOT NULL,
   hash     VARCHAR NOT NULL
 );
 --
-CREATE UNIQUE HASH INDEX states_address
+CREATE UNIQUE INDEX states_address
   ON states (address);
 --
 CREATE TABLE account_states (
