@@ -97,6 +97,7 @@ class ChannelsHolder(
     fun hasChannel(channel: Channel): Boolean = channelGroup.contains(channel)
 
     fun findNewPeer() {
+        //log.info("PEER NUMBER: ${nodeProperties.peersNumber} and CHANNEL SIZE: ${channelGroup.size} and CONNECTION TASK : $connectionTask")
         if (nodeProperties.peersNumber!! > channelGroup.size && (null == connectionTask || connectionTask!!.isDone)) {
             connectionTask = executor.submit { findNewPeer0() }
         }

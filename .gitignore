@@ -5,3 +5,5 @@ out/
 *.iml
 *.db
 *.txt
+config-*.json
+src/main/resources/application-chain-*.properties

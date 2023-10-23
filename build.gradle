@@ -38,7 +38,7 @@ dependencies {
 
     // DB
     implementation('org.flywaydb:flyway-core')
-    implementation('com.h2database:h2')
+    implementation('com.h2database:h2:2.1.210')
 
 
     // Utils
