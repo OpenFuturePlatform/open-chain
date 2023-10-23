@@ -39,6 +39,15 @@ class TransferTransactionController(
     fun add(@Valid @RequestBody request: TransferTransactionRequest): TransferTransactionResponse =
         TransferTransactionResponse(transactionManager.add(UnconfirmedTransferTransaction.of(request)))
 
+    @PostMapping("batch")
+    fun addBatch(@Valid @RequestBody requests: List<TransferTransactionRequest>): Int{
+        for (request in requests){
+            transactionManager.add(UnconfirmedTransferTransaction.of(request))
+        }
+        return requests.size
+    }
+
+
     @CrossOrigin
     @GetMapping
     fun getAll(@Valid request: TransactionPageRequest): PageResponse<TransferTransactionResponse> =
