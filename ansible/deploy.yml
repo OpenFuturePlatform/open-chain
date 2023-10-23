@@ -34,6 +34,7 @@
       docker_container:
         name: "{{ item.name }}"
         image: openplatform/chain-v3:v0.0.1
+        hostname: "{{ item.name }}"
         state: started
         env:
           RPC_PORT: "{{ item.app_port }}"
