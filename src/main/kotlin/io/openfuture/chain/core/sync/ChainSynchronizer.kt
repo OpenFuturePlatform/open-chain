@@ -23,7 +23,7 @@ import io.openfuture.chain.network.message.sync.GenesisBlockMessage
 import io.openfuture.chain.network.service.NetworkApiService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-//import org.springframework.boot.autoconfigure.jdbc.DataSourceSchemaCreatedEvent
+import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
@@ -43,8 +43,7 @@ class ChainSynchronizer(
     private val dbChecker: DBChecker,
     private val nodeConfigurator: NodeConfigurator,
     private val syncSession: SyncSession
-) {
-    //: ApplicationListener<DataSourceSchemaCreatedEvent>  {
+) : ApplicationListener<ApplicationReadyEvent>  {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(ChainSynchronizer::class.java)
@@ -58,9 +57,9 @@ class ChainSynchronizer(
     fun forceSynchronizationCheck() {
         checkLastBlock()
     }
-//    override fun onApplicationEvent(event: DataSourceSchemaCreatedEvent) {
-//        prepareDB(nodeConfigurator.getConfig().mode)
-//    }
+    override fun onApplicationEvent(event: ApplicationReadyEvent) {
+        prepareDB(nodeConfigurator.getConfig().mode)
+    }
 
     @EventListener
     fun eventSyncMode(syncMode: SyncMode) {
