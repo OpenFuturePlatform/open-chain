@@ -46,5 +46,13 @@ class TransferTransactionController(
             TransferTransactionResponse(it, receiptService.getByTransactionHash(it.hash))
         })
 
+    @CrossOrigin
+    @GetMapping("unconfirmed")
+    fun getUnconfirmedAll(@Valid request: TransactionPageRequest): PageResponse<UnconfirmedTransferTransaction> {
+        val unconfirmedTransferTransactions = transactionManager.getAllUnconfirmedTransferTransactions(request)
+        return PageResponse(unconfirmedTransferTransactions.size.toLong(), unconfirmedTransferTransactions)
+    }
+
+
 }
 
