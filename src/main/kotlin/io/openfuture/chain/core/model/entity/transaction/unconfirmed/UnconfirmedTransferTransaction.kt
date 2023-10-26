@@ -6,10 +6,12 @@ import io.openfuture.chain.network.message.core.TransferTransactionMessage
 import io.openfuture.chain.rpc.domain.transaction.request.TransferTransactionRequest
 import javax.persistence.Embedded
 import javax.persistence.Entity
+import javax.persistence.PrimaryKeyJoinColumn
 import javax.persistence.Table
 
 @Entity
 @Table(name = "u_transfer_transactions")
+@PrimaryKeyJoinColumn(name = "id")
 class UnconfirmedTransferTransaction(
     timestamp: Long,
     fee: Long,
