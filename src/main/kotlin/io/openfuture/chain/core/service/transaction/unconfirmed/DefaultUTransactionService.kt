@@ -12,6 +12,7 @@ import io.openfuture.chain.core.model.entity.transaction.unconfirmed.Unconfirmed
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedVoteTransaction
 import io.openfuture.chain.core.repository.TransactionRepository
 import io.openfuture.chain.core.repository.UTransactionRepository
+import io.openfuture.chain.core.repository.jdbc.UTransactionsJdbcRepository
 import io.openfuture.chain.core.service.UTransactionService
 import io.openfuture.chain.core.service.transaction.validation.DelegateTransactionValidator
 import io.openfuture.chain.core.service.transaction.validation.TransferTransactionValidator
@@ -25,7 +26,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @Transactional(readOnly = true)
 abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
-    private val uRepository: UTransactionRepository<uT>
+    private val uRepository: UTransactionRepository<uT>,
+    private val jdbcRepository: UTransactionsJdbcRepository
 ) : UTransactionService<uT> {
 
     @Autowired private lateinit var networkService: NetworkApiService
@@ -93,9 +95,19 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
                 else -> throw IllegalStateException("Wrong type")
             }
 
-            val savedUtx = uRepository.saveAndFlush(uTx)
-            networkService.broadcast(savedUtx.toMessage())
-            return savedUtx
+            //
+
+            return if (uTx is UnconfirmedTransferTransaction) {
+                val savedUtx = jdbcRepository.save(uTx)
+                networkService.broadcast(savedUtx.toMessage())
+                uTx.id = savedUtx.id
+                return uTx
+            } else {
+                val savedUtx = uRepository.saveAndFlush(uTx)
+                networkService.broadcast(savedUtx.toMessage())
+                savedUtx
+            }
+
         } finally {
             BlockchainLock.writeLock.unlock()
         }
