@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package ibc;
+
+option go_package = "planet/x/blog/types";
+
+message BlogPacketData {
+  oneof packet {
+    NoData            noData        = 1;
+    IbcPostPacketData ibcPostPacket = 2;
+  }
+}
+
+message NoData {}
+
+// IbcPostPacketData defines a struct for the packet payload
+message IbcPostPacketData {
+  string title   = 1;
+  string content = 2;
+  string creator = 3;
+}
+
+// IbcPostPacketAck defines a struct for the packet acknowledgment
+message IbcPostPacketAck {
+  string postID = 1;
+}
+

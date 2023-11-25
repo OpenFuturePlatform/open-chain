@@ -52,13 +52,13 @@ class ClockChecker(
 
             if (absOffsets.isEmpty()) {
                 status = NOT_SYNCHRONIZED
-                log.error("Clock is not synchronised: nobody answered")
+                //log.error("Clock is not synchronised: nobody answered")
                 return
             }
 
             if (absOffsets.minOf { it } >= properties.ntpOffsetThreshold!!) {
                 status = NOT_SYNCHRONIZED
-                log.info("Clock is not synchronised: offset ${absOffsets.minOf { it }} is critical")
+                //log.info("Clock is not synchronised: offset ${absOffsets.minOf { it }} is critical")
                 return
             }
 

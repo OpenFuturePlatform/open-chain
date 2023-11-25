@@ -9,6 +9,8 @@ import io.openfuture.chain.core.model.entity.block.TemporaryBlock
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
+import io.openfuture.chain.core.model.entity.tendermint.TendermintTransaction
+import io.openfuture.chain.core.model.entity.tendermint.TendermintTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -174,3 +176,17 @@ interface TemporaryBlockRepository : BaseRepository<TemporaryBlock> {
     fun findByHeightIn(heights: List<Long>): List<TemporaryBlock>
 
 }
+
+@Repository
+interface TendermintTransactionRepository<uT : TendermintTransaction> : BaseRepository<uT> {
+
+    fun findOneByHash(hash: String): uT?
+
+    fun findAllByOrderByFeeDesc(request: Pageable): MutableList<uT>
+
+    fun findAllBySenderAddress(address: String): List<uT>
+
+}
+
+@Repository
+interface TendermintTransferTransactionRepository : TendermintTransactionRepository<TendermintTransferTransaction>

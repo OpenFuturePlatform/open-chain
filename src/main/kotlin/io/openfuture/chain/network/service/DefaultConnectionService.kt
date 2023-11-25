@@ -32,7 +32,7 @@ class DefaultConnectionService(
                         it.accept(channel)
                     }
                 } else {
-                    log.warn("Can not connect to ${networkAddress.host}:${networkAddress.port}")
+                    //log.warn("Can not connect to ${networkAddress.host}:${networkAddress.port}")
                     addressesHolder.removeNodeInfo(networkAddress)
                     result = false
                 }

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package planet.blog;
+
+option go_package = "planet/x/blog/types";
+
+// Msg defines the Msg service.
+service Msg {
+  rpc SendIbcPost (MsgSendIbcPost) returns (MsgSendIbcPostResponse);
+}
+message MsgSendIbcPost {
+  string title            = 5;
+  string content          = 6;
+  string creator          = 1;
+  string port             = 2;
+  string channelID        = 3;
+  uint64 timeoutTimestamp = 4;
+}
+
+message MsgSendIbcPostResponse {}

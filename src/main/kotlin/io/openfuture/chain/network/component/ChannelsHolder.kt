@@ -120,7 +120,7 @@ class ChannelsHolder(
             if (nodeProperties.peersNumber!! <= channelGroup.size) {
                 return
             }
-            log.info("Unable to find peer. Retry...")
+            //log.info("Unable to find peer. Retry...")
             Thread.sleep(3000)
         }
     }

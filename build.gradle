@@ -1,3 +1,12 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.8'
+    }
+}
+
 plugins {
     id 'jacoco'
     id 'idea'
@@ -6,16 +15,17 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.spring' version '1.6.21'
     id 'org.jetbrains.kotlin.plugin.jpa' version '1.6.21'
     id 'org.springframework.boot' version '2.7.16'
+    id 'com.google.protobuf' version '0.9.2'
 }
 
 apply plugin: "io.spring.dependency-management"
 
 version='sprint'
 group = 'io.openfuture.chain'
-sourceCompatibility = JavaVersion.VERSION_11
+sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -32,6 +42,7 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web')
     implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation('org.springframework.boot:spring-boot-starter-validation')
+    implementation 'net.devh:grpc-server-spring-boot-starter:2.9.0.RELEASE'
 
     // Cache
     implementation('com.github.ben-manes.caffeine:caffeine')
@@ -71,11 +82,31 @@ dependencies {
     testImplementation('junit:junit:4.13')
     // Monitoring
     implementation('io.micrometer:micrometer-registry-prometheus')
+    // GRPC
+    implementation 'io.grpc:grpc-netty-shaded:1.22.1'
+    implementation 'io.grpc:grpc-stub:1.22.1'
+    implementation 'io.grpc:grpc-protobuf:1.22.1'
 }
 
+
+
 sourceSets {
-    main.kotlin.srcDirs += 'src/main/kotlin'
-    main.resources.srcDirs += 'src/main/resources/frontend'
+    main {
+        proto {
+            srcDirs 'src/main/proto'
+        }
+        kotlin {
+            srcDirs 'src/main/kotlin'
+        }
+        java{
+            srcDirs 'build/generated/source/proto/main/grpc'
+            srcDirs 'build/generated/source/proto/main/java'
+
+        }
+        resources{
+            srcDirs 'src/main/resources/frontend'
+        }
+    }
 }
 
 // Jar
@@ -96,6 +127,7 @@ compileTestKotlin {
         jvmTarget = "1.8"
     }
 }
+
 noArg {
     annotations(
             "javax.persistence.MappedSuperclass",
@@ -117,6 +149,16 @@ idea {
         def kaptMain = file('build/generated/source/kapt/main')
         sourceDirs += kaptMain
         generatedSourceDirs += kaptMain
+
+//        def kaptMain = file('build/generated/source/kapt/main')
+//        def protoGrpc = file('build/generated/source/proto/main/grpc')
+//        def protoMain = file('build/generated/source/proto/main/java')
+//        sourceDirs += kaptMain
+//        sourceDirs += protoGrpc
+//        sourceDirs += protoMain
+//        generatedSourceDirs += kaptMain
+//        generatedSourceDirs += protoGrpc
+//        generatedSourceDirs += protoMain
     }
 }
 
@@ -128,3 +170,27 @@ jacocoTestReport {
     }
 }
 check.dependsOn jacocoTestReport
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.7.1"
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.22.1'
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}
+
+//build.dependsOn(tasks.generateProto)
+//
+//tasks.compileKotlin {
+//    dependsOn(tasks.generateProto)
+//}
+//
+//tasks.build.dependsOn(tasks.generateProto)

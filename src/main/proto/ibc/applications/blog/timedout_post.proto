@@ -1,0 +1,12 @@
+syntax = "proto3";
+package planet.blog;
+
+option go_package = "planet/x/blog/types";
+
+message TimedoutPost {
+  uint64 id = 1;
+  string title = 2;
+  string chain = 3;
+  string creator = 4;
+
+}

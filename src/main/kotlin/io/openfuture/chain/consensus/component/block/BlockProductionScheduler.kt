@@ -41,7 +41,7 @@ class BlockProductionScheduler(
     private fun proceedProductionLoop() {
         try {
             if (NOT_SYNCHRONIZED == clockChecker.getStatus()) {
-                log.error("Please set up Time synchronization by the ntp servers")
+                //log.error("Please set up Time synchronization by the ntp servers")
                 return
             }
 

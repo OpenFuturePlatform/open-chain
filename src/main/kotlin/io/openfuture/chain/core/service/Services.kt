@@ -10,6 +10,8 @@ import io.openfuture.chain.core.model.entity.dictionary.VoteType
 import io.openfuture.chain.core.model.entity.state.AccountState
 import io.openfuture.chain.core.model.entity.state.DelegateState
 import io.openfuture.chain.core.model.entity.state.State
+import io.openfuture.chain.core.model.entity.tendermint.TendermintTransaction
+import io.openfuture.chain.core.model.entity.tendermint.TendermintTransferTransaction
 import io.openfuture.chain.core.model.entity.transaction.confirmed.*
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedDelegateTransaction
 import io.openfuture.chain.core.model.entity.transaction.unconfirmed.UnconfirmedTransaction
@@ -186,6 +188,24 @@ interface UTransactionService<uT : UnconfirmedTransaction> {
 
     fun add(uTx: uT, unconfirmedBalance: Long): uT
 
+}
+
+interface TendermintTransactionManager{
+
+    fun getUnconfirmedBalanceBySenderAddress(address: String): Long
+    fun <uT : TendermintTransaction> check(uTx: uT): Boolean
+    fun <uT : TendermintTransferTransaction> add(uTx: uT): Boolean
+
+    fun getAllTransferTransactions(address: String): List<TendermintTransferTransaction>
+}
+
+interface TendermintTransferTransactionService : TendermintTransactionService<TendermintTransferTransaction>
+interface TendermintTransactionService<uT : TendermintTransferTransaction> {
+
+    fun getAll(): List<uT>
+    fun add(uTx: uT, unconfirmedBalance: Long): Boolean
+    fun check(uTx: uT, unconfirmedBalance: Long): Boolean
+    fun getAllBySenderAddress(address: String): List<uT>
 }
 
 interface UDelegateTransactionService : UTransactionService<UnconfirmedDelegateTransaction>
