@@ -127,11 +127,11 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: sqlite
-      - name: Download JAR
-        uses: actions/download-artifact@master
-        with:
-          name: open-chain.jar
-          path: build/libs/
+#      - name: Download JAR
+#        uses: actions/download-artifact@master
+#        with:
+#          name: open-chain.jar
+#          path: build/libs/
 
 #      - name: Build and push
 #        run: |
