@@ -144,7 +144,7 @@ jobs:
           eval $(ssh-agent -s)
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          ssh-keyscan 35.194.84.89 >> ~/.ssh/known_hosts
+          ssh-keyscan ec2-54-87-74-220.compute-1.amazonaws.com >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
           echo "${{ secrets.OPENCHAIN_DEPLOY_KEY_AWS }}" | tr -d '\r' > ansible/key.pem
           chmod 600 ansible/key.pem
