@@ -145,7 +145,7 @@ jobs:
           chmod 700 ~/.ssh
           ssh-keyscan 35.194.84.89 >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
-          echo "${{ secrets.OPENCHAIN_DEPLOY_KEY }}" | tr -d '\r' > ansible/key.pem
+          echo "${{ secrets.OPENCHAIN_DEPLOY_KEY_AWS }}" | tr -d '\r' > ansible/key.pem
           chmod 600 ansible/key.pem
       - name: Deploy
         uses: docker://openplatform/ansible

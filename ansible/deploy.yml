@@ -10,24 +10,24 @@
         state: absent
       with_items: 
         - { name: openchain }
-        - { name: openchain-2 }
-        - { name: openchain-3 }
+#        - { name: openchain-2 }
+#        - { name: openchain-3 }
     - name: Remove the embedded DB volumes
       docker_volume:
         name: "{{ item.name }}"
         state: absent
       with_items:
         - { name: db_volume }
-        - { name: db_volume-2 }
-        - { name: db_volume-3 }
+#        - { name: db_volume-2 }
+#        - { name: db_volume-3 }
 #      when: del_volume
     - name: Create a volumes for embedded DB
       docker_volume:
         name: "{{ item.name }}"
       with_items:
         - { name: db_volume }
-        - { name: db_volume-2 }
-        - { name: db_volume-3 }
+#        - { name: db_volume-2 }
+#        - { name: db_volume-3 }
     - name: Delete all images
       shell: docker image prune -a --force
     - name: Re-create openchain containers
@@ -48,7 +48,7 @@
         restart_policy: always
       with_items:
         - { name: openchain, db_volume: db_volume, app_port: 9090, api_port: 9190, secret_key: "4ec209b805ed3dab43dd626f016f7276b896a2cf38ff7796a40eb9ee32228afe" }
-        - { name: openchain-2, db_volume: db_volume-2, app_port: 9091, api_port: 9191, secret_key: "60113219c767c72b7b758645d1f55573a00ec3bf835fb3511be01d17839a994d" }
-        - { name: openchain-3, db_volume: db_volume-3, app_port: 9092, api_port: 9192, secret_key: "5f610a0cebb0685cd0ef3e354cb0893c39b372abcf851a676c05ddf25d991ed8" }
+#        - { name: openchain-2, db_volume: db_volume-2, app_port: 9091, api_port: 9191, secret_key: "60113219c767c72b7b758645d1f55573a00ec3bf835fb3511be01d17839a994d" }
+#        - { name: openchain-3, db_volume: db_volume-3, app_port: 9092, api_port: 9192, secret_key: "5f610a0cebb0685cd0ef3e354cb0893c39b372abcf851a676c05ddf25d991ed8" }
     - name: Delete old images
       shell: docker image prune -a --force --filter "until=24h"
