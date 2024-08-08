@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
-@Transactional(readOnly = true)
+@Transactional
 abstract class TransactionValidator {
 
     @Autowired private lateinit var cryptoService: CryptoService

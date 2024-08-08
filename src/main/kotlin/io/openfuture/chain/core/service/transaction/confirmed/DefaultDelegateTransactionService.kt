@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 class DefaultDelegateTransactionService(
     private val repository: DelegateTransactionRepository,
     private val consensusProperties: ConsensusProperties

@@ -24,7 +24,7 @@ import io.openfuture.chain.rpc.domain.base.PageRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
-@Transactional(readOnly = true)
+@Transactional
 abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
     private val uRepository: UTransactionRepository<uT>,
     private val jdbcRepository: UTransactionsJdbcRepository
@@ -66,6 +66,7 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
 
     @BlockchainSynchronized
     @Transactional
+    @Synchronized
     override fun add(uTx: uT, unconfirmedBalance: Long): uT {
         BlockchainLock.writeLock.lock()
         try {
@@ -95,18 +96,27 @@ abstract class DefaultUTransactionService<uT : UnconfirmedTransaction>(
                 else -> throw IllegalStateException("Wrong type")
             }
 
+            val findOneByHash = uRepository.findOneByHash(uTx.hash)
+            if (null != findOneByHash) {
+                print("Tried to save duplicate")
+            }
+
+            val savedUtx = uRepository.saveAndFlush(uTx)
+            networkService.broadcast(savedUtx.toMessage())
+            return savedUtx
+
             //
 
-            return if (uTx is UnconfirmedTransferTransaction) {
-                val savedUtx = jdbcRepository.save(uTx)
-                networkService.broadcast(savedUtx.toMessage())
-                uTx.id = savedUtx.id
-                return uTx
-            } else {
-                val savedUtx = uRepository.saveAndFlush(uTx)
-                networkService.broadcast(savedUtx.toMessage())
-                savedUtx
-            }
+//            return if (uTx is UnconfirmedTransferTransaction) {
+//                val savedUtx = jdbcRepository.save(uTx)
+//                networkService.broadcast(savedUtx.toMessage())
+//                uTx.id = savedUtx.id
+//                return uTx
+//            } else {
+//                val savedUtx = uRepository.saveAndFlush(uTx)
+//                networkService.broadcast(savedUtx.toMessage())
+//                savedUtx
+//            }
 
         } finally {
             BlockchainLock.writeLock.unlock()

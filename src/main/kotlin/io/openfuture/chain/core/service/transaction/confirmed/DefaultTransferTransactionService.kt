@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 class DefaultTransferTransactionService(
     private val repository: TransferTransactionRepository,
     private val contractService: ContractService,

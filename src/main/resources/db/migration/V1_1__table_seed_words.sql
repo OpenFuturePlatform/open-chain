@@ -1,7 +1,8 @@
-CREATE TABLE seed_words (
-  id    BIGINT AUTO_INCREMENT PRIMARY KEY,
-  ind   INTEGER NOT NULL UNIQUE,
-  value VARCHAR NOT NULL UNIQUE
+CREATE TABLE seed_words
+(
+    id    serial PRIMARY KEY,
+    ind   INTEGER      NOT NULL UNIQUE,
+    value varchar(255) NOT NULL UNIQUE
 );
 
 INSERT INTO seed_words (ind, value)

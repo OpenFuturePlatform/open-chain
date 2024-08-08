@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 class MainBlockValidator(
     private val consensusProperties: ConsensusProperties,
     private val stateManager: StateManager,

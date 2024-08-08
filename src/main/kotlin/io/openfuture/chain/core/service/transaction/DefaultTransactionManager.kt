@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 class DefaultTransactionManager(
     private val repository: TransactionRepository<Transaction>,
     private val uRepository: UTransactionRepository<UnconfirmedTransaction>,

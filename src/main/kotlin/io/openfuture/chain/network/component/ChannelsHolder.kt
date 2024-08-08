@@ -112,6 +112,7 @@ class ChannelsHolder(
                 .minus(regularAddresses)
             val addresses = regularAddresses.plus(bootAddresses).shuffled()
             for (address in addresses) {
+                log.info("$addresses")
                 val connected = connectionService.connect(address, Consumer {
                     greet(it)
                 })

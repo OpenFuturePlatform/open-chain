@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 class DefaultEpochService(
     private val blockManager: BlockManager,
     private val properties: ConsensusProperties

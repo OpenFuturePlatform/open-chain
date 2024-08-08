@@ -9,7 +9,7 @@ import io.openfuture.chain.core.service.ExternalTransactionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 
-@Transactional(readOnly = true)
+@Transactional
 abstract class DefaultExternalTransactionService<T : Transaction>(
     private val repository: TransactionRepository<T>
 ) : DefaultTransactionService<T>(repository), ExternalTransactionService<T> {

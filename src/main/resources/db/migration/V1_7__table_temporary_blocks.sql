@@ -1,6 +1,6 @@
 CREATE TABLE temporary_blocks
 (
-  id     BIGINT AUTO_INCREMENT PRIMARY KEY HASH,
-  height BIGINT UNIQUE NOT NULL,
-  block  VARCHAR NOT NULL
+    id     serial PRIMARY KEY,
+    height BIGINT UNIQUE NOT NULL,
+    block  text NOT NULL
 );

@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional
 import kotlin.math.max
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 class DefaultMainBlockService(
     private val repository: MainBlockRepository,
     private val stateManager: StateManager,

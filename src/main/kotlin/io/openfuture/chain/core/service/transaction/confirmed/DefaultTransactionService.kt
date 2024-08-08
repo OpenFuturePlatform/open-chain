@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.transaction.annotation.Transactional
 
-@Transactional(readOnly = true)
+@Transactional
 abstract class DefaultTransactionService<T : Transaction>(
     private val repository: TransactionRepository<T>
 ) : TransactionService<T> {

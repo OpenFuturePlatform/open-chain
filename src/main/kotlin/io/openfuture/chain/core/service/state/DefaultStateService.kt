@@ -5,7 +5,7 @@ import io.openfuture.chain.core.repository.StateRepository
 import io.openfuture.chain.core.service.StateService
 import org.springframework.transaction.annotation.Transactional
 
-@Transactional(readOnly = true)
+@Transactional
 abstract class DefaultStateService<T : State>(
     private val repository: StateRepository<T>
 ) : StateService<T> {
